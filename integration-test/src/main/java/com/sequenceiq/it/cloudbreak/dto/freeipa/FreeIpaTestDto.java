@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -60,6 +61,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAu
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -648,6 +650,14 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         securityRequest.setSeLinux(seLinux);
         getRequest().setSecurity(securityRequest);
         return this;
+    }
+
+    public SeLinux getSelinuxMode() {
+        return Optional.ofNullable(getResponse())
+                .map(DescribeFreeIpaResponse::getSecurity)
+                .map(SecurityResponse::getSeLinux)
+                .map(s -> SeLinux.fromStringWithFallback(s))
+                .orElse(SeLinux.PERMISSIVE);
     }
 
     public FreeIpaTestDto withInstanceType(String instanceType) {

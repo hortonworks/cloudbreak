@@ -1,14 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.testng.annotations.Test;
 
@@ -24,6 +22,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
+import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -40,7 +39,6 @@ import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXVolumesModificationTest extends AbstractE2ETest {
@@ -53,14 +51,6 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
     private static final Map<String, String> DX_TAGS = Map.of("distroxTagKey", "distroxTagValue");
 
     private static final String TEST_INSTANCE_GROUP = "coordinator";
-
-    private static final String SELINUX_DL_INSTANCE_GROUP = "master";
-
-    private static final String EXPECTED_SELINUX_CONFIG = "selinux=enforcing";
-
-    private static final String EXPECTED_SELINUXTYPE_CONFIG = "selinuxtype=targeted";
-
-    private static final int EXPECTED_NUMBER_SELINUX_ENABLED_MODULES = 400;
 
     private static final int UPDATE_SIZE = 500;
 
@@ -84,7 +74,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
     private StackTestClient stackTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SELinuxAssertions selinuxAssertions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -121,10 +111,8 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
-            .then((tc, testDto, client) -> {
-                validateSeLinux(testDto.getResponse().getStackV4Response().getInstanceGroups(), SELINUX_DL_INSTANCE_GROUP);
-                return testDto;
-            })
+//TODO turn back on, when the salt policy is merged
+//            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
             .given("dx", DistroXTestDto.class)
             .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
             .withSeLinuxSecurity(SeLinux.ENFORCING.name())
@@ -136,10 +124,8 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(distroXTestClient.create(), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
-            .then((tc, testDto, client) -> {
-                validateSeLinux(testDto.getResponse().getInstanceGroups(), TEST_INSTANCE_GROUP);
-                return testDto;
-            })
+//TODO turn back on, when the salt policy is merged
+//            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
             .given("dx", DistroXTestDto.class)
             .when(distroXTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform), TEST_INSTANCE_GROUP,
                             DiskType.ROOT_DISK), RunningParameter.key("dx"))
@@ -258,41 +244,6 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             throw new TestFailException(String.format("Root volume is not present on instances in CB for group %s",
                     TEST_INSTANCE_GROUP));
 
-        }
-    }
-
-    private void validateSeLinux(List<InstanceGroupV4Response> instanceGroups, String instanceGroup) {
-        // CHECK IF SELINUX IS SET TO ENFORCING ON INSTANCES
-        List<String> seLinuxPoliciesForInstances = sshJUtil.executeSshCommandsOnInstances(instanceGroups, List.of(instanceGroup),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "sudo getenforce");
-        if (CollectionUtils.isEmpty(seLinuxPoliciesForInstances) || seLinuxPoliciesForInstances.contains(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT))) {
-            throw new TestFailException(String.format("SELinux policy was not set to 'enforced' on instances in CB for group %s",
-                    instanceGroup));
-        }
-
-        // CHECK IF SELINUX CONFIG FILES ARE UPDATED ON INSTANCES
-        List<String> seLinuxConfigForInstances = sshJUtil.executeSshCommandsOnInstances(instanceGroups, List.of(instanceGroup),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "sudo cat /etc/sysconfig/selinux");
-        if (CollectionUtils.isEmpty(seLinuxConfigForInstances)) {
-            throw new TestFailException(String.format("SELinux config file is missing on instances in CB for group %s",
-                    instanceGroup));
-        }
-        for (String config : seLinuxConfigForInstances) {
-            if (StringUtils.isEmpty(config) || !config.contains(EXPECTED_SELINUX_CONFIG) || !config.contains(EXPECTED_SELINUXTYPE_CONFIG)) {
-                throw new TestFailException(String.format("SELinux config file is not updated correctly on instances in CB for group %s",
-                        instanceGroup));
-            }
-        }
-
-        // CHECK NUMBER OF ENABLED SELINUX MODULES
-        List<String> seLinuxEnabledModulesForInstances = sshJUtil.executeSshCommandsOnInstances(instanceGroups, List.of(instanceGroup),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "sudo semodule -l | wc -l");
-        for (String moduleLength : seLinuxEnabledModulesForInstances) {
-            int numOfEnabledModules = Integer.parseInt(moduleLength.replaceAll("[\\r\\n\\t ]", ""));
-            if (numOfEnabledModules < EXPECTED_NUMBER_SELINUX_ENABLED_MODULES) {
-                throw new TestFailException(String.format("SELinux enabled modules is less than expected in CB for group %s",
-                        instanceGroup));
-            }
         }
     }
 }

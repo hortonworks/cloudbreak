@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.assertion.encryption;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -13,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -103,7 +100,7 @@ public class SecretEncryptionAssertions {
     }
 
     private void validate(FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
-        List<String> instanceIps = getAllFreeipaInstanceIps(freeIpaTestDto.getEnvironmentCrn(), freeIpaClient, false);
+        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(freeIpaTestDto, freeIpaClient, false);
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the FreeIPA instances. Failed instances with command output: "
@@ -112,7 +109,7 @@ public class SecretEncryptionAssertions {
     }
 
     private void validate(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        List<String> instanceIps = getAllDataLakeInstanceIps(sdxInternalTestDto.getCrn(), sdxClient, false);
+        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(sdxInternalTestDto, sdxClient, false);
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the SDX instances. Failed instances with command output: "
@@ -121,7 +118,7 @@ public class SecretEncryptionAssertions {
     }
 
     private void validate(DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        List<String> instanceIps = getAllDataHubInstanceIps(distroXTestDto.getCrn(), cloudbreakClient, false);
+        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(distroXTestDto, cloudbreakClient, false);
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the DistroX instances. Failed instances with command output: "
@@ -135,46 +132,4 @@ public class SecretEncryptionAssertions {
                 .filter(entry -> entry.getValue().getLeft() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
     }
-
-    private List<String> getAllFreeipaInstanceIps(String environmentCrn, FreeIpaClient freeipaClient, boolean publicIp) {
-        return freeipaClient.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn).getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetaData().stream())
-                .filter(Objects::nonNull)
-                .map(instanceMetaData -> mapInstanceToIp(instanceMetaData, publicIp))
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    private List<String> getAllDataLakeInstanceIps(String datalakeCrn, SdxClient sdxClient, boolean publicIp) {
-        return sdxClient.getDefaultClient().sdxEndpoint().getDetailByCrn(datalakeCrn, Set.of()).getStackV4Response().getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
-                .filter(Objects::nonNull)
-                .map(instanceMetaData -> mapInstanceToIp(instanceMetaData, publicIp))
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    private List<String> getAllDataHubInstanceIps(String datahubCrn, CloudbreakClient cloudbreakClient, boolean publicIp) {
-        return cloudbreakClient.getDefaultClient().distroXV1Endpoint().getByCrn(datahubCrn, Set.of()).getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
-                .filter(Objects::nonNull)
-                .map(instanceMetaData -> mapInstanceToIp(instanceMetaData, publicIp))
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    private String mapInstanceToIp(InstanceMetaDataResponse instanceMetaDataResponse, boolean publicIp) {
-        LOGGER.info("The selected FreeIPA Instance Type [{}] and the available Private IP [{}] and Public IP [{}]. {} IP will be used!",
-                instanceMetaDataResponse.getInstanceType(), instanceMetaDataResponse.getPrivateIp(), instanceMetaDataResponse.getPublicIp(),
-                publicIp ? "Public" : "Private");
-        return publicIp ? instanceMetaDataResponse.getPublicIp() : instanceMetaDataResponse.getPrivateIp();
-    }
-
-    private String mapInstanceToIp(InstanceMetaDataV4Response instanceMetaDataV4Response, boolean publicIp) {
-        LOGGER.info("The selected Instance Type [{}] and the available Private IP [{}] and Public IP [{}]. {} IP will be used!",
-                instanceMetaDataV4Response.getInstanceType(), instanceMetaDataV4Response.getPrivateIp(), instanceMetaDataV4Response.getPublicIp(),
-                publicIp ? "Public" : "Private");
-        return publicIp ? instanceMetaDataV4Response.getPublicIp() : instanceMetaDataV4Response.getPrivateIp();
-    }
-
 }

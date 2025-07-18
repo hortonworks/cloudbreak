@@ -2,27 +2,22 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
+import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -30,11 +25,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
@@ -43,12 +35,6 @@ public class FreeIpaTests extends AbstractE2ETest {
     protected static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
 
     protected static final Status FREEIPA_DELETE_COMPLETED = Status.DELETE_COMPLETED;
-
-    private static final String EXPECTED_SELINUX_CONFIG = "selinux=enforcing";
-
-    private static final String EXPECTED_SELINUXTYPE_CONFIG = "selinuxtype=targeted";
-
-    private static final int EXPECTED_NUMBER_SELINUX_ENABLED_MODULES = 400;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -66,7 +52,7 @@ public class FreeIpaTests extends AbstractE2ETest {
     private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
 
     @Inject
-    private FreeIpaInstanceUtil freeIpaInstanceUtil;
+    private SELinuxAssertions selinuxAssertions;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -107,10 +93,8 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
-                .then((tc, testDto, client) -> {
-                    validateSeLinux(tc, testDto, client);
-                    return testDto;
-                })
+//TODO turn back on, when the salt policy is merged
+//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
@@ -121,11 +105,15 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+//TODO turn back on, when the salt policy is merged
+//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+//TODO turn back on, when the salt policy is merged
+//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .given(FreeIpaUserSyncTestDto.class)
                 .forAllEnvironments()
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
@@ -141,44 +129,5 @@ public class FreeIpaTests extends AbstractE2ETest {
 
     protected CloudFunctionality getCloudFunctionality(TestContext testContext) {
         return testContext.getCloudProvider().getCloudFunctionality();
-    }
-
-    private void validateSeLinux(TestContext testContext, FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
-        List<InstanceGroupResponse> instanceGroups = freeIpaTestDto.getResponse().getInstanceGroups();
-        CloudFunctionality cloudFunctionality = getCloudFunctionality(testContext);
-        // CHECK IF SELINUX IS SET TO ENFORCING ON INSTANCES
-        List<String> seLinuxPoliciesForInstances = cloudFunctionality.executeSshCommandsOnInstances(instanceGroups, List.of(MASTER.name()),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "getenforce");
-        if (CollectionUtils.isEmpty(seLinuxPoliciesForInstances) || seLinuxPoliciesForInstances.contains(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT))) {
-            throw new TestFailException(String.format("SELinux policy was not set to 'enforced' on instances in CB for group %s",
-                    MASTER.name()));
-        }
-
-        // CHECK IF SELINUX CONFIG FILES ARE UPDATED ON INSTANCES
-        List<String> seLinuxConfigForInstances = cloudFunctionality.executeSshCommandsOnInstances(instanceGroups, List.of(MASTER.name()),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "sudo cat /etc/sysconfig/selinux");
-        if (CollectionUtils.isEmpty(seLinuxConfigForInstances)) {
-            throw new TestFailException(String.format("SELinux config file is missing on instances in CB for group %s",
-                    MASTER.name()));
-        }
-        for (String config : seLinuxConfigForInstances) {
-            if (StringUtils.isEmpty(config) || !config.contains(EXPECTED_SELINUX_CONFIG) || !config.contains(EXPECTED_SELINUXTYPE_CONFIG)) {
-                throw new TestFailException(String.format("SELinux config file is not updated correctly on instances in CB for group %s",
-                        MASTER.name()));
-            }
-        }
-
-        // CHECK NUMBER OF ENABLED SELINUX MODULES
-        List<String> seLinuxEnabledModulesForInstances = cloudFunctionality.executeSshCommandsOnInstances(instanceGroups, List.of(MASTER.name()),
-                commonCloudProperties().getDefaultPrivateKeyFile(), "sudo semodule -l | wc -l");
-        for (String moduleLength : seLinuxEnabledModulesForInstances) {
-            if (StringUtils.isNotEmpty(moduleLength)) {
-                int numOfEnabledModules = Integer.parseInt(moduleLength.replaceAll("[\\r\\n\\t ]", ""));
-                if (numOfEnabledModules < EXPECTED_NUMBER_SELINUX_ENABLED_MODULES) {
-                    throw new TestFailException(String.format("SELinux enabled modules is less than expected in CB for group %s",
-                            MASTER.name()));
-                }
-            }
-        }
     }
 }

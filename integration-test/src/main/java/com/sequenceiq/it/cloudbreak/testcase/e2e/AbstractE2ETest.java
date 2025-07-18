@@ -22,6 +22,7 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.encryption.SecretEncryptionAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
+import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -62,6 +63,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     private SecretEncryptionAssertions secretEncryptionAssertions;
 
     @Inject
+    private SELinuxAssertions selinuxAssertions;
+
+    @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
 
     @Override
@@ -84,22 +88,46 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     @AfterMethod
     public void tearDownAbstract(Object[] data) {
         TestContext testContext = (TestContext) data[0];
+        validateImageIdAndWriteToFile(testContext);
+        if (MapUtils.isEmpty(testContext.getExceptionMap())) {
+            validateTags(testContext);
+            validateSELinux(testContext);
+            validateSafeLogic(testContext);
+            validateSecretEncryption(testContext);
+        }
+        spotUtil.setUseSpotInstances(Boolean.FALSE);
+    }
+
+    private void validateImageIdAndWriteToFile(TestContext testContext) {
         if (this instanceof ImageValidatorE2ETest imageValidatorE2ETest) {
             imageValidatorE2ETestUtil.validateImageIdAndWriteToFile(testContext, imageValidatorE2ETest);
         }
-        if (MapUtils.isEmpty(testContext.getExceptionMap())) {
-            LOGGER.info("Validating default tags on the created and tagged test resources...");
-            testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));
-            if (testContext.getSafeLogicValidation()) {
-                LOGGER.info("Validating SafeLogic installation of created resources...");
-                safeLogicAssertions.validate(testContext);
-            }
-            if (testContext.isSecretEncryptionEnabled()) {
-                LOGGER.info("Validating secret encryption on the created resources...");
-                secretEncryptionAssertions.validateAllExisting(testContext);
-            }
+    }
+
+    private void validateTags(TestContext testContext) {
+        LOGGER.info("Validating default tags on the created and tagged test resources...");
+        testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));
+    }
+
+    private void validateSELinux(TestContext testContext) {
+        if (testContext.getSELinuxValidation()) {
+            LOGGER.info("Validating SELinux on the created resources...");
+            selinuxAssertions.validateAllExistingAndThrowIfAnyError(testContext);
         }
-        spotUtil.setUseSpotInstances(Boolean.FALSE);
+    }
+
+    private void validateSafeLogic(TestContext testContext) {
+        if (testContext.getSafeLogicValidation()) {
+            LOGGER.info("Validating SafeLogic installation of created resources...");
+            safeLogicAssertions.validate(testContext);
+        }
+    }
+
+    private void validateSecretEncryption(TestContext testContext) {
+        if (testContext.isSecretEncryptionEnabled()) {
+            LOGGER.info("Validating secret encryption on the created resources...");
+            secretEncryptionAssertions.validateAllExisting(testContext);
+        }
     }
 
     /**

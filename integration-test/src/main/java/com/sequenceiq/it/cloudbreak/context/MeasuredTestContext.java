@@ -321,6 +321,16 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public void setValidateSelinux(boolean validateSelinux) {
+        wrappedTestContext.setValidateSelinux(validateSelinux);
+    }
+
+    @Override
+    public boolean getSELinuxValidation() {
+        return wrappedTestContext.getSELinuxValidation();
+    }
+
+    @Override
     public void checkNonEmpty(String name, String value) {
         wrappedTestContext.checkNonEmpty(name, value);
     }

@@ -156,6 +156,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private boolean safeLogicValidation = true;
 
+    @Value("${integrationtest.selinux.validate:false}")
+    private boolean validateSelinux;
+
     public TestUsers getTestUsers() {
         checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
         if ((StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
@@ -1150,6 +1153,14 @@ public abstract class TestContext implements ApplicationContextAware {
      */
     public boolean getSafeLogicValidation() {
         return safeLogicValidation;
+    }
+
+    public void setValidateSelinux(boolean validateSelinux) {
+        this.validateSelinux = validateSelinux;
+    }
+
+    public boolean getSELinuxValidation() {
+        return validateSelinux;
     }
 
     public boolean isSecretEncryptionEnabled() {

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -744,6 +745,13 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         securityRequest.setSeLinux(seLinux);
         getRequest().setSecurity(securityRequest);
         return this;
+    }
+
+    public SeLinux getSelinuxMode() {
+        return Optional.ofNullable(getResponse())
+                .map(SdxClusterDetailResponse::getSeLinuxPolicy)
+                .map(s -> SeLinux.fromStringWithFallback(s))
+                .orElse(SeLinux.PERMISSIVE);
     }
 
     public String getVariant() {

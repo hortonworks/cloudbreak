@@ -44,17 +44,33 @@ public class SshSudoCommandActions {
         });
     }
 
+    public Map<String, Pair<Integer, String>> executeCommandWithoutThrowing(Collection<String> ipAddresses, String... sudoCommands) {
+        return executeCommandWithoutThrowing(ipAddresses, Arrays.asList(sudoCommands));
+    }
+
     public Map<String, Pair<Integer, String>> executeCommandWithoutThrowing(Collection<String> ipAddresses, Collection<String> sudoCommands) {
         String commandsAsSingleCommand = sudoCommands.stream()
                 .map(command -> getSudoCommand(null, command))
                 .collect(Collectors.joining(" && "));
         return ipAddresses.parallelStream()
-                .collect(Collectors.toMap(Function.identity(), ipAddress -> executeCommand(ipAddress, null, null, commandsAsSingleCommand)));
+                .collect(Collectors.toMap(Function.identity(), ipAddress -> executeCommand(ipAddress, commandsAsSingleCommand)));
     }
 
     private String getSudoCommand(String password, String sudoCommand) {
-        return StringUtils.isEmpty(password) ?
-                "sudo " + sudoCommand : "echo " + password + " | sudo -S " + sudoCommand;
+        // Double escape double quotes, since the whole command will be wrapped in double quotes;
+        // escape dollar signs to allow for command substitution
+        String escapedCommand = sudoCommand
+                .replace("\"", "\\\"")
+                .replace("$", "\\$");
+
+        // Wrap the escaped command in bash -c "<COMMAND>" so that the whole command is executed with sudo
+        return StringUtils.isEmpty(password)
+                ? "sudo bash -c \"" + escapedCommand + "\""
+                : "echo " + password + " | sudo -S bash -c \"" + escapedCommand + "\"";
+    }
+
+    private Pair<Integer, String> executeCommand(String instanceIP, String command) {
+        return executeCommand(instanceIP, null, null, command);
     }
 
     private Pair<Integer, String> executeCommand(String instanceIP, String user, String password, String command) {

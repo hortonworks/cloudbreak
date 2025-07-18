@@ -26,6 +26,7 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -37,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaSecurityRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -156,6 +158,19 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withFreeIpaArchitecture(Architecture architecture) {
         if (architecture != null) {
             getRequest().getFreeIpa().setArchitecture(architecture.getName());
+        }
+        return this;
+    }
+
+    public EnvironmentTestDto withFreeIpaSeLinux(SeLinux seLinux) {
+        if (seLinux != null) {
+            if (getRequest().getFreeIpa().getSecurity() == null) {
+                FreeIpaSecurityRequest freeIpaSecurityRequest = new FreeIpaSecurityRequest();
+                freeIpaSecurityRequest.setSeLinux(seLinux.name());
+                getRequest().getFreeIpa().setSecurity(freeIpaSecurityRequest);
+            } else {
+                getRequest().getFreeIpa().getSecurity().setSeLinux(seLinux.name());
+            }
         }
         return this;
     }
