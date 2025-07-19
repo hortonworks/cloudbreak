@@ -232,7 +232,8 @@ public class Crn {
         NOTIFICATION("notification", NON_ADMIN_SERVICE),
         COMMONCONSOLE("commonconsole", NON_ADMIN_SERVICE),
         HYBRID("hybrid", NON_ADMIN_SERVICE),
-        REMOTECLUSTER("remotecluster", NON_ADMIN_SERVICE);
+        REMOTECLUSTER("remotecluster", NON_ADMIN_SERVICE),
+        APP_FACTORY("appfactory", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
@@ -467,7 +468,8 @@ public class Crn {
         PVC_CONTROL_PLANE("pvcControlPlane"),
         VIRTUAL_CLUSTER("virtualCluster"),
         MLSERVING("mlserving"),
-        ENCRYPTION_PROFILE("encryptionProfile");
+        ENCRYPTION_PROFILE("encryptionProfile"),
+        APP("app");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 
