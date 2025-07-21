@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
@@ -100,6 +101,8 @@ public class TemplatePreparationObject {
 
     private final boolean enableSecretEncryption;
 
+    private final Optional<TrustView> trustView;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         platformVariant = builder.platformVariant;
@@ -131,6 +134,7 @@ public class TemplatePreparationObject {
         servicePrincipals = builder.servicePrincipals;
         enableSecretEncryption = builder.enableSecretEncryption;
         crn = builder.crn;
+        trustView = builder.trustView;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -252,6 +256,10 @@ public class TemplatePreparationObject {
         return crn;
     }
 
+    public Optional<TrustView> getTrustView() {
+        return trustView;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -307,6 +315,8 @@ public class TemplatePreparationObject {
         private boolean enableSecretEncryption;
 
         private String crn;
+
+        private Optional<TrustView> trustView;
 
         public static Builder builder() {
             return new Builder();
@@ -527,10 +537,14 @@ public class TemplatePreparationObject {
             return this;
         }
 
+        public Builder withTrust(Optional<TrustView> trustView) {
+            this.trustView = trustView;
+            return this;
+        }
+
         public TemplatePreparationObject build() {
             return new TemplatePreparationObject(this);
         }
-
     }
 
 }

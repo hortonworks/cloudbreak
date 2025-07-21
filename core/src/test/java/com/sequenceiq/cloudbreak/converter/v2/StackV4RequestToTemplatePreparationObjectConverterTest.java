@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -93,10 +94,13 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -238,6 +242,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Mock
+    private FreeipaClientService freeipaClientService;
 
     @BeforeEach
     public void setUp() {
@@ -488,6 +495,23 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         assertTrue(result.getPlacementView().isPresent());
         assertEquals(REGION, result.getPlacementView().get().getRegion());
         assertEquals(REGION, result.getPlacementView().get().getAvailabilityZone());
+    }
+
+    @Test
+    public void testConvertWhenHybridEnvironment() {
+        when(environmentResponse.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID.name());
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setRealm("realm");
+        trustResponse.setFqdn("fqdn");
+        trustResponse.setIp("ip");
+        describeFreeIpaResponse.setTrust(trustResponse);
+        when(freeipaClientService.findByEnvironmentCrn(TestConstants.CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+        TemplatePreparationObject result = underTest.convert(source);
+
+        assertEquals("fqdn", result.getTrustView().get().fqdn());
+        assertEquals("realm", result.getTrustView().get().realm());
+        assertEquals("ip", result.getTrustView().get().ip());
     }
 
     private Set<String> createRdsConfigNames() {

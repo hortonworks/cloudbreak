@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -89,6 +90,7 @@ import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewP
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
@@ -115,9 +117,12 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -289,6 +294,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private LoadBalancerFqdnUtil loadBalancerFqdnUtil;
+
+    @Mock
+    private FreeipaClientService freeipaClientService;
 
     @BeforeEach
     public void setUp() throws IOException, TransactionService.TransactionExecutionException {
@@ -817,6 +825,41 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertEquals(lbUrl, result.getGeneralClusterConfigs().getLoadBalancerGatewayFqdn().get());
         assertFalse(result.isEnableSecretEncryption());
+    }
+
+    @Test
+    public void testConvertWhenHybridEnvironment() {
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
+        DetailedEnvironmentResponse environmentResponse = DetailedEnvironmentResponse.builder()
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCredential(new CredentialResponse())
+                .withAdminGroupName(ADMIN_GROUP_NAME)
+                .withCrn(TestConstants.CRN)
+                .withEnableSecretEncryption(true)
+                .withEnvironmentType(EnvironmentType.HYBRID.name())
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setRealm("realm");
+        trustResponse.setFqdn("fqdn");
+        trustResponse.setIp("ip");
+        describeFreeIpaResponse.setTrust(trustResponse);
+        when(freeipaClientService.findByEnvironmentCrn(TestConstants.CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertEquals("fqdn", result.getTrustView().get().fqdn());
+        assertEquals("realm", result.getTrustView().get().realm());
+        assertEquals("ip", result.getTrustView().get().ip());
+    }
+
+    @Test
+    public void testConvertWhenNoHybridThenNoFreeipaCall() {
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
+        underTest.convert(stackMock);
+        verify(freeipaClientService, never()).findByEnvironmentCrn(anyString());
     }
 
     private BlueprintView getBlueprintView() {

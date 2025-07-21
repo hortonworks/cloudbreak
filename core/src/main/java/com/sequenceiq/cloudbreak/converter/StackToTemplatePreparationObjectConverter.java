@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsServi
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
@@ -102,9 +104,11 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class StackToTemplatePreparationObjectConverter {
@@ -146,6 +150,9 @@ public class StackToTemplatePreparationObjectConverter {
 
     @Inject
     private EnvironmentService environmentClientService;
+
+    @Inject
+    private FreeipaClientService freeipaClientService;
 
     @Inject
     private AwsMockAccountMappingService awsMockAccountMappingService;
@@ -247,6 +254,7 @@ public class StackToTemplatePreparationObjectConverter {
             Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
                     .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform(), externalDatabaseRequested))
                     .collect(Collectors.toSet());
+
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withPlatformVariant(source.getPlatformVariant())
@@ -269,7 +277,8 @@ public class StackToTemplatePreparationObjectConverter {
                             source.getEnvironmentCrn()))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest)
-                    .withEnableSecretEncryption(environment.isEnableSecretEncryption());
+                    .withEnableSecretEncryption(environment.isEnableSecretEncryption())
+                    .withTrust(createTrustView(environment));
 
             transactionService.required(() -> {
                 builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()), getEphemeralVolumeWhichMustBeProvisioned());
@@ -286,6 +295,16 @@ public class StackToTemplatePreparationObjectConverter {
             throw new CloudbreakServiceException(aTVF);
         } catch (BlueprintProcessingException | IOException | TransactionService.TransactionExecutionException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private Optional<TrustView> createTrustView(DetailedEnvironmentResponse environment) {
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
+            return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
+                    .map(DescribeFreeIpaResponse::getTrust)
+                    .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
+        } else {
+            return Optional.empty();
         }
     }
 

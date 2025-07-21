@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
@@ -78,8 +80,10 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter {
@@ -112,6 +116,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
     @Inject
     private EnvironmentService environmentClientService;
+
+    @Inject
+    private FreeipaClientService freeipaClientService;
 
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
@@ -190,7 +197,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                     .withCustomInputs(source.getInputs())
                     .withKerberosConfig(getDummyKerberosConfigForGeneratedBp(source, environment))
                     .withStackType(source.getType())
-                    .withVirtualGroupView(virtualGroupRequest);
+                    .withVirtualGroupView(virtualGroupRequest)
+                    .withTrust(createTrustView(environment));
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
             decorateBuilderWithProductDetails(source, builder);
@@ -198,6 +206,16 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private Optional<TrustView> createTrustView(DetailedEnvironmentResponse environment) {
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
+            return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
+                    .map(DescribeFreeIpaResponse::getTrust)
+                    .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
+        } else {
+            return Optional.empty();
         }
     }
 

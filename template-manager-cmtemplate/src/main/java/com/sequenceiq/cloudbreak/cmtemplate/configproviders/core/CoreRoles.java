@@ -12,8 +12,6 @@ public class CoreRoles {
 
     public static final String CORE_DEFAULTFS = "core_defaultfs";
 
-    public static final String DEFAULT_BACKUP = "default.backup.location";
-
     public static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
     public static final String HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD = "hadoop.security.groups.cache.background.reload";
