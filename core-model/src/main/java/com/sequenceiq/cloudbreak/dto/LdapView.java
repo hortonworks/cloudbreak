@@ -97,6 +97,10 @@ public class LdapView {
         return directoryType != DirectoryType.ACTIVE_DIRECTORY;
     }
 
+    public boolean isAd() {
+        return directoryType == DirectoryType.ACTIVE_DIRECTORY;
+    }
+
     public String getUserSearchBase() {
         return userSearchBase;
     }

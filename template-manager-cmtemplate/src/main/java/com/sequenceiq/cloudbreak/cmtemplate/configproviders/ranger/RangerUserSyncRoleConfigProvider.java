@@ -82,7 +82,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
                     config("ranger.usersync.group.memberattributename", ldapView.getGroupMemberAttribute()),
                     config("ranger.usersync.group.searchbase", ldapView.getGroupSearchBase()),
                     config("ranger.usersync.source.impl.class", LDAPUSERSYNC_PROCESS_LDAP_USER_GROUP_BUILDER),
-                    config("ranger.usersync.ldap.user.searchfilter", "uid=*"),
+                    config("ranger.usersync.ldap.user.searchfilter", ldapView.isAd() ? "cn=*" : "uid=*"),
                     config("ranger.usersync.group.searchfilter", "cn=*"),
                     config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("ranger.usersync.cdp.public", Boolean.TRUE.toString())),
                     config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty("ranger.usersync.syncsource.validation.enabled", Boolean.FALSE.toString())));
