@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -36,17 +39,29 @@ public class TestUpgradeCandidateProvider {
     private ImageCatalogTestClient imageCatalogTestClient;
 
     public Pair<String, String> getPatchUpgradeSourceAndCandidate(TestContext testContext) {
-        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasDifferentBuildNumber);
+        String runtimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
+        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasDifferentBuildNumber, runtimeVersion, Architecture.X86_64);
+    }
+
+    public Pair<String, String> getPatchUpgradeSourceAndCandidate(TestContext testContext, String runtimeVersion, Architecture architecture) {
+        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasDifferentBuildNumber, runtimeVersion, architecture);
     }
 
     public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext) {
-        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber);
+        String runtimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
+        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, runtimeVersion, Architecture.X86_64);
     }
 
-    private Pair<String, String> getUpgradeSourceAndCandidateByCondition(TestContext testContext, BiPredicate<ImageV4Response, ImageV4Response> matchCondition) {
-        String runtimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
-        List<ImageV4Response> allCdhImage = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAllImages());
-        List<ImageV4Response> advertisedCdhImages = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAdvertisedImages());
+    public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext, String runtimeVersion, Architecture architecture) {
+        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, runtimeVersion, architecture);
+    }
+
+    private Pair<String, String> getUpgradeSourceAndCandidateByCondition(TestContext testContext, BiPredicate<ImageV4Response, ImageV4Response> matchCondition,
+            String runtimeVersion, Architecture architecture) {
+        List<ImageV4Response> allCdhImage = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAllImages())
+                .stream().filter(hasArchitecture(architecture)).toList();
+        List<ImageV4Response> advertisedCdhImages = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAdvertisedImages())
+                .stream().filter(hasArchitecture(architecture)).toList();
 
         for (int i = 0; i < advertisedCdhImages.size(); i++) {
             ImageV4Response targetImage = advertisedCdhImages.get(advertisedCdhImages.size() - i - 1);
@@ -60,6 +75,10 @@ public class TestUpgradeCandidateProvider {
             }
         }
         throw new TestFailException(String.format("There is no upgrade candidate found for runtime %s. Available images: %s", runtimeVersion, allCdhImage));
+    }
+
+    private static Predicate<ImageV4Response> hasArchitecture(Architecture architecture) {
+        return image -> architecture.equals(Architecture.fromStringWithFallback(image.getArchitecture()));
     }
 
     private List<ImageV4Response> getCdhImagesByRuntime(TestContext testContext, String runtimeVersion, Action<ImageCatalogTestDto, CloudbreakClient> action) {
@@ -88,7 +107,10 @@ public class TestUpgradeCandidateProvider {
     private boolean hasDifferentBuildNumber(ImageV4Response current, ImageV4Response target) {
         String currentCdhBuildNumber = current.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         String targetCdhBuildNumber = target.getPackageVersions().get(ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
-        return !Objects.equals(currentCdhBuildNumber, targetCdhBuildNumber) && current.getCreated() < target.getCreated();
+        String currentCmVersion = current.getPackageVersions().get(ImagePackageVersion.CM.getKey());
+        String targetCmVersion = target.getPackageVersions().get(ImagePackageVersion.CM.getKey());
+        return new VersionComparator().compare(() -> targetCmVersion, () -> currentCmVersion) > 0 &&
+                !Objects.equals(currentCdhBuildNumber, targetCdhBuildNumber) && current.getCreated() < target.getCreated();
     }
 
     private boolean hasSameBuildNumber(ImageV4Response current, ImageV4Response target) {

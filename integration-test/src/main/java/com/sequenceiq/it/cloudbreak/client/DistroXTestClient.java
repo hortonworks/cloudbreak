@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXChangeImageCatalogAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCmPackageSyncAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
@@ -189,5 +190,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> skuMigration() {
         return new DistroXSkuMigrationAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> syncPackages() {
+        return new DistroXCmPackageSyncAction();
     }
 }
