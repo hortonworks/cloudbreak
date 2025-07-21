@@ -17,13 +17,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -96,6 +101,28 @@ class ClusterStartHandlerServiceTest {
         computeGroups.add("compute");
         computeGroups.add("computing");
         lenient().when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
+    }
+
+    public static Stream<Arguments> startBasedOnSdxTargetPlatform() {
+        return Stream.of(
+                Arguments.of(TargetPlatform.PAAS, true),
+                Arguments.of(TargetPlatform.CDL, false),
+                Arguments.of(TargetPlatform.PDL, true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("startBasedOnSdxTargetPlatform")
+    void testStartBasedOnSdxTargetPlatform(TargetPlatform targetPlatform, boolean shouldStart) throws Exception {
+        // GIVEN
+        SdxBasicView sdxBasicView = SdxBasicView.builder().withPlatform(targetPlatform).build();
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(sdxBasicView));
+        // WHEN
+        underTest.startCluster(stack, cmTemplateProcessor, false);
+        // THEN
+        VerificationMode verificationMode = shouldStart ? times(1) : never();
+        verify(connector, verificationMode).startClusterManagerAndAgents();
+        verify(connector, verificationMode).startCluster(true);
     }
 
     @Test
