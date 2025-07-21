@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.CORE_PROVIDER_TEMPLATE_UPDATE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.CORE_PROVIDER_TEMPLATE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState.INIT_STATE;
 
@@ -25,22 +27,34 @@ public class CoreProviderTemplateUpdateFlowConfig
             new Transition.Builder<CoreProviderTemplateUpdateState, CoreProviderTemplateUpdateFlowEvent>()
                     .defaultFailureEvent(CORE_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT)
 
-                    .from(INIT_STATE).to(CORE_PROVIDER_TEMPLATE_UPDATE_STATE)
-                    .event(CORE_PROVIDER_TEMPLATE_UPDATE_EVENT)
+                    .from(INIT_STATE)
+                    .to(CORE_PROVIDER_TEMPLATE_VALIDATION_STATE)
+                    .event(CORE_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CORE_PROVIDER_TEMPLATE_UPDATE_STATE).to(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_STATE)
+                    .from(CORE_PROVIDER_TEMPLATE_VALIDATION_STATE)
+                    .to(CORE_PROVIDER_TEMPLATE_UPDATE_STATE)
+                    .event(CORE_PROVIDER_TEMPLATE_VALIDATION_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CORE_PROVIDER_TEMPLATE_UPDATE_STATE)
+                    .to(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_STATE)
                     .event(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_STATE).to(FINAL_STATE)
+                    .from(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_STATE)
+                    .to(FINAL_STATE)
                     .event(CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT)
                     .defaultFailureEvent()
 
                     .build();
 
-    private static final FlowEdgeConfig<CoreProviderTemplateUpdateState, CoreProviderTemplateUpdateFlowEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE,
-            FINAL_STATE, CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_STATE, CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT);
+    private static final FlowEdgeConfig<CoreProviderTemplateUpdateState, CoreProviderTemplateUpdateFlowEvent> EDGE_CONFIG =
+            new FlowEdgeConfig<>(
+                    INIT_STATE,
+                    FINAL_STATE,
+                    CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_STATE,
+                    CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT);
 
     public CoreProviderTemplateUpdateFlowConfig() {
         super(CoreProviderTemplateUpdateState.class, CoreProviderTemplateUpdateFlowEvent.class);
@@ -63,7 +77,7 @@ public class CoreProviderTemplateUpdateFlowConfig
 
     @Override
     public CoreProviderTemplateUpdateFlowEvent[] getInitEvents() {
-        return new CoreProviderTemplateUpdateFlowEvent[] {CORE_PROVIDER_TEMPLATE_UPDATE_EVENT};
+        return new CoreProviderTemplateUpdateFlowEvent[] {CORE_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT};
     }
 
     @Override

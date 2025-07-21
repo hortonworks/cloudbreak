@@ -567,7 +567,6 @@ public class StackCommonService {
         if (stackNetworkScaleV4Request != null
                 && stackNetworkScaleV4Request.getPreferredSubnetIds() != null
                 && stackNetworkScaleV4Request.getPreferredSubnetIds().stream().anyMatch(StringUtils::isNotBlank)) {
-            String platformVariant = stack.getPlatformVariant();
             Set<InstanceGroupView> instanceGroupViews = new HashSet<>(stack.getInstanceGroupViews());
             Set<String> subnetIds = multiAzValidator.collectSubnetIds(instanceGroupViews);
             if (subnetIds.size() < 2) {
@@ -591,23 +590,12 @@ public class StackCommonService {
         return clusterCommonService.putDeleteVolumes(stackView.getResourceCrn(), deleteRequest);
     }
 
-    private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {
-        verticalScalingValidatorService.validateProviderForDelete(stack, "Deleting volumes", false);
-        verticalScalingValidatorService.validateEntitlementForDelete(stack);
-        verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
-    }
-
-    private void validateAddVolumesRequest(Stack stack) {
-        verticalScalingValidatorService.validateProviderForAddVolumes(stack, "Adding volumes");
-        verticalScalingValidatorService.validateEntitlementForAddVolumes(stack);
-    }
-
     public FlowIdentifier putAddVolumesInWorkspace(NameOrCrn nameOrCrn, String accountId, StackAddVolumesRequest addVolumesRequest) {
         StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         Stack stack = stackService.getByIdWithLists(stackView.getId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Validating Stack Add Volumes Request for Stack ID {}", stack.getId());
-        validateAddVolumesRequest(stack);
+        validateAddVolumesRequest(stack, addVolumesRequest);
         return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
 
@@ -619,5 +607,16 @@ public class StackCommonService {
     public FlowIdentifier triggerMigrateRdsToTls(StackView stack) {
         MDCBuilder.buildMdcContext(stack);
         return clusterOperationService.triggerMigrateRdsToTls(stack);
+    }
+
+    private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {
+        verticalScalingValidatorService.validateProviderForDelete(stack, "Deleting volumes", false);
+        verticalScalingValidatorService.validateEntitlementForDelete(stack);
+        verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
+    }
+
+    private void validateAddVolumesRequest(Stack stack, StackAddVolumesRequest addVolumesRequest) {
+        verticalScalingValidatorService.validateProviderForAddVolumes(stack, "Adding volumes");
+        verticalScalingValidatorService.validateEntitlementForAddVolumes(stack);
     }
 }

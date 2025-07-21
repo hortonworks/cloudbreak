@@ -6,14 +6,19 @@ import java.util.StringJoiner;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @JsonDeserialize(builder = DistroXDiskUpdateEvent.Builder.class)
 public class DistroXDiskUpdateEvent  extends StackEvent {
 
-    private final DiskUpdateRequest diskUpdateRequest;
+    private final String volumeType;
+
+    private final int size;
+
+    private final String group;
+
+    private final String diskType;
 
     private final Long stackId;
 
@@ -30,21 +35,23 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("clusterName") String clusterName,
             @JsonProperty("accountId") String accountId,
-            @JsonProperty("diskUpdateRequest") DiskUpdateRequest diskUpdateRequest,
             @JsonProperty("volumesToBeUpdated") List<Volume> volumesToBeUpdated,
             @JsonProperty("cloudPlatform") String cloudPlatform,
-            @JsonProperty("stackId") Long stackId) {
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("volumeType") String volumeType,
+            @JsonProperty("size") int size,
+            @JsonProperty("group") String group,
+            @JsonProperty("diskType") String diskType) {
         super(selector, resourceId);
-        this.diskUpdateRequest = diskUpdateRequest;
+        this.volumeType = volumeType;
+        this.size = size;
+        this.group = group;
+        this.diskType = diskType;
         this.clusterName = clusterName;
         this.accountId = accountId;
         this.volumesToBeUpdated = volumesToBeUpdated;
         this.cloudPlatform = cloudPlatform;
         this.stackId = stackId;
-    }
-
-    public DiskUpdateRequest getDiskUpdateRequest() {
-        return diskUpdateRequest;
     }
 
     public String getClusterName() {
@@ -67,9 +74,28 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
         return stackId;
     }
 
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public String getDiskType() {
+        return diskType;
+    }
+
     public String toString() {
         return new StringJoiner(", ", DistroXDiskUpdateEvent.class.getSimpleName() + "[", "]")
-            .add("diskUpdateRequest=" + diskUpdateRequest.toString())
+            .add("volumeType=" + volumeType)
+            .add("size=" + size)
+            .add("group=" + group)
+            .add("diskType=" + diskType)
             .add("clusterName=" + clusterName)
             .add("volumesToBeUpdated=" + volumesToBeUpdated)
             .add("cloudPlatform=" + cloudPlatform)
@@ -82,8 +108,6 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
 
     @JsonPOJOBuilder
     public static final class Builder {
-
-        private DiskUpdateRequest diskUpdateRequest;
 
         private String selector;
 
@@ -98,6 +122,14 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
         private String cloudPlatform;
 
         private Long stackId;
+
+        private String volumeType;
+
+        private int size;
+
+        private String group;
+
+        private String diskType;
 
         private Builder() {
         }
@@ -122,11 +154,6 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
             return this;
         }
 
-        public Builder withDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
-            this.diskUpdateRequest = diskUpdateRequest;
-            return this;
-        }
-
         public Builder withVolumesToBeUpdated(List<Volume> volumesToBeUpdated) {
             this.volumesToBeUpdated = volumesToBeUpdated;
             return this;
@@ -142,9 +169,39 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
             return this;
         }
 
+        public Builder withVolumeType(String volumeType) {
+            this.volumeType = volumeType;
+            return this;
+        }
+
+        public Builder withSize(int size) {
+            this.size = size;
+            return this;
+        }
+
+        public Builder withGroup(String group) {
+            this.group = group;
+            return this;
+        }
+
+        public Builder withDiskType(String diskType) {
+            this.diskType = diskType;
+            return this;
+        }
+
         public DistroXDiskUpdateEvent build() {
-            return new DistroXDiskUpdateEvent(selector, resourceId, clusterName, accountId,
-                    diskUpdateRequest, volumesToBeUpdated, cloudPlatform, stackId);
+            return new DistroXDiskUpdateEvent(
+                    selector,
+                    resourceId,
+                    clusterName,
+                    accountId,
+                    volumesToBeUpdated,
+                    cloudPlatform,
+                    stackId,
+                    volumeType,
+                    size,
+                    group,
+                    diskType);
         }
     }
 }

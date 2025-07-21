@@ -370,26 +370,22 @@ public class ClusterCommonService {
 
     public FlowIdentifier putDeleteVolumes(String crn, StackDeleteVolumesRequest deleteRequest) {
         StackDto stack = stackDtoService.getByCrn(crn);
-        Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
-        FlowIdentifier flowIdentifier;
         if (deleteRequest != null) {
-            flowIdentifier = clusterOperationService.deleteVolumes(stackId, deleteRequest);
+            return clusterOperationService.deleteVolumes(stack.getId(), deleteRequest);
         } else {
-            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            LOGGER.info("Invalid cluster update request received. Stack id: {}",  stack.getId());
             throw new BadRequestException("Invalid update cluster request!");
         }
-        return flowIdentifier;
     }
 
     public FlowIdentifier putAddVolumes(String crn, StackAddVolumesRequest addVolumesRequest) {
         StackDto stack = stackDtoService.getByCrn(crn);
-        Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         if (addVolumesRequest != null) {
-            return clusterOperationService.addVolumes(stackId, addVolumesRequest);
+            return clusterOperationService.addVolumes(stack.getId(), addVolumesRequest);
         } else {
-            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            LOGGER.info("Invalid cluster update request received. Stack id: {}",  stack.getId());
             throw new BadRequestException("Invalid update cluster request!");
         }
     }

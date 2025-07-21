@@ -75,9 +75,11 @@ class AddVolumesValidateHandlerTest {
 
     @Test
     void testAcceptFailure() {
-        doThrow(CloudbreakServiceException.class).when(addVolumesService).validateVolumeAddition(1L, "test");
+        AddVolumesValidateEvent addVolumesValidateEvent = new AddVolumesValidateEvent(1L, 2L, "gp2", 200L, CloudVolumeUsageType.GENERAL, "test");
+        doThrow(CloudbreakServiceException.class).when(addVolumesService).validateVolumeAddition(1L, "test",
+                addVolumesValidateEvent);
 
-        underTest.accept(new Event<>(new AddVolumesValidateEvent(1L, 2L, "gp2", 200L, CloudVolumeUsageType.GENERAL, "test")));
+        underTest.accept(new Event<>(addVolumesValidateEvent));
 
         verify(eventBus).notify(eq(FAILURE_EVENT.event()), failureEventCaptor.capture());
         AddVolumesFailedEvent failureEvent = failureEventCaptor.getValue().getData();

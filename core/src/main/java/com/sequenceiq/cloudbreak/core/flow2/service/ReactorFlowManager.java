@@ -531,7 +531,10 @@ public class ReactorFlowManager {
         DistroXDiskUpdateEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateEvent.builder()
                 .withResourceId(stackId)
                 .withStackId(stackId)
-                .withDiskUpdateRequest(updateRequest)
+                .withGroup(updateRequest.getGroup())
+                .withVolumeType(updateRequest.getVolumeType())
+                .withSize(updateRequest.getSize())
+                .withDiskType(updateRequest.getDiskType().name())
                 .withClusterName(stack.getCluster().getResourceName())
                 .withAccountId(stack.getAccountId())
                 .withSelector(selector)
@@ -575,9 +578,18 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new RotateRdsCertificateTriggerRequest(selector, stackId, MIGRATE));
     }
 
-    public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap) {
+    public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap, DiskUpdateRequest updateRequest) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT,
-                new CoreRootVolumeUpdateTriggerEvent(FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT, stackId, updatedNodesMap));
+                new CoreRootVolumeUpdateTriggerEvent(
+                        FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT,
+                        stackId,
+                        updatedNodesMap,
+                        updateRequest.getVolumeType(),
+                        updateRequest.getSize(),
+                        updateRequest.getGroup(),
+                        updateRequest.getDiskType().name()
+                )
+        );
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM, boolean rollingRestart) {

@@ -26,9 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -55,6 +58,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -62,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -124,6 +129,9 @@ public class AddVolumesService {
     @Inject
     private DeleteVolumesService deleteVolumesService;
 
+    @Inject
+    private VerticalScalingValidatorService verticalScalingValidatorService;
+
     public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
         String blueprintText = stack.getBlueprint().getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
@@ -169,17 +177,33 @@ public class AddVolumesService {
         }
     }
 
-    public void validateVolumeAddition(Long stackId, String instanceGroupName) {
-        StackDto stackDto = stackDtoService.getById(stackId);
-        CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stackDto);
+    public void validateVolumeAddition(Long stackId, String instanceGroupName, AddVolumesValidateEvent payload) {
+        Stack stack = stackService.getByIdWithLists(stackId);
+        CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
         CloudConnector cloudConnector = cloudConnectResources.getCloudConnector();
+
+        ValidationResult validationResult = verticalScalingValidatorService.validateAddVolumesRequest(stack, payload);
+        if (validationResult.hasError()) {
+            throw new CloudbreakServiceException(validationResult.getFormattedErrors());
+        }
         CloudStack cloudStack = cloudConnectResources.getCloudStack();
         AuthenticatedContext ac = cloudConnectResources.getAuthenticatedContext();
         InstanceGroup instanceGroup = instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(stackId, instanceGroupName)
                 .orElseThrow(() -> new NotFoundException("Instance group with name " + instanceGroupName + " not found in stack " + stackId));
         List<String> instanceIds = instanceGroup.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getInstanceId).toList();
 
-        Integer expectedVolumeCount = instanceGroup.getTemplate().getVolumeTemplates().stream()
+        DiskTypes diskTypes = cloudConnector.parameters().diskTypes();
+
+        Integer expectedVolumeCount = instanceGroup.getTemplate().getVolumeTemplates()
+                .stream()
+                .filter(e -> {
+                    VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(e.getVolumeType());
+                    if (volumeParameterType != null && volumeParameterType.equals(VolumeParameterType.EPHEMERAL)) {
+                        // filtering out ephemeral volumes
+                        return false;
+                    }
+                    return true;
+                })
                 .map(VolumeTemplate::getVolumeCount)
                 .reduce(Integer::sum).orElse(0);
         Map<String, Integer> actualVolumeCounts = cloudConnector.volumeConnector().getAttachedVolumeCountPerInstance(ac, cloudStack, instanceIds);
@@ -193,7 +217,9 @@ public class AddVolumesService {
     }
 
     private boolean anyInstanceHasDifferentAttachedVolumeCount(Map<String, Integer> actualVolumeCounts, Integer expectedVolumeCount) {
-        return actualVolumeCounts.values().stream().anyMatch(Predicate.not(expectedVolumeCount::equals));
+        return actualVolumeCounts.values()
+                .stream()
+                .anyMatch(Predicate.not(expectedVolumeCount::equals));
     }
 
     public List<Resource> createVolumes(Set<Resource> resources, VolumeSetAttributes.Volume volume, int volToAddPerInstance,

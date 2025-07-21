@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -57,15 +57,11 @@ class RootDiskValidationServiceTest {
 
     @Test
     void testValidateRootDiskResourcesForGroupAndUpdateStackTemplateBadRequestException() {
-        when(diskUpdateRequest.getGroup()).thenReturn(TEST_GROUP);
-        when(diskUpdateRequest.getSize()).thenReturn(400);
-        when(diskUpdateRequest.getVolumeType()).thenReturn("gp2");
         when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(anyString(), eq(true))).thenReturn(100);
         when(stackDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
         when(stackDto.getId()).thenReturn(1L);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(eq(1L))).thenReturn(Optional.of(pgwInstanceMetadata));
         when(pgwInstanceMetadata.getInstanceGroupName()).thenReturn("test");
-        when(diskUpdateRequest.getVolumeType()).thenReturn("gp2");
         Template template = mock(Template.class);
         when(template.getRootVolumeType()).thenReturn("gp2");
         when(template.getRootVolumeSize()).thenReturn(400);
@@ -76,41 +72,36 @@ class RootDiskValidationServiceTest {
         when(stackDto.getInstanceGroupByInstanceGroupName(anyString())).thenReturn(instanceGroupDto);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateRootDiskResourcesForGroupAndUpdateStackTemplate(stackDto, diskUpdateRequest));
+                () -> underTest.validateRootDiskResourcesForGroup(stackDto, TEST_GROUP, "gp2", 400));
         assertEquals("No update required.", exception.getMessage());
     }
 
     @Test
     void testValidateRootDiskResourcesForGroupAndUpdateStackTemplate() throws Exception {
-        when(diskUpdateRequest.getGroup()).thenReturn(TEST_GROUP);
-        when(diskUpdateRequest.getSize()).thenReturn(400);
-        when(diskUpdateRequest.getVolumeType()).thenReturn("gp2");
         when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(anyString(), eq(true))).thenReturn(100);
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         when(stackDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
         when(stackDto.getId()).thenReturn(1L);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(eq(1L))).thenReturn(Optional.of(pgwInstanceMetadata));
         when(pgwInstanceMetadata.getInstanceGroupName()).thenReturn("test");
+        when(instanceMetaDataService.anyInvalidMetadataForVerticalScaleInGroup(anyLong(), anyString())).thenReturn(false);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         Template template = new Template();
         template.setRootVolumeType("gp3");
-        template.setRootVolumeSize(100);
+        template.setRootVolumeSize(400);
         InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
         when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
         when(instanceGroupView.getTemplate()).thenReturn(template);
         when(stackDto.getInstanceGroupByInstanceGroupName(TEST_GROUP)).thenReturn(instanceGroupDto);
 
-        underTest.validateRootDiskResourcesForGroupAndUpdateStackTemplate(stackDto, diskUpdateRequest);
-        verify(templateService).savePure(template);
-        assertEquals(400, template.getRootVolumeSize());
-        assertEquals("gp2", template.getRootVolumeType());
+        underTest.validateRootDiskResourcesForGroup(stackDto, TEST_GROUP, "gp2", 400);
     }
 
     @Test
     void testValidateRootDiskResourcesForGroupAndUpdateStackTemplateBadRequestExceptionUnsupportedPlatform() {
         when(stackDto.getCloudPlatform()).thenReturn("GCP");
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateRootDiskResourcesForGroupAndUpdateStackTemplate(stackDto, diskUpdateRequest));
-        assertEquals("Root Volume Update is not supported for cloud platform: GCP and volume type: null", exception.getMessage());
+                () -> underTest.validateRootDiskResourcesForGroup(stackDto, TEST_GROUP, "gp2", 400));
+        assertEquals("Root Volume Update is not supported for cloud platform: GCP and volume type: gp2", exception.getMessage());
     }
 }

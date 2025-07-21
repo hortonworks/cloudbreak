@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -192,14 +196,13 @@ class DiskUpdateServiceTest {
         doReturn(stack).when(stackService).getByIdWithListsInTransaction(STACK_ID);
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         List<Volume> volumeListToUpdate = List.of(mock(Volume.class));
-        underTest.resizeDisks(STACK_ID, "test", diskUpdateRequest, volumeListToUpdate);
+        underTest.resizeDisks(STACK_ID, "test", "gp2", 100, volumeListToUpdate);
 
         ArgumentCaptor<DiskResizeRequest> captor = ArgumentCaptor.forClass(DiskResizeRequest.class);
         verify(reactorNotifier).notify(any(), any(), captor.capture());
         assertEquals("test", captor.getValue().getInstanceGroup());
         assertEquals(DISK_RESIZE_TRIGGER_EVENT.selector(), captor.getValue().getSelector());
         assertEquals(STACK_ID, captor.getValue().getResourceId());
-        assertEquals(diskUpdateRequest, captor.getValue().getDiskUpdateRequest());
         assertEquals(volumeListToUpdate, captor.getValue().getVolumesToUpdate());
     }
 
@@ -211,6 +214,16 @@ class DiskUpdateServiceTest {
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         AwsResourceVolumeConnector awsResourceVolumeConnector = mock(AwsResourceVolumeConnector.class);
         doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
+        DiskTypes diskTypes = mock(DiskTypes.class);
+        when(diskTypes.diskMapping()).thenReturn(
+                Map.of(
+                        "ephemeral", VolumeParameterType.EPHEMERAL,
+                        "st1", VolumeParameterType.ST1
+                )
+        );
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        when(platformParameters.diskTypes()).thenReturn(diskTypes);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
         StackDto stack = mock(StackDto.class);
         doReturn("AWS").when(stack).getPlatformVariant();
         doReturn("AWS").when(stack).getCloudPlatform();
@@ -226,39 +239,40 @@ class DiskUpdateServiceTest {
         Template template = mock(Template.class);
         doReturn(template).when(instanceGroupView).getTemplate();
         VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VolumeParameterType.ST1.name().toLowerCase());
         doReturn(Set.of(volumeTemplate)).when(template).getVolumeTemplates();
         doReturn(Optional.of(instanceGroupView)).when(instanceGroupService).findInstanceGroupViewByStackIdAndGroupName(stackId, instanceGroup);
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setSize(200);
-        diskUpdateRequest.setVolumeType("test");
+        diskUpdateRequest.setVolumeType(VolumeParameterType.ST1.name().toLowerCase());
         diskUpdateRequest.setGroup("master");
         Volume volume = mock(Volume.class);
         doReturn("vol-1").when(volume).getId();
-        underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(volume), stackId);
+        underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume), stackId);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("test"), eq(200));
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200));
         verify(resourceService).saveAll(any());
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
-        assertEquals("test", resultVolumeTemplate.getVolumeType());
+        assertEquals("st1", resultVolumeTemplate.getVolumeType());
     }
 
     @Test
     void testUpdateDiskTypeAndSizeResourceUpdated() throws Exception {
         AwsResourceVolumeConnector awsResourceVolumeConnector = mock(AwsResourceVolumeConnector.class);
         Template template = mock(Template.class);
-        setUpForDiskResize(awsResourceVolumeConnector, template);
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setSize(200);
-        diskUpdateRequest.setVolumeType("test");
+        diskUpdateRequest.setVolumeType("st1");
         diskUpdateRequest.setGroup("master");
         Volume volume1 = mock(Volume.class);
         doReturn("vol-1").when(volume1).getId();
-        underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(volume1), 1L);
+        setUpForDiskResize(awsResourceVolumeConnector, template);
+        underTest.updateDiskTypeAndSize("master", "st1", 200, List.of(volume1), 1L);
 
         verify(templateService).savePure(template);
-        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("test"), eq(200));
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("st1"), eq(200));
         ArgumentCaptor<List<Resource>> saveResourcesCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveResourcesCaptor.capture());
         List<VolumeSetAttributes.Volume> volResult = saveResourcesCaptor.getValue().get(0).getAttributes().get(VolumeSetAttributes.class)
@@ -269,7 +283,7 @@ class DiskUpdateServiceTest {
         assertEquals(100, notUpdatedVolume.getSize());
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
-        assertEquals("test", resultVolumeTemplate.getVolumeType());
+        assertEquals("st1", resultVolumeTemplate.getVolumeType());
     }
 
     @Test
@@ -288,7 +302,7 @@ class DiskUpdateServiceTest {
         diskUpdateRequest.setVolumeType("test");
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
+                () -> underTest.updateDiskTypeAndSize("master", "test", 200, List.of(), stackId));
         assertEquals("Resizing Disk for Azure is not enabled for this account", badRequestException.getMessage());
     }
 
@@ -308,7 +322,7 @@ class DiskUpdateServiceTest {
         diskUpdateRequest.setVolumeType("test");
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
+                () -> underTest.updateDiskTypeAndSize("master", "test", 200, List.of(), stackId));
         assertEquals("Changing Volume Type is not supported for Azure", badRequestException.getMessage());
     }
 
@@ -316,6 +330,16 @@ class DiskUpdateServiceTest {
         String instanceGroup = "master";
         Long stackId = 1L;
         CloudConnector cloudConnector = mock(CloudConnector.class);
+        DiskTypes diskTypes = mock(DiskTypes.class);
+        when(diskTypes.diskMapping()).thenReturn(
+                Map.of(
+                        "ephemeral", VolumeParameterType.EPHEMERAL,
+                        "st1", VolumeParameterType.ST1
+                )
+        );
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        when(platformParameters.diskTypes()).thenReturn(diskTypes);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
         doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
         doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
         StackDto stack = mock(StackDto.class);
@@ -329,8 +353,8 @@ class DiskUpdateServiceTest {
         doReturn(authenticator).when(cloudConnector).authentication();
         Resource resource = new Resource();
         resource.setInstanceGroup("master");
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-1", "", 100, "test", CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes.Volume volume2 = new VolumeSetAttributes.Volume("vol-2", "", 100, "test", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-1", "", 100, "st1", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume volume2 = new VolumeSetAttributes.Volume("vol-2", "", 100, "st1", CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "", List.of(volume, volume2), 100, "");
         resource.setAttributes(Json.silent(volumeSetAttributes));
         doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(eq(resource), eq(VolumeSetAttributes.class));
@@ -342,8 +366,12 @@ class DiskUpdateServiceTest {
 
         doReturn(template).when(instanceGroupView).getTemplate();
         VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeCount(1);
+        volumeTemplate.setVolumeType("st1");
         doReturn(Set.of(volumeTemplate)).when(template).getVolumeTemplates();
-        doReturn(Optional.of(instanceGroupView)).when(instanceGroupService).findInstanceGroupViewByStackIdAndGroupName(stackId, instanceGroup);
+        doReturn(Optional.of(instanceGroupView))
+                .when(instanceGroupService)
+                .findInstanceGroupViewByStackIdAndGroupName(stackId, instanceGroup);
     }
 
     @Test

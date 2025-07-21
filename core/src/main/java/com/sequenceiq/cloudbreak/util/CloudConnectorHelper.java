@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 
 @Component
@@ -30,17 +31,22 @@ public class CloudConnectorHelper {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    public CloudConnectResources getCloudConnectorResources(StackDto stack) {
+    public CloudConnectResources getCloudConnectorResources(Stack stack) {
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        CloudContext cloudContext = getCloudContext(stack);
+        CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext authenticatedContext = cloudConnector.authentication().authenticate(cloudContext, cloudCredential);
         return new CloudConnectResources(cloudCredential, cloudContext, cloudConnector, authenticatedContext, cloudStack);
     }
 
-    private CloudContext getCloudContext(StackDto stack) {
-        return cloudContextProvider.getCloudContext(stack);
+    public CloudConnectResources getCloudConnectorResources(StackDto stack) {
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        AuthenticatedContext authenticatedContext = cloudConnector.authentication().authenticate(cloudContext, cloudCredential);
+        return new CloudConnectResources(cloudCredential, cloudContext, cloudConnector, authenticatedContext, cloudStack);
     }
 
 }
