@@ -30,7 +30,7 @@ public class OneOfEnumValidator implements ConstraintValidator<OneOfEnum, CharSe
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
         if (value == null) {
-            getError(context);
+            return true;
         } else {
             boolean valid = acceptedValues.contains(value.toString().toUpperCase(Locale.ROOT));
             if (!valid) {
@@ -38,7 +38,6 @@ public class OneOfEnumValidator implements ConstraintValidator<OneOfEnum, CharSe
             }
             return valid;
         }
-        return false;
     }
 
     private void getError(ConstraintValidatorContext context) {
