@@ -4,11 +4,8 @@ set -e
 
 # Fetch already imported cacerts with fingerprint, but ':' removed
 STORE_CERTS=$(keytool -list -cacerts -storepass changeit | sed 's/://g')
-
 echo "$(date +"%Y%m%d-%H%M%S") Starting PDL cert import script"
-
 {% for fingerprint, certificate in salt['pillar.get']('java:rootCertificates', {}).items() %}
-
 if echo $STORE_CERTS | grep -q {{ fingerprint }}; then
   echo "{{ fingerprint }} already present";
 else
@@ -19,13 +16,14 @@ else
 EOF_CERT
   CERT_ALIAS="pdl_$(echo "{{ fingerprint }}" | cut -c -8)_$(date +%s)"
   echo "Import cert with fingerprint {{ fingerprint }} and with alias $CERT_ALIAS"
-  keytool -importcert -cacerts -storepass changeit -noprompt -alias "$CERT_ALIAS" -file $CERT_TMP
+  cp -f $CERT_TMP /etc/pki/ca-trust/source/anchors/${CERT_ALIAS}.pem
   echo "Imported cert with fingerprint {{ fingerprint }}"
   rm -f $CERT_TMP
 fi
 
 {% endfor %}
 
+update-ca-trust
 echo "$(date +"%Y%m%d-%H%M%S") Finished running PDL cert import script"
 
 set +e
