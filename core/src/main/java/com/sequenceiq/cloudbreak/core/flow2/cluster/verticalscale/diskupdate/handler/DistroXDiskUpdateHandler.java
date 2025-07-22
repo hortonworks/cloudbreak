@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -45,19 +44,31 @@ public class DistroXDiskUpdateHandler extends ExceptionCatcherEventHandler<Distr
         DistroXDiskUpdateEvent payload = datahubDiskUpdateEventEvent.getData();
         List<Volume> volumesToBeUpdated = payload.getVolumesToBeUpdated();
         Long stackId = payload.getStackId();
-        DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
         try {
-            LOGGER.debug("Starting Disk Update for datahub. Calling updateDiskTypeAndSize with request :: {}", diskUpdateRequest);
-            diskUpdateService.updateDiskTypeAndSize(diskUpdateRequest, volumesToBeUpdated, stackId);
+            LOGGER.debug("Starting Disk Update for datahub. Calling updateDiskTypeAndSize with disk type {} group {}  size {} volume type {}.",
+                    payload.getDiskType(),
+                    payload.getGroup(),
+                    payload.getSize(),
+                    payload.getVolumeType());
+            diskUpdateService.updateDiskTypeAndSize(
+                    payload.getGroup(),
+                    payload.getVolumeType(),
+                    payload.getSize(),
+                    volumesToBeUpdated,
+                    stackId
+            );
             return DistroXDiskUpdateEvent.builder()
                 .withResourceId(payload.getResourceId())
-                .withDiskUpdateRequest(payload.getDiskUpdateRequest())
                 .withClusterName(payload.getClusterName())
                 .withAccountId(payload.getAccountId())
                 .withSelector(DATAHUB_DISK_UPDATE_FINISH_EVENT.selector())
                 .withVolumesToBeUpdated(payload.getVolumesToBeUpdated())
                 .withCloudPlatform(payload.getCloudPlatform())
                 .withStackId(stackId)
+                .withGroup(payload.getGroup())
+                .withVolumeType(payload.getVolumeType())
+                .withSize(payload.getSize())
+                .withDiskType(payload.getDiskType())
                 .build();
         } catch (Exception ex) {
             LOGGER.warn("FAILED_DATAHUB_DISK_UPDATE_EVENT event sent on stack {}", payload.getStackId(), ex);

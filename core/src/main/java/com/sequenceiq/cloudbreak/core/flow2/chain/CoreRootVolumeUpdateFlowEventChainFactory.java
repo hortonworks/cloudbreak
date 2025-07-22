@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,7 +27,14 @@ public class CoreRootVolumeUpdateFlowEventChainFactory implements FlowEventChain
     public FlowTriggerEventQueue createFlowTriggerEventQueue(CoreRootVolumeUpdateTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        flowEventChain.add(new CoreProviderTemplateUpdateEvent(CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new CoreProviderTemplateUpdateEvent(
+                CORE_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event(),
+                event.getResourceId(),
+                event.getVolumeType(),
+                event.getSize(),
+                event.getGroup(),
+                event.getDiskType()
+        ));
         flowEventChain.add(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
                 ClusterRepairTriggerEvent.RepairType.ONE_BY_ONE, event.getUpdatedNodesMap(), true, null, false));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

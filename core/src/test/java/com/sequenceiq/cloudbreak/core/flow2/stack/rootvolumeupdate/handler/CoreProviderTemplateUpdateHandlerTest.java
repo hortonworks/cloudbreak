@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.handler;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -80,8 +83,22 @@ public class CoreProviderTemplateUpdateHandlerTest {
 
     @BeforeEach
     void setUp() {
-        request = new ProviderTemplateUpdateHandlerRequest(EventSelectorUtil.selector(ProviderTemplateUpdateHandlerRequest.class), 1L,
-                cloudContext, cloudCredential, cloudStack);
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
+        diskUpdateRequest.setGroup("executor");
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setSize(100);
+        request = new ProviderTemplateUpdateHandlerRequest(
+                EventSelectorUtil.selector(ProviderTemplateUpdateHandlerRequest.class),
+                1L,
+                cloudContext,
+                cloudCredential,
+                cloudStack,
+                "gp2",
+                "executor",
+                100,
+                DiskType.ADDITIONAL_DISK.name()
+        );
     }
 
     @Test
@@ -103,7 +120,7 @@ public class CoreProviderTemplateUpdateHandlerTest {
 
     @Test
     void testSelector() {
-        assertEquals(EventSelectorUtil.selector(ProviderTemplateUpdateHandlerRequest.class), underTest.selector());
+        assertEquals(CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.selector(), underTest.selector());
     }
 
     @Test

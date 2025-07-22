@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +30,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConnectResources;
@@ -38,7 +43,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -50,6 +57,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -65,6 +73,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.VerticalScalingValidatorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -72,6 +81,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -115,6 +125,9 @@ class AddVolumesServiceTest {
 
     @Mock
     private ClusterBootstrapper clusterBootstrapper;
+
+    @Mock
+    private VerticalScalingValidatorService verticalScalingValidatorService;
 
     @Mock
     private ClusterHostServiceRunner clusterHostServiceRunner;
@@ -220,25 +233,55 @@ class AddVolumesServiceTest {
     }
 
     @Test
-    void testValidateVolumeAddition() {
+    void testValidateVolumeAdditionWhenTheHostDiskNumberDoesNotMatchWithTheProviderPart() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
+        diskUpdateRequest.setGroup("executor");
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setSize(100);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
         InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
         Template template = mock(Template.class);
         VolumeTemplate volumeTemplate1 = mock(VolumeTemplate.class);
         VolumeTemplate volumeTemplate2 = mock(VolumeTemplate.class);
+        when(volumeTemplate1.getVolumeCount()).thenReturn(1);
+        when(volumeTemplate1.getVolumeType()).thenReturn(VolumeParameterType.ST1.name().toLowerCase(Locale.ROOT));
+        when(volumeTemplate2.getVolumeType()).thenReturn(VolumeParameterType.EPHEMERAL.name().toLowerCase(Locale.ROOT));
         when(instanceMetaData1.getInstanceId()).thenReturn("instanceId1");
         when(instanceMetaData2.getInstanceId()).thenReturn("instanceId2");
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData1, instanceMetaData2));
         when(instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(1L, "test")).thenReturn(Optional.of(instanceGroup));
+        when(stackService.getByIdWithLists(any())).thenReturn(stack);
+        DiskTypes diskTypes = mock(DiskTypes.class);
+        when(diskTypes.diskMapping()).thenReturn(
+                Map.of(
+                        "ephemeral", VolumeParameterType.EPHEMERAL,
+                        "st1", VolumeParameterType.ST1
+                )
+        );
+        CloudConnectResources cloudConnectResources = mock(CloudConnectResources.class);
+        CloudConnector connector = mock(CloudConnector.class);
+        PlatformParameters parameters = mock(PlatformParameters.class);
+        when(parameters.diskTypes()).thenReturn(diskTypes);
+        when(connector.parameters()).thenReturn(parameters);
+        when(cloudConnectResources.getCloudConnector()).thenReturn(connector);
+        when(cloudConnectorHelper.getCloudConnectorResources(any(Stack.class))).thenReturn(cloudConnectResources);
+        ValidationResult validationResult = mock(ValidationResult.class);
+        when(validationResult.hasError()).thenReturn(false);
+        when(verticalScalingValidatorService.validateAddVolumesRequest(any(Stack.class), any(AddVolumesValidateEvent.class)))
+                .thenReturn(validationResult);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(template.getVolumeTemplates()).thenReturn(Set.of(volumeTemplate1, volumeTemplate2));
-        when(volumeTemplate1.getVolumeCount()).thenReturn(1);
-        when(volumeTemplate2.getVolumeCount()).thenReturn(2);
-        when(awsResourceVolumeConnector.getAttachedVolumeCountPerInstance(eq(authenticatedContext), eq(cloudStack), anyList()))
-                .thenReturn(Map.of("instanceId1", 3, "instanceId2", 4));
-
-        assertThrows(CloudbreakServiceException.class, () -> underTest.validateVolumeAddition(1L, "test"));
+        ResourceVolumeConnector resourceVolumeConnector = mock(ResourceVolumeConnector.class);
+        when(resourceVolumeConnector.getAttachedVolumeCountPerInstance(any(), any(), anyList()))
+                .thenReturn(Map.of(
+                        "host1", 5,
+                        "host2", 5
+                ));
+        when(connector.volumeConnector()).thenReturn(resourceVolumeConnector);
+        assertThrows(CloudbreakServiceException.class, () -> underTest.validateVolumeAddition(1L, "test",
+                new AddVolumesValidateEvent(1L, 1L, VolumeParameterType.ST1.name(), 100L, CloudVolumeUsageType.GENERAL, "executor")));
     }
 
     @Test

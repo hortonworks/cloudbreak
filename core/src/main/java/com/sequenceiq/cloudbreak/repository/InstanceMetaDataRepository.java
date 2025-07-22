@@ -320,6 +320,11 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
     @Query("SELECT COUNT(i) FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus = 'STOPPED'")
     long countStoppedForStack(@Param("stackId") Long stackId);
 
+    @Query("SELECT COUNT(i) FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId " +
+            "AND i.instanceStatus IN ('STOPPED', 'DELETED_ON_PROVIDER_SIDE') " +
+            "AND i.instanceGroup.groupName = :group")
+    long countInvalidMetadataForVerticalScaleInGroup(@Param("stackId") Long stackId, @Param("group") String group);
+
     @Modifying
     @Query("UPDATE InstanceMetaData SET serverCert = :serverCert WHERE id = :instanceMetadataId")
     void updateServerCert(@Param("instanceMetadataId") Long instanceMetadataId, @Param("serverCert") String serverCert);

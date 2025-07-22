@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.action;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent.CORE_PROVIDER_TEMPLATE_VALIDATION_EVENT;
 
 import java.util.Map;
 
@@ -26,7 +29,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
 public class CoreProviderTemplateUpdateActions {
@@ -36,6 +38,35 @@ public class CoreProviderTemplateUpdateActions {
     @Inject
     private StackUpdater stackUpdater;
 
+    @Bean(name = "CORE_PROVIDER_TEMPLATE_VALIDATION_STATE")
+    public Action<?, ?> launchTemplateValidateAction() {
+        return new CoreAbstractProviderTemplateUpdateAction<>(CoreProviderTemplateUpdateEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, CoreProviderTemplateUpdateEvent payload, Map<Object, Object> variables) {
+                StackDtoDelegate stack = context.getStack();
+                LOGGER.info("Validating launch template {}", payload);
+                stackUpdater.updateStackStatus(
+                        stack.getId(),
+                        PROVIDER_TEMPLATE_UPDATE_IN_PROGRESS,
+                        "Starting to validate launch template.");
+                sendEvent(
+                        context,
+                        new ProviderTemplateUpdateHandlerRequest(
+                                CORE_PROVIDER_TEMPLATE_VALIDATION_EVENT.selector(),
+                                stack.getId(),
+                                context.getCloudContext(),
+                                context.getCloudCredential(),
+                                context.getCloudStack(),
+                                payload.getVolumeType(),
+                                payload.getGroup(),
+                                payload.getSize(),
+                                payload.getDiskType()
+                        )
+                );
+            }
+        };
+    }
+
     @Bean(name = "CORE_PROVIDER_TEMPLATE_UPDATE_STATE")
     public Action<?, ?> launchTemplateUpdateAction() {
         return new CoreAbstractProviderTemplateUpdateAction<>(CoreProviderTemplateUpdateEvent.class) {
@@ -43,10 +74,24 @@ public class CoreProviderTemplateUpdateActions {
             protected void doExecute(StackContext context, CoreProviderTemplateUpdateEvent payload, Map<Object, Object> variables) {
                 StackDtoDelegate stack = context.getStack();
                 LOGGER.info("Updating launch template {}", payload);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_IN_PROGRESS, "Starting to update launch template.");
-                String selector = EventSelectorUtil.selector(ProviderTemplateUpdateHandlerRequest.class);
-                sendEvent(context, selector, new ProviderTemplateUpdateHandlerRequest(selector, stack.getId(), context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack()));
+                stackUpdater.updateStackStatus(
+                        stack.getId(),
+                        PROVIDER_TEMPLATE_UPDATE_IN_PROGRESS,
+                        "Starting to update launch template.");
+                sendEvent(
+                        context,
+                        new ProviderTemplateUpdateHandlerRequest(
+                                CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.event(),
+                                stack.getId(),
+                                context.getCloudContext(),
+                                context.getCloudCredential(),
+                                context.getCloudStack(),
+                                payload.getVolumeType(),
+                                payload.getGroup(),
+                                payload.getSize(),
+                                payload.getDiskType()
+                        )
+                );
             }
         };
     }
@@ -58,7 +103,10 @@ public class CoreProviderTemplateUpdateActions {
             protected void doExecute(StackContext context, CoreProviderTemplateUpdateEvent payload, Map<Object, Object> variables) {
                 StackDtoDelegate stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_COMPLETE, "Updating Launch Template complete.");
-                sendEvent(context, CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT.selector(), new StackEvent(stack.getId()));
+                sendEvent(
+                        context,
+                        CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT.selector(),
+                        new StackEvent(stack.getId()));
             }
         };
     }
@@ -81,7 +129,10 @@ public class CoreProviderTemplateUpdateActions {
                 StackDtoDelegate stack = context.getStack();
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_FAILED, errorReason);
-                sendEvent(context, CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT.event(), payload);
+                sendEvent(
+                        context,
+                        CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT.event(),
+                        payload);
             }
 
             private String getErrorReason(Exception payloadException) {
