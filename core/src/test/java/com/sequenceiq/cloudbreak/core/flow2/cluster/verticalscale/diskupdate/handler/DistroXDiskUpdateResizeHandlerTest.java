@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -57,8 +58,18 @@ class DistroXDiskUpdateResizeHandlerTest {
         updateRequest.setGroup("compute");
         updateRequest.setSize(100);
         updateRequest.setVolumeType("GP2");
-        handlerRequest = new DistroXDiskUpdateEvent(selector, STACK_ID, "TEST", "accountId", updateRequest,
-                List.of(), "AWS", STACK_ID);
+        handlerRequest = new DistroXDiskUpdateEvent(
+                selector,
+                STACK_ID,
+                "TEST",
+                "accountId",
+                List.of(),
+                "AWS",
+                STACK_ID,
+                "GP2",
+                100,
+                "compute",
+                DiskType.ADDITIONAL_DISK.name());
     }
 
     @Test

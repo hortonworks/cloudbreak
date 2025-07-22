@@ -109,7 +109,7 @@ public class DeleteVolumesValidationHandlerTest {
         assertEquals("DELETEVOLUMESFAILEDEVENT_ERROR", result.getSelector());
         assertInstanceOf(DeleteVolumesFailedEvent.class, result);
         assertInstanceOf(BadRequestException.class, result.getException());
-        assertEquals("BadRequestException: Instance group being scaled isn't a compute instance. Non-compliant services: GATEWAY",
+        assertEquals("Group compute request to be scaled, isn't compute specific group. The Non-compliant service list is: GATEWAY",
                 result.getException().getMessage());
 
     }
@@ -123,7 +123,7 @@ public class DeleteVolumesValidationHandlerTest {
         assertEquals("DELETEVOLUMESFAILEDEVENT_ERROR", result.getSelector());
         assertInstanceOf(DeleteVolumesFailedEvent.class, result);
         assertInstanceOf(BadRequestException.class, result.getException());
-        assertEquals("BadRequestException: There are no volumes attached to compute instance group", result.getException().getMessage());
+        assertEquals("There are no persistent volumes attached to compute instance group", result.getException().getMessage());
 
     }
 

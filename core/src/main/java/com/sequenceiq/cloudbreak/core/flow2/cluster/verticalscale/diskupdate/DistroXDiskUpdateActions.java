@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.UPDATE_ATTACHED_VOLUMES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_RESIZE_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateHandlerSelectors.DATAHUB_DISK_UPDATE_HANDLER_EVENT;
@@ -24,7 +25,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
@@ -53,15 +53,15 @@ public class DistroXDiskUpdateActions {
             protected void doExecute(ClusterViewContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Starting validations for datahub disk update.");
                 Long stackId = payload.getResourceId();
-                String targetInstanceGroup = payload.getDiskUpdateRequest().getGroup();
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Validating volume update on the host " +
+                String targetInstanceGroup = payload.getGroup();
+                stackUpdater.updateStackStatus(stackId, UPDATE_ATTACHED_VOLUMES, String.format("Validating volume update on the host " +
                                 "group %s", targetInstanceGroup));
                 flowMessageService.fireEventAndLog(stackId,
                         Status.DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS.name(),
                         DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS,
                         targetInstanceGroup,
-                        payload.getDiskUpdateRequest().getVolumeType(),
-                        String.valueOf(payload.getDiskUpdateRequest().getSize()));
+                        payload.getVolumeType(),
+                        String.valueOf(payload.getSize()));
                 sendEvent(context, DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT.selector(), payload);
             }
         };
@@ -74,15 +74,16 @@ public class DistroXDiskUpdateActions {
             protected void doExecute(ClusterViewContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Starting datahub disk update with request {}", payload);
                 Long stackId = payload.getResourceId();
-                DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Updating volumes on the host group %s",
-                        diskUpdateRequest.getGroup()));
+                stackUpdater.updateStackStatus(
+                        stackId,
+                        UPDATE_ATTACHED_VOLUMES,
+                        String.format("Updating volumes on the host group %s", payload.getGroup()));
                 flowMessageService.fireEventAndLog(stackId,
-                        Status.UPDATE_IN_PROGRESS.name(),
+                        UPDATE_IN_PROGRESS.name(),
                         DATAHUB_DISK_UPDATE_IN_PROGRESS,
-                        diskUpdateRequest.getGroup(),
-                        diskUpdateRequest.getVolumeType(),
-                        String.valueOf(diskUpdateRequest.getSize()));
+                        payload.getGroup(),
+                        payload.getVolumeType(),
+                        String.valueOf(payload.getSize()));
                 sendEvent(context, DATAHUB_DISK_UPDATE_HANDLER_EVENT.selector(), payload);
             }
         };
@@ -94,20 +95,23 @@ public class DistroXDiskUpdateActions {
             @Override
             protected void doExecute(ClusterViewContext ctx, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
-                DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
                 LOGGER.debug("Starting disk resize for stack: {}", stackId);
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Resizing volumes on the host group %s",
-                        diskUpdateRequest.getGroup()));
+                stackUpdater.updateStackStatus(stackId, UPDATE_ATTACHED_VOLUMES, String.format("Resizing volumes on the host group %s",
+                        payload.getGroup()));
                 flowMessageService.fireEventAndLog(stackId,
                         UPDATE_IN_PROGRESS.name(),
                         DISK_RESIZE_STARTED,
-                        payload.getDiskUpdateRequest().getGroup());
+                        payload.getGroup());
                 DistroXDiskUpdateEvent handlerRequest = DistroXDiskUpdateEvent.builder()
                         .withResourceId(stackId)
                         .withStackId(payload.getStackId())
-                        .withDiskUpdateRequest(diskUpdateRequest)
                         .withClusterName(payload.getClusterName())
                         .withAccountId(payload.getAccountId())
+                        .withDiskType(payload.getDiskType())
+                        .withSize(payload.getSize())
+                        .withGroup(payload.getGroup())
+                        .withVolumeType(payload.getVolumeType())
+                        .withVolumesToBeUpdated(payload.getVolumesToBeUpdated())
                         .withSelector(DATAHUB_DISK_RESIZE_HANDLER_EVENT.selector())
                         .build();
                 sendEvent(ctx, DATAHUB_DISK_RESIZE_HANDLER_EVENT.event(), handlerRequest);

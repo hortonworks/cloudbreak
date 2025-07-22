@@ -17,16 +17,33 @@ public class ProviderTemplateUpdateHandlerRequest extends StackEvent {
 
     private final CloudStack cloudStack;
 
+    private final String volumeType;
+
+    private final int size;
+
+    private final String group;
+
+    private final String diskType;
+
     @JsonCreator
-    public ProviderTemplateUpdateHandlerRequest(@JsonProperty("selector") String selector,
+    public ProviderTemplateUpdateHandlerRequest(
+            @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
-            @JsonProperty("cloudStack") CloudStack cloudStack) {
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("volumeType") String volumeType,
+            @JsonProperty("group") String group,
+            @JsonProperty("size") int size,
+            @JsonProperty("diskType") String diskType) {
         super(selector, stackId);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
+        this.volumeType = volumeType;
+        this.diskType = diskType;
+        this.size = size;
+        this.group = group;
     }
 
     public CloudContext getCloudContext() {
@@ -41,10 +58,30 @@ public class ProviderTemplateUpdateHandlerRequest extends StackEvent {
         return cloudStack;
     }
 
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public String getDiskType() {
+        return diskType;
+    }
+
     public String toString() {
         return new StringJoiner(", ", ProviderTemplateUpdateHandlerRequest.class.getSimpleName() + "[", "]")
                 .add("selector=" + super.getSelector())
                 .add("stackId=" + super.getResourceId())
+                .add("volumeType=" + this.volumeType)
+                .add("group=" + this.group)
+                .add("size=" + this.size)
+                .add("diskType=" + this.diskType)
                 .toString();
     }
 }

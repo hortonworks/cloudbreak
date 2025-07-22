@@ -27,12 +27,13 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.ProviderTemplateUpdateHandlerRequest;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreProviderTemplateUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreProviderTemplateUpdateFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -42,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,7 +95,14 @@ public class CoreProviderTemplateUpdateActionsTest {
 
     @Test
     void testLaunchTemplateUpdateAction() throws Exception {
-        CoreProviderTemplateUpdateEvent launchTemplateUpdateEvent = new CoreProviderTemplateUpdateEvent(CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.event(), 1L);
+        CoreProviderTemplateUpdateEvent launchTemplateUpdateEvent = new CoreProviderTemplateUpdateEvent(
+                CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.event(),
+                1L,
+                "gp2",
+                100,
+                "executor",
+                DiskType.ADDITIONAL_DISK.name()
+        );
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), launchTemplateUpdateEvent)).when(reactorEventFactory).createEvent(any(), any());
         CoreAbstractProviderTemplateUpdateAction<CoreProviderTemplateUpdateEvent> action =
                 (CoreAbstractProviderTemplateUpdateAction<CoreProviderTemplateUpdateEvent>) underTest.launchTemplateUpdateAction();
@@ -104,14 +111,26 @@ public class CoreProviderTemplateUpdateActionsTest {
         verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_IN_PROGRESS), eq("Starting to update launch template."));
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        assertEquals(EventSelectorUtil.selector(ProviderTemplateUpdateHandlerRequest.class), captor.getValue());
+        assertEquals(CORE_PROVIDER_TEMPLATE_UPDATE_EVENT.event(), captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testLaunchTemplateUpdateFinishedAction() throws Exception {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setDiskType(DiskType.ADDITIONAL_DISK);
+        diskUpdateRequest.setGroup("executor");
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setSize(100);
         CoreProviderTemplateUpdateEvent launchTemplateUpdateEvent =
-                new CoreProviderTemplateUpdateEvent(CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT.event(), 1L);
+                new CoreProviderTemplateUpdateEvent(
+                        CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT.event(),
+                        1L,
+                        "gp2",
+                        100,
+                        "executor",
+                        DiskType.ADDITIONAL_DISK.name()
+                );
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), launchTemplateUpdateEvent)).when(reactorEventFactory).createEvent(any(), any());
         CoreAbstractProviderTemplateUpdateAction<CoreProviderTemplateUpdateEvent> action =
                 (CoreAbstractProviderTemplateUpdateAction<CoreProviderTemplateUpdateEvent>) underTest.launchTemplateUpdateFinishedAction();

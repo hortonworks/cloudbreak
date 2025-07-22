@@ -41,7 +41,7 @@ public class AddVolumesValidateHandler extends ExceptionCatcherEventHandler<AddV
         Long stackId = payload.getResourceId();
         String instanceGroupName = payload.getInstanceGroup();
         try {
-            addVolumesService.validateVolumeAddition(stackId, instanceGroupName);
+            addVolumesService.validateVolumeAddition(stackId, instanceGroupName, payload);
             return new AddVolumesValidationFinishedEvent(stackId, payload.getNumberOfDisks(), payload.getType(),
                     payload.getSize(), payload.getCloudVolumeUsageType(), instanceGroupName);
         } catch (Exception e) {

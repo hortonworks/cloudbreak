@@ -28,7 +28,6 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
@@ -92,10 +91,8 @@ class DistroXDiskUpdateActionsTest {
     void testDiskUpdateValidationAction() throws Exception {
         DistroXDiskUpdateEvent event = mock(DistroXDiskUpdateEvent.class);
         doReturn(1L).when(event).getResourceId();
-        DiskUpdateRequest request = mock(DiskUpdateRequest.class);
-        doReturn(request).when(event).getDiskUpdateRequest();
-        doReturn("test").when(request).getGroup();
-        doReturn("gp2").when(request).getVolumeType();
+        doReturn("test").when(event).getGroup();
+        doReturn("gp2").when(event).getVolumeType();
         AbstractClusterAction<DistroXDiskUpdateEvent> action =
                 (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.datahubDiskUpdateValidationAction();
         initActionPrivateFields(action);
@@ -110,10 +107,8 @@ class DistroXDiskUpdateActionsTest {
     void testDiskUpdateAction() throws Exception {
         DistroXDiskUpdateEvent event = mock(DistroXDiskUpdateEvent.class);
         doReturn(1L).when(event).getResourceId();
-        DiskUpdateRequest request = mock(DiskUpdateRequest.class);
-        doReturn(request).when(event).getDiskUpdateRequest();
-        doReturn("test").when(request).getGroup();
-        doReturn("gp2").when(request).getVolumeType();
+        doReturn("test").when(event).getGroup();
+        doReturn("gp2").when(event).getVolumeType();
         AbstractClusterAction<DistroXDiskUpdateEvent> action =
                 (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.diskUpdateInDatahubAction();
         initActionPrivateFields(action);
@@ -128,14 +123,11 @@ class DistroXDiskUpdateActionsTest {
     void testDiskResizeInDatahubAction() throws Exception {
         DistroXDiskUpdateEvent event = mock(DistroXDiskUpdateEvent.class);
         doReturn(1L).when(event).getResourceId();
-        DiskUpdateRequest request = mock(DiskUpdateRequest.class);
-        doReturn("TEST").when(request).getGroup();
-        doReturn(request).when(event).getDiskUpdateRequest();
         AbstractClusterAction<DistroXDiskUpdateEvent> action =
                 (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.diskResizeInDatahubAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), anyString());
+        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), any());
         assertEquals(Status.UPDATE_IN_PROGRESS.name(), captor.getValue());
         verify(eventBus, times(1)).notify(selectorCaptor.capture(), any());
         assertEquals(DATAHUB_DISK_RESIZE_HANDLER_EVENT.event(), selectorCaptor.getValue());

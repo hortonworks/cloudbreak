@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -19,25 +22,36 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesValidateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 
@@ -51,7 +65,13 @@ public class VerticalScalingValidatorService {
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     @Inject
+    private LocationService locationService;
+
+    @Inject
     private CredentialClientService credentialService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     @Inject
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
@@ -70,6 +90,12 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Autowired
+    private StackService stackService;
 
     public void validateProviderForDelete(Stack stack, String message, boolean checkStackStopped) {
         if (!cloudParameterCache.isDeleteVolumesSupported(stack.getCloudPlatform())) {
@@ -205,5 +231,66 @@ public class VerticalScalingValidatorService {
                 && !entitlementService.azureAddDiskEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
             throw new BadRequestException("Adding Disk for Azure is not enabled for this account");
         }
+    }
+
+    public ValidationResult validateAddVolumesRequest(Stack stack, AddVolumesValidateEvent addVolumesRequest) {
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+
+        Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
+                .stream()
+                .filter(e -> e.getGroupName().equalsIgnoreCase(addVolumesRequest.getInstanceGroup()))
+                .findFirst();
+        if (instanceGroupOptional.isPresent()) {
+            InstanceGroup instanceGroup = instanceGroupOptional.get();
+            VolumeTemplate volumeTemplate = new VolumeTemplate();
+            volumeTemplate.setVolumeCount(addVolumesRequest.getNumberOfDisks().intValue());
+            volumeTemplate.setVolumeSize(addVolumesRequest.getSize().intValue());
+            volumeTemplate.setVolumeType(addVolumesRequest.getType());
+            instanceGroup.getTemplate().getVolumeTemplates().add(volumeTemplate);
+            templateValidatorAndUpdater.validateGroupForVerticalScale(
+                    credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn()),
+                    instanceGroup,
+                    stack,
+                    CdpResourceType.DATAHUB,
+                    validationBuilder
+            );
+        }
+        return validationBuilder.build();
+    }
+
+    public ValidationResult validateAddVolumesRequest(Stack stack, List<Volume> volumesToBeUpdated, DistroXDiskUpdateEvent distroXDiskUpdateEvent) {
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+
+        Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
+                .stream()
+                .filter(e -> e.getGroupName().equalsIgnoreCase(distroXDiskUpdateEvent.getGroup()))
+                .findFirst();
+
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(
+                stack.getCloudPlatform()),
+                Variant.variant(stack.getPlatformVariant()));
+        PlatformParameters parameters = cloudConnector.parameters();
+        DiskTypes diskTypes = parameters.diskTypes();
+
+        if (!volumesToBeUpdated.isEmpty() && instanceGroupOptional.isPresent()) {
+            InstanceGroup instanceGroup = instanceGroupOptional.get();
+
+            for (VolumeTemplate template : instanceGroup.getTemplate().getVolumeTemplates()) {
+                VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(template.getVolumeType());
+                if (!EPHEMERAL.equals(volumeParameterType)) {
+                    template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
+                    template.setVolumeSize(distroXDiskUpdateEvent.getSize());
+                }
+            }
+
+            templateValidatorAndUpdater.validateGroupForVerticalScale(
+                    credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn()),
+                    instanceGroup,
+                    stack,
+                    CdpResourceType.DATAHUB,
+                    validationBuilder
+            );
+        }
+        return validationBuilder.build();
     }
 }

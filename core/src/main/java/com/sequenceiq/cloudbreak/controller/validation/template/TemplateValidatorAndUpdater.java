@@ -142,6 +142,31 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
+    public void validateGroupForVerticalScale(Credential credential, InstanceGroup instanceGroup, Stack stack,
+        CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+        Template template = instanceGroup.getTemplate();
+        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                stack.getRegion(),
+                stack.getPlatformVariant(),
+                stackType,
+                Map.of(ARCHITECTURE, stack.getArchitectureName()));
+        VmType vmType = null;
+        Platform platform = Platform.platform(template.getCloudPlatform());
+        Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
+        String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
+        if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
+            for (VmType type : machines.get(locationString)) {
+                if (type.value().equals(template.getInstanceType())) {
+                    vmType = type;
+                    break;
+                }
+            }
+        }
+        validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
+        validateMaximumVolumeSize(template, vmType, validationBuilder);
+    }
+
     private void validateArchitecture(VmType vmType, Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
         Architecture vmArchitecture = vmType.getMetaData().getArchitecture();
         Architecture stackArchitecture = stack.getArchitecture();
@@ -240,7 +265,7 @@ public class TemplateValidatorAndUpdater {
 
     private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
             ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
-        if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
+        if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount()) && volumeParameterType != null) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
                 validateVolumeCountInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);
@@ -277,7 +302,7 @@ public class TemplateValidatorAndUpdater {
 
     private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
             ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
-        if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
+        if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount()) && volumeParameterType != null) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
                 validateVolumeSizeInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);

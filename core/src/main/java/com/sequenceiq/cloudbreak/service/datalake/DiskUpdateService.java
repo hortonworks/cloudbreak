@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -29,10 +28,12 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -117,23 +118,23 @@ public class DiskUpdateService {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
     }
 
-    public void updateDiskTypeAndSize(DiskUpdateRequest diskUpdateRequest, List<Volume> volumesToUpdate, Long stackId) throws Exception {
+    public void updateDiskTypeAndSize(String group, String volumeType, int size, List<Volume> volumesToUpdate, Long stackId) throws Exception {
         StackDto stackDto = stackDtoService.getById(stackId);
-        validateDiskUpdateRequest(diskUpdateRequest, CloudPlatform.valueOf(stackDto.getCloudPlatform()), stackDto.getResourceCrn());
+        validateDiskUpdateRequest(volumeType, size, CloudPlatform.valueOf(stackDto.getCloudPlatform()), stackDto.getResourceCrn());
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(stackDto.getCloudPlatform()),
                 Variant.variant(stackDto.getPlatformVariant()));
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
         AuthenticatedContext ac = getAuthenticatedContext(cloudConnector, stackDto);
         List<String> volumeIds = volumesToUpdate.stream().map(Volume::getId).toList();
-        cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, diskUpdateRequest.getVolumeType(), diskUpdateRequest.getSize());
+        cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, volumeType, size);
         for (Resource resource : stackDto.getDiskResources()) {
             Optional<VolumeSetAttributes> optionalVolumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
-            if (diskUpdateRequest.getGroup().equals(resource.getInstanceGroup()) && optionalVolumeSetAttributes.isPresent()) {
+            if (group.equals(resource.getInstanceGroup()) && optionalVolumeSetAttributes.isPresent()) {
                 VolumeSetAttributes volumeSetAttributes = optionalVolumeSetAttributes.get();
                 List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
                 for (VolumeSetAttributes.Volume volume : volumes) {
                     if (volumeIds.contains(volume.getId())) {
-                        updateVolumeTypeAndSize(diskUpdateRequest, volume);
+                        updateVolumeTypeAndSize(volumeType, size, volume);
                     }
                 }
                 volumeSetAttributes.setVolumes(volumes);
@@ -142,15 +143,15 @@ public class DiskUpdateService {
         }
         LOGGER.info("Updated resources for disk update flow::{}", stackDto.getDiskResources());
         resourceService.saveAll(stackDto.getDiskResources());
-        updateTemplate(stackId, diskUpdateRequest);
+        updateTemplate(stackId, group, volumeType, size);
     }
 
-    private static void updateVolumeTypeAndSize(DiskUpdateRequest diskUpdateRequest, VolumeSetAttributes.Volume volume) {
-        if (diskUpdateRequest.getSize() > 0) {
-            volume.setSize(diskUpdateRequest.getSize());
+    private void updateVolumeTypeAndSize(String volumeType, int size, VolumeSetAttributes.Volume volume) {
+        if (size > 0) {
+            volume.setSize(size);
         }
-        if (null != diskUpdateRequest.getVolumeType()) {
-            volume.setType(diskUpdateRequest.getVolumeType());
+        if (null != volumeType) {
+            volume.setType(volumeType);
         }
     }
 
@@ -166,7 +167,7 @@ public class DiskUpdateService {
         clusterApi.clusterModificationService().startCluster();
     }
 
-    public FlowIdentifier resizeDisks(long stackId, String instanceGroup, DiskUpdateRequest diskUpdateRequest, List<Volume> volumesToUpdate) {
+    public FlowIdentifier resizeDisks(long stackId, String instanceGroup, String volumeType, int size, List<Volume> volumesToUpdate) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack Resize Flow triggered for stack {}", stack.getName());
@@ -174,7 +175,8 @@ public class DiskUpdateService {
                 .withSelector(DISK_RESIZE_TRIGGER_EVENT.selector())
                 .withStackId(stackId)
                 .withInstanceGroup(instanceGroup)
-                .withDiskUpdateRequest(diskUpdateRequest)
+                .withSize(size)
+                .withVolumeType(volumeType)
                 .withVolumesToUpdate(volumesToUpdate)
                 .build();
         FlowIdentifier flowIdentifier = reactorNotifier.notify(stackId, diskResizeRequest.selector(), diskResizeRequest);
@@ -198,23 +200,32 @@ public class DiskUpdateService {
         return cloudConnector.authentication().authenticate(cloudContext, cloudCredential);
     }
 
-    private void updateTemplate(Long stackId, DiskUpdateRequest diskUpdateRequest) {
+    private void updateTemplate(Long stackId, String group, String volumeType, int size) {
         LOGGER.debug("Updating stack template and saving it to CBDB.");
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
-                .findInstanceGroupViewByStackIdAndGroupName(stackId, diskUpdateRequest.getGroup());
+                .findInstanceGroupViewByStackIdAndGroupName(stackId, group);
+
+        DiskTypes diskTypes = getDiskTypes(stackDtoService.getById(stackId));
         if (optionalGroup.isPresent()) {
             InstanceGroupView instanceGroup = optionalGroup.get();
             Template template = instanceGroup.getTemplate();
-            for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
-                if (null != diskUpdateRequest.getVolumeType()) {
-                    volumeTemplateInTheDatabase.setVolumeType(diskUpdateRequest.getVolumeType());
+            for (VolumeTemplate volumeTemplateInTheDatabase : notEphemeralVolumes(template, diskTypes)) {
+                if (null != group) {
+                    volumeTemplateInTheDatabase.setVolumeType(volumeType);
                 }
-                if (diskUpdateRequest.getSize() > 0) {
-                    volumeTemplateInTheDatabase.setVolumeSize(diskUpdateRequest.getSize());
+                if (size > 0) {
+                    volumeTemplateInTheDatabase.setVolumeSize(size);
                 }
             }
             templateService.savePure(template);
         }
+    }
+
+    private List<VolumeTemplate> notEphemeralVolumes(Template template, DiskTypes diskTypes) {
+        return template.getVolumeTemplates()
+                .stream()
+                .filter(e -> !isEphemeral(e, diskTypes))
+                .toList();
     }
 
     public void resizeDisksAndUpdateFstab(Stack stack, String instanceGroup) throws CloudbreakOrchestratorFailedException {
@@ -274,17 +285,31 @@ public class DiskUpdateService {
                 .collect(Collectors.toList()));
     }
 
-    private void validateDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest, CloudPlatform cloudPlatform, String clusterCrn) {
+    private void validateDiskUpdateRequest(String volumeType, int size, CloudPlatform cloudPlatform, String clusterCrn) {
         if (cloudPlatform == CloudPlatform.AZURE) {
             if (!entitlementService.azureResizeDiskEnabled(Crn.safeFromString(clusterCrn).getAccountId())) {
                 throw new BadRequestException("Resizing Disk for Azure is not enabled for this account");
-            } else if (StringUtils.isNotEmpty(diskUpdateRequest.getVolumeType())) {
+            } else if (StringUtils.isNotEmpty(volumeType)) {
                 throw new BadRequestException("Changing Volume Type is not supported for Azure");
             }
         } else if (cloudPlatform == CloudPlatform.AWS) {
-            if (StringUtils.isEmpty(diskUpdateRequest.getVolumeType()) && diskUpdateRequest.getSize() == 0) {
+            if (StringUtils.isEmpty(volumeType) && size == 0) {
                 throw new BadRequestException("Volume Type or Disk Size must be specified for AWS disk modification.");
             }
         }
     }
+
+    public DiskTypes getDiskTypes(StackDto stackDto) {
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                Platform.platform(stackDto.getCloudPlatform()),
+                Variant.variant(stackDto.getPlatformVariant())
+        );
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
+        return cloudConnector.parameters().diskTypes();
+    }
+
+    private boolean isEphemeral(VolumeTemplate volumeTemplate, DiskTypes diskTypes) {
+        return VolumeParameterType.EPHEMERAL.equals(diskTypes.diskMapping().get(volumeTemplate.getVolumeType()));
+    }
+
 }

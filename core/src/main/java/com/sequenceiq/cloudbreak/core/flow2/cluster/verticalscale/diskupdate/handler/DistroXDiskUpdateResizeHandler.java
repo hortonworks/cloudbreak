@@ -47,7 +47,7 @@ public class DistroXDiskUpdateResizeHandler extends ExceptionCatcherEventHandler
         DistroXDiskUpdateEvent payload = diskResizeHandlerRequestEvent.getData();
         LOGGER.debug("Starting resizeDisks on DiskUpdateService with request {}", payload);
         Long stackId = payload.getResourceId();
-        String instanceGroup = payload.getDiskUpdateRequest().getGroup();
+        String instanceGroup = payload.getGroup();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceType diskResourceType = stack.getDiskResourceType();

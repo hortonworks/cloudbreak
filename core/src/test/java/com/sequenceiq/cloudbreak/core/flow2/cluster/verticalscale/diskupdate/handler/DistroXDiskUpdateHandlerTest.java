@@ -50,34 +50,43 @@ class DistroXDiskUpdateHandlerTest {
         DistroXDiskUpdateEvent event = DistroXDiskUpdateEvent.builder()
                 .withClusterName(TEST_CLUSTER)
                 .withAccountId(ACCOUNT_ID)
-                .withDiskUpdateRequest(diskUpdateRequest)
+                .withGroup("compute")
+                .withSize(100)
+                .withVolumeType("gp2")
                 .withSelector(selector)
                 .withVolumesToBeUpdated(List.of(mock(Volume.class)))
                 .withCloudPlatform("AWS")
                 .withStackId(1L)
                 .build();
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(eq(diskUpdateRequest), eq(event.getVolumesToBeUpdated()),
-                eq(1L));
+        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(
+                eq(event.getGroup()),
+                eq(event.getVolumeType()),
+                eq(event.getSize()),
+                eq(event.getVolumesToBeUpdated()),
+                eq(1L)
+        );
         assertEquals(DATAHUB_DISK_UPDATE_FINISH_EVENT.selector(), selectable.getSelector());
     }
 
     @Test
     void testDiskUpdateFailureAction() throws Exception {
         String selector = DATAHUB_DISK_UPDATE_EVENT.event();
-        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
-        diskUpdateRequest.setGroup("compute");
-        diskUpdateRequest.setSize(100);
-        diskUpdateRequest.setVolumeType("gp2");
         DistroXDiskUpdateEvent event = DistroXDiskUpdateEvent.builder()
                 .withClusterName(TEST_CLUSTER)
                 .withAccountId(ACCOUNT_ID)
-                .withDiskUpdateRequest(diskUpdateRequest)
+                .withGroup("compute")
+                .withVolumeType("gp2")
+                .withSize(100)
                 .withSelector(selector)
                 .withVolumesToBeUpdated(List.of(mock(Volume.class)))
                 .withCloudPlatform("AWS")
                 .build();
-        doThrow(new CloudbreakException("Test")).when(diskUpdateService).updateDiskTypeAndSize(eq(diskUpdateRequest), eq(event.getVolumesToBeUpdated()),
+        doThrow(new CloudbreakException("Test")).when(diskUpdateService).updateDiskTypeAndSize(
+                eq(event.getGroup()),
+                eq(event.getVolumeType()),
+                eq(event.getSize()),
+                eq(event.getVolumesToBeUpdated()),
                 eq(1L));
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());

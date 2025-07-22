@@ -122,7 +122,12 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
         Long stackId = payload.getResourceId();
         String instanceGroup = payload.getInstanceGroup();
         try {
-            diskUpdateService.updateDiskTypeAndSize(payload.getDiskUpdateRequest(), payload.getVolumesToUpdate(), stackId);
+            diskUpdateService.updateDiskTypeAndSize(
+                    payload.getInstanceGroup(),
+                    payload.getVolumeType(),
+                    payload.getSize(),
+                    payload.getVolumesToUpdate(),
+                    stackId);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceType diskResourceType = stack.getDiskResourceType();
             if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {
