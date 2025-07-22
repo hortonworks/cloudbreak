@@ -144,36 +144,57 @@ public class EnvironmentSyncService {
 
     public EnvironmentStatus getStatusByFreeipa(Environment environment) {
         Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.internalDescribe(environment.getResourceCrn(), environment.getAccountId());
-        if (isHybridEnvironment(environment) && freeIpaResponseOpt.isPresent()) {
-            return getHybridEnvironmentStatus(environment, freeIpaResponseOpt.get());
+        if (isHybridEnvironment(environment)) {
+            return getHybridEnvironmentStatus(environment, freeIpaResponseOpt);
         } else {
-            if (freeIpaResponseOpt.isPresent()) {
-                return FREEIPA_STATUS_TO_ENV_STATUS_MAP.get(freeIpaResponseOpt.get().getStatus());
-            } else if (environment.isCreateFreeIpa()) {
-                return FREEIPA_DELETED_ON_PROVIDER_SIDE;
-            }
-            return EnvironmentStatus.AVAILABLE;
+            return getNormalEnvironmentStatus(environment, freeIpaResponseOpt);
         }
     }
 
+    private EnvironmentStatus getNormalEnvironmentStatus(Environment environment, Optional<DescribeFreeIpaResponse> freeIpaResponseOpt) {
+        if (freeIpaResponseOpt.isPresent()) {
+            return FREEIPA_STATUS_TO_ENV_STATUS_MAP.get(freeIpaResponseOpt.get().getStatus());
+        } else if (environment.isCreateFreeIpa()) {
+            return FREEIPA_DELETED_ON_PROVIDER_SIDE;
+        }
+        return EnvironmentStatus.AVAILABLE;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
-    private EnvironmentStatus getHybridEnvironmentStatus(Environment environment, DescribeFreeIpaResponse describeFreeIpaResponse) {
-        if (describeFreeIpaResponse.getTrust() != null && StringUtils.isNotBlank(describeFreeIpaResponse.getTrust().getTrustStatus())) {
-            TrustStatus trustStatus = TrustStatus.valueOf(describeFreeIpaResponse.getTrust().getTrustStatus());
-            return switch (trustStatus) {
-                case UNKNOWN, TRUST_SETUP_REQUIRED -> EnvironmentStatus.TRUST_SETUP_REQUIRED;
-                case TRUST_SETUP_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
-                case TRUST_SETUP_FAILED -> EnvironmentStatus.TRUST_SETUP_FAILED;
-                case TRUST_SETUP_FINISH_REQUIRED -> EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
-                case TRUST_SETUP_FINISH_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
-                case TRUST_SETUP_FINISH_FAILED -> EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
-                case TRUST_ACTIVE -> EnvironmentStatus.AVAILABLE;
-                case TRUST_BROKEN -> EnvironmentStatus.TRUST_BROKEN;
-            };
+    private EnvironmentStatus getHybridEnvironmentStatus(Environment environment, Optional<DescribeFreeIpaResponse> describeFreeIpaResponse) {
+        if (freeIpaAvailable(describeFreeIpaResponse)) {
+            if (trustPresented(describeFreeIpaResponse)) {
+                TrustStatus trustStatus = getTrustStatus(describeFreeIpaResponse);
+                return switch (trustStatus) {
+                    case UNKNOWN, TRUST_SETUP_REQUIRED -> EnvironmentStatus.TRUST_SETUP_REQUIRED;
+                    case TRUST_SETUP_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
+                    case TRUST_SETUP_FAILED -> EnvironmentStatus.TRUST_SETUP_FAILED;
+                    case TRUST_SETUP_FINISH_REQUIRED -> EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
+                    case TRUST_SETUP_FINISH_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
+                    case TRUST_SETUP_FINISH_FAILED -> EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
+                    case TRUST_ACTIVE -> EnvironmentStatus.AVAILABLE;
+                    case TRUST_BROKEN -> EnvironmentStatus.TRUST_BROKEN;
+                };
+            }
+        } else {
+            return getNormalEnvironmentStatus(environment, describeFreeIpaResponse);
         }
         return environment.getStatus();
     }
     //CHECKSTYLE:ON
+
+    private TrustStatus getTrustStatus(Optional<DescribeFreeIpaResponse> describeFreeIpaResponse) {
+        return TrustStatus.valueOf(describeFreeIpaResponse.get().getTrust().getTrustStatus());
+    }
+
+    private boolean freeIpaAvailable(Optional<DescribeFreeIpaResponse> describeFreeIpaResponse) {
+        return describeFreeIpaResponse.map(DescribeFreeIpaResponse::getStatus).map(Status::isAvailable).orElse(false);
+    }
+
+    private boolean trustPresented(Optional<DescribeFreeIpaResponse> describeFreeIpaResponse) {
+        return describeFreeIpaResponse.get().getTrust() != null
+                && StringUtils.isNotBlank(describeFreeIpaResponse.get().getTrust().getTrustStatus());
+    }
 
     private boolean isHybridEnvironment(Environment environment) {
         return environment.getEnvironmentType() != null && environment.getEnvironmentType().isHybrid();
