@@ -253,6 +253,12 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
                 .collect(Collectors.toList());
     }
 
+    public List<InstanceMetadataView> getAllAvailableAndProviderDeletedInstances() {
+        return instanceGroups.values().stream()
+                .flatMap(ig -> ig.getNotTerminateAndNotZombieInstanceMetaData().stream())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceMetadataView> getNotDeletedInstanceMetaData() {
         return instanceGroups.entrySet().stream()
                 .flatMap(e -> e.getValue().getNotDeletedInstanceMetaData().stream())

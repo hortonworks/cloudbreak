@@ -660,24 +660,24 @@ class StackOperationServiceTest {
     @Test
     void testRootVolumeDiskUpdate() throws Exception {
         StackDto stack = mock(StackDto.class);
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         when(stack.getId()).thenReturn(STACK_ID);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of());
         when(stack.getInstanceGroupByInstanceGroupName(anyString())).thenReturn(instanceGroupDto);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         when(diskUpdateRequest.getGroup()).thenReturn("test");
         InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
         when(instanceMetadataView.getInstanceGroupName()).thenReturn("test");
         when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("test-fqdn");
-        when(stack.getAllAvailableInstances()).thenReturn(List.of(instanceMetadataView));
+        when(stack.getAllAvailableAndProviderDeletedInstances()).thenReturn(List.of(instanceMetadataView));
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = Result.success(Map.of());
         when(clusterRepairService.validateRepair(eq(NODE_ID), eq(STACK_ID), any(Set.class), eq(false))).thenReturn(repairValidationResult);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         Map<String, List<String>> updatedNodesMap = Map.of("test", List.of("test-fqdn"));
         underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST");
 
-        verify(flowManager).triggerRootVolumeUpdateFlow(STACK_ID, updatedNodesMap);
+        verify(flowManager).triggerRootVolumeUpdateFlow(STACK_ID, updatedNodesMap, diskUpdateRequest);
     }
 
     @Test

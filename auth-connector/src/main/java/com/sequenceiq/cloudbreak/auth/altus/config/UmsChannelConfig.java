@@ -14,7 +14,7 @@ import io.grpc.ManagedChannelBuilder;
 @Configuration
 public class UmsChannelConfig {
 
-    @Value("${altus.ums.host:}")
+    @Value("${altus.ums.host:localhost}")
     private String host;
 
     @Value("${altus.ums.port:8982}")

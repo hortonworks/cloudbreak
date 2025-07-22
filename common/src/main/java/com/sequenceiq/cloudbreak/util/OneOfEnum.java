@@ -21,6 +21,8 @@ public @interface OneOfEnum {
 
     String message() default "Must be any of {enumClass}";
 
+    String fieldName() default "fieldName";
+
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

@@ -34,6 +34,8 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.actions.AbstractAddVolumesAction;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.actions.AddVolumesActions;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFinalizedEvent;

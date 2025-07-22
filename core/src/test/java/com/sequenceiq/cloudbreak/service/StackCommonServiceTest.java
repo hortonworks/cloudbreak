@@ -599,8 +599,6 @@ class StackCommonServiceTest {
     @Test
     void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
         StackDto stack = mock(StackDto.class);
-        String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
-        when(stack.getPlatformVariant()).thenReturn(variant);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));

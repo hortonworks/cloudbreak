@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.handler;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Set;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
@@ -22,12 +22,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.BlackListedDeleteVolumesRole;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -56,15 +56,15 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
         LOGGER.debug("Received event: {}", deleteVolumesValidationEvent);
         DeleteVolumesValidationRequest payload = deleteVolumesValidationEvent.getData();
         StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
-        StackDto stack = stackDtoService.getById(payload.getResourceId());
         String requestGroup = stackDeleteVolumesRequest.getGroup();
-        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-        Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(requestGroup);
-        Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
+
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
+
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+
         boolean computeInstance = true;
         StringBuilder blackListedServices = new StringBuilder();
-        for (String service : hostTemplateComponents) {
+        for (String service : processor.getComponentsInHostGroup(requestGroup)) {
             com.google.common.base.Optional<BlackListedDeleteVolumesRole> enumValue =
                     Enums.getIfPresent(BlackListedDeleteVolumesRole.class, service);
             if (enumValue.isPresent()) {
@@ -77,31 +77,46 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
         }
         if (!computeInstance) {
             LOGGER.warn("Deleting volumes flow is being stopped, as instance being scaled is not a compute instance.");
-            String statusReason = "BadRequestException: Instance group being scaled isn't a compute instance. Non-compliant services: " +
-                    blackListedServices.toString();
-            return new DeleteVolumesFailedEvent(statusReason, new BadRequestException(statusReason), stack.getId());
+            String statusReason = String.format(
+                    "Group %s request to be scaled, isn't compute specific group. The Non-compliant service list is: %s",
+                    requestGroup,
+                    blackListedServices);
+            return new DeleteVolumesFailedEvent(
+                    statusReason,
+                    new BadRequestException(statusReason),
+                    stack.getId());
         } else {
-            List<CloudResource> cloudResourcesToBeDeleted = stack.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
-                            && resource.getInstanceGroup().equals(requestGroup)
-                            && resource.getResourceType().name().contains("VOLUMESET"))
-                    .map(s -> cloudResourceConverter.convert(s)).collect(toList());
+            List<CloudResource> cloudResourcesToBeDeleted = stack.getResources()
+                    .stream()
+                    .filter(getVolumeset(requestGroup))
+                    .map(s -> cloudResourceConverter.convert(s))
+                    .collect(toList());
             long numVolumesToDelete = cloudResourcesToBeDeleted.stream()
                     .map(this::getVolumeSetAttributes)
                     .map(VolumeSetAttributes::getVolumes)
                     .flatMap(List::stream)
                     .count();
             if (numVolumesToDelete == 0) {
-                String errorMessage = String.format("BadRequestException: There are no volumes attached to %s instance group", requestGroup);
+                String errorMessage = String.format("There are no persistent volumes attached to %s instance group", requestGroup);
                 LOGGER.warn(errorMessage);
                 return new DeleteVolumesFailedEvent(
                         errorMessage,
                         new BadRequestException(errorMessage),
                         stack.getId());
             }
-            String cloudPlatform = stack.getCloudPlatform();
-            return new DeleteVolumesRequest(cloudResourcesToBeDeleted, stackDeleteVolumesRequest, cloudPlatform,
-                        hostTemplateServiceComponents);
+            return new DeleteVolumesRequest(
+                    cloudResourcesToBeDeleted,
+                    stackDeleteVolumesRequest,
+                    stack.getCloudPlatform(),
+                    processor.getServiceComponentsByHostGroup().get(requestGroup));
         }
+    }
+
+    private Predicate<Resource> getVolumeset(String requestGroup) {
+        return resource ->
+                null != resource.getInstanceGroup()
+                        && resource.getInstanceGroup().equals(requestGroup)
+                        && resource.getResourceType().name().contains("VOLUMESET");
     }
 
     private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {

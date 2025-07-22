@@ -6,7 +6,6 @@ import java.util.StringJoiner;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -15,7 +14,9 @@ public class DiskResizeRequest extends StackEvent {
 
     private final String instanceGroup;
 
-    private final DiskUpdateRequest diskUpdateRequest;
+    private final String volumeType;
+
+    private final int size;
 
     private final List<Volume> volumesToUpdate;
 
@@ -23,11 +24,13 @@ public class DiskResizeRequest extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("stackId") Long stackId,
             @JsonProperty("instanceGroup") String instanceGroup,
-            @JsonProperty("diskUpdateRequest") DiskUpdateRequest diskUpdateRequest,
+            @JsonProperty("volumeType") String volumeType,
+            @JsonProperty("size") int size,
             @JsonProperty("volumesToUpdate") List<Volume> volumesToUpdate) {
         super(selector, stackId);
         this.instanceGroup = instanceGroup;
-        this.diskUpdateRequest = diskUpdateRequest;
+        this.volumeType = volumeType;
+        this.size = size;
         this.volumesToUpdate = volumesToUpdate;
     }
 
@@ -35,8 +38,12 @@ public class DiskResizeRequest extends StackEvent {
         return instanceGroup;
     }
 
-    public DiskUpdateRequest getDiskUpdateRequest() {
-        return diskUpdateRequest;
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public List<Volume> getVolumesToUpdate() {
@@ -46,6 +53,8 @@ public class DiskResizeRequest extends StackEvent {
     public String toString() {
         return new StringJoiner(", ", DiskResizeRequest.class.getSimpleName() + "[", "]")
                 .add("instanceGroup=" + instanceGroup)
+                .add("volumeType=" + volumeType)
+                .add("size=" + size)
                 .toString();
     }
 
@@ -58,7 +67,9 @@ public class DiskResizeRequest extends StackEvent {
 
         private String instanceGroup;
 
-        private DiskUpdateRequest diskUpdateRequest;
+        private String volumeType;
+
+        private int size;
 
         private List<Volume> volumesToUpdate;
 
@@ -80,8 +91,13 @@ public class DiskResizeRequest extends StackEvent {
             return this;
         }
 
-        public Builder withDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
-            this.diskUpdateRequest = diskUpdateRequest;
+        public Builder withVolumeType(String volumeType) {
+            this.volumeType = volumeType;
+            return this;
+        }
+
+        public Builder withSize(int size) {
+            this.size = size;
             return this;
         }
 
@@ -95,7 +111,7 @@ public class DiskResizeRequest extends StackEvent {
         }
 
         public DiskResizeRequest build() {
-            return new DiskResizeRequest(selector, stackId, instanceGroup, diskUpdateRequest, volumesToUpdate);
+            return new DiskResizeRequest(selector, stackId, instanceGroup, volumeType, size, volumesToUpdate);
         }
     }
 }
