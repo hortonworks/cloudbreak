@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -278,7 +279,9 @@ public class VerticalScalingValidatorService {
             for (VolumeTemplate template : instanceGroup.getTemplate().getVolumeTemplates()) {
                 VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(template.getVolumeType());
                 if (!EPHEMERAL.equals(volumeParameterType)) {
-                    template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
+                    if (StringUtils.isNotEmpty(distroXDiskUpdateEvent.getVolumeType())) {
+                        template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
+                    }
                     template.setVolumeSize(distroXDiskUpdateEvent.getSize());
                 }
             }
