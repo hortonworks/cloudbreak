@@ -18,16 +18,25 @@ public class OpenSshPublicKeyValidator {
         try {
             PublicKeyReaderUtil.load(publicKey, fipsEnabled);
         } catch (Exception e) {
-            String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
-                    publicKey, e.getMessage());
             if (e.getCause() instanceof IllegalArgumentException) {
-                errorMessage = String.format("The provided public key ['%s'] is not valid, possibly due to insufficient strength. Cause: %s. " +
-                                "Please create new SSH keys for the environment by editing 'Root SSH' on the environment's Summary page " +
-                                "or with this command: 'cdp environments update-ssh-key'",
-                        publicKey, e.getCause().getMessage());
+                if (e.getCause().getMessage().contains("RSA modulus has a small prime factor")) {
+                    LOGGER.info("The provided key is not FIPS compliant but ignoring the error to be backward compatible", e);
+                } else {
+                    String errorMessage = String.format(
+                            "The provided public key ['%s'] is not valid, possibly due to insufficient strength. Cause: %s. " +
+                            "Please create new SSH keys for the environment by editing 'Root SSH' on the environment's Summary page " +
+                            "or with this command: 'cdp environments update-ssh-key'", publicKey, e.getCause().getMessage()
+                    );
+                    LOGGER.info(errorMessage, e);
+                    throw new BadRequestException(errorMessage, e);
+                }
+            } else {
+                String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
+                        publicKey, e.getMessage());
+                LOGGER.info(errorMessage, e);
+                throw new BadRequestException(errorMessage, e);
             }
-            LOGGER.info(errorMessage, e);
-            throw new BadRequestException(errorMessage, e);
+
         }
     }
 

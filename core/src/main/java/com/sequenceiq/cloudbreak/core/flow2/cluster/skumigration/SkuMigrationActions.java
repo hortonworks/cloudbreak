@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.SKU_MIGRATION_FINISH
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.UPDATE_DNS_FOR_LB;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.model.ProviderSyncState;
 
 @Configuration
 public class SkuMigrationActions {
@@ -65,9 +67,13 @@ public class SkuMigrationActions {
                 LOGGER.info("Checking Load Balancer SKU");
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.MIGRATING_SKU);
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.UPDATE_IN_PROGRESS.name(), CHECK_LOAD_BALANCERS_SKU);
-                CheckSkuRequest detachPublicIpsRequest = new CheckSkuRequest(context.getStack(), context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudConnector(), context.getCloudStack(), payload.isForce());
-                sendEvent(context, detachPublicIpsRequest);
+                boolean skuMigrationNeededBySync = context.getProviderSyncStates().contains(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+                boolean force = payload.isForce() || skuMigrationNeededBySync;
+                LOGGER.debug("Provider sync states: {}, SKU migration needed by sync: {}, Force migration: {}",
+                        context.getProviderSyncStates(), skuMigrationNeededBySync, force);
+                CheckSkuRequest checkSkuRequest = new CheckSkuRequest(context.getStack(), context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudConnector(), context.getCloudStack(), force);
+                sendEvent(context, checkSkuRequest);
             }
         };
     }
@@ -145,6 +151,10 @@ public class SkuMigrationActions {
                 LOGGER.info("Load Balancer Migration successfully completed from Basic to Standard SKU");
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE);
                 stackService.updateTemplateForStackToLatest(payload.getResourceId());
+                Set<ProviderSyncState> providerSyncStates = context.getStack().getProviderSyncStates();
+                LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for stack: {}", context.getStack().getName());
+                providerSyncStates.remove(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+                stackUpdater.updateProviderState(payload.getResourceId(), providerSyncStates);
                 skuMigrationService.setSkuMigrationParameter(payload.getResourceId());
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), SKU_MIGRATION_FINISHED);
                 sendEvent(context);
