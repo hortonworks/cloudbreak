@@ -66,8 +66,10 @@ public abstract class AbstractSkuMigrationAction<P extends Payload> extends
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
+
         CloudConnector cloudConnector = cloudPlatformConnectors.get(new CloudPlatformVariant(stack.getCloudPlatform(), stack.getPlatformVariant()));
-        return new SkuMigrationContext(flowParameters, stack.getStack(), stack.getCloudPlatform(), cloudContext, cloudCredential, cloudConnector, cloudStack);
+        return new SkuMigrationContext(flowParameters, stack.getStack(), stack.getCloudPlatform(), cloudContext, cloudCredential, cloudConnector, cloudStack,
+                stack.getStack().getProviderSyncStates());
     }
 
     @Override
