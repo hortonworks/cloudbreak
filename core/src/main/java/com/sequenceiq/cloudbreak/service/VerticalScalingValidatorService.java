@@ -279,7 +279,7 @@ public class VerticalScalingValidatorService {
             for (VolumeTemplate template : instanceGroup.getTemplate().getVolumeTemplates()) {
                 VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(template.getVolumeType());
                 if (!EPHEMERAL.equals(volumeParameterType)) {
-                    if (StringUtils.isNotEmpty(distroXDiskUpdateEvent.getVolumeType())) {
+                    if (StringUtils.isNotBlank(distroXDiskUpdateEvent.getVolumeType())) {
                         template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
                     }
                     template.setVolumeSize(distroXDiskUpdateEvent.getSize());
