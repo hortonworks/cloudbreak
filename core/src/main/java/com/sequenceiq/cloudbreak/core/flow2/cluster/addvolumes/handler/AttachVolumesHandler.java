@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -123,7 +124,9 @@ public class AttachVolumesHandler extends ExceptionCatcherEventHandler<AttachVol
                 VolumeTemplate volumeTemplate = new VolumeTemplate();
                 volumeTemplate.setVolumeCount(attachedNumberOfDisksFromResources);
                 volumeTemplate.setVolumeSize(payload.getSize().intValue());
-                volumeTemplate.setVolumeType(payload.getType());
+                if (StringUtils.isNotBlank(payload.getType())) {
+                    volumeTemplate.setVolumeType(payload.getType());
+                }
                 volumeTemplate.setTemplate(template);
                 template.getVolumeTemplates().add(volumeTemplate);
                 LOGGER.info("Added new Volume Template with volume count - {}", attachedNumberOfDisksFromResources);
