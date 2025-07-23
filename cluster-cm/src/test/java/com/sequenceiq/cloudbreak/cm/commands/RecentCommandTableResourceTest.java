@@ -25,14 +25,15 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cm.model.CommandResource;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.HttpUrl;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Protocol;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
+
+import okhttp3.Call;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 @ExtendWith(MockitoExtension.class)
 public class RecentCommandTableResourceTest {
@@ -76,7 +77,7 @@ public class RecentCommandTableResourceTest {
         Request request = createDefaultRequest();
         given(clustersResourceApi.getApiClient()).willReturn(apiClient);
         given(apiClient.getHttpClient()).willReturn(okHttpClient);
-        given(apiClient.buildRequest(any(), any(), any(), isNull(),
+        given(apiClient.buildRequest(any(), any(), any(), isNull(), isNull(),
                 any(), any(), any(), isNull())).willReturn(request);
         given(okHttpClient.newCall(any())).willReturn(requestCall);
         given(requestCall.execute()).willReturn(
@@ -94,7 +95,7 @@ public class RecentCommandTableResourceTest {
         Request request = createDefaultRequest();
         given(clustersResourceApi.getApiClient()).willReturn(apiClient);
         given(apiClient.getHttpClient()).willReturn(okHttpClient);
-        given(apiClient.buildRequest(any(), any(), any(), isNull(),
+        given(apiClient.buildRequest(any(), any(), any(), isNull(), isNull(),
                 any(), any(), any(), isNull())).willReturn(request);
         given(okHttpClient.newCall(any())).willReturn(requestCall);
         given(requestCall.execute()).willReturn(
@@ -151,6 +152,7 @@ public class RecentCommandTableResourceTest {
                 .request(request)
                 .body(createResponseBody(body))
                 .protocol(Protocol.HTTP_2)
+                .message("message")
                 .build();
     }
 

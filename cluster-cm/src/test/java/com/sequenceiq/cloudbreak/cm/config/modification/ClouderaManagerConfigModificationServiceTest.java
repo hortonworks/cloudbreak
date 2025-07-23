@@ -79,12 +79,11 @@ public class ClouderaManagerConfigModificationServiceTest {
     @Test
     void testUpdateConfigWhenConfigMissing() throws Exception {
         mockReadServices();
-        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("other", "old")));
-        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("other", "old")));
-        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("other", "old")));
+        ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+        apiServiceConfig.addItemsItem(apiConfig("other", "old"));
+        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(apiServiceConfig);
+        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(apiServiceConfig);
+        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(apiServiceConfig);
         when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service1"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
                 new ApiRoleConfigGroup().name("roleConfigGroup2").config(new ApiConfigList().addItemsItem(apiConfig("other", "old")))));
         when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service2"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
@@ -132,12 +131,15 @@ public class ClouderaManagerConfigModificationServiceTest {
 
     private void mockConfigServiceCalls() {
         mockReadServices();
-        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig1", "old")));
-        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig2", "old")));
-        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig3", "old")));
+        ApiServiceConfig serviceConfig1 = new ApiServiceConfig();
+        serviceConfig1.addItemsItem(apiConfig("serviceConfig1", "old"));
+        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(serviceConfig1);
+        ApiServiceConfig serviceConfig2 = new ApiServiceConfig();
+        serviceConfig2.addItemsItem(apiConfig("serviceConfig2", "old"));
+        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(serviceConfig2);
+        ApiServiceConfig serviceConfig3 = new ApiServiceConfig();
+        serviceConfig3.addItemsItem(apiConfig("serviceConfig3", "old"));
+        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(serviceConfig3);
         when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service2"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
                 new ApiRoleConfigGroup().name("roleConfigGroup2").config(new ApiConfigList().addItemsItem(apiConfig("roleConfigGroupConfig2", "old")))));
         when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service3"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
@@ -148,12 +150,15 @@ public class ClouderaManagerConfigModificationServiceTest {
 
     private void mockConfigServiceCallsWithoutFallback() {
         mockReadServices();
-        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig1", "old")));
-        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig2", "old")));
-        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(new ApiServiceConfig()
-                .addItemsItem(apiConfig("serviceConfig3", "old")));
+        ApiServiceConfig serviceConfig1 = new ApiServiceConfig();
+        serviceConfig1.addItemsItem(apiConfig("serviceConfig1", "old"));
+        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(serviceConfig1);
+        ApiServiceConfig serviceConfig2 = new ApiServiceConfig();
+        serviceConfig2.addItemsItem(apiConfig("serviceConfig1", "old"));
+        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(serviceConfig2);
+        ApiServiceConfig serviceConfig3 = new ApiServiceConfig();
+        serviceConfig3.addItemsItem(apiConfig("serviceConfig1", "old"));
+        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(serviceConfig3);
         lenient().doNothing().when(configService).modifyServiceConfigs(any(), any(), any(Map.class), any());
     }
 

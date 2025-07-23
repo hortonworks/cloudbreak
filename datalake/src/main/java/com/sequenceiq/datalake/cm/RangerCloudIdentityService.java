@@ -147,9 +147,9 @@ public class RangerCloudIdentityService {
     }
 
     private RangerCloudIdentitySyncState toRangerCloudIdentitySyncState(ApiCommand apiCommand) {
-        if (apiCommand.getActive()) {
+        if (apiCommand.isActive()) {
             return RangerCloudIdentitySyncState.ACTIVE;
-        } else if (apiCommand.getSuccess()) {
+        } else if (apiCommand.isSuccess()) {
             return RangerCloudIdentitySyncState.SUCCESS;
         } else {
             return RangerCloudIdentitySyncState.FAILED;

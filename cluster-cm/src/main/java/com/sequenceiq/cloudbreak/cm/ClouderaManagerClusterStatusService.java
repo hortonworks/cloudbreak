@@ -225,7 +225,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                     .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
             fastClient = clouderaManagerApiClientProvider
                     .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
-            fastClient.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
+            fastClient.setHttpClient(fastClient.getHttpClient().newBuilder().connectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS).build());
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -255,7 +255,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
             return apiHostList.getItems()
                     .stream()
-                    .filter(host -> Boolean.TRUE.equals(host.getMaintenanceMode()))
+                    .filter(host -> Boolean.TRUE.equals(host.isMaintenanceMode()))
                     .map(ApiHost::getHostname)
                     .collect(toList());
         } catch (ApiException e) {
@@ -433,9 +433,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setId(apiCommand.getId());
         command.setName(apiCommand.getName());
-        command.setSuccess(apiCommand.getSuccess());
-        command.setActive(apiCommand.getActive());
-        command.setRetryable(apiCommand.getCanRetry());
+        command.setSuccess(apiCommand.isSuccess());
+        command.setActive(apiCommand.isActive());
+        command.setRetryable(apiCommand.isCanRetry());
         command.setEndTime(apiCommand.getEndTime());
         command.setResultMessage(apiCommand.getResultMessage());
         command.setStartTime(apiCommand.getStartTime());

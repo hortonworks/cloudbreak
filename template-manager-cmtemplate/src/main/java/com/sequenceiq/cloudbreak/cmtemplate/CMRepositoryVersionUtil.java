@@ -276,6 +276,10 @@ public class CMRepositoryVersionUtil {
                 && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16);
     }
 
+    public static boolean isMemoryRelocationSupported(String cmVersion) {
+        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1);
+    }
+
     public static boolean isDataSharingConfigurationSupported(String cmVersion, String cdhVersion) {
         return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1_300) &&
                 isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1);

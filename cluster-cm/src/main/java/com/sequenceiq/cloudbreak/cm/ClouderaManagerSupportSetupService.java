@@ -30,12 +30,12 @@ public class ClouderaManagerSupportSetupService {
 
     void prepareSupportRole(ApiClient apiClient, StackType type) {
         try {
-            clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).updateConfig("",
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).updateConfig(
                 new ApiConfigList().addItemsItem(
                     new ApiConfig()
                         .name(CREATOR_TAG)
                         .value(String.format("Cloudera %s %s", getServiceType(type), cbVersion))
-                ));
+                ), "");
         } catch (ApiException e) {
             LOGGER.debug("Failed to set CREATOR_TAG on Cloudera Manager", e);
             throw new ClouderaManagerOperationFailedException("Failed to set CREATOR_TAG on Cloudera Manager", e);

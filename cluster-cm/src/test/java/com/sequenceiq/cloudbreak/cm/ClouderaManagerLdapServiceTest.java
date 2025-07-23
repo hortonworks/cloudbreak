@@ -177,7 +177,7 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, null, null);
         // THEN
-        verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
+        verify(clouderaManagerResourceApi, never()).updateConfig(any(), anyString());
         verify(authRolesResourceApi, never()).readAuthRolesMetadata(anyString());
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }

@@ -169,7 +169,7 @@ class ClouderaManagerParcelManagementServiceTest {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withParcel("https://cdh.parcel");
         ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withParcel("https://flink.parcel");
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        when(clouderaManagerResourceApi.updateConfig(eq("Updated configurations."), apiConfigListCaptor.capture())).thenReturn(new ApiConfigList());
+        when(clouderaManagerResourceApi.updateConfig(apiConfigListCaptor.capture(), eq("Updated configurations."))).thenReturn(new ApiConfigList());
 
         underTest.setParcelRepos(Set.of(cdhProduct, flinkProduct), clouderaManagerResourceApi);
 

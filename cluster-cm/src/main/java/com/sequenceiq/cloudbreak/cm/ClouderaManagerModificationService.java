@@ -193,6 +193,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private ApiClient v52Client;
 
+    private ApiClient v55Client;
+
     public ClouderaManagerModificationService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
@@ -212,6 +214,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             v52Client = clouderaManagerApiClientProvider.getV52Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V52 client!");
+        }
+        try {
+            v55Client = clouderaManagerApiClientProvider.getV55Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.warn("Client init failed for V55 client!");
         }
     }
 
@@ -721,11 +728,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, true, START_ROLES_ON_UPSCALED_NODES, body);
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
             } else {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, false, START_ROLES_ON_UPSCALED_NODES, body);
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
             }
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
@@ -817,7 +824,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void validateBatchResponse(ApiBatchResponse batchResponse) {
-        if (batchResponse != null && batchResponse.getSuccess() != null && batchResponse.getItems() != null && batchResponse.getSuccess()) {
+        if (batchResponse != null && batchResponse.isSuccess() != null && batchResponse.getItems() != null && batchResponse.isSuccess()) {
             // batchResponse contains the updated ApiHost for each request as well, but we are going to ignore them here
             LOGGER.debug("Setting rack ID for hosts batch operation finished. Updated host count: [{}].", batchResponse.getItems().size());
         } else {
@@ -947,7 +954,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         apiConfig.setName("memory_overcommit_threshold");
         apiConfig.setValue("0.95");
         apiConfigList.addItemsItem(apiConfig);
-        allHostsResourceApi.updateConfig(null, apiConfigList);
+        allHostsResourceApi.updateConfig(apiConfigList, null);
     }
 
     @Override
@@ -1034,7 +1041,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
         if (startClusterCommand.isPresent()) {
             Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
-            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().getActive())) {
+            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().isActive())) {
                 return startClusterCommand.get();
             } else {
                 clusterCommandService.delete(startClusterCommand.get());

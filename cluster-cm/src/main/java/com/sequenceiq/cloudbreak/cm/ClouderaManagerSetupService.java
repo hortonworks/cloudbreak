@@ -330,7 +330,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         // addRepositories - if true the parcels repositories in the cluster template
         // will be added.
         ApiCommand apiCommand = clouderaManagerResourceApi
-                .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
+                .importClusterTemplate(apiClusterTemplate, calculateAddRepositories(apiClusterTemplate, prewarmed));
         ClusterCommand clusterCommand = new ClusterCommand();
         clusterCommand.setClusterId(cluster.getId());
         clusterCommand.setCommandId(apiCommand.getId());
@@ -342,7 +342,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private void retryTemplateInstallIfNeeded(ClusterCommand importCommand) throws ApiException {
         ApiCommand apiCommand = clouderaManagerCommandsService.getApiCommand(apiClient, importCommand.getCommandId());
-        if (apiCommand != null && isFalse(apiCommand.getSuccess()) && isFalse(apiCommand.getActive()) && isTrue(apiCommand.getCanRetry())) {
+        if (apiCommand != null && isFalse(apiCommand.isSuccess()) && isFalse(apiCommand.isActive()) && isTrue(apiCommand.isCanRetry())) {
             ApiCommand retriedApiCommand = clouderaManagerCommandsService.retryApiCommand(apiClient, importCommand.getCommandId());
             importCommand.setCommandId(retriedApiCommand.getId());
             clusterCommandService.save(importCommand);
@@ -406,7 +406,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .addItemsItem(removeRemoteParcelRepos())
                     .addItemsItem(setHeader(stackType))
                     .addItemsItem(disableGoogleAnalytics());
-            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
+            clouderaManagerResourceApi.updateConfig(apiConfigList, "Updated configurations.");
             updateClouderaManagerMonitoringConfig();
         } catch (ApiException e) {
             throw mapApiException(e);
@@ -432,7 +432,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             ApiConfigList apiConfigList = new ApiConfigList().addItemsItem(new ApiConfig().name(parameterName).value(value));
-            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
+            clouderaManagerResourceApi.updateConfig(apiConfigList, "Updated configurations.");
         } catch (ApiException e) {
             if (e.getCode() == BAD_REQUEST_ERROR_CODE && e.getResponseBody() != null && e.getResponseBody().contains("Unknown configuration attribute")) {
                 LOGGER.debug("CM parameter '{}' is not supported by this CM version.", parameterName);
@@ -522,7 +522,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         addNoProxyHosts(proxyConfig, proxyConfigList);
         try {
             LOGGER.info("Update settings with: " + proxyConfigList);
-            clouderaManagerResourceApi.updateConfig("Update proxy settings", proxyConfigList);
+            clouderaManagerResourceApi.updateConfig(proxyConfigList, "Update proxy settings");
         } catch (ApiException e) {
             String failMessage = "Update proxy settings failed";
             LOGGER.error(failMessage, e);

@@ -103,7 +103,7 @@ ext {
   bouncycastleUtilFipsVersion = '2.1.4'
 
   // Cloudera
-  cmClientVersion = '7.12.0.0'
+  cmClientVersion = '7.13.1'
 
   // Testing
   assertjVersion = '3.21.0'

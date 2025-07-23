@@ -27,10 +27,10 @@ public class ClouderaManagerCommandUtil {
     private static Predicate<ApiCommand> commandFailed() {
         return cmd -> {
             if (cmd != null) {
-                if (cmd.getActive() != null && cmd.getActive()) {
+                if (cmd.isActive() != null && cmd.isActive()) {
                     return true;
                 }
-                return cmd.getSuccess() != null && !cmd.getSuccess();
+                return cmd.isSuccess() != null && !cmd.isSuccess();
             }
             return false;
         };
