@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -29,8 +28,6 @@ class TrustCommandsGeneratorServiceTest {
 
     @Test
     void returnsCommandsResponseWithExpectedFields() {
-        TrustSetupCommandsRequest request = new TrustSetupCommandsRequest();
-        request.setEnvironmentCrn("env-crn");
         Stack stack = mock(Stack.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
@@ -38,11 +35,10 @@ class TrustCommandsGeneratorServiceTest {
         when(activeDirectoryCommandsBuilder.buildCommands(stack, freeIpa, crossRealmTrust)).thenReturn("active directory commands");
         when(baseClusterKrb5ConfBuilder.buildCommands(freeIpa, crossRealmTrust)).thenReturn("krb5 conf");
 
-        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands(request, stack, freeIpa, crossRealmTrust);
+        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands("env-crn", stack, freeIpa, crossRealmTrust);
 
         assertEquals("env-crn", response.getEnvironmentCrn());
         assertEquals("active directory commands", response.getActiveDirectoryCommands().getCommands());
         assertEquals("krb5 conf", response.getBaseClusterCommands().getKrb5Conf());
     }
-
 }

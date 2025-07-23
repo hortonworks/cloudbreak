@@ -22,7 +22,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -134,8 +133,7 @@ public class TrustSetupService {
         return response;
     }
 
-    public TrustSetupCommandsResponse getTrustSetupCommands(String accountId, TrustSetupCommandsRequest request) {
-        String environmentCrn = request.getEnvironmentCrn();
+    public TrustSetupCommandsResponse getTrustSetupCommands(String accountId, String environmentCrn) {
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
         if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {
@@ -144,7 +142,7 @@ public class TrustSetupService {
                     ", required states: " + ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS);
         }
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return trustCommandsGeneratorService.getTrustSetupCommands(request, stack, freeIpa, crossRealmTrust);
+        return trustCommandsGeneratorService.getTrustSetupCommands(environmentCrn, stack, freeIpa, crossRealmTrust);
     }
 
     private boolean isFinishTrustSetupPossible(Stack stack, CrossRealmTrust crossRealmTrust) {
