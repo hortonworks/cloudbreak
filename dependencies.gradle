@@ -58,7 +58,7 @@ ext {
   apacheCommonsLangVersion = '3.8.1'
   apacheCommonsTextVersion = '1.10.0'
   apacheCommonsValidatorVersion = '1.6'
-  commonsCodecVersion = '1.18.0'
+  commonsCodecVersion = '1.19.0'
   commonsCollections4Version = '4.4'
   guavaVersion = '33.4.8-jre'
   byteBuddyVersion = '1.17.6'
