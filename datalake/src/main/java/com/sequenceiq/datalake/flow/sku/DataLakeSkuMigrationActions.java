@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationFlowEvent.DAT
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -75,6 +77,11 @@ public class DataLakeSkuMigrationActions {
                 LOGGER.info("Successfully migrated Skus for the Data Lake");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         "Successfully migrated Skus for the Data Lake", context.getSdxId());
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                Set<ProviderSyncState> providerSyncStates = sdxCluster.getProviderSyncStates();
+                LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for datalake: {}", sdxCluster.getClusterName());
+                providerSyncStates.remove(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+                sdxService.save(sdxCluster);
                 sendEvent(context, new SdxEvent(DATALAKE_SKU_MIGRATION_FINALIZED_EVENT.event(), context.getSdxId(), context.getUserId()));
             }
 

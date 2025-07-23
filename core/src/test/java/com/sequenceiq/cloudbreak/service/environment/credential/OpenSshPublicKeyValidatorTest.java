@@ -2,14 +2,19 @@ package com.sequenceiq.cloudbreak.service.environment.credential;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.mockStatic;
 
 import java.security.Security;
 
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil;
 
 class OpenSshPublicKeyValidatorTest {
 
@@ -132,10 +137,10 @@ class OpenSshPublicKeyValidatorTest {
     }
 
     @Test
-    public void rsaPublicKeyWithInsufficientStrengthWillFailWithBcFipsProvider() {
+    public void rsaPublicKeyWithInsufficientStrengthWillNotFailWithBcFipsProviderBecauseOfBackwardCompatiblity() {
         Security.removeProvider("SunRsaSign");
         Security.addProvider(new BouncyCastleFipsProvider());
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.validate(
+        underTest.validate(
                 "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC1jlaUF4QDFeB5iOmla9f53gJawrhLgB4" +
                         "UuGJMwbDOoqBpIHDq2L3Muf9vCAz18LjvDiBt1NvbqK8w1ZJYcUh4IS+grwCs439wy3aIfs" +
                         "5Lgm29/NVyM4QrJFoyySf2lMTnymVxkzYS1X6Fd47nJnDJvF4RRZmzzUvVb9+pAjnk8Q/Ux" +
@@ -144,10 +149,28 @@ class OpenSshPublicKeyValidatorTest {
                         "unQPFNGnhzq5yZZIZFiiVu7K5VWmNt4xwMACvKL1YLHKbd7ps+hfDZ/p7Xw7IhKhKoj+21l" +
                         "leH3//i/xXe4Ft8rAFMTksHAacpapXrkQLfeDUcIHt374J4j1BzSvK04rwSOQA3wLrLfWXb" +
                         "LZhDPcYVbTZRZvWHvJDDa+u5xEKqLgssCpmRqUTKsJ7zmYxJKZfxCk= cloudbreak", false
-        ));
-        assertThat(badRequestException).hasMessageEndingWith("is not valid, possibly due to insufficient strength. " +
-                "Cause: RSA modulus has a small prime factor. Please create new SSH keys for the environment by editing 'Root SSH' on the " +
-                "environment's Summary page or with this command: 'cdp environments update-ssh-key'");
+        );
+    }
+
+    @Test
+    void testValidateFipsNonCompliantKeyIgnored() {
+        Security.removeProvider("SunRsaSign");
+        Security.addProvider(new BouncyCastleFipsProvider());
+        Exception inner = new IllegalArgumentException("RSAnot modulus has a small prime factor");
+        Exception outer = new RuntimeException(inner);
+
+        try (MockedStatic<PublicKeyReaderUtil> mockedStatic = mockStatic(PublicKeyReaderUtil.class)) {
+            mockedStatic.when(() -> PublicKeyReaderUtil.load(any(), anyBoolean()))
+                    .thenThrow(outer);
+            BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                    underTest.validate("fips-noncompliant-key", true));
+            assertThat(badRequestException).hasMessageEndingWith(
+                            "The provided public key ['fips-noncompliant-key'] is not valid, " +
+                            "possibly due to insufficient strength. Cause: RSAnot modulus " +
+                            "has a small prime factor. Please create new SSH keys for the " +
+                            "environment by editing 'Root SSH' on the environment's Summary" +
+                            " page or with this command: 'cdp environments update-ssh-key'");
+        }
     }
 
 }

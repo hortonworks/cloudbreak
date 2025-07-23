@@ -210,7 +210,7 @@ public class DiskUpdateService {
             InstanceGroupView instanceGroup = optionalGroup.get();
             Template template = instanceGroup.getTemplate();
             for (VolumeTemplate volumeTemplateInTheDatabase : notEphemeralVolumes(template, diskTypes)) {
-                if (null != group) {
+                if (null != group && StringUtils.isNotBlank(volumeType)) {
                     volumeTemplateInTheDatabase.setVolumeType(volumeType);
                 }
                 if (size > 0) {
