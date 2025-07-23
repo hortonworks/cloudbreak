@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -24,10 +23,10 @@ public class TrustCommandsGeneratorService {
     @Inject
     private BaseClusterKrb5ConfBuilder baseClusterKrb5ConfBuilder;
 
-    public TrustSetupCommandsResponse getTrustSetupCommands(TrustSetupCommandsRequest request, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
+    public TrustSetupCommandsResponse getTrustSetupCommands(String environmentCrn, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
         LOGGER.info("Retrieving commands for cross-realm trust setup for active directory: {}", crossRealmTrust.getFqdn());
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
-        response.setEnvironmentCrn(request.getEnvironmentCrn());
+        response.setEnvironmentCrn(environmentCrn);
         ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
         adCommands.setCommands(activeDirectoryCommandsBuilder.buildCommands(stack, freeIpa, crossRealmTrust));
         response.setActiveDirectoryCommands(adCommands);

@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
@@ -45,8 +44,6 @@ class TrustSetupServiceTest {
     void returnsTrustSetupCommandsResponseWhenStatusIsAllowed() {
         String accountId = "acc";
         String envCrn = "env-crn";
-        TrustSetupCommandsRequest request = new TrustSetupCommandsRequest();
-        request.setEnvironmentCrn(envCrn);
 
         Stack stack = mock(Stack.class);
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
@@ -58,9 +55,9 @@ class TrustSetupServiceTest {
         when(crossRealmTrustService.getByStackId(stack.getId())).thenReturn(crossRealmTrust);
         when(crossRealmTrust.getTrustStatus()).thenReturn(TrustStatus.TRUST_ACTIVE);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        when(trustCommandsGeneratorService.getTrustSetupCommands(request, stack, freeIpa, crossRealmTrust)).thenReturn(expectedResponse);
+        when(trustCommandsGeneratorService.getTrustSetupCommands(envCrn, stack, freeIpa, crossRealmTrust)).thenReturn(expectedResponse);
 
-        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands(accountId, request);
+        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands(accountId, envCrn);
 
         assertSame(expectedResponse, response);
     }
@@ -69,8 +66,6 @@ class TrustSetupServiceTest {
     void throwsBadRequestExceptionWhenTrustStatusIsNotAllowed() {
         String accountId = "acc";
         String envCrn = "env-crn";
-        TrustSetupCommandsRequest request = new TrustSetupCommandsRequest();
-        request.setEnvironmentCrn(envCrn);
 
         Stack stack = mock(Stack.class);
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
@@ -83,7 +78,7 @@ class TrustSetupServiceTest {
         when(stackStatus.getDetailedStackStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-                () -> underTest.getTrustSetupCommands(accountId, request));
+                () -> underTest.getTrustSetupCommands(accountId, envCrn));
         assertTrue(ex.getMessage().contains("trust is not in state, where trust setup commands can be generated"));
     }
 }

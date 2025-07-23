@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
@@ -19,6 +20,7 @@ public class PrepareCrossRealmTrustBase {
     @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
+    @ResourceCrn
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
