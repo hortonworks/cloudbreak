@@ -26,6 +26,8 @@ public class SdxAssertion {
 
     private static final String VALIDATE_LOAD_BALANCER_CMD = "nslookup %s | grep -q '%s' && echo Success || echo Failure - $(hostname)";
 
+    private static final String VALIDATE_FILE_CONTENT_CMD = "sudo grep -Pq '%s' %s && echo Success || echo Failure";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxAssertion.class);
 
     @Inject
@@ -61,6 +63,29 @@ public class SdxAssertion {
         } catch (Exception e) {
             LOGGER.error("Error trying to check load balancer FQDN", e);
             throw new TestFailException("Error trying to check load balancer FQDN: " + e.getMessage(), e);
+        }
+    }
+
+    public void validateFileContentExists(SdxTestDto sdxTestDto, String fileName, String fileContent) {
+        try {
+            String cmd = String.format(VALIDATE_FILE_CONTENT_CMD, fileContent, fileName);
+            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnPrimaryGateways(
+                    sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), cmd, false);
+
+            List<String> errors = results
+                    .values()
+                    .stream()
+                    .map(Pair::getValue)
+                    .filter(value -> value != null && value.contains("Failure"))
+                    .collect(toList());
+
+            if (!errors.isEmpty()) {
+                throw new RuntimeException("File content does not exist in " + fileName);
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error trying to check {} in {}", fileContent, fileName, e);
+            throw new TestFailException("Error trying to check file content exists: " + e.getMessage(), e);
         }
     }
 }
