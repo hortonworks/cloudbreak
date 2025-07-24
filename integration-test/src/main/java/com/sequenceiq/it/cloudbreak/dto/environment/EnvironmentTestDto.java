@@ -445,7 +445,7 @@ public class EnvironmentTestDto
     @Override
     public List<SimpleEnvironmentResponse> getAll(EnvironmentClient client) {
         EnvironmentEndpoint environmentEndpoint = client.getDefaultClient().environmentV1Endpoint();
-        return new ArrayList<>(environmentEndpoint.list().getResponses()).stream()
+        return new ArrayList<>(environmentEndpoint.list(null).getResponses()).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();

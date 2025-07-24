@@ -146,12 +146,12 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public Map<String, String> getAllEnvironments(EnvironmentClient environmentClient) {
-        return environmentClient.environmentV1Endpoint().list().getResponses().stream()
+        return environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
     }
 
     public Map<String, String> getEnvironments(EnvironmentClient environmentClient) {
-        Map<String, String> parentEnvironments = environmentClient.environmentV1Endpoint().list().getResponses().stream()
+        Map<String, String> parentEnvironments = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                 .filter(response -> response.getParentEnvironmentName() == null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
         parentEnvironments.forEach((crn, name) -> LOG.info("Found deletable environment CRN: {} and NAME: {}", crn, name));
@@ -159,7 +159,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public Map<String, String> getChildEnvironments(EnvironmentClient environmentClient) {
-        Map<String, String> childEnvironments = environmentClient.environmentV1Endpoint().list().getResponses().stream()
+        Map<String, String> childEnvironments = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                 .filter(response -> response.getParentEnvironmentName() != null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
         childEnvironments.forEach((crn, name) -> LOG.info("Found deletable child environment CRN: {} and NAME: {}", crn, name));

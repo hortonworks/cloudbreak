@@ -12,6 +12,7 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -323,8 +324,11 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @FilterListBasedOnPermissions
-    public SimpleEnvironmentResponses list() {
-        List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(DESCRIBE_ENVIRONMENT);
+    public SimpleEnvironmentResponses list(String remoteEnvironmentCrn) {
+        List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(
+                DESCRIBE_ENVIRONMENT,
+                Optional.ofNullable(remoteEnvironmentCrn)
+        );
         return toSimpleEnvironmentResponses(environmentDtos);
     }
 

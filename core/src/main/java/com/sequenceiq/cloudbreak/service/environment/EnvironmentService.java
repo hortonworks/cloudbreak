@@ -69,7 +69,7 @@ public class EnvironmentService {
 
     public SimpleEnvironmentResponses list() {
         try {
-            return environmentEndpoint.list();
+            return environmentEndpoint.list(null);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to LIST Environment due to: %s. %s.", e.getMessage(), errorMessage);

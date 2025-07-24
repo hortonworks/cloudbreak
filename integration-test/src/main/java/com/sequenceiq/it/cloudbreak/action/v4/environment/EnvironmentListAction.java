@@ -13,7 +13,8 @@ public class EnvironmentListAction implements Action<EnvironmentTestDto, Environ
         testDto.setResponseSimpleEnvSet(
                 environmentClient.getDefaultClient()
                         .environmentV1Endpoint()
-                        .list().getResponses());
+                        .list(null)
+                        .getResponses());
         Log.whenJson("Environment list response: ", testDto.getResponse());
         return testDto;
     }

@@ -47,7 +47,7 @@ public class CleanupWaitUtil {
      */
     public WaitResult waitForDistroxesCleanup(CloudbreakClient cloudbreak, EnvironmentClient environment) {
         int retryCount = 0;
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+        Map<String, String> environments = environment.environmentV1Endpoint().list(null).getResponses().stream()
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
 
         while (retryCount < maxRetry && checkDistroxesAreAvailable(cloudbreak, environments) && !checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
@@ -116,7 +116,7 @@ public class CleanupWaitUtil {
      */
     public WaitResult waitForSdxesCleanup(SdxClient sdx, EnvironmentClient environment) {
         int retryCount = 0;
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+        Map<String, String> environments = environment.environmentV1Endpoint().list(null).getResponses().stream()
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
 
         while (retryCount < maxRetry && checkSdxesAreAvailable(sdx, environments) && !checkSdxesDeleteFailedStatus(sdx, environments)) {
@@ -346,7 +346,7 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentsAreAvailable(EnvironmentClient environment) {
         try {
-            return !(environment.environmentV1Endpoint().list().getResponses().stream()
+            return !(environment.environmentV1Endpoint().list(null).getResponses().stream()
                     .map(EnvironmentBaseResponse::getName).count() == 0);
         } catch (Exception e) {
             LOG.warn("Exception has been occurred during check environments are available: {}", e.getMessage(), e);
@@ -367,7 +367,7 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentIsAvailable(EnvironmentClient environmentClient, String environmentName) {
         try {
-            return environmentClient.environmentV1Endpoint().list().getResponses().stream()
+            return environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                     .anyMatch(response -> response.getName().equalsIgnoreCase(environmentName));
         } catch (Exception e) {
             LOG.warn("Exception has been occurred while checking {} environment is available: {}", environmentName, e.getMessage(), e);
@@ -473,7 +473,7 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentsDeleteFailedStatus(EnvironmentClient environment) {
         try {
-            return environment.environmentV1Endpoint().list().getResponses().stream()
+            return environment.environmentV1Endpoint().list(null).getResponses().stream()
                     .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
         } catch (Exception e) {
             LOG.warn("Exception has been occurred during check environments DELETE_FAILED state: {}", e.getMessage(), e);
@@ -494,7 +494,7 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentDeleteFailedStatus(EnvironmentClient environmentClient, String environmentName) {
         try {
-            EnvironmentStatus environmentStatus = environmentClient.environmentV1Endpoint().list().getResponses().stream()
+            EnvironmentStatus environmentStatus = environmentClient.environmentV1Endpoint().list(null).getResponses().stream()
                     .filter(response -> response.getName().equalsIgnoreCase(environmentName))
                     .findFirst()
                     .map(EnvironmentBaseResponse::getEnvironmentStatus)

@@ -119,9 +119,19 @@ public interface EnvironmentEndpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.LIST, description = ENVIRONMENT_NOTES, operationId = "listEnvironmentV1",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SimpleEnvironmentResponses list();
+    @Operation(
+            summary = EnvironmentOpDescription.LIST,
+            description = ENVIRONMENT_NOTES + """
+                remoteEnvironmentCrn is optional filter for those environment which are connected" +
+                to the specified remote environment, if not provided, all environments" +
+                in the account will be listed.
+                """,
+            operationId = "listEnvironmentV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true)
+    )
+    SimpleEnvironmentResponses list(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("remoteEnvironmentCrn") String remoteEnvironmentCrn
+    );
 
     @GET
     @Path("internal")

@@ -45,6 +45,20 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "LEFT JOIN FETCH e.credential c "
             + "LEFT JOIN FETCH e.authentication a "
             + "LEFT JOIN FETCH e.parameters p "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.remoteEnvironmentCrn = :remoteEnvironmentCrn "
+            + "AND e.archived = false")
+    Set<Environment> findByAccountIdAndRemoveEnvironmentCrn(
+        @Param("accountId") String accountId,
+        @Param("remoteEnvironmentCrn") String remoteEnvironmentCrn
+    );
+
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
             + "WHERE e.id IN :ids "
             + "AND e.archived = false")
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);

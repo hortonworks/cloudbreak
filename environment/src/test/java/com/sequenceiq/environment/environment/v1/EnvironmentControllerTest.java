@@ -9,6 +9,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -36,6 +38,9 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -62,6 +67,9 @@ class EnvironmentControllerTest {
 
     @Mock
     private EnvironmentApiConverter environmentApiConverter;
+
+    @Mock
+    private EnvironmentFiltering environmentFiltering;
 
     @Mock
     private EnvironmentCreationService environmentCreationService;
@@ -239,6 +247,23 @@ class EnvironmentControllerTest {
                 Arguments.of(Tunnel.CCMV2_JUMPGATE, 1, true),
                 Arguments.of(Tunnel.CCMV2_JUMPGATE, 2, true)
         );
+    }
+
+    @Test
+    void testListEndpointReturnsSimpleEnvironmentResponses() {
+        String remoteCrn = "remoteCrn";
+        EnvironmentDto envDto = new EnvironmentDto();
+        List<EnvironmentDto> envDtoList = List.of(envDto);
+        SimpleEnvironmentResponse simpleResponse = new SimpleEnvironmentResponse();
+
+        when(environmentFiltering.filterEnvironments(any(), eq(Optional.of(remoteCrn)))).thenReturn(envDtoList);
+        when(environmentResponseConverter.dtoToSimpleResponse(envDto, true, true)).thenReturn(simpleResponse);
+
+        SimpleEnvironmentResponses result = underTest.list(remoteCrn);
+
+        assertThat(result.getResponses()).containsExactly(simpleResponse);
+        verify(environmentFiltering).filterEnvironments(any(), eq(Optional.of(remoteCrn)));
+        verify(environmentResponseConverter).dtoToSimpleResponse(envDto, true, true);
     }
 
 }
