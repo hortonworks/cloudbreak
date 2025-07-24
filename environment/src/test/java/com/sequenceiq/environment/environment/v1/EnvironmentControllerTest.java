@@ -139,7 +139,7 @@ class EnvironmentControllerTest {
             try {
                 underTest.editByName(ENV_CRN, null);
             } catch (BadRequestException e) {
-                assertEquals("Environment status is not AVAILABLE for Edit", e.getMessage());
+                assertEquals("Environment's status needs to be AVAILABLE for the environment to be editable", e.getMessage());
             }
         }
     }
@@ -165,6 +165,44 @@ class EnvironmentControllerTest {
     }
 
     @Test
+    void testEditByCrnNotAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofCrn(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.CREATE_FAILED);
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            try {
+                underTest.editByCrn(ENV_CRN, null);
+            } catch (BadRequestException e) {
+                assertEquals("Environment's status needs to be AVAILABLE for the environment to be editable", e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void testEditByCrnAvailable() {
+        String accountId = "accountId";
+        NameOrCrn environmentCRN = NameOrCrn.ofCrn(ENV_CRN);
+        Environment env = new Environment();
+        env.setStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withResourceCrn(ENV_CRN)
+                .build();
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
+            when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
+            when(environmentApiConverter.initEditDto(env, null)).thenReturn(environmentEditDto);
+            when(environmentModificationService.edit(env, environmentEditDto)).thenReturn(environmentDto);
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(DetailedEnvironmentResponse.builder().build());
+            DetailedEnvironmentResponse response = underTest.editByCrn(ENV_CRN, null);
+            assertEquals(DetailedEnvironmentResponse.class, response.getClass());
+        }
+    }
+
+    @Test
     void testChangeCredentialByEnvironmentNameNotAvailable() {
         String accountId = "accountId";
         NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
@@ -176,7 +214,7 @@ class EnvironmentControllerTest {
             try {
                 underTest.changeCredentialByEnvironmentName(ENV_CRN, null);
             } catch (BadRequestException e) {
-                assertEquals("Environment status is not AVAILABLE for Edit", e.getMessage());
+                assertEquals("Environment's status needs to be AVAILABLE for the environment to be editable", e.getMessage());
             }
         }
     }
