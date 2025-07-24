@@ -55,6 +55,21 @@ import_certs_from_dir_to_keystore() {
 import_certs_from_dir_to_keystore $TRUSTED_CERT_DIR
 import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
 
+JACOCO_AGENT_OPTIONS=""
+if [ "${JACOCO_AGENT_ENABLED:-false}" = true ]; then
+    : ${JACOCO_AGENT_DIR:=/tmp/jacoco}
+    mkdir -p ${JACOCO_AGENT_DIR}
+    : ${JACOCO_AGENT_VERSION:=0.8.13}
+    : ${JACOCO_AGENT_PORT:=6300}
+    JACOCO_AGENT_JAR_URL="https://nexus-private.hortonworks.com/nexus/repository/public/org/jacoco/org.jacoco.agent/${JACOCO_AGENT_VERSION}/org.jacoco.agent-${JACOCO_AGENT_VERSION}-runtime.jar"
+    curl -fsSL -o "${JACOCO_AGENT_DIR}/jacocoagent.jar" "${JACOCO_AGENT_JAR_URL}"
+    if [ ! -f "${JACOCO_AGENT_DIR}/jacocoagent.jar" ]; then
+        echo "JACOCO agent not found. Please check the url: ${JACOCO_AGENT_JAR_URL} and path: ${JACOCO_AGENT_DIR}/jacocoagent.jar"
+        exit 1
+    fi
+    JACOCO_AGENT_OPTIONS="-javaagent:${JACOCO_AGENT_DIR}/jacocoagent.jar=output=tcpserver,port=${JACOCO_AGENT_PORT},address=*"
+fi
+
 echo "Starting the Periscope application..."
 
 CB_JAVA_OPTS="$CB_JAVA_OPTS -XX:+ExitOnOutOfMemoryError --add-opens java.base/java.util.concurrent=ALL-UNNAMED"
@@ -87,6 +102,6 @@ if [ -e "${BC_FIPS_LOCATION}" ]; then
 else
   SECURITY_OPTS="${SECURITY_OPTS} -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
 fi
-CB_JAVA_OPTS="${CB_JAVA_OPTS} ${SECURITY_OPTS}"
+CB_JAVA_OPTS="${CB_JAVA_OPTS} ${SECURITY_OPTS} ${JACOCO_AGENT_OPTIONS}"
 
 eval "(java $CB_JAVA_OPTS -jar /periscope.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
