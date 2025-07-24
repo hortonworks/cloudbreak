@@ -161,7 +161,7 @@ public class FreeIpaClientFactory {
     }
 
     private List<InstanceMetaData> getPriorityOrderedFreeIpaInstances(Stack stack, boolean forceCheckUnreachable) {
-        return stack.getNotDeletedInstanceMetaDataList().stream()
+        return stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(im -> forceCheckUnreachable || im.isAvailable())
                 .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator())
                 .collect(Collectors.toList());

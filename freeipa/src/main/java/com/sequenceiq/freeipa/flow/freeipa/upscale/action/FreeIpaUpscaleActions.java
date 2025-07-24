@@ -534,7 +534,7 @@ public class FreeIpaUpscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Recording hostnames");
                 List<String> instanceIds = getInstanceIds(variables);
-                List<String> hosts = stack.getNotDeletedInstanceMetaDataList().stream()
+                List<String> hosts = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> instanceIds.contains(instanceMetaData.getInstanceId()))
                         .map(InstanceMetaData::getDiscoveryFQDN)
                         .collect(Collectors.toList());
@@ -726,7 +726,7 @@ public class FreeIpaUpscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getUpscaleCompleteStatus(variables), "Upscale complete");
                 if (!isChainedAction(variables)) {
-                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataList().size());
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataSet().size());
                 }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());

@@ -126,7 +126,7 @@ public class ChangePrimaryGatewayActions {
                 List<String> repairInstanceIds = getInstanceIds(variables);
                 ClusterProxyUpdateRegistrationRequest request;
                 if (Objects.nonNull(repairInstanceIds)) {
-                    List<String> instanceIdsToRegister = stack.getNotDeletedInstanceMetaDataList().stream()
+                    List<String> instanceIdsToRegister = stack.getNotDeletedInstanceMetaDataSet().stream()
                             .map(InstanceMetaData::getInstanceId)
                             .filter(instanceId -> !repairInstanceIds.contains(instanceId))
                             .collect(Collectors.toList());

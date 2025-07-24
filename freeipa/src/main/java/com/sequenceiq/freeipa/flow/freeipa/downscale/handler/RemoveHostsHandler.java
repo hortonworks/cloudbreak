@@ -89,7 +89,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
     }
 
     private void updateMinionMultiMasterConfig(Stack stack, Set<String> hostNames) throws CloudbreakOrchestratorException {
-        Set<InstanceMetaData> remainingInstances = stack.getNotDeletedInstanceMetaDataList().stream()
+        Set<InstanceMetaData> remainingInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(metadata -> Objects.nonNull(metadata.getDiscoveryFQDN()))
                 .filter(metadata -> !hostNames.contains(metadata.getDiscoveryFQDN()))
                 .collect(Collectors.toSet());
@@ -105,7 +105,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
                             hostNames.stream()
                                     .anyMatch(hn -> hn.equals(instanceMetaData.getDiscoveryFQDN())))
                     .collect(Multimaps.toMultimap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp, HashMultimap::create));
-            Set<InstanceMetaData> remainingInstanceMetaDatas = stack.getNotDeletedInstanceMetaDataList().stream()
+            Set<InstanceMetaData> remainingInstanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet().stream()
                     .filter(instanceMetaData -> !shouldRemove(instanceMetaData, removeNodePrivateIPsByFQDN))
                     .collect(Collectors.toSet());
             Set<InstanceMetaData> invalidInstanceMetadata = remainingInstanceMetaDatas.stream()

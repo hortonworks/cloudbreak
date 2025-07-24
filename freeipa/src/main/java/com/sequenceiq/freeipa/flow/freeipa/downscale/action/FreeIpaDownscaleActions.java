@@ -154,7 +154,7 @@ public class FreeIpaDownscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating cluster proxy registration.");
                 List<String> repairInstanceIds = getInstanceIds(variables);
-                List<String> instanceIdsToRegister = stack.getNotDeletedInstanceMetaDataList().stream()
+                List<String> instanceIdsToRegister = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .map(InstanceMetaData::getInstanceId)
                         .filter(instanceId -> !repairInstanceIds.contains(instanceId))
                         .collect(Collectors.toList());
@@ -183,7 +183,7 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, CollectAdditionalHostnamesResponse payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
-                Set<String> knownHostnamesFromStack = stack.getNotDeletedInstanceMetaDataList().stream()
+                Set<String> knownHostnamesFromStack = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .map(InstanceMetaData::getDiscoveryFQDN)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet());
@@ -466,7 +466,7 @@ public class FreeIpaDownscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getDownscaleCompleteStatus(variables), "Downscale complete");
                 if (!isChainedAction(variables)) {
-                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getNotDeletedInstanceMetaDataList().size());
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getNotDeletedInstanceMetaDataSet().size());
                 }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());

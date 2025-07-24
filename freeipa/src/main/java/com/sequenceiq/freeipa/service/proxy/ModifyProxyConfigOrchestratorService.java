@@ -58,7 +58,7 @@ public class ModifyProxyConfigOrchestratorService {
      * Instances have to be sorted to make sure that we are applying the state on the instances in the same order in a flow retry.
      */
     private List<InstanceMetaData> getSortedInstances(Stack stack) {
-        return stack.getNotDeletedInstanceMetaDataList().stream()
+        return stack.getNotDeletedInstanceMetaDataSet().stream()
                 .sorted(getInstanceMetaDataComparator())
                 .collect(Collectors.toList());
     }

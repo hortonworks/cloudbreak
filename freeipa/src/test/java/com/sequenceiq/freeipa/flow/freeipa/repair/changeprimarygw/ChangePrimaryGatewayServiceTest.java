@@ -98,7 +98,7 @@ class ChangePrimaryGatewayServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(gatewayConfigService.getPrimaryGatewayConfigForSalt(any())).thenReturn(gatewayConfig);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
-        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
@@ -117,7 +117,7 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenThrow(NotFoundException.class);
-        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2));
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         lenient().when(im2.getInstanceId()).thenReturn(INSTANCE_ID_2);
 
@@ -133,7 +133,7 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenThrow(CloudbreakOrchestratorFailedException.class);
-        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2));
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         lenient().when(im2.getInstanceId()).thenReturn(INSTANCE_ID_2);
 
@@ -156,7 +156,7 @@ class ChangePrimaryGatewayServiceTest {
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_1);
         when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
-        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
@@ -183,7 +183,7 @@ class ChangePrimaryGatewayServiceTest {
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_2);
         when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
         when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
-        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2, im3));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2, im3));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
         lenient().when(im3.getDiscoveryFQDN()).thenReturn(HOSTNAME_3);

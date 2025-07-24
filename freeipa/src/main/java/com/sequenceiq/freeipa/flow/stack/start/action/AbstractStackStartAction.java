@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -49,7 +49,7 @@ public abstract class AbstractStackStartAction<P extends Payload> extends Abstra
         Long stackId = payload.getResourceId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
-        List<InstanceMetaData> instances = stack.getNotDeletedInstanceMetaDataList();
+        Set<InstanceMetaData> instances = stack.getNotDeletedInstanceMetaDataSet();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(stack.getId())

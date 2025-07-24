@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +74,7 @@ class ModifyProxyConfigOrchestratorServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        lenient().when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(I_2, I_1, I_3));
+        lenient().when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(I_2, I_1, I_3));
         lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_1.getDiscoveryFQDN()), any())).thenReturn(stateParams1);
         lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_2.getDiscoveryFQDN()), any())).thenReturn(stateParams2);
         lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_3.getDiscoveryFQDN()), any())).thenReturn(stateParams3);

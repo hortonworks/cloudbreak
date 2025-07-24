@@ -427,12 +427,6 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                 .collect(Collectors.toSet());
     }
 
-    public List<InstanceMetaData> getNotDeletedInstanceMetaDataList() {
-        return instanceGroups.stream()
-                .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
-                .collect(Collectors.toList());
-    }
-
     public List<InstanceMetaData> getAllInstanceMetaDataList() {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())

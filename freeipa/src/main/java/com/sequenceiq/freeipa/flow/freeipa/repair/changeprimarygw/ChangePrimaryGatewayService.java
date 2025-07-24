@@ -79,7 +79,7 @@ public class ChangePrimaryGatewayService {
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
         return hostOrchestrator.getFreeIpaMasterHostname(currentPrimaryGatewayConfig, allNodes).stream()
                 .flatMap(hostname ->
-                        stack.getNotDeletedInstanceMetaDataList().stream()
+                        stack.getNotDeletedInstanceMetaDataSet().stream()
                                 .filter(im -> hostname.equals(im.getDiscoveryFQDN()))
                                 .map(InstanceMetaData::getInstanceId)
                 )
@@ -87,7 +87,7 @@ public class ChangePrimaryGatewayService {
     }
 
     private String assignNewPrimaryGatewayInstanceId(Stack stack, List<String> repairInstanceIds) throws NotFoundException {
-        return stack.getNotDeletedInstanceMetaDataList().stream()
+        return stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getInstanceId)
                 .filter(id -> Objects.isNull(repairInstanceIds) || !repairInstanceIds.contains(id))
                 .findFirst()
