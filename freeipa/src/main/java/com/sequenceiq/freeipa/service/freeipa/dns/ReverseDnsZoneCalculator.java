@@ -14,6 +14,11 @@ public class ReverseDnsZoneCalculator {
 
     public static final int B_CLASS_ADDRESS = 16;
 
+    public static final int A_CLASS_ADDRESS = 8;
+
+    public static final String CIDR_REGEX =
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([1-9]|[1-2][0-9]|3[0-2]))$";
+
     public String reverseDnsZoneForCidrs(Collection<String> cidrs) {
         return cidrs.stream()
                 .map(this::reverseDnsZoneForCidr)
@@ -22,7 +27,7 @@ public class ReverseDnsZoneCalculator {
     }
 
     public String reverseDnsZoneForCidr(String cidr) {
-        if (!cidr.matches("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([0-9]|[1-2][0-9]|3[0-2]))$")) {
+        if (!cidr.matches(CIDR_REGEX)) {
             throw new ReverseDnsZoneCalculatorException(String.format("CIDR [%s] is not a valid", cidr));
         }
         String[] subnetAndMask = cidr.split("/");

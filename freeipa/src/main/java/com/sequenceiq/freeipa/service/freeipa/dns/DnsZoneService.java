@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.dns;
 
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -17,14 +19,17 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -44,6 +49,12 @@ public class DnsZoneService {
     private ReverseDnsZoneCalculator reverseDnsZoneCalculator;
 
     @Inject
+    private HybridReverseDnsZoneCalculator hybridReverseDnsZoneCalculator;
+
+    @Inject
+    private CachedEnvironmentClientService environmentClient;
+
+    @Inject
     private NetworkService networkService;
 
     @Retryable(value = RetryableFreeIpaClientException.class,
@@ -53,6 +64,16 @@ public class DnsZoneService {
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnets(AddDnsZoneForSubnetsRequest request, String accountId) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(request.getEnvironmentCrn(), accountId);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentClient.getByCrn(request.getEnvironmentCrn()).getEnvironmentType())) {
+            addHybridDnsZonesForSubnets(client, request.getSubnets());
+        } else {
+            addDnsZonesForSubnets(request, client, response);
+        }
+        return response;
+    }
+
+    private void addDnsZonesForSubnets(AddDnsZoneForSubnetsRequest request, FreeIpaClient client, AddDnsZoneForSubnetsResponse response)
+            throws RetryableFreeIpaClientException {
         for (String subnet : request.getSubnets()) {
             try {
                 LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
@@ -66,7 +87,6 @@ public class DnsZoneService {
                 response.getFailed().put(subnet, e.getMessage());
             }
         }
-        return response;
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,
@@ -108,22 +128,26 @@ public class DnsZoneService {
                 request.getAddDnsZoneNetwork().getNetworkId(), request.getAddDnsZoneNetwork().getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
-        for (Entry<String, String> subnet : subnetWithCidr.entries()) {
-            try {
-                LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
-                String subnetCidr = subnet.getValue();
-                Set<DnsZone> dnsZones = client.findDnsZone(subnetCidr);
-                if (dnsZones.isEmpty()) {
-                    LOGGER.debug("Subnet reverse DNS zone does not exists [{}], add it now", subnet);
-                    client.addReverseDnsZone(subnetCidr);
-                    response.getSuccess().add(subnet.getKey());
-                    LOGGER.debug("Subnet [{}] added", subnet);
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentClient.getByCrn(stack.getEnvironmentCrn()).getEnvironmentType())) {
+            addHybridDnsZonesForSubnets(client, subnetWithCidr.values());
+        } else {
+            for (Entry<String, String> subnet : subnetWithCidr.entries()) {
+                try {
+                    LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
+                    String subnetCidr = subnet.getValue();
+                    Set<DnsZone> dnsZones = client.findDnsZone(subnetCidr);
+                    if (dnsZones.isEmpty()) {
+                        LOGGER.debug("Subnet reverse DNS zone does not exists [{}], add it now", subnet);
+                        client.addReverseDnsZone(subnetCidr);
+                        response.getSuccess().add(subnet.getKey());
+                        LOGGER.debug("Subnet [{}] added", subnet);
+                    }
+                } catch (RetryableFreeIpaClientException e) {
+                    throw e;
+                } catch (FreeIpaClientException e) {
+                    LOGGER.warn("Can't add subnet's [{}] reverse DNS zone with cidr [{}]", subnet, subnet.getValue(), e);
+                    response.getFailed().putIfAbsent(subnet.getKey(), e.getMessage());
                 }
-            } catch (RetryableFreeIpaClientException e) {
-                throw e;
-            } catch (FreeIpaClientException e) {
-                LOGGER.warn("Can't add subnet's [{}] reverse DNS zone with cidr [{}]", subnet, subnet.getValue(), e);
-                response.getFailed().putIfAbsent(subnet.getKey(), e.getMessage());
             }
         }
         return response;
@@ -136,6 +160,23 @@ public class DnsZoneService {
                 networkService.getFilteredSubnetWithCidr(environmentCrn, stack, networkId, Collections.singletonList(subnetId));
         for (String cidr : subnetWithCidr.values()) {
             deleteDnsZoneBySubnet(environmentCrn, accountId, cidr);
+        }
+    }
+
+    private void addHybridDnsZonesForSubnets(FreeIpaClient client, Collection<String> subnetCidrs) throws FreeIpaClientException {
+        LOGGER.debug("Calculating hybrid dns zones for subnets: {}", subnetCidrs);
+        Set<String> cidrs = Set.copyOf(subnetCidrs);
+        Set<String> reverseDnsZoneForCidrs = hybridReverseDnsZoneCalculator.reverseDnsZoneForCidrsAsSet(cidrs);
+        Set<DnsZone> allDnsZone = client.findAllDnsZone();
+        Set<String> reverseZonesFromFreeIpa = allDnsZone.stream()
+                .map(DnsZone::getIdnsname)
+                .filter(StringUtils::isNotBlank)
+                .filter(zone -> zone.endsWith(ReverseDnsZoneCalculator.IN_ADDR_ARPA))
+                .collect(Collectors.toSet());
+        reverseDnsZoneForCidrs.removeAll(reverseZonesFromFreeIpa);
+        LOGGER.info("Adding reverse zones: {}", reverseDnsZoneForCidrs);
+        for (String reverseZone : reverseDnsZoneForCidrs) {
+            FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException(() -> client.addDnsZone(reverseZone), null);
         }
     }
 }

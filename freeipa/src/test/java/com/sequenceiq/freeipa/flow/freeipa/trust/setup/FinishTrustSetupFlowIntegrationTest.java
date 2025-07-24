@@ -30,12 +30,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -178,8 +176,8 @@ class FinishTrustSetupFlowIntegrationTest {
     }
 
     @Test
-    public void testAddTrustFails() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakServiceException("Cross-realm add trust failed")).when(addTrustService).addTrust(STACK_ID);
+    public void testAddTrustFails() throws FreeIpaClientException {
+        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(addTrustService).addTrust(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -27,6 +28,7 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.dns.HybridReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
@@ -71,17 +73,22 @@ public class FreeIpaConfigService {
     @Inject
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
+    @Inject
+    private HybridReverseDnsZoneCalculator hybridReverseDnsZoneCalculator;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         Multimap<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
         LOGGER.debug("Subnets for reverse zone calculation : {}", subnetWithCidr);
-        String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
+        DetailedEnvironmentResponse environmentResponse = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
+        String reverseZones = EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType()) ?
+                hybridReverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values()) :
+                reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
         LOGGER.debug("Reverse zones : {}", reverseZones);
         String seLinux = null != stack.getSecurityConfig() && null != stack.getSecurityConfig().getSeLinux() ?
                 stack.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
-        DetailedEnvironmentResponse environmentResponse = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())

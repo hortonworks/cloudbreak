@@ -44,6 +44,7 @@ import com.sequenceiq.freeipa.client.model.SudoCommand;
 import com.sequenceiq.freeipa.client.model.SudoRule;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
+import com.sequenceiq.freeipa.client.model.Trust;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.client.operation.BatchOperation;
 import com.sequenceiq.freeipa.client.operation.SudoCommandAddOperation;
@@ -504,11 +505,20 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
     }
 
+    public DnsZone addDnsZone(String zone) throws FreeIpaClientException {
+        List<Object> flags = List.of(zone);
+        Map<String, Object> params = Map.of(
+                "skip_overlap_check", true,
+                "raw", true);
+        return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
+    }
+
     public DnsZone addForwardDnsZone(String forwardZone, String forwarderIp, String forwardPolicy) throws FreeIpaClientException {
         List<Object> flags = List.of(forwardZone);
         Map<String, Object> params = Map.of(
                 "idnsforwarders", forwarderIp,
-                "idnsforwardpolicy", forwardPolicy);
+                "idnsforwardpolicy", forwardPolicy,
+                "skip_overlap_check", true);
         return (DnsZone) invoke("dnsforwardzone_add", flags, params, DnsZone.class).getResult();
     }
 
@@ -598,6 +608,14 @@ public class FreeIpaClient {
         List<Object> flags = List.of(fqdn);
         Map<String, Object> params = Map.of();
         return (Host) invoke("host_show", flags, params, Host.class).getResult();
+    }
+
+    public Trust addTrust(String trustSecret, String trustType, boolean bidirectional, String realm) throws FreeIpaClientException {
+        List<Object> flags = List.of(realm);
+        Map<String, Object> params = Map.of("trust_type", trustType,
+                "trust_secret", trustSecret,
+                "bidirectional", bidirectional);
+        return (Trust) invoke("trust_add", flags, params, Trust.class).getResult();
     }
 
     public RPCResponse<Boolean> serverConnCheck(String cn, String remoteCn) throws FreeIpaClientException {

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue;
 
 import java.util.Map;
@@ -81,9 +82,10 @@ public class ConfigureDnsServerService {
         Optional<DnsZone> dnsZone = ignoreNotFoundExceptionWithValue(() -> freeIpaClient.showForwardDnsZone(realm), null);
         if (dnsZone.isEmpty()) {
             LOGGER.debug("Forward DNS zone does not exists [{}], add it now", realm);
-            freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getIp(), FORWARD_POLICY);
+            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getIp(), FORWARD_POLICY), null);
             LOGGER.debug("Forward DNS zone [{}] added", realm);
         }
+        ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone("in-addr.arpa.", crossRealmTrust.getIp(), FORWARD_POLICY), null);
     }
 
     private OrchestratorStateParams createOrchestratorStateParams(GatewayConfig primaryGatewayConfig, CrossRealmTrust crossRealmTrust, Long stackId) {

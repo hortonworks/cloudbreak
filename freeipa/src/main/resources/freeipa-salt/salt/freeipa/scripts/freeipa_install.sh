@@ -19,7 +19,9 @@ ipa-server-install \
           -a "$FPW" \
           -p "$FPW" \
           --setup-dns \
+{%- if salt['pillar.get']('environmentType', 'PUBLIC_CLOUD') == 'PUBLIC_CLOUD' %}
           --auto-reverse \
+{%- endif %}
 {%- if salt['pillar.get']('freeipa:reverseZones') %}
   {%- for zone in salt['pillar.get']('freeipa:reverseZones').split(',') %}
           --reverse-zone {{ zone }} \

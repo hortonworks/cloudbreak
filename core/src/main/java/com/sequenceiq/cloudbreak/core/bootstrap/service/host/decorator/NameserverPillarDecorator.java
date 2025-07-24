@@ -55,7 +55,8 @@ public class NameserverPillarDecorator {
         if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
             TrustResponse trustResponse = freeipaClient.findByEnvironmentCrn(environmentCrn).map(DescribeFreeIpaResponse::getTrust).orElse(null);
             if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
-                return singletonMap(trustResponse.getRealm().toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList));
+                return Map.of(trustResponse.getRealm().toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList),
+                        "in-addr.arpa.", singletonMap("nameservers", ipList));
             } else {
                 return Map.of();
             }
