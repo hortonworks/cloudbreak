@@ -273,6 +273,76 @@ class BaseDnsEntryServiceTest {
         assertEquals(PUBLIC_IP_1, result.get(FQDN_1));
     }
 
+    @Test
+    void testCreateOrUpdateCreateCdpConsoleDomainEntry() {
+        // --- Setup common objects ---
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+
+        // Mocked ECS master FQDN and IP
+        String ecsMasterFqdn = "ecs-master-1.example.com";
+        String ecsMasterShortHostname = "ecs-master-1";
+        String ecsMasterIp = "1.2.3.4";
+
+        // Prepare instance metadata for ECS master
+        InstanceMetaData ecsMasterInstance = new InstanceMetaData();
+        ecsMasterInstance.setPrivateId(10L);
+        ecsMasterInstance.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        ecsMasterInstance.setDiscoveryFQDN(ecsMasterFqdn);
+        ecsMasterInstance.setPublicIp(ecsMasterIp);
+
+        // Primary gateway instance (excluded from candidate IPs)
+        InstanceMetaData gatewayInstance = new InstanceMetaData();
+        gatewayInstance.setPrivateId(99L);
+        gatewayInstance.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        gatewayInstance.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        gatewayInstance.setDiscoveryFQDN("gateway-fqdn");
+
+        // Set instance groups
+        InstanceGroup ig1 = new InstanceGroup();
+        ig1.setInstanceGroupType(InstanceGroupType.CORE);
+        ig1.setInstanceMetaData(Set.of(ecsMasterInstance));
+        InstanceGroup ig2 = new InstanceGroup();
+        ig2.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        ig2.setInstanceMetaData(Set.of(gatewayInstance));
+        stack.setInstanceGroups(Set.of(ig1, ig2));
+
+        // Mock environment response
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setName(ENVIRONMENT_NAME);
+
+        // --- Branch 1: HYBRID_BASE, ecs_master present, candidate IP found ---
+        envResponse.setEnvironmentType("HYBRID_BASE");
+        when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(envResponse);
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(Map.of("ecs_master", List.of(ecsMasterFqdn)));
+
+        Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
+        assertTrue(result.containsKey("console-cdp.apps"));
+        assertEquals(ecsMasterIp, result.get("console-cdp.apps"));
+
+        // --- Branch 2: HYBRID_BASE, ecs_master present, candidate IP not found ---
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(Map.of("ecs_master", List.of("ecs-master-2.example.com")));
+        result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
+        assertTrue(!result.containsKey("console-cdp.apps"));
+
+        // --- Branch 3: HYBRID_BASE, ecs_master not present ---
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(Map.of("other_component", List.of("host1")));
+        result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
+        assertTrue(!result.containsKey("console-cdp.apps"));
+
+        // --- Branch 4: Not HYBRID_BASE ---
+        envResponse.setEnvironmentType("SOMETHING_ELSE");
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(Map.of("ecs_master", List.of(ecsMasterFqdn)));
+        result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
+        assertTrue(!result.containsKey("console-cdp.apps"));
+    }
+
     private void setInstanceGroups(Stack stack) {
         InstanceGroup ig1 = getInstanceGroup1();
         InstanceGroup ig2 = getInstanceGroup2();
