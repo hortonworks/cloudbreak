@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,6 +21,7 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommissionState;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -55,11 +55,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testSingleGoodHostOnFirstInvocation() throws ApiException {
-        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setDiscoveryFQDN("h1");
-        instanceMetaData1.setPrivateId(1L);
-        instanceMetadatas.add(instanceMetaData1);
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList = new ApiHostList().items(List.of(
@@ -72,11 +68,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testHostNotMarkedAsGood() throws ApiException {
-        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setDiscoveryFQDN("h1");
-        instanceMetaData1.setPrivateId(1L);
-        instanceMetadatas.add(instanceMetaData1);
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList;
@@ -92,7 +84,8 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
         // HealthSummary - CONCERNING
         apiHostList = new ApiHostList().items(List.of(
-                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.CONCERNING, false, ApiCommissionState.COMMISSIONED)));
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.CONCERNING, false,
+                        ApiCommissionState.COMMISSIONED, ApiHealthSummary.BAD, "HOST_AGENT_CERTIFICATE_EXPIRY")));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
         result = underTest.doStatusCheck(getPollerObject());
@@ -109,11 +102,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testHostMarkedAsGoodDespiteMaintenanceCommissionState() throws ApiException {
-        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setDiscoveryFQDN("h1");
-        instanceMetaData1.setPrivateId(1L);
-        instanceMetadatas.add(instanceMetaData1);
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList;
@@ -146,19 +135,9 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testSeriesOfInvocations() throws ApiException {
-        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setDiscoveryFQDN("h1");
-        instanceMetaData1.setPrivateId(1L);
-        instanceMetadatas.add(instanceMetaData1);
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setDiscoveryFQDN("h2");
-        instanceMetaData2.setPrivateId(2L);
-        instanceMetadatas.add(instanceMetaData2);
-        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
-        instanceMetaData3.setDiscoveryFQDN("h3");
-        instanceMetaData3.setPrivateId(3L);
-        instanceMetadatas.add(instanceMetaData3);
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
+                constructInstanceMetadata("h2", 2L),
+                constructInstanceMetadata("h3", 3L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
         ApiHostList apiHostList;
         boolean result;
@@ -202,6 +181,107 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
         assertEquals(0, underTest.hostnamesToCheckFor.size());
     }
 
+    @Test
+    public void testSeriesOfInvocationsWithConcerningHealthNotAllowed() throws ApiException {
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
+                constructInstanceMetadata("h2", 2L),
+                constructInstanceMetadata("h3", 3L));
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
+        ApiHostList apiHostList;
+        boolean result;
+
+        // First invocation - CM gives back info on only 1 of the hosts, and it is not in healthy state.
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start, ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(3, underTest.hostnamesToCheckFor.size());
+
+        // Second invocation - the same host moves into HEALTHY state
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(2, underTest.hostnamesToCheckFor.size());
+
+        // Third invocation - 2nd  and 3rd is still not ready. 1st host continues to exist.
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h2", underTest.start, ApiHealthSummary.CONCERNING, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h3", underTest.start, ApiHealthSummary.CONCERNING, true, ApiCommissionState.DECOMMISSIONED)
+        ));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(2, underTest.hostnamesToCheckFor.size());
+
+        // Fourth invocation - 2 hosts are considered healthy except host2
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h2", underTest.start.plusMillis(300), ApiHealthSummary.CONCERNING, true,
+                        ApiCommissionState.DECOMMISSIONED, ApiHealthSummary.CONCERNING, "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE"),
+                constructApiHost("h3", underTest.start.plusMillis(300), ApiHealthSummary.CONCERNING, true,
+                        ApiCommissionState.DECOMMISSIONED, ApiHealthSummary.CONCERNING, "HOST_AGENT_CERTIFICATE_EXPIRY")
+        ));
+
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(1, underTest.hostnamesToCheckFor.size());
+    }
+
+    @Test
+    public void testSeriesOfInvocationsWithConcerningHealth() throws ApiException {
+        Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
+                constructInstanceMetadata("h2", 2L),
+                constructInstanceMetadata("h3", 3L));
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
+        ApiHostList apiHostList;
+        boolean result;
+
+        // First invocation - CM gives back info on only 1 of the hosts, and it is not in healthy state.
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start, ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(3, underTest.hostnamesToCheckFor.size());
+
+        // Second invocation - the same host moves into HEALTHY state
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(2, underTest.hostnamesToCheckFor.size());
+
+        // Third invocation - 2nd hosts marked good, and 3rd is still not ready. 1st host continues to exist.
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h2", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h3", underTest.start, ApiHealthSummary.CONCERNING, true, ApiCommissionState.DECOMMISSIONED)
+        ));
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertFalse(result);
+        assertEquals(1, underTest.hostnamesToCheckFor.size());
+
+        // Fourth invocation - all hosts considered healthy.
+        apiHostList = new ApiHostList().items(List.of(
+                constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h2", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED),
+                constructApiHost("h3", underTest.start.plusMillis(300), ApiHealthSummary.CONCERNING, true,
+                        ApiCommissionState.DECOMMISSIONED, ApiHealthSummary.CONCERNING, "HOST_AGENT_CERTIFICATE_EXPIRY")
+        ));
+
+        when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
+        result = underTest.doStatusCheck(getPollerObject());
+        assertTrue(result);
+        assertEquals(0, underTest.hostnamesToCheckFor.size());
+    }
+
     private ClouderaManagerCommandPollerObject getPollerObject() {
         Stack stack = new Stack();
         stack.setId(1L);
@@ -216,5 +296,26 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 .healthSummary(healthSummary)
                 .maintenanceMode(maintenanceMode)
                 .commissionState(commissionState);
+    }
+
+    private ApiHost constructApiHost(String hostname, Instant lastHeartbeat, ApiHealthSummary healthSummary,
+            boolean maintenanceMode, ApiCommissionState commissionState, ApiHealthSummary apiHealthSummary, String apiHealthCheckName) {
+        ApiHealthCheck apiHealthCheck = new ApiHealthCheck();
+        apiHealthCheck.setName(apiHealthCheckName);
+        apiHealthCheck.setSummary(apiHealthSummary);
+        return new ApiHost()
+                .hostname(hostname)
+                .lastHeartbeat(lastHeartbeat.toString())
+                .healthSummary(healthSummary)
+                .maintenanceMode(maintenanceMode)
+                .healthChecks(List.of(apiHealthCheck))
+                .commissionState(commissionState);
+    }
+
+    private InstanceMetaData constructInstanceMetadata(String discoveryName, Long privateId) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(discoveryName);
+        instanceMetaData.setPrivateId(privateId);
+        return instanceMetaData;
     }
 }

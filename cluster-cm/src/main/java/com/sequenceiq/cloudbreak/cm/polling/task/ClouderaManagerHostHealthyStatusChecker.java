@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommissionState;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -31,6 +33,8 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
 
     @VisibleForTesting
     static final String VIEW_TYPE = "FULL";
+
+    private static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerHostHealthyStatusChecker.class);
 
@@ -102,18 +106,31 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
         Set<String> goodHealthSet = new HashSet<>();
         for (ApiHost apiHost : hostList.getItems()) {
             String hostname = apiHost.getHostname();
-            Instant lastheatbeat = null;
+            Instant lastHeartBeat = null;
             if (StringUtils.isNotBlank(apiHost.getLastHeartbeat())) {
-                lastheatbeat = Instant.parse(apiHost.getLastHeartbeat());
+                lastHeartBeat = Instant.parse(apiHost.getLastHeartbeat());
             }
             ApiHealthSummary healthSummary = apiHost.getHealthSummary();
             boolean inMaintenance = Boolean.TRUE.equals(apiHost.getMaintenanceMode());
             ApiCommissionState commissionState = apiHost.getCommissionState();
             LOGGER.trace("CM info for: [{}]: lastHeatbeat={}, lastHeartbeatInstant={}, healthSummary={}, commissionState={}, maint={}",
-                    hostname, apiHost.getLastHeartbeat(), lastheatbeat, healthSummary, commissionState, inMaintenance);
+                    hostname, apiHost.getLastHeartbeat(), lastHeartBeat, healthSummary, commissionState, inMaintenance);
 
-            if (lastheatbeat != null && start.isBefore(lastheatbeat) && healthSummary == ApiHealthSummary.GOOD) {
-                goodHealthSet.add(hostname);
+            if (lastHeartBeat != null && start.isBefore(lastHeartBeat)) {
+                if (healthSummary == ApiHealthSummary.GOOD) {
+                    goodHealthSet.add(hostname);
+                } else if (healthSummary == ApiHealthSummary.CONCERNING) {
+                    List<String> concerningHealthCheckNames = apiHost.getHealthChecks()
+                            .stream()
+                            .filter(apiHealthCheck -> apiHealthCheck.getSummary().equals(ApiHealthSummary.CONCERNING))
+                            .map(ApiHealthCheck::getName)
+                            .toList();
+                    if (concerningHealthCheckNames.size() == 1) {
+                        if (concerningHealthCheckNames.getFirst().equals(HOST_AGENT_CERTIFICATE_EXPIRY)) {
+                            goodHealthSet.add(hostname);
+                        }
+                    }
+                }
             }
         }
         LOGGER.info("Found good host count={}", goodHealthSet.size());
