@@ -75,26 +75,26 @@ public class ClusterStatusUpdaterTest {
     @Test
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
         // GIVEN
-        Stack stack = createStackWithCluster(DetailedStackStatus.AVAILABLE);
+        Stack stack = createStackWithCluster(DetailedStackStatus.NODE_FAILURE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
         verify(clusterService, times(1)).updateClusterMetadata(eq(stack.getId()));
-        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.STOPPED),
+        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.AVAILABLE),
                 eq("Services are installed but not running."));
     }
 
     @Test
     public void testUpdateStackStatusWhenStackIsAvailableAndClusterStatusIsInstalled() {
         // GIVEN
-        Stack stack = createStackWithCluster(DetailedStackStatus.AVAILABLE);
+        Stack stack = createStackWithCluster(DetailedStackStatus.NODE_FAILURE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
         verify(clusterService, times(1)).updateClusterMetadata(eq(stack.getId()));
-        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.STOPPED),
+        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.AVAILABLE),
                 eq("Services are installed but not running."));
     }
 
