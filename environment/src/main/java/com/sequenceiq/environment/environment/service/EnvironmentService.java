@@ -153,7 +153,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     public List<EnvironmentDto> listByAccountIdAndRemoteEnvironmentCrn(String accountId, String remoteEnvironmentCrn) {
-        LOGGER.debug("Listing environments by account id '{}' and remoteEnvironmentCrn.", accountId, remoteEnvironmentCrn);
+        LOGGER.debug("Listing environments by account id '{}' and remoteEnvironmentCrn '{}'.", accountId, remoteEnvironmentCrn);
         Set<Environment> environments = environmentRepository.findByAccountIdAndRemoveEnvironmentCrn(accountId, remoteEnvironmentCrn);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
