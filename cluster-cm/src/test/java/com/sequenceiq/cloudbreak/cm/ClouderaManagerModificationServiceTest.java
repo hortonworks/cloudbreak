@@ -1002,13 +1002,21 @@ class ClouderaManagerModificationServiceTest {
 
         // Start services if they are not running
         ApiServiceList serviceList = new ApiServiceList();
-        ApiService service = new ApiService();
-        service.setServiceState(ApiServiceState.STOPPED);
-        serviceList.addItemsItem(service);
+        ApiService service1 = new ApiService();
+        service1.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service1);
+        ApiService service2 = new ApiService();
+        service2.setServiceState(ApiServiceState.STARTED);
+        serviceList.addItemsItem(service2);
         ApiCommand startCommand = mock(ApiCommand.class);
+        ApiCommand stopCommand = mock(ApiCommand.class);
         when(startCommand.getId()).thenReturn(apiCommandId);
+        when(stopCommand.getId()).thenReturn(apiCommandId);
         when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
         when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        when(clustersResourceApi.stopCommand(STACK_NAME)).thenReturn(stopCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, v31Client, apiCommandId)).thenReturn(success);
+
 
         // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
@@ -1028,6 +1036,8 @@ class ClouderaManagerModificationServiceTest {
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
+        verify(servicesResourceApi, times(2)).readServices(stack.getName(), "SUMMARY");
+        verify(clustersResourceApi).stopCommand(cluster.getName());
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
@@ -1106,6 +1116,8 @@ class ClouderaManagerModificationServiceTest {
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
+        verify(servicesResourceApi, times(2)).readServices(stack.getName(), "SUMMARY");
+        verify(clustersResourceApi, times(0)).stopCommand(cluster.getName());
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
