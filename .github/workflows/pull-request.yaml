@@ -943,7 +943,7 @@ jobs:
           
           export AWS=false
           export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/real-ums-mock-tests.yaml
-          export INTEGRATIONTEST_UMS_HOST=usermanagement-internal.eu-1.cdp.mow-dev.cloudera.com
+          export INTEGRATIONTEST_UMS_HOST=usermanagement.internal-insecure.eu-1.cdp.mow-dev.cloudera.com
           export INTEGRATIONTEST_UMS_PORT=80
           export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
           export INTEGRATIONTEST_CDL_PORT=8982
