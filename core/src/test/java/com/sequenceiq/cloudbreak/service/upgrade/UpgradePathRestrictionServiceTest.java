@@ -35,6 +35,7 @@ class UpgradePathRestrictionServiceTest {
         VersionComparisonContext currentVersionContext = createVersionComparisonContext(currentVersion, currentPatchVersion);
         VersionComparisonContext candidateVersionContext = createVersionComparisonContext(candidateVersion, candidatePatchVersion);
         lenient().when(entitlementService.internalTenant(any())).thenReturn(false);
+        lenient().when(entitlementService.isMitigateReleaseFailure7218P1100Enabled(any())).thenReturn(false);
 
         assertEquals(expectedResult, doAs(USER_CRN, () -> underTest.permitUpgrade(currentVersionContext, candidateVersionContext)));
     }
@@ -91,6 +92,33 @@ class UpgradePathRestrictionServiceTest {
 
                 Arguments.of("7.2.16", 0, "7.2.18", 1100, false),
                 Arguments.of("7.2.17", 0, "7.2.18", 1100, false),
+                Arguments.of("7.2.18", 1100, "7.2.18", 1101, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 0, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 400, false),
+                Arguments.of("7.2.18", 1100, "7.3.1", 500, true)
+
+        );
+    }
+
+    @ParameterizedTest(name = "[{index}] Upgrade from {0}.{1} to {2}.{3}, should be allowed: {4}")
+    @MethodSource("provideTestParametersFor7218P1100")
+    public void testPermitUpgradeFor7218P1100WhenTheMitigateReleaseFailure7218P1100EntitlementEnabled(String currentVersion, Integer currentPatchVersion,
+            String candidateVersion, Integer candidatePatchVersion, boolean expectedResult) {
+        VersionComparisonContext currentVersionContext = createVersionComparisonContext(currentVersion, currentPatchVersion);
+        VersionComparisonContext candidateVersionContext = createVersionComparisonContext(candidateVersion, candidatePatchVersion);
+        lenient().when(entitlementService.internalTenant(any())).thenReturn(false);
+        lenient().when(entitlementService.isMitigateReleaseFailure7218P1100Enabled(any())).thenReturn(true);
+
+        assertEquals(expectedResult, doAs(USER_CRN, () -> underTest.permitUpgrade(currentVersionContext, candidateVersionContext)));
+    }
+
+    private static Stream<Arguments> provideTestParametersFor7218P1100() {
+        return Stream.of(
+                Arguments.of("7.2.16", 1100, "7.2.18", 1100, true),
+                Arguments.of("7.2.16", 0, "7.2.18", 1100, true),
+                Arguments.of("7.2.17", 0, "7.2.18", 1100, true),
+                Arguments.of("7.2.18", 1100, "7.2.18", 1100, true),
+                Arguments.of("7.2.18", 1100, "7.2.18", 1101, false),
                 Arguments.of("7.2.18", 1100, "7.3.1", 0, false),
                 Arguments.of("7.2.18", 1100, "7.3.1", 400, false),
                 Arguments.of("7.2.18", 1100, "7.3.1", 500, true)
