@@ -22,6 +22,8 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
 
     private static final String NEW_POSTGRES_VERSION_KEY = "new_postgres_version";
 
+    private static final String POSTGRES_VERSION_KEY = "postgres_version";
+
     private static final String DEFAULT_ORIGINAL_POSTGRES_VERSION = "10";
 
     private static final String POSTGRES_PILLAR = "postgres";
@@ -50,13 +52,11 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
         return params;
     }
 
-    public Map<String, Object> createParamsWithNewVersion() {
+    public Map<String, Object> createParamsWithPostgresVersion() {
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
         params.put("postgres", postgresParams);
-        Map<String, String> upgradeParams = new HashMap<>();
-        postgresParams.put("upgrade", upgradeParams);
-        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
+        postgresParams.put(POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
         return params;
 
     }

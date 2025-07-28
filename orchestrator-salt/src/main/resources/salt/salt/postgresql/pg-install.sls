@@ -1,4 +1,4 @@
-{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
+{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '11') | int %}
 {% if not salt['file.file_exists']('/usr/pgsql-' +  postgres_version | string + '/bin/psql') %}
 
 include:

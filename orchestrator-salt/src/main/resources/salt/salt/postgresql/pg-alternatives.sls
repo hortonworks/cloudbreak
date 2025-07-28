@@ -1,4 +1,4 @@
-{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
+{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '11') | int %}
 
 pgsql-ld-conf:
   alternatives.set:

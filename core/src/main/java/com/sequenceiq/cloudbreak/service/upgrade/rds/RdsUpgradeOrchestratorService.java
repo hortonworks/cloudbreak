@@ -125,14 +125,14 @@ public class RdsUpgradeOrchestratorService {
 
     public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PG_INSTALL_STATE, false);
-        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithNewVersion());
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion());
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void updatePostgresAlternatives(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PG_ALTERNATIVES_STATE, false);
-        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithNewVersion());
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion());
         LOGGER.debug("Calling updatePostgresAlternatives with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
