@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -18,6 +20,21 @@ public class NetworkAttributes implements Serializable {
     private String networkId;
 
     private final Class<NetworkAttributes> attributeType = NetworkAttributes.class;
+
+    public NetworkAttributes() {
+    }
+
+    @JsonCreator
+    public NetworkAttributes(
+            @JsonProperty("subnetId") String subnetId,
+            @JsonProperty("cloudPlatform") String cloudPlatform,
+            @JsonProperty("resourceGroupName") String resourceGroupName,
+            @JsonProperty("networkId") String networkId) {
+        this.subnetId = subnetId;
+        this.cloudPlatform = cloudPlatform;
+        this.resourceGroupName = resourceGroupName;
+        this.networkId = networkId;
+    }
 
     /**
      * Needed for serialization
