@@ -43,7 +43,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.BaseImageValida
 import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.BasicEnvironmentVirtualGroupTest;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeAndRotationTest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.MonitoringTests;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests;
 import com.sequenceiq.it.util.TestNGUtil;
@@ -54,7 +53,6 @@ public class ImageValidatorE2ETestUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
 
     private static final Map<String, Class<?>> ALL_TESTS_FOR_FREEIPA = Map.of(
-            "testCcmV1Upgrade", DatalakeCcmUpgradeAndRotationTest.class,
             "testAddUsersToEnvironment", BasicEnvironmentVirtualGroupTest.class,
             "testAddGroupsToEnvironment", BasicEnvironmentVirtualGroupTest.class,
             "testHAFreeIpaInstanceUpgrade", FreeIpaUpgradeTests.class,
@@ -62,7 +60,6 @@ public class ImageValidatorE2ETestUtil {
     );
 
     private static final Map<String, Class<?>> ALL_TESTS_FOR_RUNTIME = Map.of(
-            "testCcmV1Upgrade", DatalakeCcmUpgradeAndRotationTest.class,
             "testClusterProvisionWithForcedJavaVersion", ForceJavaVersionE2ETest.class,
             "testSDXUpgrade", SdxUpgradeTests.class,
             "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class
