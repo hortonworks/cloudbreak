@@ -87,8 +87,8 @@ auth:
     upgrade.skip.attached.datahubs.check.enable: false
     upgrade.skip.rolling.upgrade.validation: false
     targeting.subnets.for.endpoint.access.gateway.enable: true
-    cost.calculation.enable: true
-    co2.calculation.enable: true
+    cost.calculation.enable: false
+    co2.calculation.enable: false
     enforce.aws.native.single.az.enabled: true
     azure.database.flexibleserver.upgrade.enabled: true
     azure.database.flexibleserver.upgrade.longpolling.enabled: false
