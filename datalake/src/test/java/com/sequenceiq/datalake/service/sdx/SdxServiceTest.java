@@ -106,6 +106,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet.Builder;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -143,6 +145,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.resize.SdxResizeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -1020,6 +1023,41 @@ class SdxServiceTest {
     }
 
     @Test
+    void testSdxResizeToMultiAZThrowsExceptionIfSubnetsAreNotInMultipleAZ() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(true);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCrn(getCrn());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
+        network.setSubnetMetas(Map.of(
+                "subnet1", new CloudSubnet(new Builder().availabilityZone("az1")),
+                "subnet2", new CloudSubnet(new Builder().availabilityZone("az1"))
+        ));
+        detailedEnvironmentResponse.setNetwork(network);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+        assertEquals("Multi AZ cluster requires subnets in multiple availability zones but the cluster uses subnest only from az1 availability zone.",
+                badRequestException.getMessage());
+    }
+
+    @Test
     void testSdxResizeMediumDutySdxEnabled710Runtime() {
         final String invalidRuntime = "7.1.0";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
@@ -1095,6 +1133,7 @@ class SdxServiceTest {
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
         sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(true);
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(SDX_ID);
@@ -1121,6 +1160,18 @@ class SdxServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCrn(getCrn());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
+        network.setSubnetMetas(Map.of(
+                "subnet1", new CloudSubnet(new Builder().availabilityZone("az1")),
+                "subnet2", new CloudSubnet(new Builder().availabilityZone("az2"))
+        ));
+        detailedEnvironmentResponse.setNetwork(network);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
