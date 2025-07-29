@@ -10,7 +10,7 @@ public enum ClusterStatus {
     CLUSTERMANAGER_RUNNING(DetailedStackStatus.AVAILABLE, "The Cluster Manager server is running."),
     INSTALLING(DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
             "The Cluster Manager server is running, services are being installed... [%s]"),
-    INSTALLED(DetailedStackStatus.STOPPED, "Services are installed but not running."),
+    INSTALLED(DetailedStackStatus.AVAILABLE, "Services are installed but not running."),
     INSTALL_FAILED(DetailedStackStatus.AVAILABLE, "The Cluster Manager server is running, but service installation has failed. [%s]"),
     STARTING(DetailedStackStatus.START_IN_PROGRESS, "Services are installed, starting... [%s]"),
     STARTED(DetailedStackStatus.AVAILABLE, "Services are installed and running."),

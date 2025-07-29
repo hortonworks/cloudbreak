@@ -64,7 +64,7 @@ public class UserKeyPairSaltStateRunRotationContextGenerator {
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Pair<String, String> publicKeys = getPublicKeys(environment, stack, changedKeyPair);
             saltRunOrchestratorStateRotationContextBuilder.withGatewayConfig(primaryGatewayConfig)
-                    .withTargets(stack.getAllInstanceMetaDataList().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet()))
+                    .withTargets(stack.getNotTerminatedInstanceMetaDataSet().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet()))
                     .withExitCriteriaModel(exitCriteriaProvider.get(stack))
                     .withMaxRetry(MAX_RETRY)
                     .withMaxRetryOnError(MAX_RETRY)
