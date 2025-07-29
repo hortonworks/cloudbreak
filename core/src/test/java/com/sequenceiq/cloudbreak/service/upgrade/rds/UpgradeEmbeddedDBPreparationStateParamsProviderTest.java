@@ -48,4 +48,12 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
         Assertions.assertEquals(upgradeParams.get("original_postgres_version"), "10");
         Assertions.assertEquals(upgradeParams.get("original_postgres_binaries"), "/usr/pgsql-10");
     }
+
+    @Test
+    void  testCreateParamsWithPostgresVersion() {
+        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
+        Map<String, Object> actualResult = underTest.createParamsWithPostgresVersion();
+        Map<String, Object> postgresParams = (Map<String, Object>) actualResult.get("postgres");
+        Assertions.assertEquals(postgresParams.get("postgres_version"), TargetMajorVersion.VERSION_11.getMajorVersion());
+    }
 }
