@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.getAccountId;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionEqualToLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
@@ -10,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @Component
@@ -36,18 +36,20 @@ public class UpgradePathRestrictionService {
 
         if (targetPatch == 1100) {
             boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
-            return !to7218;
+            return !to7218 || entitlementService.isMitigateReleaseFailure7218P1100Enabled(getAccountId());
+        }
+
+        if (currentPatch == 1100) {
+            boolean from7218 = majorVersionEquals(currentMajor, "7.2.18");
+            boolean to731 = majorVersionEquals(targetMajor, "7.3.1");
+            boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
+            return from7218 && !to7218 && !(to731 && targetPatch >= 0 && targetPatch <= 400);
         }
 
         if (skipValidation(current, target)) {
             return true;
         }
 
-        if (currentPatch == 1100) {
-            boolean from7218 = majorVersionEquals(currentMajor, "7.2.18");
-            boolean to731 = majorVersionEquals(targetMajor, "7.3.1");
-            return !(from7218 && to731 && targetPatch >= 0 && targetPatch <= 400);
-        }
 
         if (targetPatch == 0 || targetPatch == 100) {
             boolean from7217 = majorVersionEquals(currentMajor, "7.2.17") && currentPatch > 100 && currentPatch < 600;
@@ -74,7 +76,7 @@ public class UpgradePathRestrictionService {
     }
 
     private boolean isInternalAccount() {
-        return entitlementService.internalTenant(ThreadBasedUserCrnProvider.getAccountId());
+        return entitlementService.internalTenant(getAccountId());
     }
 
 }

@@ -194,6 +194,9 @@ class EntitlementServiceTest {
 
                 {"CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION", (EntitlementCheckFunction) EntitlementService::isZookeeperToKRaftMigrationEnabled, false},
                 {"CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION", (EntitlementCheckFunction) EntitlementService::isZookeeperToKRaftMigrationEnabled, true},
+
+                {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, false},
+                {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, true},
         };
     }
 
