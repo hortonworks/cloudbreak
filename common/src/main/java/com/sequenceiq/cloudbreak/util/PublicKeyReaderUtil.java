@@ -4,19 +4,25 @@ import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.EdECPoint;
-import java.security.spec.EdECPublicKeySpec;
 import java.security.spec.KeySpec;
-import java.security.spec.NamedParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.asn1.edec.EdECObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil.PublicKeyParseException.ErrorCode;
 
 public final class PublicKeyReaderUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublicKeyReaderUtil.class);
+
     private static final String BEGIN_PUB_KEY = "---- BEGIN SSH2 PUBLIC KEY ----";
 
     private static final String END_PUB_KEY = "---- END SSH2 PUBLIC KEY ----";
@@ -120,19 +126,22 @@ public final class PublicKeyReaderUtil {
 
             return rsaKeyFact.generatePublic(rsaPubSpec);
         } catch (Exception ex) {
+            LOGGER.debug("Failed to decode RSA public key", ex);
             throw new PublicKeyParseException(ErrorCode.SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
         }
     }
 
     private static PublicKey decodeEd25519PublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
-        EdECPoint point = buffer.readEdEcPoint();
 
         try {
-            KeyFactory ed25519KeyFact = KeyFactory.getInstance("Ed25519");
-            KeySpec ed25519PubSpec = new EdECPublicKeySpec(NamedParameterSpec.ED25519, point);
-
-            return ed25519KeyFact.generatePublic(ed25519PubSpec);
+            AlgorithmIdentifier ed25519AlgId = new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519);
+            SubjectPublicKeyInfo spki = new SubjectPublicKeyInfo(ed25519AlgId, buffer.readByteArray());
+            byte[] spkiEncodedBytes = spki.getEncoded("DER");
+            KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(spkiEncodedBytes);
+            return keyFactory.generatePublic(keySpec);
         } catch (Exception ex) {
+            LOGGER.debug("Failed to decode ed25519 public key", ex);
             throw new PublicKeyParseException(ErrorCode.SSH2ED25519_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
         }
     }
@@ -210,7 +219,7 @@ public final class PublicKeyReaderUtil {
         }
 
         private PublicKeyParseException(ErrorCode errorCode, Throwable cause) {
-            super(errorCode.message, cause);
+            super(errorCode.message + ": " + cause.getMessage(), cause);
             this.errorCode = errorCode;
         }
 

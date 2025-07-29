@@ -60,6 +60,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGATE_RELEASE_FAILURE_7218P1100;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
@@ -576,6 +577,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.configure.encryption.profile.enabled}")
     private boolean configureEncryptionProfileEnabled;
 
+    @Value("${auth.mock.mitigate.release.failure.7218P1100.enabled}")
+    private boolean mitigateReleaseFailure7218P1100Enabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1084,6 +1088,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (configureEncryptionProfileEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_CONFIGURE_ENCRYPTION_PROFILE));
+        }
+        if (mitigateReleaseFailure7218P1100Enabled) {
+            builder.addEntitlements(createEntitlement(CDP_MITIGATE_RELEASE_FAILURE_7218P1100));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
