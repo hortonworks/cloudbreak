@@ -5,16 +5,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.math.BigInteger;
 import java.security.PublicKey;
-import java.security.interfaces.EdECPublicKey;
+import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.EdECPoint;
+import java.util.Arrays;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
+import org.testcontainers.shaded.org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil.PublicKeyParseException;
 
 class PublicKeyReaderUtilTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublicKeyReaderUtilTest.class);
+
+    @BeforeAll
+    static void beforeAll() {
+        Security.removeProvider("SunEC");
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     @Test
     void loadTestRsaKeyMustUseAlgorithmRSAWhenOpenSSH() throws PublicKeyParseException {
@@ -96,15 +109,32 @@ class PublicKeyReaderUtilTest {
     @Test
     void loadTestEd25519KeyMustUseAlgorithmEdDSAAndParameterSpecEd25519WhenOpenSSH() throws PublicKeyParseException {
         PublicKey ed25519Key = PublicKeyReaderUtil.load("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMQltFutaGpkyuDLScqHRZtknBd4c/IJCkVsY7WFS+gK", false);
-        assertThat(ed25519Key.getAlgorithm()).isEqualTo("EdDSA");
-        assertThat(ed25519Key).isInstanceOf(EdECPublicKey.class);
-        if (ed25519Key instanceof EdECPublicKey edECPublicKey) {
-            assertThat(edECPublicKey.getParams().getName()).isEqualTo("Ed25519");
-            EdECPoint point = edECPublicKey.getPoint();
-            assertThat(point.getY().toString()).isEqualTo("4933558240612590083993219300962144511659480787166253786943024901159224878532");
-            assertThat(point.isXOdd()).isFalse();
+        assertThat(ed25519Key.getAlgorithm()).startsWith("Ed");
+        if (ed25519Key instanceof BCEdDSAPublicKey edECPublicKey) {
+            assertThat(edECPublicKey.getAlgorithm()).isEqualTo("Ed25519");
+            byte[] rawEd25519Bytes = edECPublicKey.getEncoded();
+            // This is the little-endian Y-coordinate + X-sign bit
+            byte[] yBytes = Arrays.copyOfRange(rawEd25519Bytes, rawEd25519Bytes.length - 32, rawEd25519Bytes.length);
+            // Clear the highest bit for the Y-coordinate value
+            yBytes[31] &= (byte) 0x7F;
+
+            // Reverse for BigInteger constructor (BigInteger expects big-endian) and prepend 0x00 for positive value
+            byte[] bigEndianYBytes = new byte[33];
+            for (int i = 0; i < 32; i++) {
+                bigEndianYBytes[32 - i] = yBytes[i];
+            }
+            // Get the X-sign bit if needed:
+            boolean xSignIsOdd = (rawEd25519Bytes[rawEd25519Bytes.length - 1] & 0x80) != 0;
+
+            BigInteger yCoord = new BigInteger(bigEndianYBytes);
+
+            LOGGER.info("Extracted Y-coordinate (BigInteger): {}", yCoord);
+            LOGGER.info("Y-coordinate hex: {}", yCoord.toString(16));
+            LOGGER.info("X-coordinate sign bit (true for negative/odd): {}", xSignIsOdd);
+            assertThat(yCoord.toString()).isEqualTo("4933558240612590083993219300962144511659480787166253786943024901159224878532");
+            assertThat(xSignIsOdd).isFalse();
         } else {
-            fail("PublicKey is not an instance of EdECPublicKey.");
+            fail("PublicKey is not an instance of BCEdDSAPublicKey.");
         }
     }
 
@@ -177,7 +207,8 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x07ssh-rsa\x00\x00\x00\x01\x00\x00\x00\x00\x01\x00'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-rsa AAAAB3NzaC1yc2EAAAABAAAAAAEA", false));
-        assertThat(publicKeyParseException).hasMessage("SSH2RSA: error decoding public key blob");
+        assertThat(publicKeyParseException)
+                .hasMessage("SSH2RSA: error decoding public key blob: java.security.InvalidKeyException: RSA keys must be at least 512 bits long");
     }
 
     @Test
@@ -185,7 +216,7 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x0Bssh-ed25519\x12\x13\x14\x15'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5EhMUFQ==", false));
-        assertThat(publicKeyParseException).hasMessage("Public key length is shorter than 2048 bits or byte array is corrupt.");
+        assertThat(publicKeyParseException).hasMessageContaining("Public key length is shorter than 2048 bits or byte array is corrupt.");
     }
 
     @Test
@@ -193,7 +224,7 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x0Bssh-ed25519\x00\x00\x00\x01\x00'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAAQA=", false));
-        assertThat(publicKeyParseException).hasMessage("SSH2ED25519: byte array for EdECPoint must be 32 bytes long");
+        assertThat(publicKeyParseException).hasMessage("SSH2ED25519: error decoding public key blob: raw key data not recognised");
     }
 
     // No way to test SSH2ED25519_ERROR_DECODING_PUBLIC_KEY_BLOB.

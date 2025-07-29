@@ -40,17 +40,17 @@ class ClusterManagerUpgradeHandlerTest {
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT.event(), result.selector());
-        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true);
+        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID);
     }
 
     @Test
     void testDoAcceptShouldReturnFailureEvent() throws CloudbreakOrchestratorException, CloudbreakException {
         ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true);
-        doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true);
+        doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
-        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true);
+        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID);
     }
 }

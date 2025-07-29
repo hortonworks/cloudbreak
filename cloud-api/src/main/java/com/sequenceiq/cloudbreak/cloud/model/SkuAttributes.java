@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,6 +16,17 @@ public class SkuAttributes implements Serializable {
     private String ipAllocationMethod;
 
     private final Class<SkuAttributes> attributeType = SkuAttributes.class;
+
+    public SkuAttributes() {
+    }
+
+    @JsonCreator
+    public SkuAttributes(
+            @JsonProperty("sku") String sku,
+            @JsonProperty("ipAllocationMethod") String ipAllocationMethod) {
+        this.sku = sku;
+        this.ipAllocationMethod = ipAllocationMethod;
+    }
 
     /**
      * Needed for serialization

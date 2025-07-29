@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGATE_RELEASE_FAILURE_7218P1100;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
@@ -516,6 +517,10 @@ public class EntitlementService {
 
     public boolean isDataLakeArmEnabled(String accountId) {
         return isEntitledFor(accountId, CDP_AWS_ARM_DATALAKE);
+    }
+
+    public boolean isMitigateReleaseFailure7218P1100Enabled(String accountId) {
+        return isEntitledFor(accountId, CDP_MITIGATE_RELEASE_FAILURE_7218P1100);
     }
 
     public List<String> getEntitlements(String accountId) {
