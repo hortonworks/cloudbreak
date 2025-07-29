@@ -191,6 +191,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, false},
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, true},
+
+                {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, false},
+                {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, true},
         };
     }
 

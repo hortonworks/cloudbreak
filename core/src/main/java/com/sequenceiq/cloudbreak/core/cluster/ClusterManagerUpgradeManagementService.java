@@ -43,12 +43,11 @@ public class ClusterManagerUpgradeManagementService {
     @Inject
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
-    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled)
+    public void upgradeClusterManager(Long stackId)
             throws CloudbreakOrchestratorException, CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
-        stopClusterServicesIfNecessary(rollingUpgradeEnabled, clusterManagerUpgradeNecessary, stackDto);
         if (clusterManagerUpgradeNecessary) {
             clusterUpgradeService.upgradeClusterManager(stackDto.getId());
             clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo);
@@ -91,17 +90,6 @@ public class ClusterManagerUpgradeManagementService {
 
     private String stripEndingMagicP(String version) {
         return StringUtils.removeEnd(version, "p");
-    }
-
-    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean clusterManagerUpgradeNecessary, StackDto stackDto)
-            throws CloudbreakException {
-        if (rollingUpgradeEnabled || !clusterManagerUpgradeNecessary) {
-            LOGGER.debug("Not necessary to stop services because the rolling upgrade option is: {} or cluster manager upgrade is not necessary: {}",
-                    rollingUpgradeEnabled, !clusterManagerUpgradeNecessary);
-        } else {
-            LOGGER.debug("Stopping cluster services.");
-            clusterApiConnectors.getConnector(stackDto).stopCluster(true);
-        }
     }
 
     private void startClusterServices(StackDto stackDto) throws CloudbreakException {

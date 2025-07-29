@@ -1,5 +1,7 @@
 package com.sequenceiq.common.api.type;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,6 +38,7 @@ public enum LoadBalancerTypeAttribute {
      * Needed for serialization
      * @return name of the enum
      */
+    @JsonProperty("name")
     public String getName() {
         return name();
     }
@@ -44,16 +47,22 @@ public enum LoadBalancerTypeAttribute {
      * Needed for serialization
      * @return class of the current enum
      */
+    @JsonProperty("attributeType")
     public Class<LoadBalancerTypeAttribute> getAttributeType() {
         return attributeType;
     }
 
     /**
-     * Needed for deserialization
-     * @param name String representation of the enum to be deserialized
+     * Factory method to create enum instance from JSON object (map-based)
+     * @param value map containing enum properties
+     * @return enum instance
      */
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static LoadBalancerTypeAttribute create(@JsonProperty("name") String name) {
-        return valueOf(name);
+    @JsonCreator
+    public static LoadBalancerTypeAttribute fromMap(Map<String, Object> value) {
+        Object nameObj = value.get("name");
+        if (nameObj instanceof String) {
+            return LoadBalancerTypeAttribute.valueOf((String) nameObj);
+        }
+        throw new IllegalArgumentException("Cannot deserialize LoadBalancerTypeAttribute from: " + value);
     }
 }

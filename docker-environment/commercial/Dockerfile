@@ -6,7 +6,7 @@ MAINTAINER info@cloudera.com
 ARG REPO_URL=https://nexus-private.hortonworks.com/nexus/content/groups/public
 ARG VERSION=''
 ARG TARGETARCH=''
-ARG FIPS_MODE_ENABLED=true
+ARG FIPS_MODE_ENABLED=false
 
 ENV FIPS_MODE_ENABLED=${FIPS_MODE_ENABLED}
 ENV VERSION=${VERSION}
