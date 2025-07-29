@@ -57,7 +57,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
-    private static final int MAX_RECIPE_SIZE_PER_WORKSPACE = 2500;
+    private static final int MAX_RECIPE_SIZE_PER_WORKSPACE = 5000;
 
     @Inject
     private RecipeRepository recipeRepository;

@@ -284,7 +284,7 @@ public class RecipeServiceTest {
     @Test
     public void testCreateWhenAccountReachedMaxRecipeLimit() {
         Recipe recipe = getRecipe();
-        when(recipeRepository.countByAccountId("account_id")).thenReturn(2501);
+        when(recipeRepository.countByAccountId("account_id")).thenReturn(5001);
 
         String userCrn = CrnTestUtil.getUserCrnBuilder()
                 .setResource("user_id")
