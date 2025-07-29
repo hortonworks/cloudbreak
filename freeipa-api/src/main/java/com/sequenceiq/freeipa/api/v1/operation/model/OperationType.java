@@ -22,6 +22,7 @@ public enum OperationType {
     MODIFY_SELINUX_MODE,
     TRUST_SETUP,
     TRUST_SETUP_FINISH,
+    CANCEL_TRUST_SETUP,
     UPGRADE_DEFAULT_OUTBOUND;
 
     private final String lowerCaseName;

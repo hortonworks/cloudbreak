@@ -2444,6 +2444,13 @@ message CDPFreeIPAStatus {
     TRUST_SETUP_FINISH_FINISHED = 44;
     // The status when finishing to set up cross-realm trust for CDP FreeIPA is failed
     TRUST_SETUP_FINISH_FAILED = 45;
+
+    // The status when rolling back cross-realm trust on CDP FreeIPA is started
+    CANCEL_TRUST_SETUP_STARTED = 46;
+    // The status when rolling back cross-realm trust on CDP FreeIPA is successful
+    CANCEL_TRUST_SETUP_FINISHED = 47;
+    // The status when rolling back cross-realm trust on CDP FreeIPA is failed
+    CANCEL_TRUST_SETUP_FAILED = 48;
   }
 }
 

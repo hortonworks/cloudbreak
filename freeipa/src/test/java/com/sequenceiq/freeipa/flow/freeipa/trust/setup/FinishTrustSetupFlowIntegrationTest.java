@@ -230,7 +230,6 @@ class FinishTrustSetupFlowIntegrationTest {
             FinishTrustSetupFailedAction.class,
             FinishTrustSetupAddTrustAction.class,
             FinishTrustSetupFinishedAction.class,
-            FinishTrustSetupFailedAction.class,
             AddTrustHandler.class,
             CrossRealmTrustService.class
     })

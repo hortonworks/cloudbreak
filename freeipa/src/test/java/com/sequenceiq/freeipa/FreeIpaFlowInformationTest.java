@@ -33,6 +33,7 @@ import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetada
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.FreeIpaCancelTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
@@ -60,7 +61,8 @@ class FreeIpaFlowInformationTest {
             FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT.event(),
             FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(),
             FreeIpaTrustSetupFlowEvent.TRUST_SETUP_EVENT.event(),
-            FreeIpaFinishTrustSetupFlowEvent.FINISH_TRUST_SETUP_EVENT.event()
+            FreeIpaFinishTrustSetupFlowEvent.FINISH_TRUST_SETUP_EVENT.event(),
+            FreeIpaCancelTrustSetupFlowEvent.CANCEL_TRUST_SETUP_EVENT.event()
     );
 
     @Mock

@@ -522,6 +522,12 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnsforwardzone_add", flags, params, DnsZone.class).getResult();
     }
 
+    public RPCResponse<Object> deleteForwardDnsZone(String forwardZone) throws FreeIpaClientException {
+        List<Object> flags = List.of(forwardZone);
+        Map<String, Object> params = Map.of();
+        return invoke("dnsforwardzone_del", flags, params, Object.class);
+    }
+
     public DnsZone showForwardDnsZone(String forwardZone) throws FreeIpaClientException {
         List<Object> flags = List.of(forwardZone);
         Map<String, Object> params = Map.of();
@@ -616,6 +622,12 @@ public class FreeIpaClient {
                 "trust_secret", trustSecret,
                 "bidirectional", bidirectional);
         return (Trust) invoke("trust_add", flags, params, Trust.class).getResult();
+    }
+
+    public RPCResponse<Object> deleteTrust(String realm) throws FreeIpaClientException {
+        List<Object> flags = List.of(realm);
+        Map<String, Object> params = Map.of();
+        return invoke("trust_del", flags, params, Object.class);
     }
 
     public RPCResponse<Boolean> serverConnCheck(String cn, String remoteCn) throws FreeIpaClientException {

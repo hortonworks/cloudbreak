@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
@@ -62,5 +63,12 @@ public class TrustV1Controller implements TrustV1Endpoint {
     public TrustSetupCommandsResponse getTrustCleanupCommands(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.CLEANUP);
+    }
+
+    @Override
+    @InternalOnly
+    public CancelCrossRealmTrustResponse cancelByCrn(@ResourceCrn String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return trustSetupService.breakDownTrust(accountId, environmentCrn);
     }
 }

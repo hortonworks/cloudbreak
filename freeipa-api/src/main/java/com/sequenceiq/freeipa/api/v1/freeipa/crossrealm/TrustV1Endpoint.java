@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
@@ -63,5 +64,14 @@ public interface TrustV1Endpoint {
             operationId = "getTrustCleanupCommandsV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
     TrustSetupCommandsResponse getTrustCleanupCommands(
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+
+    @POST
+    @Path("/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.CANCEL_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "cancelCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    CancelCrossRealmTrustResponse cancelByCrn(
             @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 }

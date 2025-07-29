@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
@@ -271,6 +272,18 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to prepare cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public CancelCrossRealmTrustResponse crossCancel(String environmentCrn) {
+        try {
+            LOGGER.debug("Calling FreeIPA cross realm cancel for environment {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> trustV1Endpoint.cancelByCrn(environmentCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to cancel cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

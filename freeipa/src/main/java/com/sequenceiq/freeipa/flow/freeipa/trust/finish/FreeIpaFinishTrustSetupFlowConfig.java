@@ -10,6 +10,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrus
 import static com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowEvent.FINISH_TRUST_SETUP_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowEvent.FINISH_TRUST_SETUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowEvent.FINISH_TRUST_SETUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupState.INIT_STATE;
 
 import java.util.List;
 
@@ -20,7 +21,6 @@ import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIp
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState;
 
 @Component
 public class FreeIpaFinishTrustSetupFlowConfig
@@ -31,7 +31,7 @@ public class FreeIpaFinishTrustSetupFlowConfig
             new Transition.Builder<FreeIpaFinishTrustSetupState, FreeIpaFinishTrustSetupFlowEvent>()
                     .defaultFailureEvent(FINISH_TRUST_SETUP_FAILURE_EVENT)
 
-                    .from(FreeIpaFinishTrustSetupState.INIT_STATE)
+                    .from(INIT_STATE)
                     .to(FreeIpaFinishTrustSetupState.ADD_TRUST_STATE)
                     .event(FINISH_TRUST_SETUP_EVENT)
                     .defaultFailureEvent()
@@ -49,7 +49,7 @@ public class FreeIpaFinishTrustSetupFlowConfig
                     .build();
 
     private static final FlowEdgeConfig<FreeIpaFinishTrustSetupState, FreeIpaFinishTrustSetupFlowEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(FreeIpaFinishTrustSetupState.INIT_STATE, FreeIpaFinishTrustSetupState.FINAL_STATE,
+            new FlowEdgeConfig<>(INIT_STATE, FreeIpaFinishTrustSetupState.FINAL_STATE,
                     FreeIpaFinishTrustSetupState.FINISH_TRUST_SETUP_FAILED_STATE, FINISH_TRUST_SETUP_FAILURE_HANDLED_EVENT);
 
     public FreeIpaFinishTrustSetupFlowConfig() {
@@ -58,7 +58,7 @@ public class FreeIpaFinishTrustSetupFlowConfig
 
     @Override
     public UsageProto.CDPFreeIPAStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
-        if (FreeIpaTrustSetupState.INIT_STATE.equals(flowState)) {
+        if (INIT_STATE.equals(flowState)) {
             return TRUST_SETUP_FINISH_STARTED;
         } else if (FreeIpaFinishTrustSetupState.FINISH_TRUST_SETUP_FINISHED_STATE.equals(flowState)) {
             return TRUST_SETUP_FINISH_FINISHED;

@@ -67,7 +67,7 @@ public class EnvironmentCrossRealmTrustCancelHandler extends ExceptionCatcherEve
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, cross realm trust cancel interrupted.");
                 } else {
                     LOGGER.info("FreeIPA will be cross realm trust cancel.");
-                    freeIpaPollerService.waitForCrossRealmTrustCancel();
+                    freeIpaPollerService.waitForCrossRealmTrustCancel(data.getResourceId(), data.getResourceCrn());
                 }
             }
             LOGGER.debug("FINISH_TRUST_CANCEL_EVENT event sent");

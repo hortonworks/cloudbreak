@@ -20,6 +20,9 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.UPDATE_IN
 import static com.sequenceiq.environment.environment.EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CANCEL_TRUST_SETUP_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CANCEL_TRUST_SETUP_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CANCEL_TRUST_SETUP_SUCCESSFUL;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
@@ -133,7 +136,10 @@ public class EnvironmentSyncService {
             Map.entry(TRUST_SETUP_FAILED, EnvironmentStatus.TRUST_SETUP_FAILED),
             Map.entry(TRUST_SETUP_FINISH_IN_PROGRESS, EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS),
             Map.entry(TRUST_SETUP_FINISH_FAILED, EnvironmentStatus.TRUST_SETUP_FINISH_FAILED),
-            Map.entry(TRUST_SETUP_FINISH_SUCCESSFUL, EnvironmentStatus.AVAILABLE)
+            Map.entry(TRUST_SETUP_FINISH_SUCCESSFUL, EnvironmentStatus.AVAILABLE),
+            Map.entry(CANCEL_TRUST_SETUP_SUCCESSFUL, EnvironmentStatus.AVAILABLE),
+            Map.entry(CANCEL_TRUST_SETUP_FAILED, EnvironmentStatus.TRUST_CANCEL_FAILED),
+            Map.entry(CANCEL_TRUST_SETUP_IN_PROGRESS, EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS)
     );
 
     private final FreeIpaService freeIpaService;
@@ -167,6 +173,8 @@ public class EnvironmentSyncService {
                 TrustStatus trustStatus = getTrustStatus(describeFreeIpaResponse);
                 return switch (trustStatus) {
                     case UNKNOWN, TRUST_SETUP_REQUIRED -> EnvironmentStatus.TRUST_SETUP_REQUIRED;
+                    case CANCEL_TRUST_SETUP_IN_PROGRESS -> EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS;
+                    case CANCEL_TRUST_SETUP_FAILED -> EnvironmentStatus.TRUST_CANCEL_FAILED;
                     case TRUST_SETUP_IN_PROGRESS -> EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
                     case TRUST_SETUP_FAILED -> EnvironmentStatus.TRUST_SETUP_FAILED;
                     case TRUST_SETUP_FINISH_REQUIRED -> EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;

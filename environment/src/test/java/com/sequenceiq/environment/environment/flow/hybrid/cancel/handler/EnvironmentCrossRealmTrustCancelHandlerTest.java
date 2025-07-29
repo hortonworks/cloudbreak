@@ -75,7 +75,7 @@ class EnvironmentCrossRealmTrustCancelHandlerTest {
                 eq(eventData.getResourceCrn())
         );
 
-        verify(freeIpaPollerService).waitForCrossRealmTrustCancel();
+        verify(freeIpaPollerService).waitForCrossRealmTrustCancel(eventData.getResourceId(), eventData.getResourceCrn());
 
         assertThat(result.selector()).isEqualTo(FINISH_TRUST_CANCEL_EVENT.selector());
     }
