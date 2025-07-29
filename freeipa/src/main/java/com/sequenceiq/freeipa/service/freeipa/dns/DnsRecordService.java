@@ -135,7 +135,8 @@ public class DnsRecordService {
     private void cleanupOldRecords(FreeIpaClient freeIpaClient, AddDnsARecordRequest request, Stack stack) throws FreeIpaClientException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         String domain = freeIpa.getDomain();
-        cleanupService.removeDnsEntries(freeIpaClient, Set.of(FreeIpaDomainUtils.buildFqdn(request.getHostname(), domain)), Set.of(request.getIp()), domain);
+        cleanupService.removeDnsEntries(freeIpaClient, Set.of(FreeIpaDomainUtils.buildFqdn(request.getHostname(), domain)), Set.of(request.getIp()), domain,
+                stack.getEnvironmentCrn());
     }
 
     private String calculateZone(String zoneFromRequest, FreeIpaAndClient freeIpaAndClient) throws FreeIpaClientException {

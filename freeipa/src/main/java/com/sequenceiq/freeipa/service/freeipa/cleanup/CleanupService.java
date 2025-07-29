@@ -11,10 +11,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +27,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -50,8 +54,10 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCacheService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneBatchedService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -116,6 +122,12 @@ public class CleanupService {
     @Value("${freeipa.server.deletion.check.interval}")
     private long serverDeletionCheckInterval;
 
+    @Inject
+    private CachedEnvironmentClientService environmentClientService;
+
+    @Inject
+    private DnsZoneBatchedService dnsZoneBatchedService;
+
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
@@ -167,52 +179,72 @@ public class CleanupService {
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     @Measure(CleanupService.class)
-    public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain)
+    public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain, String envCrn)
             throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
-        return removeDnsEntries(client, hosts, ips, domain);
+        return removeDnsEntries(client, hosts, ips, domain, envCrn);
     }
 
-    public Pair<Set<String>, Map<String, String>> removeDnsEntries(FreeIpaClient client, Set<String> hosts, Set<String> ips, String domain)
+    public Pair<Set<String>, Map<String, String>> removeDnsEntries(FreeIpaClient client, Set<String> hosts, Set<String> ips, String domain, String envCrn)
             throws FreeIpaClientException {
         Set<String> dnsCleanupSuccess = new HashSet<>();
         Map<String, String> dnsCleanupFailed = new HashMap<>();
-        Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());
-        for (String zone : allDnsZoneName) {
-            removeHostNameRelatedDnsRecords(hosts, domain, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
-            removeIpRelatedRecords(ips, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
+        if (CollectionUtils.isNotEmpty(hosts) || CollectionUtils.isNotEmpty(ips)) {
+            Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());
+            Map<String, Set<DnsRecord>> dnsRecordsByZone = fetchDnsRecordsByZone(client, allDnsZoneName, envCrn);
+            for (Entry<String, Set<DnsRecord>> zoneRecords : dnsRecordsByZone.entrySet()) {
+                removeHostNameRelatedDnsRecords(hosts, domain, client, dnsCleanupSuccess, dnsCleanupFailed, zoneRecords.getValue(), zoneRecords.getKey());
+                removeIpRelatedRecords(ips, client, dnsCleanupSuccess, dnsCleanupFailed, zoneRecords.getValue(), zoneRecords.getKey());
+            }
         }
         return Pair.of(dnsCleanupSuccess, dnsCleanupFailed);
     }
 
-    private void removeIpRelatedRecords(Set<String> ips, FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed,
-            String zone) throws FreeIpaClientException {
-        if (ips != null && !ips.isEmpty()) {
-            Optional<Set<DnsRecord>> allDnsRecordInZone = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> client.findAllDnsRecordInZone(zone),
-                    "DNS zone [{}] is not found", zone);
-            if (allDnsRecordInZone.isPresent()) {
-                for (String ip : ips) {
-                    allDnsRecordInZone.get().stream().filter(record -> record.isIpRelatedRecord(ip, zone))
-                            .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, ip, record));
+    private Map<String, Set<DnsRecord>> fetchDnsRecordsByZone(FreeIpaClient client, Set<String> allDnsZoneName, String envCrn)
+            throws FreeIpaClientException {
+        String environmentType = environmentClientService.getByCrn(envCrn).getEnvironmentType();
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
+            try {
+                Map<String, Set<DnsRecord>> dnsRecordsByZone = dnsZoneBatchedService.fetchDnsRecordsByZone(client, allDnsZoneName);
+                dnsRecordsByZone.entrySet().removeIf(entry -> entry.getValue().size() < 2);
+                return dnsRecordsByZone;
+            } catch (TimeoutException e) {
+                throw new CloudbreakServiceException("Timeout while fetching dns records for environment: " + envCrn, e);
+            }
+        } else {
+            Map<String, Set<DnsRecord>> dnsRecordsByZone = new HashMap<>();
+            for (String zone : allDnsZoneName) {
+                Optional<Set<DnsRecord>> allDnsRecordInZone = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(
+                        () -> client.findAllDnsRecordInZone(zone), "DNS zone [{}] is not found", zone);
+                if (allDnsRecordInZone.isPresent() && allDnsRecordInZone.get().size() > 1) {
+                    dnsRecordsByZone.put(zone, allDnsRecordInZone.get());
                 }
+            }
+            return dnsRecordsByZone;
+        }
+    }
+
+    private void removeIpRelatedRecords(Set<String> ips, FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed,
+            Set<DnsRecord> allDnsRecordInZone, String zone) {
+        if (ips != null && !ips.isEmpty()) {
+            for (String ip : ips) {
+                allDnsRecordInZone.stream()
+                        .filter(record -> record.isIpRelatedRecord(ip, zone))
+                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, ip, record));
             }
         }
     }
 
     private void removeHostNameRelatedDnsRecords(Set<String> hosts, String domain, FreeIpaClient client, Set<String> dnsCleanupSuccess,
-            Map<String, String> dnsCleanupFailed, String zone) throws FreeIpaClientException {
+            Map<String, String> dnsCleanupFailed, Set<DnsRecord> allDnsRecordInZone, String zone) {
         if (hosts != null && !hosts.isEmpty()) {
-            Optional<Set<DnsRecord>> allDnsRecordInZone = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> client.findAllDnsRecordInZone(zone),
-                    "DNS zone [{}] is not found", zone);
-            if (allDnsRecordInZone.isPresent()) {
-                for (String host : hosts) {
-                    allDnsRecordInZone.get().stream().filter(record -> record.isHostRelatedRecord(host, domain))
-                            .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
-
-                    allDnsRecordInZone.get().stream()
-                            .filter(record -> record.isHostRelatedSrvRecord(host))
-                            .forEach(record -> deleteSrvRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
-                }
+            for (String host : hosts) {
+                allDnsRecordInZone.stream()
+                        .filter(record -> record.isHostRelatedRecord(host, domain))
+                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
+                allDnsRecordInZone.stream()
+                        .filter(record -> record.isHostRelatedSrvRecord(host))
+                        .forEach(record -> deleteSrvRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
             }
         }
     }

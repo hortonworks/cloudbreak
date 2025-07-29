@@ -45,6 +45,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class FreeIpaCleanupAfterRestoreHandlerTest {
     private static final Long RESOURCE_ID = 1L;
 
+    private static final String ENVIRONMENT_CRN = "envCrn";
+
     @Mock
     private CleanupService cleanupService;
 
@@ -76,6 +78,7 @@ public class FreeIpaCleanupAfterRestoreHandlerTest {
 
         Stack stack = mock(Stack.class);
         when(stack.getId()).thenReturn(RESOURCE_ID);
+        when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         FreeIpa freeIpa = mock(FreeIpa.class);
         InstanceMetaData pgw = mock(InstanceMetaData.class);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
@@ -95,7 +98,7 @@ public class FreeIpaCleanupAfterRestoreHandlerTest {
 
         assertInstanceOf(FreeIpaCleanupAfterRestoreSuccess.class, result);
         verify(cleanupService).removeServers(RESOURCE_ID, Set.of("server1"));
-        verify(cleanupService).removeDnsEntries(RESOURCE_ID, Set.of("server1"), Set.of(), freeIpa.getDomain());
+        verify(cleanupService).removeDnsEntries(RESOURCE_ID, Set.of("server1"), Set.of(), freeIpa.getDomain(), ENVIRONMENT_CRN);
     }
 
     @Test
@@ -118,7 +121,7 @@ public class FreeIpaCleanupAfterRestoreHandlerTest {
 
         assertInstanceOf(FreeIpaCleanupAfterRestoreFailed.class, result);
         verify(cleanupService, never()).removeServers(anyLong(), anySet());
-        verify(cleanupService, never()).removeDnsEntries(anyLong(), anySet(), anySet(), anyString());
+        verify(cleanupService, never()).removeDnsEntries(anyLong(), anySet(), anySet(), anyString(), anyString());
     }
 
     @Test

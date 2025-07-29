@@ -25,7 +25,7 @@ public class RPCResponse<R> {
 
     private Boolean truncated;
 
-    private List<RpcBatchResult> results;
+    private List<RpcBatchResult<R>> results;
 
     public Integer getCount() {
         return count;
@@ -91,11 +91,11 @@ public class RPCResponse<R> {
         this.truncated = truncated;
     }
 
-    public List<RpcBatchResult> getResults() {
+    public List<RpcBatchResult<R>> getResults() {
         return results;
     }
 
-    public void setResults(List<RpcBatchResult> results) {
+    public void setResults(List<RpcBatchResult<R>> results) {
         this.results = results;
     }
 

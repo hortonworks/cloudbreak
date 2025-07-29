@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,8 @@ public class FreeIpaClient {
 
     public static final String MAX_PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
 
+    public static final Map<String, Object> UNLIMITED_PARAMS = Map.of("sizelimit", 0, "timelimit", 0);
+
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssVV");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClient.class);
@@ -72,8 +75,6 @@ public class FreeIpaClient {
     private static final int CESSATION_OF_OPERATION = 5;
 
     private static final boolean USER_ENABLED = false;
-
-    private static final Map<String, Object> UNLIMITED_PARAMS = Map.of("sizelimit", 0, "timelimit", 0);
 
     private static final Map<String, Object> PRIMARY_KEY_ONLY = Map.of("pkey_only", true);
 
@@ -720,6 +721,17 @@ public class FreeIpaClient {
             check.run();
             BatchOperation.create(operationsPartition, warnings, acceptableErrorCodes).invoke(this);
         }
+    }
+
+    public <T> List<RPCResponse<T>> callBatchWithResult(BiConsumer<String, String> warnings, List<Object> operations, Integer partitionSize,
+            Set<FreeIpaErrorCodes> acceptableErrorCodes, CheckedTimeoutRunnable check, Type resultType) throws FreeIpaClientException, TimeoutException {
+        List<List<Object>> partitions = Lists.partition(operations, partitionSize);
+        List<RPCResponse<T>> responses = new ArrayList<>();
+        for (List<Object> operationsPartition : partitions) {
+            check.run();
+            responses.add(BatchOperation.<T>create(operationsPartition, warnings, acceptableErrorCodes).rpcInvoke(this, resultType));
+        }
+        return responses;
     }
 
     public void checkIfClientStillUsable(FreeIpaClientException e) throws FreeIpaClientException {

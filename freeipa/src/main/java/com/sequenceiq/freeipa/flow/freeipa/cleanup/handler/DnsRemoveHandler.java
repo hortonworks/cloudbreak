@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class DnsRemoveHandler implements EventHandler<RemoveDnsRequest> {
@@ -35,6 +36,9 @@ public class DnsRemoveHandler implements EventHandler<RemoveDnsRequest> {
     @Inject
     private FreeIpaService freeIpaService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(RemoveDnsRequest.class);
@@ -45,8 +49,9 @@ public class DnsRemoveHandler implements EventHandler<RemoveDnsRequest> {
         RemoveDnsRequest request = event.getData();
         try {
             FreeIpa freeIpa = freeIpaService.findByStackId(request.getResourceId());
+            String envCrn = stackService.getEnvironmentCrnByStackId(request.getResourceId());
             Pair<Set<String>, Map<String, String>> removeDnsResult =
-                    cleanupService.removeDnsEntries(request.getResourceId(), request.getHosts(), request.getIps(), freeIpa.getDomain());
+                    cleanupService.removeDnsEntries(request.getResourceId(), request.getHosts(), request.getIps(), freeIpa.getDomain(), envCrn);
             RemoveDnsResponse response = new RemoveDnsResponse(request, removeDnsResult.getFirst(), removeDnsResult.getSecond());
             eventBus.notify(response.getDnsCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveDnsResponse.class) : EventSelectorUtil.failureSelector(RemoveDnsResponse.class),

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.client.model;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,10 @@ public class DnsRecord {
     private List<String> srvrecord;
 
     private List<String> cnamerecord;
+
+    private List<String> nsrecord;
+
+    private String dn;
 
     public String getIdnsname() {
         return idnsname;
@@ -72,6 +77,22 @@ public class DnsRecord {
 
     public void setCnamerecord(List<String> cnamerecord) {
         this.cnamerecord = cnamerecord;
+    }
+
+    public String getDn() {
+        return dn;
+    }
+
+    public void setDn(String dn) {
+        this.dn = dn;
+    }
+
+    public List<String> getNsrecord() {
+        return nsrecord;
+    }
+
+    public void setNsrecord(List<String> nsrecord) {
+        this.nsrecord = nsrecord;
     }
 
     public boolean isHostRelatedRecord(String fqdn, String domain) {
@@ -145,15 +166,36 @@ public class DnsRecord {
         return cnamerecord != null && !cnamerecord.isEmpty();
     }
 
+    public boolean isNsRecord() {
+        return "@".equals(idnsname) && nsrecord != null && !nsrecord.isEmpty();
+    }
+
+    /**
+     * This is how a dn looks like for an nsrecord. This give back the zone
+     * "dn": "idnsname=191.84.10.in-addr.arpa.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site"
+     *
+     * @return 191.84.10.in-addr.arpa.
+     */
+    public Optional<String> calcZoneFromNsRecord() {
+        if (isNsRecord()) {
+            String recordWithoutLdapParts = StringUtils.substringBefore(dn, ",");
+            return Optional.ofNullable(StringUtils.removeStart(recordWithoutLdapParts, "idnsname="));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     @Override
     public String toString() {
-        return "DnsRecord{"
-                + "idnsname='" + idnsname + '\''
-                + ", arecord=" + arecord
-                + ", sshfprecord=" + sshfprecord
-                + ", ptrrecord=" + ptrrecord
-                + ", srvrecord=" + srvrecord
-                + ", cnamerecord=" + cnamerecord
-                + '}';
+        return "DnsRecord{" +
+                "idnsname='" + idnsname + '\'' +
+                ", arecord=" + arecord +
+                ", sshfprecord=" + sshfprecord +
+                ", ptrrecord=" + ptrrecord +
+                ", srvrecord=" + srvrecord +
+                ", cnamerecord=" + cnamerecord +
+                ", nsrecord=" + nsrecord +
+                ", dn='" + dn + '\'' +
+                '}';
     }
 }

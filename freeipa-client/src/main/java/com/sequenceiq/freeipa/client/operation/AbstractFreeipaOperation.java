@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.client.operation;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +24,12 @@ public abstract class AbstractFreeipaOperation<R> {
         return operationParams;
     }
 
-    public RPCResponse rpcInvoke(FreeIpaClient freeipaClient, Class<R> clazz) throws FreeIpaClientException {
-        return freeipaClient.invoke(getOperationName(), getFlags(), getParams(), clazz);
+    public RPCResponse<R> rpcInvoke(FreeIpaClient freeipaClient, Type resultType) throws FreeIpaClientException {
+        return freeipaClient.invoke(getOperationName(), getFlags(), getParams(), resultType);
     }
 
     protected R invoke(FreeIpaClient freeipaClient, Class<R> clazz) throws FreeIpaClientException {
-        return (R) rpcInvoke(freeipaClient, clazz).getResult();
+        return rpcInvoke(freeipaClient, clazz).getResult();
     }
 
     protected List<Object> getFlags() {

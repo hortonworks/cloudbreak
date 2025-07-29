@@ -91,6 +91,7 @@ public class DnsRecordServiceTest {
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setId(1L);
+        stack.setEnvironmentCrn(ENV_CRN);
         return stack;
     }
 
@@ -346,7 +347,7 @@ public class DnsRecordServiceTest {
 
         underTest.addDnsARecord(ACCOUNT_ID, request);
 
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN));
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 
@@ -418,7 +419,7 @@ public class DnsRecordServiceTest {
 
         underTest.addDnsARecord(ACCOUNT_ID, request);
 
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN));
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 

@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,8 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -56,8 +60,10 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneBatchedService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -112,6 +118,12 @@ public class CleanupServiceTest {
 
     @Mock
     private OperationToOperationStatusConverter operationToOperationStatusConverter;
+
+    @Mock
+    private CachedEnvironmentClientService environmentClientService;
+
+    @Mock
+    private DnsZoneBatchedService dnsZoneBatchedService;
 
     @BeforeEach
     void init() throws FreeIpaClientException {
@@ -567,19 +579,81 @@ public class CleanupServiceTest {
         DnsRecord ptrRecord = new DnsRecord();
         ptrRecord.setIdnsname("1.0");
         ptrRecord.setPtrrecord(List.of("ptrRecord"));
-        doReturn(Set.of(deleteMe, notFound, failed)).when(client).findAllDnsRecordInZone(eq(dnsZone.getIdnsname()));
+        DnsRecord nsRecord = new DnsRecord();
+        nsRecord.setIdnsname("@");
+        nsRecord.setNsrecord(List.of("nsRecord"));
+        nsRecord.setDn("generalZone");
+        doReturn(Set.of(deleteMe, notFound, failed, nsRecord)).when(client).findAllDnsRecordInZone(eq(dnsZone.getIdnsname()));
         doReturn(new RPCResponse()).when(client).deleteDnsRecord("1.0", "0.10.in-addr.arpa.");
         doThrow(new FreeIpaClientException("delete failed"))
                 .when(client).deleteDnsRecord("failed", "test.com");
         doThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
                 .when(client).deleteDnsRecord("notfound", "test.com");
-        doReturn(Set.of(ptrRecord)).when(client).findAllDnsRecordInZone(eq(reverseZone.getIdnsname()));
+        doReturn(Set.of(ptrRecord, nsRecord)).when(client).findAllDnsRecordInZone(eq(reverseZone.getIdnsname()));
         doThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
                 .when(client).findAllDnsRecordInZone(eq(disappearingZone.getIdnsname()));
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(new DetailedEnvironmentResponse());
 
         Pair<Set<String>, Map<String, String>> result = underTest.removeDnsEntries(STACK_ID,
                 Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),
-                Set.of("10.0.0.1", "10.1.0.1"), domain);
+                Set.of("10.0.0.1", "10.1.0.1"), domain, ENVIRONMENT_CRN);
+
+        verify(client).deleteDnsRecord(deleteMe.getIdnsname(), domain);
+        assertTrue(result.getFirst().containsAll(Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), "10.0.0.1")));
+        assertTrue(result.getSecond().containsKey(failed.getIdnsname()));
+        assertEquals("delete failed", result.getSecond().get(failed.getIdnsname()));
+        assertEquals(1, result.getSecond().size());
+        assertEquals(3, result.getFirst().size());
+    }
+
+    @Test
+    public void testRemoveDnsEntriesWhenHybridEnv() throws FreeIpaClientException, TimeoutException {
+        FreeIpaClient client = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(client);
+        DnsZone dnsZone = new DnsZone();
+        String domain = "test.com";
+        dnsZone.setIdnsname(domain);
+        DnsZone reverseZone = new DnsZone();
+        reverseZone.setIdnsname("0.10.in-addr.arpa.");
+        DnsZone disappearingZone = new DnsZone();
+        disappearingZone.setIdnsname("disappear");
+        Set<DnsZone> zones = Set.of(dnsZone, reverseZone, disappearingZone);
+        when(client.findAllDnsZone()).thenReturn(zones);
+        DnsRecord deleteMe = new DnsRecord();
+        deleteMe.setIdnsname("deleteMe");
+        deleteMe.setArecord(List.of("ignored"));
+        DnsRecord notFound = new DnsRecord();
+        notFound.setIdnsname("notfound");
+        notFound.setArecord(List.of("ignored"));
+        DnsRecord failed = new DnsRecord();
+        failed.setIdnsname("failed");
+        failed.setArecord(List.of("ignored"));
+        DnsRecord ptrRecord = new DnsRecord();
+        ptrRecord.setIdnsname("1.0");
+        ptrRecord.setPtrrecord(List.of("ptrRecord"));
+        DnsRecord nsRecord = new DnsRecord();
+        nsRecord.setIdnsname("@");
+        nsRecord.setNsrecord(List.of("nsRecord"));
+        nsRecord.setDn("generalZone");
+        doReturn(new RPCResponse()).when(client).deleteDnsRecord("1.0", "0.10.in-addr.arpa.");
+        doThrow(new FreeIpaClientException("delete failed"))
+                .when(client).deleteDnsRecord("failed", "test.com");
+        doThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
+                .when(client).deleteDnsRecord("notfound", "test.com");
+        doThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
+                .when(client).findAllDnsRecordInZone(eq(disappearingZone.getIdnsname()));
+        when(dnsZoneBatchedService.fetchDnsRecordsByZone(client, zones.stream().map(DnsZone::getIdnsname).collect(Collectors.toSet())))
+                .thenReturn(Map.of(
+                        dnsZone.getIdnsname(), Set.of(deleteMe, notFound, failed, nsRecord),
+                        reverseZone.getIdnsname(), Set.of(ptrRecord, nsRecord)
+                ));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+
+        Pair<Set<String>, Map<String, String>> result = underTest.removeDnsEntries(STACK_ID,
+                Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),
+                Set.of("10.0.0.1", "10.1.0.1"), domain, ENVIRONMENT_CRN);
 
         verify(client).deleteDnsRecord(deleteMe.getIdnsname(), domain);
         assertTrue(result.getFirst().containsAll(Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), "10.0.0.1")));

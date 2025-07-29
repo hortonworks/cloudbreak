@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpcBatchResult {
+public class RpcBatchResult<R> {
     private String error;
 
     @JsonProperty("error_code")
@@ -16,7 +19,8 @@ public class RpcBatchResult {
     @JsonProperty("error_kw")
     private RpcBatchErrorKw errorKw;
 
-    private Object result;
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    private List<R> result;
 
     public String getError() {
         return error;
@@ -50,11 +54,11 @@ public class RpcBatchResult {
         this.errorKw = errorKw;
     }
 
-    public Object getResult() {
+    public List<R> getResult() {
         return result;
     }
 
-    public void setResult(Object result) {
+    public void setResult(List<R> result) {
         this.result = result;
     }
 

@@ -71,7 +71,7 @@ public class FreeIpaCleanupAfterRestoreHandler extends ExceptionCatcherEventHand
             LOGGER.info("Primary gateway: [{}] Servers to cleanup: {}", pgw, serversToCleanup);
             if (!serversToCleanup.isEmpty()) {
                 cleanupService.removeServers(stack.getId(), serversToCleanup);
-                cleanupService.removeDnsEntries(stack.getId(), serversToCleanup, Set.of(), freeIpa.getDomain());
+                cleanupService.removeDnsEntries(stack.getId(), serversToCleanup, Set.of(), freeIpa.getDomain(), stack.getEnvironmentCrn());
             }
             return new FreeIpaCleanupAfterRestoreSuccess(request.getResourceId());
         } catch (FreeIpaClientException e) {

@@ -1,9 +1,11 @@
 package com.sequenceiq.freeipa.client.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -143,5 +145,85 @@ public class DnsRecordTest {
         underTest.setSshfprecord(List.of("1 1 ABCDEF"));
         assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
         assertFalse(underTest.isHostRelatedRecord("server1.example.com", "example.com"));
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithValidNsRecord() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(List.of("ns1.example.com."));
+        underTest.setDn("idnsname=191.84.10.in-addr.arpa.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertTrue(result.isPresent());
+        assertEquals("191.84.10.in-addr.arpa.", result.get());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithValidForwardZone() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(List.of("ns1.example.com.", "ns2.example.com."));
+        underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertTrue(result.isPresent());
+        assertEquals("example.com.", result.get());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithNonNsRecord() {
+        underTest.setIdnsname("server");
+        underTest.setArecord(List.of("192.168.1.1"));
+        underTest.setDn("idnsname=server,idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithEmptyNsRecord() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(List.of());
+        underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithNullNsRecord() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(null);
+        underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithNullDn() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(List.of("ns1.example.com."));
+        underTest.setDn(null);
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testCalcZoneFromNsRecordWithMalformedDn() {
+        underTest.setIdnsname("@");
+        underTest.setNsrecord(List.of("ns1.example.com."));
+        underTest.setDn("malformed-dn-without-comma");
+
+        Optional<String> result = underTest.calcZoneFromNsRecord();
+
+        assertTrue(result.isPresent());
+        assertEquals("malformed-dn-without-comma", result.get());
     }
 }

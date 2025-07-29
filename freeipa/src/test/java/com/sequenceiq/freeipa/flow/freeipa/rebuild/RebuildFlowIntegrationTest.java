@@ -505,7 +505,7 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
         verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
-        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com", ENVIRONMENT_CRN);
         verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
         verify(kerberosConfigUpdateService).updateNameservers(STACK_ID);
         verify(environmentEndpoint).updateConfigsInEnvironmentByCrn(ENVIRONMENT_CRN);
@@ -597,7 +597,7 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
         verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
-        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com", ENVIRONMENT_CRN);
         verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
@@ -686,7 +686,7 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
         verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
-        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com", ENVIRONMENT_CRN);
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
         verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
