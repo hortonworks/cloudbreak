@@ -1,4 +1,5 @@
-# Extend krb5.conf with the following content
+# Remove the following content from krb5.conf
+
 [domain_realm]
 .freeipa.org = FREEIPA.ORG
 freeipa.org = FREEIPA.ORG

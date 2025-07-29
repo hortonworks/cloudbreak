@@ -37,22 +37,27 @@ public class ActiveDirectoryCommandsBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String buildCommands(Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
+    public String buildCommands(TrustCommandType trustCommandType, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
         Map<String, Object> model = new HashMap<>();
+        model.put("trustCommandType", trustCommandType);
         model.put("adDomain", crossRealmTrust.getRealm().toLowerCase());
-        model.put("ipaIpAdresses", getServerIps(stack));
         model.put("ipaDomain", freeIpa.getDomain());
-        model.put("trustSecret", crossRealmTrust.getTrustSecret());
-        return build(model);
+        if (trustCommandType == TrustCommandType.SETUP) {
+            model.put("ipaIpAdresses", getServerIps(stack));
+            model.put("trustSecret", crossRealmTrust.getTrustSecret());
+        }
+        return build(trustCommandType, model);
     }
 
-    private String build(Map<String, Object> model) {
+    private String build(TrustCommandType trustCommandType, Map<String, Object> model) {
+        String template = String.format("crossrealmtrust/activedirectory_%s_commands.ftl", trustCommandType.name().toLowerCase());
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(
-                    freemarkerConfiguration.getTemplate("crossrealmtrust/activedirectory_commands.ftl", "UTF-8"), model);
+                    freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new CloudbreakServiceException("Failed to build activedirectory_commands freemarker template", e);
+            String message = String.format("Failed to build %s freemarker template", template);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 

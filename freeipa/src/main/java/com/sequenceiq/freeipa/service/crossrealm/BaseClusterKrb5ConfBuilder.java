@@ -28,11 +28,20 @@ public class BaseClusterKrb5ConfBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String buildCommands(FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
+    public String buildCommands(TrustCommandType trustCommandType, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
         Map<String, Object> model = new HashMap<>();
+        model.put("comment", getComment(trustCommandType));
+        model.put("trustCommandType", trustCommandType);
         model.put("adDomain", crossRealmTrust.getRealm());
         model.put("ipaDomain", freeIpa.getDomain());
         return build(model);
+    }
+
+    private String getComment(TrustCommandType trustCommandType) {
+        return switch (trustCommandType) {
+            case SETUP -> "Extend krb5.conf with the following content";
+            case CLEANUP -> "Remove the following content from krb5.conf";
+        };
     }
 
     private String build(Map<String, Object> model) {

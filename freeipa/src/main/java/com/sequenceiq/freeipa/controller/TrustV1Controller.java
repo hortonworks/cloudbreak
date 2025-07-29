@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCross
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.crossrealm.TrustSetupService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -53,6 +54,13 @@ public class TrustV1Controller implements TrustV1Endpoint {
     @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
     public TrustSetupCommandsResponse getTrustSetupCommands(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.getTrustSetupCommands(accountId, environmentCrn);
+        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.SETUP);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
+    public TrustSetupCommandsResponse getTrustCleanupCommands(@ResourceCrn String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.CLEANUP);
     }
 }

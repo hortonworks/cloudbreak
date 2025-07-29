@@ -55,4 +55,13 @@ public interface TrustV1Endpoint {
             useReturnTypeSchema = true))
     TrustSetupCommandsResponse getTrustSetupCommands(
             @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+
+    @GET
+    @Path("/trust_cleanup_commands")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.TRUST_CLEANUP_COMMANDS, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "getTrustCleanupCommandsV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    TrustSetupCommandsResponse getTrustCleanupCommands(
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 }

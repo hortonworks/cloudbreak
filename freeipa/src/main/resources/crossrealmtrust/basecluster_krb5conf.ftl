@@ -1,4 +1,5 @@
-# Extend krb5.conf with the following content
+# ${comment}
+
 [domain_realm]
 .${ipaDomain} = ${ipaDomain?c_upper_case}
 ${ipaDomain} = ${ipaDomain?c_upper_case}

@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.service.crossrealm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -11,8 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -53,8 +54,9 @@ class ActiveDirectoryCommandsBuilderTest {
         ReflectionTestUtils.setField(underTest, "freemarkerConfiguration", configuration);
     }
 
-    @Test
-    void testBuildCommandsWithLoadBalancer() throws IOException {
+    @ParameterizedTest
+    @EnumSource(TrustCommandType.class)
+    void testBuildCommandsWithLoadBalancer(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
         Stack stack = new Stack();
         stack.setId(1L);
@@ -68,26 +70,28 @@ class ActiveDirectoryCommandsBuilderTest {
         Set<String> lbIps = new LinkedHashSet<>();
         Collections.addAll(lbIps, "ipaIp1", "ipaIp2", "ipaIp3");
         loadBalancer.setIp(lbIps);
-        when(freeIpaLoadBalancerService.findByStackId(stack.getId())).thenReturn(Optional.of(loadBalancer));
+        lenient().when(freeIpaLoadBalancerService.findByStackId(stack.getId())).thenReturn(Optional.of(loadBalancer));
         // WHEN
-        String result = underTest.buildCommands(stack, freeIpa, crossRealmTrust);
+        String result = underTest.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust);
         // THEN
-        String expectedOutput = FileReaderUtils.readFileFromClasspath("crossrealmtrust/activedirectory_commands_lb.bat");
+        String fileName = String.format("crossrealmtrust/activedirectory_commands_lb_%s.bat", trustCommandType.name().toLowerCase());
+        String expectedOutput = FileReaderUtils.readFileFromClasspath(fileName);
         assertEquals(expectedOutput, result);
     }
 
-    @Test
-    void testBuildCommandsWithoutLoadBalancer() throws IOException {
+    @ParameterizedTest
+    @EnumSource(TrustCommandType.class)
+    void testBuildCommandsWithoutLoadBalancer(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
         Stack stack = mock(Stack.class);
-        when(stack.getId()).thenReturn(1L);
+        lenient().when(stack.getId()).thenReturn(1L);
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
         instanceMetaData1.setPrivateIp("ip1");
         InstanceMetaData instanceMetaData2 = new InstanceMetaData();
         instanceMetaData2.setPrivateIp("ip2");
         Set<InstanceMetaData> instanceMetadatas = new LinkedHashSet<>();
         Collections.addAll(instanceMetadatas, instanceMetaData1, instanceMetaData2);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetadatas);
+        lenient().when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetadatas);
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("freeipa.org");
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
@@ -95,9 +99,10 @@ class ActiveDirectoryCommandsBuilderTest {
         crossRealmTrust.setRealm("ad.org");
         crossRealmTrust.setFqdn("adHostName.ad.org");
         // WHEN
-        String result = underTest.buildCommands(stack, freeIpa, crossRealmTrust);
+        String result = underTest.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust);
         // THEN
-        String expectedOutput = FileReaderUtils.readFileFromClasspath("crossrealmtrust/activedirectory_commands_nolb.bat");
+        String fileName = String.format("crossrealmtrust/activedirectory_commands_nolb_%s.bat", trustCommandType.name().toLowerCase());
+        String expectedOutput = FileReaderUtils.readFileFromClasspath(fileName);
         assertEquals(expectedOutput, result);
     }
 }

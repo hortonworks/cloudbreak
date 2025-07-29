@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -44,8 +45,9 @@ class BaseClusterKrb5ConfBuilderTest {
         ReflectionTestUtils.setField(underTest, "freemarkerConfiguration", configuration);
     }
 
-    @Test
-    void testBuildCommandsr() throws IOException {
+    @ParameterizedTest
+    @EnumSource(TrustCommandType.class)
+    void testBuildCommands(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("freeipa.org");
@@ -54,9 +56,10 @@ class BaseClusterKrb5ConfBuilderTest {
         crossRealmTrust.setRealm("ad.org");
         crossRealmTrust.setFqdn("adHostName.ad.org");
         // WHEN
-        String result = underTest.buildCommands(freeIpa, crossRealmTrust);
+        String result = underTest.buildCommands(trustCommandType, freeIpa, crossRealmTrust);
         // THEN
-        String expectedOutput = FileReaderUtils.readFileFromClasspath("crossrealmtrust/basecluster_krb5conf.sh");
+        String fileName = String.format("crossrealmtrust/basecluster_krb5conf_%s.sh", trustCommandType.name().toLowerCase());
+        String expectedOutput = FileReaderUtils.readFileFromClasspath(fileName);
         assertEquals(expectedOutput, result);
     }
 }

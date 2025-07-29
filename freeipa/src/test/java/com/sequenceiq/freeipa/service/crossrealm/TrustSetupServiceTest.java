@@ -55,9 +55,9 @@ class TrustSetupServiceTest {
         when(crossRealmTrustService.getByStackId(stack.getId())).thenReturn(crossRealmTrust);
         when(crossRealmTrust.getTrustStatus()).thenReturn(TrustStatus.TRUST_ACTIVE);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        when(trustCommandsGeneratorService.getTrustSetupCommands(envCrn, stack, freeIpa, crossRealmTrust)).thenReturn(expectedResponse);
+        when(trustCommandsGeneratorService.getTrustCommands(TrustCommandType.SETUP, envCrn, stack, freeIpa, crossRealmTrust)).thenReturn(expectedResponse);
 
-        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands(accountId, envCrn);
+        TrustSetupCommandsResponse response = underTest.getTrustCommands(accountId, envCrn, TrustCommandType.SETUP);
 
         assertSame(expectedResponse, response);
     }
@@ -78,7 +78,7 @@ class TrustSetupServiceTest {
         when(stackStatus.getDetailedStackStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-                () -> underTest.getTrustSetupCommands(accountId, envCrn));
+                () -> underTest.getTrustCommands(accountId, envCrn, TrustCommandType.SETUP));
         assertTrue(ex.getMessage().contains("trust is not in state, where trust setup commands can be generated"));
     }
 }

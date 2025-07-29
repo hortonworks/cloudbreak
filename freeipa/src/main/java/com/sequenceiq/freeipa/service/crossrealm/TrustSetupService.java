@@ -133,7 +133,7 @@ public class TrustSetupService {
         return response;
     }
 
-    public TrustSetupCommandsResponse getTrustSetupCommands(String accountId, String environmentCrn) {
+    public TrustSetupCommandsResponse getTrustCommands(String accountId, String environmentCrn, TrustCommandType trustCommandType) {
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
         if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {
@@ -142,7 +142,7 @@ public class TrustSetupService {
                     ", required states: " + ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS);
         }
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return trustCommandsGeneratorService.getTrustSetupCommands(environmentCrn, stack, freeIpa, crossRealmTrust);
+        return trustCommandsGeneratorService.getTrustCommands(trustCommandType, environmentCrn, stack, freeIpa, crossRealmTrust);
     }
 
     private boolean isFinishTrustSetupPossible(Stack stack, CrossRealmTrust crossRealmTrust) {

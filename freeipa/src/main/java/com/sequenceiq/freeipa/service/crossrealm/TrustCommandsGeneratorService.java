@@ -23,15 +23,16 @@ public class TrustCommandsGeneratorService {
     @Inject
     private BaseClusterKrb5ConfBuilder baseClusterKrb5ConfBuilder;
 
-    public TrustSetupCommandsResponse getTrustSetupCommands(String environmentCrn, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
-        LOGGER.info("Retrieving commands for cross-realm trust setup for active directory: {}", crossRealmTrust.getFqdn());
+    public TrustSetupCommandsResponse getTrustCommands(
+            TrustCommandType trustCommandType, String environmentCrn, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
+        LOGGER.info("Retrieving {} commands for cross-realm trust setup for active directory: {}", trustCommandType.name(), crossRealmTrust.getFqdn());
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
         response.setEnvironmentCrn(environmentCrn);
         ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
-        adCommands.setCommands(activeDirectoryCommandsBuilder.buildCommands(stack, freeIpa, crossRealmTrust));
+        adCommands.setCommands(activeDirectoryCommandsBuilder.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust));
         response.setActiveDirectoryCommands(adCommands);
         BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
-        baseClusterTrustSetupCommands.setKrb5Conf(baseClusterKrb5ConfBuilder.buildCommands(freeIpa, crossRealmTrust));
+        baseClusterTrustSetupCommands.setKrb5Conf(baseClusterKrb5ConfBuilder.buildCommands(trustCommandType, freeIpa, crossRealmTrust));
         response.setBaseClusterCommands(baseClusterTrustSetupCommands);
         return response;
     }

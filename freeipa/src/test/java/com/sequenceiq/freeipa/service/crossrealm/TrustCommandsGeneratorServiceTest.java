@@ -32,10 +32,10 @@ class TrustCommandsGeneratorServiceTest {
         FreeIpa freeIpa = mock(FreeIpa.class);
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
 
-        when(activeDirectoryCommandsBuilder.buildCommands(stack, freeIpa, crossRealmTrust)).thenReturn("active directory commands");
-        when(baseClusterKrb5ConfBuilder.buildCommands(freeIpa, crossRealmTrust)).thenReturn("krb5 conf");
+        when(activeDirectoryCommandsBuilder.buildCommands(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust)).thenReturn("active directory commands");
+        when(baseClusterKrb5ConfBuilder.buildCommands(TrustCommandType.SETUP, freeIpa, crossRealmTrust)).thenReturn("krb5 conf");
 
-        TrustSetupCommandsResponse response = underTest.getTrustSetupCommands("env-crn", stack, freeIpa, crossRealmTrust);
+        TrustSetupCommandsResponse response = underTest.getTrustCommands(TrustCommandType.SETUP, "env-crn", stack, freeIpa, crossRealmTrust);
 
         assertEquals("env-crn", response.getEnvironmentCrn());
         assertEquals("active directory commands", response.getActiveDirectoryCommands().getCommands());
