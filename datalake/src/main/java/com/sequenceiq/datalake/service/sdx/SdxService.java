@@ -109,6 +109,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -1005,7 +1006,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
         validateRmsEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
-        validateMultiAz(enableMultiAz, environmentResponse, shape);
+        validateMultiAz(enableMultiAz, environmentResponse, shape, true);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
@@ -1030,7 +1031,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
         validateRmsEnablement(version, cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
-        validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape());
+        validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape(), false);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
@@ -1048,7 +1049,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return newSdxCluster;
     }
 
-    private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape) {
+    private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape, boolean resize) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (enableMultiAz) {
             if (!clusterShape.isMultiAzEnabledByDefault()) {
@@ -1068,10 +1069,33 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (GCP.equals(cloudPlatform)) {
                 validateMultiAzForGcp(environmentResponse.getAccountId(), clusterShape, validationBuilder);
             }
+            if (resize) {
+                validateSubnetsInMultiAZIfNeeded(environmentResponse, validationBuilder);
+            }
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateSubnetsInMultiAZIfNeeded(DetailedEnvironmentResponse environmentResponse, ValidationResultBuilder validationBuilder) {
+        if (environmentResponse.getNetwork() != null) {
+            Set<String> availabilityZones;
+            if (AWS.equalsIgnoreCase(environmentResponse.getCloudPlatform())) {
+                availabilityZones = environmentResponse.getNetwork()
+                        .getSubnetMetas()
+                        .values()
+                        .stream()
+                        .map(CloudSubnet::getAvailabilityZone)
+                        .collect(Collectors.toSet());
+            } else {
+                availabilityZones = environmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.fromName(environmentResponse.getCloudPlatform()));
+            }
+            if (availabilityZones.size() == 1) {
+                validationBuilder.error(String.format("Multi AZ cluster requires subnets in multiple availability zones but the cluster " +
+                        "uses subnest only from %s availability zone.", availabilityZones.stream().findFirst().get()));
+            }
         }
     }
 
