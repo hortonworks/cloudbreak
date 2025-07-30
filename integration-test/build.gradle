@@ -175,9 +175,7 @@ dependencies {
     exclude group: "velocity"
   }
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  implementation (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion) {
-    transitive = false
-  }
+  implementation (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion)
   implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.40.0') {
     exclude group: "net.i2p.crypto"
   }
