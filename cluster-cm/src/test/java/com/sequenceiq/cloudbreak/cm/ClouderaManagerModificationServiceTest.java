@@ -113,8 +113,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-import okhttp3.Call;
-
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerModificationServiceTest {
 
@@ -129,6 +127,12 @@ class ClouderaManagerModificationServiceTest {
     private static final String HOSTNAME = "host1";
 
     private static final String GROUP_NAME = "group1";
+
+    private final ExtendedPollingResult success = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+
+    private final ExtendedPollingResult exit = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
+
+    private final ExtendedPollingResult timeout = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
 
     @InjectMocks
     private ClouderaManagerModificationService underTest;
@@ -239,11 +243,15 @@ class ClouderaManagerModificationServiceTest {
 
     private HostGroup hostGroup;
 
-    private final ExtendedPollingResult success = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-
-    private final ExtendedPollingResult exit = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
-
-    private final ExtendedPollingResult timeout = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
+    static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
+        return new Object[][]{
+                // testCaseName batchResponseFactory
+                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
+                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
+                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
+                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
+        };
+    }
 
     @BeforeEach
     void setUp() {
@@ -624,16 +632,6 @@ class ClouderaManagerModificationServiceTest {
         assertThat(host.getRackId()).isEqualTo(rackIdExpected);
     }
 
-    static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
-        return new Object[][]{
-                // testCaseName batchResponseFactory
-                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
-                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
-                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
-                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider")
     void upscaleClusterTestWhenRackIdBatchExecutionFailure(String testCaseName, Supplier<ApiBatchResponse> batchResponseFactory) throws Exception {
@@ -936,8 +934,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_6_0.getVersion());
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostResourceApi);
-        Call call = mock(Call.class);
-        when(hostResourceApi.addTagsAsync(eq(HOSTNAME), any(), any())).thenReturn(call);
+        when(hostResourceApi.addTags(eq(HOSTNAME), any())).thenReturn(List.of());
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
@@ -962,7 +959,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerRestartService, times(2)).waitForRestartExecutionIfPresent(v31Client, stack, false);
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
         ArgumentCaptor<List<ApiEntityTag>> entityTagListCaptor = ArgumentCaptor.forClass(List.class);
-        verify(hostResourceApi, times(1)).addTagsAsync(eq(HOSTNAME), entityTagListCaptor.capture(), any());
+        verify(hostResourceApi, times(1)).addTags(eq(HOSTNAME), entityTagListCaptor.capture());
         assertEquals("_cldr_cm_host_template_name", entityTagListCaptor.getValue().get(0).getName());
         assertEquals(GROUP_NAME, entityTagListCaptor.getValue().get(0).getValue());
 
