@@ -889,16 +889,16 @@ For example: `https://tb-nt-local.tb-local.xcu2-8y8x.workload-dev.cloudera.com/c
 
 We are using Openapi to create API definitions for our services. The following list contains all the service and the specific link for the definitions.
 
-|      Service      |                                     Openapi JSON                                      | 
-|:-----------------:|:-------------------------------------------------------------------------------------:|
-|    Cloudbreak     |    https://cloudbreak-swagger.s3.eu-central-1.amazonaws.com/openapi-<VERSION>.json    |
-|      FreeIPA      |       https://freeipa-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
-|    Environment    |     https://environment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json     |
-|     DataLake      |      https://datalake-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
-|     RedBeams      |      https://redbeams-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
-|     Periscope     |      https://autoscale-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json      |
-| RemoteEnvironment |  https://remoteenvironment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json  |
-|  ExternalCompute  | https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json |
+| Service           | Openapi JSON                                                                            |
+|:-----------------:|:---------------------------------------------------------------------------------------:|
+| Cloudbreak        | `https://cloudbreak-swagger.s3.eu-central-1.amazonaws.com/openapi-<VERSION>.json`       |
+| FreeIPA           | `https://freeipa-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`             |
+| Environment       | `https://environment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`         |
+| DataLake          | `https://datalake-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`            |
+| RedBeams          | `https://redbeams-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`            |
+| Periscope         | `https://autoscale-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`           |
+| RemoteEnvironment | `https://remoteenvironment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json`   |
+| ExternalCompute   | `https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json` |
 
 # How to Contribute
 
