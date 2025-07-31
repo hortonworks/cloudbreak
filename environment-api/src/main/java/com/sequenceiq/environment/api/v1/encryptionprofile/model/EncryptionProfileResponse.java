@@ -39,6 +39,9 @@ public class EncryptionProfileResponse {
     @Schema(description = EncryptionProfileModelDescription.TLS_CIPHER_SUITES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<String>> cipherSuites;
 
+    @Schema(description = EncryptionProfileModelDescription.CLOUDERA_TLS_CIPHER_SUITES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Set<String>> clouderaInternalCipherSuites;
+
     @Schema(description = EncryptionProfileModelDescription.STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
 
@@ -56,6 +59,14 @@ public class EncryptionProfileResponse {
 
     public void setCipherSuites(Map<String, Set<String>> cipherSuites) {
         this.cipherSuites = cipherSuites;
+    }
+
+    public Map<String, Set<String>> getClouderaInternalCipherSuites() {
+        return clouderaInternalCipherSuites;
+    }
+
+    public void setClouderaInternalCipherSuites(Map<String, Set<String>> clouderaInternalCipherSuites) {
+        this.clouderaInternalCipherSuites = clouderaInternalCipherSuites;
     }
 
     public String getDescription() {
@@ -106,6 +117,7 @@ public class EncryptionProfileResponse {
                 ", crn='" + crn + '\'' +
                 ", tlsVersions='" + tlsVersions + '\'' +
                 ", cipherSuites='" + cipherSuites + '\'' +
+                ", clouderaInternalCipherSuites='" + clouderaInternalCipherSuites + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

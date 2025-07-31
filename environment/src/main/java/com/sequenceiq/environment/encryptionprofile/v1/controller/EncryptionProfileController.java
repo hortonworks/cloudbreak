@@ -106,7 +106,7 @@ public class EncryptionProfileController extends NotificationController implemen
 
         EncryptionProfile deletedEncryptionProfile = encryptionProfileService.deleteByNameAndAccountId(name, accountId);
         notify(ResourceEvent.ENCRYPTION_PROFILE_DELETED);
-        return encryptionProfileResponseConverter.convert(deletedEncryptionProfile, false);
+        return encryptionProfileResponseConverter.convert(deletedEncryptionProfile);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EncryptionProfileController extends NotificationController implemen
 
         EncryptionProfile deletedEncryptionProfile = encryptionProfileService.deleteByResourceCrn(crn);
         notify(ResourceEvent.ENCRYPTION_PROFILE_DELETED);
-        return encryptionProfileResponseConverter.convert(deletedEncryptionProfile, false);
+        return encryptionProfileResponseConverter.convert(deletedEncryptionProfile);
     }
 
     @Override

@@ -57,11 +57,11 @@ public class EncryptionProfileRequestValidatorTest {
                 "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
         )));
         tls12.setAvailable(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA")));
-        tls12.setRecommended(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
+        tls12.setRequired(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
 
         EncryptionProfileConfig.TlsCipherGroup tls13 = new EncryptionProfileConfig.TlsCipherGroup();
         tls13.setAvailable(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384")));
-        tls13.setRecommended(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+        tls13.setRequired(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
 
         mapping.put(TlsVersion.TLS_1_2, tls12);
         mapping.put(TlsVersion.TLS_1_3, tls13);

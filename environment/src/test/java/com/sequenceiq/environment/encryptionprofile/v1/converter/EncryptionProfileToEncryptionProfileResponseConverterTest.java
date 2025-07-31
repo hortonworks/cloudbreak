@@ -79,10 +79,10 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     @Test
     void testConvertEmptyCipherSuitesReturnDefaultMap() {
         // TLS 1.2 only supports one of the cipher suites
-        when(encryptionProfileConfig.getRecommendedCiphers(TlsVersion.TLS_1_2))
+        when(encryptionProfileConfig.getRequiredCiphers(TlsVersion.TLS_1_2))
                 .thenReturn(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
         // TLS 1.3 supports a different one
-        when(encryptionProfileConfig.getRecommendedCiphers(TlsVersion.TLS_1_3))
+        when(encryptionProfileConfig.getRequiredCiphers(TlsVersion.TLS_1_3))
                 .thenReturn(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
         encryptionProfile.setCipherSuites(Collections.emptySet());
 
@@ -97,14 +97,14 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         expectedCipherMap.put("TLSv1.2", new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
         expectedCipherMap.put("TLSv1.3", new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
 
-        assertThat(response.getCipherSuites()).isEqualTo(expectedCipherMap);
+        assertThat(response.getClouderaInternalCipherSuites()).isEqualTo(expectedCipherMap);
     }
 
     @Test
     void testConvertEmptyCipherSuitesReturnEmptyMap() {
         encryptionProfile.setCipherSuites(Collections.emptySet());
 
-        EncryptionProfileResponse response = converter.convert(encryptionProfile, false);
+        EncryptionProfileResponse response = converter.convert(encryptionProfile);
 
         assertThat(response.getCipherSuites()).isEmpty();
     }
@@ -113,7 +113,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     void testConvertNullCipherSuitesReturnEmptyMap() {
         encryptionProfile.setCipherSuites(null);
 
-        EncryptionProfileResponse response = converter.convert(encryptionProfile, false);
+        EncryptionProfileResponse response = converter.convert(encryptionProfile);
 
         assertThat(response.getCipherSuites()).isEmpty();
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -47,8 +48,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -112,6 +112,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     @Inject
     private CachedEnvironmentClientService environmentService;
 
+    @Inject
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
         Stack stack = stackService.getStackById(stackId);
@@ -141,8 +144,8 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);
-        List<String> tlsCipherSuitesBlackBoxExporter = TlsSpecificationsHelper.getTlsCipherSuitesIanaList(userCipherSuits,
-                CipherSuitesLimitType.BLACKBOX_EXPORTER);
+        List<String> tlsCipherSuitesBlackBoxExporter = defaultEncryptionProfileProvider
+                .getTlsCipherSuitesIanaList(userCipherSuits, BLACKBOX_EXPORTER);
         telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         if (telemetry != null) {
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));

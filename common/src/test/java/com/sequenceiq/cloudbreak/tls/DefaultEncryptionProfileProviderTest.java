@@ -12,31 +12,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 
 @ExtendWith(MockitoExtension.class)
-public class TlsSpecificationsHelperTest {
+public class DefaultEncryptionProfileProviderTest {
+
+    private DefaultEncryptionProfileProvider underTest = new DefaultEncryptionProfileProvider();
 
     @Test
     public void testgetCipherSuiteString() {
 
-        String assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.BLACKBOX_EXPORTER, ",");
+        String assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA," +
                 "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", assertValue);
 
-        assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.REDHAT_VERSION8, ",");
+        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.REDHAT_VERSION8, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", assertValue);
 
-        assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.MINIMAL, ",");
+        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.MINIMAL, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", assertValue);
 
-        assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ",");
+        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA," +
@@ -44,13 +46,13 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA," +
                 "TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA", assertValue);
 
-        assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, ",");
+        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, ",");
         assertEquals("ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384," +
                 "DHE-RSA-AES128-GCM-SHA256,DHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-AES128-SHA256,ECDHE-ECDSA-AES128-SHA,ECDHE-RSA-AES128-SHA," +
                 "ECDHE-ECDSA-AES256-SHA384,ECDHE-ECDSA-AES256-SHA,ECDHE-RSA-AES256-SHA,DHE-RSA-AES128-SHA256,DHE-RSA-AES128-SHA,DHE-RSA-AES256-SHA256," +
                 "DHE-RSA-AES256-SHA,AES128-SHA,AES256-SHA", assertValue);
 
-        assertValue = TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.DEFAULT, ",");
+        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.DEFAULT, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256," +
@@ -71,7 +73,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
                 "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256").toArray(new String[9]);
 
-        List<String> cipherSuites = TlsSpecificationsHelper.getTlsCipherSuitesIanaList(suites, CipherSuitesLimitType.BLACKBOX_EXPORTER);
+        List<String> cipherSuites = underTest.getTlsCipherSuitesIanaList(suites, CipherSuitesLimitType.BLACKBOX_EXPORTER);
         assertTrue(cipherSuites.containsAll(List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                 "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384")));
     }
@@ -89,7 +91,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
                 "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256").toArray(new String[9]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.BLACKBOX_EXPORTER, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.BLACKBOX_EXPORTER, ":");
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384")));
     }
@@ -108,7 +110,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
                 "TLS_DH_DSS_WITH_AES_128_GCM_SHA256").toArray(new String[10]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384")));
@@ -129,7 +131,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DH_DSS_WITH_AES_128_GCM_SHA256",
                 "TLS Invalid Suite").toArray(new String[10]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "DHE-RSA-AES256-SHA256",
@@ -153,7 +155,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DH_DSS_WITH_AES_128_GCM_SHA256",
                 "TLS Invalid Suite").toArray(new String[11]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.DEFAULT, ":");
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES128-SHA256", "DHE-RSA-AES256-GCM-SHA384",
@@ -175,7 +177,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
                 "TLS_DH_DSS_WITH_AES_128_GCM_SHA256").toArray(new String[10]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.MINIMAL, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.MINIMAL, ":");
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES128-SHA256", "DHE-RSA-AES256-GCM-SHA384",
@@ -196,7 +198,7 @@ public class TlsSpecificationsHelperTest {
                 "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
                 "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256").toArray(new String[9]);
 
-        String assertValue = TlsSpecificationsHelper.getTlsCipherSuites(suites, CipherSuitesLimitType.REDHAT_VERSION8, ":");
+        String assertValue = underTest.getTlsCipherSuites(suites, CipherSuitesLimitType.REDHAT_VERSION8, ":");
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertTrue(result.containsAll(List.of("DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES128-SHA256", "DHE-RSA-AES256-GCM-SHA384",
@@ -206,7 +208,7 @@ public class TlsSpecificationsHelperTest {
 
     @Test
     public void testGetAllCipherSuitesAvailableByTlsVersion() {
-        Map<String, Set<String>> result = TlsSpecificationsHelper.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, Set<String>> result = underTest.getAllCipherSuitesAvailableByTlsVersion();
 
         assertTrue(result.containsKey(TlsVersion.TLS_1_2.getVersion()));
         assertTrue(result.containsKey(TlsVersion.TLS_1_3.getVersion()));
@@ -217,7 +219,7 @@ public class TlsSpecificationsHelperTest {
 
     @Test
     public void testGetRecommendedCipherSuites() {
-        Map<String, Set<String>> result = TlsSpecificationsHelper.getRecommendedCipherSuites();
+        Map<String, Set<String>> result = underTest.getRecommendedCipherSuites();
 
         assertTrue(result.containsKey(TlsVersion.TLS_1_2.getVersion()));
         assertTrue(result.containsKey(TlsVersion.TLS_1_3.getVersion()));

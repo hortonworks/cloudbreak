@@ -200,7 +200,8 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
             flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CONFIGURE_POLICY);
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CONFIGURE_POLICY, "Configure FISMA Policies for Cloudera Manager");
         }
-        getClusterSetupService(stackDto).publishPolicy(stackDto.getCluster().getExtendedBlueprintText(), govCloud);
+        getClusterSetupService(stackDto)
+                .publishPolicy(stackDto.getCluster().getExtendedBlueprintText(), govCloud);
     }
 
     public void autoConfigureCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,7 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -21,6 +24,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,6 +54,7 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -56,6 +62,7 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -111,6 +118,9 @@ public class TelemetryConfigServiceTest {
 
     @Mock
     private CachedEnvironmentClientService environmentService;
+
+    @Mock
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -211,11 +221,21 @@ public class TelemetryConfigServiceTest {
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
+        encryptionProfileResponse.setCipherSuites(
+                Map.of(
+                        "TLSv1.2", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
+                        "TLSv1.3", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+                )
+        );
+        detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true));
+        given(defaultEncryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+                .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
@@ -236,6 +256,14 @@ public class TelemetryConfigServiceTest {
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
+        encryptionProfileResponse.setCipherSuites(
+                Map.of(
+                        "TLSv1.2", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
+                        "TLSv1.3", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+                )
+        );
+        detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
@@ -250,6 +278,8 @@ public class TelemetryConfigServiceTest {
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+        given(defaultEncryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+                .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
 
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);

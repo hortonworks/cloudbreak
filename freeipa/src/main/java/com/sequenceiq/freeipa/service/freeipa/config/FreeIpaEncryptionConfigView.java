@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 
 public class FreeIpaEncryptionConfigView {
@@ -18,7 +18,7 @@ public class FreeIpaEncryptionConfigView {
 
     private final String tlsCipherSuitesRedHat8;
 
-    public FreeIpaEncryptionConfigView(EncryptionProfileResponse encryptionProfileResponse) {
+    public FreeIpaEncryptionConfigView(DefaultEncryptionProfileProvider defaultEncryptionProfileProvider, EncryptionProfileResponse encryptionProfileResponse) {
         Set<String> usetTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
                 .map(EncryptionProfileResponse::getTlsVersions)
@@ -27,10 +27,10 @@ public class FreeIpaEncryptionConfigView {
                 Optional.ofNullable(encryptionProfileResponse)
                 .map(EncryptionProfileResponse::getCipherSuites)
                 .orElse(null);
-        tlsVersionsSpaceSeparated = TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, " ");
-        tlsVersionsCommaSeparated = TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, ",");
-        tlsCipherSuites = TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits, CipherSuitesLimitType.DEFAULT, ":", false);
-        tlsCipherSuitesRedHat8 = TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits, CipherSuitesLimitType.REDHAT_VERSION8, ":", false);
+        tlsVersionsSpaceSeparated = defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, " ");
+        tlsVersionsCommaSeparated = defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, ",");
+        tlsCipherSuites = defaultEncryptionProfileProvider.getTlsCipherSuites(userCipherSuits, CipherSuitesLimitType.DEFAULT, ":", false);
+        tlsCipherSuitesRedHat8 = defaultEncryptionProfileProvider.getTlsCipherSuites(userCipherSuits, CipherSuitesLimitType.REDHAT_VERSION8, ":", false);
     }
 
     public Map<String, Object> toMap() {

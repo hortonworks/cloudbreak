@@ -7,21 +7,40 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPH
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE_JAVA;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE_JAVA_EXCLUDE;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 
+@ExtendWith(MockitoExtension.class)
 class ClouderaManagerCipherServiceTest {
 
-    private final ClouderaManagerCipherService underTest = new ClouderaManagerCipherService();
+    @Mock
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
+    @InjectMocks
+    private ClouderaManagerCipherService underTest;
+
+    private DefaultEncryptionProfileProvider testData = new DefaultEncryptionProfileProvider();
 
     @Test
     void testGetApiConfigEnforcements() {
+        when(defaultEncryptionProfileProvider.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR))
+                .thenReturn(testData.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
+        when(defaultEncryptionProfileProvider.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR))
+                .thenReturn(testData.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
+
         List<ApiConfigEnforcement> result = underTest.getApiConfigEnforcements();
 
         assertThat(result).hasSize(4);
@@ -32,15 +51,13 @@ class ClouderaManagerCipherServiceTest {
                 .containsExactly(INTERMEDIATE2018);
         assertThat(result).filteredOn(enforcement -> TLS_CIPHER_SUITE_JAVA.equals(enforcement.getLabel()))
                 .extracting(ApiConfigEnforcement::getDefaultValue)
-                .containsExactly(TlsSpecificationsHelper.getCipherSuiteString(
-                        TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
+                .containsExactly(testData.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
         assertThat(result).filteredOn(enforcement -> TLS_CIPHER_SUITE_JAVA_EXCLUDE.equals(enforcement.getLabel()))
                 .extracting(ApiConfigEnforcement::getDefaultValue)
                 .containsExactly(JAVA_EXCLUDE_INTERMEDIATE2018);
         assertThat(result).filteredOn(enforcement -> TLS_CIPHERS_LIST_OPENSSL.equals(enforcement.getLabel()))
                 .extracting(ApiConfigEnforcement::getDefaultValue)
-                .containsExactly(
-                        TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
+                .containsExactly(testData.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
         assertThat(result).filteredOn(enforcement ->
                 List.of(TLS_CIPHER_SUITE_JAVA, TLS_CIPHER_SUITE_JAVA_EXCLUDE, TLS_CIPHERS_LIST_OPENSSL).contains(enforcement.getLabel()))
                 .extracting(ApiConfigEnforcement::getSeparator)

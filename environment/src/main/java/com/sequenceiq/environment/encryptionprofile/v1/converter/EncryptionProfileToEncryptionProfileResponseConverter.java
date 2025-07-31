@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
@@ -17,14 +18,10 @@ import com.sequenceiq.environment.environment.dto.EncryptionProfileDto;
 @Component
 public class EncryptionProfileToEncryptionProfileResponseConverter {
 
-    @Autowired
+    @Inject
     private EncryptionProfileConfig encryptionProfileConfig;
 
     public EncryptionProfileResponse convert(EncryptionProfile source) {
-        return convert(source, true);
-    }
-
-    public EncryptionProfileResponse convert(EncryptionProfile source, boolean useDefaultCipherSuitesIfEmpty) {
         if (source == null) {
             return null;
         }
@@ -34,16 +31,17 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
         response.setDescription(source.getDescription());
         response.setCrn(source.getResourceCrn());
         response.setTlsVersions(source.getTlsVersions().stream().map(TlsVersion::getVersion).collect(Collectors.toSet()));
-        response.setCipherSuites(getCipherSuiteMap(source.getCipherSuites(), source.getTlsVersions(), useDefaultCipherSuitesIfEmpty));
+        response.setCipherSuites(getCipherSuiteMap(source.getCipherSuites(), source.getTlsVersions()));
+        response.setClouderaInternalCipherSuites(getClouderaCipherSuiteMap(source.getTlsVersions()));
         response.setCreated(source.getCreated());
         response.setStatus(source.getResourceStatus().name());
         return response;
     }
 
-    private Map<String, Set<String>> getCipherSuiteMap(Set<String> cipherSuites,
-                                                    Set<TlsVersion> tlsVersions,
-                                                    boolean useDefaultCipherSuitesIfEmpty) {
-        if (shouldReturnEmptyMap(cipherSuites, useDefaultCipherSuitesIfEmpty)) {
+    private Map<String, Set<String>> getCipherSuiteMap(
+            Set<String> cipherSuites,
+            Set<TlsVersion> tlsVersions) {
+        if (shouldReturnEmptyMap(cipherSuites)) {
             return Collections.emptyMap();
         }
 
@@ -54,15 +52,21 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
                     Set<String> filteredCiphers = cipherSuites.stream()
                             .filter(availableCiphers::contains)
                             .collect(Collectors.toSet());
-                    return filteredCiphers.isEmpty() && useDefaultCipherSuitesIfEmpty
-                            ? encryptionProfileConfig.getRecommendedCiphers(tlsVersion)
-                            : filteredCiphers;
+                    return filteredCiphers;
                 }
         ));
     }
 
-    private boolean shouldReturnEmptyMap(Set<String> cipherSuites, boolean useDefaultCipherSuitesIfEmpty) {
-        return !useDefaultCipherSuitesIfEmpty && (cipherSuites == null || cipherSuites.isEmpty());
+    private Map<String, Set<String>> getClouderaCipherSuiteMap(Set<TlsVersion> tlsVersions) {
+
+        return tlsVersions.stream().collect(Collectors.toMap(
+                TlsVersion::getVersion,
+                tlsVersion -> encryptionProfileConfig.getRequiredCiphers(tlsVersion)
+        ));
+    }
+
+    private boolean shouldReturnEmptyMap(Set<String> cipherSuites) {
+        return (cipherSuites == null || cipherSuites.isEmpty());
     }
 
     public EncryptionProfileResponse dtoToResponse(EncryptionProfileDto encryptionProfile) {
@@ -79,8 +83,8 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
                 .stream()
                 .map(TlsVersion::getVersion)
                 .collect(Collectors.toSet()));
-        response.setCipherSuites(getCipherSuiteMap(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions(), true));
-
+        response.setCipherSuites(getCipherSuiteMap(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions()));
+        response.setClouderaInternalCipherSuites(getClouderaCipherSuiteMap(encryptionProfile.getTlsVersions()));
         return response;
     }
 }

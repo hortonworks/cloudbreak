@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
@@ -40,14 +40,20 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private final TransactionService transactionService;
 
-    public EncryptionProfileService(EncryptionProfileRepository repository,
-                                    RegionAwareCrnGenerator regionAwareCrnGenerator,
-                                    OwnerAssignmentService ownerAssignmentService,
-                                    TransactionService transactionService) {
+    private final DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
+    public EncryptionProfileService(
+            EncryptionProfileRepository repository,
+            RegionAwareCrnGenerator regionAwareCrnGenerator,
+            OwnerAssignmentService ownerAssignmentService,
+            TransactionService transactionService,
+            DefaultEncryptionProfileProvider defaultEncryptionProfileProvider
+    ) {
         this.repository = repository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.ownerAssignmentService = ownerAssignmentService;
         this.transactionService = transactionService;
+        this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
     }
 
     public EncryptionProfile create(EncryptionProfile encryptionProfile, String accountId, String creator) {
@@ -140,8 +146,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     public Set<TlsVersionResponse> listCiphersByTlsVersion() {
-        Map<String, Set<String>> ciphersByTls = TlsSpecificationsHelper.getAllCipherSuitesAvailableByTlsVersion();
-        Map<String, Set<String>> recommendedCipherSuites = TlsSpecificationsHelper.getRecommendedCipherSuites();
+        Map<String, Set<String>> ciphersByTls = defaultEncryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, Set<String>> recommendedCipherSuites = defaultEncryptionProfileProvider.getRecommendedCipherSuites();
 
         return ciphersByTls.entrySet()
                 .stream()

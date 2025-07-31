@@ -35,6 +35,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -68,6 +69,9 @@ public class EncryptionProfileControllerTest {
 
     @Mock
     private EncryptionProfileToEncryptionProfileResponseConverter responseConverter;
+
+    @Mock
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @InjectMocks
     private EncryptionProfileController controller;
@@ -166,14 +170,14 @@ public class EncryptionProfileControllerTest {
 
         when(encryptionProfileService.deleteByNameAndAccountId(eq(NAME), eq(ACCOUNT_ID)))
                 .thenReturn(profile);
-        when(responseConverter.convert(profile, false)).thenReturn(expectedResponse);
+        when(responseConverter.convert(profile)).thenReturn(expectedResponse);
 
         EncryptionProfileResponse actualResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.deleteByName(NAME));
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
         verify(encryptionProfileService).deleteByNameAndAccountId(eq(NAME), eq(ACCOUNT_ID));
-        verify(responseConverter).convert(profile, false);
+        verify(responseConverter).convert(profile);
         verify(notificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
     }
 
@@ -185,14 +189,14 @@ public class EncryptionProfileControllerTest {
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
         when(encryptionProfileService.deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(profile);
-        when(responseConverter.convert(profile, false)).thenReturn(expectedResponse);
+        when(responseConverter.convert(profile)).thenReturn(expectedResponse);
 
         EncryptionProfileResponse actualResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.deleteByCrn(ENCRYPTION_PROFILE_CRN));
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
         verify(encryptionProfileService).deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN));
-        verify(responseConverter).convert(profile, false);
+        verify(responseConverter).convert(profile);
         verify(notificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
     }
 
@@ -220,7 +224,31 @@ public class EncryptionProfileControllerTest {
     @Test
     public void testListCiphersByTlsVersion() {
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
-        when(encryptionProfileService.listCiphersByTlsVersion()).thenCallRealMethod();
+        when(encryptionProfileService.listCiphersByTlsVersion()).thenReturn(Set.of(
+                new TlsVersionResponse(TlsVersion.TLS_1_2.getVersion(),
+                        Set.of("TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256",
+                                "TLS_ECCPWD_WITH_AES_128_CCM_SHA256",
+                                "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256",
+                                "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256",
+                                "TLS_AES_128_CCM_8_SHA256", "TLS_AES_128_CCM_SHA256"),
+                        Set.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256",
+                                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                                "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256",
+                                "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384",
+                                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256",
+                                "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384",
+                                "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256",
+                                "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                                "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256",
+                                "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+                                "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384",
+                                "TLS_ECCPWD_WITH_AES_128_GCM_SHA256",
+                                "TLS_ECCPWD_WITH_AES_256_GCM_SHA384",
+                                "TLS_CHACHA20_POLY1305_SHA256"
+                        )
+                ),
+                new TlsVersionResponse(TlsVersion.TLS_1_3.getVersion(), Set.of(), Set.of())
+        ));
 
         CipherSuitesByTlsVersionResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.listCiphersByTlsVersion());
 

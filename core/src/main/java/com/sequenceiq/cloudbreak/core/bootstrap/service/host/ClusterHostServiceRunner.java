@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.DEFAULT;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.MINIMAL;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
@@ -135,8 +138,8 @@ import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecor
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper.CipherSuitesLimitType;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -308,6 +311,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private KerberosPillarConfigGenerator kerberosPillarConfigGenerator;
+
+    @Inject
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -580,6 +586,9 @@ public class ClusterHostServiceRunner {
         boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
+
+
+        //ide kell
         EncryptionProfileResponse encryptionProfileResponse = detailedEnvironmentResponse.getEncryptionProfile();
         Set<String> usetTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
@@ -599,14 +608,26 @@ public class ClusterHostServiceRunner {
                 Map.entry("hybridEnabled", hybridEnabled),
                 Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
-                Map.entry("tlsVersionsSpaceSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, " ")),
-                Map.entry("tlsVersionsCommaSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, ",")),
-                Map.entry("tlsCipherSuites", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
-                        CipherSuitesLimitType.DEFAULT, ":", false)),
-                Map.entry("tlsCipherSuitesMinimal", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
-                        CipherSuitesLimitType.MINIMAL, ":", false)),
-                Map.entry("tlsCipherSuitesJavaIntermediate", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
-                        CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ":", true))
+                Map.entry("tlsVersionsSpaceSeparated", defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, " ")),
+                Map.entry("tlsVersionsCommaSeparated", defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, ",")),
+                Map.entry("tlsCipherSuites", defaultEncryptionProfileProvider.getTlsCipherSuites(
+                        userCipherSuits,
+                        DEFAULT,
+                        ":",
+                        false
+                )),
+                Map.entry("tlsCipherSuitesMinimal", defaultEncryptionProfileProvider.getTlsCipherSuites(
+                        userCipherSuits,
+                        MINIMAL,
+                        ":",
+                        false
+                )),
+                Map.entry("tlsCipherSuitesJavaIntermediate", defaultEncryptionProfileProvider.getTlsCipherSuites(
+                        userCipherSuits,
+                        JAVA_INTERMEDIATE2018,
+                        ":",
+                        true
+                ))
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
@@ -859,13 +880,13 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
         gateway.put("tlsv13Enabled", Boolean.FALSE);
-        gateway.put("tlsVersionsSpaceSeparated", TlsSpecificationsHelper.getTlsVersions(usetTlsVersions, " "));
-        gateway.put("tlsCipherSuites", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
-                CipherSuitesLimitType.DEFAULT, ":", false));
-        gateway.put("tlsCipherSuitesRedHat8", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
+        gateway.put("tlsVersionsSpaceSeparated", defaultEncryptionProfileProvider.getTlsVersions(usetTlsVersions, " "));
+        gateway.put("tlsCipherSuites", defaultEncryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
+                DEFAULT, ":", false));
+        gateway.put("tlsCipherSuitesRedHat8", defaultEncryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
                 CipherSuitesLimitType.REDHAT_VERSION8, ":", false));
-        gateway.put("tlsCipherSuitesMinimal", TlsSpecificationsHelper.getTlsCipherSuites(userCipherSuits,
-                CipherSuitesLimitType.MINIMAL, ":", false));
+        gateway.put("tlsCipherSuitesMinimal", defaultEncryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
+                MINIMAL, ":", false));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.put("kerberos", kerberosConfig != null);

@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
-import com.sequenceiq.cloudbreak.tls.TlsSpecificationsHelper;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 
 @Service
 public class ClouderaManagerCipherService {
@@ -29,6 +34,9 @@ public class ClouderaManagerCipherService {
                     "^.*RC4.*$," +
                     "^.*CCM.*$";
 
+    @Inject
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
     public List<ApiConfigEnforcement> getApiConfigEnforcements() {
         List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>();
 
@@ -38,8 +46,13 @@ public class ClouderaManagerCipherService {
 
         ApiConfigEnforcement tlsChipherSuiteJavaEnforcement = new ApiConfigEnforcement();
         tlsChipherSuiteJavaEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA);
+
         tlsChipherSuiteJavaEnforcement.setDefaultValue(
-                TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
+                defaultEncryptionProfileProvider.getCipherSuiteString(
+                        JAVA_INTERMEDIATE2018,
+                        POLICY_SEPARATOR
+                )
+        );
         tlsChipherSuiteJavaEnforcement.setSeparator(POLICY_SEPARATOR);
 
         ApiConfigEnforcement tlsChipherSuiteJavaExcludedEnforcement = new ApiConfigEnforcement();
@@ -50,7 +63,11 @@ public class ClouderaManagerCipherService {
         ApiConfigEnforcement tlsChipherListOpenSslEnforcement = new ApiConfigEnforcement();
         tlsChipherListOpenSslEnforcement.setLabel(TLS_CIPHERS_LIST_OPENSSL);
         tlsChipherListOpenSslEnforcement.setDefaultValue(
-                TlsSpecificationsHelper.getCipherSuiteString(TlsSpecificationsHelper.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
+                defaultEncryptionProfileProvider.getCipherSuiteString(
+                        OPENSSL_INTERMEDIATE2018,
+                        POLICY_SEPARATOR
+                )
+        );
 
         tlsChipherListOpenSslEnforcement.setSeparator(POLICY_SEPARATOR);
 

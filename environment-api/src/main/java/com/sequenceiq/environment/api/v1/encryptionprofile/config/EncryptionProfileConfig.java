@@ -38,15 +38,15 @@ public class EncryptionProfileConfig {
                 .collect(Collectors.toSet());
     }
 
-    public Set<String> getRecommendedCiphers(TlsVersion tlsVersion) {
+    public Set<String> getRequiredCiphers(TlsVersion tlsVersion) {
         TlsCipherGroup group = tlsCipherMapping.get(tlsVersion);
-        return group != null ? group.getRecommended() : Collections.emptySet();
+        return group != null ? group.getRequired() : Collections.emptySet();
     }
 
     public static class TlsCipherGroup {
         private Set<String> available;
 
-        private Set<String> recommended;
+        private Set<String> required;
 
         public Set<String> getAvailable() {
             return available;
@@ -56,12 +56,12 @@ public class EncryptionProfileConfig {
             this.available = available;
         }
 
-        public Set<String> getRecommended() {
-            return recommended;
+        public Set<String> getRequired() {
+            return required;
         }
 
-        public void setRecommended(Set<String> recommended) {
-            this.recommended = recommended;
+        public void setRequired(Set<String> required) {
+            this.required = required;
         }
     }
 }

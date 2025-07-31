@@ -3,7 +3,9 @@ package com.sequenceiq.freeipa.service.freeipa.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
@@ -122,6 +125,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
+    @Mock
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -167,6 +173,10 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -230,7 +240,10 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
@@ -285,6 +298,10 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());
