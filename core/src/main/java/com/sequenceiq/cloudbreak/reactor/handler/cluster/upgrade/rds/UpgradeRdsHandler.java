@@ -100,7 +100,7 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
             throws CloudbreakOrchestratorException {
         String targetMajorVersion = request.getVersion().getMajorVersion();
         LOGGER.debug("Starting embedded database upgrade to {} version...", targetMajorVersion);
-        rdsUpgradeOrchestratorService.upgradeEmbeddedDatabase(stackDto);
+        rdsUpgradeOrchestratorService.upgradeEmbeddedDatabase(stackDto, targetMajorVersion);
         LOGGER.debug("Upgrading embedded database version in db to {} version...", targetMajorVersion);
         stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion);
         stackDto.getDatabase().setExternalDatabaseEngineVersion(targetMajorVersion);

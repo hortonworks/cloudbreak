@@ -332,8 +332,6 @@ class StackServiceTest {
     void testCreateWithRuntime() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        String os = "redhat8";
-        when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
         when(stack.getStackVersion()).thenReturn(stackVersion);
@@ -346,7 +344,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackVersion, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -361,8 +359,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledSingleRequested() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        String os = "redhat8";
-        when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
         when(stack.getStackVersion()).thenReturn(stackVersion);
@@ -375,7 +371,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackVersion, dbVersion))
                 .thenReturn(calculatedDbVersion);
         when(azureDatabaseServerParameterDecorator.getDatabaseType(anyMap())).thenReturn(Optional.of(AzureDatabaseType.SINGLE_SERVER));
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -390,8 +386,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledFlexibleRequested() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        String os = "redhat8";
-        when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
         when(stack.getStackVersion()).thenReturn(stackVersion);
@@ -404,7 +398,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackVersion, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -419,8 +413,6 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledWithoutDbRequest() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        String os = "redhat8";
-        when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
         when(stack.getStackVersion()).thenReturn(stackVersion);
@@ -433,7 +425,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackVersion, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -448,8 +440,6 @@ class StackServiceTest {
     void testCreateWithoutRuntime() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        String os = "redhat8";
-        when(image.getOs()).thenReturn(os);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of());
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
@@ -457,7 +447,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(null, dbVersion))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));

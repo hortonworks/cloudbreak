@@ -44,7 +44,7 @@ public class UpgradeEmbeddedDBPreparationHandler extends ExceptionCatcherEventHa
             LOGGER.info("Checking that the attached db volume size is enough for db upgrade...");
             rdsUpgradeOrchestratorService.validateDbDirectorySpace(stackId);
             LOGGER.info("Starting embedded database preparation for upgrade...");
-            rdsUpgradeOrchestratorService.prepareUpgradeEmbeddedDatabase(stackId);
+            rdsUpgradeOrchestratorService.prepareUpgradeEmbeddedDatabase(stackId, request.getVersion());
             return new UpgradeEmbeddedDBPreparationResult(stackId, request.getVersion());
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("Embedded database upgrade preparation has failed", e);

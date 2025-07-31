@@ -9,7 +9,6 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -20,8 +19,8 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.embeddeddb.UpgradeEmbeddedDBPreparationTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class EmbeddedDbUpgradeFlowTriggersFactory {
@@ -30,14 +29,14 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
 
     private static final Logger LOGGER = getLogger(EmbeddedDbUpgradeFlowTriggersFactory.class);
 
-    @Value("${cb.db.env.upgrade.embedded.targetversion}")
-    private TargetMajorVersion targetMajorVersion;
-
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
     public List<Selectable> createFlowTriggers(Long stackid, boolean upgradeRequested) {
         StackDto stackDto = stackDtoService.getById(stackid);
@@ -45,8 +44,9 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
     }
 
     public List<Selectable> createFlowTriggers(StackDto stackDto, boolean upgradeRequested) {
-        boolean embeddedDBUpgrade = isEmbeddedDBUpgradeNeeded(stackDto, upgradeRequested);
-        if (embeddedDBUpgrade) {
+        String targetVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackDto.getStackVersion(), null);
+        TargetMajorVersion targetMajorVersion = isEmbeddedDBUpgradeNeeded(stackDto, upgradeRequested, targetVersion);
+        if (targetMajorVersion != null) {
             LOGGER.debug("Cluster repair flowchain is extended with upgrade embedded db flows as embedded db upgrade is needed");
             ArrayList<Selectable> flowTriggers = new ArrayList<>(2);
             flowTriggers.add(new UpgradeEmbeddedDBPreparationTriggerRequest(UpgradeEmbeddedDBPreparationEvent.UPGRADE_EMBEDDEDDB_PREPARATION_EVENT.event(),
@@ -59,21 +59,22 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
         }
     }
 
-    private boolean isEmbeddedDBUpgradeNeeded(StackDto stackDto, boolean upgradeRequested) {
-        StackView stackView = stackDto.getStack();
+    private TargetMajorVersion isEmbeddedDBUpgradeNeeded(StackDto stackDto, boolean upgradeRequested, String targetVersion) {
         boolean embeddedDBOnAttachedDisk = embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
         String currentDbVersion = StringUtils.isNotEmpty(stackDto.getExternalDatabaseEngineVersion())
                 ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
-        boolean versionsAreDifferent = !targetMajorVersion.getMajorVersion().equals(currentDbVersion);
-        if (upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent) {
+        boolean versionsAreDifferent = !targetVersion.equals(currentDbVersion);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.fromVersion(targetVersion);
+        if (upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent && targetMajorVersion != null) {
             LOGGER.debug("Embedded db upgrade is possible and needed.");
-            return true;
+            return targetMajorVersion;
         } else {
             LOGGER.debug("Check of embedded db upgrade necessity has evaluated to False. At least one of the following conditions is false:"
                     + ", os upgrade requested: " + upgradeRequested
                     + ", embedded database is on attached disk: " + embeddedDBOnAttachedDisk
-                    + ", target db version is different: " + versionsAreDifferent);
-            return false;
+                    + ", target db version is different: " + versionsAreDifferent
+                    + ", targetMajorVersion is valid: " + (targetMajorVersion != null));
+            return null;
         }
     }
 }

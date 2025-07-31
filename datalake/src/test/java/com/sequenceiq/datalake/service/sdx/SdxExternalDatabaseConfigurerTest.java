@@ -57,7 +57,7 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any()))
+        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any()))
                 .thenReturn("11");
         environmentResponse = new DetailedEnvironmentResponse();
     }
@@ -235,7 +235,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntime("7.2.0", null);
     }
 
     @Test
@@ -259,7 +259,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntime("7.2.0", null);
     }
 
     @Test
@@ -283,7 +283,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntime("7.2.0", null);
     }
 
     @Test
@@ -309,7 +309,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntime("7.2.0", null);
     }
 
     @Test
@@ -328,7 +328,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null);
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntime("7.2.0", null);
     }
 
     @Test
@@ -390,7 +390,7 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any()))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any()))
                 .thenReturn(null);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,

@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -28,10 +26,7 @@ public class UpgradeEmbeddedDBStateParamsProvider {
 
     private static final String ORIGINAL_POSTGRES_BINARIES_SUBDIRECTORY_PREFIX = "tmp/pgsql-";
 
-    @Value("${cb.db.env.upgrade.embedded.targetversion}")
-    private TargetMajorVersion targetMajorVersion;
-
-    public Map<String, Object> createParamsForEmbeddedDBUpgrade(StackDto stackDto) {
+    public Map<String, Object> createParamsForEmbeddedDBUpgrade(StackDto stackDto, String targetVersion) {
         String originalVersion = StringUtils.isNotEmpty(stackDto.getExternalDatabaseEngineVersion())
                 ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_ORIGINAL_POSTGRES_VERSION;
         Map<String, Object> params = new HashMap<>();
@@ -42,7 +37,7 @@ public class UpgradeEmbeddedDBStateParamsProvider {
         upgradeParams.put(ORIGINAL_POSTGRES_VERSION_KEY, originalVersion);
         upgradeParams.put(ORIGINAL_POSTGRES_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + ORIGINAL_POSTGRES_SUBDIRECTORY);
         upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, VolumeUtils.DATABASE_VOLUME + "/" + ORIGINAL_POSTGRES_BINARIES_SUBDIRECTORY_PREFIX + originalVersion);
-        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
+        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetVersion);
         return params;
     }
 }

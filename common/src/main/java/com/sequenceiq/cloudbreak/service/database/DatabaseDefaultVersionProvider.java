@@ -15,7 +15,7 @@ public class DatabaseDefaultVersionProvider {
     @Inject
     private DbOverrideConfig dbOverrideConfig;
 
-    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion) {
+    public String calculateDbVersionBasedOnRuntime(String runtime, String requestedDbEngineVersion) {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;
@@ -26,7 +26,7 @@ public class DatabaseDefaultVersionProvider {
             return dbEngineVersion;
         } else {
             String dbEngineVersion = dbOverrideConfig.findMinEngineVersion();
-            LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
+            LOGGER.debug("Setting DB engine version to [{}]", dbEngineVersion);
             return dbEngineVersion;
         }
     }

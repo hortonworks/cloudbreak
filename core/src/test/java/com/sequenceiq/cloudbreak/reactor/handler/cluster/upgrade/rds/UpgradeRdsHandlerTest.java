@@ -116,7 +116,7 @@ class UpgradeRdsHandlerTest {
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter).convert(TARGET_MAJOR_VERSION);
         verify(databaseService).upgradeDatabase(cluster, UpgradeTargetMajorVersion.VERSION_11, newSettings);
-        verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
+        verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto, TARGET_MAJOR_VERSION.getMajorVersion());
         verify(embeddedDatabaseService, never()).isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
         assertThat(((UpgradeRdsUpgradeDatabaseServerResult) result).getFlowIdentifier()).isEqualTo(flowIdentifier);
@@ -142,7 +142,7 @@ class UpgradeRdsHandlerTest {
         verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), any(UpgradeTargetMajorVersion.class), any(DatabaseServerV4StackRequest.class));
         verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class));
         verify(environmentClientService, never()).getByCrn(any());
-        verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
+        verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto, TARGET_MAJOR_VERSION.getMajorVersion());
         verify(stackUpdater).updateExternalDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
         verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
@@ -166,7 +166,7 @@ class UpgradeRdsHandlerTest {
         verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), any(UpgradeTargetMajorVersion.class), any(DatabaseServerV4StackRequest.class));
         verify(databaseService, never()).migrateDatabaseSettingsIfNeeded(any(StackDto.class), any(TargetMajorVersion.class));
         verify(environmentClientService, never()).getByCrn(any());
-        verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
+        verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto, TARGET_MAJOR_VERSION.getMajorVersion());
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         UpgradeRdsFailedEvent failedEvent = (UpgradeRdsFailedEvent) result;
@@ -185,11 +185,12 @@ class UpgradeRdsHandlerTest {
         when(cluster.getDatabaseServerCrn()).thenReturn(null);
         when(event.getData()).thenReturn(request);
 
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
+        doThrow(new CloudbreakOrchestratorFailedException("salt error"))
+                .when(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto, TARGET_MAJOR_VERSION.getMajorVersion());
 
         Selectable result = underTest.doAccept(event);
 
-        verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
+        verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto, TARGET_MAJOR_VERSION.getMajorVersion());
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         UpgradeRdsFailedEvent failedEvent = (UpgradeRdsFailedEvent) result;

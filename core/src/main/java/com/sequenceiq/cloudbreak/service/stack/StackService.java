@@ -701,8 +701,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     private void setDbVersion(Stack stack, StatedImage imgFromCatalog) {
         boolean flexibleServerRequested = !isSingleServerRequested(stack);
-        String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
-                stack.getStackVersion(), imgFromCatalog.getImage().getOs(), stack.getExternalDatabaseEngineVersion()
+        String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(
+                stack.getStackVersion(), stack.getExternalDatabaseEngineVersion()
         );
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);

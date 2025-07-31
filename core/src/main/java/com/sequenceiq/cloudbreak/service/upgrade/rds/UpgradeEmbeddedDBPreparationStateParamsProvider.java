@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -34,10 +32,7 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
 
     private static final String TMP_DIR_SUFFIX = "/tmp";
 
-    @Value("${cb.db.env.upgrade.embedded.targetversion}")
-    private TargetMajorVersion targetMajorVersion;
-
-    public Map<String, Object> createParamsForEmbeddedDBUpgradePreparation(StackDto stackDto) {
+    public Map<String, Object> createParamsForEmbeddedDBUpgradePreparation(StackDto stackDto, String targetVersion) {
         String originalVersion = StringUtils.isNotEmpty(stackDto.getDatabase().getExternalDatabaseEngineVersion())
                 ? stackDto.getDatabase().getExternalDatabaseEngineVersion() : DEFAULT_ORIGINAL_POSTGRES_VERSION;
         Map<String, Object> params = new HashMap<>();
@@ -48,15 +43,15 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
         upgradeParams.put(ORIGINAL_POSTGRES_VERSION_KEY, originalVersion);
         upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, POSTGRES_PATH_PREFIX + originalVersion);
         upgradeParams.put(TEMP_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + TMP_DIR_SUFFIX);
-        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
+        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetVersion);
         return params;
     }
 
-    public Map<String, Object> createParamsWithPostgresVersion() {
+    public Map<String, Object> createParamsWithPostgresVersion(String targetVersion) {
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
         params.put("postgres", postgresParams);
-        postgresParams.put(POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
+        postgresParams.put(POSTGRES_VERSION_KEY, targetVersion);
         return params;
 
     }

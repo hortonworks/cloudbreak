@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
@@ -28,8 +27,7 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
         Database database = new Database();
         database.setExternalDatabaseEngineVersion("version");
         when(stackDto.getDatabase()).thenReturn(database);
-        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
-        Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto);
+        Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto, TargetMajorVersion.VERSION_11.getMajorVersion());
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
         Assertions.assertEquals(upgradeParams.get("original_postgres_version"), "version");
         Assertions.assertEquals(upgradeParams.get("original_postgres_binaries"), "/usr/pgsql-version");
@@ -42,8 +40,7 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
         StackDto stackDto = mock(StackDto.class);
         Database database = new Database();
         when(stackDto.getDatabase()).thenReturn(database);
-        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
-        Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto);
+        Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto, TargetMajorVersion.VERSION_11.getMajorVersion());
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
         Assertions.assertEquals(upgradeParams.get("original_postgres_version"), "10");
         Assertions.assertEquals(upgradeParams.get("original_postgres_binaries"), "/usr/pgsql-10");
@@ -51,8 +48,7 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
 
     @Test
     void  testCreateParamsWithPostgresVersion() {
-        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
-        Map<String, Object> actualResult = underTest.createParamsWithPostgresVersion();
+        Map<String, Object> actualResult = underTest.createParamsWithPostgresVersion(TargetMajorVersion.VERSION_11.getMajorVersion());
         Map<String, Object> postgresParams = (Map<String, Object>) actualResult.get("postgres");
         Assertions.assertEquals(postgresParams.get("postgres_version"), TargetMajorVersion.VERSION_11.getMajorVersion());
     }

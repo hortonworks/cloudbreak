@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -73,6 +74,8 @@ class RdsUpgradeOrchestratorServiceTest {
     private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
 
     private static final String DATABASE_ENGINE_VERSION = "11";
+
+    private static final TargetMajorVersion DATABASE_ENGINE_TARGET_VERSION = TargetMajorVersion.VERSION14;
 
     private static final String CHECK_CONNECTION_STATE = "postgresql/upgrade/check-db-connection";
 
@@ -180,7 +183,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testUpgradeEmbeddedDatabase() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
-        underTest.upgradeEmbeddedDatabase(stack);
+        underTest.upgradeEmbeddedDatabase(stack, DATABASE_ENGINE_TARGET_VERSION.getMajorVersion());
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/embedded");
@@ -203,7 +206,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testPrepareUpgradeEmbeddedDatabase() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
-        underTest.prepareUpgradeEmbeddedDatabase(STACK_ID);
+        underTest.prepareUpgradeEmbeddedDatabase(STACK_ID, DATABASE_ENGINE_TARGET_VERSION);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/prepare-embedded");

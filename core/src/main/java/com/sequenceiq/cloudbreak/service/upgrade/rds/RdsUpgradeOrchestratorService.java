@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -125,21 +126,21 @@ public class RdsUpgradeOrchestratorService {
 
     public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PG_INSTALL_STATE, false);
-        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion());
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion(targetVersion.getMajorVersion()));
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void updatePostgresAlternatives(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PG_ALTERNATIVES_STATE, false);
-        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion());
+        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsWithPostgresVersion(targetVersion.getMajorVersion()));
         LOGGER.debug("Calling updatePostgresAlternatives with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void upgradeEmbeddedDatabase(StackDto stackDto) throws CloudbreakOrchestratorException {
+    public void upgradeEmbeddedDatabase(StackDto stackDto, String targetMajorVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackDto, UPGRADE_EMBEDDED_DATABASE, true);
-        stateParams.setStateParams(upgradeEmbeddedDBStateParamsProvider.createParamsForEmbeddedDBUpgrade(stackDto));
+        stateParams.setStateParams(upgradeEmbeddedDBStateParamsProvider.createParamsForEmbeddedDBUpgrade(stackDto, targetMajorVersion));
         LOGGER.debug("Calling upgradeEmbeddedDatabase with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
@@ -167,10 +168,12 @@ public class RdsUpgradeOrchestratorService {
         }
     }
 
-    public void prepareUpgradeEmbeddedDatabase(Long stackId) throws CloudbreakOrchestratorException {
+    public void prepareUpgradeEmbeddedDatabase(Long stackId, TargetMajorVersion version) throws CloudbreakOrchestratorException {
         StackDto stackDto = stackDtoService.getById(stackId);
         OrchestratorStateParams stateParams = createStateParams(stackDto, PREPARE_UPGRADE_EMBEDDED_DATABASE, true);
-        stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsForEmbeddedDBUpgradePreparation(stackDto));
+        stateParams.setStateParams(
+                upgradeEmbeddedDBPreparationStateParamsProvider.createParamsForEmbeddedDBUpgradePreparation(stackDto, version.getMajorVersion())
+        );
         LOGGER.debug("Calling prepareUpgradeOfEmbeddedDatabase with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

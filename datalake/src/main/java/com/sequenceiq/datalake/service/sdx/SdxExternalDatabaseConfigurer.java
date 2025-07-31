@@ -63,9 +63,7 @@ public class SdxExternalDatabaseConfigurer {
         AzureDatabaseType azureDatabaseType = getAzureDatabaseType(cloudPlatform, internalDatabaseRequest, databaseRequest,
                 databaseAvailabilityType);
         boolean singleServerRequested = azureDatabaseType != null && azureDatabaseType.isSingleServer();
-        String dbEngineVersion =
-                databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion
-                );
+        String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(sdxCluster.getRuntime(), requestedDbEngineVersion);
         SdxDatabase sdxDatabase = DatabaseParameterInitUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, azureDatabaseType, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),

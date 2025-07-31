@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,38 +40,26 @@ class DatabaseDefaultVersionProviderTest {
 
     static Object[][] testInput() {
         return new Object[][]{
-                {"Version already set, runtime older, os centos7", "7.2.10", "centos7", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime older, os redhat8", "7.2.10", "redhat8", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime same, os centos7", "7.2.12", "centos7", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime same, os redhat8", "7.2.12", "redhat8", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime newer, os centos7", "7.2.14", "centos7", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime newer, os redhat8", "7.2.14", "redhat8", "10", "10", CloudPlatform.AWS},
-                {"Version not set, runtime older, os centos7", "7.2.10", "centos7", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime older, os redhat8", "7.2.10", "redhat8", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime same, os centos7", "7.2.12", "centos7", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime same, os redhat8", "7.2.12", "redhat8", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime newer, os centos7", "7.2.14", "centos7", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime newer, os redhat8", "7.2.14", "redhat8", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime null, os redhat8", null, "redhat8", null, "11", CloudPlatform.AWS},
-                {"Version not set, runtime newest, os centos7", "7.3.2", "centos7", null, "17", CloudPlatform.AWS},
-                {"Version not set, runtime newest, os redhat8", "7.3.2", "redhat8", null, "17", CloudPlatform.AWS},
-                {"Version already set, runtime null, os centos7", null, "centos7", "10", "10", CloudPlatform.AWS},
-                {"Version already set, runtime null, os redhat8", null, "redhat8", "10", "10", CloudPlatform.AWS},
-                {"Version not set, runtime newer, os redhat8, Azure", "7.2.14", "redhat8", null, "11", CloudPlatform.AZURE},
-                {"Version not set, runtime older, os centos7, Azure", "7.2.10", "centos7", null, "11", CloudPlatform.AZURE},
-                {"Version not set, runtime newest, os centos7, Azure", "7.3.2", "centos7", null, "17", CloudPlatform.AZURE},
-                {"Version not set, runtime newest, os redhat8, Azure", "7.3.2", "redhat8", null, "17", CloudPlatform.AZURE},
+                {"Version already set, runtime older", "7.2.10", "10", "10"},
+                {"Version already set, runtime same", "7.2.12", "10", "10"},
+                {"Version already set, runtime newer", "7.2.14", "10", "10"},
+                {"Version not set, runtime older", "7.2.10", null, "11"},
+                {"Version not set, runtime same", "7.2.12", null, "11"},
+                {"Version not set, runtime newer", "7.2.14", null, "11"},
+                {"Version not set, runtime null, os redhat8", null, null, "11"},
+                {"Version not set, runtime newest", "7.3.2", null, "17"},
+                {"Version already set, runtime null", null, "10", "10"},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testInput")
-    public void testCalculateDbVersionBasedOnRuntimeIfMissing(String name, String runtime, String os, String externalDatabaseEngineVersion,
-            String expected, CloudPlatform cloudPlatform) {
+    public void testCalculateDbVersionBasedOnRuntimeIfMissing(String name, String runtime, String externalDatabaseEngineVersion,
+            String expected) {
         if (externalDatabaseEngineVersion == null && runtime != null) {
             when(dbOverrideConfig.findEngineVersionForRuntime(runtime)).thenReturn(findEngineVersionForRuntime(runtime));
         }
-        String result = underTest.calculateDbVersionBasedOnRuntimeAndOsIfMissing(runtime, os, externalDatabaseEngineVersion
+        String result = underTest.calculateDbVersionBasedOnRuntime(runtime, externalDatabaseEngineVersion
         );
 
         assertEquals(expected, result);
