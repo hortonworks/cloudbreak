@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -372,6 +373,35 @@ public class DefaultEncryptionProfileProvider {
                 cipherSuite("DHE-RSA-AES256-SHA", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", Set.of(TLS_1_2, TLS_1_3)),
                 cipherSuite("AES128-SHA", "TLS_RSA_WITH_AES_128_CBC_SHA", Set.of(TLS_1_2, TLS_1_3)),
                 cipherSuite("AES256-SHA", "TLS_RSA_WITH_AES_256_CBC_SHA", Set.of(TLS_1_2, TLS_1_3)));
+    }
+
+    public Set<String> convertCipherSuitesToIana(Set<String> inputCipherSuites) {
+        if (inputCipherSuites == null || inputCipherSuites.isEmpty()) {
+            return inputCipherSuites;
+        }
+
+        Set<String> result = new HashSet<>();
+        Set<String> notAllowedCipherSuites = new HashSet<>();
+        List<CipherSuite> allowedCipherSuites = getCipherSuiteList();
+
+        for (String input : inputCipherSuites) {
+            Optional<String> ianaName = allowedCipherSuites
+                    .stream()
+                    .filter(cs -> cs.ianaName().equals(input) || cs.name().equals(input))
+                    .map(CipherSuite::ianaName)
+                    .findFirst();
+            if (ianaName.isPresent()) {
+                result.add(ianaName.get());
+            } else {
+                notAllowedCipherSuites.add(input);
+            }
+        }
+
+        if (!notAllowedCipherSuites.isEmpty()) {
+            throw new IllegalArgumentException("The following cipher(s) are not allowed: " + notAllowedCipherSuites);
+        }
+
+        return result;
     }
 
     public enum CipherSuitesLimitType {

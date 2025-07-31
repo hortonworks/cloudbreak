@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.tls;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -234,5 +235,61 @@ public class DefaultEncryptionProfileProviderTest {
                 "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
                 "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384", "TLS_ECCPWD_WITH_AES_128_GCM_SHA256", "TLS_ECCPWD_WITH_AES_256_GCM_SHA384",
                 "TLS_CHACHA20_POLY1305_SHA256")));
+    }
+
+    @Test
+    public void testConvertCipherSuitesToIana() {
+        Set<String> result = underTest.convertCipherSuitesToIana(
+                Set.of(
+                        "ECDHE-ECDSA-AES128-GCM-SHA256",
+                        "ECDHE-RSA-AES128-GCM-SHA256",
+                        "ECDHE-ECDSA-AES256-GCM-SHA384",
+                        "ECDHE-RSA-AES256-GCM-SHA384",
+                        "DHE-RSA-AES128-GCM-SHA256",
+                        "DHE-RSA-AES256-GCM-SHA384",
+                        "ECDHE-ECDSA-AES128-SHA256",
+                        "ECDHE-ECDSA-AES128-SHA",
+                        "ECDHE-RSA-AES128-SHA",
+                        "ECDHE-ECDSA-AES256-SHA384",
+                        "ECDHE-ECDSA-AES256-SHA",
+                        "ECDHE-RSA-AES256-SHA",
+                        "DHE-RSA-AES128-SHA256",
+                        "DHE-RSA-AES128-SHA",
+                        "DHE-RSA-AES256-SHA256",
+                        "DHE-RSA-AES256-SHA",
+                        "AES128-SHA",
+                        "AES256-SHA"
+                ));
+
+        assertTrue(result.containsAll(
+                Set.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+                        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+                        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+                        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+                        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+                        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+                        "TLS_RSA_WITH_AES_128_CBC_SHA",
+                        "TLS_RSA_WITH_AES_256_CBC_SHA")));
+    }
+
+    @Test
+    public void testConvertCipherSuitesToIanaDoesNotIgnoreNotAllowed() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> underTest.convertCipherSuitesToIana(
+                Set.of(
+                        "ECDHE-ECDSA-AES128-GCM-SHA256",
+                        "NOT_ALLOWED"
+                )));
+
+        assertEquals("The following cipher(s) are not allowed: [NOT_ALLOWED]", ex.getMessage());
     }
 }

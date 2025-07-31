@@ -19,7 +19,7 @@ public class EncryptionProfileTestConstants {
 
     public static final String DESCRIPTION = "An encryption profile with TLS settings";
 
-    public static final Set<TlsVersion> TLS_VERSIONS = new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_2));
+    public static final Set<TlsVersion> TLS_VERSIONS = new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3));
 
     public static final Set<String> CIPHER_SUITES = new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"));
 

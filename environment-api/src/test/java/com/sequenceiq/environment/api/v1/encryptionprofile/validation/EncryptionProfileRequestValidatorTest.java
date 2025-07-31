@@ -15,10 +15,13 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
+import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -32,14 +35,14 @@ public class EncryptionProfileRequestValidatorTest {
     @BeforeEach
     void setup() {
         EncryptionProfileConfig encryptionProfileConfig = buildTestEncryptionProfileConfig();
+        DefaultEncryptionProfileProvider defaultEncryptionProfileProvider = new DefaultEncryptionProfileProvider();
         validator = new EncryptionProfileRequestValidator();
         validator.setEncryptionProfileConfig(encryptionProfileConfig);
+        validator.setDefaultEncryptionProfileProvider(defaultEncryptionProfileProvider);
 
         context = mock(ConstraintValidatorContext.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder =
-                mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-        ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext nodeBuilder =
-                mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
+        ConstraintViolationBuilder violationBuilder = mock(ConstraintViolationBuilder.class);
+        NodeBuilderCustomizableContext nodeBuilder = mock(NodeBuilderCustomizableContext.class);
 
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         when(violationBuilder.addPropertyNode(anyString())).thenReturn(nodeBuilder);
@@ -117,7 +120,7 @@ public class EncryptionProfileRequestValidatorTest {
     }
 
     @Test
-    void testValidTlsVersionsInvalidCipherSuites() {
+    void testInvalidCipherSuites() {
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         Set<TlsVersion> tls = new HashSet<>();
         tls.add(TlsVersion.TLS_1_2);
@@ -129,7 +132,23 @@ public class EncryptionProfileRequestValidatorTest {
 
         boolean result = validator.isValid(request, context);
         assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate(contains("Unsupported cipher suite"));
+        verify(context).buildConstraintViolationWithTemplate(contains("The following cipher(s) are not allowed: [INVALID_CIPHER]"));
+    }
+
+    @Test
+    void testValidInvalidCipherSuiteForTlsVersions() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        Set<TlsVersion> tls = new HashSet<>();
+        tls.add(TlsVersion.TLS_1_2);
+        request.setTlsVersions(tls);
+
+        Set<String> ciphers = new HashSet<>();
+        ciphers.add("TLS_CHACHA20_POLY1305_SHA256");
+        request.setCipherSuites(ciphers);
+
+        boolean result = validator.isValid(request, context);
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate(contains("Unsupported cipher suite(s) for the given TLS versions: TLS_CHACHA20_POLY1305_SHA256"));
     }
 }
 

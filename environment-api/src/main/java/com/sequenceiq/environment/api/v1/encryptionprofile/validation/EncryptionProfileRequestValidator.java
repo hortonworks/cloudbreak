@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
@@ -18,10 +19,19 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
     @Autowired
     private EncryptionProfileConfig encryptionProfileConfig;
 
+    @Autowired
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
     @Override
     public boolean isValid(EncryptionProfileRequest request, ConstraintValidatorContext context) {
         Set<TlsVersion> tlsVersions = request.getTlsVersions();
-        Set<String> cipherSuites = request.getCipherSuites();
+        Set<String> cipherSuites;
+        try {
+            cipherSuites = defaultEncryptionProfileProvider.convertCipherSuitesToIana(request.getCipherSuites());
+        } catch (IllegalArgumentException e) {
+            ValidatorUtil.addConstraintViolation(context, e.getMessage());
+            return false;
+        }
 
         // Validate mandatory tlsVersions
         if (tlsVersions == null || tlsVersions.isEmpty()) {
@@ -54,5 +64,9 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
 
     public void setEncryptionProfileConfig(EncryptionProfileConfig encryptionProfileConfig) {
         this.encryptionProfileConfig = encryptionProfileConfig;
+    }
+
+    public void setDefaultEncryptionProfileProvider(DefaultEncryptionProfileProvider defaultEncryptionProfileProvider) {
+        this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
     }
 }
