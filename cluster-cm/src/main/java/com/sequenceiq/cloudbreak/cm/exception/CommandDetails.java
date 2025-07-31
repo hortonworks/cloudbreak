@@ -44,9 +44,9 @@ public class CommandDetails {
 
     public static CommandDetails fromApiCommand(ApiCommand apiCommand) {
         CommandStatus commandStatus;
-        if (Boolean.TRUE.equals(apiCommand.isActive())) {
+        if (Boolean.TRUE.equals(apiCommand.getActive())) {
             commandStatus = CommandStatus.ACTIVE;
-        } else if (Boolean.TRUE.equals(apiCommand.isSuccess())) {
+        } else if (Boolean.TRUE.equals(apiCommand.getSuccess())) {
             commandStatus = CommandStatus.SUCCESS;
         } else {
             commandStatus = CommandStatus.FAILED;

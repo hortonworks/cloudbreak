@@ -98,7 +98,7 @@ public class ClouderaManagerConfigServiceTest {
 
         ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
         verify(servicesResourceApi, times(1))
-                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(knoxName), apiServiceConfigArgumentCaptor.capture(), eq(""));
+                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(knoxName), eq(""), apiServiceConfigArgumentCaptor.capture());
 
         ApiServiceConfig actualBody = apiServiceConfigArgumentCaptor.getValue();
         assertFalse(actualBody.getItems().isEmpty());
@@ -151,7 +151,7 @@ public class ClouderaManagerConfigServiceTest {
 
         ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
         verify(servicesResourceApi, times(1))
-                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), apiServiceConfigArgumentCaptor.capture(), eq(""));
+                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), eq(""), apiServiceConfigArgumentCaptor.capture());
 
         ApiServiceConfig actualBody = apiServiceConfigArgumentCaptor.getValue();
         assertFalse(actualBody.getItems().isEmpty());
@@ -180,7 +180,7 @@ public class ClouderaManagerConfigServiceTest {
 
         ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
         verify(servicesResourceApi, times(1))
-                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), apiServiceConfigArgumentCaptor.capture(), eq(""));
+                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), eq(""), apiServiceConfigArgumentCaptor.capture());
 
         ApiServiceConfig actualBody = apiServiceConfigArgumentCaptor.getValue();
         assertFalse(actualBody.getItems().isEmpty());
@@ -369,7 +369,7 @@ public class ClouderaManagerConfigServiceTest {
         underTest.modifyServiceConfigs(API_CLIENT, "cluster", Map.of("config", "newvalue"), "service");
 
         ArgumentCaptor<ApiServiceConfig> bodyCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
-        verify(servicesResourceApi).updateServiceConfig(any(), any(), bodyCaptor.capture(), any());
+        verify(servicesResourceApi).updateServiceConfig(any(), any(), any(), bodyCaptor.capture());
         assertTrue(bodyCaptor.getValue().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), "config")));
         assertTrue(bodyCaptor.getValue().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getValue(), "newvalue")));
     }
@@ -395,7 +395,7 @@ public class ClouderaManagerConfigServiceTest {
                 Map.of("config", "newvalue"));
 
         ArgumentCaptor<ApiRoleConfigGroup> bodyCaptor = ArgumentCaptor.forClass(ApiRoleConfigGroup.class);
-        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), bodyCaptor.capture(), any());
+        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), bodyCaptor.capture());
         assertTrue(bodyCaptor.getValue().getConfig().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), "config")));
         assertTrue(bodyCaptor.getValue().getConfig().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getValue(), "newvalue")));
     }
@@ -470,7 +470,7 @@ public class ClouderaManagerConfigServiceTest {
         underTest.modifyRoleBasedConfig(API_CLIENT, TEST_CLUSTER_NAME, serviceType, config, List.of(roleName));
 
         verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
-                eq(yarnName), eq(apiConfigList), eq("Modifying role based config for service yarn-1"));
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
     }
 
     @Test
@@ -488,12 +488,12 @@ public class ClouderaManagerConfigServiceTest {
         ApiConfigList apiConfigList = new ApiConfigList();
         apiConfigList.addItemsItem(new ApiConfig().name("test-config").value("test-config-property"));
         doThrow(new ApiException("Test")).when(roleConfigGroupsResourceApi).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
-                eq(yarnName), eq(apiConfigList), eq("Modifying role based config for service yarn-1"));
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
 
         assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.modifyRoleBasedConfig(API_CLIENT, TEST_CLUSTER_NAME, serviceType, config, List.of(roleName)));
 
         verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
-                eq(yarnName), eq(apiConfigList), eq("Modifying role based config for service yarn-1"));
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
     }
 }

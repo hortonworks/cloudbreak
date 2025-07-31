@@ -45,7 +45,7 @@ public class ClouderaManagerYarnSetupService {
 
             ApiConfigList allHostsApiConfigList = getSuppressionApiConfigList(ALL_HOSTS_SUPPRESSION_NAMES);
             clouderaManagerApiFactory.getAllHostsResourceApi(apiClient)
-                    .updateConfig(allHostsApiConfigList, "Suppress Yarn warnings for all hosts");
+                    .updateConfig("Suppress Yarn warnings for all hosts", allHostsApiConfigList);
 
             String clusterName = stack.getCluster().getName();
             ApiConfigList serviceRoleApiConfigList = getSuppressionApiConfigList(SERVICE_ROLE_SUPPRESSION_NAMES);
@@ -62,8 +62,8 @@ public class ClouderaManagerYarnSetupService {
                                 clusterName,
                                 apiRoleName,
                                 apiServiceName,
-                                serviceRoleApiConfigList,
-                                String.format("Suppress Yarn warnings for service %s and role %s", apiServiceName, apiRoleName));
+                                String.format("Suppress Yarn warnings for service %s and role %s", apiServiceName, apiRoleName),
+                                serviceRoleApiConfigList);
                     } catch (ApiException e) {
                         // some service roles are not supporting the suppression configurations and respond with bad request
                         if (e.getCode() != HttpStatus.SC_BAD_REQUEST) {

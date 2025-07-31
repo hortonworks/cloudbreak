@@ -134,7 +134,7 @@ class ClouderaManagerRangerUtilTest {
         assertFalse(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), apiConfigListCaptor.capture(), anyString());
+        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
         verify(roleCommandsResourceApi, times(1)).refreshCommand(any(), any(), any());
 
         ApiConfig expectedAzureUserMappingConfig = new ApiConfig();
@@ -158,7 +158,7 @@ class ClouderaManagerRangerUtilTest {
         assertTrue(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        verify(rolesResourceApi, never()).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), apiConfigListCaptor.capture(), anyString());
+        verify(rolesResourceApi, never()).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
         verify(roleCommandsResourceApi, never()).refreshCommand(any(), any(), any());
     }
 
@@ -177,7 +177,7 @@ class ClouderaManagerRangerUtilTest {
         assertFalse(apiCommand.isEmpty());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), apiConfigListCaptor.capture(), anyString());
+        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
         verify(roleCommandsResourceApi, times(1)).refreshCommand(any(), any(), any());
     }
 

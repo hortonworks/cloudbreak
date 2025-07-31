@@ -33,7 +33,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
     protected boolean doStatusCheck(T pollerObject) throws ApiException {
         CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         List<ApiCommand> apiCommands = collectApiCommands(pollerObject, commandsResourceApi);
-        boolean allCommandsFinished = apiCommands.stream().noneMatch(ApiCommand::isActive);
+        boolean allCommandsFinished = apiCommands.stream().noneMatch(ApiCommand::getActive);
         if (allCommandsFinished) {
             validateApiCommandResults(apiCommands, commandsResourceApi);
             return true;
@@ -47,7 +47,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
         for (BigDecimal commandId : pollerObject.getIdList()) {
             ApiCommand apiCommand = commandsResourceApi.readCommand(commandId);
             apiCommands.add(apiCommand);
-            if (apiCommand.isActive()) {
+            if (apiCommand.getActive()) {
                 LOGGER.debug("Command [" + getCommandName() + "] with id [" + commandId + "] is active, so it hasn't finished yet");
                 break;
             }
@@ -56,7 +56,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
     }
 
     private void validateApiCommandResults(List<ApiCommand> apiCommands, CommandsResourceApi commandsResourceApi) {
-        List<ApiCommand> failedCommands = apiCommands.stream().filter(cmd -> !cmd.isSuccess()).collect(Collectors.toList());
+        List<ApiCommand> failedCommands = apiCommands.stream().filter(cmd -> !cmd.getSuccess()).collect(Collectors.toList());
         if (!failedCommands.isEmpty()) {
             List<CommandDetails> failedCommandDetails = new LinkedList<>();
             failedCommands.forEach(cmd -> failedCommandDetails.addAll(ClouderaManagerCommandUtil.getFailedOrActiveCommands(cmd, commandsResourceApi)));

@@ -40,10 +40,10 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-        if (apiCommand.isActive()) {
+        if (apiCommand.getActive()) {
             LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");
             return false;
-        } else if (apiCommand.isSuccess()) {
+        } else if (apiCommand.getSuccess()) {
             return true;
         } else {
             fail("", apiCommand, commandsResourceApi, pollerObject.getStack().getType());

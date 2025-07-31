@@ -98,7 +98,7 @@ public class RangerRmsDatalakeConfigProviderTest {
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVICE_TYPE, clusterTemplateService.getServiceType()),
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVICE_REF_NAME, clusterTemplateService.getRefName()),
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVER_REF_NAME, roleConfigGroups.get(0).getRefName()),
-                    () -> assertTrue(roleConfigGroups.get(0).isBase()),
+                    () -> assertTrue(roleConfigGroups.get(0).getBase()),
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVER_ROLE_TYPE, roleConfigGroups.get(0).getRoleType())
             );
         });

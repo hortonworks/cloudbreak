@@ -129,7 +129,7 @@ public class SyncApiCommandRetriever {
         command.setStart(new DateTime(apiCommand.getStartTime()).toDate().toInstant().toEpochMilli());
         command.setName(apiCommand.getName());
         command.setId(apiCommand.getId().longValue());
-        command.setSuccess(apiCommand.isSuccess());
+        command.setSuccess(apiCommand.getSuccess());
         return command;
     }
 }

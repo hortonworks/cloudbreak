@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 
-import okhttp3.OkHttpClient;
-
 @Component
 public class ClouderaManagerProxiedClientFactory {
 
@@ -35,10 +33,8 @@ public class ClouderaManagerProxiedClientFactory {
         ApiClient apiClient = new ApiClient();
         apiClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
         apiClient.setBasePath(getClusterProxyCloderaManagerBasePath(clouderaManagerStackCrn));
-        OkHttpClient.Builder builder = apiClient.getHttpClient().newBuilder();
-        builder.connectTimeout(CM_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        builder.readTimeout(CM_READ_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        apiClient.setHttpClient(builder.build());
+        apiClient.setConnectTimeout(CM_READ_TIMEOUT_MS);
+        apiClient.getHttpClient().setReadTimeout(CM_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         return apiClient;
     }
 

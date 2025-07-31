@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.client.ApiClient;
 
-import okhttp3.OkHttpClient;
-
 @Component
 public class ClouderaManagerClient {
 
@@ -39,28 +37,23 @@ public class ClouderaManagerClient {
         cmClient.setBasePath(basePath);
         cmClient.setUsername(cmUser);
         cmClient.setPassword(cmPassword);
-        OkHttpClient.Builder builder = cmClient.getHttpClient().newBuilder();
-        builder.addInterceptor(cmRequestIdProviderInterceptor);
-        cmClient.setHttpClient(builder.build());
+        cmClient.setVerifyingSsl(false);
+        cmClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
         LOGGER.info(String.format("Cloudera Manager Base Path: %s", cmClient.getBasePath()));
         return cmClient;
     }
 
     public ApiClient getCmApiClientWithTimeoutDisabled(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
         ApiClient cmClient = getCmApiClient(serverFqdn, clusterName, apiVersion, cmUser, cmPassword);
-        OkHttpClient.Builder builder = cmClient.getHttpClient().newBuilder();
-        builder.connectTimeout(0, TimeUnit.MILLISECONDS);
-        builder.readTimeout(0, TimeUnit.MILLISECONDS);
-        cmClient.setHttpClient(builder.build());
+        cmClient.setConnectTimeout(0);
+        cmClient.getHttpClient().setReadTimeout(0, TimeUnit.MILLISECONDS);
         return cmClient;
     }
 
     public ApiClient getCmApiClientWithTimeoutDisabledDirect(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
         ApiClient cmClient = getCmApiClientDirect(serverFqdn, clusterName, apiVersion, cmUser, cmPassword);
-        OkHttpClient.Builder builder = cmClient.getHttpClient().newBuilder();
-        builder.connectTimeout(0, TimeUnit.MILLISECONDS);
-        builder.readTimeout(0, TimeUnit.MILLISECONDS);
-        cmClient.setHttpClient(builder.build());
+        cmClient.setConnectTimeout(0);
+        cmClient.getHttpClient().setReadTimeout(0, TimeUnit.MILLISECONDS);
         return cmClient;
     }
 }

@@ -56,7 +56,7 @@ class RangerCloudIdentityServiceTest {
     public void testSetAzureCloudIdentityMappingSuccessSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
-        when(apiCommand.isSuccess()).thenReturn(true);
+        when(apiCommand.getSuccess()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.SUCCESS);
@@ -66,7 +66,7 @@ class RangerCloudIdentityServiceTest {
     public void testSetAzureCloudIdentityMappingActiveSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
-        when(apiCommand.isActive()).thenReturn(true);
+        when(apiCommand.getActive()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.ACTIVE);
@@ -76,7 +76,7 @@ class RangerCloudIdentityServiceTest {
     public void testSetAzureCloudIdentityMappingFailSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
-        when(apiCommand.isSuccess()).thenReturn(false);
+        when(apiCommand.getSuccess()).thenReturn(false);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.FAILED);

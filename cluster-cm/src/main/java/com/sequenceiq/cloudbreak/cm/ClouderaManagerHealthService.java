@@ -110,8 +110,8 @@ public class ClouderaManagerHealthService {
                 .findFirst()
                 .map(apiHealthCheck -> new HealthCheck(
                         HealthCheckType.HOST,
-                        healthSummaryToHealthCheckResult(apiHealthCheck.getSummary(), apiHost.isMaintenanceMode()),
-                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.isMaintenanceMode()), Optional.empty()));
+                        healthSummaryToHealthCheckResult(apiHealthCheck.getSummary(), apiHost.getMaintenanceMode()),
+                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.getMaintenanceMode()), Optional.empty()));
     }
 
     private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation, Boolean maintenanceMode) {

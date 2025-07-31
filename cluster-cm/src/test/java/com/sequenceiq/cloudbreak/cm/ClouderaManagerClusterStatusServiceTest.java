@@ -62,8 +62,7 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedExce
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-
-import okhttp3.OkHttpClient;
+import com.squareup.okhttp.OkHttpClient;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerClusterStatusServiceTest {
@@ -126,7 +125,6 @@ public class ClouderaManagerClusterStatusServiceTest {
         ReflectionTestUtils.setField(subject, "clouderaManagerCommandsService", clouderaManagerCommandsService);
         ReflectionTestUtils.setField(subject, "connectQuickTimeoutSeconds", 1);
         ReflectionTestUtils.setField(subject, "metricService", metricService);
-        when(okHttpClient.newBuilder()).thenReturn(new OkHttpClient.Builder());
         when(client.getHttpClient()).thenReturn(okHttpClient);
         when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cluster.getCloudbreakClusterManagerUser(),
                 cluster.getPassword(), clientConfig)).thenReturn(client);

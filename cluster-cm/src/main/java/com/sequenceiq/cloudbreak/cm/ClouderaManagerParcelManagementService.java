@@ -95,7 +95,7 @@ class ClouderaManagerParcelManagementService {
                 .addItemsItem(new ApiConfig()
                         .name("remote_parcel_repo_urls")
                         .value(String.join(",", stackProductParcels)));
-        clouderaManagerResourceApi.updateConfig(apiConfigList, "Updated configurations.");
+        clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
     }
 
     public void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi, StackDtoDelegate stack, ApiClient apiClient) {

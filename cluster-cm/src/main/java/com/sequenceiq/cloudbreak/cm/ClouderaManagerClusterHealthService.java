@@ -214,7 +214,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
                 .findFirst()
                 .map(apiHealthCheck -> new DetailedHostHealthCheck(healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),
-                        Boolean.TRUE.equals(apiHost.isMaintenanceMode()),
+                        Boolean.TRUE.equals(apiHost.getMaintenanceMode()),
                         HostCommissionState.valueOf(apiHost.getCommissionState().getValue()), apiHost.getLastHeartbeat()));
     }
 
