@@ -220,7 +220,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 Stream.of(templateInstallCmd),
                 templateInstallCmd.getChildren().getItems().stream()
         )
-                .filter(cmd -> cmd.isActive() != null && cmd.isActive() || cmd.isSuccess() != null && !cmd.isSuccess())
+                .filter(cmd -> cmd.getActive() != null && cmd.getActive() || cmd.getSuccess() != null && !cmd.getSuccess())
                 .collect(Collectors.toMap(ApiCommand::getId, Function.identity()));
 
         when(commandsResourceApi.readCommand(any(BigDecimal.class))).thenAnswer(invocation -> {

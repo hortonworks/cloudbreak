@@ -473,7 +473,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     private void processHostCertsBatchResponse(ApiClient client, ApiBatchResponse apiBatchResponse) {
-        if (apiBatchResponse != null && apiBatchResponse.isSuccess() != null && apiBatchResponse.getItems() != null && apiBatchResponse.isSuccess()) {
+        if (apiBatchResponse != null && apiBatchResponse.getSuccess() != null && apiBatchResponse.getItems() != null && apiBatchResponse.getSuccess()) {
             List<BigDecimal> ids = apiBatchResponse.getItems().stream()
                     .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
                     .collect(Collectors.toList());

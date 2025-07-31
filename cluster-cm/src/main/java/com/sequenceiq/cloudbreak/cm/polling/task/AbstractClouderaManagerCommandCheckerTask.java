@@ -30,10 +30,10 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     protected boolean doStatusCheck(T pollerObject) throws ApiException {
         CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-        if (apiCommand.isActive()) {
+        if (apiCommand.getActive()) {
             LOGGER.debug("Command [{}] with id [{}] is active, so it hasn't finished yet", getCommandName(), pollerObject.getId());
             return false;
-        } else if (apiCommand.isSuccess()) {
+        } else if (apiCommand.getSuccess()) {
             return true;
         } else {
             List<CommandDetails> commandDetails = ClouderaManagerCommandUtil.getFailedOrActiveCommands(apiCommand, commandsResourceApi);

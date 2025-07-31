@@ -659,7 +659,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         for (ApiClusterTemplateService service : ofNullable(cmTemplate.getServices()).orElse(List.of())) {
             List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(List.of())
                     .stream()
-                    .filter(rcg -> rcg.isBase() == null || !rcg.isBase())
+                    .filter(rcg -> rcg.getBase() == null || !rcg.getBase())
                     .map(ApiClusterTemplateRoleConfigGroup::getRefName)
                     .collect(Collectors.toList());
             for (String nonBaseRef : nonBaseRefs) {

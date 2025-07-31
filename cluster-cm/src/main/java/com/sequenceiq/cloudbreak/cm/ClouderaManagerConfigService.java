@@ -75,10 +75,9 @@ public class ClouderaManagerConfigService {
     private Consumer<String> modifyKnoxAutorestart(String clusterName, ServicesResourceApi servicesResourceApi, boolean autorestart) {
         return knoxServiceName -> {
             ApiConfig autorestartConfig = new ApiConfig().name(KNOX_AUTORESTART_ON_STOP).value(Boolean.valueOf(autorestart).toString());
-            ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
-            apiServiceConfig.addItemsItem(autorestartConfig);
+            ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
             try {
-                servicesResourceApi.updateServiceConfig(clusterName, knoxServiceName, apiServiceConfig, "");
+                servicesResourceApi.updateServiceConfig(clusterName, knoxServiceName, "", serviceConfig);
             } catch (ApiException e) {
                 LOGGER.debug("Failed to set autorestart_on_stop to KNOX in Cloudera Manager.", e);
             }
@@ -104,7 +103,7 @@ public class ClouderaManagerConfigService {
                 apiServiceConfig.addItemsItem(new ApiConfig().name(key).value(value));
             });
             try {
-                servicesResourceApi.updateServiceConfig(clusterName, serviceName, apiServiceConfig, "");
+                servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", apiServiceConfig);
             } catch (ApiException e) {
                 LOGGER.error("Failed to set configs {} for service {}", config, serviceName, e);
                 throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -210,7 +209,7 @@ public class ClouderaManagerConfigService {
             ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
             ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
             config.forEach((key, value) -> apiServiceConfig.addItemsItem(new ApiConfig().name(key).value(value)));
-            servicesResourceApi.updateServiceConfig(clusterName, serviceName, apiServiceConfig, "");
+            servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", apiServiceConfig);
         } catch (ApiException e) {
             LOGGER.error("Failed to set configs [{}] for service {}.", Joiner.on(",").withKeyValueSeparator("=").join(config), serviceName, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -227,7 +226,7 @@ public class ClouderaManagerConfigService {
             ApiConfigList apiConfigList = new ApiConfigList();
             config.forEach((key, value) -> apiConfigList.addItemsItem(new ApiConfig().name(key).value(value)));
             apiRoleConfigGroup.setConfig(apiConfigList);
-            roleConfigGroupsResourceApi.updateRoleConfigGroup(clusterName, roleConfigGroupName, serviceName, apiRoleConfigGroup, "");
+            roleConfigGroupsResourceApi.updateRoleConfigGroup(clusterName, roleConfigGroupName, serviceName, "", apiRoleConfigGroup);
         } catch (ApiException e) {
             LOGGER.error("Failed to update role group config [{}] for role group {} of service {}",
                     Joiner.on(",").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
@@ -253,8 +252,8 @@ public class ClouderaManagerConfigService {
         ApiConfigList apiConfigList = createApiConfigList(config);
         return serviceName -> roleConfigGroupNames.forEach(role -> {
             try {
-                roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName,
-                        apiConfigList, "Modifying role based config for service " + serviceName);
+                roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName, "Modifying role based config for service " + serviceName,
+                        apiConfigList);
             } catch (ApiException e) {
                 LOGGER.error("Failed to set configs {} for service {}", config, serviceName, e);
                 throw new ClouderaManagerOperationFailedException(e.getMessage(), e);

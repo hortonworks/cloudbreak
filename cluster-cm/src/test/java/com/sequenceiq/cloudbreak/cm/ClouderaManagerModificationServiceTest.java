@@ -112,6 +112,7 @@ import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.squareup.okhttp.Call;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerModificationServiceTest {
@@ -127,12 +128,6 @@ class ClouderaManagerModificationServiceTest {
     private static final String HOSTNAME = "host1";
 
     private static final String GROUP_NAME = "group1";
-
-    private final ExtendedPollingResult success = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-
-    private final ExtendedPollingResult exit = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
-
-    private final ExtendedPollingResult timeout = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
 
     @InjectMocks
     private ClouderaManagerModificationService underTest;
@@ -243,15 +238,11 @@ class ClouderaManagerModificationServiceTest {
 
     private HostGroup hostGroup;
 
-    static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
-        return new Object[][]{
-                // testCaseName batchResponseFactory
-                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
-                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
-                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
-                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
-        };
-    }
+    private final ExtendedPollingResult success = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+
+    private final ExtendedPollingResult exit = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
+
+    private final ExtendedPollingResult timeout = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
 
     @BeforeEach
     void setUp() {
@@ -486,8 +477,8 @@ class ClouderaManagerModificationServiceTest {
         ReflectionTestUtils.setField(underTest, "v52Client", null);
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.FALSE),
-                eq(Boolean.TRUE))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.FALSE),
+                eq(Boolean.TRUE), any(ApiHostRefList.class))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v31Client))).thenReturn(hostTemplatesResourceApi);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.9.0");
         when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
@@ -515,7 +506,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
-                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), applyTemplateBodyCatcher.capture(), eq(Boolean.FALSE), eq(Boolean.TRUE));
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.FALSE), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
@@ -535,8 +526,8 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE),
-                eq(Boolean.TRUE))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE),
+                eq(Boolean.TRUE), any(ApiHostRefList.class))).thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
 
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(v31Client), eq(applyHostTemplateCommandId)))
@@ -565,7 +556,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
-                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), applyTemplateBodyCatcher.capture(), eq(Boolean.TRUE), eq(Boolean.TRUE));
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
@@ -595,7 +586,7 @@ class ClouderaManagerModificationServiceTest {
         assertThat(result).isEqualTo(List.of("upscaled"));
 
         verify(hostTemplatesResourceApi, never())
-                .applyHostTemplate(anyString(), anyString(), any(), anyBoolean(), anyBoolean());
+                .applyHostTemplate(anyString(), anyString(), anyBoolean(), anyBoolean(), any());
     }
 
     private void setUpBatchWithResponseAnswer(Answer<ApiBatchResponse> batchResponseAnswer) throws ApiException {
@@ -632,6 +623,16 @@ class ClouderaManagerModificationServiceTest {
         assertThat(host.getRackId()).isEqualTo(rackIdExpected);
     }
 
+    static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
+        return new Object[][]{
+                // testCaseName batchResponseFactory
+                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
+                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
+                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
+                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
+        };
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider")
     void upscaleClusterTestWhenRackIdBatchExecutionFailure(String testCaseName, Supplier<ApiBatchResponse> batchResponseFactory) throws Exception {
@@ -653,7 +654,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
         verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
-        verify(hostTemplatesResourceApi, never()).applyHostTemplate(anyString(), anyString(), any(ApiHostRefList.class), anyBoolean(), anyBoolean());
+        verify(hostTemplatesResourceApi, never()).applyHostTemplate(anyString(), anyString(), anyBoolean(), anyBoolean(), any(ApiHostRefList.class));
 
         ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         verify(batchResourceApi).execute(batchRequestCaptor.capture());
@@ -668,7 +669,7 @@ class ClouderaManagerModificationServiceTest {
         setUpDeployClientConfigPolling(success);
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
@@ -697,7 +698,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
-                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), applyTemplateBodyCatcher.capture(), eq(Boolean.TRUE), eq(Boolean.TRUE));
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
@@ -714,7 +715,7 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
@@ -747,7 +748,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
-                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), applyTemplateBodyCatcher.capture(), eq(Boolean.TRUE), eq(Boolean.TRUE));
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
@@ -770,7 +771,7 @@ class ClouderaManagerModificationServiceTest {
         setUpBatchSuccess();
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
-        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), any(ApiHostRefList.class), eq(Boolean.TRUE), eq(Boolean.TRUE)))
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(v52Client))).thenReturn(hostTemplatesResourceApi);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.10.0");
@@ -803,7 +804,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
-                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), applyTemplateBodyCatcher.capture(), eq(Boolean.TRUE), eq(Boolean.TRUE));
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
@@ -934,7 +935,8 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_6_0.getVersion());
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostResourceApi);
-        when(hostResourceApi.addTags(eq(HOSTNAME), any())).thenReturn(List.of());
+        Call call = mock(Call.class);
+        when(hostResourceApi.addTagsAsync(eq(HOSTNAME), any(), any())).thenReturn(call);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
@@ -959,7 +961,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerRestartService, times(2)).waitForRestartExecutionIfPresent(v31Client, stack, false);
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
         ArgumentCaptor<List<ApiEntityTag>> entityTagListCaptor = ArgumentCaptor.forClass(List.class);
-        verify(hostResourceApi, times(1)).addTags(eq(HOSTNAME), entityTagListCaptor.capture());
+        verify(hostResourceApi, times(1)).addTagsAsync(eq(HOSTNAME), entityTagListCaptor.capture(), any());
         assertEquals("_cldr_cm_host_template_name", entityTagListCaptor.getValue().get(0).getName());
         assertEquals(GROUP_NAME, entityTagListCaptor.getValue().get(0).getValue());
 
@@ -1669,7 +1671,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
                 .thenReturn(Optional.of(clusterCommand));
         ApiCommand startCommand = mock(ApiCommand.class);
-        when(startCommand.isActive()).thenReturn(Boolean.TRUE);
+        when(startCommand.getActive()).thenReturn(Boolean.TRUE);
         when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, BigDecimal.ONE)).thenReturn(Optional.of(startCommand));
         ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);

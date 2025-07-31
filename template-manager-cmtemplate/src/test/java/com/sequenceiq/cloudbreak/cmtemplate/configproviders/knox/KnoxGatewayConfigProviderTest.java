@@ -109,7 +109,7 @@ public class KnoxGatewayConfigProviderTest {
         assertEquals("knox", knox.getRefName());
         ApiClusterTemplateRoleConfigGroup roleConfigGroup = knox.getRoleConfigGroups().get(0);
         assertEquals("KNOX_GATEWAY", roleConfigGroup.getRoleType());
-        assertTrue(roleConfigGroup.isBase());
+        assertTrue(roleConfigGroup.getBase());
     }
 
     @Test
@@ -139,9 +139,9 @@ public class KnoxGatewayConfigProviderTest {
         ApiClusterTemplateRoleConfigGroup roleConfigGroup1 = knox1.getRoleConfigGroups().get(0);
         ApiClusterTemplateRoleConfigGroup roleConfigGroup2 = knox2.getRoleConfigGroups().get(0);
         assertEquals("KNOX_GATEWAY", roleConfigGroup1.getRoleType());
-        assertTrue(roleConfigGroup1.isBase());
+        assertTrue(roleConfigGroup1.getBase());
         assertEquals("KNOX_GATEWAY", roleConfigGroup2.getRoleType());
-        assertTrue(roleConfigGroup2.isBase());
+        assertTrue(roleConfigGroup2.getBase());
     }
 
     @Test

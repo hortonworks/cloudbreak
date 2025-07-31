@@ -46,6 +46,7 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
+import com.cloudera.api.swagger.client.ApiCallback;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiBatchRequest;
@@ -121,10 +122,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private static final String HOST_TEMPLATE_NAME_TAG = "_cldr_cm_host_template_name";
 
-    private final StackDtoDelegate stack;
-
-    private final HttpClientConfig clientConfig;
-
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
@@ -188,11 +185,13 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
 
+    private final StackDtoDelegate stack;
+
+    private final HttpClientConfig clientConfig;
+
     private ApiClient v31Client;
 
     private ApiClient v52Client;
-
-    private ApiClient v55Client;
 
     public ClouderaManagerModificationService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
@@ -213,11 +212,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             v52Client = clouderaManagerApiClientProvider.getV52Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V52 client!");
-        }
-        try {
-            v55Client = clouderaManagerApiClientProvider.getV55Client(stack.getGatewayPort(), user, password, clientConfig);
-        } catch (ClouderaManagerClientInitException e) {
-            LOGGER.warn("Client init failed for V55 client!");
         }
     }
 
@@ -370,18 +364,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ApiClient v46Client = buildv46ApiClient();
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(v46Client);
             Set<String> hostnamesFromCM = fetchHostNamesFromCm(v46Client);
-            startTagCalls(hostsResourceApi, hostnamesFromCM);
+            startAsyncTagCalls(hostsResourceApi, hostnamesFromCM);
         } else {
             LOGGER.info("Skipping host tagging. Cloudera Manager version needs to be equal or higher, than 7.6.0. Current version: [{}]",
                     clouderaManagerRepoDetails.getVersion());
         }
     }
 
-    private void startTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
+    private void startAsyncTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
         stack.getNotTerminatedInstanceMetaData()
                 .stream()
                 .filter(im -> hostnamesFromCM.contains(im.getDiscoveryFQDN()))
-                .forEach(im -> tagHost(im.getDiscoveryFQDN(), hostsResourceApi, im.getInstanceGroupName()));
+                .forEach(im -> asyncTagHost(im.getDiscoveryFQDN(), hostsResourceApi, im.getInstanceGroupName()));
     }
 
     private Set<String> fetchHostNamesFromCm(ApiClient v46Client) throws ApiException {
@@ -401,12 +395,31 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void tagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
+    private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
         ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroupName);
         try {
+            ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
+                @Override
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                    LOGGER.error("Tagging failed for host [{}]: {}. Response headers: {}", hostname, e.getMessage(), map, e);
+                    throw new ClouderaManagerOperationFailedException("Host tagging failed for host: " + hostname, e);
+                }
+
+                @Override
+                public void onSuccess(List<ApiEntityTag> apiEntityTags, int i, Map<String, List<String>> map) {
+                    LOGGER.debug("Tagging successful for host: [{}]. Body: {}, headers: {}", hostname, apiEntityTags, map);
+                }
+
+                @Override
+                public void onUploadProgress(long l, long l1, boolean b) {
+                }
+
+                @Override
+                public void onDownloadProgress(long l, long l1, boolean b) {
+                }
+            };
             LOGGER.debug("Tagging host [{}] with [{}]", hostname, tag);
-            hostsResourceApi.addTags(hostname, List.of(tag));
-            LOGGER.debug("Tagging successful for host: [{}] with [{}]", hostname, tag);
+            hostsResourceApi.addTagsAsync(hostname, List.of(tag), callback);
         } catch (ApiException e) {
             LOGGER.error("Error while tagging host: [{}]", hostname, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -716,11 +729,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
+                        .applyHostTemplate(stack.getName(), hostGroupName, true, START_ROLES_ON_UPSCALED_NODES, body);
             } else {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
+                        .applyHostTemplate(stack.getName(), hostGroupName, false, START_ROLES_ON_UPSCALED_NODES, body);
             }
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
@@ -812,7 +825,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void validateBatchResponse(ApiBatchResponse batchResponse) {
-        if (batchResponse != null && batchResponse.isSuccess() != null && batchResponse.getItems() != null && batchResponse.isSuccess()) {
+        if (batchResponse != null && batchResponse.getSuccess() != null && batchResponse.getItems() != null && batchResponse.getSuccess()) {
             // batchResponse contains the updated ApiHost for each request as well, but we are going to ignore them here
             LOGGER.debug("Setting rack ID for hosts batch operation finished. Updated host count: [{}].", batchResponse.getItems().size());
         } else {
@@ -942,7 +955,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         apiConfig.setName("memory_overcommit_threshold");
         apiConfig.setValue("0.95");
         apiConfigList.addItemsItem(apiConfig);
-        allHostsResourceApi.updateConfig(apiConfigList, null);
+        allHostsResourceApi.updateConfig(null, apiConfigList);
     }
 
     @Override
@@ -1029,7 +1042,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
         if (startClusterCommand.isPresent()) {
             Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
-            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().isActive())) {
+            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().getActive())) {
                 return startClusterCommand.get();
             } else {
                 clusterCommandService.delete(startClusterCommand.get());

@@ -579,13 +579,14 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         underTest.updateConfig();
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                any(ApiConfigList.class), anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
     }
 
@@ -600,14 +601,14 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         underTest.updateConfig();
 
         verify(clouderaManagerResourceApi, times(2)).updateConfig(
-                any(ApiConfigList.class),
-                anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
     }
 
@@ -622,14 +623,14 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         underTest.updateConfig();
 
         verify(clouderaManagerResourceApi, times(3)).updateConfig(
-                any(ApiConfigList.class),
-                anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
     }
 
@@ -643,14 +644,14 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        doThrow(error).when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
+        doThrow(error).when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.updateConfig());
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                any(ApiConfigList.class),
-                anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
     }
@@ -662,15 +663,15 @@ class ClouderaManagerSetupServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
         doThrow(new ClouderaManagerOperationFailedException("error"))
-                .when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
+                .when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.updateConfig());
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                any(ApiConfigList.class),
-                anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
     }
@@ -900,7 +901,7 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -914,8 +915,8 @@ class ClouderaManagerSetupServiceTest {
         ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                configsCaptor.capture(),
-                messageCaptor.capture()
+                messageCaptor.capture(),
+                configsCaptor.capture()
         );
 
         String capturedMessage = messageCaptor.getValue();
@@ -937,7 +938,7 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -951,8 +952,8 @@ class ClouderaManagerSetupServiceTest {
         ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                configsCaptor.capture(),
-                messageCaptor.capture()
+                messageCaptor.capture(),
+                configsCaptor.capture()
         );
 
         String capturedMessage = messageCaptor.getValue();
@@ -975,7 +976,7 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString()))
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -989,8 +990,8 @@ class ClouderaManagerSetupServiceTest {
         ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                configsCaptor.capture(),
-                messageCaptor.capture()
+                messageCaptor.capture(),
+                configsCaptor.capture()
         );
 
         String capturedMessage = messageCaptor.getValue();
@@ -1014,7 +1015,7 @@ class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        doThrow(error).when(clouderaManagerResourceApi).updateConfig(any(ApiConfigList.class), anyString());
+        doThrow(error).when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.1.0");
@@ -1025,8 +1026,8 @@ class ClouderaManagerSetupServiceTest {
                 () -> underTest.setupProxy(testProxyConfig()));
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                any(ApiConfigList.class),
-                anyString()
+                anyString(),
+                any(ApiConfigList.class)
         );
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
     }
@@ -1066,7 +1067,7 @@ class ClouderaManagerSetupServiceTest {
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.importClusterTemplate(any(ApiClusterTemplate.class), anyBoolean())).thenReturn(apiCommand);
+        when(clouderaManagerResourceApi.importClusterTemplate(anyBoolean(), any(ApiClusterTemplate.class))).thenReturn(apiCommand);
         when(clusterCommandService.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(BigDecimal.class)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
@@ -1094,7 +1095,7 @@ class ClouderaManagerSetupServiceTest {
         when(clustersResourceApi.readCluster(anyString())).thenReturn(apiCluster);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.of(clusterCommand));
-        when(apiCommand.isSuccess()).thenReturn(Boolean.TRUE);
+        when(apiCommand.getSuccess()).thenReturn(Boolean.TRUE);
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerCommandsService.getApiCommand(any(), any())).thenReturn(apiCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(BigDecimal.class)))
@@ -1124,9 +1125,9 @@ class ClouderaManagerSetupServiceTest {
         when(clustersResourceApi.readCluster(anyString())).thenReturn(apiCluster);
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.of(clusterCommand));
-        when(apiCommand.isSuccess()).thenReturn(Boolean.FALSE);
-        when(apiCommand.isActive()).thenReturn(Boolean.FALSE);
-        when(apiCommand.isCanRetry()).thenReturn(Boolean.TRUE);
+        when(apiCommand.getSuccess()).thenReturn(Boolean.FALSE);
+        when(apiCommand.getActive()).thenReturn(Boolean.FALSE);
+        when(apiCommand.getCanRetry()).thenReturn(Boolean.TRUE);
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerCommandsService.getApiCommand(any(), any())).thenReturn(apiCommand);
         when(clouderaManagerCommandsService.retryApiCommand(any(), any())).thenReturn(apiCommand);

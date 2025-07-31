@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 
 import jakarta.inject.Inject;
 
@@ -22,8 +20,6 @@ import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderIntercepto
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestLoggerInterceptor;
 import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.cloudbreak.util.HostUtil;
-
-import okhttp3.OkHttpClient;
 
 @Component
 public class ClouderaManagerApiClientProvider {
@@ -45,8 +41,6 @@ public class ClouderaManagerApiClientProvider {
     public static final String API_V_52 = API_ROOT + "/v52";
 
     public static final String API_V_53 = API_ROOT + "/v53";
-
-    public static final String API_V_55 = API_ROOT + "/v55";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
@@ -131,22 +125,19 @@ public class ClouderaManagerApiClientProvider {
     private ApiClient decorateClient(HttpClientConfig clientConfig, String userName, String password, ApiClient cmClient) throws Exception {
         cmClient.setUsername(userName);
         cmClient.setPassword(password);
-        OkHttpClient.Builder builder = cmClient.getHttpClient().newBuilder();
+        cmClient.setVerifyingSsl(true);
         try {
             if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {
                 SSLContext sslContext = sslContextProvider.getSSLContext(clientConfig.getServerCert(), Optional.empty(),
                         clientConfig.getClientCert(), clientConfig.getClientKey());
-                SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-                X509TrustManager trustManager = sslContextProvider.createTrustManager(clientConfig.getServerCert(), clientConfig.getClientCert());
-                builder.sslSocketFactory(socketFactory, trustManager);
-                builder.hostnameVerifier(CertificateTrustManager.hostnameVerifier());
+                cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
+                cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             }
-            builder.connectTimeout(Long.valueOf(connectTimeoutSeconds), TimeUnit.SECONDS);
-            builder.readTimeout(Long.valueOf(readTimeoutSeconds), TimeUnit.SECONDS);
-            builder.writeTimeout(Long.valueOf(writeTimeoutSeconds), TimeUnit.SECONDS);
-            builder.interceptors().add(cmRequestIdProviderInterceptor);
-            builder.interceptors().add(cmRequestLoggerInterceptor);
-            cmClient.setHttpClient(builder.build());
+            cmClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
+            cmClient.getHttpClient().interceptors().add(cmRequestLoggerInterceptor);
+            cmClient.getHttpClient().setConnectTimeout(Long.valueOf(connectTimeoutSeconds), TimeUnit.SECONDS);
+            cmClient.getHttpClient().setReadTimeout(Long.valueOf(readTimeoutSeconds), TimeUnit.SECONDS);
+            cmClient.getHttpClient().setWriteTimeout(Long.valueOf(writeTimeoutSeconds), TimeUnit.SECONDS);
             return cmClient;
         } catch (Exception e) {
             LOGGER.info("Cannot create SSL context for Cloudera Manager", e);
@@ -188,9 +179,5 @@ public class ClouderaManagerApiClientProvider {
 
     public ApiClient getV53Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_53);
-    }
-
-    public ApiClient getV55Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_55);
     }
 }

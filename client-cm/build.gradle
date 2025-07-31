@@ -24,7 +24,7 @@ dependencies {
   testImplementation (group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
+  implementation group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
 
   testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                                 version: hamcrestVersion
   testImplementation group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion

@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
 import okio.Buffer;
 
 @Component
@@ -24,10 +24,10 @@ public class CmRequestLoggerInterceptor implements Interceptor {
         if ("GET".equals(request.method())) {
             return chain.proceed(request);
         }
-        LOGGER.debug("[CM request]: url:{}, method:{}, body:{}", request.url().encodedPath(), request.method(),
+        LOGGER.debug("[CM request]: url:{}, method:{}, body:{}", request.urlString(), request.method(),
                 AnonymizerUtil.anonymize(getBodyAsString(request)));
         Response response = chain.proceed(chain.request());
-        LOGGER.debug("[CM response]: statusCode:{}, message:{}, url:{}", response.code(), response.message(), request.url().encodedPath());
+        LOGGER.debug("[CM response]: statusCode:{}, message:{}, url:{}", response.code(), response.message(), request.urlString());
         return response;
     }
 
