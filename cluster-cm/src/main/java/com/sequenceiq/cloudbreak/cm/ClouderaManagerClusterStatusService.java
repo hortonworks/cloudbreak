@@ -34,6 +34,7 @@ import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
+import com.sequenceiq.cloudbreak.cm.converter.ApiClusterTemplateToCmTemplateConverter;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -128,6 +130,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
+
+    @Inject
+    private ApiClusterTemplateToCmTemplateConverter apiClusterTemplateToCmTemplateConverter;
 
     @Qualifier("CommonMetricService")
     @Inject
@@ -424,6 +429,19 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.warn("Unexpected error while waiting for services to be in a healthy status.", e);
         }
         return false;
+    }
+
+    @Override
+    public String getDeployment(String clusterName) {
+        try {
+            ApiClusterTemplate apiClusterTemplate = clouderaManagerApiFactory
+                    .getClustersResourceApi(client)
+                    .export(clusterName, Boolean.FALSE);
+            return apiClusterTemplateToCmTemplateConverter.convert(apiClusterTemplate);
+        } catch (ApiException e) {
+            LOGGER.warn("Failed to get deployment from CM", e);
+            throw new ClouderaManagerOperationFailedException("Failed to get deployment from CM", e);
+        }
     }
 
     private ClusterManagerCommand convertApiCommand(ApiCommand apiCommand) {

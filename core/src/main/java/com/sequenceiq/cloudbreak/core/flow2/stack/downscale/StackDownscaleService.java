@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -74,6 +75,9 @@ public class StackDownscaleService {
 
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
+
+    @Inject
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         StackView stack = context.getStack();
@@ -115,6 +119,7 @@ public class StackDownscaleService {
                 .map(instanceMetaData ->
                         instanceMetaData.getInstanceId() != null ? instanceMetaData.getInstanceId() : instanceMetaData.getPrivateId().toString())
                 .collect(Collectors.toList());
+        clusterManagerTemplateSyncService.sync(stack.getId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", deletedInstanceIds));
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_DOWNSCALE_SUCCESS, String.join(",", deletedInstanceIds));

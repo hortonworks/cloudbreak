@@ -49,7 +49,7 @@ public class CmSyncerService {
      * @return the summary of the sync operation, with status, parcel and package information
      */
     public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
-        if (!cmServerQueryService.isCmServerRunning(stack)) {
+        if (cmServerQueryService.isCmServerNotRunning(stack)) {
             return buildSummaryWithErrorMessage("CM server is down, it is not possible to sync parcels and CM version from the server.");
         }
         if (candidateImages.isEmpty()) {
@@ -70,9 +70,17 @@ public class CmSyncerService {
                 cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)
         );
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
-        componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
+        componentPersistingService.persistComponentsToDb(
+                stack,
+                cmSyncOperationResult
+        );
+        mixedPackageVersionService.validatePackageVersions(
+                stack.getWorkspace().getId(),
+                stack.getId(),
+                cmSyncOperationResult,
+                candidateImages
+        );
         CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
-        mixedPackageVersionService.validatePackageVersions(stack.getWorkspace().getId(), stack.getId(), cmSyncOperationResult, candidateImages);
         LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationStatus);
         return new CmSyncOperationSummary(cmSyncOperationStatus, cmSyncOperationResult);
     }

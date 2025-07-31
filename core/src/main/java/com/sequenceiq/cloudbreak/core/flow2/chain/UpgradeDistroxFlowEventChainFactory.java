@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUST
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.ALL;
 import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.NODE_ID;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
@@ -22,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscale
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -127,26 +129,34 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DistroXUpgradeTriggerEvent event) {
-        Optional<Image> helperImage = centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(),
-                event.getResourceId());
-        DistroXUpgradeTriggerEvent eventForRuntimeUpgrade = helperImage.map(image -> createEventForRuntimeUpgrade(image, event)).orElse(event);
-
-        LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
+        LOGGER.debug("Creating flow trigger event queue for data hub upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
-        flowEventChain.add(getUpgradeValidationTriggerEvent(eventForRuntimeUpgrade));
-        getClusterUpgradePreparationTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
-        getClusterScaleTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
-        saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
-        flowEventChain.add(getSaltUpdateTriggerEvent(eventForRuntimeUpgrade));
-        getClusterUpgradeTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
-        getImageUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
+        DistroXUpgradeTriggerEvent eventForRuntimeUpgrade = getEventForRuntimeUpgrade(event);
+
+        flowEventChain.addAll(getFullSyncEvent(event));
+        flowEventChain.addAll(getUpgradeValidationTriggerEvent(eventForRuntimeUpgrade));
+        flowEventChain.addAll(getClusterUpgradePreparationTriggerEvent(eventForRuntimeUpgrade));
+        flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
+        flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
+        flowEventChain.addAll(getSaltUpdateTriggerEvent(eventForRuntimeUpgrade));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(eventForRuntimeUpgrade));
+        flowEventChain.addAll(getImageUpdateTriggerEvent(event));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
-        getClusterRepairTriggerEvent(event).ifPresent(flowEventChain::add);
+        flowEventChain.addAll(getClusterRepairTriggerEvent(event));
+
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
-    private Optional<StopStartUpscaleTriggerEvent> getClusterScaleTriggerEvent(Long stackId) {
+    private DistroXUpgradeTriggerEvent getEventForRuntimeUpgrade(DistroXUpgradeTriggerEvent event) {
+        return centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(
+                        event.getImageChangeDto().getImageId(),
+                        event.getResourceId())
+                .map(image -> createEventForRuntimeUpgrade(image, event))
+                .orElse(event);
+    }
+
+    private List<StopStartUpscaleTriggerEvent> getClusterScaleTriggerEvent(Long stackId) {
         String hostGroup = "";
         List<String> stoppedInstances = new ArrayList<>();
         for (InstanceMetadataView instanceMetadataView : instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackId)) {
@@ -158,10 +168,10 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
         if (stoppedInstances.isEmpty()) {
             LOGGER.info("There are no stopped instances present.");
-            return Optional.empty();
+            return List.of();
         } else {
             LOGGER.info("There are {} stopped nodes present. Starting them before the upgrade.", stoppedInstances.size());
-            return Optional.of(new StopStartUpscaleTriggerEvent(
+            return List.of(new StopStartUpscaleTriggerEvent(
                     StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT.event(),
                     stackId,
                     hostGroup,
@@ -180,63 +190,88 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 event.isReplaceVms(), event.isLockComponents(), event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled(), event.getRuntimeVersion());
     }
 
-    private ClusterUpgradeValidationTriggerEvent getUpgradeValidationTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<ClusterUpgradeValidationTriggerEvent> getUpgradeValidationTriggerEvent(DistroXUpgradeTriggerEvent event) {
         LOGGER.info("Upgrade validation enabled, adding to flowchain");
-        return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                event.isLockComponents(), event.isRollingUpgradeEnabled(), event.isReplaceVms());
+        return List.of(
+                new ClusterUpgradeValidationTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        event.getImageChangeDto().getImageId(),
+                        event.isLockComponents(),
+                        event.isRollingUpgradeEnabled(),
+                        event.isReplaceVms()
+                )
+        );
     }
 
-    private Optional<ClusterUpgradePreparationTriggerEvent> getClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<Selectable> getFullSyncEvent(DistroXUpgradeTriggerEvent event) {
+        LOGGER.info("Add sync events for full sync");
+        List<Selectable> syncEvents = new ArrayList<>();
+
+        syncEvents.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
+        syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
+
+        return syncEvents;
+    }
+
+    private List<ClusterUpgradePreparationTriggerEvent> getClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip upgrade preparation because the component versions are not changing.");
-            return Optional.empty();
+            return List.of();
         } else {
-            return Optional.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+            return List.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
                     event.getRuntimeVersion()));
         }
     }
 
-    private StackEvent getSaltUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
-        return new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted());
+    private List<StackEvent> getSaltUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
-    private Optional<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
-            return Optional.empty();
+            return List.of();
         } else {
-            return Optional.of(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
+            return List.of(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
                     event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled()));
         }
     }
 
-    private Optional<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
         if (event.isLockComponents() && !event.isReplaceVms()) {
             LOGGER.warn("OS upgrade without replacing the instances (lockComponents=true, replaceVms=false) is invalid, do not update image.");
-            return Optional.empty();
+            return List.of();
         } else {
-            return Optional.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
+            return List.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
         }
     }
 
-    private Optional<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {
         LOGGER.info("ReplaceVms: {}, lockComponents: {}", event.isReplaceVms(), event.isLockComponents());
         if (event.isReplaceVms()) {
             StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
             Pair<Boolean, Map<String, List<String>>> variantMigrationFeasibleNodeMapPair = getReplaceableInstancesByHostGroup(event, stack);
             if (variantMigrationFeasibleNodeMapPair.getRight().isEmpty()) {
                 LOGGER.info("OS upgrade is not required, as replaceable node list is empty.");
-                return Optional.empty();
+                return List.of();
             }
             ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, variantMigrationFeasibleNodeMapPair.getRight());
             String triggeredStackVariant = calculateTriggeredStackVariant(event.getTriggeredStackVariant(),
                     variantMigrationFeasibleNodeMapPair.getLeft(), stack);
             LOGGER.info("Repair type: {}", repairType);
-            return Optional.of(new ClusterRepairTriggerEvent(CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
-                    repairType, variantMigrationFeasibleNodeMapPair.getRight(), true, triggeredStackVariant, event.isRollingUpgradeEnabled()));
+            return List.of(new ClusterRepairTriggerEvent(
+                    CLUSTER_REPAIR_TRIGGER_EVENT,
+                    event.getResourceId(),
+                    repairType,
+                    variantMigrationFeasibleNodeMapPair.getRight(),
+                    true,
+                    triggeredStackVariant,
+                    event.isRollingUpgradeEnabled()
+            ));
         } else {
             LOGGER.info("The replaceVms flag is false, no need to add repair trigger.");
-            return Optional.empty();
+            return List.of();
         }
     }
 

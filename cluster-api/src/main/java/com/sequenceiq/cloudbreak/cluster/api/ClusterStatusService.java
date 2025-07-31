@@ -37,4 +37,6 @@ public interface ClusterStatusService {
     Optional<ClusterManagerCommand> findCommand(StackDtoDelegate stack, ClusterCommandType command);
 
     boolean waitForHealthyServices(Optional<String> runtimeVersion);
+
+    String getDeployment(String clusterName);
 }

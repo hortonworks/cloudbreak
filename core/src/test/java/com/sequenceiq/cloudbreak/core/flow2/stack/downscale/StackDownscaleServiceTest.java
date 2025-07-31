@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.CommonStatus;
 
@@ -48,6 +51,9 @@ class StackDownscaleServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
@@ -97,6 +103,7 @@ class StackDownscaleServiceTest {
         when(instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(1L, Set.of(123L))).thenReturn(List.of(master));
         stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(123L));
         verify(resourceService).saveAll(resourcesCaptor.capture());
+        verify(clusterManagerTemplateSyncService).sync(anyLong());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();
         assertEquals("master1.cloudera.site", attributes.getValue("discoveryFQDN"));
@@ -195,6 +202,7 @@ class StackDownscaleServiceTest {
         doReturn(Optional.of(volumeSetAttributes2)).when(resourceAttributeUtil).getTypedAttributes(volume2, VolumeSetAttributes.class);
         when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
         when(instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(1L, Set.of(123L))).thenReturn(List.of(master));
+        doNothing().when(clusterManagerTemplateSyncService).sync(anyLong());
         stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(123L));
         verify(resourceService).save(resourceCaptor.capture());
         assertEquals(CommonStatus.FAILED, volume1.getResourceStatus());
