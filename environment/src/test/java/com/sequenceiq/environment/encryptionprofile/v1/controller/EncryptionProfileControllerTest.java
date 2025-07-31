@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -93,6 +94,7 @@ public class EncryptionProfileControllerTest {
     public void testCreate() {
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
         EncryptionProfileRequest request = new EncryptionProfileRequest();
+        request.setTlsVersions(Set.of(TlsVersion.TLS_1_2));
         EncryptionProfile profile = new EncryptionProfile();
         EncryptionProfileResponse expectedResponse = new EncryptionProfileResponse();
 
@@ -270,5 +272,18 @@ public class EncryptionProfileControllerTest {
                 "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
                 "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384", "TLS_ECCPWD_WITH_AES_128_GCM_SHA256", "TLS_ECCPWD_WITH_AES_256_GCM_SHA384",
                 "TLS_CHACHA20_POLY1305_SHA256")));
+    }
+
+    @Test
+    public void testCreateTls13OnlyShouldThrowBadRequestException() {
+        EncryptionProfileRequest request = new EncryptionProfileRequest();
+        request.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
+
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.create(request)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("TLS 1.3 only is not supported yet. Use TLSv1.2 and TLSv1.3 or TLSv1.2 only");
     }
 }

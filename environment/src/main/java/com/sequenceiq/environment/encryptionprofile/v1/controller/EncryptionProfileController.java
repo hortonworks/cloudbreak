@@ -3,6 +3,7 @@ package com.sequenceiq.environment.encryptionprofile.v1.controller;
 import java.util.Collections;
 import java.util.Set;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -63,6 +65,11 @@ public class EncryptionProfileController extends NotificationController implemen
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
 
         verifyEncryptionProfileEntitlement(accountId);
+
+        if (request.getTlsVersions().size() == 1 && request.getTlsVersions().contains(TlsVersion.TLS_1_3) &&
+                !entitlementService.isTlsv13OnlyEnabled(accountId)) {
+            throw new BadRequestException("TLS 1.3 only is not supported yet. Use TLSv1.2 and TLSv1.3 or TLSv1.2 only");
+        }
 
         EncryptionProfile createdEncryptionProfile = encryptionProfileService
                 .create(encryptionProfileConverter.convert(request), accountId, creator);
