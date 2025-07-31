@@ -13,8 +13,10 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -89,9 +91,23 @@ public class OperationService {
 
     public Operation getOperationForAccountIdAndOperationId(String accountId, String operationId) {
         Optional<Operation> operationOptional = operationRepository.findByOperationIdAndAccountId(operationId, accountId);
-        if (!operationOptional.isPresent()) {
+        if (operationOptional.isEmpty()) {
             LOGGER.info("Operation [{}] in account [{}] not found", operationId, accountId);
             throw NotFoundException.notFound("Operation", operationId).get();
+        } else {
+            Operation operation = operationOptional.get();
+            LOGGER.debug("Operation found: {}", operation);
+            return operation;
+        }
+    }
+
+    public Operation getLatestOperationForEnvironmentCrnAndOperationType(String environmentCrn, OperationType operationType) {
+        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+        PageRequest first = PageRequest.of(0, 1);
+        Optional<Operation> operationOptional = operationRepository.findLatestByEnvironmentCrnAndOperationType(accountId, environmentCrn, operationType);
+        if (operationOptional.isEmpty()) {
+            LOGGER.info("Operation with type [{}] for environment [{}] not found", operationType, environmentCrn);
+            throw NotFoundException.notFound("Operation").get();
         } else {
             Operation operation = operationOptional.get();
             LOGGER.debug("Operation found: {}", operation);

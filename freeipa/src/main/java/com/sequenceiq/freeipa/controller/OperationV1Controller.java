@@ -19,7 +19,9 @@ import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.service.FlowService;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.operation.FlowOperationService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -51,6 +53,13 @@ public class OperationV1Controller implements OperationV1Endpoint {
     public OperationStatus getOperationStatus(String operationId, @AccountId String accountId) {
         String currentAccountId = Optional.ofNullable(accountId).orElseGet(ThreadBasedUserCrnProvider::getAccountId);
         return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(currentAccountId, operationId));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public OperationStatus getLatestOperationStatusByEnvironmentAndType(@ResourceCrn String environmentCrn, String operationTypeName) {
+        Operation operation = operationService.getLatestOperationForEnvironmentCrnAndOperationType(environmentCrn, OperationType.fromName(operationTypeName));
+        return operationToOperationStatusConverter.convert(operation);
     }
 
     @Override

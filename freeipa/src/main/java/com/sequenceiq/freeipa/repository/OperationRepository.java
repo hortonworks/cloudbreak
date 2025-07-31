@@ -27,4 +27,22 @@ public interface OperationRepository extends JpaRepository<Operation, Long> {
 
     @Query("SELECT s FROM Operation s WHERE s.startTime < :startBeforeTime AND s.endTime IS NULL AND s.operationType = 'UPGRADE'")
     List<Operation> findUpgradeStaleRunning(@Param("startBeforeTime") Long startBeforeTime);
+
+    /**
+     * @param accountId needed for query optimization as environmentList is not indexed (but accountId is)
+     * @param environmentCrn environment crn
+     * @param operationType operation type
+     */
+    @Query("""
+            SELECT s FROM Operation s
+            WHERE s.accountId = :accountId
+                AND s.operationType = :operationType
+                AND s.environmentList LIKE CONCAT('%', :environmentCrn, '%')
+            ORDER BY startTime DESC
+            LIMIT 1
+    """)
+    Optional<Operation> findLatestByEnvironmentCrnAndOperationType(
+            @Param("accountId") String accountId,
+            @Param("environmentCrn") String environmentCrn,
+            @Param("operationType") OperationType operationType);
 }

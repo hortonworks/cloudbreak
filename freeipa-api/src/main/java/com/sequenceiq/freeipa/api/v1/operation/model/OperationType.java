@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.api.v1.operation.model;
 
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 
 public enum OperationType {
@@ -37,6 +39,17 @@ public enum OperationType {
             case SET_PASSWORD -> SET_PASSWORD;
             default -> throw new UnsupportedOperationException("SyncOperationType not mapped: " + syncOperationType);
         };
+    }
+
+    public static OperationType fromName(String operationTypeName) {
+        if (StringUtils.isNotBlank(operationTypeName)) {
+            try {
+                return valueOf(operationTypeName.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format("Operation type %s is not supported", operationTypeName));
+            }
+        }
+        return null;
     }
 
     public String getLowerCaseName() {
