@@ -28,7 +28,7 @@ dependencies {
   implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
   implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
-  implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.10.0'
+  implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.12.0'
 
   implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.11'
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
