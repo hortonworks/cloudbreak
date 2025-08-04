@@ -82,7 +82,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         if (networkDto == null) {
             return;
         }
-        checkEitherNetworkCidrOrNetworkIdIsPresent(networkDto, resultBuilder);
+        checkNetworkIdIsPresent(networkDto, resultBuilder);
         AzureParams azureParams = networkDto.getAzure();
         if (azureParams != null) {
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, networkDto.getSubnetMetas());
@@ -101,9 +101,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         validateDuringRequest(null, networkDto, resultBuilder);
     }
 
-    private void checkEitherNetworkCidrOrNetworkIdIsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
-        if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
-            String message = "Either the AZURE networkId or CIDR needs to be defined!";
+    private void checkNetworkIdIsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        if (networkDto.getAzure() == null || StringUtils.isEmpty(networkDto.getAzure().getNetworkId())) {
+            String message = "Azure existing networkId needs to be defined, environment creation with new network is not supported.";
             LOGGER.info(message);
             resultBuilder.error(message);
         }

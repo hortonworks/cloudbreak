@@ -107,6 +107,7 @@ public interface CloudProvider {
 
     EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network);
 
+    @Deprecated
     EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network);
 
     TelemetryTestDto telemetry(TelemetryTestDto telemetry);

@@ -67,6 +67,7 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         return this;
     }
 
+    @Deprecated
     public EnvironmentNetworkTestDto withNetworkCIDR(String networkCIDR) {
         getRequest().setAws(null);
         getRequest().setAzure(null);
