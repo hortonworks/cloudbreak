@@ -251,7 +251,7 @@ public class ClusterRepairService {
     }
 
     private boolean isCMRepairAndAllStoppedNodesNotSelected(List<InstanceMetadataView> nonTerminatedInstanceMetadata, Set<String> selectedInstances) {
-        boolean cmNodeSelectedForRepair = nonTerminatedInstanceMetadata.stream()
+        boolean cmNodeSelectedForRepair = nonTerminatedInstanceMetadata.stream().filter(i -> i.getInstanceId() != null)
                 .anyMatch(i -> selectedInstances.contains(i.getInstanceId()) && i.getClusterManagerServer());
         if (cmNodeSelectedForRepair) {
             for (InstanceMetadataView instanceMetadataView : nonTerminatedInstanceMetadata) {

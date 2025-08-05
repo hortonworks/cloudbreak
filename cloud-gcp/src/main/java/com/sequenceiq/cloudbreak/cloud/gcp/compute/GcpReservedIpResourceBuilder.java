@@ -44,7 +44,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         if (group.getType() == InstanceGroupType.GATEWAY && !context.getNoPublicIp()) {
             String resourceName = getResourceNameService().instance(auth.getCloudContext().getName(), group.getName(), privateId);
-            return Collections.singletonList(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone()));
+            return Collections.singletonList(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone(), group.getName()));
         } else {
             LOGGER.debug("Public IPs for instances in {} group won't be created, because it is not a gateway instancegroup or no public ip is needed.",
                     group.getName());

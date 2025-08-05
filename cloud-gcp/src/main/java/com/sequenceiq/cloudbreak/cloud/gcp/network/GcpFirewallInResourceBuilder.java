@@ -55,7 +55,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
         String resourceName = getResourceNameService().firewallIn(context.getName());
-        return createNamedResource(resourceType(), resourceName, null);
+        return createNamedResource(resourceType(), resourceName, null, group.getName());
     }
 
     @Override

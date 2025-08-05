@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.context;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
@@ -20,13 +21,14 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 @Service
 public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
 
-    public static final int PARALLEL_RESOURCE_REQUEST = 30;
-
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
     @Inject
     private GcpStackUtil gcpStackUtil;
+
+    @Value("${gcp.resource.builder.pool.size:20}")
+    private int resourceBuilderPoolSize;
 
     @Override
     public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, boolean build) {
@@ -36,7 +38,7 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
         Compute compute = gcpComputeFactory.buildCompute(credential);
         Location location = context.getLocation();
         boolean noPublicIp = network != null ? gcpStackUtil.noPublicIp(network) : false;
-        return new GcpContext(context.getName(), location, projectId, serviceAccountId, compute, noPublicIp, PARALLEL_RESOURCE_REQUEST, build);
+        return new GcpContext(context.getName(), location, projectId, serviceAccountId, compute, noPublicIp, resourceBuilderPoolSize, build);
     }
 
     @Override

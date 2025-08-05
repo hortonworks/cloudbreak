@@ -41,8 +41,6 @@ import freemarker.template.TemplateException;
 @Import(ComponentTestUtil.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",
-        "cb.gcp.stopStart.batch.size=2",
-        "cb.gcp.create.batch.size=2",
         "cb.aws.hostkey.verify=true",
         "cb.aws.spotinstances.enabled=true",
         "cb.aws.credential.cache.ttl=1"
@@ -92,11 +90,6 @@ public class TestConfig {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
-    }
-
-    @Bean
-    public AsyncTaskExecutor resourceBuilderExecutor() {
-        return new AsyncTaskExecutorTestImpl();
     }
 
     @Bean

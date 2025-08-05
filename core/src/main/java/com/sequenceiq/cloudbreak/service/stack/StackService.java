@@ -101,7 +101,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -1317,10 +1316,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         LOGGER.debug("Cleanup instancegroups for stack {}", stack.getResourceCrn());
         if (stack.getInstanceGroups() != null) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                LOGGER.debug("Cleanup targetgroups for instanceGroup {}", instanceGroup.getId());
-                for (TargetGroup targetGroup : instanceGroup.getTargetGroups()) {
-                    targetGroupPersistenceService.delete(targetGroup.getId());
-                }
                 LOGGER.debug("Cleanup instancegroup {}", instanceGroup.getId());
                 instanceGroup.setTargetGroups(new HashSet<>());
                 instanceGroupService.save(instanceGroup);

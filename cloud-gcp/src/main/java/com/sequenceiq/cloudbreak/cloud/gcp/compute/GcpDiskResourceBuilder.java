@@ -50,7 +50,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().instance(cloudContext.getName(), group.getName(), privateId);
-        return Collections.singletonList(createNamedResource(resourceType(), resourceName, getLocation(instance, context)));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName, getLocation(instance, context), group.getName()));
     }
 
     @Override

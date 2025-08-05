@@ -39,15 +39,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${redbeams.etc.config.dir}")
     private String etcConfigDir;
 
-    @Value("${redbeams.threadpool.core.size:}")
-    private int corePoolSize;
-
-    @Value("${redbeams.threadpool.capacity.size:}")
-    private int queueCapacity;
-
-    @Value("${redbeams.threadpool.termination.seconds:60}")
-    private int awaitTerminationSeconds;
-
     @Value("${redbeams.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
@@ -87,12 +78,6 @@ public class AppConfig implements ResourceLoaderAware {
     public AsyncTaskExecutor intermediateBuilderExecutor() {
         return commonExecutorServiceFactory.newAsyncTaskExecutor("intermediateBuilderExecutor", virtualThreadsAvailable, intermediateCorePoolSize,
                 intermediateQueueCapacity, intermediateAwaitTerminationSeconds);
-    }
-
-    @Bean
-    public AsyncTaskExecutor resourceBuilderExecutor() {
-        return commonExecutorServiceFactory.newAsyncTaskExecutor("resourceBuilderExecutor", virtualThreadsAvailable, corePoolSize, queueCapacity,
-                awaitTerminationSeconds);
     }
 
     @Bean(name = DELAYED_TASK_EXECUTOR)

@@ -91,19 +91,20 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                                 group.getName(),
                                 stackName);
                     } else {
-                        LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack",
+                        LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack, for private id: {}",
                                 builder.resourceType(),
                                 builder.getClass().getSimpleName(),
                                 group.getName(),
-                                stackName);
+                                stackName,
+                                privateId);
                         List<CloudResourceStatus> computeResults = createComputeResources(instance, privateId, builder);
                         results.addAll(computeResults);
                         if (containsFailed(computeResults)) {
                             failedComputeCreation = true;
                         }
                     }
-                    LOGGER.info("Finished building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
-                            builder.getClass().getSimpleName(), group.getName(), stackName);
+                    LOGGER.info("Finished building '{} ({})' resources of '{}' instance group of '{}' stack, for private id: '{}'", builder.resourceType(),
+                            builder.getClass().getSimpleName(), group.getName(), stackName, privateId);
                 }
             } catch (CancellationException e) {
                 LOGGER.warn("Cancellation exception has been arrived, throwing forward: {}", e.getMessage());

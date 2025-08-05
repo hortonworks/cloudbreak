@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -49,58 +50,68 @@ public class CloudFailureHandler {
     @Inject
     private Optional<CloudbreakEventService> cloudbreakEventService;
 
-    public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, Integer requestedNodeCount) {
-        if (failuresList.isEmpty()) {
+    public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, Map<CloudResourceStatus, Group> failedResources,
+            Map<CloudResourceStatus, Group> allResources, Integer requestedNodeCount) {
+        if (failedResources.isEmpty()) {
             return;
         }
-        LOGGER.debug("Roll back the following resources: {}", failuresList);
-        doRollback(cloudFailureContext, failuresList, resourceStatuses, group, requestedNodeCount);
+        LOGGER.debug("Roll back the following resources: {}", failedResources.keySet());
+        doRollback(cloudFailureContext, failedResources, allResources, requestedNodeCount);
     }
 
-    private void doRollback(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, Integer requestedNodeCount) {
-        Set<Long> failures = failureCount(failuresList);
+    private void doRollback(CloudFailureContext cloudFailureContext, Map<CloudResourceStatus, Group> failedResources,
+            Map<CloudResourceStatus, Group> allResources, Integer requestedNodeCount) {
+        Set<Long> failures = failureCount(failedResources.keySet());
         ScaleContext stx = cloudFailureContext.getStx();
         AuthenticatedContext auth = cloudFailureContext.getAuth();
         ResourceBuilderContext ctx = cloudFailureContext.getCtx();
         if (stx.getAdjustmentType() == null && !failures.isEmpty()) {
-            LOGGER.info("Failure policy is null so error will be thrown");
-            throwError(failuresList);
+            LOGGER.warn("Failure policy is null so error will be thrown");
+            throwError(failedResources.keySet());
         }
+        handleFailedResources(failedResources, allResources, requestedNodeCount, stx, failures, auth, ctx);
+    }
 
-        LOGGER.info("Adjustment type is {}", stx.getAdjustmentType());
+    private void handleFailedResources(Map<CloudResourceStatus, Group> failedResources, Map<CloudResourceStatus, Group> allResources,
+            Integer requestedNodeCount, ScaleContext stx, Set<Long> failures, AuthenticatedContext auth, ResourceBuilderContext ctx) {
+        LOGGER.info("Adjustment type is {}, failures are: {}", stx.getAdjustmentType(), failures);
+        int successfulNodeCount = requestedNodeCount - failures.size();
         switch (stx.getAdjustmentType()) {
             case EXACT:
-                if (stx.getThreshold() > requestedNodeCount - failures.size()) {
-                    LOGGER.info("Number of failures is more than the threshold ({}) so error will be thrown", stx.getThreshold());
-                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
+                if (stx.getThreshold() > successfulNodeCount) {
+                    LOGGER.warn("Successful nodes ({}) below threshold ({}). Rolling back all operations.", successfulNodeCount, stx.getThreshold());
+                    rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
                 } else if (!failures.isEmpty()) {
-                    LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
+                    LOGGER.info("Successful nodes ({}) exceed threshold ({}). Rolling back failed nodes and proceeding.",
+                            successfulNodeCount, stx.getThreshold());
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
                 }
                 break;
             case PERCENTAGE:
-                double calculatedPercentage = calculatePercentage(failures.size(), requestedNodeCount);
+                double successPercentage = calculatePercentage(failures.size(), requestedNodeCount);
                 Double threshold = Double.valueOf(stx.getThreshold());
-                if (threshold > calculatedPercentage) {
-                    LOGGER.info("Calculated percentage ({}) is lower than threshold, do rollback ({})", calculatedPercentage, threshold);
-                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
+                if (threshold > successPercentage) {
+                    LOGGER.warn("Success percentage ({}) below threshold ({}). Rolling back all operations.", successPercentage, threshold);
+                    rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
                 } else if (!failures.isEmpty()) {
-                    LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
+                    LOGGER.info("Success percentage ({}) exceeds threshold ({}). Rolling back failed nodes and proceeding.", successPercentage, threshold);
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
                 }
                 break;
             case BEST_EFFORT:
-                LOGGER.info("Decrease node counts because threshold was higher");
-                handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
+                if (successfulNodeCount == 0) {
+                    LOGGER.warn("Successful node count is 0 so rolling back all operations.");
+                    rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
+                } else {
+                    LOGGER.info("Successful node count ({}) is positive. Rolling back failed nodes and proceeding.", successfulNodeCount);
+                    handleExceptions(auth, allResources, ctx, failures, stx.getUpscale());
+                }
                 break;
             default:
                 LOGGER.info("Unsupported adjustment type so error will throw");
-                rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
+                rollbackEverythingAndThrowException(failedResources, allResources, stx, auth, ctx);
                 break;
         }
-
     }
 
     private void fireResourceDeletionFailedEvent(AuthenticatedContext auth, String failedResourcesWithReason) {
@@ -125,11 +136,11 @@ public class CloudFailureHandler {
         }
     }
 
-    private void rollbackEverythingAndThrowException(List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, ScaleContext stx, AuthenticatedContext auth, ResourceBuilderContext ctx) {
-        Set<Long> rollbackIds = resourceStatuses.stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
-        doRollback(auth, resourceStatuses, rollbackIds, group, ctx, stx.getUpscale());
-        throwRolledbackException(failuresList);
+    private void rollbackEverythingAndThrowException(Map<CloudResourceStatus, Group> failedResources, Map<CloudResourceStatus, Group> resourceStatuses,
+            ScaleContext stx, AuthenticatedContext auth, ResourceBuilderContext ctx) {
+        Set<Long> rollbackIds = resourceStatuses.keySet().stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
+        doRollback(auth, resourceStatuses, rollbackIds, ctx, stx.getUpscale());
+        throwRolledbackException(failedResources.keySet());
     }
 
     private Set<Long> failureCount(Collection<CloudResourceStatus> failedResourceRequestResults) {
@@ -148,8 +159,9 @@ public class CloudFailureHandler {
         return calculatedPercentage;
     }
 
-    private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
+    private void handleExceptions(AuthenticatedContext auth, Map<CloudResourceStatus, Group> allResources,
             ResourceBuilderContext ctx, Collection<Long> ids, Boolean upscale) {
+        Set<CloudResourceStatus> cloudResourceStatuses = allResources.keySet();
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
@@ -159,24 +171,27 @@ public class CloudFailureHandler {
         }
         if (!resources.isEmpty()) {
             LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resources.size());
-            doRollback(auth, cloudResourceStatuses, ids, group, ctx, upscale);
+            doRollback(auth, allResources, ids, ctx, upscale);
         }
     }
 
-    private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Collection<Long> rollbackIds, Group group,
+    private void doRollback(AuthenticatedContext auth, Map<CloudResourceStatus, Group> allResources, Collection<Long> rollbackIds,
             ResourceBuilderContext ctx, Boolean upscale) {
         LOGGER.info("Rollback resources for the following private ids: {}", rollbackIds);
 
-        if (getRemovableInstanceTemplates(group, rollbackIds).size() <= 0 && !upscale) {
+        List<Group> groups = allResources.values().stream().distinct().toList();
+        List<CloudResourceStatus> resourceStatuses = allResources.keySet().stream()
+                .sorted(Comparator.comparing(o -> o.getCloudResource().getName())).toList();
+        if (getRemovableInstanceTemplates(groups, rollbackIds).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will be thrown");
-            throwError(statuses);
+            throwError(resourceStatuses);
         } else {
-            fireResourceCreationFailedEvent(auth, statuses.stream()
+            fireResourceCreationFailedEvent(auth, resourceStatuses.stream()
                     .filter(cloudResourceStatus -> ResourceStatus.FAILED.equals(cloudResourceStatus.getStatus()))
                     .collect(Collectors.toList()));
-            Set<CloudResource> cloudResources = getUniqueCloudResources(statuses, rollbackIds);
-            LOGGER.debug("Rollback cloud resources: {}", cloudResources);
-            List<CloudResourceStatus> deleteStatuses = computeResourceService.deleteResources(ctx, auth, cloudResources, false, false);
+            Set<CloudResource> deletableCloudResources = getUniqueCloudResources(resourceStatuses, rollbackIds);
+            LOGGER.debug("Rollback cloud resources: {}", deletableCloudResources);
+            List<CloudResourceStatus> deleteStatuses = computeResourceService.deleteResources(ctx, auth, deletableCloudResources, false, false);
 
             if (deleteStatuses.stream().anyMatch(CloudResourceStatus::isFailed)) {
                 String failedResourcesWithReason = deleteStatuses.stream().filter(CloudResourceStatus::isFailed)
@@ -188,7 +203,7 @@ public class CloudFailureHandler {
         }
     }
 
-    private Set<CloudResource> getUniqueCloudResources(List<CloudResourceStatus> statuses, Collection<Long> rollbackIds) {
+    private Set<CloudResource> getUniqueCloudResources(Collection<CloudResourceStatus> statuses, Collection<Long> rollbackIds) {
         Map<String, CloudResource> nameToResourceMap = new LinkedHashMap<>();
         for (CloudResourceStatus cloudResourceStatus : statuses) {
             if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
@@ -200,9 +215,9 @@ public class CloudFailureHandler {
         return new LinkedHashSet<>(nameToResourceMap.values());
     }
 
-    private Collection<InstanceTemplate> getRemovableInstanceTemplates(Group group, Collection<Long> ids) {
+    private Collection<InstanceTemplate> getRemovableInstanceTemplates(Collection<Group> groups, Collection<Long> ids) {
         Collection<InstanceTemplate> instanceTemplates = new ArrayList<>();
-        for (CloudInstance cloudInstance : group.getInstances()) {
+        for (CloudInstance cloudInstance : groups.stream().flatMap(group -> group.getInstances().stream()).toList()) {
             InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
             if (!ids.contains(instanceTemplate.getPrivateId())) {
                 instanceTemplates.add(instanceTemplate);
@@ -211,12 +226,12 @@ public class CloudFailureHandler {
         return instanceTemplates;
     }
 
-    private void throwRolledbackException(List<CloudResourceStatus> statuses) {
+    private void throwRolledbackException(Collection<CloudResourceStatus> statuses) {
         throw new RolledbackResourcesException("Resources are rolled back because successful node count was lower than threshold. "
                 + statuses.size() + " nodes are failed. Error reason: " + ResourceStatusLists.aggregateReason(statuses));
     }
 
-    private void throwError(List<CloudResourceStatus> statuses) {
+    private void throwError(Collection<CloudResourceStatus> statuses) {
         throw new CloudConnectorException("Error reason: " + ResourceStatusLists.aggregateReason(statuses));
     }
 

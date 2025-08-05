@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.context;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
@@ -17,7 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 @Service
 public class AwsContextBuilder implements ResourceContextBuilder<AwsContext> {
 
-    private static final int PARALLEL_RESOURCE_REQUEST = 30;
+    @Value("${aws.resource.builder.pool.size:20}")
+    private int resourceBuilderPoolSize;
 
     @Override
     public AwsContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, boolean build) {
@@ -25,7 +27,7 @@ public class AwsContextBuilder implements ResourceContextBuilder<AwsContext> {
         AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(auth);
         AmazonEc2Client amazonEC2Client = authenticatedContextView.getAmazonEC2Client();
         AmazonElasticLoadBalancingClient elasticLoadBalancingClient = authenticatedContextView.getElasticLoadBalancingClient();
-        return new AwsContext(context.getName(), amazonEC2Client, location, PARALLEL_RESOURCE_REQUEST, build, elasticLoadBalancingClient);
+        return new AwsContext(context.getName(), amazonEC2Client, location, resourceBuilderPoolSize, build, elasticLoadBalancingClient);
     }
 
     @Override

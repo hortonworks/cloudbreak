@@ -103,11 +103,7 @@ cb:
   gcp:
     hostkey.verify: false
     disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
-    stopStart.batch.size: 10
-    create.batch.size: 5
   aws:
-    stopStart.batch.size: 10
-    create.batch.size: 8
     spotinstances.enabled: true
     disabled.instance.types:
     hostkey.verify: false

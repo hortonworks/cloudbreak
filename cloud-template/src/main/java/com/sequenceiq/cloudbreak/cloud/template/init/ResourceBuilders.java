@@ -24,24 +24,12 @@ import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
-import com.sequenceiq.cloudbreak.cloud.template.ResourceCreateBatchConfig;
-import com.sequenceiq.cloudbreak.cloud.template.ResourceStopStartBatchConfig;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component
 public class ResourceBuilders {
 
     private static final Logger LOGGER = getLogger(ResourceBuilders.class);
-
-    private static final Integer DEFAULT_STOP_START_BATCH_SIZE = 10;
-
-    private static final Integer DEFAULT_CREATE_BATCH_SIZE = 5;
-
-    @Autowired(required = false)
-    private List<ResourceCreateBatchConfig> createBatchConfigs = new ArrayList<>();
-
-    @Autowired(required = false)
-    private List<ResourceStopStartBatchConfig> stopStartBatchConfigs = new ArrayList<>();
 
     @Autowired(required = false)
     private List<NetworkResourceBuilder> network = new ArrayList<>();
@@ -68,10 +56,6 @@ public class ResourceBuilders {
 
     private final Map<Variant, List<LoadBalancerResourceBuilder<ResourceBuilderContext>>> loadBalancerChain = new HashMap<>();
 
-    private final Map<Variant, Integer> stopStartBatchSize = new HashMap<>();
-
-    private final Map<Variant, Integer> createBatchSize = new HashMap<>();
-
     @PostConstruct
     public void init() {
         Comparator<OrderedBuilder> comparator = new BuilderComparator();
@@ -80,8 +64,6 @@ public class ResourceBuilders {
         initGroup(comparator);
         initCompute(comparator);
         initLoadBalancer(comparator);
-        initStopStartBatchSize();
-        initCreateBatchSize();
     }
 
     public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Variant platformVariant) {
@@ -129,16 +111,6 @@ public class ResourceBuilders {
         return new ArrayList<>(loadBalancerResourceBuilders);
     }
 
-    public Integer getStopStartBatchSize(Variant variant) {
-        Integer batchSize = stopStartBatchSize.get(variant);
-        return batchSize == null ? DEFAULT_STOP_START_BATCH_SIZE : batchSize;
-    }
-
-    public Integer getCreateBatchSize(Variant variant) {
-        Integer batchSize = createBatchSize.get(variant);
-        return batchSize == null ? DEFAULT_CREATE_BATCH_SIZE : batchSize;
-    }
-
     private void initNetwork(Comparator<OrderedBuilder> comparator) {
         for (NetworkResourceBuilder<ResourceBuilderContext> builder : network) {
             List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
@@ -160,18 +132,6 @@ public class ResourceBuilders {
             List<ComputeResourceBuilder<ResourceBuilderContext>> chain = computeChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
-        }
-    }
-
-    private void initStopStartBatchSize() {
-        for (ResourceStopStartBatchConfig resourceBatchConfig : stopStartBatchConfigs) {
-            stopStartBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.batchSize());
-        }
-    }
-
-    private void initCreateBatchSize() {
-        for (ResourceCreateBatchConfig resourceBatchConfig : createBatchConfigs) {
-            createBatchSize.put(resourceBatchConfig.variant(), resourceBatchConfig.batchSize());
         }
     }
 

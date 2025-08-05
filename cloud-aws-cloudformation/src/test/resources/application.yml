@@ -11,8 +11,6 @@ spring:
 
 cb:
   aws:
-    stopStart.batch.size: 10
-    create.batch.size: 8
     spotinstances.enabled: true
     disabled.instance.types:
     distrox:
@@ -58,10 +56,6 @@ cb:
 
   platform.default:
     regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
-
-  gcp:
-    stopStart.batch.size: 10
-    create.batch.size: 5
 
   nginx:
     port: 9443

@@ -2,11 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.template.context;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,31 +27,31 @@ public class ResourceBuilderContext extends DynamicModel {
 
     private final String name;
 
-    private final int parallelResourceRequest;
+    private final int resourceBuilderPoolSize;
 
     private final Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
 
     private final Queue<CloudResource> authenticationResources = new ConcurrentLinkedQueue<>();
 
-    private final Map<String, List<CloudResource>> groupResources = new HashMap<>();
+    private final Map<String, List<CloudResource>> groupResources = new ConcurrentHashMap<>();
 
-    private final Map<Long, List<CloudResource>> computeResources = new HashMap<>();
+    private final Map<Long, List<CloudResource>> computeResources = new ConcurrentHashMap<>();
 
-    private final Map<LoadBalancerType, List<CloudResource>> loadBalancerResources = new HashMap<>();
+    private final Map<LoadBalancerType, List<CloudResource>> loadBalancerResources = new ConcurrentHashMap<>();
 
     private final Lock lock = new ReentrantLock();
 
     private boolean build;
 
-    public ResourceBuilderContext(String name, Location location, int parallelResourceRequest, boolean build) {
-        this(name, location, parallelResourceRequest);
+    public ResourceBuilderContext(String name, Location location, int resourceBuilderPoolSize, boolean build) {
+        this(name, location, resourceBuilderPoolSize);
         this.build = build;
     }
 
-    public ResourceBuilderContext(String name, Location location, int parallelResourceRequest) {
+    public ResourceBuilderContext(String name, Location location, int resourceBuilderPoolSize) {
         this.location = location;
         this.name = name;
-        this.parallelResourceRequest = parallelResourceRequest;
+        this.resourceBuilderPoolSize = resourceBuilderPoolSize;
     }
 
     public Location getLocation() {
@@ -73,8 +74,8 @@ public class ResourceBuilderContext extends DynamicModel {
         return name;
     }
 
-    public int getParallelResourceRequest() {
-        return parallelResourceRequest;
+    public int getResourceBuilderPoolSize() {
+        return resourceBuilderPoolSize;
     }
 
     public void addNetworkResources(Collection<CloudResource> resources) {
@@ -91,14 +92,15 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public void addGroupResources(String groupName, Collection<CloudResource> resources) {
         withLock(() -> {
-            List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new ArrayList<>());
+            List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new CopyOnWriteArrayList<>());
             list.addAll(resources.stream().filter(cloudResource -> groupName.equals(cloudResource.getGroup())).toList());
         });
     }
 
     public void addComputeResources(Long privateId, Collection<CloudResource> resources) {
         withLock(() -> {
-            List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new ArrayList<>());
+            LOGGER.debug("Adding compute resources for private id {}: {}", privateId, resources);
+            List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new CopyOnWriteArrayList<>());
             for (CloudResource resource : resources) {
                 if (list.contains(resource)) {
                     LOGGER.info("Resource {} already exists for private id {}", resource, privateId);
@@ -115,7 +117,7 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public void addLoadBalancerResources(LoadBalancerType type, Collection<CloudResource> resources) {
         withLock(() -> {
-            List<CloudResource> list = loadBalancerResources.computeIfAbsent(type, k -> new ArrayList<>());
+            List<CloudResource> list = loadBalancerResources.computeIfAbsent(type, k -> new CopyOnWriteArrayList<>());
             list.addAll(resources);
         });
     }

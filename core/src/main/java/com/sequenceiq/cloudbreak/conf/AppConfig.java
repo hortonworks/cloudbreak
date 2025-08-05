@@ -71,15 +71,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
     private List<String> orchestrators;
 
-    @Value("${cb.threadpool.core.size:}")
-    private int corePoolSize;
-
-    @Value("${cb.threadpool.capacity.size:}")
-    private int queueCapacity;
-
-    @Value("${cb.threadpool.termination.seconds:60}")
-    private int awaitTerminationSeconds;
-
     @Value("${cb.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
@@ -200,12 +191,6 @@ public class AppConfig implements ResourceLoaderAware {
     public AsyncTaskExecutor intermediateBuilderExecutor() {
         return commonExecutorServiceFactory.newAsyncTaskExecutor("intermediateBuilderExecutor", virtualThreadsAvailable, intermediateCorePoolSize,
                 intermediateQueueCapacity, intermediateAwaitTerminationSeconds);
-    }
-
-    @Bean
-    public AsyncTaskExecutor resourceBuilderExecutor() {
-        return commonExecutorServiceFactory.newAsyncTaskExecutor("resourceBuilderExecutor", virtualThreadsAvailable, corePoolSize, queueCapacity,
-                awaitTerminationSeconds);
     }
 
     @Bean

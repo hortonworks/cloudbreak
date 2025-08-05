@@ -132,7 +132,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().instance(cloudContext.getName(), group.getName(), privateId);
         CloudResource cloudResource = CloudResource.builder()
-                .cloudResource(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone()))
+                .cloudResource(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone(), group.getName()))
                 .withPrivateId(privateId)
                 .build();
         return singletonList(cloudResource);

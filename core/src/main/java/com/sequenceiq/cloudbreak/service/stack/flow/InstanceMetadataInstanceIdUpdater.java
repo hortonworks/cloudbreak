@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -55,7 +56,7 @@ public class InstanceMetadataInstanceIdUpdater {
         transactionService.required(() -> {
             try {
                 ResourceType instanceResourceType = connector.resources().getInstanceResourceType();
-                List<CloudResource> instanceCloudResources = getInstanceCloudResourcesWithType(cloudResourceStatuses, instanceResourceType);
+                List<CloudResource> instanceCloudResources = getCreatedInstanceCloudResourcesWithType(cloudResourceStatuses, instanceResourceType);
                 List<InstanceMetaData> requestedInstanceMetadatas = instanceMetaDataService.findAllByStackIdAndStatus(ac.getCloudContext().getId(), REQUESTED);
                 LOGGER.debug("Requested instance metadata entries with private ids: {}",
                         requestedInstanceMetadatas.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
@@ -75,8 +76,9 @@ public class InstanceMetadataInstanceIdUpdater {
         });
     }
 
-    private List<CloudResource> getInstanceCloudResourcesWithType(List<CloudResourceStatus> cloudResourceStatuses, ResourceType instanceResourceType) {
+    private List<CloudResource> getCreatedInstanceCloudResourcesWithType(List<CloudResourceStatus> cloudResourceStatuses, ResourceType instanceResourceType) {
         return cloudResourceStatuses.stream()
+                .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
                 .filter(cloudResource -> instanceResourceType.equals(cloudResource.getType()))
                 .toList();

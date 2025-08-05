@@ -32,6 +32,15 @@ public abstract class AbstractGcpBaseResourceChecker {
                 .build();
     }
 
+    protected CloudResource createNamedResource(ResourceType type, String name, String zone, String group) {
+        return CloudResource.builder()
+                .withType(type)
+                .withName(name)
+                .withAvailabilityZone(zone)
+                .withGroup(group)
+                .build();
+    }
+
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
         GoogleJsonError jsonError = getGoogleJsonError(ex);
         if (jsonError != null) {

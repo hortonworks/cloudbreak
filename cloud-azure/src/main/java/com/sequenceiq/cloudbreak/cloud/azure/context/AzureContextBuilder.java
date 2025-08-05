@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.context;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
@@ -14,12 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 @Service
 public class AzureContextBuilder implements ResourceContextBuilder<AzureContext> {
 
-    private static final int PARALLEL_RESOURCE_REQUEST = 30;
+    @Value("${azure.resource.builder.pool.size:20}")
+    private int resourceBuilderPoolSize;
 
     @Override
     public AzureContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, boolean build) {
         Location location = context.getLocation();
-        return new AzureContext(context.getName(), location, PARALLEL_RESOURCE_REQUEST, build);
+        return new AzureContext(context.getName(), location, resourceBuilderPoolSize, build);
     }
 
     @Override

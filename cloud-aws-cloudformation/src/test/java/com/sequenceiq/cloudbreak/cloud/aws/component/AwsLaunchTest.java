@@ -102,10 +102,6 @@ import software.amazon.awssdk.services.efs.model.MountTargetDescription;
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",
-        "cb.gcp.stopStart.batch.size=2",
-        "cb.gcp.create.batch.size=2",
-        "cb.aws.stopStart.batch.size=2",
-        "cb.aws.create.batch.size=2",
         "cb.aws.hostkey.verify=true",
         "cb.aws.spotinstances.enabled=true",
         "cb.aws.credential.cache.ttl=1",

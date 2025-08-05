@@ -11,9 +11,9 @@ public class AwsContext extends ResourceBuilderContext {
 
     private final AmazonElasticLoadBalancingClient loadBalancingClient;
 
-    public AwsContext(String name, AmazonEc2Client amazonEC2Client, Location location, int parallelResourceRequest, boolean build,
+    public AwsContext(String name, AmazonEc2Client amazonEC2Client, Location location, int resourceBuilderPoolSize, boolean build,
             AmazonElasticLoadBalancingClient elasticLoadBalancingClient) {
-        super(name, location, parallelResourceRequest, build);
+        super(name, location, resourceBuilderPoolSize, build);
         this.amazonEc2Client = amazonEC2Client;
         this.loadBalancingClient = elasticLoadBalancingClient;
     }

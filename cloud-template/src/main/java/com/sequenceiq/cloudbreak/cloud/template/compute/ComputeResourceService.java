@@ -13,15 +13,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -61,9 +64,6 @@ public class ComputeResourceService {
     private static final int MAX_POLLING_ATTEMPT = 100;
 
     @Inject
-    private AsyncTaskExecutor resourceBuilderExecutor;
-
-    @Inject
     private ResourceBuilders resourceBuilders;
 
     @Inject
@@ -80,9 +80,6 @@ public class ComputeResourceService {
 
     @Inject
     private ResourceActionFactory resourceActionFactory;
-
-    @Inject
-    private CloudInstanceBatchSplitter cloudInstanceBatchSplitter;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
@@ -103,18 +100,22 @@ public class ComputeResourceService {
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Variant variant = auth.getCloudContext().getVariant();
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = Lists.reverse(resourceBuilders.compute(variant));
-        for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
-            List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
-            for (CloudResource cloudResource : resourceList) {
-                ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(
-                        new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
-                futures.add(resourceBuilderExecutor.submit(deletionCallable));
-                if (isRequestFull(futures.size(), context)) {
+        int poolSize = context.getResourceBuilderPoolSize();
+        LOGGER.info("Pool size: {} for delete resources", poolSize);
+        try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(), Thread.ofVirtual().factory())) {
+            for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
+                LOGGER.debug("Delete resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
+                List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
+                for (CloudResource cloudResource : resourceList) {
+                    ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(
+                            new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
+                    futures.add(executor.submit(deletionCallable));
                     results.addAll(getDeletedResourcesOrFail(futures, hardFail));
                 }
+                // wait for builder type to finish before starting the next one
+                results.addAll(getDeletedResourcesOrFail(futures, hardFail));
             }
-            // wait for builder type to finish before starting the next one
-            results.addAll(getDeletedResourcesOrFail(futures, hardFail));
         }
         return results;
     }
@@ -150,6 +151,7 @@ public class ComputeResourceService {
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
             AuthenticatedContext auth, List<CloudInstance> instances) {
+        LOGGER.debug("Stop / start instances: {}", instances);
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         Variant variant = auth.getCloudContext().getVariant();
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
@@ -158,46 +160,45 @@ public class ComputeResourceService {
         }
 
         List<ComputeResourceBuilder<ResourceBuilderContext>> instanceBuilders =
-                builders.stream().filter(ComputeResourceBuilder::isInstanceBuilder).collect(Collectors.toList());
+                builders.stream().filter(ComputeResourceBuilder::isInstanceBuilder).toList();
 
-        for (ComputeResourceBuilder<ResourceBuilderContext> builder : instanceBuilders) {
-            LOGGER.debug("The builder for the resource of {} is executed", builder.resourceType());
-
-            Integer stopStartBatchSize = resourceBuilders.getStopStartBatchSize(auth.getCloudContext().getVariant());
-            if (!instances.isEmpty()) {
-                LOGGER.debug("Split {} instances to {} chunks to execute the stop/start operation parallel", instances.size(), stopStartBatchSize);
-                AtomicInteger counter = new AtomicInteger();
-                Collection<List<CloudInstance>> instancesChunks = instances.stream()
-                        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / stopStartBatchSize)).values();
-
-                Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
-                for (List<CloudInstance> instancesChunk : instancesChunks) {
-                    LOGGER.debug("Submit stop/start operation thread with {} instances", instancesChunk.size());
-                    ResourceStopStartCallablePayload stopStartCallablePayload = new ResourceStopStartCallablePayload(context, auth, instancesChunk, builder);
-                    ResourceStopStartCallable stopStartCallable = resourceActionFactory.buildStopStartCallable(stopStartCallablePayload);
-                    Future<ResourceRequestResult<List<CloudVmInstanceStatus>>> future = resourceBuilderExecutor.submit(stopStartCallable);
-                    futures.add(future);
-                }
-
-                if (!futures.isEmpty()) {
-                    LOGGER.debug("Wait for all {} stop/start threads to finish", futures.size());
-                    List<List<CloudVmInstanceStatus>> instancesStatuses = waitForRequests(futures).get(FutureResult.SUCCESS);
-                    LOGGER.debug("There are {} success operation. Instance statuses: {}", instancesStatuses.size(), instancesStatuses);
-                    List<CloudVmInstanceStatus> allVmStatuses = instancesStatuses.stream().flatMap(Collection::stream).collect(Collectors.toList());
-                    List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
-                    PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory.newPollComputeStatusTask(builder, auth, context, checkInstances);
-                    try {
-                        List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask, MAX_POLLING_ATTEMPT);
-                        results.addAll(statuses);
-                    } catch (Exception e) {
-                        LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);
-                        results.addAll(allVmStatuses.stream()
-                                .map(vs -> new CloudVmInstanceStatus(vs.getCloudInstance(), InstanceStatus.FAILED, e.getMessage()))
-                                .collect(Collectors.toList()));
+        int poolSize = context.getResourceBuilderPoolSize();
+        LOGGER.info("Pool size: {} for stop / start", poolSize);
+        try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(), Thread.ofVirtual().factory())) {
+            for (ComputeResourceBuilder<ResourceBuilderContext> builder : instanceBuilders) {
+                LOGGER.debug("Stop / start resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
+                if (!instances.isEmpty()) {
+                    Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
+                    for (CloudInstance instance : instances) {
+                        ResourceStopStartCallablePayload stopStartCallablePayload =
+                                new ResourceStopStartCallablePayload(context, auth, List.of(instance), builder);
+                        ResourceStopStartCallable stopStartCallable = resourceActionFactory.buildStopStartCallable(stopStartCallablePayload);
+                        Future<ResourceRequestResult<List<CloudVmInstanceStatus>>> future = executor.submit(stopStartCallable);
+                        futures.add(future);
                     }
+
+                    if (!futures.isEmpty()) {
+                        LOGGER.debug("Wait for all {} stop/start threads to finish", futures.size());
+                        List<List<CloudVmInstanceStatus>> instancesStatuses = waitForRequests(futures).get(FutureResult.SUCCESS);
+                        LOGGER.debug("There are {} success operation. Instance statuses: {}", instancesStatuses.size(), instancesStatuses);
+                        List<CloudVmInstanceStatus> allVmStatuses = instancesStatuses.stream().flatMap(Collection::stream).toList();
+                        List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+                        PollTask<List<CloudVmInstanceStatus>> pollTask =
+                                resourcePollTaskFactory.newPollComputeStatusTask(builder, auth, context, checkInstances);
+                        try {
+                            List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask, MAX_POLLING_ATTEMPT);
+                            results.addAll(statuses);
+                        } catch (Exception e) {
+                            LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);
+                            results.addAll(allVmStatuses.stream()
+                                    .map(vs -> new CloudVmInstanceStatus(vs.getCloudInstance(), InstanceStatus.FAILED, e.getMessage()))
+                                    .toList());
+                        }
+                    }
+                } else {
+                    LOGGER.debug("Cloud resources are not instances so they cannot be stopped or started, skipping builder type {}", builder.resourceType());
                 }
-            } else {
-                LOGGER.debug("Cloud resources are not instances so they cannot be stopped or started, skipping builder type {}", builder.resourceType());
             }
         }
         return results;
@@ -230,10 +231,6 @@ public class ComputeResourceService {
         }
         LOGGER.debug("{} requests have finished, continue with next group", requests);
         return result;
-    }
-
-    private boolean isRequestFull(int runningRequests, ResourceBuilderContext context) {
-        return runningRequests % context.getParallelResourceRequest() == 0;
     }
 
     private List<CloudResource> getResources(ResourceType resourceType, Iterable<CloudResource> resources) {
@@ -307,88 +304,70 @@ public class ComputeResourceService {
 
         public List<CloudResourceStatus> buildResources(CloudStack cloudStack, Iterable<Group> groups,
                 Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
-
-            Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
-            List<CloudInstancesGroupProcessingBatch> cloudInstanceProcessingBatches = cloudInstanceBatchSplitter.split(groups, createBatchSize);
-
-            List<FutureResourceGroupResults> futureResourceGroupResults = new ArrayList<>();
-            LOGGER.debug("Number of instance group batches: {}", cloudInstanceProcessingBatches.size());
-            for (CloudInstancesGroupProcessingBatch batch : cloudInstanceProcessingBatches) {
-                LOGGER.debug("Processing instance group batch: {}", batch.getGroup().getName());
-                Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-                for (List<CloudInstance> instancesChunk : batch.getCloudInstances()) {
-                    LOGGER.debug("Submit the create operation thread with {} instances, in group: {}", instancesChunk.size(), batch.getGroup().getName());
-                    ResourceCreationCallablePayload creationCallablePayload = new ResourceCreationCallablePayload(instancesChunk, batch.getGroup(),
-                            ctx, auth, cloudStack);
-                    ResourceCreationCallable creationCallable = resourceActionFactory.buildCreationCallable(creationCallablePayload);
-                    Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(creationCallable);
-                    futures.add(future);
+            int poolSize = ctx.getResourceBuilderPoolSize();
+            LOGGER.info("Pool size: {} for resource creation", poolSize);
+            try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(), Thread.ofVirtual().factory())) {
+                List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+                for (Group group : groups) {
+                    LOGGER.debug("Build resources for group: {}", group.getName());
+                    List<CloudInstance> createRequestedInstances = group.getInstances().stream()
+                            .filter(cloudInstance -> CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus())).toList();
+                    for (CloudInstance instance : createRequestedInstances) {
+                        LOGGER.debug("Build resources for instance: {}", instance.getInstanceId());
+                        ResourceCreationCallablePayload creationCallablePayload =
+                                new ResourceCreationCallablePayload(List.of(instance), group, ctx, auth, cloudStack);
+                        ResourceCreationCallable creationCallable = resourceActionFactory.buildCreationCallable(creationCallablePayload);
+                        Future<ResourceRequestResult<List<CloudResourceStatus>>> future = executor.submit(creationCallable);
+                        futures.add(future);
+                    }
                 }
-                futureResourceGroupResults.add(new FutureResourceGroupResults(batch, futures));
-            }
 
-            List<CloudResourceStatus> results = waitForResourceCreations(groups, upscale, adjustmentTypeAndThreshold, futureResourceGroupResults);
-            LOGGER.debug("Resource creation has been finished, the results are: {}", results);
-            return results;
+                List<CloudResourceStatus> results = waitForResourceCreations(groups, upscale, adjustmentTypeAndThreshold, futures);
+                LOGGER.debug("Resource creation has been finished, the results are: {}", results);
+                return results;
+            }
         }
 
         private List<CloudResourceStatus> waitForResourceCreations(Iterable<Group> groups, Boolean upscale,
-                AdjustmentTypeWithThreshold adjustmentTypeAndThreshold, List<FutureResourceGroupResults> futureResourceGroupResults) {
-
+                AdjustmentTypeWithThreshold adjustmentTypeAndThreshold, Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures) {
             List<CloudResourceStatus> results = new ArrayList<>();
-            List<RuntimeException> exceptions = new ArrayList<>();
+            if (!futures.isEmpty()) {
+                LOGGER.debug("Wait for all {} creation threads to finish", futures.size());
+                Map<FutureResult, List<List<CloudResourceStatus>>> futureResults = waitForRequests(futures);
+                List<List<CloudResourceStatus>> failedFutureResults = futureResults.get(FutureResult.FAILED);
+                List<List<CloudResourceStatus>> successfulFutureResults = futureResults.get(FutureResult.SUCCESS);
+                List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(successfulFutureResults);
+                List<CloudResourceStatus> failedResources = filterResourceStatuses(resourceStatuses, ResourceStatus.FAILED);
+                failedResources.addAll(failedFutureResults.stream().flatMap(Collection::stream).toList());
 
-            for (FutureResourceGroupResults futureResourceGroupResult : futureResourceGroupResults) {
-                Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = futureResourceGroupResult.getFutures();
+                Map<String, Group> groupMapByName = StreamSupport.stream(groups.spliterator(), false).collect(Collectors.toMap(Group::getName, group -> group));
 
-                if (!futures.isEmpty()) {
-                    LOGGER.debug("Wait for all {} creation threads to finish", futures.size());
-                    List<List<CloudResourceStatus>> cloudResourceStatusChunks = waitForRequests(futures).get(FutureResult.SUCCESS);
-                    List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(cloudResourceStatusChunks);
-                    List<CloudResourceStatus> failedResources = filterResourceStatuses(resourceStatuses, ResourceStatus.FAILED);
-                    if (adjustmentTypeAndThreshold == null) {
-                        adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT,
-                                futureResourceGroupResult.getBatch().getTotalInstanceCount());
-                    }
-                    try {
-                        ctx.setBuild(false);
-                        CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
-                                new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
-                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses,
-                                futureResourceGroupResult.getBatch().getGroup(), getNewNodeCount(groups));
-                        results.addAll(resourceStatuses);
-                    } catch (RuntimeException e) {
-                        LOGGER.error("Failed to handle provisioning rollback", e);
-                        exceptions.add(e);
-                    } finally {
-                        ctx.setBuild(true);
-                    }
+                Map<CloudResourceStatus, Group> groupCloudResourceStatuses = resourceStatuses.stream().distinct()
+                        .filter(status -> status.getCloudResource().getGroup() != null)
+                        .collect(Collectors.toMap(status -> status, status -> groupMapByName.get(status.getCloudResource().getGroup())));
+
+                Map<CloudResourceStatus, Group> failedGroupCloudResourceStatus = failedResources.stream().distinct()
+                        .collect(Collectors.toMap(status -> status, status -> groupMapByName.get(status.getCloudResource().getGroup())));
+
+                if (adjustmentTypeAndThreshold == null) {
+                    adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) futures.size());
+                }
+                try {
+                    ctx.setBuild(false);
+                    CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
+                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
+                    cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedGroupCloudResourceStatus, groupCloudResourceStatuses,
+                            getNewNodeCount(groups));
+                    results.addAll(resourceStatuses);
+                } catch (RuntimeException e) {
+                    LOGGER.error("Failed to handle provisioning rollback", e);
+                    throw e;
+                } finally {
+                    ctx.setBuild(true);
                 }
             }
-
-            combineRollbackFailures(exceptions);
-
             return results;
-        }
-
-        private void combineRollbackFailures(List<RuntimeException> exceptions) {
-            if (!exceptions.isEmpty()) {
-                if (exceptions.size() == 1) {
-                    throw exceptions.getFirst();
-                }
-                StringBuilder message = new StringBuilder("Multiple exceptions occurred during resource creation: ");
-                int i = 1;
-                for (RuntimeException exception : exceptions) {
-                    message.append(i).append(". ").append(exception.getMessage()).append(" ");
-                    i++;
-                }
-                RuntimeException combinedException = new RuntimeException(message.toString());
-                for (RuntimeException exception : exceptions) {
-                    combinedException.addSuppressed(exception);
-                }
-                LOGGER.error("Combined exeption during resource creation!", combinedException);
-                throw combinedException;
-            }
         }
 
         public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,
@@ -397,27 +376,32 @@ public class ComputeResourceService {
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             Variant variant = auth.getCloudContext().getVariant();
             List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
-            for (ComputeResourceBuilder<ResourceBuilderContext> builder : Lists.reverse(builders)) {
-                List<CloudResource> resourceList = getResources(builder.resourceType(), computeResources);
-                for (CloudResource cloudResource : resourceList) {
-                    Optional<CloudInstance> instance = cloudStack.getGroups()
-                            .stream()
-                            .flatMap(g -> g.getInstances().stream())
-                            .filter(e -> getInstanceId(cloudResource).equals(e.getInstanceId()))
-                            .findFirst();
-                    if (instance.isPresent()) {
-                        ResourceUpdateCallablePayload resourceUpdateCallablePayload
-                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder, group, updateType);
-                        ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(resourceUpdateCallablePayload);
-                        Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(updateCallable);
-                        futures.add(future);
-                        if (isRequestFull(futures.size(), ctx)) {
+            int poolSize = ctx.getResourceBuilderPoolSize();
+            LOGGER.info("Pool size: {} for update resources", poolSize);
+            try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(), Thread.ofVirtual().factory())) {
+                for (ComputeResourceBuilder<ResourceBuilderContext> builder : Lists.reverse(builders)) {
+                    LOGGER.debug("Update resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
+                    List<CloudResource> resourceList = getResources(builder.resourceType(), computeResources);
+                    for (CloudResource cloudResource : resourceList) {
+                        Optional<CloudInstance> instance = cloudStack.getGroups()
+                                .stream()
+                                .flatMap(g -> g.getInstances().stream())
+                                .filter(e -> getInstanceId(cloudResource).equals(e.getInstanceId()))
+                                .findFirst();
+                        if (instance.isPresent()) {
+                            ResourceUpdateCallablePayload resourceUpdateCallablePayload
+                                    = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder, group, updateType);
+                            ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(resourceUpdateCallablePayload);
+                            Future<ResourceRequestResult<List<CloudResourceStatus>>> future = executor.submit(updateCallable);
+                            futures.add(future);
                             results.addAll(getBuilderResults(futures));
                         }
                     }
+                    // wait for builder type to finish before starting the next one
+                    results.addAll(getBuilderResults(futures));
+                    LOGGER.debug("Update resources has been finished for builder {}", builder.getClass().getSimpleName());
                 }
-                // wait for builder type to finish before starting the next one
-                results.addAll(getBuilderResults(futures));
             }
             return results;
         }
