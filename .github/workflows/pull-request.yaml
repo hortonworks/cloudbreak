@@ -759,7 +759,9 @@ jobs:
           export USE_FEDRAMP_CONTAINERS=false
 
           make integration-test-steps_integration_test
-          
+      - name: integration_test_compress_results
+        if: ${{ always() }}
+        run: |-
           cd integration-test
           make compress-results
       - name: integration_test_collect_service_artifacts
@@ -846,7 +848,9 @@ jobs:
           export USE_FEDRAMP_CONTAINERS=true
 
           make fedramp-integration-test-steps_fedramp_integration_test
-          
+      - name: fedramp_integration_test_compress_results
+        if: ${{ always() }}
+        run: |-
           cd integration-test
           make compress-results
       - name: fedramp_integration_test_collect_service_artifacts
@@ -954,7 +958,9 @@ jobs:
           echo $REAL_UMS_USERS_DEV
 
           make real-ums-test-steps_real_ums_test
-
+      - name: real_ums_test_compress_results
+        if: ${{ always() }}
+        run: |-
           cd integration-test
           make compress-results
       - name: real_ums_test_collect_service_artifacts
@@ -1111,7 +1117,9 @@ jobs:
           export SEQ_PRIV_FILE=$(echo "${{ steps.build_secrets.outputs.SEQ_PRIV_FILE}}")
 
           make aws-test-steps_aws_test
-
+      - name: aws_test_compress_results
+        if: ${{ always() }}
+        run: |-
           cd integration-test
           make compress-results
       - name: aws_test_collect_service_artifacts
