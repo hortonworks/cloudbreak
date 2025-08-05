@@ -256,6 +256,10 @@
     "label": "IMPALA_statestored_ERROR"
   },
   {
+    "path": "/var/log/impalad/profiles/impala_profile_log*",
+    "label": "IMPALA_PROFILES"
+  },
+  {
     "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager*.log",
     "label": "STREAMS_MESSAGING_MANAGER_server",
     "excludes": [
