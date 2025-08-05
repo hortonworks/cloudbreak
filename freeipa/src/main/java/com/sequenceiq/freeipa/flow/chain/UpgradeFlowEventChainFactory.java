@@ -6,9 +6,12 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,6 +28,8 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -32,7 +38,10 @@ import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
 import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
 import com.sequenceiq.flow.core.chain.init.config.FlowChainInitState;
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
@@ -45,6 +54,7 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
+import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
 @Component
@@ -63,6 +73,9 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.UPGRADE_TRIGGER_EVENT;
@@ -72,6 +85,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+        getSaltSecretRotationTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
         if (event.getVerticalScaleRequest() != null) {
             flowEventChain.add(new FreeIpaVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getResourceId(),
@@ -158,6 +172,27 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
                     .collect(Collectors.toList());
         } else {
             return List.of();
+        }
+    }
+
+    public Optional<SecretRotationFlowChainTriggerEvent> getSaltSecretRotationTriggerEvent(Long stackId) {
+        List<SecretType> secretTypes = new ArrayList<>();
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
+        if (StringUtils.isNotEmpty(saltSecurityConfig.getLegacySaltSignPublicKey())) {
+            secretTypes.add(SALT_SIGN_KEY_PAIR);
+        }
+        if (StringUtils.isEmpty(saltSecurityConfig.getSaltMasterPrivateKeyVault())
+                || StringUtils.isNotEmpty(saltSecurityConfig.getLegacySaltMasterPublicKey())) {
+            secretTypes.add(SALT_MASTER_KEY_PAIR);
+        }
+        if (secretTypes.isEmpty()) {
+            LOGGER.info("Secret rotation is not required.");
+            return Optional.empty();
+        } else {
+            LOGGER.info("Secret rotation flow chain trigger added with secret types: {}", secretTypes);
+            return Optional.of(new SecretRotationFlowChainTriggerEvent(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
+                    stackId, stack.getEnvironmentCrn(), secretTypes, null, null));
         }
     }
 }
