@@ -34,11 +34,10 @@ public class FreeIpaSaltPingService {
     private HostOrchestrator hostOrchestrator;
 
     public void saltPing(Stack stack) throws SaltPingFailedException {
-        InstanceMetaData pgwInstanceMetadata = stack.getPrimaryGatewayAndThrowExceptionIfEmpty();
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfigForSalt(stack);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
         Set<String> hostNames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, pgwInstanceMetadata);
         try {
             saltPing(hostNames, gatewayConfig);
         } catch (CloudbreakOrchestratorFailedException e) {
