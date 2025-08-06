@@ -27,9 +27,11 @@ class ApiClusterTemplateToCmTemplateConverterTest {
     @ParameterizedTest
     @MethodSource("testConversion")
     public void testConversion(String scenario) throws IOException {
+        String expectedApiClusterTemplateFromExpectedJson = getExpectedApiClusterTemplateFromExpectedJson(scenario);
+        String originalExtendedBlueprintText = getOriginalExtendedBlueprintContent(scenario);
         assertEquals(
-                getExpectedApiClusterTemplateFromExpectedJson(scenario),
-                underTest.convert(getApiClusterTemplateFromInputJson(scenario)),
+                expectedApiClusterTemplateFromExpectedJson,
+                underTest.convert(getApiClusterTemplateFromInputJson(scenario), originalExtendedBlueprintText),
                 "The converted template does not match the expected output."
         );
     }
@@ -40,6 +42,10 @@ class ApiClusterTemplateToCmTemplateConverterTest {
 
     private String getExpectedFileContent(String scenario) throws IOException {
         return FileReaderUtils.readFileFromClasspath(String.format("deployment/expected/%s.json", scenario));
+    }
+
+    private String getOriginalExtendedBlueprintContent(String scenario) throws IOException {
+        return FileReaderUtils.readFileFromClasspath(String.format("deployment/original/%s.json", scenario));
     }
 
     private ApiClusterTemplate getApiClusterTemplateFromInputJson(String scenario) throws IOException {

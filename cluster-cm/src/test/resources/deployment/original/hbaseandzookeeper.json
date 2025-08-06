@@ -1,10 +1,16 @@
 {
   "cdhVersion": "7.3.1",
+  "displayName": "fdtgyhjkl",
   "cmVersion": "7.13.1",
   "repositories": [
     "http://build-cache.vpc.cloudera.com/s3/build/67986116/cdh/7.x/parcels/"
   ],
-  "products":[{"version":"7.3.1-1.cdh7.3.1.p400.67986116","product":"CDH"}],
+  "products": [
+    {
+      "version": "7.3.1-1.cdh7.3.1.p400.67986116",
+      "product": "CDH"
+    }
+  ],
   "services": [
     {
       "refName": "yarn",
@@ -72,7 +78,6 @@
         {
           "refName": "zookeeper-c048-SERVER-BASE",
           "roleType": "SERVER",
-          "base": true,
           "configs": [
             {
               "name": "dataDir",
@@ -90,7 +95,8 @@
               "name": "maxClientCnxns",
               "value": "200"
             }
-          ]
+          ],
+          "base": true
         }
       ]
     },
@@ -150,7 +156,6 @@
         {
           "refName": "knox-20fa-KNOX_GATEWAY-BASE",
           "roleType": "KNOX_GATEWAY",
-          "base": true,
           "configs": [
             {
               "name": "gateway_service_tokenstate_impl",
@@ -212,7 +217,8 @@
               "name": "gateway_token_generation_enable_lifespan_input",
               "value": "true"
             }
-          ]
+          ],
+          "base": true
         }
       ]
     }
@@ -220,6 +226,7 @@
   "hostTemplates": [
     {
       "refName": "leader",
+      "cardinality": 0,
       "roleConfigGroupsRefNames": [
         "knox-20fa-KNOX_GATEWAY-BASE",
         "stub_dfs-STORAGEOPERATIONS-BASE",
@@ -227,11 +234,9 @@
         "yarn-NODEMANAGER-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-c048-SERVER-BASE"
-      ],
-      "cardinality": 0
+      ]
     }
   ],
-  "displayName": "fdtgyhjkl",
   "tags": [
     {
       "name": "_cldr_cb_clustertype",

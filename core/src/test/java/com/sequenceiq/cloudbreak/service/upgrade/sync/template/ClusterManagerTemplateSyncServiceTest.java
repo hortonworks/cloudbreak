@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -66,7 +67,7 @@ class ClusterManagerTemplateSyncServiceTest {
     @Test
     void testPersistTemplateEntitlementEnabledWithValidDeployment() {
         when(entitlementService.isCdpCBCmTemplateSyncEnabled("acc-123")).thenReturn(true);
-        when(clusterStatusService.getDeployment("test-stack")).thenReturn("deployment-template");
+        when(clusterStatusService.getDeployment(stack)).thenReturn("deployment-template");
         when(stack.getCluster()).thenReturn(cluster);
         when(cluster.getId()).thenReturn(42L);
         when(clusterApiConnectors.clusterStatusService()).thenReturn(clusterStatusService);
@@ -78,9 +79,23 @@ class ClusterManagerTemplateSyncServiceTest {
     }
 
     @Test
+    void testSyncWhenEntitlementEnabledAndNoUpdateRequired() {
+        when(entitlementService.isCdpCBCmTemplateSyncEnabled("acc-123")).thenReturn(true);
+        when(clusterStatusService.getDeployment(stack)).thenReturn("deployment-template");
+        when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getExtendedBlueprintText()).thenReturn("deployment-template");
+        when(clusterApiConnectors.clusterStatusService()).thenReturn(clusterStatusService);
+        when(apiConnectors.getConnector(stack)).thenReturn(clusterApiConnectors);
+
+        service.sync(1L);
+
+        verify(clusterService, times(0)).updateExtendedBlueprintText(42L, "deployment-template");
+    }
+
+    @Test
     void testPersistTemplateEntitlementEnabledWithBlankDeployment() {
         when(entitlementService.isCdpCBCmTemplateSyncEnabled("acc-123")).thenReturn(true);
-        when(clusterStatusService.getDeployment("test-stack")).thenReturn("");
+        when(clusterStatusService.getDeployment(stack)).thenReturn("");
         when(clusterApiConnectors.clusterStatusService()).thenReturn(clusterStatusService);
         when(apiConnectors.getConnector(stack)).thenReturn(clusterApiConnectors);
 

@@ -70,17 +70,9 @@ public class CmSyncerService {
                 cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)
         );
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
-        componentPersistingService.persistComponentsToDb(
-                stack,
-                cmSyncOperationResult
-        );
-        mixedPackageVersionService.validatePackageVersions(
-                stack.getWorkspace().getId(),
-                stack.getId(),
-                cmSyncOperationResult,
-                candidateImages
-        );
+        componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
         CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
+        mixedPackageVersionService.validatePackageVersions(stack.getWorkspace().getId(), stack.getId(), cmSyncOperationResult, candidateImages);
         LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationStatus);
         return new CmSyncOperationSummary(cmSyncOperationStatus, cmSyncOperationResult);
     }

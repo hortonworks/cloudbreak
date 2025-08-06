@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedExce
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -141,6 +142,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private ApiClient client;
 
     private ApiClient fastClient;
+
+    private ApiClient v52Client;
 
     ClouderaManagerClusterStatusService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
@@ -231,6 +234,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             fastClient = clouderaManagerApiClientProvider
                     .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
             fastClient.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
+            v52Client = clouderaManagerApiClientProvider
+                    .getV52Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -432,12 +437,14 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public String getDeployment(String clusterName) {
+    public String getDeployment(Stack stack) {
+        String clusterName = stack.getName();
+        String extendedBlueprintText = stack.getCluster().getExtendedBlueprintText();
         try {
             ApiClusterTemplate apiClusterTemplate = clouderaManagerApiFactory
-                    .getClustersResourceApi(client)
+                    .getClustersResourceApi(v52Client)
                     .export(clusterName, Boolean.FALSE);
-            return apiClusterTemplateToCmTemplateConverter.convert(apiClusterTemplate);
+            return apiClusterTemplateToCmTemplateConverter.convert(apiClusterTemplate, extendedBlueprintText);
         } catch (ApiException e) {
             LOGGER.warn("Failed to get deployment from CM", e);
             throw new ClouderaManagerOperationFailedException("Failed to get deployment from CM", e);

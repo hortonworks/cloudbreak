@@ -1,5 +1,6 @@
 {
   "cdhVersion": "7.3.1",
+  "products":[{"version":"7.3.1-1.cdh7.3.1.p400.67986116","product":"CDH"}],
   "services": [
     {
       "refName": "ranger",
@@ -840,5 +841,168 @@
       "cardinality": 0
     }
   ],
-  "displayName": "doktorics-001"
+  "displayName": "doktorics-001",
+  "cmVersion": "7.13.1",
+  "instantiator": {
+    "clusterName": "doktorics-001",
+    "hosts": [
+      {
+        "hostName": "doktorics-001-idbroker0.tb-env2.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/eu-central-1a",
+        "hostTemplateRefName": "idbroker"
+      },
+      {
+        "hostName": "doktorics-001-master0.tb-env2.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/eu-central-1a",
+        "hostTemplateRefName": "master"
+      }
+    ],
+    "keepHostTemplates": true,
+    "lenient": true,
+    "enableKerberos": {},
+    "variables": [
+      {
+        "name": "hdfs-NAMENODE-BASE-dfs_name_dir_list",
+        "value": "/hadoopfs/fs1/namenode"
+      },
+      {
+        "name": "hdfs-SECONDARYNAMENODE-BASE-fs_checkpoint_dir_list",
+        "value": "/hadoopfs/fs1/namesecondary"
+      },
+      {
+        "name": "hive-hive_metastore_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "hive-hive_metastore_database_name",
+        "value": "hive"
+      },
+      {
+        "name": "hive-hive_metastore_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "hive-hive_metastore_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "hive-hive_metastore_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "hive-hive_metastore_database_user",
+        "value": "hive"
+      },
+      {
+        "name": "kafka-KAFKA_BROKER-BASE-log.dirs",
+        "value": "/hadoopfs/fs1/kafka"
+      },
+      {
+        "name": "knox-IDBROKER-BASE-idbroker_master_secret",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-KNOX_GATEWAY-BASE-gateway_master_secret",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-knox_gateway_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "knox-knox_gateway_database_name",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "knox-knox_gateway_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-knox_gateway_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "knox-knox_gateway_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "knox-knox_gateway_database_user",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "ranger-RANGER_USERSYNC-BASE-ranger_usersync_ldap_ldapbindpassword",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-keyadmin_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-ranger_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "ranger-ranger_database_name",
+        "value": "ranger"
+      },
+      {
+        "name": "ranger-ranger_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-ranger_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "ranger-ranger_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "ranger-ranger_database_user",
+        "value": "ranger"
+      },
+      {
+        "name": "ranger-rangeradmin_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-rangertagsync_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-rangerusersync_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "solr-SOLR_SERVER-BASE-solr_data_dir",
+        "value": "/hadoopfs/fs1/solr"
+      },
+      {
+        "name": "zookeeper-SERVER-BASE-dataDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      },
+      {
+        "name": "zookeeper-SERVER-BASE-dataLogDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      }
+    ]
+  },
+  "repositories": [
+    "http://build-cache.vpc.cloudera.com/s3/build/67986116/cdh/7.x/parcels/"
+  ],
+  "clusterSpec": null,
+  "tags": [
+    {
+      "name": "_cldr_cb_clustertype",
+      "value": "SDX"
+    },
+    {
+      "name": "_cldr_cb_origin",
+      "value": "cloudbreak"
+    },
+    {
+      "name": "_cldr_cluster.core_settings.service_name",
+      "value": "core_settings"
+    }
+  ]
 }

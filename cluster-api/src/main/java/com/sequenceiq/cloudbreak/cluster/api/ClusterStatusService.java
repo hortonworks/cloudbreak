@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
@@ -38,5 +39,5 @@ public interface ClusterStatusService {
 
     boolean waitForHealthyServices(Optional<String> runtimeVersion);
 
-    String getDeployment(String clusterName);
+    String getDeployment(Stack stack);
 }
