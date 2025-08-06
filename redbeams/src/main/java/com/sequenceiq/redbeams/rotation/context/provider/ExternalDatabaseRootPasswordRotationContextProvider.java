@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.rotation.context.provider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep;
@@ -46,7 +48,16 @@ public class ExternalDatabaseRootPasswordRotationContextProvider implements Rota
         newSecretMap.put(databaseServerConfig.getConnectionPasswordSecret(), newPassword);
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withVaultPathSecretMap(newSecretMap)
+                .withNewSecretMap(newSecretMap)
+                .withEntitySaverList(List.of(
+                        () -> databaseServerConfigService.update(databaseServerConfig),
+                        () -> dbStackService.save(dbStack)))
+                .withEntitySecretFieldUpdaterMap(Map.of(
+                        dbStack.getDatabaseServer().getRootPasswordSecret(),
+                        vaultSecretJson -> dbStack.getDatabaseServer().setRootPasswordSecret(new SecretProxy(vaultSecretJson)),
+                        databaseServerConfig.getConnectionPasswordSecret(),
+                        vaultSecretJson -> databaseServerConfig.setConnectionPasswordSecret(new SecretProxy(vaultSecretJson))
+                ))
                 .build();
         contexts.put(CommonSecretRotationStep.VAULT, vaultRotationContext);
         contexts.put(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, new RotationContext(resourceCrn));

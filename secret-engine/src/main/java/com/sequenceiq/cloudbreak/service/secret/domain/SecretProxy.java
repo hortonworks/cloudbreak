@@ -16,10 +16,4 @@ public class SecretProxy extends Secret {
         SecretService secretService = StaticApplicationContext.getBean(SecretService.class);
         return secretService.get(getSecret());
     }
-
-    @Override
-    public void cacheEvict() {
-        SecretService secretService = StaticApplicationContext.getBean(SecretService.class);
-        secretService.cacheEvict(getSecret());
-    }
 }

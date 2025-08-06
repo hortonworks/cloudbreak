@@ -70,7 +70,7 @@ class ExternalDatabaseRootPasswordRotationContextProviderTest {
         assertThat(contexts.get(CommonSecretRotationStep.VAULT)).isInstanceOf(VaultRotationContext.class);
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(CommonSecretRotationStep.VAULT);
         assertEquals(RESOURCE_CRN, vaultRotationContext.getResourceCrn());
-        Map<String, String> vaultPathSecretMap = vaultRotationContext.getVaultPathSecretMap();
+        Map<String, String> vaultPathSecretMap = vaultRotationContext.getNewSecretMap();
         assertThat(vaultPathSecretMap).containsOnlyKeys(ROOT_PASSWORD_SECRET, CONNECTION_PASSWORD_SECRET);
         assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(ROOT_PASSWORD_SECRET));
         assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(CONNECTION_PASSWORD_SECRET));

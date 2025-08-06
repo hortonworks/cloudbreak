@@ -134,11 +134,11 @@ public class VaultKvV2EngineTest {
     public void testGetWithCache() {
         Map<String, Object> vaultData = Map.of(VaultConstants.FIELD_SECRET, "secretValue", VaultConstants.FIELD_BACKUP, "backupValue");
 
-        Versioned<Map<String, Object>> versioned = Versioned.create(vaultData, versionedMetadata());
+        Versioned<Object> versioned = Versioned.create(vaultData, versionedMetadata());
 
-        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
+        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString(), any(Versioned.Version.class))).thenReturn(versioned);
 
-        Map<String, String> result = underTest.getWithCache("testPath/" + UUID.randomUUID());
+        Map<String, String> result = underTest.getWithCache("testPath/" + UUID.randomUUID(), 1);
 
         assertEquals("secretValue", result.get(VaultConstants.FIELD_SECRET));
         assertEquals("backupValue", result.get(VaultConstants.FIELD_BACKUP));
@@ -161,18 +161,18 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testGetWithCacheWithNullResponse() {
-        Versioned<Map<String, Object>> versioned = Versioned.create(null, versionedMetadata());
+        Versioned<Object> versioned = Versioned.create(null, versionedMetadata());
 
-        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
+        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString(), any(Versioned.Version.class))).thenReturn(versioned);
 
-        assertNull(underTest.getWithCache("testPath"));
+        assertNull(underTest.getWithCache("testPath", 1));
     }
 
     @Test
     public void testPut() {
         when(vaultVersionedKeyValueOperations.put(anyString(), any())).thenReturn(versionedMetadata());
 
-        String result = underTest.put("appPath/path", Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
+        String result = underTest.put("appPath/path", null, Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
 
         assertEquals("{\"enginePath\":\"enginePath\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
                 "\"path\":\"appPath/path\",\"version\":1}", result);
@@ -195,14 +195,14 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testDelete() {
-        underTest.delete("appPath/path");
+        underTest.delete("appPath/path", 1);
 
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
     }
 
     @Test
     public void testValidatePathPatternWithEmptyPath() {
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache(""));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache("", null));
     }
 
     @Test
@@ -210,17 +210,17 @@ public class VaultKvV2EngineTest {
         String secretPath = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
                 "\"path\":\"app/path\",\"version\":1}";
 
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache(secretPath));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache(secretPath, 1));
     }
 
     @Test
     public void testValidatePathPatternWithMultipleAppPathOccurrences() {
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache("appPath/appPath/something"));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache("appPath/appPath/something", 1));
     }
 
     @Test
     public void testValidatePathPatternNotOwned() {
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.put("noright/something",
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.put("noright/something", null,
                 Collections.singletonMap(VaultConstants.FIELD_SECRET, "value")));
     }
 

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -93,14 +96,24 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
     }
 
     protected VaultRotationContext getVaultRotationContext(Map<RDSConfig, Pair<String, String>> userPassPairs, StackDto stack) {
-        Map<String, String> secretMap = Maps.newHashMap();
+        Map<String, String> newSecretMap = Maps.newHashMap();
         userPassPairs.forEach((rdsConfig, userPassPair) -> {
-            secretMap.put(rdsConfig.getConnectionUserNameSecret(), userPassPair.getKey());
-            secretMap.put(rdsConfig.getConnectionPasswordSecret(), userPassPair.getValue());
+            newSecretMap.put(rdsConfig.getConnectionUserNameSecret(), userPassPair.getKey());
+            newSecretMap.put(rdsConfig.getConnectionPasswordSecret(), userPassPair.getValue());
+        });
+        Function<RDSConfig, Runnable> rdsConfigSaveFunction = rdsConfig -> () -> rdsConfigService.pureSave(rdsConfig);
+        Map<String, Consumer<String>> secretUpdaterMap = Maps.newHashMap();
+        userPassPairs.forEach((rdsConfig, userPassPair) -> {
+            secretUpdaterMap.put(rdsConfig.getConnectionUserNameSecret(),
+                    vaultSecretJson -> rdsConfig.setConnectionUserNameSecret(new SecretProxy(vaultSecretJson)));
+            secretUpdaterMap.put(rdsConfig.getConnectionPasswordSecret(),
+                    vaultSecretJson -> rdsConfig.setConnectionPasswordSecret(new SecretProxy(vaultSecretJson)));
         });
         return VaultRotationContext.builder()
-                .withVaultPathSecretMap(secretMap)
                 .withResourceCrn(stack.getResourceCrn())
+                .withNewSecretMap(newSecretMap)
+                .withEntitySaverList(userPassPairs.keySet().stream().map(rdsConfigSaveFunction).toList())
+                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
                 .build();
     }
 

@@ -13,16 +13,14 @@ public interface SecretEngine {
 
     boolean isSecret(String vaultSecretJson);
 
-    String put(@NotNull String secretPath, @NotNull Map<String, String> value);
+    String put(@NotNull String secretPath, @NotNull Integer currentVersion, @NotNull Map<String, String> value);
 
-    Map<String, String> getWithCache(@NotNull String secretPath);
+    Map<String, String> getWithCache(@NotNull String secretPath, @NotNull Integer version);
 
     Map<String, String> getWithoutCache(@NotNull String secretPath);
 
-    void delete(String path);
+    void delete(String path, Integer version);
 
     List<String> listEntries(String secretPathPrefix);
-
-    void cacheEvict(String secretPath);
 
 }

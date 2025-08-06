@@ -160,6 +160,10 @@ public class DatabaseServer implements AccountIdAwareResource {
         this.rootPassword = new Secret(rootPassword);
     }
 
+    public void setRootPasswordSecret(Secret rootPassword) {
+        this.rootPassword = rootPassword;
+    }
+
     public SecurityGroup getSecurityGroup() {
         return securityGroup;
     }

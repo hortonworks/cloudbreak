@@ -39,7 +39,7 @@ public class SecretService {
     }
 
     public String put(String secretPath, String value) throws Exception {
-        return vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullSecretPath(secretPath),
+        return vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullSecretPath(secretPath), null,
                 Collections.singletonMap(VaultConstants.FIELD_SECRET, value)));
     }
 
@@ -50,7 +50,7 @@ public class SecretService {
             return null;
         }
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        Map<String, String> response = vaultRetryService.tryReadingVault(() -> persistentEngine.getWithCache(vaultSecret.getPath()));
+        Map<String, String> response = vaultRetryService.tryReadingVault(() -> persistentEngine.getWithCache(vaultSecret.getPath(), vaultSecret.getVersion()));
         return response != null ? response.get(field) : null;
     }
 
@@ -67,13 +67,13 @@ public class SecretService {
     public void deleteByVaultSecretJson(String vaultSecretJson) {
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
         if (vaultSecret != null && vaultSecret.getPath() != null) {
-            persistentEngine.delete(vaultSecret.getPath());
+            persistentEngine.delete(vaultSecret.getPath(), vaultSecret.getVersion());
         }
     }
 
     public void deleteByPathPostfix(String pathPostfix) {
         if (pathPostfix != null) {
-            persistentEngine.delete(persistentEngine.appPath() + pathPostfix);
+            persistentEngine.delete(persistentEngine.appPath() + pathPostfix, null);
         }
     }
 
@@ -91,19 +91,14 @@ public class SecretService {
                 .orElse(null);
     }
 
-    public String getSecretFromExternalVault(String externalVaultPath) {
-        Map<String, String> response = vaultRetryService.tryReadingVault(() ->
-                persistentEngine.getWithCache(externalVaultPath));
-        return response != null ? response.get(VaultConstants.FIELD_SECRET) : null;
-    }
-
     private String fullSecretPath(String secretPath) {
         return persistentEngine.appPath() + secretPath;
     }
 
-    public void cacheEvict(String vaultSecretJson) {
-        VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        persistentEngine.cacheEvict(vaultSecret.getPath());
+    public String getSecretFromExternalVault(String externalVaultPath) {
+        Map<String, String> response = vaultRetryService.tryReadingVault(() ->
+                persistentEngine.getWithCache(externalVaultPath, null));
+        return response != null ? response.get(VaultConstants.FIELD_SECRET) : null;
     }
 
 }

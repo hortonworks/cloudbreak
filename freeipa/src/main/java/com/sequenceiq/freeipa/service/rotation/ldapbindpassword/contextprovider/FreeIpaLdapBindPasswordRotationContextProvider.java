@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_USER_PASSWORD;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
@@ -49,9 +51,13 @@ public class FreeIpaLdapBindPasswordRotationContextProvider implements RotationC
         if (!StringUtils.equals(clusterName, clusterLdapConfig.getClusterName())) {
             throw new SecretRotationException("There is no LDAP config for the given cluster name.");
         }
+        Map<String, String> newSecretMap = Map.of(clusterLdapConfig.getBindPasswordSecret(), FreeIpaPasswordUtil.generatePassword());
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withVaultPathSecretMap(Map.of(clusterLdapConfig.getBindPasswordSecret(), FreeIpaPasswordUtil.generatePassword()))
+                .withNewSecretMap(newSecretMap)
+                .withEntitySaverList(List.of(() -> ldapConfigService.repository().save(clusterLdapConfig)))
+                .withEntitySecretFieldUpdaterMap(Map.of(clusterLdapConfig.getBindPasswordSecret(),
+                        vaultSecretJson -> clusterLdapConfig.setBindPasswordSecret(new SecretProxy(vaultSecretJson))))
                 .build();
         FreeIpaUserPasswordRotationContext freeIpaUserPasswordRotationContext = FreeIpaUserPasswordRotationContext.builder()
                 .withUserName(ldapUserName)

@@ -174,6 +174,12 @@ public class ImageEntity implements AccountIdAwareResource {
         }
     }
 
+    public void setGatewayUserdataSecret(Secret gatewayUserdata) {
+        if (gatewayUserdata != null) {
+            this.gatewayUserdata = gatewayUserdata;
+        }
+    }
+
     public Secret getGatewayUserdataSecret() {
         return gatewayUserdata;
     }

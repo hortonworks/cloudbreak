@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -22,7 +22,7 @@ public class FreeIpaAdminPasswordRotationUtil {
     @Inject
     private StackService stackService;
 
-    public void checkRedhat8(FreeIpaAdminPasswordRotationContext rotationContext) {
+    public void checkRedhat8(RotationContext rotationContext) {
         String environmentCrnAsString = rotationContext.getResourceCrn();
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());

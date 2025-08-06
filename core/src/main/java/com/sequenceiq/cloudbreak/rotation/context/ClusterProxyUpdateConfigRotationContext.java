@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.rotation.context;
 
+import java.util.function.Supplier;
+
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class ClusterProxyUpdateConfigRotationContext extends RotationContext {
 
-    private final String knoxSecretPath;
+    private final Supplier<String> knoxSecretPath;
 
-    protected ClusterProxyUpdateConfigRotationContext(String resourceCrn, String knoxSecretPath) {
+    protected ClusterProxyUpdateConfigRotationContext(String resourceCrn, Supplier<String> knoxSecretPath) {
         super(resourceCrn);
         this.knoxSecretPath = knoxSecretPath;
     }
 
-    public String getKnoxSecretPath() {
+    public Supplier<String> getKnoxSecretPath() {
         return knoxSecretPath;
     }
 
@@ -23,14 +25,14 @@ public class ClusterProxyUpdateConfigRotationContext extends RotationContext {
 
         private String resourceCrn;
 
-        private String knoxSecretPath;
+        private Supplier<String> knoxSecretPath;
 
         public ClusterProxyUpdateConfigRotationContextBuilder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public ClusterProxyUpdateConfigRotationContextBuilder withKnoxSecretPath(String knoxSecretPath) {
+        public ClusterProxyUpdateConfigRotationContextBuilder withKnoxSecretPath(Supplier<String> knoxSecretPath) {
             this.knoxSecretPath = knoxSecretPath;
             return this;
         }

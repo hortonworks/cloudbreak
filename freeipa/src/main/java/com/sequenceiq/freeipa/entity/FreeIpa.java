@@ -110,10 +110,6 @@ public class FreeIpa implements AccountIdAwareResource {
         return stack.getAccountId();
     }
 
-    public void evictVaultCacheForSecrets() {
-        adminPassword.cacheEvict();
-    }
-
     @Override
     public String toString() {
         return "FreeIpa{" +
