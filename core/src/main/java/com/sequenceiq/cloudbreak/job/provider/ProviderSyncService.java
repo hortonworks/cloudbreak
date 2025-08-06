@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.job.provider;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.SkuAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.ProviderSyncState;
 
@@ -79,20 +81,47 @@ public class ProviderSyncService {
     }
 
     private void setProviderSyncStatus(StackDto stack, List<CloudResource> syncedCloudResources) {
-        boolean hasBasicSku = syncedCloudResources.stream()
+        Optional<SkuAttributes> hasBasicSku = hasBasicSku(syncedCloudResources);
+        if (hasBasicSku.isPresent()) {
+            LOGGER.info("Basic SKU migration is needed for {}, updating status", hasBasicSku.get());
+            stackUpdater.addProviderState(stack.getId(), ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+        } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent()) {
+            LOGGER.info("Outbound upgrade is needed for {}, updating status", shouldUpgradeOutbound(syncedCloudResources).get());
+            stackUpdater.addProviderState(stack.getId(), ProviderSyncState.OUTBOUND_UPGRADE_NEEDED);
+        } else {
+            LOGGER.debug("Provider sync have not detected errors for {}, cleaning up error states",
+                    syncedCloudResources.stream().map(CloudResource::getDetailedInfo).toList());
+            stackUpdater.removeProviderStates(stack.getId(), Set.of(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED, ProviderSyncState.OUTBOUND_UPGRADE_NEEDED));
+        }
+    }
+
+    private Optional<SkuAttributes> hasBasicSku(List<CloudResource> syncedCloudResources) {
+        return syncedCloudResources.stream()
                 .map(cloudResource -> {
                     try {
                         return cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class);
                     } catch (CloudbreakServiceException e) {
                         return new SkuAttributes();
                     }
-                }).anyMatch(skuAttributes -> skuAttributes != null && LoadBalancerSku.BASIC.getTemplateName().equalsIgnoreCase(skuAttributes.getSku()));
-        if (hasBasicSku) {
-            LOGGER.info("Basic SKU migration is needed for stack, updating status {}", stack.getId());
-            stackUpdater.updateProviderState(stack.getId(), Set.of(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED));
-        } else if (CollectionUtils.isNotEmpty(syncedCloudResources)) {
-            stackUpdater.updateProviderState(stack.getId(), Set.of(ProviderSyncState.VALID));
-        }
+                }).filter(skuAttributes -> skuAttributes != null
+                        && LoadBalancerSku.BASIC.getTemplateName().equalsIgnoreCase(skuAttributes.getSku()))
+                .findFirst();
+    }
+
+    private Optional<NetworkAttributes> shouldUpgradeOutbound(List<CloudResource> syncedCloudResources) {
+        return syncedCloudResources.stream()
+                .map(cloudResource -> {
+                    try {
+                        return cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class);
+                    } catch (CloudbreakServiceException e) {
+                        return new NetworkAttributes();
+                    }
+                }).filter(networkAttributes ->
+                        Optional.ofNullable(networkAttributes)
+                                .map(NetworkAttributes::getOutboundType)
+                                .map(OutboundType::isUpgradeable)
+                                .orElse(false))
+                .findFirst();
     }
 
     private List<CloudResource> getCloudResources(StackDto stack) {

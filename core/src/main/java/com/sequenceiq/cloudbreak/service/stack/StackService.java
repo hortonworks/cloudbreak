@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -1158,8 +1159,43 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         stackRepository.updateJavaVersion(stackId, javaVersion);
     }
 
-    public void updateProviderSyncStates(Long stackId, Set<ProviderSyncState> statuses) {
-        stackRepository.updateProviderSyncStates(stackId, statuses);
+    public Set<ProviderSyncState> getProviderSyncStates(Long stackId) {
+        ProviderSyncSetToStringConverter converter = new ProviderSyncSetToStringConverter();
+        Set<ProviderSyncState> providerSyncStatesByStackId = converter.convertToEntityAttribute(
+                stackRepository.getProviderSyncStatesByStackId(stackId));
+        return providerSyncStatesByStackId;
+    }
+
+    public void addProviderSyncState(Long stackId, ProviderSyncState state) {
+        try {
+            transactionService.required(() -> {
+                Set<ProviderSyncState> providerSyncStates = getProviderSyncStates(stackId);
+                Set<ProviderSyncState> originalStates = Set.copyOf(providerSyncStates);
+                boolean changed = providerSyncStates.add(state);
+                if (changed) {
+                    LOGGER.debug("Adding provider sync state '{}' to original states '{}'.", state, originalStates);
+                    stackRepository.updateProviderSyncStates(stackId, providerSyncStates);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public void removeProviderSyncStates(Long stackId, Set<ProviderSyncState> states) {
+        try {
+            transactionService.required(() -> {
+                Set<ProviderSyncState> providerSyncStates = getProviderSyncStates(stackId);
+                Set<ProviderSyncState> originalStates = Set.copyOf(providerSyncStates);
+                boolean changed = providerSyncStates.removeAll(states);
+                if (changed) {
+                    LOGGER.info("Removed provider sync states {} from original states {}", states, originalStates);
+                    stackRepository.updateProviderSyncStates(stackId, providerSyncStates);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
@@ -1300,3 +1336,4 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 }
+

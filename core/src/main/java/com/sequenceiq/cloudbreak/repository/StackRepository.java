@@ -557,6 +557,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("UPDATE Stack s SET s.providerSyncStates = :providerSyncStates WHERE s.id = :stackId")
     void updateProviderSyncStates(@Param("stackId") Long stackId, @Param("providerSyncStates") Set<ProviderSyncState> providerSyncStates);
 
+    @Query("SELECT s.providerSyncStates FROM Stack s WHERE s.id = :stackId")
+    String getProviderSyncStatesByStackId(@Param("stackId") Long stackId);
+
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :stackId")
     Optional<String> findEnvironmentCrnByStackId(@Param("stackId") Long stackId);
 
@@ -577,3 +580,4 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     void deleteByResourceCrn(String crn);
 
 }
+

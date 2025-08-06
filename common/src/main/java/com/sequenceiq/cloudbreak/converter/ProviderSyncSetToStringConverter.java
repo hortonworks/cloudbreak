@@ -17,7 +17,9 @@ public class ProviderSyncSetToStringConverter implements AttributeConverter<Set<
     @Override
     public String convertToDatabaseColumn(Set<ProviderSyncState> providerSyncStates) {
         return CollectionUtils.isEmpty(providerSyncStates) ? null
-                : providerSyncStates.stream().map(ProviderSyncState::name).collect(Collectors.joining(","));
+                : providerSyncStates.stream()
+                .map(ProviderSyncState::name)
+                .collect(Collectors.joining(","));
     }
 
     @Override

@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.REMOVE_LOAD_BALACERS
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SKU_MIGRATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SKU_MIGRATION_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.UPDATE_DNS_FOR_LB;
+import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.model.ProviderSyncState;
 
 @Configuration
 public class SkuMigrationActions {
@@ -67,7 +67,7 @@ public class SkuMigrationActions {
                 LOGGER.info("Checking Load Balancer SKU");
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.MIGRATING_SKU);
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.UPDATE_IN_PROGRESS.name(), CHECK_LOAD_BALANCERS_SKU);
-                boolean skuMigrationNeededBySync = context.getProviderSyncStates().contains(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+                boolean skuMigrationNeededBySync = context.getProviderSyncStates().contains(BASIC_SKU_MIGRATION_NEEDED);
                 boolean force = payload.isForce() || skuMigrationNeededBySync;
                 LOGGER.debug("Provider sync states: {}, SKU migration needed by sync: {}, Force migration: {}",
                         context.getProviderSyncStates(), skuMigrationNeededBySync, force);
@@ -151,10 +151,8 @@ public class SkuMigrationActions {
                 LOGGER.info("Load Balancer Migration successfully completed from Basic to Standard SKU");
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE);
                 stackService.updateTemplateForStackToLatest(payload.getResourceId());
-                Set<ProviderSyncState> providerSyncStates = context.getStack().getProviderSyncStates();
                 LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for stack: {}", context.getStack().getName());
-                providerSyncStates.remove(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
-                stackUpdater.updateProviderState(payload.getResourceId(), providerSyncStates);
+                stackUpdater.removeProviderStates(payload.getResourceId(), Set.of(BASIC_SKU_MIGRATION_NEEDED));
                 skuMigrationService.setSkuMigrationParameter(payload.getResourceId());
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), SKU_MIGRATION_FINISHED);
                 sendEvent(context);

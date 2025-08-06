@@ -81,8 +81,12 @@ public class StackUpdater {
         stackService.updateJavaVersion(stackId, javaVersion);
     }
 
-    public void updateProviderState(Long stackId, Set<ProviderSyncState> syncStates) {
-        stackService.updateProviderSyncStates(stackId, syncStates);
+    public void addProviderState(Long stackId, ProviderSyncState state) {
+        stackService.addProviderSyncState(stackId, state);
+    }
+
+    public void removeProviderStates(Long stackId, Set<ProviderSyncState> states) {
+        stackService.removeProviderSyncStates(stackId, states);
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {

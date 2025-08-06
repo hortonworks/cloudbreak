@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.job.provider;
 
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
+import static com.sequenceiq.common.model.ProviderSyncState.OUTBOUND_UPGRADE_NEEDED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.SkuAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
@@ -43,8 +46,8 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.ProviderSyncState;
 
 @ExtendWith(MockitoExtension.class)
 class ProviderSyncServiceTest {
@@ -150,10 +153,12 @@ class ProviderSyncServiceTest {
 
         underTest.syncResources(stack);
 
-        ProviderSyncState syncState = "Basic".equalsIgnoreCase(sku) ?
-                ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED :
-                ProviderSyncState.VALID;
-        verify(stackUpdater, times(1)).updateProviderState(stack.getId(), Set.of(syncState));
+        if ("Basic".equalsIgnoreCase(sku)) {
+            verify(stackUpdater, times(1)).addProviderState(stack.getId(), BASIC_SKU_MIGRATION_NEEDED);
+        } else {
+            verify(stackUpdater, times(1)).removeProviderStates(stack.getId(), Set.of(OUTBOUND_UPGRADE_NEEDED,
+                    BASIC_SKU_MIGRATION_NEEDED));
+        }
     }
 
     @Test
@@ -172,7 +177,58 @@ class ProviderSyncServiceTest {
 
         underTest.syncResources(stack);
 
-        verify(stackUpdater, times(1)).updateProviderState(stack.getId(), Set.of(ProviderSyncState.VALID));
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(), Set.of(OUTBOUND_UPGRADE_NEEDED,
+                BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"NOT_DEFINED", "DEFAULT"})
+    void testSetProviderSyncStatusWithUpgradeableOutboundType(String outboundTypeStr) throws CloudbreakServiceException {
+        // Given
+        List<CloudResource> resourceList = getCloudResourceList(outboundTypeStr);
+
+        List<CloudResourceStatus> resourceStatusList = resourceList.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"LOAD_BALANCER", "PUBLIC_IP", "USER_ASSIGNED_NATGATEWAY", "USER_DEFINED_ROUTING"})
+    void testSetProviderSyncStatusWithNonUpgradeableOutboundType(String outboundTypeStr) throws CloudbreakServiceException {
+        // Given
+        List<CloudResource> resourceList = getCloudResourceList(outboundTypeStr);
+
+        List<CloudResourceStatus> resourceStatusList = resourceList.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, resourceList)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    private List<CloudResource> getCloudResourceList(String outboundTypeStr) {
+        CloudResource cloudResource = mock(CloudResource.class);
+        NetworkAttributes networkAttributes = new NetworkAttributes();
+        OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
+        networkAttributes.setOutboundType(outboundType);
+
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
+        List<CloudResource> resourceList = List.of(cloudResource);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(resourceList);
+        when(cloudResource.getType()).thenReturn(AZURE_INSTANCE);
+        return resourceList;
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {
