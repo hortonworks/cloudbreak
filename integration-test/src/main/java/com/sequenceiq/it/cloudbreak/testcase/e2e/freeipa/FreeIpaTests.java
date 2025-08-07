@@ -93,8 +93,7 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
-//TODO turn back on, when the salt policy is merged
-//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
+                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
@@ -105,15 +104,13 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
-//TODO turn back on, when the salt policy is merged
-//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
+                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
-//TODO turn back on, when the salt policy is merged
-//                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
+                .then(selinuxAssertions::validateAllAndThrowIfAnyError)
                 .given(FreeIpaUserSyncTestDto.class)
                 .forAllEnvironments()
                 .when(freeIpaTestClient.getLastSyncOperationStatus())

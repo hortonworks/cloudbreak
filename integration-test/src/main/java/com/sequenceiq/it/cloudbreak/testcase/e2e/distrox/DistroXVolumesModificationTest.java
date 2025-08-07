@@ -111,8 +111,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
-//TODO turn back on, when the salt policy is merged
-//            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
+            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
             .given("dx", DistroXTestDto.class)
             .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
             .withSeLinuxSecurity(SeLinux.ENFORCING.name())
@@ -124,8 +123,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(distroXTestClient.create(), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
-//TODO turn back on, when the salt policy is merged
-//            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
+            .then(selinuxAssertions::validateAllAndThrowIfAnyError)
             .given("dx", DistroXTestDto.class)
             .when(distroXTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform), TEST_INSTANCE_GROUP,
                             DiskType.ROOT_DISK), RunningParameter.key("dx"))
