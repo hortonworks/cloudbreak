@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips.cldr.17
+FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:jdk-21-fips
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
