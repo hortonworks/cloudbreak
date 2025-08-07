@@ -85,6 +85,12 @@ public class VaultKvV2Engine implements SecretEngine {
         return get(fullSecretPath);
     }
 
+    @Override
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
+    public void cacheEvict(String fullSecretPath) {
+        LOGGER.trace("Cache evicted for vault path [{}]", fullSecretPath);
+    }
+
     private Map<String, String> get(@NotNull String fullSecretPath) {
         validatePathPattern(fullSecretPath);
         long start = System.currentTimeMillis();

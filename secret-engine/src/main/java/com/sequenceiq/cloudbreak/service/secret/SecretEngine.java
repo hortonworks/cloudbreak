@@ -23,4 +23,6 @@ public interface SecretEngine {
 
     List<String> listEntries(String secretPathPrefix);
 
+    void cacheEvict(String secretPath);
+
 }

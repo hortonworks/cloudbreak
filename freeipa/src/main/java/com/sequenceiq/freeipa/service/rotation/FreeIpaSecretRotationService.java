@@ -22,8 +22,10 @@ import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepPro
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -47,12 +49,21 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     @Inject
     private List<SecretType> enabledSecretTypes;
 
+    @Inject
+    private FreeIpaService freeIpaService;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets(),
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, null);
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+
+        // in order to ensure updated secrets like admin password for salt update, we are evicting vault cache for relevant secrets
+        // CB-30149 needed for proper solution, when it is done, we can remove this workaround
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        freeIpa.evictVaultCacheForSecrets();
+
         Optional<RotationFlowExecutionType> usedExecutionType =
                 secretRotationValidationService.validate(environmentCrn, secretTypes, request.getExecutionType(), stack::isAvailable);
         SecretRotationFlowChainTriggerEvent triggerEvent = createSecretRotationTriggerEvent(stack, secretTypes, usedExecutionType.orElse(null),

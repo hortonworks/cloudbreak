@@ -101,4 +101,9 @@ public class SecretService {
         return persistentEngine.appPath() + secretPath;
     }
 
+    public void cacheEvict(String vaultSecretJson) {
+        VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
+        persistentEngine.cacheEvict(vaultSecret.getPath());
+    }
+
 }
