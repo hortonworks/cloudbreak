@@ -5,20 +5,20 @@ import jakarta.ws.rs.ext.Provider;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.exception.MarketplaceTermsAlreadySetException;
+import com.sequenceiq.environment.exception.TermsAlreadySetException;
 
 @Provider
 @Component
-public class MarketplaceTermsAlreadySetExceptionMapper extends EnvironmentBaseExceptionMapper<MarketplaceTermsAlreadySetException> {
+public class MarketplaceTermsAlreadySetExceptionMapper extends EnvironmentBaseExceptionMapper<TermsAlreadySetException> {
 
     @Override
-    public Status getResponseStatus(MarketplaceTermsAlreadySetException exception) {
+    public Status getResponseStatus(TermsAlreadySetException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    public Class<MarketplaceTermsAlreadySetException> getExceptionType() {
-        return MarketplaceTermsAlreadySetException.class;
+    public Class<TermsAlreadySetException> getExceptionType() {
+        return TermsAlreadySetException.class;
     }
 
 }

@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +14,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.environment.api.v1.terms.model.TermType;
 
 @Entity
 @Table
@@ -26,6 +29,10 @@ public class Terms implements Serializable, AccountIdAwareResource {
 
     @Column(nullable = false)
     private String accountId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "term_type", nullable = false)
+    private TermType termType;
 
     @Override
     public String getAccountId() {
@@ -52,12 +59,21 @@ public class Terms implements Serializable, AccountIdAwareResource {
         this.accepted = accepted;
     }
 
+    public TermType getTermType() {
+        return termType;
+    }
+
+    public void setTermType(TermType termType) {
+        this.termType = termType;
+    }
+
     @Override
     public String toString() {
         return "Terms{" +
                 "id=" + id +
                 ", accepted=" + accepted +
                 ", accountId='" + accountId + '\'' +
+                ", termType=" + termType +
                 '}';
     }
 

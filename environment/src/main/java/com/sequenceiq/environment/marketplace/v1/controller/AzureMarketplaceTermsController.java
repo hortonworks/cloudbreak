@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.marketplace.v1.controller;
 
+import static com.sequenceiq.environment.api.v1.terms.model.TermType.AZURE_MARKETPLACE_IMAGE_TERMS;
+
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
@@ -15,7 +17,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsRequest;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsResponse;
-import com.sequenceiq.environment.marketplace.service.AzureMarketplaceTermsService;
+import com.sequenceiq.environment.terms.service.TermsService;
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
@@ -24,10 +26,10 @@ public class AzureMarketplaceTermsController extends NotificationController impl
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMarketplaceTermsController.class);
 
-    private final AzureMarketplaceTermsService azureMarketplaceTermsService;
+    private final TermsService termsService;
 
-    public AzureMarketplaceTermsController(AzureMarketplaceTermsService azureMarketplaceTermsService) {
-        this.azureMarketplaceTermsService = azureMarketplaceTermsService;
+    public AzureMarketplaceTermsController(TermsService termsService) {
+        this.termsService = termsService;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
     @Override
     @InternalOnly
     public AzureMarketplaceTermsResponse getInAccount(@AccountId String accountId) {
-        Boolean accepted = azureMarketplaceTermsService.get(accountId);
+        Boolean accepted = termsService.get(accountId, AZURE_MARKETPLACE_IMAGE_TERMS);
         LOGGER.debug("Automatic image terms acceptance setting in account {}: {}", accountId, accepted);
         return new AzureMarketplaceTermsResponse(accepted);
     }
@@ -50,7 +52,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
     public AzureMarketplaceTermsResponse put(AzureMarketplaceTermsRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("New automatic image terms acceptance setting in account {} : {}", accountId, request.getAccepted());
-        azureMarketplaceTermsService.updateOrCreate(request.getAccepted(), accountId);
+        termsService.updateOrCreate(request.getAccepted(), AZURE_MARKETPLACE_IMAGE_TERMS, accountId);
         return new AzureMarketplaceTermsResponse(request.getAccepted());
     }
 }
