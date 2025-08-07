@@ -8,6 +8,7 @@ import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -283,6 +284,10 @@ public class FreeIpaService {
                     () -> trustV1Endpoint.cancelByCrn(environmentCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            if (e.getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.info("Cross realm trust was not set up yet for the environment: {}.", errorMessage);
+                return new CancelCrossRealmTrustResponse();
+            }
             LOGGER.error("Failed to cancel cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
