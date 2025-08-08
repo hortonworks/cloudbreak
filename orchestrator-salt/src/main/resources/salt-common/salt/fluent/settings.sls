@@ -9,11 +9,17 @@
 {% set cdp_logging_agent_version = '1.3.5' %}
 {% set cdp_logging_agent_build_number = 'b1' %}
 {% set cdp_logging_agent_dev_version = '0.1.0*' %}
-{% if os == "RedHat" %}
+{% if os == "RedHat" and grains['osmajorrelease'] | int == 8 %}
     {% if cpuarch != 'aarch64' %}
         {% set rpm_os = 'redhat8' %}
     {% else %}
         {% set rpm_os = 'redhat8arm64' %}
+    {% endif %}
+{% elif os == "RedHat" and grains['osmajorrelease'] | int == 9 %}
+    {% if cpuarch != 'aarch64' %}
+        {% set rpm_os = 'redhat9' %}
+    {% else %}
+        {% set rpm_os = 'redhat9arm64' %}
     {% endif %}
 {% elif os == "CentOS" %}
     {% set rpm_os = 'redhat7' %}

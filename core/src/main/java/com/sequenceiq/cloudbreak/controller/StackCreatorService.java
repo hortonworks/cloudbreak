@@ -93,6 +93,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -498,6 +499,10 @@ public class StackCreatorService {
                     throw new RuntimeException(e);
                 }
             });
+            OsType imageOs = OsType.getByOsTypeStringWithCentos7Fallback(statedImage.getImage().getOsType());
+            if (!entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), imageOs)) {
+                throw new BadRequestException(String.format("Your account is not entitled to use %s images.", imageOs.getShortName()));
+            }
             MDCBuilder.cleanupMdc();
             return statedImage;
         });

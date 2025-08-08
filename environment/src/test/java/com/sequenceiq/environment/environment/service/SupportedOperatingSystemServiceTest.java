@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +44,8 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
-        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)));
+        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8),
+                osTypeToOsTypeResponseConverter.convert(RHEL9)));
     }
 
     @Test

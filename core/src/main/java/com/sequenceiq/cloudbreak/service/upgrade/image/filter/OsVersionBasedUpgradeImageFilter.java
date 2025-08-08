@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
+import static com.sequenceiq.common.model.OsType.RHEL9;
+
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -28,7 +30,8 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         String currentOs = imageFilterParams.getCurrentImage().getOs();
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
         List<Image> filteredImages = filterImages(imageFilterResult,
-                image -> isOsVersionsMatch(imageFilterParams.getCurrentImage(), image) || isCentosToRedhatUpgrade(imageFilterParams, image));
+                image -> notRedhat9Image(image)
+                        && (isOsVersionsMatch(imageFilterParams.getCurrentImage(), image) || isCentosToRedhatUpgrade(imageFilterParams, image)));
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -45,6 +48,10 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     @Override
     public Integer getFilterOrderNumber() {
         return ORDER_NUMBER;
+    }
+
+    private boolean notRedhat9Image(Image image) {
+        return !RHEL9.getOs().equalsIgnoreCase(image.getOs()) && !RHEL9.getOsType().equalsIgnoreCase(image.getOsType());
     }
 
     private boolean isOsVersionsMatch(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {

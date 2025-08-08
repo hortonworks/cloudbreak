@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.Architecture.ARM64;
 import static com.sequenceiq.common.model.Architecture.X86_64;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
@@ -27,7 +28,8 @@ class TelemetryRepoConfigurationHolderTest {
     void setup() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "platformValues", Map.of(
                 CENTOS7, Map.of(X86_64, "centos7"),
-                RHEL8, Map.of(X86_64, "redhat8", ARM64, "redhat8arm")
+                RHEL8, Map.of(X86_64, "redhat8", ARM64, "redhat8arm"),
+                RHEL9, Map.of(X86_64, "redhat9", ARM64, "redhat9arm")
         ), true);
         FieldUtils.writeField(underTest, "name", "name", true);
         FieldUtils.writeField(underTest, "baseUrl", "url/%s", true);

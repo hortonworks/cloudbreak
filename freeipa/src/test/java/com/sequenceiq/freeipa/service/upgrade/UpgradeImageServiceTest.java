@@ -328,7 +328,8 @@ class UpgradeImageServiceTest {
     void testOsTypeOrdinal() {
         assertEquals(0, OsType.CENTOS7.ordinal());
         assertEquals(1, OsType.RHEL8.ordinal());
-        assertEquals(2, OsType.values().length);
+        assertEquals(2, OsType.RHEL9.ordinal());
+        assertEquals(3, OsType.values().length);
     }
 
     private Image createImage(String date, String os) {

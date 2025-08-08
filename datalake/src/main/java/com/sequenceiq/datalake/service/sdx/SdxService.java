@@ -138,6 +138,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
@@ -494,6 +495,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        validateOsEntitled(os, accountId);
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         Architecture architecture = validateAndGetArchitecture(sdxClusterRequest, imageV4Response, cloudPlatform, accountId);
 
@@ -559,6 +561,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void validateOsEntitled(String os, String accountId) {
+        OsType imageOs = OsType.getByOsTypeStringWithCentos7Fallback(os);
+        if (!entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), imageOs)) {
+            throw new BadRequestException(String.format("Your account is not entitled to use %s images.", imageOs.getShortName()));
+        }
     }
 
     private void setArchitecture(StackV4Request internalStackV4Request, SdxCluster sdxCluster, Architecture architecture) {

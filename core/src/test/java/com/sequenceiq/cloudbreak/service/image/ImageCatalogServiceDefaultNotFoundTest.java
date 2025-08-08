@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatf
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,8 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -41,6 +44,8 @@ import com.sequenceiq.common.model.Architecture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceDefaultNotFoundTest {
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:1111:user:1111";
 
     private static final String[] PROVIDERS = {"aws", "azure", "gcp"};
 
@@ -91,6 +96,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private ImageComparator imageComparator;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -111,6 +119,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
         when(imageOsService.isSupported(any())).thenReturn(true);
+        lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(true);
     }
 
     @Test
@@ -146,12 +155,22 @@ public class ImageCatalogServiceDefaultNotFoundTest {
                 .withOperatingSystems(Set.of("centos7"))
                 .build();
         try {
-            underTest.getImagePrewarmedDefaultPreferred(imageFilter);
-        } catch (CloudbreakImageNotFoundException exception) {
-            Assertions.assertEquals(
-                    "Could not find any image for platform 'aws centos7', runtime 'null' " +
-                            "and Cloudbreak version '5.0.0' in 'null' image catalog.",
-                    exception.getMessage());
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+                try {
+                    return underTest.getImagePrewarmedDefaultPreferred(imageFilter);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception exception) {
+            if (exception.getCause() instanceof CloudbreakImageNotFoundException) {
+                Assertions.assertEquals(
+                        "Could not find any image for platform 'aws centos7', runtime 'null' " +
+                                "and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                        exception.getCause().getMessage());
+            } else {
+                Assertions.fail();
+            }
         }
         verify(providerSpecificImageFilter, times(3)).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[0]))), anyList());
         verify(providerSpecificImageFilter, never()).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[1]))), anyList());
@@ -174,12 +193,22 @@ public class ImageCatalogServiceDefaultNotFoundTest {
                 .withArchitecture(Architecture.ARM64)
                 .build();
         try {
-            underTest.getImagePrewarmedDefaultPreferred(imageFilter);
-        } catch (CloudbreakImageNotFoundException exception) {
-            Assertions.assertEquals(
-                    "Could not find any image for platform 'aws centos7-arm64', runtime 'null' " +
-                            "and Cloudbreak version '5.0.0' in 'null' image catalog.",
-                    exception.getMessage());
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+                try {
+                    return underTest.getImagePrewarmedDefaultPreferred(imageFilter);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception exception) {
+            if (exception.getCause() instanceof CloudbreakImageNotFoundException) {
+                Assertions.assertEquals(
+                        "Could not find any image for platform 'aws centos7-arm64', runtime 'null' " +
+                                "and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                        exception.getCause().getMessage());
+            } else {
+                Assertions.fail();
+            }
         }
         verify(providerSpecificImageFilter, times(3)).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[0]))), anyList());
         verify(providerSpecificImageFilter, never()).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[1]))), anyList());

@@ -6,7 +6,8 @@ import java.util.Optional;
 public enum OsType {
 
     CENTOS7("centos7", "redhat7", "CentOS 7", "CentOS 7", "el7"),
-    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8", "el8");
+    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8", "el8"),
+    RHEL9("redhat9", "redhat9", "Red Hat Enterprise Linux 9", "RHEL 9", "el9");
 
     private final String os;
 

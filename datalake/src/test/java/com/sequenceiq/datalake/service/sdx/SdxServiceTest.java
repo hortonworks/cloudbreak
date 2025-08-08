@@ -317,6 +317,7 @@ class SdxServiceTest {
         lenient().when(platformConfig.getRazSupportedPlatforms()).thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
         lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
+        lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
     }
 
     @Test

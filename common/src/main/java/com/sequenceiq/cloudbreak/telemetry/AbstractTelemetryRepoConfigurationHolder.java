@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.Architecture.ARM64;
 import static com.sequenceiq.common.model.Architecture.X86_64;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 
 import java.util.Map;
 
@@ -36,7 +37,12 @@ public abstract class AbstractTelemetryRepoConfigurationHolder {
             case ARM64 -> getRepoConfigByPlatformValue(platformValues.get(RHEL8).get(ARM64));
             case X86_64, UNKNOWN -> getRepoConfigByPlatformValue(platformValues.get(RHEL8).get(X86_64));
         };
+        TelemetryRepoConfiguration rhel9RepoConfigBasedOnArch = switch (Architecture.fromStringWithFallback(context.getArchitecture())) {
+            case ARM64 -> getRepoConfigByPlatformValue(platformValues.get(RHEL9).get(ARM64));
+            case X86_64, UNKNOWN -> getRepoConfigByPlatformValue(platformValues.get(RHEL9).get(X86_64));
+        };
         return switch (OsType.getByOsTypeStringWithCentos7Fallback(context.getOsType())) {
+            case RHEL9 -> rhel9RepoConfigBasedOnArch;
             case RHEL8 -> rhel8RepoConfigBasedOnArch;
             case CENTOS7 -> getRepoConfigByPlatformValue(platformValues.get(CENTOS7).get(X86_64));
         };

@@ -34,6 +34,9 @@ telemetry:
         RHEL8:
             X86_64: redhat8
             ARM64: redhat8arm64
+        RHEL9:
+            X86_64: redhat9
+            ARM64: redhat9arm64
   devrepos:
       name: cdp-infra-tools
       base-url: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/64129287/cdp-infra-tools/0.x/%s/yum
@@ -45,6 +48,9 @@ telemetry:
           RHEL8:
               X86_64: redhat8
               ARM64: redhat8arm64
+          RHEL9:
+              X86_64: redhat9
+              ARM64: redhat9arm64
   monitoring:
     remote-write-url: ""
     remote-write-internal-url: ""

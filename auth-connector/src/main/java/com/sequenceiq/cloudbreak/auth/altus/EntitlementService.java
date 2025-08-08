@@ -52,6 +52,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
@@ -115,6 +116,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IA
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -128,11 +130,14 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.common.model.OsType;
 
 @Service
 public class EntitlementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitlementService.class);
+
+    private static final Map<OsType, Entitlement> OS_ENTITLEMENTS = Map.of(OsType.RHEL9, CDP_ENABLE_RHEL9_IMAGES);
 
     @Inject
     private GrpcUmsClient umsClient;
@@ -626,5 +631,13 @@ public class EntitlementService {
 
     public boolean isTlsv13OnlyEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_SUPPORTS_TLS_1_3_ONLY);
+    }
+
+    public boolean isEntitledToUseOS(String accountId, OsType osType) {
+        if (osType != null && OS_ENTITLEMENTS.containsKey(osType)) {
+            return isEntitlementRegistered(accountId, OS_ENTITLEMENTS.get(osType));
+        } else {
+            return true;
+        }
     }
 }

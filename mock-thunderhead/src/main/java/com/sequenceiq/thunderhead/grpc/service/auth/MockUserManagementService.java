@@ -52,6 +52,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
@@ -594,6 +595,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.tlsv13.only.enabled}")
     private boolean tlsv13OnlyEnabled;
 
+    @Value("${auth.mock.rhel9.enabled}")
+    private boolean rhel9Enabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1111,6 +1115,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (tlsv13OnlyEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SUPPORTS_TLS_1_3_ONLY));
+        }
+        if (rhel9Enabled) {
+            builder.addEntitlements(createEntitlement(CDP_ENABLE_RHEL9_IMAGES));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

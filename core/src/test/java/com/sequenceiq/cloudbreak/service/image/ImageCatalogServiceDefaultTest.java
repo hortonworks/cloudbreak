@@ -29,6 +29,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -50,7 +51,9 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class ImageCatalogServiceDefaultTest {
 
-    private static final String[] PROVIDERS = { "aws", "azure", "gcp" };
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String[] PROVIDERS = {"aws", "azure", "gcp"};
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
 
@@ -121,20 +124,20 @@ public class ImageCatalogServiceDefaultTest {
     private ImageCatalogService underTest;
 
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                    // catalog                  //provider  //clusterVersion    // expected image           //cbversion     //os
-                { "Testing catalog for filterin 2.6 runtimes  for 5.0.0 CB  without os limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "5.0.0",        "" },
-                { "Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with centos7 limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "5.0.0",        "centos7" },
-                { "Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with amazonlinux2 limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-amazonlinux-hdp",   "5.0.0",        "amazonlinux2" },
-                { "Testing catalog for filterin 2.6 runtimes for 6.0.0 CB without os limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "second-latest-hdp",        "6.0.0",        "" },
-                { "Testing catalog for filterin 2.6 runtimes for 6.1.0 CB without os limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "second-latest-hdp",        "6.1.0",        "" },
-                { "Testing catalog for filterin 2.6 runtimes for 9.0.0 CB without os limit",
-                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "9.0.0",        "" }
+        return Arrays.asList(new Object[][]{
+                // catalog                  //provider  //clusterVersion    // expected image           //cbversion     //os
+                {"Testing catalog for filterin 2.6 runtimes  for 5.0.0 CB  without os limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", ""},
+                {"Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with centos7 limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", "centos7"},
+                {"Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with amazonlinux2 limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-amazonlinux-hdp", "5.0.0", "amazonlinux2"},
+                {"Testing catalog for filterin 2.6 runtimes for 6.0.0 CB without os limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.0.0", ""},
+                {"Testing catalog for filterin 2.6 runtimes for 6.1.0 CB without os limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.1.0", ""},
+                {"Testing catalog for filterin 2.6 runtimes for 9.0.0 CB without os limit",
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "9.0.0", ""}
         });
     }
 
@@ -186,7 +189,13 @@ public class ImageCatalogServiceDefaultTest {
                 .withOperatingSystems(operatingSystems)
                 .withClusterVersion(clusterVersion)
                 .build();
-        StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter);
+        StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            try {
+                return underTest.getImagePrewarmedDefaultPreferred(imageFilter);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
 

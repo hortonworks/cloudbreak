@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ha.service.ServiceFlowLogComponent;
-import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 import com.sequenceiq.redbeams.repository.RedbeamsFlowLogRepository;
 
 @Primary
@@ -26,6 +25,6 @@ public class RedbeamsFlowLogComponent implements ServiceFlowLogComponent {
 
     @Override
     public Set<Long> findTerminatingResourcesByNodeId(String nodeId) {
-        return redbeamsFlowLogRepository.findTerminatingResourcesByNodeId(nodeId, RedbeamsTerminationFlowConfig.class);
+        return redbeamsFlowLogRepository.findTerminatingResourcesByNodeId(nodeId);
     }
 }

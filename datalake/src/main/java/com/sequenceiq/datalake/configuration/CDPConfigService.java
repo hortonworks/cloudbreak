@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.configuration;
 
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,6 +65,8 @@ public class CDPConfigService {
     private static final VersionComparator VERSION_COMPARATOR = new VersionComparator();
 
     private static final String RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8 = "7.2.17";
+
+    private static final String RUNTIME_SUPPORTIG_RHEL8_AND_RHEL9 = "7.3.2";
 
     private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.2";
 
@@ -173,6 +176,9 @@ public class CDPConfigService {
         List<String> ret;
         if (StringUtils.isBlank(os)) {
             ret = runtimeVersions;
+        } else if (RHEL9.getOs().equals(os)) {
+            ret = runtimeVersions.stream()
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_RHEL8_AND_RHEL9) >= 0).collect(Collectors.toList());
         } else if (RHEL8.getOs().equals(os)) {
             ret = runtimeVersions.stream()
                     .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) >= 0).collect(Collectors.toList());

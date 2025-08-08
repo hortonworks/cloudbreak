@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.partitioningBy;
@@ -568,6 +569,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 String filterName = String.format("operating system in (%s)", String.join(",", imageFilter.getOperatingSystems()));
                 images = filterImages(images, filterName, isMatchingOs(imageFilter.getOperatingSystems()));
             }
+            boolean rhel9Enabled = entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), RHEL9);
+            if (!rhel9Enabled) {
+                String filterName = "architecture=redhat9";
+                images = filterImages(images, filterName, isMatchingOs(Set.of(RHEL9.getOs())).negate());
+            }
             if (!Strings.isNullOrEmpty(imageFilter.getClusterVersion())) {
                 String filterName = "runtime version=" + imageFilter.getClusterVersion();
                 images = filterImages(images, filterName, filterImagesByRuntimeVersion(imageFilter.getClusterVersion()));
@@ -712,7 +718,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private static Predicate<Image> isMatchingOs(Set<String> operatingSystems) {
         //This predicate should be used after image burning generates the right OS into the image catalog
         //return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os));
-        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os) || img.getOsType().equalsIgnoreCase(os));
+        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os)
+                || (img.getOsType() != null && img.getOsType().equalsIgnoreCase(os)));
     }
 
     private Image getLatestImageDefaultPreferred(ImageFilter imageFilter, List<Image> images) throws CloudbreakImageNotFoundException {

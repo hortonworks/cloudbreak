@@ -290,7 +290,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
+        StatedImage image = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -310,7 +316,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
                 .withBaseImageEnabled(true)
                 .build();
-        underTest.getLatestImageDefaultPreferred(imageFilter, true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         verify(advertisedImageProvider).getImages(any(), any());
     }
@@ -333,7 +345,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
+        StatedImage image = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -351,7 +369,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
+        StatedImage image = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -369,7 +393,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
+        StatedImage image = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -387,7 +417,13 @@ public class ImageCatalogServiceTest {
                 .withOperatingSystems(operatingSystems)
                 .withCbVersion(CB_VERSION)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean allMatch = images.getImages().getBaseImages().stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
         assertTrue(allMatch, "All images should be based on supported OS");
@@ -403,7 +439,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Set.of(imageCatalogPlatform("azure")))
                 .withCbVersion(cbVersion)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -420,7 +462,13 @@ public class ImageCatalogServiceTest {
                 .withCbVersion(cbVersion)
                 .withOperatingSystems(ImmutableSet.of("amazonlinux"))
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
         for (Image image : images.getImages().getBaseImages()) {
             boolean containsAws = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "aws".equals(platformImages.getKey()));
             boolean containsAzure = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "azure_rm".equals(platformImages.getKey()));
@@ -440,7 +488,13 @@ public class ImageCatalogServiceTest {
                 .withOperatingSystems(ImmutableSet.of("amazonlinux"))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
@@ -465,7 +519,13 @@ public class ImageCatalogServiceTest {
                 .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "cab28152-f5e1-43e1-5107-9e7bbed33eef".equals(img.getUuid()));
@@ -484,7 +544,13 @@ public class ImageCatalogServiceTest {
                 .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
@@ -509,7 +575,13 @@ public class ImageCatalogServiceTest {
                 .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> img.getUuid().equals("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
@@ -532,7 +604,13 @@ public class ImageCatalogServiceTest {
                 .withCbVersion("1.16.2-dev.132")
                 .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -555,7 +633,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
                 .withCbVersion("1.16.2-rc.13")
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -578,7 +662,13 @@ public class ImageCatalogServiceTest {
                 .withCbVersion("2.1.0-dev.4000")
                 .withBaseImageEnabled(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean baseImgMatch = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "f6e778fc-7f17-4535-9021-515351df3691".equals(img.getUuid()));
@@ -600,7 +690,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
                 .withCbVersion("2.0.0-rc.4")
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -616,7 +712,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
                 .withCbVersion("1.16.2")
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -639,7 +741,13 @@ public class ImageCatalogServiceTest {
                 .withArchitecture(Architecture.ARM64)
                 .withCbVersion("2.41.0")
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals(1, images.getImages().getCdhImages().size());
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
@@ -662,7 +770,13 @@ public class ImageCatalogServiceTest {
                 .withPlatforms(Collections.singleton(imageCatalogPlatform("aws")))
                 .withCbVersion("2.41.0")
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         List<String> imageUuids = images.getImages().getCdhImages().stream().map(Image::getUuid).toList();
         assertTrue(imageUuids.contains("f3071603-8ab3-4214-b78d-94131c588e83"), "Result must contain the only image with arm64 architecture.");
@@ -694,7 +808,13 @@ public class ImageCatalogServiceTest {
                 .withCbVersion("2.41.0-b115")
                 .withDefaultOnly(true)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals(1, images.getImages().getCdhImages().size());
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
@@ -713,7 +833,13 @@ public class ImageCatalogServiceTest {
                 .withCbVersion("2.41.0-b115")
                 .withDefaultOnly(false)
                 .build();
-        StatedImages images = underTest.getImages(imageFilter);
+        StatedImages images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertEquals(3, images.getImages().getCdhImages().size());
     }
@@ -831,7 +957,13 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(ImageCatalogPlatform.class), anyBoolean())).thenReturn(imageCatalogPlatform);
-        underTest.getImagesFromDefault(WORKSPACE_ID, null, imageCatalogPlatform, emptySet(), null, false, false, null);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImagesFromDefault(WORKSPACE_ID, null, imageCatalogPlatform, emptySet(), null, false, false, null);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -879,7 +1011,13 @@ public class ImageCatalogServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
-        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, null);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, null);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -898,7 +1036,13 @@ public class ImageCatalogServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
-        Images images = underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64");
+        Images images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64");
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertThat(images.getCdhImages(), hasSize(1));
         assertEquals("996aa8bf-bc1a-4cc6-43f1-427b4432c8c2", images.getCdhImages().getFirst().getUuid());
@@ -914,7 +1058,13 @@ public class ImageCatalogServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
-        Images images = underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "x86_64");
+        Images images = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "x86_64");
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         assertThat(images.getCdhImages(), hasSize(1));
         assertEquals("886aa8bf-bc1a-4cc6-43f1-427b4432c8c2", images.getCdhImages().getFirst().getUuid());

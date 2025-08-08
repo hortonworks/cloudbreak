@@ -103,7 +103,7 @@ java_security_set_keymanagerfactory_algorithm:
 
 {% else %}
 
-{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
 change_krb5_conf_crypto_policies:
   file.managed:
     - name: /etc/krb5.conf.d/crypto-policies

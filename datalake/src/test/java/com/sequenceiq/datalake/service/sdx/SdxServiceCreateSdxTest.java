@@ -283,6 +283,7 @@ class SdxServiceCreateSdxTest {
                 .thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
+        lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(true);
         lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
     }
 
