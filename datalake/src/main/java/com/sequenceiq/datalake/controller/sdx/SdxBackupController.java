@@ -7,9 +7,11 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -18,6 +20,8 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
@@ -106,6 +110,34 @@ public class SdxBackupController implements SdxBackupEndpoint {
     public SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@ResourceName String name, String operationId) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public void setBackupRestoreSettings(@ResourceName String name, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        sdxBackupRestoreService.setDatabaseBackupRestoreSettings(sdxCluster, backupRestoreSettingsRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxBackupRestoreSettingsResponse getBackupRestoreSettings(@ResourceName String name) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return sdxBackupRestoreService.getDatabaseBackupRestoreSettingsResponse(sdxCluster);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public void deleteBackupRestoreSettings(@ResourceName String name) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        sdxBackupRestoreService.deleteDatabaseBackupRestoreSettings(sdxCluster);
+    }
+
+    @Override
+    @InternalOnly
+    public SdxBackupRestoreSettingsResponse internalGetBackupRestoreSettings(@ResourceCrn String crn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(crn);
+        return sdxBackupRestoreService.getDatabaseBackupRestoreSettingsResponse(sdxCluster);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

@@ -3,6 +3,7 @@ package com.sequenceiq.sdx.api.endpoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -15,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
@@ -93,4 +96,32 @@ public interface SdxBackupEndpoint {
     @Operation(summary = "Get the status of datalake database backup operation", operationId = "backupDatabaseStatus",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@PathParam("name") String name, @QueryParam("operationId") String operationId);
+
+    @POST
+    @Path("{name}/setBackupRestoreSettings")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set backup and restore settings for the datalake", operationId = "setBackupRestoreSettings",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void setBackupRestoreSettings(@PathParam("name") String name, @Valid @NotNull SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest);
+
+    @GET
+    @Path("{name}/getBackupRestoreSettings")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get backup and restore settings for the datalake", operationId = "getBackupRestoreSettings",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxBackupRestoreSettingsResponse getBackupRestoreSettings(@PathParam("name") String name);
+
+    @DELETE
+    @Path("{name}/deleteBackupRestoreSettings")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Delete backup and restore settings for the datalake", operationId = "deleteBackupRestoreSettings",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void deleteBackupRestoreSettings(@PathParam("name") String name);
+
+    @GET
+    @Path("{crn}/getBackupRestoreSettingsInternal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Internal api to get backup and restore settings for the datalake", operationId = "getBackupRestoreSettingsInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxBackupRestoreSettingsResponse internalGetBackupRestoreSettings(@PathParam("crn") String crn);
 }

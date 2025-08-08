@@ -10,6 +10,14 @@ public class ModelDescriptions {
 
     public static final String BACKUP_LOCATION = "The location where the database backup will be stored.";
 
+    public static final String BACKUP_TEMP_LOCATION = "The location where the database backup will be stored temporarily.";
+
+    public static final String BACKUP_TIMEOUT_IN_MINUTES = "The maximum duration allowed for a backup in minutes.";
+
+    public static final String RESTORE_TEMP_LOCATION = "The location where the database restore will be stored temporarily.";
+
+    public static final String RESTORE_TIMEOUT_IN_MINUTES = "The maximum duration allowed for a restore in minutes.";
+
     public static final String OPERATION_TYPE = "The type of disaster recovery operation.";
 
     public static final String CLOSE_CONNECTIONS = "The conditional parameter for whether connections to the database will be closed during backup or not.";

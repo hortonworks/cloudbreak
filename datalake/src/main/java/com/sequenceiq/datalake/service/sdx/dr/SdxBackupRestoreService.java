@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.datalake.entity.SdxBackupRestoreSettings;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
@@ -68,6 +69,7 @@ import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
+import com.sequenceiq.datalake.repository.SdxBackupRestoreSettingsRepository;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
@@ -80,6 +82,8 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
@@ -119,6 +123,9 @@ public class SdxBackupRestoreService {
 
     @Inject
     private SdxOperationRepository sdxOperationRepository;
+
+    @Inject
+    private SdxBackupRestoreSettingsRepository sdxBackupRestoreSettingsRepository;
 
     @Inject
     private DatalakeDrClient datalakeDrClient;
@@ -428,6 +435,55 @@ public class SdxBackupRestoreService {
         SdxOperation drStatus = getDatabaseDrStatus(sdxCluster, operationId,
                 SdxOperationType.RESTORE);
         return new SdxDatabaseRestoreStatusResponse(convertSdxDatabaseDrStatus(drStatus.getStatus()), drStatus.getStatusReason());
+    }
+
+    public void setDatabaseBackupRestoreSettings(SdxCluster sdxCluster, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        SdxBackupRestoreSettings sdxBackupRestoreSettings = getSdxBackupRestoreSettings(sdxCluster.getCrn(), backupRestoreSettingsRequest);
+        sdxBackupRestoreSettingsRepository.save(sdxBackupRestoreSettings);
+    }
+
+    public SdxBackupRestoreSettings getDatabaseBackupRestoreSettings(String sdxClusterCrn) {
+        return sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxClusterCrn);
+    }
+
+    public SdxBackupRestoreSettingsResponse getDatabaseBackupRestoreSettingsResponse(SdxCluster sdxCluster) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
+        if (backupRestoreSettings == null) {
+            LOGGER.info("No backup/restore settings found for SDX cluster with CRN: {}", sdxCluster.getCrn());
+            throw new NotFoundException(String.format("No backup/restore settings found for SDX cluster with CRN: %s", sdxCluster.getCrn()));
+        }
+        return getSdxBackupRestoreSettingsResponse(backupRestoreSettings);
+    }
+
+    public void deleteDatabaseBackupRestoreSettings(SdxCluster sdxCluster) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
+        if (backupRestoreSettings != null) {
+            sdxBackupRestoreSettingsRepository.delete(backupRestoreSettings);
+        } else {
+            LOGGER.info("No backup/restore settings found for SDX cluster with CRN: {}", sdxCluster.getCrn());
+        }
+    }
+
+    private SdxBackupRestoreSettings getSdxBackupRestoreSettings(String clusterCrn, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+        SdxBackupRestoreSettings sdxBackupRestoreSettings = new SdxBackupRestoreSettings();
+        sdxBackupRestoreSettings.setBackupTempLocation(backupRestoreSettingsRequest.getBackupTempLocation());
+        sdxBackupRestoreSettings.setBackupTimeoutInMinutes(backupRestoreSettingsRequest.getBackupTimeoutInMinutes());
+        sdxBackupRestoreSettings.setRestoreTempLocation(backupRestoreSettingsRequest.getRestoreTempLocation());
+        sdxBackupRestoreSettings.setRestoreTimeoutInMinutes(backupRestoreSettingsRequest.getRestoreTimeoutInMinutes());
+        sdxBackupRestoreSettings.setSdxClusterCrn(clusterCrn);
+        return sdxBackupRestoreSettings;
+    }
+
+    private SdxBackupRestoreSettingsResponse getSdxBackupRestoreSettingsResponse(SdxBackupRestoreSettings backupRestoreSettings) {
+        SdxBackupRestoreSettingsResponse sdxBackupRestoreSettingsResponse = new SdxBackupRestoreSettingsResponse();
+        sdxBackupRestoreSettingsResponse.setBackupTempLocation(backupRestoreSettings.getBackupTempLocation());
+        sdxBackupRestoreSettingsResponse.setBackupTimeoutInMinutes(backupRestoreSettings.getBackupTimeoutInMinutes());
+        sdxBackupRestoreSettingsResponse.setRestoreTempLocation(backupRestoreSettings.getRestoreTempLocation());
+        sdxBackupRestoreSettingsResponse.setRestoreTimeoutInMinutes(backupRestoreSettings.getRestoreTimeoutInMinutes());
+        return sdxBackupRestoreSettingsResponse;
     }
 
     private void updateSuccessStatus(String operationId, SdxCluster sdxCluster, FlowIdentifier flowIdentifier,
