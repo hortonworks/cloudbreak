@@ -120,7 +120,7 @@ public class CDPRestCommonService {
         if (json.isArray() && idType.equals(restParams.get(ID_TYPE))) {
             List<String> asList = json.asArray();
             values = String.join(",", asList);
-        } else if (json.isObject() && json.getMap().containsKey("responses")) {
+        } else if (json.isObject() && json.getMap() != null && json.getMap().containsKey("responses")) {
             values = ((Collection<Object>) json.getMap().get("responses"))
                     .stream()
                     .map(obj -> (String) new Json(obj).getMap().get(idType))
