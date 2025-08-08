@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
 @Component
@@ -30,7 +30,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
     private UpgradePermissionProvider upgradePermissionProvider;
 
     @Inject
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
@@ -101,11 +101,11 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
     }
 
     private boolean shouldCheckWithLockedComponents(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return imageFilterParams.isLockComponents() || isCentOSToRedhatOsUpgrade(imageFilterParams, candidateImage);
+        return imageFilterParams.isLockComponents() || isOsChangeAllowed(imageFilterParams, candidateImage);
     }
 
-    private boolean isCentOSToRedhatOsUpgrade(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getStackId(), imageFilterParams.getCurrentImage(), candidateImage,
+    private boolean isOsChangeAllowed(ImageFilterParams imageFilterParams, Image candidateImage) {
+        return osChangeUtil.isOsUpgradePermitted(imageFilterParams.getStackId(), imageFilterParams.getCurrentImage(), candidateImage,
                 imageFilterParams.getStackRelatedParcels());
     }
 

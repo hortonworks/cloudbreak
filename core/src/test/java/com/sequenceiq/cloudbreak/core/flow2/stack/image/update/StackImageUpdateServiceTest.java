@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
@@ -70,7 +70,7 @@ public class StackImageUpdateServiceTest {
     private PlatformStringTransformer platformStringTransformer;
 
     @Mock
-    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+    private OsChangeUpgradeCondition osChangeUpgradeCondition;
 
     @InjectMocks
     private StackImageUpdateService underTest;
@@ -187,7 +187,7 @@ public class StackImageUpdateServiceTest {
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(targetStatedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
-        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(stack.getId(), targetStatedImage.getImage())).thenReturn(true);
+        when(osChangeUpgradeCondition.isNextMajorOsImage(stack.getId(), targetStatedImage.getImage())).thenReturn(true);
 
         underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
 

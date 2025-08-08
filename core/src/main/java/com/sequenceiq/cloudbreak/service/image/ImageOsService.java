@@ -16,7 +16,8 @@ public class ImageOsService {
 
     public boolean isSupported(String os) {
         //since os is not mandatory in the request, we should return true if it's not present
-        return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) || RHEL8.getOs().equalsIgnoreCase(os) ||
+        return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) ||
+                RHEL8.getOs().equalsIgnoreCase(os) ||
                 RHEL9.getOs().equalsIgnoreCase(os);
     }
 

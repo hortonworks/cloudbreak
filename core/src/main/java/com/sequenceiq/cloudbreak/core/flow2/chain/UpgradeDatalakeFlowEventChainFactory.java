@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -50,7 +50,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     private StackDtoService stackDtoService;
 
     @Inject
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Inject
     private SaltVersionUpgradeService saltVersionUpgradeService;
@@ -94,7 +94,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     }
 
     private ClusterUpgradeTriggerEvent getEventForRuntimeUpgrade(ClusterUpgradeTriggerEvent event) {
-        return centOSToRedHatUpgradeAvailabilityService
+        return osChangeUtil
                 .findHelperImageIfNecessary(event.getImageId(), event.getResourceId())
                 .map(image -> createEventForRuntimeUpgrade(image, event))
                 .orElse(event);

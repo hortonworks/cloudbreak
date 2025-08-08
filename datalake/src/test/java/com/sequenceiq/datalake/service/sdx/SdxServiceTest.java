@@ -128,6 +128,7 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
@@ -317,7 +318,7 @@ class SdxServiceTest {
         lenient().when(platformConfig.getRazSupportedPlatforms()).thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
         lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
-        lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
+        lenient().when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
     }
 
     @Test

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 public class CurrentImageUsageCondition {
@@ -34,11 +35,12 @@ public class CurrentImageUsageCondition {
                 .allMatch(imageIdOnInstance -> imageIdOnInstance.equals(currentImageId));
     }
 
-    public boolean isCurrentOsUsedOnInstances(Long stackId, String currentImageOs) {
-        Map<String, Image> imageByInstances = getImagesByInstance(stackId);
-        return !imageByInstances.isEmpty() && imageByInstances.values().stream()
-                .map(Image::getOs)
-                .allMatch(osUsedOnInstance -> StringUtils.equalsIgnoreCase(osUsedOnInstance, currentImageOs));
+    public Set<OsType> getOSUsedByInstances(Long stackId) {
+        return getImagesByInstance(stackId)
+                .values()
+                .stream()
+                .map(image -> OsType.getByOsTypeStringWithCentos7Fallback(image.getOsType()))
+                .collect(Collectors.toSet());
     }
 
     private Map<String, Image> getImagesByInstance(Long stackId) {

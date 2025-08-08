@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -41,7 +41,7 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
     private static final Logger LOGGER = LoggerFactory.getLogger(PrepareClusterUpgradeFlowEventChainFactory.class);
 
     @Inject
-    private CentosToRedHatUpgradeAvailabilityService centosToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Override
     public String initEvent() {
@@ -50,7 +50,7 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradePreparationChainTriggerEvent event) {
-        Optional<Image> helperImage = centosToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(
+        Optional<Image> helperImage = osChangeUtil.findHelperImageIfNecessary(
                 event.getImageChangeDto().getImageId(),
                 event.getResourceId());
         UpgradePreparationChainTriggerEvent upgradeTriggerEvent = helperImage.map(image ->

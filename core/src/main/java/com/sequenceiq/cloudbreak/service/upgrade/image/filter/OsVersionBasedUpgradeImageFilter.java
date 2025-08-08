@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 
 import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -10,10 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
@@ -23,15 +28,22 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     private static final int ORDER_NUMBER = 8;
 
     @Inject
-    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+    private OsChangeUpgradeCondition osChangeUpgradeCondition;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private CurrentImageUsageCondition currentImageUsageCondition;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         String currentOs = imageFilterParams.getCurrentImage().getOs();
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
+        boolean rhel9Enabled = entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), RHEL9);
+        Set<OsType> osUsedByInstances = currentImageUsageCondition.getOSUsedByInstances(imageFilterParams.getStackId());
         List<Image> filteredImages = filterImages(imageFilterResult,
-                image -> notRedhat9Image(image)
-                        && (isOsVersionsMatch(imageFilterParams.getCurrentImage(), image) || isCentosToRedhatUpgrade(imageFilterParams, image)));
+                image -> isSameOsOrAllowedOsChange(imageFilterParams, image, rhel9Enabled, osUsedByInstances));
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -50,15 +62,16 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private boolean notRedhat9Image(Image image) {
-        return !RHEL9.getOs().equalsIgnoreCase(image.getOs()) && !RHEL9.getOsType().equalsIgnoreCase(image.getOsType());
+    private boolean isSameOsOrAllowedOsChange(ImageFilterParams imageFilterParams, Image image, boolean rhel9Enabled, Set<OsType> osUsedByInstances) {
+        return isOsEntitled(image, rhel9Enabled) &&
+                (isOsMatches(imageFilterParams.getCurrentImage(), image) || osChangeUpgradeCondition.isNextMajorOsImage(osUsedByInstances, image));
     }
 
-    private boolean isOsVersionsMatch(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
+    private boolean isOsEntitled(Image image, boolean rhel9Enabled) {
+        return !RHEL9.matches(image.getOs(), image.getOsType()) || rhel9Enabled;
+    }
+
+    private boolean isOsMatches(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
-    }
-
-    private boolean isCentosToRedhatUpgrade(ImageFilterParams imageFilterParams, Image image) {
-        return centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(imageFilterParams.getStackId(), image);
     }
 }

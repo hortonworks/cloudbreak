@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,9 +44,11 @@ public class SupportedOperatingSystemService {
             response.setDefaultOs(RHEL8.getOs());
             LOGGER.info("List of supported OS for gov cloud response: {}", response);
         } else {
-            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
+            boolean rhel9Enabled = entitlementService.isEntitledToUseOS(accountId, RHEL9);
+            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values())
+                    .filter(os -> !RHEL9.equals(os) || rhel9Enabled)
+                    .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
-
             response.setDefaultOs(RHEL8.getOs());
             LOGGER.info("List of supported OS. response: {}", response);
         }

@@ -24,14 +24,14 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class })
+@SpringBootTest(classes = {UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class})
 public class UpgradeImageFilterConfigTest {
 
     @Inject
@@ -50,7 +50,7 @@ public class UpgradeImageFilterConfigTest {
     }
 
     @Configuration
-    @ComponentScan(basePackageClasses = { UpgradeImageFilter.class })
+    @ComponentScan(basePackageClasses = {UpgradeImageFilter.class})
     static class TestAppContext {
 
         @MockBean
@@ -78,13 +78,13 @@ public class UpgradeImageFilterConfigTest {
         private ImageCatalogService imageCatalogService;
 
         @MockBean
-        private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+        private OsChangeUtil osChangeUtil;
 
         @MockBean
         private ImageUtil imageUtil;
 
         @MockBean
-        private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+        private OsChangeUpgradeCondition osChangeUpgradeCondition;
 
         @MockBean
         private SeLinuxValidationService seLinuxValidationService;

@@ -297,7 +297,6 @@ public class ImageCatalogServiceTest {
                 throw new RuntimeException(e);
             }
         });
-
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
     }
@@ -1425,6 +1424,26 @@ public class ImageCatalogServiceTest {
 
     private void setMockedLegacyCatalogEnabled(boolean value) {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "legacyCatalogEnabled", value, boolean.class);
+    }
+
+    private StatedImage getLatestImageDefaultPreferred(ImageFilter imageFilter, boolean selectBaseImage) {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getLatestImageDefaultPreferred(imageFilter, selectBaseImage);
+            } catch (CloudbreakImageCatalogException | CloudbreakImageNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private StatedImages getImages(ImageFilter imageFilter) {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.getImages(imageFilter);
+            } catch (CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private static class AwsCloudConstant implements CloudConstant {

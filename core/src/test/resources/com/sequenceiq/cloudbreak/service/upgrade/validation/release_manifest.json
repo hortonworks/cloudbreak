@@ -318,6 +318,7 @@
     "generic/jar/cm_api/apidocs/json_ApiExternalUserMappingList.html",
     "generic/jar/cm_api/apidocs/json_ApiCommandStep.html",
     "redhat7/yum/RPMS/x86_64/cloudera-manager-server-7.6.0-23760327p.el7.x86_64.rpm",
+    "redhat9/yum/RPMS/x86_64/cloudera-manager-server-7.6.0-23760327p.el9.x86_64.rpm",
     "sles12/yum/cloudera-manager.repo",
     "generic/jar/cm_api/apidocs/json_ApiEnableOozieHaArguments.html",
     "generic/jar/cm_api/swagger-html-sdk-docs/python/docs/ApiProcess.html",

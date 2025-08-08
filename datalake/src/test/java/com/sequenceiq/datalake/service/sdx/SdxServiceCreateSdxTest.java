@@ -87,6 +87,7 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -283,7 +284,7 @@ class SdxServiceCreateSdxTest {
                 .thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
-        lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(true);
+        lenient().when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
         lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
     }
 
@@ -1047,6 +1048,7 @@ class SdxServiceCreateSdxTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
 
@@ -1132,6 +1134,7 @@ class SdxServiceCreateSdxTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->

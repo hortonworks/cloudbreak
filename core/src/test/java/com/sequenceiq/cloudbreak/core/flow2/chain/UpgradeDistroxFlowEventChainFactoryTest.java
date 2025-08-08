@@ -69,7 +69,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -99,7 +99,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Mock
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Mock
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
@@ -126,7 +126,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForNonReplaceVms() {
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
@@ -147,7 +147,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForUpgradeWithStoppedNodes() {
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
 
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
@@ -196,7 +196,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -227,7 +227,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForReplaceVmsWithHundredNodes() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -266,7 +266,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -299,7 +299,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
                 .thenReturn(Optional.of(Image.builder().withUuid(RH_IMAGE).build()));
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -320,7 +320,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -354,7 +354,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForOsUpgradeShouldSkipOsUpgradeWhenNoUpgradableInstanceFound() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 
@@ -385,7 +385,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForOsUpgradeWhenReplaceVmsIsFalse() {
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 

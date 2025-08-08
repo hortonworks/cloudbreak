@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -55,7 +55,7 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Mock
     private SaltVersionUpgradeService saltVersionUpgradeService;
@@ -67,7 +67,7 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
 
     @Test
     void testCreateFlowTriggerEventQueue() {
-        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -104,7 +105,7 @@ public class CurrentImageUsageConditionTest {
         Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithOs(OsType.CENTOS7, OsType.CENTOS7, OsType.CENTOS7);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertTrue(underTest.isCurrentOsUsedOnInstances(STACK_ID, OsType.CENTOS7.getOs()));
+        assertEquals(Set.of(OsType.CENTOS7), underTest.getOSUsedByInstances(STACK_ID));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }
@@ -114,7 +115,7 @@ public class CurrentImageUsageConditionTest {
         Set<InstanceMetaData> instanceMetaData = createInstanceMetaDataWithOs(OsType.CENTOS7, OsType.RHEL8, OsType.CENTOS7);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
-        assertFalse(underTest.isCurrentOsUsedOnInstances(STACK_ID, OsType.CENTOS7.getOs()));
+        assertEquals(Set.of(OsType.RHEL8, OsType.CENTOS7), underTest.getOSUsedByInstances(STACK_ID));
 
         verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
     }

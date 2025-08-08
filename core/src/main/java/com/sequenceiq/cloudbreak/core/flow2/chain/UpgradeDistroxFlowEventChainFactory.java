@@ -67,7 +67,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.util.CodUtil;
@@ -93,7 +93,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @Inject
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
@@ -149,7 +149,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     private DistroXUpgradeTriggerEvent getEventForRuntimeUpgrade(DistroXUpgradeTriggerEvent event) {
-        return centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(
+        return osChangeUtil.findHelperImageIfNecessary(
                         event.getImageChangeDto().getImageId(),
                         event.getResourceId())
                 .map(image -> createEventForRuntimeUpgrade(image, event))

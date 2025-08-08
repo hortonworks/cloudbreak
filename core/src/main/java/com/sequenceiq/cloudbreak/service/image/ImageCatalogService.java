@@ -14,6 +14,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -572,7 +573,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             boolean rhel9Enabled = entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), RHEL9);
             if (!rhel9Enabled) {
                 String filterName = "architecture=redhat9";
-                images = filterImages(images, filterName, isMatchingOs(Set.of(RHEL9.getOs())).negate());
+                images = filterImages(images, filterName, isMatchingOs(Collections.singleton(RHEL9.getOs())).negate());
             }
             if (!Strings.isNullOrEmpty(imageFilter.getClusterVersion())) {
                 String filterName = "runtime version=" + imageFilter.getClusterVersion();
@@ -718,8 +719,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private static Predicate<Image> isMatchingOs(Set<String> operatingSystems) {
         //This predicate should be used after image burning generates the right OS into the image catalog
         //return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os));
-        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os)
-                || (img.getOsType() != null && img.getOsType().equalsIgnoreCase(os)));
+        return img -> operatingSystems.stream().anyMatch(os -> os.equalsIgnoreCase(img.getOs()) || os.equalsIgnoreCase(img.getOsType()));
     }
 
     private Image getLatestImageDefaultPreferred(ImageFilter imageFilter, List<Image> images) throws CloudbreakImageNotFoundException {

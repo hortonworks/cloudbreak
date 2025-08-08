@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -56,6 +58,8 @@ public class ImageCatalogServiceDefaultTest {
     private static final String[] PROVIDERS = {"aws", "azure", "gcp"};
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:acc1:user:user1";
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -189,10 +193,10 @@ public class ImageCatalogServiceDefaultTest {
                 .withOperatingSystems(operatingSystems)
                 .withClusterVersion(clusterVersion)
                 .build();
-        StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+        StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
                 return underTest.getImagePrewarmedDefaultPreferred(imageFilter);
-            } catch (Exception e) {
+            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new RuntimeException(e);
             }
         });

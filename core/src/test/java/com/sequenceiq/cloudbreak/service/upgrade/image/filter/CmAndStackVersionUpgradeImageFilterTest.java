@@ -23,9 +23,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeS
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +44,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     private UpgradePermissionProvider upgradePermissionProvider;
 
     @Mock
-    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @InjectMocks
     private CmAndStackVersionUpgradeImageFilter underTest;

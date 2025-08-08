@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +43,7 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
     private static final String RHEL_UPGRADE_HELPER_IMAGE_ID = "rhelUpgradeHelperImageId";
 
     @Mock
-    private CentosToRedHatUpgradeAvailabilityService centosToRedHatUpgradeAvailabilityService;
+    private OsChangeUtil osChangeUtil;
 
     @InjectMocks
     private PrepareClusterUpgradeFlowEventChainFactory underTest;
@@ -58,7 +58,7 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
     void createFlowTriggerEventQueueWithNoHelperImageShouldReturnCorrectQueue() {
         UpgradePreparationChainTriggerEvent event = createEvent();
 
-        when(centosToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
+        when(osChangeUtil.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
                 .thenReturn(Optional.empty());
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
@@ -75,7 +75,7 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
         UpgradePreparationChainTriggerEvent event = createEvent();
 
         Image helperImage = Image.builder().withUuid(RHEL_UPGRADE_HELPER_IMAGE_ID).build();
-        when(centosToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
+        when(osChangeUtil.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
                 .thenReturn(Optional.of(helperImage));
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);

@@ -47,6 +47,10 @@ public enum OsType {
         return parcelPostfix;
     }
 
+    public boolean matches(String os, String osType) {
+        return this.os.equalsIgnoreCase(os) && this.osType.equalsIgnoreCase(osType);
+    }
+
     public static OsType getByOsTypeString(String osType) {
         return getOptionalByOsTypeString(osType).orElse(null);
     }

@@ -5,6 +5,7 @@ import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -39,6 +40,7 @@ class SupportedOperatingSystemServiceTest {
     @Test
     void listSupportedOperatingSystemRHEL8Default() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
+        when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
