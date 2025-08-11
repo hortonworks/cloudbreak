@@ -26,6 +26,30 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
+validate_directory() {
+  local dir_path="$1"
+
+  if [ ! -d "$dir_path" ]; then
+    doLog "ERROR Directory '$dir_path' does not exist"
+    return 1
+  fi
+
+  if [ ! -r "$dir_path" ]; then
+    doLog "ERROR Directory '$dir_path' is not readable"
+    return 2
+  fi
+
+  if ! touch "$dir_path/.test_write_$$" 2>/dev/null; then
+    doLog "ERROR Cannot write to directory '$dir_path'"
+    return 4
+  fi
+
+  rm -f "$dir_path/.test_write_$$" 2>/dev/null
+
+  doLog "INFO Directory validation successful: $dir_path"
+  return 0
+}
+
 usage() {
   doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
   doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
@@ -38,6 +62,7 @@ usage() {
   doLog "  -c bool : Whether or not to close connections for the database while it is being backed up."
   doLog "  -z compression_level : (optional)  database dump compression level 0-9"
   doLog "  -d \"db1 db2 db3\" : (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
+  doLog "  -l local_backup_dir : (optional) Local backup base directory. If not given, will use /var/tmp."
 }
 
 BACKUP_LOCATION=""
@@ -47,8 +72,9 @@ USERNAME=""
 RANGERGROUP=""
 CLOSECONNECTIONS=""
 COMPRESSION=""
+LOCAL_BACKUP_BASE_DIR=""
 
-while getopts "s:h:p:u:r:c:z:d:" OPTION; do
+while getopts "s:h:p:u:r:c:z:d:l:" OPTION; do
     case $OPTION in
     s  )
         BACKUP_LOCATION="$OPTARG"
@@ -71,7 +97,10 @@ while getopts "s:h:p:u:r:c:z:d:" OPTION; do
     z  )
         COMPRESSION=$OPTARG
         ;;
-    \? ) echo "Unknown option: -$OPTNAME" >&2;
+    l  )
+        LOCAL_BACKUP_BASE_DIR="$OPTARG"
+        ;;
+    \? ) echo "Unknown option: -$OPTARG" >&2;
          usage
          exit 1;;
     :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
@@ -91,7 +120,13 @@ DATABASENAMES="$@"
 doLog "Backup with compression level $COMPRESSION"
 
 # Root directory for local postgres dump.
-BACKUPS_DIR="/var/tmp"
+BACKUPS_DIR="${LOCAL_BACKUP_BASE_DIR:-/var/tmp}"
+
+if ! validate_directory "$BACKUPS_DIR"; then
+  doLog "ERROR Local backup directory is not valid"
+  exit 1
+fi
+
 # Directory for the current postgres dump.
 DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
 
@@ -105,7 +140,7 @@ errorExit() {
   if [[ "$CLOSECONNECTIONS" == "true" ]]; then
     limit_incomming_connection $SERVICE -1
   fi
-  if [ -d "$DATE_DIR" ] && [[ $DATE_DIR == /var/tmp/* ]]; then
+  if [ -d "$DATE_DIR" ] && [[ $DATE_DIR == ${BACKUPS_DIR}/* ]]; then
     rm -rf -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
     doLog "Removed directory $DATE_DIR"
   fi
@@ -240,7 +275,7 @@ run_backup() {
 
   doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
 
-  if [[ -z "$DATABASENAMES" ]]; then
+  if [[ -z "$DATABASENAMES" || "$DATABASENAMES" == "DEFAULT" ]]; then
     doLog "INFO No database name provided. Will backup hive, ranger, profiler_agent and profiler_metric databases."
     backup_database_for_service "hive"
     backup_database_for_service "ranger"

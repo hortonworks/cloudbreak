@@ -19,11 +19,16 @@ public class DatalakeDataInfoJsonToObjectConverter {
             JsonObject hbaseJSON = json.getAsJsonObject("hbase");
             JsonObject solrJSON = json.getAsJsonObject("solr");
             JsonElement backupSpaceJSON = json.get("freeSpace");
-
+            long databaseBackupNodeFreeSpaceInBytes = backupSpaceJSON != null ?
+                    (backupSpaceJSON.getAsLong() < 0 ?
+                        backupSpaceJSON.getAsLong() :
+                        backupSpaceJSON.getAsLong() * BYTES_IN_FILESYSTEM_BLOCK
+                    ) : 0;
             return DatalakeDataInfoObject.newBuilder()
                     .setOperationId(operationId)
                     .setDatabaseSizeInBytes(databaseJSON != null ? getTotalDatabaseSize(databaseJSON) : 0)
-                    .setDatabaseBackupNodeFreeSpaceInBytes(backupSpaceJSON != null ? backupSpaceJSON.getAsLong() * BYTES_IN_FILESYSTEM_BLOCK : 0)
+                    .setDatabaseBackupNodeFreeSpaceInBytes(databaseBackupNodeFreeSpaceInBytes < 0 ? 0 : databaseBackupNodeFreeSpaceInBytes)
+                    .setSigneddatabaseBackupNodeFreeSpaceInBytes(databaseBackupNodeFreeSpaceInBytes)
                     .setHbaseAtlasEntityAuditEventsTableSizeInBytes(getLongFromJson(hbaseJSON, "atlas_entity_audit_events", 0))
                     .setHbaseAtlasJanusTableSizeInBytes(getLongFromJson(hbaseJSON, "atlas_janus", 0))
                     .setSolrVertexIndexCollectionSizeInBytes(getLongFromJson(solrJSON, "vertex_index", 0))

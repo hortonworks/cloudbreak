@@ -26,7 +26,31 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
-if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" || -z "$1" ]]; then
+validate_directory() {
+  local dir_path="$1"
+
+  if [ ! -d "$dir_path" ]; then
+    doLog "ERROR Directory '$dir_path' does not exist"
+    return 1
+  fi
+
+  if [ ! -r "$dir_path" ]; then
+    doLog "ERROR Directory '$dir_path' is not readable"
+    return 2
+  fi
+
+  if ! touch "$dir_path/.test_write_$$" 2>/dev/null; then
+    doLog "ERROR Cannot write to directory '$dir_path'"
+    return 4
+  fi
+
+  rm -f "$dir_path/.test_write_$$" 2>/dev/null
+
+  doLog "INFO Directory validation successful: $dir_path"
+  return 0
+}
+
+if [[ $# -lt 5 || $# -gt 7 || "$1" == "None" || -z "$1" ]]; then
   doLog "ERROR: Invalid inputs provided"
   doLog "A total of $# inputs were provided."
   if [[ $# -gt 0 ]]; then
@@ -40,13 +64,14 @@ if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" || -z "$1" ]]; then
   fi
   doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
   doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
-  doLog "Script accepts at least 5 and at most 6 inputs:"
+  doLog "Script accepts at least 5 and at most 7 inputs:"
   doLog "  1. Object Storage Service url to retrieve backups."
   doLog "  2. PostgresSQL host name."
   doLog "  3. PostgresSQL port."
   doLog "  4. PostgresSQL user name."
   doLog "  5. Ranger admin group."
-  doLog "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
+  doLog "  6. (optional) Name of the database to restore. If not given or 'DEFAULT', will restore ranger and hive databases."
+  doLog "  7. (optional) Local backup base directory. If not given, will use /var/tmp."
   exit 1
 fi
 
@@ -56,8 +81,15 @@ PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
 DATABASENAME="${6-}"
+LOCAL_BACKUP_BASE_DIR="${7:-/var/tmp}"
 
-BACKUPS_DIR="/var/tmp/postgres_restore_staging"
+if ! validate_directory "$LOCAL_BACKUP_BASE_DIR"; then
+  doLog "ERROR Local backup directory is not valid"
+  exit 1
+fi
+
+# Script appends its own suffix
+BACKUPS_DIR="${LOCAL_BACKUP_BASE_DIR}/postgres_restore_staging"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
@@ -66,7 +98,7 @@ export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 errorExit() {
-  if [[ -z "$DATABASENAME" ]]; then
+  if [[ -z "$DATABASENAME" || "$DATABASENAME" == "DEFAULT" ]]; then
     limit_incomming_connection "hive" -1
     limit_incomming_connection "ranger" -1
     limit_incomming_connection "profiler_agent" -1
@@ -78,7 +110,7 @@ errorExit() {
     done
   fi
 
-  if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == /var/tmp/postgres_restore_staging* ]]; then
+  if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == */postgres_restore_staging* || $BACKUPS_DIR == */postgres_backup_staging* ]]; then
       rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
       doLog "Removed directory $BACKUPS_DIR"
   fi
@@ -205,7 +237,7 @@ run_restore() {
 
   hdfs --loglevel ERROR dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
-  if [[ -z "$DATABASENAME" ]]; then
+  if [[ -z "$DATABASENAME" || "$DATABASENAME" == "DEFAULT" ]]; then
     echo "No database name provided. Will restore hive, ranger, profiler_agent and profiler_metric databases."
     restore_db_from_local "hive"
     restore_db_from_local "ranger"

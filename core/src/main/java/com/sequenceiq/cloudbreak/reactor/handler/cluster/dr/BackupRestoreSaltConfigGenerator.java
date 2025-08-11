@@ -45,8 +45,18 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String RAZ_ENABLED = "raz_enabled";
 
+    public static final String TEMP_BACKUP_DIR = "temp_backup_dir";
+
+    public static final String TEMP_RESTORE_DIR = "temp_restore_dir";
+
+    public static final String BACKUP_RESTORE_CONFIG = "backup_restore_config";
+
+    public static final String BACKUP_RESTORE_CONFIG_PATH = "/postgresql/backup_restore_config.sls";
+
     public static final List<DatabaseType> DEFAULT_BACKUP_DATABASE =
             List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC);
+
+    public static final String DEFAULT_LOCAL_BACKUP_DIR = "/var/tmp";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
 
@@ -77,6 +87,8 @@ public class BackupRestoreSaltConfigGenerator {
                     .map(db -> "Tried to skip unknown database " + db)
                     .forEach(LOGGER::warn);
             disasterRecoveryValues.put(DATABASE_NAMES_KEY, String.join(" ", names));
+        } else {
+            disasterRecoveryValues.put(DATABASE_NAMES_KEY, "DEFAULT");
         }
         disasterRecoveryValues.put(COMPRESSION_LEVEL, enableCompression ? FAST_COMPRESSION_VALUE : SKIP_COMPRESSION_VALUE);
         disasterRecoveryValues.put(RAZ_ENABLED, razEnabled ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
@@ -84,6 +96,16 @@ public class BackupRestoreSaltConfigGenerator {
                 singletonMap(DISASTER_RECOVERY_KEY, disasterRecoveryValues)));
 
         return new SaltConfig(servicePillar);
+    }
+
+    public SaltConfig createSaltConfig(SaltConfig saltConfig, String tempBackupDir, String tempRestoreDir) {
+        Map<String, String> pillarValues = new HashMap<>();
+        pillarValues.put(TEMP_BACKUP_DIR, tempBackupDir);
+        pillarValues.put(TEMP_RESTORE_DIR, tempRestoreDir);
+
+        saltConfig.getServicePillarConfig().put("backup-restore-config", new SaltPillarProperties(BACKUP_RESTORE_CONFIG_PATH,
+                singletonMap(BACKUP_RESTORE_CONFIG, pillarValues)));
+        return saltConfig;
     }
 
     private String buildFullLocation(String location, String backupId, String cloudPlatform) throws URISyntaxException {

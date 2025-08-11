@@ -28,11 +28,13 @@ BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the d
 HOST="$2"
 PORT="$3"
 USERNAME="$4"
-RAZ_ENABLED="$5"
+RAZ_ENABLED="$6"
 SERVICE=""
 FAILED=0
 
-BACKUPS_DIR="/var/tmp/postgres_dry_run"
+LOCAL_BACKUP_BASE_DIR="${7:-/var/tmp}"
+# Script appends its own suffix
+BACKUPS_DIR="${LOCAL_BACKUP_BASE_DIR}/postgres_dry_run_backup"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
@@ -41,7 +43,7 @@ export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 errorExit() {
-  if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == /var/tmp/postgres_restore_staging* ]]; then
+  if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == */postgres_dry_run_backup* || $BACKUPS_DIR == */postgres_backup_staging* ]]; then
     rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
     doLog "INFO Removed directory $BACKUPS_DIR"
   fi
@@ -137,6 +139,20 @@ execute_run() {
   fi
   rm -rfv "$BACKUPS_DIR"
 }
+
+doLog "Checking Validation for directory: $LOCAL_BACKUP_BASE_DIR"
+
+# Check if directory exists
+if [[ ! -d "$LOCAL_BACKUP_BASE_DIR" ]]; then
+  doLog "ERROR: Directory '$LOCAL_BACKUP_BASE_DIR' does not exist"
+  ((FAILED++))
+fi
+
+# Check if directory is readable and writable
+if [[ ! -r "$LOCAL_BACKUP_BASE_DIR" || ! -w "$LOCAL_BACKUP_BASE_DIR" ]]; then
+  doLog "ERROR: Directory '$LOCAL_BACKUP_BASE_DIR' is not readable or writable"
+  ((FAILED++))
+fi
 
 doLog "INFO Initiating dry-run"
 execute_run

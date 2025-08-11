@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,21 +18,27 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesSubmissionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.GetDatalakeDataSizesRequest;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 
 @Component
 public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<GetDatalakeDataSizesRequest> {
@@ -64,6 +71,12 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private BackupRestoreSaltConfigGenerator  saltConfigGenerator;
+
+    @Inject
+    private SdxClientService sdxClientService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(GetDatalakeDataSizesRequest.class);
@@ -78,15 +91,30 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
     @Override
     protected Selectable doAccept(HandlerEvent<GetDatalakeDataSizesRequest> event) {
         GetDatalakeDataSizesRequest request = event.getData();
+        String tempBackupDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
+        String tempRestoreDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
         Long stackId = request.getResourceId();
         StackDto stackDto = stackDtoService.getById(stackId);
+        SdxBackupRestoreSettingsResponse sdxBackupRestoreSettingsResponse = sdxClientService.getBackupRestoreSettings(stackDto.getResourceCrn());
+        if (Objects.nonNull(sdxBackupRestoreSettingsResponse)) {
+            LOGGER.info("Custom configuration exist {}", sdxBackupRestoreSettingsResponse);
+            if (Objects.nonNull(sdxBackupRestoreSettingsResponse.getBackupTempLocation())) {
+                tempBackupDir = sdxBackupRestoreSettingsResponse.getBackupTempLocation();
+            }
+            if (Objects.nonNull(sdxBackupRestoreSettingsResponse.getRestoreTempLocation())) {
+                tempRestoreDir = sdxBackupRestoreSettingsResponse.getRestoreTempLocation();
+            }
+        }
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
         String gatewayHost = primaryGatewayConfig.getHostname();
         Set<String> serviceHost = getServiceHost(stackDto, gatewayHost);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(new SaltConfig(), tempBackupDir, tempRestoreDir);
 
         try {
+            ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stackDto.getCluster().getId());
             String databaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_DATABASE_SIZES_STATE, Set.of(gatewayHost), stackId);
-            String dbBackupAvailableSpace = runSaltStateAndGetResult(primaryGatewayConfig, GET_NODE_FREE_SPACE_STATE, Set.of(gatewayHost), stackId);
+            String dbBackupAvailableSpace = runSaltStateWithParams(primaryGatewayConfig, GET_NODE_FREE_SPACE_STATE, Set.of(gatewayHost), saltConfig, stackId,
+                    exitModel);
             String solrHBaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_SOLR_HBASE_DATA_SIZES_STATE, serviceHost, stackId);
 
             String result = '{' + databaseSizes + ',' + solrHBaseSizes + ',' + dbBackupAvailableSpace + '}';
@@ -110,6 +138,19 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
 
         String result = saltResultToDataSizesResult(hostOrchestrator.applyOrchestratorState(stateParams), state);
         LOGGER.info("Finished running Salt state {} for stack with ID '{}'", state, stackId);
+        return result;
+    }
+
+    private String runSaltStateWithParams(GatewayConfig primaryGatewayConfig, String state, Set<String> targetHostNames,
+            SaltConfig saltConfig, Long stackId, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        LOGGER.info("Attempting to run Salt state {} with parameters for stack with ID '{}'", state, stackId);
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        stateParams.setPrimaryGatewayConfig(primaryGatewayConfig);
+        stateParams.setState(state);
+        stateParams.setTargetHostNames(targetHostNames);
+        hostOrchestrator.saveCustomPillars(saltConfig, exitModel, stateParams);
+        String result = saltResultToDataSizesResult(hostOrchestrator.applyOrchestratorState(stateParams), state);
+        LOGGER.info("Finished running Salt state {} with parameters for stack with ID '{}'", state, stackId);
         return result;
     }
 

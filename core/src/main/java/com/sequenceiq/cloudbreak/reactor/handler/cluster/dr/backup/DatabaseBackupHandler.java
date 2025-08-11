@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.backup;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBac
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 
 @Component
 public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<DatabaseBackupRequest> {
@@ -56,6 +59,9 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private SdxClientService sdxClientService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatabaseBackupRequest.class);
@@ -74,8 +80,20 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
         LOGGER.debug("Backing up database on stack {}, backup id {}", stackId, request.getBackupId());
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
+            String tempBackupDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
+            String tempRestoreDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
             ClusterView cluster = stackDto.getCluster();
             StackView stack = stackDto.getStack();
+            SdxBackupRestoreSettingsResponse sdxBackupRestoreSettingsResponse = sdxClientService.getBackupRestoreSettings(stackDto.getResourceCrn());
+            if (Objects.nonNull(sdxBackupRestoreSettingsResponse)) {
+                LOGGER.info("Custom configuration exist {}", sdxBackupRestoreSettingsResponse);
+                if (Objects.nonNull(sdxBackupRestoreSettingsResponse.getBackupTempLocation())) {
+                    tempBackupDir = sdxBackupRestoreSettingsResponse.getBackupTempLocation();
+                }
+                if (Objects.nonNull(sdxBackupRestoreSettingsResponse.getRestoreTempLocation())) {
+                    tempRestoreDir = sdxBackupRestoreSettingsResponse.getRestoreTempLocation();
+                }
+            }
             InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
@@ -86,6 +104,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             LOGGER.info("Compression entitlement: {}", enableDbCompression);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
                     request.isCloseConnections(), request.getSkipDatabaseNames(), enableDbCompression, stack, cluster.isRangerRazEnabled());
+            saltConfig = saltConfigGenerator.createSaltConfig(saltConfig, tempBackupDir, tempRestoreDir);
             if (event.getData().isDryRun()) {
                 hostOrchestrator.backupDryRunValidation(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
             } else {

@@ -328,7 +328,8 @@ message DatalakeDataInfoObject {
   uint64 solrFulltextIndexCollectionSizeInBytes = 6; // Size of the fulltext Solr index collection.
   uint64 solrEdgeIndexCollectionSizeInBytes = 7; // Size of the edge Solr index collection.
   uint64 solrRangerAuditsCollectionSizeInBytes = 8; // Size of the Ranger Audits Solr collection.
-  uint64 databaseBackupNodeFreeSpaceInBytes = 9; // Space available for database backup.
+  uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true]; // Space available for database backup.
+  sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10; // Space available for database backup.
 }
 
 /**

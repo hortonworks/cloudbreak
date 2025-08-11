@@ -31151,10 +31151,22 @@ public final class datalakeDRProto {
      * Space available for database backup.
      * </pre>
      *
-     * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9;</code>
+     * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true];</code>
+     * @deprecated datalakedr.DatalakeDataInfoObject.databaseBackupNodeFreeSpaceInBytes is deprecated.
+     *     See datalakedr.proto;l=330
      * @return The databaseBackupNodeFreeSpaceInBytes.
      */
-    long getDatabaseBackupNodeFreeSpaceInBytes();
+    @java.lang.Deprecated long getDatabaseBackupNodeFreeSpaceInBytes();
+
+    /**
+     * <pre>
+     * Space available for database backup.
+     * </pre>
+     *
+     * <code>sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10;</code>
+     * @return The signeddatabaseBackupNodeFreeSpaceInBytes.
+     */
+    long getSigneddatabaseBackupNodeFreeSpaceInBytes();
   }
   /**
    * <pre>
@@ -31356,12 +31368,29 @@ public final class datalakeDRProto {
      * Space available for database backup.
      * </pre>
      *
-     * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9;</code>
+     * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true];</code>
+     * @deprecated datalakedr.DatalakeDataInfoObject.databaseBackupNodeFreeSpaceInBytes is deprecated.
+     *     See datalakedr.proto;l=330
      * @return The databaseBackupNodeFreeSpaceInBytes.
      */
     @java.lang.Override
-    public long getDatabaseBackupNodeFreeSpaceInBytes() {
+    @java.lang.Deprecated public long getDatabaseBackupNodeFreeSpaceInBytes() {
       return databaseBackupNodeFreeSpaceInBytes_;
+    }
+
+    public static final int SIGNEDDATABASEBACKUPNODEFREESPACEINBYTES_FIELD_NUMBER = 10;
+    private long signeddatabaseBackupNodeFreeSpaceInBytes_ = 0L;
+    /**
+     * <pre>
+     * Space available for database backup.
+     * </pre>
+     *
+     * <code>sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10;</code>
+     * @return The signeddatabaseBackupNodeFreeSpaceInBytes.
+     */
+    @java.lang.Override
+    public long getSigneddatabaseBackupNodeFreeSpaceInBytes() {
+      return signeddatabaseBackupNodeFreeSpaceInBytes_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -31404,6 +31433,9 @@ public final class datalakeDRProto {
       }
       if (databaseBackupNodeFreeSpaceInBytes_ != 0L) {
         output.writeUInt64(9, databaseBackupNodeFreeSpaceInBytes_);
+      }
+      if (signeddatabaseBackupNodeFreeSpaceInBytes_ != 0L) {
+        output.writeSInt64(10, signeddatabaseBackupNodeFreeSpaceInBytes_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -31449,6 +31481,10 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(9, databaseBackupNodeFreeSpaceInBytes_);
       }
+      if (signeddatabaseBackupNodeFreeSpaceInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeSInt64Size(10, signeddatabaseBackupNodeFreeSpaceInBytes_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -31482,6 +31518,8 @@ public final class datalakeDRProto {
           != other.getSolrRangerAuditsCollectionSizeInBytes()) return false;
       if (getDatabaseBackupNodeFreeSpaceInBytes()
           != other.getDatabaseBackupNodeFreeSpaceInBytes()) return false;
+      if (getSigneddatabaseBackupNodeFreeSpaceInBytes()
+          != other.getSigneddatabaseBackupNodeFreeSpaceInBytes()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -31519,6 +31557,9 @@ public final class datalakeDRProto {
       hash = (37 * hash) + DATABASEBACKUPNODEFREESPACEINBYTES_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getDatabaseBackupNodeFreeSpaceInBytes());
+      hash = (37 * hash) + SIGNEDDATABASEBACKUPNODEFREESPACEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSigneddatabaseBackupNodeFreeSpaceInBytes());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -31664,6 +31705,7 @@ public final class datalakeDRProto {
         solrEdgeIndexCollectionSizeInBytes_ = 0L;
         solrRangerAuditsCollectionSizeInBytes_ = 0L;
         databaseBackupNodeFreeSpaceInBytes_ = 0L;
+        signeddatabaseBackupNodeFreeSpaceInBytes_ = 0L;
         return this;
       }
 
@@ -31723,6 +31765,9 @@ public final class datalakeDRProto {
         }
         if (((from_bitField0_ & 0x00000100) != 0)) {
           result.databaseBackupNodeFreeSpaceInBytes_ = databaseBackupNodeFreeSpaceInBytes_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.signeddatabaseBackupNodeFreeSpaceInBytes_ = signeddatabaseBackupNodeFreeSpaceInBytes_;
         }
       }
 
@@ -31799,6 +31844,9 @@ public final class datalakeDRProto {
         if (other.getDatabaseBackupNodeFreeSpaceInBytes() != 0L) {
           setDatabaseBackupNodeFreeSpaceInBytes(other.getDatabaseBackupNodeFreeSpaceInBytes());
         }
+        if (other.getSigneddatabaseBackupNodeFreeSpaceInBytes() != 0L) {
+          setSigneddatabaseBackupNodeFreeSpaceInBytes(other.getSigneddatabaseBackupNodeFreeSpaceInBytes());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -31870,6 +31918,11 @@ public final class datalakeDRProto {
                 bitField0_ |= 0x00000100;
                 break;
               } // case 72
+              case 80: {
+                signeddatabaseBackupNodeFreeSpaceInBytes_ = input.readSInt64();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 80
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -32293,11 +32346,13 @@ public final class datalakeDRProto {
        * Space available for database backup.
        * </pre>
        *
-       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9;</code>
+       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true];</code>
+       * @deprecated datalakedr.DatalakeDataInfoObject.databaseBackupNodeFreeSpaceInBytes is deprecated.
+       *     See datalakedr.proto;l=330
        * @return The databaseBackupNodeFreeSpaceInBytes.
        */
       @java.lang.Override
-      public long getDatabaseBackupNodeFreeSpaceInBytes() {
+      @java.lang.Deprecated public long getDatabaseBackupNodeFreeSpaceInBytes() {
         return databaseBackupNodeFreeSpaceInBytes_;
       }
       /**
@@ -32305,11 +32360,13 @@ public final class datalakeDRProto {
        * Space available for database backup.
        * </pre>
        *
-       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9;</code>
+       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true];</code>
+       * @deprecated datalakedr.DatalakeDataInfoObject.databaseBackupNodeFreeSpaceInBytes is deprecated.
+       *     See datalakedr.proto;l=330
        * @param value The databaseBackupNodeFreeSpaceInBytes to set.
        * @return This builder for chaining.
        */
-      public Builder setDatabaseBackupNodeFreeSpaceInBytes(long value) {
+      @java.lang.Deprecated public Builder setDatabaseBackupNodeFreeSpaceInBytes(long value) {
 
         databaseBackupNodeFreeSpaceInBytes_ = value;
         bitField0_ |= 0x00000100;
@@ -32321,12 +32378,58 @@ public final class datalakeDRProto {
        * Space available for database backup.
        * </pre>
        *
-       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9;</code>
+       * <code>uint64 databaseBackupNodeFreeSpaceInBytes = 9 [deprecated = true];</code>
+       * @deprecated datalakedr.DatalakeDataInfoObject.databaseBackupNodeFreeSpaceInBytes is deprecated.
+       *     See datalakedr.proto;l=330
        * @return This builder for chaining.
        */
-      public Builder clearDatabaseBackupNodeFreeSpaceInBytes() {
+      @java.lang.Deprecated public Builder clearDatabaseBackupNodeFreeSpaceInBytes() {
         bitField0_ = (bitField0_ & ~0x00000100);
         databaseBackupNodeFreeSpaceInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long signeddatabaseBackupNodeFreeSpaceInBytes_ ;
+      /**
+       * <pre>
+       * Space available for database backup.
+       * </pre>
+       *
+       * <code>sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10;</code>
+       * @return The signeddatabaseBackupNodeFreeSpaceInBytes.
+       */
+      @java.lang.Override
+      public long getSigneddatabaseBackupNodeFreeSpaceInBytes() {
+        return signeddatabaseBackupNodeFreeSpaceInBytes_;
+      }
+      /**
+       * <pre>
+       * Space available for database backup.
+       * </pre>
+       *
+       * <code>sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10;</code>
+       * @param value The signeddatabaseBackupNodeFreeSpaceInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSigneddatabaseBackupNodeFreeSpaceInBytes(long value) {
+
+        signeddatabaseBackupNodeFreeSpaceInBytes_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Space available for database backup.
+       * </pre>
+       *
+       * <code>sint64 signeddatabaseBackupNodeFreeSpaceInBytes = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSigneddatabaseBackupNodeFreeSpaceInBytes() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        signeddatabaseBackupNodeFreeSpaceInBytes_ = 0L;
         onChanged();
         return this;
       }
@@ -33038,7 +33141,7 @@ public final class datalakeDRProto {
       "\001(\t\".\n\034CancelDatalakeBackupResponse\022\016\n\006r" +
       "esult\030\001 \001(\t\"1\n\034CancelDatalakeRestoreRequ" +
       "est\022\021\n\trestoreId\030\001 \001(\t\"/\n\035CancelDatalake" +
-      "RestoreResponse\022\016\n\006result\030\001 \001(\t\"\215\003\n\026Data" +
+      "RestoreResponse\022\016\n\006result\030\001 \001(\t\"\303\003\n\026Data" +
       "lakeDataInfoObject\022\023\n\013operationId\030\001 \001(\t\022" +
       "\033\n\023databaseSizeInBytes\030\002 \001(\004\0223\n+hbaseAtl" +
       "asEntityAuditEventsTableSizeInBytes\030\003 \001(" +
@@ -33047,35 +33150,36 @@ public final class datalakeDRProto {
       "es\030\005 \001(\004\022.\n&solrFulltextIndexCollectionS" +
       "izeInBytes\030\006 \001(\004\022*\n\"solrEdgeIndexCollect" +
       "ionSizeInBytes\030\007 \001(\004\022-\n%solrRangerAudits" +
-      "CollectionSizeInBytes\030\010 \001(\004\022*\n\"databaseB" +
-      "ackupNodeFreeSpaceInBytes\030\t \001(\004\" \n\036Submi" +
-      "tDatalakeDataInfoResponse*.\n\010SkipFlag\022\013\n" +
-      "\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\226\007\n\nda" +
-      "talakeDR\022A\n\nGetVersion\022\027.version.Version" +
-      "Request\032\030.version.VersionResponse\"\000\022Y\n\016B" +
-      "ackupDatalake\022!.datalakedr.BackupDatalak" +
-      "eRequest\032\".datalakedr.BackupDatalakeResp" +
-      "onse\"\000\022\\\n\017RestoreDatalake\022\".datalakedr.R" +
-      "estoreDatalakeRequest\032#.datalakedr.Resto" +
-      "reDatalakeResponse\"\000\022k\n\024BackupDatalakeSt" +
-      "atus\022\'.datalakedr.BackupDatalakeStatusRe" +
-      "quest\032(.datalakedr.BackupDatalakeStatusR" +
-      "esponse\"\000\022n\n\025RestoreDatalakeStatus\022(.dat" +
-      "alakedr.RestoreDatalakeStatusRequest\032).d" +
-      "atalakedr.RestoreDatalakeStatusResponse\"" +
-      "\000\022f\n\023ListDatalakeBackups\022%.datalakedr.Li" +
-      "stDatalakeBackupRequest\032&.datalakedr.Lis" +
-      "tDatalakeBackupResponse\"\000\022k\n\024CancelDatal" +
-      "akeBackup\022\'.datalakedr.CancelDatalakeBac" +
-      "kupRequest\032(.datalakedr.CancelDatalakeBa" +
-      "ckupResponse\"\000\022n\n\025CancelDatalakeRestore\022" +
-      "(.datalakedr.CancelDatalakeRestoreReques" +
-      "t\032).datalakedr.CancelDatalakeRestoreResp" +
-      "onse\"\000\022j\n\026SubmitDatalakeDataInfo\022\".datal" +
-      "akedr.DatalakeDataInfoObject\032*.datalaked" +
-      "r.SubmitDatalakeDataInfoResponse\"\000B>\n+co" +
-      "m.cloudera.thunderhead.service.datalaked" +
-      "rB\017datalakeDRProtob\006proto3"
+      "CollectionSizeInBytes\030\010 \001(\004\022.\n\"databaseB" +
+      "ackupNodeFreeSpaceInBytes\030\t \001(\004B\002\030\001\0220\n(s" +
+      "igneddatabaseBackupNodeFreeSpaceInBytes\030" +
+      "\n \001(\022\" \n\036SubmitDatalakeDataInfoResponse*" +
+      ".\n\010SkipFlag\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007IN" +
+      "CLUDE\020\0022\226\007\n\ndatalakeDR\022A\n\nGetVersion\022\027.v" +
+      "ersion.VersionRequest\032\030.version.VersionR" +
+      "esponse\"\000\022Y\n\016BackupDatalake\022!.datalakedr" +
+      ".BackupDatalakeRequest\032\".datalakedr.Back" +
+      "upDatalakeResponse\"\000\022\\\n\017RestoreDatalake\022" +
+      "\".datalakedr.RestoreDatalakeRequest\032#.da" +
+      "talakedr.RestoreDatalakeResponse\"\000\022k\n\024Ba" +
+      "ckupDatalakeStatus\022\'.datalakedr.BackupDa" +
+      "talakeStatusRequest\032(.datalakedr.BackupD" +
+      "atalakeStatusResponse\"\000\022n\n\025RestoreDatala" +
+      "keStatus\022(.datalakedr.RestoreDatalakeSta" +
+      "tusRequest\032).datalakedr.RestoreDatalakeS" +
+      "tatusResponse\"\000\022f\n\023ListDatalakeBackups\022%" +
+      ".datalakedr.ListDatalakeBackupRequest\032&." +
+      "datalakedr.ListDatalakeBackupResponse\"\000\022" +
+      "k\n\024CancelDatalakeBackup\022\'.datalakedr.Can" +
+      "celDatalakeBackupRequest\032(.datalakedr.Ca" +
+      "ncelDatalakeBackupResponse\"\000\022n\n\025CancelDa" +
+      "talakeRestore\022(.datalakedr.CancelDatalak" +
+      "eRestoreRequest\032).datalakedr.CancelDatal" +
+      "akeRestoreResponse\"\000\022j\n\026SubmitDatalakeDa" +
+      "taInfo\022\".datalakedr.DatalakeDataInfoObje" +
+      "ct\032*.datalakedr.SubmitDatalakeDataInfoRe" +
+      "sponse\"\000B>\n+com.cloudera.thunderhead.ser" +
+      "vice.datalakedrB\017datalakeDRProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -33213,7 +33317,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_DatalakeDataInfoObject_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_DatalakeDataInfoObject_descriptor,
-        new java.lang.String[] { "OperationId", "DatabaseSizeInBytes", "HbaseAtlasEntityAuditEventsTableSizeInBytes", "HbaseAtlasJanusTableSizeInBytes", "SolrVertexIndexCollectionSizeInBytes", "SolrFulltextIndexCollectionSizeInBytes", "SolrEdgeIndexCollectionSizeInBytes", "SolrRangerAuditsCollectionSizeInBytes", "DatabaseBackupNodeFreeSpaceInBytes", });
+        new java.lang.String[] { "OperationId", "DatabaseSizeInBytes", "HbaseAtlasEntityAuditEventsTableSizeInBytes", "HbaseAtlasJanusTableSizeInBytes", "SolrVertexIndexCollectionSizeInBytes", "SolrFulltextIndexCollectionSizeInBytes", "SolrEdgeIndexCollectionSizeInBytes", "SolrRangerAuditsCollectionSizeInBytes", "DatabaseBackupNodeFreeSpaceInBytes", "SigneddatabaseBackupNodeFreeSpaceInBytes", });
     internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor =
       getDescriptor().getMessageTypes().get(22);
     internal_static_datalakedr_SubmitDatalakeDataInfoResponse_fieldAccessorTable = new

@@ -1,3 +1,5 @@
+{%- set local_backup_dir = salt['pillar.get']('backup_restore_config:temp_backup_dir', '/var/tmp') %}
+
 get_free_space:
   cmd.run:
-    - name: /usr/bin/df --block-size=1024 --exclude-type=tmpfs  --exclude-type=devtmpfs -P -l|grep " /$"|sed 's/  */ /g'|cut -f 4 -d ' '|sed -E 's/(.*)/"freeSpace":\1/g'
+    - name: /opt/salt/scripts/get_free_space.sh "{{ local_backup_dir }}"

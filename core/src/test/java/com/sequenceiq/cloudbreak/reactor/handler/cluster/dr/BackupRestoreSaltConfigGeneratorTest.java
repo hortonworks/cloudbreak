@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestore
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.OBJECT_STORAGE_URL_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.RANGER_ADMIN_GROUP_KEY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -32,6 +31,8 @@ public class BackupRestoreSaltConfigGeneratorTest {
 
     private static final String BACKUP_ID = "backupId";
 
+    private static final String DATABASE_NAME = "DEFAULT";
+
     @Inject
     private BackupRestoreSaltConfigGenerator saltConfigGenerator;
 
@@ -50,7 +51,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
 
         assertEquals("s3a://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
         assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
-        assertNull(disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
+        assertEquals(DATABASE_NAME, disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
     }
 
     @Test

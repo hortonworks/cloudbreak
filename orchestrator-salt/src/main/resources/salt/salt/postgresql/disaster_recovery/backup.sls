@@ -7,6 +7,7 @@
 {% set close_connections = salt['pillar.get']('disaster_recovery:close_connections') %}
 {% set compression_level = salt['pillar.get']('disaster_recovery:compression_level', '0') %}
 {% set database_name = salt['pillar.get']('disaster_recovery:database_name', '') %}
+{% set local_backup_dir = salt['pillar.get']('backup_restore_config:temp_backup_dir', '/var/tmp') %}
 {% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
 
 include:
@@ -18,7 +19,7 @@ include:
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -h {{remote_db_url}} -p {{remote_db_port}} -u {{remote_admin}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} {{database_name}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -h {{remote_db_url}} -p {{remote_db_port}} -u {{remote_admin}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} -l {{local_backup_dir}} {{database_name}}
     - require:
       - sls: postgresql.disaster_recovery
 
@@ -35,7 +36,7 @@ add_root_role_to_database:
 
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} {{database_name}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} -l {{local_backup_dir}} {{database_name}}
     - require:
       - cmd: add_root_role_to_database
 {% endif %}

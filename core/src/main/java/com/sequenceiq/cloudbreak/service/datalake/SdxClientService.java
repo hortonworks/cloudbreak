@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -12,8 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
@@ -26,6 +29,9 @@ public class SdxClientService {
 
     @Inject
     private SdxInternalEndpoint internalEndpoint;
+
+    @Inject
+    private SdxBackupEndpoint sdxBackupEndpoint;
 
     public List<SdxClusterResponse> getByEnvironmentCrn(String environmentCrn) {
         try {
@@ -44,5 +50,14 @@ public class SdxClientService {
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> internalEndpoint.updateDbEngineVersion(crn, databaseEngineVersion));
+    }
+
+    public SdxBackupRestoreSettingsResponse getBackupRestoreSettings(String crn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> sdxBackupEndpoint.internalGetBackupRestoreSettings(crn));
+        } catch (NotFoundException e) {
+            return null;
+        }
     }
 }
