@@ -93,8 +93,8 @@ class ImageFallbackServiceTest {
     public void testFallbackToVhdForNonAzurePlatform() throws Exception {
         com.sequenceiq.cloudbreak.domain.stack.Component component = mock(com.sequenceiq.cloudbreak.domain.stack.Component.class);
         Image currentImage =
-                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L);
-                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L);
+                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L, null);
+                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L, null);
 
         when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stackView);
         when(stackView.getCloudPlatform()).thenReturn("AWS");
@@ -117,7 +117,7 @@ class ImageFallbackServiceTest {
     public void testFallbackToVhdWithMarketplaceOnlyEntitlement() throws Exception {
         com.sequenceiq.cloudbreak.domain.stack.Component component = mock(com.sequenceiq.cloudbreak.domain.stack.Component.class);
         Image currentImage =
-                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L);
+                new Image("originalImage", Map.of(), "redhat8", "redhat8", "arch", null, null, null, Map.of(), null, 0L, null);
 
         when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stackView);
         when(stackView.getCloudPlatform()).thenReturn("AZURE");
@@ -140,7 +140,7 @@ class ImageFallbackServiceTest {
     @Test
     public void testFallbackToVhdShouldSetFallbackImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
         Image currentImage =
-                new Image("originalImage", Map.of(), "centos7", "redhat", "arch", null, null, null, Map.of(), null, 0L);
+                new Image("originalImage", Map.of(), "centos7", "redhat", "arch", null, null, null, Map.of(), null, 0L, null);
 
         com.sequenceiq.cloudbreak.domain.stack.Component component  =
                 new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(currentImage), null);
@@ -200,7 +200,7 @@ class ImageFallbackServiceTest {
         Image image = mock(Image.class);
 
         Image currentImage =
-                new Image("originalImage", Map.of(), "centos7", "redhat", "arch", null, null, null, Map.of(), null, 0L);
+                new Image("originalImage", Map.of(), "centos7", "redhat", "arch", null, null, null, Map.of(), null, 0L, null);
         com.sequenceiq.cloudbreak.domain.stack.Component component  =
                 new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(currentImage), null);
 

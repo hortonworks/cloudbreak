@@ -96,7 +96,7 @@ class StackComponentUpdaterTest {
                 Map.of(InstanceGroupType.GATEWAY, "gw user data"),
                 statedImage.getImage().getOs(), statedImage.getImage().getOsType(), statedImage.getImage().getArchitecture(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), statedImage.getImage().getUuid(),
-                statedImage.getImage().getPackageVersions(), null, null);
+                statedImage.getImage().getPackageVersions(), null, null, null);
         return new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
     }
 

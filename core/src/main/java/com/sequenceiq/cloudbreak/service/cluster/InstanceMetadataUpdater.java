@@ -320,7 +320,7 @@ public class InstanceMetadataUpdater {
 
     private Image getImageWithPackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
         return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getArchitecture(), image.getImageCatalogUrl(),
-                image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost, image.getDate(), image.getCreated());
+                image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost, image.getDate(), image.getCreated(), image.getTags());
     }
 
 }

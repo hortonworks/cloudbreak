@@ -201,7 +201,7 @@ class UpdateUserDataFlowIntegrationTest {
         Collection<Resource> resources = Set.of();
         when(resourceService.getAllByStackId(STACK_ID)).thenReturn(resources);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mockStack);
-        Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, ""), "", "", "", "", "", "", null, null, null);
+        Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, ""), "", "", "", "", "", "", null, null, null, null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
 
         CloudConnector connector = mock(CloudConnector.class);

@@ -169,7 +169,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @BeforeEach
     public void setUp() throws CloudbreakImageNotFoundException {
         lenient().when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
-                "redhat6", "arch", "", "default", "default-id", new HashMap<>(), null, null));
+                "redhat6", "arch", "", "default", "default-id", new HashMap<>(), null, null, null));
         lenient().when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         lenient().when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         lenient().when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());

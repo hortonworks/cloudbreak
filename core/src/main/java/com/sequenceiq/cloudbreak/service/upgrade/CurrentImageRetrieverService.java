@@ -35,7 +35,7 @@ public class CurrentImageRetrieverService {
             LOGGER.debug("Using the catalog image to create the model of the current image.");
             return new Image(currentImage.getImageName(), currentImage.getUserdata(), catalogImage.getOs(), catalogImage.getOsType(),
                     catalogImage.getArchitecture(), imageCatalogUrl, imageCatalogName, imageId, catalogImage.getPackageVersions(), catalogImage.getDate(),
-                    catalogImage.getCreated());
+                    catalogImage.getCreated(), catalogImage.getTags());
         } catch (CloudbreakImageCatalogException | CloudbreakImageNotFoundException e) {
             LOGGER.warn("Failed to retrieve the current image {} from image catalog {}. Falling back to the image from the database.",
                     imageId, imageCatalogUrl);

@@ -69,6 +69,6 @@ public class ImageToStackImageV4ResponseConverterTest {
     }
 
     private Image anImageWithoutImageCatalogUrl() {
-        return new Image(IMAGE_NAME, null, OS, OS_TYPE, ARCHITECTURE.getName(), null, IMAGE_CATALOG_NAME, IMAGE_ID, null, null, null);
+        return new Image(IMAGE_NAME, null, OS, OS_TYPE, ARCHITECTURE.getName(), null, IMAGE_CATALOG_NAME, IMAGE_ID, null, null, null, null);
     }
 }

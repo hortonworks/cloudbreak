@@ -79,7 +79,7 @@ public class LoadBalancerResourceServiceTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25",
-                userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null);
+                userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null, null);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(privateId)
                 .withName("testname")

@@ -146,7 +146,7 @@ public class StackImageUpdateService {
         );
         return new Image(imageName, new HashMap<>(), image.getImage().getOs(), image.getImage().getOsType(), image.getImage().getArchitecture(),
                 image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImage().getUuid(),
-                image.getImage().getPackageVersions(), image.getImage().getDate(), image.getImage().getCreated());
+                image.getImage().getPackageVersions(), image.getImage().getDate(), image.getImage().getCreated(), image.getImage().getTags());
     }
 
     public boolean isCbVersionOk(StackDtoDelegate stack) {

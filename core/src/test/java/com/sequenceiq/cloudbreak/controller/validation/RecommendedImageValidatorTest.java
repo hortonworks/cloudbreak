@@ -142,7 +142,8 @@ public class RecommendedImageValidatorTest {
                 "imageId",
                 Map.of(),
                 "date",
-                0L);
+                0L,
+                null);
         when(recommendImageService.recommendImage(anyLong(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(image);
     }

@@ -454,6 +454,7 @@ public class StackV4RequestToStackConverter {
                 imageSettings.getId(),
                 null,
                 null,
+                null,
                 null);
         return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
     }

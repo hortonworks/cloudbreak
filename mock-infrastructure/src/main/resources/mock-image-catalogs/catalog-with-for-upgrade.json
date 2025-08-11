@@ -26,6 +26,9 @@
           "java17": "17.0.2",
           "java8": "1.8.0_372"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -100,6 +103,9 @@
           "java17": "17.0.2",
           "java8": "1.8.0_372"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -169,6 +175,9 @@
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.13-1.el7"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
         },
         "stack-details": {
           "repo": {
@@ -240,6 +249,9 @@
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -309,6 +321,9 @@
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
         },
         "stack-details": {
           "repo": {
@@ -380,6 +395,9 @@
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -448,6 +466,9 @@
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
         },
         "stack-details": {
           "repo": {
@@ -519,6 +540,9 @@
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -589,6 +613,9 @@
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -658,6 +685,9 @@
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.13-1.el7"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
         },
         "stack-details": {
           "repo": {

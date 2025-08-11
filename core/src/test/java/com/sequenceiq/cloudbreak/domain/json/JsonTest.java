@@ -30,11 +30,12 @@ public class JsonTest {
                 .withPackageVersions(Collections.emptyMap())
                 .withDate("2019-10-24")
                 .withCreated(1571884856L)
+                .withTags(Map.of("release-version", "7.3.1.500"))
                 .build();
         Json json = new Json(image);
         Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"},\"os\":\"redhat6\",\"osType\":\"redhat6\","
                         + "\"architecture\":\"arm64\",\"imageCatalogUrl\":\"\",\"imageCatalogName\":\"default\",\"imageId\":\"default-id\","
-                        + "\"packageVersions\":{},\"date\":\"2019-10-24\",\"created\":1571884856}",
+                        + "\"packageVersions\":{},\"date\":\"2019-10-24\",\"created\":1571884856,\"tags\":{\"release-version\":\"7.3.1.500\"}}",
                 json.getValue());
     }
 

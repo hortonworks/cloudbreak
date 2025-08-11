@@ -437,7 +437,7 @@ public class ImageService {
             Set<Component> components) {
         Image image = new Image(imageName, new HashMap<>(), catalogBasedImage.getOs(), catalogBasedImage.getOsType(), catalogBasedImage.getArchitecture(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
-                catalogBasedImage.getPackageVersions(), catalogBasedImage.getDate(), catalogBasedImage.getCreated());
+                catalogBasedImage.getPackageVersions(), catalogBasedImage.getDate(), catalogBasedImage.getCreated(), catalogBasedImage.getTags());
         components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));
     }
 

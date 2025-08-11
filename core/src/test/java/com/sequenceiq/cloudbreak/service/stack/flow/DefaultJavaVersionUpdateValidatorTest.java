@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -20,9 +23,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVe
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaConfigurations;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +67,7 @@ class DefaultJavaVersionUpdateValidatorTest {
     }
 
     @Test
-    void testValidateWhenImageDoesNotContainTheRequestedJavaVersion() throws CloudbreakImageNotFoundException {
+    void testValidateWhenImageDoesNotContainTheRequestedJavaVersion() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image mockImage = mock(Image.class);
         when(mockImage.getImageId()).thenReturn("mockImageId");
         Map<String, String> imagePackageVersions = Map.of(
@@ -80,7 +85,7 @@ class DefaultJavaVersionUpdateValidatorTest {
     }
 
     @Test
-    void testValidateWhenImageContainsTheRequestedJavaVersion() throws CloudbreakImageNotFoundException {
+    void testValidateWhenImageContainsTheRequestedJavaVersion() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image mockImage = mock(Image.class);
         when(mockImage.getImageId()).thenReturn("mockImageId");
         Map<String, String> imagePackageVersions = Map.of(
@@ -90,6 +95,8 @@ class DefaultJavaVersionUpdateValidatorTest {
                 ImagePackageVersion.STACK.getKey(), "7.3.1");
         when(mockImage.getPackageVersions()).thenReturn(imagePackageVersions);
         when(imageService.getImage(STACK_ID)).thenReturn(mockImage);
+        when(imageService.getCurrentImage(anyLong(), eq(STACK_ID)))
+                .thenReturn(StatedImage.statedImage(mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class), "url", "catalog"));
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
 
@@ -98,7 +105,7 @@ class DefaultJavaVersionUpdateValidatorTest {
     }
 
     @Test
-    void testValidateWhenJavaConfigNotAllowed() throws CloudbreakImageNotFoundException {
+    void testValidateWhenJavaConfigNotAllowed() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image mockImage = mock(Image.class);
         when(mockImage.getImageId()).thenReturn("mockImageId");
         Map<String, String> imagePackageVersions = Map.of(
@@ -108,6 +115,8 @@ class DefaultJavaVersionUpdateValidatorTest {
                 ImagePackageVersion.STACK.getKey(), "7.3.1");
         when(mockImage.getPackageVersions()).thenReturn(imagePackageVersions);
         when(imageService.getImage(STACK_ID)).thenReturn(mockImage);
+        when(imageService.getCurrentImage(anyLong(), eq(STACK_ID)))
+                .thenReturn(StatedImage.statedImage(mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class), "url", "catalog"));
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
         doThrow(new BadRequestException("Not valid")).when(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1");
@@ -117,7 +126,7 @@ class DefaultJavaVersionUpdateValidatorTest {
     }
 
     @Test
-    void testValidateWhenNoRuntimeInfo() throws CloudbreakImageNotFoundException {
+    void testValidateWhenNoRuntimeInfo() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image mockImage = mock(Image.class);
         String mockImageId = "mockImageId";
         when(mockImage.getImageId()).thenReturn(mockImageId);
@@ -127,6 +136,8 @@ class DefaultJavaVersionUpdateValidatorTest {
                 "java8", "1.8.0_412");
         when(mockImage.getPackageVersions()).thenReturn(imagePackageVersions);
         when(imageService.getImage(STACK_ID)).thenReturn(mockImage);
+        when(imageService.getCurrentImage(anyLong(), eq(STACK_ID)))
+                .thenReturn(StatedImage.statedImage(mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class), "url", "catalog"));
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
 
@@ -134,5 +145,27 @@ class DefaultJavaVersionUpdateValidatorTest {
         Assertions.assertEquals("The runtime version could not be found on the VM image('" + mockImageId + "') of the cluster with name '"
                         + STACK_NAME + "'.", actual.getMessage());
         verifyNoInteractions(allowableJavaConfigurations);
+    }
+
+    @Test
+    void testValidateWhenImageContainsTheRequestedJavaVersionAndImageContainsReleaseVersion()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image mockImage = mock(Image.class);
+        when(mockImage.getImageId()).thenReturn("mockImageId");
+        when(mockImage.getTags()).thenReturn(Map.of("release-version", "7.3.1.500"));
+        Map<String, String> imagePackageVersions = Map.of(
+                "java", "8",
+                "java11", "11.0.23",
+                "java8", "1.8.0_412",
+                ImagePackageVersion.STACK.getKey(), "7.3.1");
+        when(mockImage.getPackageVersions()).thenReturn(imagePackageVersions);
+        when(imageService.getImage(STACK_ID)).thenReturn(mockImage);
+
+        SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
+        javaVersionRequest.setDefaultJavaVersion("11");
+
+        Assertions.assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
+        verify(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1.500");
+        verify(imageService, never()).getCurrentImage(anyLong(), eq(STACK_ID));
     }
 }

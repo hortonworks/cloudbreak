@@ -163,6 +163,6 @@ class MaxHostnameLengthPolicyServiceTest {
     }
 
     private Image createImageWithOs(OsType osType) {
-        return new Image(null, null, osType.getOs(), osType.getOsType(), null, null, null, null, null, null, null);
+        return new Image(null, null, osType.getOs(), osType.getOsType(), null, null, null, null, null, null, null, null);
     }
 }

@@ -21,11 +21,6 @@ import com.sequenceiq.common.model.Architecture;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
-    private String imageName;
-
-    @Deprecated
-    private Map<InstanceGroupType, String> userdata;
-
     private final String os;
 
     private final String osType;
@@ -44,6 +39,13 @@ public class Image {
 
     private final Long created;
 
+    private final Map<String, String> tags;
+
+    private String imageName;
+
+    @Deprecated
+    private Map<InstanceGroupType, String> userdata;
+
     @JsonCreator
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
@@ -55,7 +57,8 @@ public class Image {
             @JsonProperty("imageId") String imageId,
             @JsonProperty("packageVersions") Map<String, String> packageVersions,
             @JsonProperty("date") String date,
-            @JsonProperty("created") Long created) {
+            @JsonProperty("created") Long created,
+            @JsonProperty("tags") Map<String, String> tags) {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
         this.imageCatalogUrl = imageCatalogUrl;
@@ -67,10 +70,19 @@ public class Image {
         this.packageVersions = packageVersions;
         this.date = date;
         this.created = created;
+        this.tags = tags;
+    }
+
+    public static ImageBuilder builder() {
+        return new ImageBuilder();
     }
 
     public String getImageName() {
         return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     public Map<InstanceGroupType, String> getUserdata() {
@@ -118,16 +130,16 @@ public class Image {
         return created;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
-
     public String getArchitecture() {
         return architecture;
     }
 
     public Architecture getArchitectureEnum() {
         return Architecture.fromStringWithFallback(architecture);
+    }
+
+    public Map<String, String> getTags() {
+        return tags != null ? tags : new HashMap<>();
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -149,13 +161,14 @@ public class Image {
                     && Objects.equals(imageCatalogName, image.imageCatalogName)
                     && Objects.equals(packageVersions, image.packageVersions)
                     && Objects.equals(date, image.date)
-                    && Objects.equals(created, image.created);
+                    && Objects.equals(created, image.created)
+                    && Objects.equals(tags, image.tags);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageId, imageCatalogName, packageVersions, date, created);
+        return Objects.hash(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageId, imageCatalogName, packageVersions, date, created, tags);
     }
 
     @Override
@@ -170,11 +183,8 @@ public class Image {
                 + ", imageCatalogName='" + imageCatalogName + '\''
                 + ", packageVersions=" + packageVersions + '\''
                 + ", date=" + date + '\''
-                + ", created=" + created + '}';
-    }
-
-    public static ImageBuilder builder() {
-        return new ImageBuilder();
+                + ", created=" + created + '\''
+                + ", tags=" + tags + '}';
     }
 
     public static final class ImageBuilder {
@@ -200,6 +210,8 @@ public class Image {
         private String date;
 
         private Long created;
+
+        private Map<String, String> tags = new HashMap<>();
 
         private ImageBuilder() {
         }
@@ -259,8 +271,13 @@ public class Image {
             return this;
         }
 
+        public ImageBuilder withTags(Map<String, String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
         public Image build() {
-            return new Image(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageCatalogName, imageId, packageVersions, date, created);
+            return new Image(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageCatalogName, imageId, packageVersions, date, created, tags);
         }
     }
 }

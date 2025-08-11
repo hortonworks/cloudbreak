@@ -22,7 +22,8 @@ public class JavaVersionUpgradeValidator implements ServiceUpgradeValidator {
         Integer currentJavaVersion = request.stack().getStack().getJavaVersion();
         if (isVersionNewerOrEqualThan731(targetRuntime) && NOT_SUPPORTED_JAVA_VERSION.equals(currentJavaVersion)) {
             String message = String.format("You cannot upgrade to %s because your current cluster uses JDK %d, and upgrading to %s with "
-                    + "JDK %d is not yet supported.", targetRuntime, NOT_SUPPORTED_JAVA_VERSION, targetRuntime, NOT_SUPPORTED_JAVA_VERSION);
+                    + "JDK %d is not supported. Please downgrade to JDK 8 before upgrading the cluster.",
+                    targetRuntime, NOT_SUPPORTED_JAVA_VERSION, targetRuntime, NOT_SUPPORTED_JAVA_VERSION);
             LOGGER.error("Cluster upgrade validation failed. {}", message);
             throw new UpgradeValidationFailedException(message);
         }

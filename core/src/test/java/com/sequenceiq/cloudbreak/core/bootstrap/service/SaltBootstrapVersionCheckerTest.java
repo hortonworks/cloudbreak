@@ -67,18 +67,18 @@ class SaltBootstrapVersionCheckerTest {
 
     @Test
     public void testNoPackageVersionMap() {
-        Image image = new Image(null, null, null, null, null, null, null, null, null, null, null);
+        Image image = new Image(null, null, null, null, null, null, null, null, null, null, null, null);
         assertFalse(underTest.isFingerprintingSupported(new Json(image)));
     }
 
     @Test
     public void testNoPackageVersionForSb() {
-        Image image = new Image(null, null, null, null, null, null, null, null, Map.of(), null, null);
+        Image image = new Image(null, null, null, null, null, null, null, null, Map.of(), null, null, null);
         assertFalse(underTest.isFingerprintingSupported(new Json(image)));
     }
 
     protected Json getJsonImage(String version) {
-        Image image = new Image(null, null, null, null, null, null, null, null, Map.of(PackageVersionChecker.SALT_BOOTSTRAP, version), null, null);
+        Image image = new Image(null, null, null, null, null, null, null, null, Map.of(PackageVersionChecker.SALT_BOOTSTRAP, version), null, null, null);
         return new Json(image);
     }
 }

@@ -62,7 +62,7 @@ public class AwsImageUpdateServiceTest {
     @Test
     void shouldUpdateImageInLaunchTemplate() {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
-        when(stack.getImage()).thenReturn(new Image(IMAGE_NAME, null, null, null, null, null, null, "imageid", null, null, null));
+        when(stack.getImage()).thenReturn(new Image(IMAGE_NAME, null, null, null, null, null, null, "imageid", null, null, null, null));
 
         underTest.updateImage(ac, stack, cfResource);
 

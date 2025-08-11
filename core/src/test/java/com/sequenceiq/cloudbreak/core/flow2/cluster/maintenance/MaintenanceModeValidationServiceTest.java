@@ -179,6 +179,7 @@ public class MaintenanceModeValidationServiceTest {
                         "uuid",
                         packageVersions,
                         null,
+                        null,
                         null);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
@@ -202,6 +203,7 @@ public class MaintenanceModeValidationServiceTest {
                         statedImage.getImageCatalogName(),
                         "uuid",
                         packageVersions,
+                        null,
                         null,
                         null);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);

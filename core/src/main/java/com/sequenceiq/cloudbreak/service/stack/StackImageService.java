@@ -77,7 +77,7 @@ public class StackImageService {
             userDataService.makeSureUserDataIsMigrated(stack.getId());
             return new Image(newImageName, new HashMap<>(), targetImage.getOs(), targetImage.getOsType(), targetImage.getArchitecture(),
                     targetStatedImage.getImageCatalogUrl(), targetStatedImage.getImageCatalogName(), targetImage.getUuid(), targetImage.getPackageVersions(),
-                    targetImage.getDate(), targetImage.getCreated());
+                    targetImage.getDate(), targetImage.getCreated(), targetImage.getTags());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);

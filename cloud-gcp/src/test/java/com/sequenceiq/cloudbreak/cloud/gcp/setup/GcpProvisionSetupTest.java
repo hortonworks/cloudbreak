@@ -471,7 +471,8 @@ public class GcpProvisionSetupTest {
                 "1234-1234-123-123",
                 Map.of(),
                 "2019-10-24",
-                1571884856L
+                1571884856L,
+                null
         );
     }
 

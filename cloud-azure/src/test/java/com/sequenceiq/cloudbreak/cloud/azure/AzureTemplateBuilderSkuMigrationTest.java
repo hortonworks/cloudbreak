@@ -168,7 +168,7 @@ public class AzureTemplateBuilderSkuMigrationTest {
         );
 
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "",
-                "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+                "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L, null);
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);

@@ -160,7 +160,7 @@ class SaltVersionUpgradeServiceTest {
     private Image getImage(String saltVersion) {
         Map<String, String> packageVersions = saltVersion != null ? Map.of(ImagePackageVersion.SALT.getKey(), saltVersion) : Map.of();
         return new Image("image", null, null, null, null, null, null, null,
-                packageVersions, null, null);
+                packageVersions, null, null, null);
     }
 
 }

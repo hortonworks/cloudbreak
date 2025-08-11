@@ -93,7 +93,8 @@ public class ImageFallbackService {
                     currentImage.getImageId(),
                     currentImage.getPackageVersions(),
                     currentImage.getDate(),
-                    currentImage.getCreated())));
+                    currentImage.getCreated(),
+                    currentImage.getTags())));
             componentConfigProviderService.store(component);
         }
     }

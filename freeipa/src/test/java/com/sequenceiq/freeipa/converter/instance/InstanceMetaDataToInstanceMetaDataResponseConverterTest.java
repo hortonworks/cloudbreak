@@ -53,7 +53,7 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
 
     private static final InstanceLifeCycle LIFE_CYCLE = InstanceLifeCycle.NORMAL;
 
-    private static final Image IMAGE = new Image("imgname", Map.of(), "alma", "rocky", "", "url", "name", "imgid", Map.of(), "2019-10-24", 1571884856L);
+    private static final Image IMAGE = new Image("imgname", Map.of(), "alma", "rocky", "", "url", "name", "imgid", Map.of(), "2019-10-24", 1571884856L, null);
 
     @Mock
     private ImageToImageSettingsResponseConverter imageConverter;

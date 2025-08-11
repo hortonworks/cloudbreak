@@ -177,7 +177,7 @@ public class InstanceMetaDataServiceTest {
         Map<String, Integer> subnetUsage = Map.of();
         when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
         com.sequenceiq.cloudbreak.cloud.model.Image image =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("a", Map.of(), "b", "v", "", "cat", "nmame", "id", Map.of(), "2019-10-24", 1571884856L);
+                new com.sequenceiq.cloudbreak.cloud.model.Image("a", Map.of(), "b", "v", "", "cat", "nmame", "id", Map.of(), "2019-10-24", 1571884856L, null);
         when(imageService.getCloudImageByStackId(STACK_ID)).thenReturn(image);
 
         Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, Collections.emptyList());

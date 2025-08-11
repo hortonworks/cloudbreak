@@ -136,6 +136,13 @@ public class AzureTemplateMultiAzBuilderTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTemplateMultiAzBuilderTest.class);
 
+    @InjectMocks
+    private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
+
+    private final Gson gson = new Gson();
+
+    private final Map<String, String> tags = new HashMap<>();
+
     @Mock
     private AzureUtils azureUtils;
 
@@ -156,9 +163,6 @@ public class AzureTemplateMultiAzBuilderTest {
 
     @Mock
     private AzurePlatformResources platformResources;
-
-    @InjectMocks
-    private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
 
     private String stackName;
 
@@ -187,10 +191,6 @@ public class AzureTemplateMultiAzBuilderTest {
     private AzureStackView azureStackView;
 
     private AzureMarketplaceImage azureMarketplaceImage;
-
-    private final Gson gson = new Gson();
-
-    private final Map<String, String> tags = new HashMap<>();
 
     public static Iterable<?> templatesPathDataProvider() {
         List<String> templates = Lists.newArrayList(LATEST_TEMPLATE_PATH);
@@ -232,7 +232,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), "2019-10-24",
-                1571884856L);
+                1571884856L, null);
         cloudContext = CloudContext.Builder.builder()
                 .withId(7899L)
                 .withName("thisisaverylongazureresourcenamewhichneedstobeshortened")

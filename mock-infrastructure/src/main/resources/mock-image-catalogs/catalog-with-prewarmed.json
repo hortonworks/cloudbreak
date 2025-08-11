@@ -26,6 +26,9 @@
           "java17": "17.0.2",
           "java8": "1.8.0_372"
         },
+        "tags": {
+          "release-version": "CDH_RELEASE"
+        },
         "stack-details": {
           "repo": {
             "stack": {
@@ -86,6 +89,9 @@
           "java11": "11.0.19",
           "java17": "17.0.2",
           "java8": "1.8.0_372"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
         },
         "stack-details": {
           "repo": {

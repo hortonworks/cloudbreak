@@ -66,7 +66,8 @@ public class RecommendImageService {
                     catalogImage.getUuid(),
                     catalogImage.getPackageVersions(),
                     catalogImage.getDate(),
-                    catalogImage.getCreated());
+                    catalogImage.getCreated(),
+                    catalogImage.getTags());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.error("Validate recommended image failed. Failed to select image.", e);
             throw new BadRequestException("Validate recommended image failed. Failed to select image: " + e.getMessage());

@@ -110,11 +110,21 @@ class GcpBackendServiceResourceBuilderTest {
 
     private CloudStack cloudStack;
 
+    static Object[][] dataForInstanceGroups() {
+        return new Object[][]{
+                {Map.of("us-west2-a", true, "us-west2-b", true, "us-west2-c", true)},
+                {Map.of("us-west2-a", false, "us-west2-b", false, "us-west2-c", false)},
+                {Map.of("us-west2-a", true, "us-west2-b", false, "us-west2-c", true)},
+                {Map.of("us-west2-a", true, "us-west2-b", false)},
+                {Map.of()}
+        };
+    }
+
     @BeforeEach
     void setup() {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), "2019-10-24",
-                1571884856L);
+                1571884856L, null);
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
@@ -174,16 +184,6 @@ class GcpBackendServiceResourceBuilderTest {
         List<TargetGroupPortPair> traffics8081 = hc8081Resources.get(0).getParameter("trafficports", List.class);
         assertTrue(traffics8081.contains(new TargetGroupPortPair(82, NetworkProtocol.TCP, httpsHealth)));
         assertTrue(traffics8081.contains(new TargetGroupPortPair(83, NetworkProtocol.UDP, httpsHealth)));
-    }
-
-    static Object[][] dataForInstanceGroups() {
-        return new Object[][]{
-                {Map.of("us-west2-a", true, "us-west2-b", true, "us-west2-c", true)},
-                {Map.of("us-west2-a", false, "us-west2-b", false, "us-west2-c", false)},
-                {Map.of("us-west2-a", true, "us-west2-b", false, "us-west2-c", true)},
-                {Map.of("us-west2-a", true, "us-west2-b", false)},
-                {Map.of()}
-        };
     }
 
     @ParameterizedTest(name = "testBuildWithSeparateHCPort{index}")

@@ -92,14 +92,16 @@ public class CloudFormationTemplateBuilderTest {
 
     private static final String INSTANCE_PROFILE = "alma";
 
+    @InjectMocks
+    private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
+
+    private final Map<String, String> defaultTags = new HashMap<>();
+
     @Mock
     private CostTagging costTagging;
 
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
-
-    @InjectMocks
-    private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
     private CloudStack cloudStack;
 
@@ -110,8 +112,6 @@ public class CloudFormationTemplateBuilderTest {
     private AuthenticatedContext authenticatedContext;
 
     private String existingSubnetCidr;
-
-    private final Map<String, String> defaultTags = new HashMap<>();
 
     private Image image;
 
@@ -142,7 +142,7 @@ public class CloudFormationTemplateBuilderTest {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null);
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null, null);
         List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security, Optional.empty()),
                 createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security, Optional.empty()));
         cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());

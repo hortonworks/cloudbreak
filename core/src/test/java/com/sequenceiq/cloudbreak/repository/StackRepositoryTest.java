@@ -63,6 +63,10 @@ class StackRepositoryTest {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    private static Predicate<StackImageView> imageIdEquals(String imageId) {
+        return stackImageView -> imageId.equals(stackImageView.getImage().getSilent(Image.class).getImageId());
+    }
+
     @BeforeEach
     void setUp() {
         Stack terminatedStack = createStack(TERMINATED_STACK_IMAGE);
@@ -120,10 +124,6 @@ class StackRepositoryTest {
         assertEquals(1, deletedStacks.size());
     }
 
-    private static Predicate<StackImageView> imageIdEquals(String imageId) {
-        return stackImageView -> imageId.equals(stackImageView.getImage().getSilent(Image.class).getImageId());
-    }
-
     private Stack createStack(String imageId) {
         final Stack stack = new Stack();
         stack.setDatabase(new Database());
@@ -150,7 +150,7 @@ class StackRepositoryTest {
     }
 
     private Json createImage(String imageId) {
-        final Image image = new Image("imageName", Map.of(), "os", "osType", "arch", "imageCatalogUrl", "imageCatalogName", imageId, null, null, null);
+        final Image image = new Image("imageName", Map.of(), "os", "osType", "arch", "imageCatalogUrl", "imageCatalogName", imageId, null, null, null, null);
         return new Json(image);
     }
 

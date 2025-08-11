@@ -308,7 +308,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     @BeforeEach
     public void setup() throws CloudbreakImageNotFoundException {
         mockStackService();
-        Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", "", null, null, null);
+        Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", "", null, null, null, null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         when(userDataService.getUserData(anyLong())).thenReturn(Map.of(
                 InstanceGroupType.CORE, "core",

@@ -893,5 +893,6 @@ vm:
     javaVersions:
       - version: 8
         minRuntimeVersion: 7.1.0
+        maxRuntimeVersion: 7.3.1
       - version: 17
-        minRuntimeVersion: 7.3.1
+        minRuntimeVersion: 7.3.1.500

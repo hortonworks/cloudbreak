@@ -503,7 +503,7 @@ public class ImageServiceTest {
     @Test
     public void testUpdateImageName() throws CloudbreakImageNotFoundException, IOException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageModel = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "anImage", new HashMap<>(), "centos7", "redhat7", "arch", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+                "anImage", new HashMap<>(), "centos7", "redhat7", "arch", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L, null);
         Component imageComponent = createImageComponent(imageModel);
         when(componentConfigProviderService.getImageComponent(STACK_ID)).thenReturn(imageComponent);
 

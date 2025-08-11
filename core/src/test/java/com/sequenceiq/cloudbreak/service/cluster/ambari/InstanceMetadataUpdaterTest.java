@@ -192,7 +192,7 @@ public class InstanceMetadataUpdaterTest {
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         Image image = new Image("imagename", null, "os", "ostype", "arch", "catalogurl",
-                "catalogname", "iamgeid", packageMap(), null, null);
+                "catalogname", "iamgeid", packageMap(), null, null, null);
         instanceMetaData.setImage(new Json(image));
         instanceMetaData.setInstanceId(instanceId);
         instanceMetaData.setDiscoveryFQDN(instanceId);

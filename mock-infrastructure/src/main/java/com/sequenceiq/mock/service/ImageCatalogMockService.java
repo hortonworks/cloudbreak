@@ -16,6 +16,8 @@ public class ImageCatalogMockService {
 
     private static final String NON_DEFAULT_IMAGE_UUID = "1a6eadd2-5B95-4EC9-B300-13dc43208b64";
 
+    private static final String PATCH_VERSION_POSTFIX = ".500";
+
     public String getImageCatalogByName(String name, String cbVersion, String runtimeVersion, String cmVersion, String defaultImageUuid,
             String nonDefaultImageUuid, String mockServerAddress) {
         String catalog = FileReaderUtils.readFileFromClasspathQuietly(String.format("mock-image-catalogs/%s.json", name));
@@ -23,6 +25,8 @@ public class ImageCatalogMockService {
         return catalog.replace("CB_VERSION", cbVersion)
                 .replace("CDH_RUNTIME_NEXT", nextRuntimeVersion)
                 .replace("CDH_RUNTIME", runtimeVersion)
+                .replace("CDH_RELEASE_NEXT", nextRuntimeVersion + PATCH_VERSION_POSTFIX)
+                .replace("CDH_RELEASE", runtimeVersion + PATCH_VERSION_POSTFIX)
                 .replace("CM_VERSION_NEXT", Objects.requireNonNullElse(cmVersion, nextRuntimeVersion))
                 .replace("CM_VERSION", Objects.requireNonNullElse(cmVersion, runtimeVersion))
                 .replace("NON_DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(nonDefaultImageUuid, NON_DEFAULT_IMAGE_UUID))

@@ -50,7 +50,7 @@ class ImageToImageSettingsResponseConverterTest {
         com.sequenceiq.cloudbreak.cloud.model.Image source =
                 new Image("imgname", Map.of(), "alma", "rocky", "", "url", "name", "imgid",
                         Map.of("freeipa-ldap-agent", "1.2.3",
-                                "source-image", SOURCE_IMAGE), "2019-10-24", 1571884856L);
+                                "source-image", SOURCE_IMAGE), "2019-10-24", 1571884856L, null);
         when(imageEntityConverter.extractLdapAgentVersion(source)).thenReturn("1.2.3");
         when(imageEntityConverter.extractSourceImage(source)).thenReturn(SOURCE_IMAGE);
 
