@@ -34,6 +34,7 @@ import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -57,10 +58,12 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
+import com.sequenceiq.cloudbreak.cm.converter.ApiClusterTemplateToCmTemplateConverter;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -129,6 +132,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
+    @Inject
+    private ApiClusterTemplateToCmTemplateConverter apiClusterTemplateToCmTemplateConverter;
+
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
@@ -136,6 +142,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private ApiClient client;
 
     private ApiClient fastClient;
+
+    private ApiClient v52Client;
 
     ClouderaManagerClusterStatusService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
@@ -226,6 +234,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             fastClient = clouderaManagerApiClientProvider
                     .getV31Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
             fastClient.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
+            v52Client = clouderaManagerApiClientProvider
+                    .getV52Client(stack.getGatewayPort(), cloudbreakClusterManagerUser, cloudbreakClusterManagerPassword, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -424,6 +434,21 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.warn("Unexpected error while waiting for services to be in a healthy status.", e);
         }
         return false;
+    }
+
+    @Override
+    public String getDeployment(Stack stack) {
+        String clusterName = stack.getName();
+        String extendedBlueprintText = stack.getCluster().getExtendedBlueprintText();
+        try {
+            ApiClusterTemplate apiClusterTemplate = clouderaManagerApiFactory
+                    .getClustersResourceApi(v52Client)
+                    .export(clusterName, Boolean.FALSE);
+            return apiClusterTemplateToCmTemplateConverter.convert(apiClusterTemplate, extendedBlueprintText);
+        } catch (ApiException e) {
+            LOGGER.warn("Failed to get deployment from CM", e);
+            throw new ClouderaManagerOperationFailedException("Failed to get deployment from CM", e);
+        }
     }
 
     private ClusterManagerCommand convertApiCommand(ApiCommand apiCommand) {

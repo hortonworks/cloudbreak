@@ -5,8 +5,11 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
@@ -58,19 +62,22 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterUpgradeTriggerEvent event) {
-        Optional<Image> helperImage = centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageId(), event.getResourceId());
-        ClusterUpgradeTriggerEvent upgradeTriggerEvent = helperImage.map(image -> createEventForRuntimeUpgrade(image, event)).orElse(event);
+        LOGGER.debug("Creating flow trigger event queue for data lake upgrade with event {}", event);
+        ClusterUpgradeTriggerEvent upgradeTriggerEvent = getEventForRuntimeUpgrade(event);
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent));
-        saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
-        flowEventChain.add(getSaltUpdateTriggerEvent(upgradeTriggerEvent));
-        flowEventChain.add(getClusterUpgradeTriggerEvent(upgradeTriggerEvent));
+
+        flowEventChain.addAll(getFullSyncEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
+        flowEventChain.addAll(getSaltUpdateTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(upgradeTriggerEvent));
+
         return new FlowTriggerEventQueue(getName(), upgradeTriggerEvent, flowEventChain);
     }
 
-    private StackEvent getSaltUpdateTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        return new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted());
+    private List<StackEvent> getSaltUpdateTriggerEvent(ClusterUpgradeTriggerEvent event) {
+        return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
     @Override
@@ -86,16 +93,47 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         }
     }
 
-    private ClusterUpgradeValidationTriggerEvent getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        StackDto stack = stackDtoService.getById(event.getResourceId());
-        boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
-        return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents,
-                event.isRollingUpgradeEnabled(), true);
+    private ClusterUpgradeTriggerEvent getEventForRuntimeUpgrade(ClusterUpgradeTriggerEvent event) {
+        return centOSToRedHatUpgradeAvailabilityService
+                .findHelperImageIfNecessary(event.getImageId(), event.getResourceId())
+                .map(image -> createEventForRuntimeUpgrade(image, event))
+                .orElse(event);
     }
 
-    private ClusterUpgradeTriggerEvent getClusterUpgradeTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        return new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                event.getImageId(), event.isRollingUpgradeEnabled());
+    private List<Selectable> getFullSyncEvent(ClusterUpgradeTriggerEvent event) {
+        LOGGER.info("Add sync events for full sync");
+        List<Selectable> syncEvents = new ArrayList<>();
+
+        syncEvents.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
+        syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
+
+        return syncEvents;
+    }
+
+    private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event) {
+        StackDto stack = stackDtoService.getById(event.getResourceId());
+        boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
+        return List.of(
+                new ClusterUpgradeValidationTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        event.getImageId(),
+                        lockComponents,
+                        event.isRollingUpgradeEnabled(),
+                        true)
+        );
+    }
+
+    private List<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(ClusterUpgradeTriggerEvent event) {
+        return List.of(
+                new ClusterUpgradeTriggerEvent(
+                        CLUSTER_UPGRADE_INIT_EVENT.event(),
+                        event.getResourceId(),
+                        event.accepted(),
+                        event.getImageId(),
+                        event.isRollingUpgradeEnabled()
+                )
+        );
     }
 
     private ClusterUpgradeTriggerEvent createEventForRuntimeUpgrade(Image helperImage, ClusterUpgradeTriggerEvent event) {

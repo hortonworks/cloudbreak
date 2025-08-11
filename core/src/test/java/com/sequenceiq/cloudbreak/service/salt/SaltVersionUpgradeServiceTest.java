@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
@@ -126,12 +124,10 @@ class SaltVersionUpgradeServiceTest {
         when(stackDto.getSecurityConfig()).thenReturn(securityConfig);
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(mock(InstanceMetadataView.class), mock(InstanceMetadataView.class)));
         when(stackDtoService.getByIdWithoutResources(eq(STACK_ID))).thenReturn(stackDto);
-        Optional<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
-        assertTrue(triggerEvent.isPresent());
-        SecretRotationFlowChainTriggerEvent secretRotationTriggerEvent = triggerEvent.get();
-        assertThat(secretRotationTriggerEvent.getSecretTypes()).containsExactlyInAnyOrder(SALT_MASTER_KEY_PAIR, SALT_SIGN_KEY_PAIR);
-        assertNull(secretRotationTriggerEvent.getExecutionType());
-        assertNull(secretRotationTriggerEvent.getAdditionalProperties());
+        List<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
+        assertThat(triggerEvent.get(0).getSecretTypes()).containsExactlyInAnyOrder(SALT_MASTER_KEY_PAIR, SALT_SIGN_KEY_PAIR);
+        assertNull(triggerEvent.get(0).getExecutionType());
+        assertNull(triggerEvent.get(0).getAdditionalProperties());
     }
 
     @Test
@@ -143,8 +139,8 @@ class SaltVersionUpgradeServiceTest {
         when(stackDto.getSecurityConfig()).thenReturn(securityConfig);
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(mock(InstanceMetadataView.class), mock(InstanceMetadataView.class)));
         when(stackDtoService.getByIdWithoutResources(eq(STACK_ID))).thenReturn(stackDto);
-        Optional<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
-        assertFalse(triggerEvent.isPresent());
+        List<SecretRotationFlowChainTriggerEvent> triggerEvent = underTest.getSaltSecretRotationTriggerEvent(STACK_ID);
+        assertTrue(triggerEvent.isEmpty());
     }
 
     private StackDto stack(List<InstanceMetadataView> instances) {

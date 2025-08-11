@@ -1,0 +1,326 @@
+{
+  "cdhVersion": "7.3.1",
+  "displayName": "fdtgyhjkl",
+  "cmVersion": "7.13.1",
+  "repositories": [
+    "http://build-cache.vpc.cloudera.com/s3/build/67986116/cdh/7.x/parcels/"
+  ],
+  "products": [
+    {
+      "version": "7.3.1-1.cdh7.3.1.p400.67986116",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "stub_dfs"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-NODEMANAGER-BASE",
+          "roleType": "NODEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "core_settings",
+      "serviceType": "CORE_SETTINGS",
+      "serviceConfigs": [
+        {
+          "name": "hadoop_security_authorization",
+          "value": "true"
+        },
+        {
+          "name": "hadoop_security_authentication",
+          "value": "kerberos"
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>fs.s3a.bucket.cb-group.endpoint</name><value>s3.eu-central-1.amazonaws.com</value></property><property><name>hadoop.security.groups.cache.background.reload</name><value>true</value></property>"
+        },
+        {
+          "name": "core_defaultfs",
+          "value": "s3a://cb-group/cdp/fdtgyhjkl"
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper-c048",
+      "serviceType": "ZOOKEEPER",
+      "serviceConfigs": [
+        {
+          "name": "enableSecurity",
+          "value": "true"
+        },
+        {
+          "name": "quorum_auth_enable_sasl",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-c048-SERVER-BASE",
+          "roleType": "SERVER",
+          "configs": [
+            {
+              "name": "dataDir",
+              "variable": "zookeeper-c048-SERVER-BASE-dataDir"
+            },
+            {
+              "name": "dataLogDir",
+              "variable": "zookeeper-c048-SERVER-BASE-dataLogDir"
+            },
+            {
+              "name": "zookeeper_server_java_heapsize",
+              "value": "1073741824"
+            },
+            {
+              "name": "maxClientCnxns",
+              "value": "200"
+            }
+          ],
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "data_context_connector-bfaf",
+      "serviceType": "DATA_CONTEXT_CONNECTOR"
+    },
+    {
+      "refName": "stub_dfs",
+      "serviceType": "STUB_DFS",
+      "roleConfigGroups": [
+        {
+          "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
+          "roleType": "STORAGEOPERATIONS",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "knox-20fa",
+      "serviceType": "KNOX",
+      "serviceConfigs": [
+        {
+          "name": "kerberos.auth.enabled",
+          "value": "true"
+        },
+        {
+          "name": "knox_gateway_database_user",
+          "variable": "knox-20fa-knox_gateway_database_user"
+        },
+        {
+          "name": "knox_gateway_database_host",
+          "variable": "knox-20fa-knox_gateway_database_host"
+        },
+        {
+          "name": "knox_gateway_database_type",
+          "variable": "knox-20fa-knox_gateway_database_type"
+        },
+        {
+          "name": "knox_gateway_database_password",
+          "variable": "knox-20fa-knox_gateway_database_password"
+        },
+        {
+          "name": "knox_gateway_database_name",
+          "variable": "knox-20fa-knox_gateway_database_name"
+        },
+        {
+          "name": "knox_gateway_database_port",
+          "variable": "knox-20fa-knox_gateway_database_port"
+        },
+        {
+          "name": "autorestart_on_stop",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "knox-20fa-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY",
+          "configs": [
+            {
+              "name": "gateway_service_tokenstate_impl",
+              "value": "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"
+            },
+            {
+              "name": "gateway_signing_keystore_name",
+              "value": "signing.jks"
+            },
+            {
+              "name": "gateway_default_topology_name",
+              "value": "cdp-proxy"
+            },
+            {
+              "name": "gateway_auto_discovery_enabled",
+              "value": "false"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "gateway_database_ssl_truststore_file",
+              "value": "/hadoopfs/fs1/database-cacerts/certs.pem"
+            },
+            {
+              "name": "gateway_signing_keystore_type",
+              "value": "JKS"
+            },
+            {
+              "name": "gateway_master_secret",
+              "variable": "knox-20fa-KNOX_GATEWAY-BASE-gateway_master_secret"
+            },
+            {
+              "name": "gateway_database_ssl_enabled",
+              "value": "true"
+            },
+            {
+              "name": "gateway_dispatch_whitelist",
+              "value": "^/.*$;^https://([^/]+\\.doktoric.xcu2-8y8x.wl.cloudera.site):[0-9]+/?.*$"
+            },
+            {
+              "name": "gateway_token_generation_knox_token_ttl",
+              "value": "86400000"
+            },
+            {
+              "name": "gateway_signing_key_alias",
+              "value": "signing-identity"
+            },
+            {
+              "name": "gateway_knox_admin_groups",
+              "value": "_c_environments_adminknox"
+            },
+            {
+              "name": "gateway_path",
+              "value": "fdtgyhjkl"
+            },
+            {
+              "name": "gateway_token_generation_enable_lifespan_input",
+              "value": "true"
+            }
+          ],
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "leader",
+      "cardinality": 0,
+      "roleConfigGroupsRefNames": [
+        "knox-20fa-KNOX_GATEWAY-BASE",
+        "stub_dfs-STORAGEOPERATIONS-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "yarn-NODEMANAGER-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "zookeeper-c048-SERVER-BASE"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "_cldr_cb_clustertype",
+      "value": "Data Hub"
+    },
+    {
+      "name": "_cldr_cb_origin",
+      "value": "cloudbreak"
+    },
+    {
+      "name": "_cldr_cluster.core_settings.service_name",
+      "value": "core_settings"
+    }
+  ],
+  "clusterSpec": {
+    "dataContextRefs": [
+      {
+        "name": "doktorics-001"
+      }
+    ]
+  },
+  "instantiator": {
+    "clusterName": "<changeme>",
+    "hosts": [
+      {
+        "hostName": "<changeme>",
+        "hostTemplateRefName": "<changeme>"
+      },
+      {
+        "hostNameRange": "<HOST[0001-0002]>",
+        "hostTemplateRefName": "<changeme>"
+      }
+    ],
+    "variables": [
+      {
+        "name": "knox-20fa-KNOX_GATEWAY-BASE-gateway_master_secret",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_host",
+        "value": "fdtgyhjkl-leader0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_name",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "knox-20fa-knox_gateway_database_user",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "zookeeper-c048-SERVER-BASE-dataDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      },
+      {
+        "name": "zookeeper-c048-SERVER-BASE-dataLogDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      }
+    ],
+    "roleConfigGroups": [
+      {
+        "rcgRefName": "yarn-RESOURCEMANAGER-1",
+        "name": ""
+      }
+    ],
+    "clusterSpec": {
+      "dataContextRefs": [
+        {
+          "name": "doktorics-001"
+        }
+      ]
+    },
+    "lenient": false
+  }
+}

@@ -60,7 +60,7 @@ public class Spark2UpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private String getBlueprintText(StackDto stack) {
-        return stack.getBlueprint().getBlueprintJsonText();
+        return stack.getCluster().getExtendedBlueprintText();
     }
 
     private boolean targetRuntimeHigherOrEqualThan730(String targetRuntime) {

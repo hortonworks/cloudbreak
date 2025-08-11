@@ -21,6 +21,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CM_TEMPLATE_SYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
@@ -1129,6 +1130,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_HYBRID_CLOUD))
                                 .addEntitlements(createEntitlement(CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION))
                                 .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))
+                                .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(accountId)
                                 .setExternalAccountId("external-" + accountId)

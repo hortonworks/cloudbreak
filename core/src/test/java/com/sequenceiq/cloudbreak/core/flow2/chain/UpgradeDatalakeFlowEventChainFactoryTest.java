@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
@@ -67,19 +70,36 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
-                .thenReturn(Optional.of(new SecretRotationFlowChainTriggerEvent(secretRotationSelector, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
+                .thenReturn(List.of(
+                        new SecretRotationFlowChainTriggerEvent(secretRotationSelector, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
 
         FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(
                 new ClusterUpgradeTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
 
-        assertEquals(4, flowTriggerQueue.getQueue().size());
+        assertEquals(6, flowTriggerQueue.getQueue().size());
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
+        assertSyncTriggerEvent(flowTriggerQueue);
+        assertClusterSyncTriggerEvent(flowTriggerQueue);
         assertClusterUpgradeValidationTriggerEvent(flowTriggerQueue);
         assertSaltSecretRotationTriggerEvent(flowTriggerQueue);
         assertSaltUpdateTriggerEvent(flowTriggerQueue);
         assertClusterUpgradeTriggerEvent(flowTriggerQueue);
         flowTriggerQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue);
+    }
+
+    private void assertClusterSyncTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
+        Selectable event = flowTriggerEventQueue.getQueue().remove();
+        assertEquals(ClusterSyncEvent.CLUSTER_SYNC_EVENT.event(), event.getSelector());
+        assertEquals(STACK_ID, event.getResourceId());
+        assertInstanceOf(StackEvent.class, event);
+    }
+
+    private void assertSyncTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
+        Selectable event = flowTriggerEventQueue.getQueue().remove();
+        assertEquals(STACK_SYNC_EVENT.event(), event.getSelector());
+        assertEquals(STACK_ID, event.getResourceId());
+        assertInstanceOf(StackSyncTriggerEvent.class, event);
     }
 
     private void assertClusterUpgradeValidationTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
