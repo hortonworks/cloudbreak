@@ -72,7 +72,10 @@ public class JsonUtil {
 
     public static <T> T readValueStrict(String content, Class<T> valueType) throws IOException {
         return STRICT_MAPPER.readValue(content, valueType);
+    }
 
+    public static <T> String readValueIntoOneLine(String content, Class<T> valueType) throws IOException {
+        return writeValueAsStringSilent(readValue(content, valueType), true);
     }
 
     public static <T> T readValueFromGrpcJson(String content, Class<T> valueType) {

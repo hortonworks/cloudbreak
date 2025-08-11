@@ -62,7 +62,7 @@ public class CmSyncerServiceTest {
 
     @Test
     void testSyncFromCmToDbWhenCmServerRunningThenSyncIsExecuted() {
-        when(cmServerQueryService.isCmServerRunning(stack)).thenReturn(true);
+        when(cmServerQueryService.isCmServerNotRunning(stack)).thenReturn(false);
         Set<Image> candidateImages = Set.of(mock(Image.class));
         CmRepoSyncOperationResult cmRepoSyncOperationResult = mock(CmRepoSyncOperationResult.class);
         CmParcelSyncOperationResult cmParcelSyncOperationResult = mock(CmParcelSyncOperationResult.class);
@@ -105,7 +105,7 @@ public class CmSyncerServiceTest {
 
     @Test
     void testSyncFromCmToDbWhenCmServerDownThenSyncSkipped() {
-        when(cmServerQueryService.isCmServerRunning(stack)).thenReturn(false);
+        when(cmServerQueryService.isCmServerNotRunning(stack)).thenReturn(true);
         Set<Image> candidateImages = Set.of(mock(Image.class));
 
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
@@ -113,7 +113,7 @@ public class CmSyncerServiceTest {
 
         assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals("CM server is down, it is not possible to sync parcels and CM version from the server.", cmSyncOperationStatus.getMessage());
-        verify(cmServerQueryService).isCmServerRunning(eq(stack));
+        verify(cmServerQueryService).isCmServerNotRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
         verify(cmInstalledComponentFinderService, never()).findParcelComponents(any(), any());
         verify(cmSyncOperationSummaryService, never()).evaluate(any());
@@ -121,7 +121,7 @@ public class CmSyncerServiceTest {
 
     @Test
     void testSyncFromCmToDbWhenNoCandidateImagesThenSyncSkipped() {
-        when(cmServerQueryService.isCmServerRunning(stack)).thenReturn(true);
+        when(cmServerQueryService.isCmServerNotRunning(stack)).thenReturn(false);
         Set<Image> candidateImages = Set.of();
 
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
@@ -132,7 +132,7 @@ public class CmSyncerServiceTest {
                 "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. "
                         + "Please open Cloudera support ticket to investigate the issue",
                 cmSyncOperationStatus.getMessage());
-        verify(cmServerQueryService).isCmServerRunning(eq(stack));
+        verify(cmServerQueryService).isCmServerNotRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
         verify(cmInstalledComponentFinderService, never()).findParcelComponents(any(), any());
         verify(cmSyncOperationSummaryService, never()).evaluate(any());

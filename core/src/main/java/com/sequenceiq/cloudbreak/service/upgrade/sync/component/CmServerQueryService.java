@@ -73,4 +73,8 @@ public class CmServerQueryService {
         return apiConnectors.getConnector(stack).clusterStatusService().isClusterManagerRunning();
     }
 
+    public boolean isCmServerNotRunning(Stack stack) {
+        return !isCmServerRunning(stack);
+    }
+
 }

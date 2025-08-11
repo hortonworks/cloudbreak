@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -64,7 +63,7 @@ public class SaltVersionUpgradeService {
         return gatewaysUsingOutdatedSaltVersion;
     }
 
-    public Optional<SecretRotationFlowChainTriggerEvent> getSaltSecretRotationTriggerEvent(Long stackId) {
+    public List<SecretRotationFlowChainTriggerEvent> getSaltSecretRotationTriggerEvent(Long stackId) {
         List<SecretType> secretTypes = new ArrayList<>();
         StackDto stack = stackDtoService.getByIdWithoutResources(stackId);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
@@ -76,10 +75,10 @@ public class SaltVersionUpgradeService {
         }
         if (secretTypes.isEmpty()) {
             LOGGER.info("Secret rotation is not required.");
-            return Optional.empty();
+            return List.of();
         } else {
             LOGGER.info("Secret rotation flow chain trigger added with secret types: {}", secretTypes);
-            return Optional.of(new SecretRotationFlowChainTriggerEvent(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
+            return List.of(new SecretRotationFlowChainTriggerEvent(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
                     stackId, stack.getResourceCrn(), secretTypes, null, null));
         }
     }

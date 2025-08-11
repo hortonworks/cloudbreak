@@ -49,7 +49,7 @@ public class CmSyncerService {
      * @return the summary of the sync operation, with status, parcel and package information
      */
     public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
-        if (!cmServerQueryService.isCmServerRunning(stack)) {
+        if (cmServerQueryService.isCmServerNotRunning(stack)) {
             return buildSummaryWithErrorMessage("CM server is down, it is not possible to sync parcels and CM version from the server.");
         }
         if (candidateImages.isEmpty()) {

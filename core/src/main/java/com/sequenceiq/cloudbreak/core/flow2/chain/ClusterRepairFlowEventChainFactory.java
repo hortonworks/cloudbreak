@@ -234,7 +234,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addClusterScaleTriggerEventIfNeeded(StackView stackView, Queue<Selectable> flowEventChain, List<String> stoppedInstances, String hostGroup) {
-        String selector = FlowChainTriggers.STOPSTART_UPSCALE_CHAIN_TRIGGER_EVENT;
         boolean stopStartFailureRecoveryEnabled = stackUtil.stopStartScalingFailureRecoveryEnabled(stackView);
         flowEventChain.add(
                 new StopStartUpscaleTriggerEvent(

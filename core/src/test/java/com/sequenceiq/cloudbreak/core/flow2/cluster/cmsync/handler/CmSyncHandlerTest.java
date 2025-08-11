@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageUpdateService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +55,9 @@ public class CmSyncHandlerTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
+
     @InjectMocks
     private CmSyncHandler underTest;
 
@@ -60,7 +66,9 @@ public class CmSyncHandlerTest {
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         HandlerEvent<CmSyncRequest> event = getCmSyncRequestHandlerEvent(candidateImageUuids);
         Stack stack = new Stack();
+        stack.setId(1L);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        doNothing().when(clusterManagerTemplateSyncService).sync(anyLong());
         Set<Image> foundImages = Set.of(mock(Image.class));
         when(cmSyncImageCollectorService.collectImages(stack, candidateImageUuids)).thenReturn(foundImages);
         CmSyncOperationStatus cmSyncOperationStatus = CmSyncOperationStatus.builder().withSuccess("").build();
@@ -71,6 +79,7 @@ public class CmSyncHandlerTest {
 
         assertEquals("CMSYNCRESULT", result.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(clusterManagerTemplateSyncService).sync(anyLong());
         verify(cmSyncImageCollectorService).collectImages(stack, candidateImageUuids);
         verify(cmSyncerService).syncFromCmToDb(stack, foundImages);
     }

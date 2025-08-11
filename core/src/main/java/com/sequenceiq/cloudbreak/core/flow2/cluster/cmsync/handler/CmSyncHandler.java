@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageUpdateService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -42,6 +43,9 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CmSyncRequest.class);
@@ -59,6 +63,7 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
         CmSyncRequest request = event.getData();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            clusterManagerTemplateSyncService.sync(stack.getId());
             Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(stack, request.getCandidateImageUuids());
             CmSyncOperationSummary cmSyncOperationSummary = cmSyncerService.syncFromCmToDb(stack, candidateImages);
             CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();

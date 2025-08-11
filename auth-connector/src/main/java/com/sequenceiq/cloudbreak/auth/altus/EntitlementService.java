@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CM_TEMPLATE_SYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
@@ -104,7 +105,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILI
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_REAL_TIME_JOBS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_PREMIUM;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_TRIAL;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
@@ -371,8 +371,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CM_BULK_HOSTS_REMOVAL);
     }
 
-    public boolean isOjdbcTokenDh(String accountId) {
-        return isEntitlementRegistered(accountId, OJDBC_TOKEN_DH);
+    public boolean isCdpCBCmTemplateSyncEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_CM_TEMPLATE_SYNC);
     }
 
     public boolean isOjdbcTokenDhOneHour(String accountId) {

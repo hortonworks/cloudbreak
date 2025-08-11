@@ -1,0 +1,1008 @@
+{
+  "cdhVersion": "7.3.1",
+  "products":[{"version":"7.3.1-1.cdh7.3.1.p400.67986116","product":"CDH"}],
+  "services": [
+    {
+      "refName": "ranger",
+      "serviceType": "RANGER",
+      "serviceConfigs": [
+        {
+          "name": "keyadmin_user_password",
+          "variable": "ranger-keyadmin_user_password"
+        },
+        {
+          "name": "cloud_storage_paths",
+          "value": "HIVE_METASTORE_WAREHOUSE=s3a://cb-group/cdp/warehouse/tablespace/managed/hive,HIVE_REPLICA_WAREHOUSE=s3a://cb-group/cdp/hive_replica_functions_dir,HIVE_METASTORE_EXTERNAL_WAREHOUSE=s3a://cb-group/cdp/warehouse/tablespace/external/hive,RANGER_AUDIT=s3a://cb-group/cdp/ranger/audit,HBASE_ROOT=s3a://cb-group/cdp/doktorics-001/hbase,BACKUP_LOCATION=s3a://cb-group/wolf"
+        },
+        {
+          "name": "ranger_database_name",
+          "variable": "ranger-ranger_database_name"
+        },
+        {
+          "name": "ranger_database_host",
+          "variable": "ranger-ranger_database_host"
+        },
+        {
+          "name": "rangeradmin_user_password",
+          "variable": "ranger-rangeradmin_user_password"
+        },
+        {
+          "name": "ranger_plugin_hdfs_audit_url",
+          "value": "s3a://cb-group/cdp/ranger/audit"
+        },
+        {
+          "name": "rangerusersync_user_password",
+          "variable": "ranger-rangerusersync_user_password"
+        },
+        {
+          "name": "ranger_database_port",
+          "variable": "ranger-ranger_database_port"
+        },
+        {
+          "name": "solr_service",
+          "ref": "solr"
+        },
+        {
+          "name": "rangertagsync_user_password",
+          "variable": "ranger-rangertagsync_user_password"
+        },
+        {
+          "name": "ranger_database_type",
+          "variable": "ranger-ranger_database_type"
+        },
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "ranger_database_user",
+          "variable": "ranger-ranger_database_user"
+        },
+        {
+          "name": "ranger_database_password",
+          "variable": "ranger-ranger_database_password"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "ranger-RANGER_USERSYNC-BASE",
+          "roleType": "RANGER_USERSYNC",
+          "base": true,
+          "configs": [
+            {
+              "name": "conf/ranger-ugsync-site.xml_role_safety_valve",
+              "value": "<property><name>ranger.usersync.syncsource.validation.enabled</name><value>false</value></property>\n<property><name>ranger.usersync.cdp.public</name><value>true</value></property>\n<property><name>ranger.usersync.unix.backend</name><value>nss</value></property>"
+            },
+            {
+              "name": "ranger.usersync.group.nameattribute",
+              "value": "cn"
+            },
+            {
+              "name": "ranger.usersync.source.impl.class",
+              "value": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "ranger.usersync.group.searchfilter",
+              "value": "cn=*"
+            },
+            {
+              "name": "ranger.usersync.ldap.user.nameattribute",
+              "value": "uid"
+            },
+            {
+              "name": "ranger.usersync.ldap.user.searchbase",
+              "value": "cn=users,cn=accounts,dc=doktoric,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site"
+            },
+            {
+              "name": "ranger.usersync.group.memberattributename",
+              "value": "member"
+            },
+            {
+              "name": "ranger.usersync.group.searchbase",
+              "value": "cn=groups,cn=accounts,dc=doktoric,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site"
+            },
+            {
+              "name": "ranger_usersync_ldap_ldapbindpassword",
+              "variable": "ranger-RANGER_USERSYNC-BASE-ranger_usersync_ldap_ldapbindpassword"
+            },
+            {
+              "name": "ranger.usersync.group.based.role.assignment.rules",
+              "value": "&ROLE_SYS_ADMIN:g:_c_environments_adminranger&ROLE_SYS_ADMIN:u:ranger"
+            },
+            {
+              "name": "ranger.usersync.ldap.binddn",
+              "value": "uid=ldapbind-doktorics-001,cn=users,cn=accounts,dc=doktoric,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site"
+            },
+            {
+              "name": "ranger.usersync.ldap.user.searchfilter",
+              "value": "uid=*"
+            },
+            {
+              "name": "ranger.usersync.ldap.user.objectclass",
+              "value": "posixAccount"
+            },
+            {
+              "name": "ranger.usersync.group.objectclass",
+              "value": "posixGroup"
+            },
+            {
+              "name": "ranger.usersync.ldap.url",
+              "value": "ldaps://ldap.doktoric.xcu2-8y8x.wl.cloudera.site:636"
+            }
+          ]
+        },
+        {
+          "refName": "ranger-RANGER_TAGSYNC-BASE",
+          "roleType": "RANGER_TAGSYNC",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "ranger-RANGER_ADMIN-BASE",
+          "roleType": "RANGER_ADMIN",
+          "base": true,
+          "configs": [
+            {
+              "name": "ranger.default.policy.groups",
+              "value": "_c_environments_adminranger"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "ranger.hbase.default.admin.groups",
+              "value": "_c_datahub_adminhbase"
+            },
+            {
+              "name": "conf/ranger-admin-site.xml_role_safety_valve",
+              "value": "<property><name>ranger.jpa.jdbc.url</name><value>jdbc:postgresql://doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site:5432/ranger?sslmode=verify-full&amp;sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem</value></property>"
+            },
+            {
+              "name": "ranger.authentication.allow.trustedproxy",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "knox",
+      "serviceType": "KNOX",
+      "serviceConfigs": [
+        {
+          "name": "autorestart_on_stop",
+          "value": "true"
+        },
+        {
+          "name": "knox_gateway_database_user",
+          "variable": "knox-knox_gateway_database_user"
+        },
+        {
+          "name": "kerberos.auth.enabled",
+          "value": "true"
+        },
+        {
+          "name": "knox_gateway_database_port",
+          "variable": "knox-knox_gateway_database_port"
+        },
+        {
+          "name": "knox_gateway_database_password",
+          "variable": "knox-knox_gateway_database_password"
+        },
+        {
+          "name": "knox_gateway_database_host",
+          "variable": "knox-knox_gateway_database_host"
+        },
+        {
+          "name": "knox_gateway_database_type",
+          "variable": "knox-knox_gateway_database_type"
+        },
+        {
+          "name": "knox_gateway_database_name",
+          "variable": "knox-knox_gateway_database_name"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "gateway_service_tokenstate_impl",
+              "value": "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"
+            },
+            {
+              "name": "gateway_signing_keystore_name",
+              "value": "signing.jks"
+            },
+            {
+              "name": "gateway_default_topology_name",
+              "value": "cdp-proxy"
+            },
+            {
+              "name": "gateway_auto_discovery_enabled",
+              "value": "false"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "gateway_database_ssl_truststore_file",
+              "value": "/hadoopfs/fs1/database-cacerts/certs.pem"
+            },
+            {
+              "name": "gateway_signing_keystore_type",
+              "value": "JKS"
+            },
+            {
+              "name": "gateway_master_secret",
+              "variable": "knox-KNOX_GATEWAY-BASE-gateway_master_secret"
+            },
+            {
+              "name": "gateway_database_ssl_enabled",
+              "value": "true"
+            },
+            {
+              "name": "gateway_dispatch_whitelist",
+              "value": "^/.*$;^https://([^/]+\\.doktoric.xcu2-8y8x.wl.cloudera.site):[0-9]+/?.*$"
+            },
+            {
+              "name": "gateway_token_generation_knox_token_ttl",
+              "value": "86400000"
+            },
+            {
+              "name": "gateway_signing_key_alias",
+              "value": "signing-identity"
+            },
+            {
+              "name": "gateway_knox_admin_groups",
+              "value": "_c_environments_adminknox"
+            },
+            {
+              "name": "gateway_path",
+              "value": "doktorics-001"
+            },
+            {
+              "name": "gateway_token_generation_enable_lifespan_input",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "knox-IDBROKER-BASE",
+          "roleType": "IDBROKER",
+          "base": true,
+          "configs": [
+            {
+              "name": "idbroker_gateway_knox_admin_groups",
+              "value": "_c_environments_adminknox"
+            },
+            {
+              "name": "idbroker_aws_user_mapping",
+              "value": "hive=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;ssb=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;streamsmsgmgr=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;atlas=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;nifiregistry=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;kudu=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;zeppelin=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;impala=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;nifi=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;flink=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;spark=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;rangerraz=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;dpprofiler=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;kafka=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;solr=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;hue=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;hdfs=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;yarn=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;schemaregistry=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;mapred=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;knox=arn:aws:iam::152813717728:role/mock-idbroker-admin-role;hbase=arn:aws:iam::152813717728:role/mock-idbroker-admin-role"
+            },
+            {
+              "name": "idbroker_gateway_signing_key_alias",
+              "value": "signing-identity"
+            },
+            {
+              "name": "idbroker_gateway_signing_keystore_type",
+              "value": "JKS"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "idbroker_master_secret",
+              "variable": "knox-IDBROKER-BASE-idbroker_master_secret"
+            },
+            {
+              "name": "idbroker_aws_group_mapping",
+              "value": "_c_environments_adminclouderamanager=arn:aws:iam::152813717728:role/mock-idbroker-admin-role"
+            },
+            {
+              "name": "idbroker_gateway_signing_keystore_name",
+              "value": "signing.jks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "atlas",
+      "serviceType": "ATLAS",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "hbase_service",
+          "ref": "hbase"
+        },
+        {
+          "name": "kafka_service",
+          "ref": "kafka"
+        },
+        {
+          "name": "kerberos.auth.enable",
+          "value": "true"
+        },
+        {
+          "name": "solr_service",
+          "ref": "solr"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "atlas-ATLAS_SERVER-BASE",
+          "roleType": "ATLAS_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "atlas_authentication_method_file",
+              "value": "false"
+            },
+            {
+              "name": "atlas_authentication_method_trustedproxy",
+              "value": "true"
+            },
+            {
+              "name": "atlas_ssl_exclude_protocols",
+              "value": "TLSv1,TLSv1.1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "serviceConfigs": [
+        {
+          "name": "quorum_auth_enable_sasl",
+          "value": "true"
+        },
+        {
+          "name": "service_config_suppression_server_count_validator",
+          "value": "true"
+        },
+        {
+          "name": "enableSecurity",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "dataDir",
+              "variable": "zookeeper-SERVER-BASE-dataDir"
+            },
+            {
+              "name": "dataLogDir",
+              "variable": "zookeeper-SERVER-BASE-dataLogDir"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "dfs_encrypt_data_transfer_algorithm",
+          "value": "AES/CTR/NoPadding"
+        },
+        {
+          "name": "service_config_suppression_datanode_count_validator",
+          "value": "true"
+        },
+        {
+          "name": "hadoop_secure_web_ui",
+          "value": "true"
+        },
+        {
+          "name": "enable_ranger_authorization",
+          "value": "true"
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>fs.s3a.bucket.cb-group.endpoint</name><value>s3.eu-central-1.amazonaws.com</value></property>"
+        },
+        {
+          "name": "dfs_replication",
+          "value": "1"
+        },
+        {
+          "name": "service_health_suppression_hdfs_verify_ec_with_topology",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+              "value": "true"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "dfs_name_dir_list",
+              "variable": "hdfs-NAMENODE-BASE-dfs_name_dir_list"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "fs_checkpoint_dir_list",
+              "variable": "hdfs-SECONDARYNAMENODE-BASE-fs_checkpoint_dir_list"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "dfs_datanode_data_dir_perm",
+              "value": "700"
+            },
+            {
+              "name": "dfs_datanode_failed_volumes_tolerated",
+              "value": "0"
+            },
+            {
+              "name": "dfs_datanode_port",
+              "value": "1004"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "dfs_datanode_http_port",
+              "value": "1006"
+            },
+            {
+              "name": "dfs_data_dir_list",
+              "value": "/hadoopfs/fs1/datanode"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "hdfs_client_env_safety_valve",
+              "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "solr",
+      "serviceType": "SOLR",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "solr_security_authentication",
+          "value": "kerberos"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "enable_ranger_authorization",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "solr-SOLR_SERVER-BASE",
+          "roleType": "SOLR_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "solr_https_port",
+              "value": "8985"
+            },
+            {
+              "name": "solr_data_dir",
+              "variable": "solr-SOLR_SERVER-BASE-solr_data_dir"
+            },
+            {
+              "name": "solr_java_opts",
+              "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "kafka",
+      "serviceType": "KAFKA",
+      "serviceConfigs": [
+        {
+          "name": "transaction.state.log.min.isr",
+          "value": "1"
+        },
+        {
+          "name": "service_config_suppression_offsets.topic.replication.factor",
+          "value": "true"
+        },
+        {
+          "name": "service_config_suppression_kafka_broker_count_validator",
+          "value": "true"
+        },
+        {
+          "name": "kerberos.auth.enable",
+          "value": "true"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "service_triggers",
+          "value": "[{\"enabled\":true,\"expressionEditorConfig\":null,\"streamThreshold\":0,\"suppressed\":false,\"triggerExpression\":\"IF (SELECT kafka_log_directory_disk_free_space/kafka_log_directory_disk_total_space WHERE serviceName=$SERVICENAME AND last(kafka_log_directory_disk_free_space/kafka_log_directory_disk_total_space) < 0.1) DO health:bad\",\"triggerName\":\"Kafka Broker Log Directory Free Capacity Check\",\"validityWindowInMs\":120000}]"
+        },
+        {
+          "name": "transaction.state.log.replication.factor",
+          "value": "1"
+        },
+        {
+          "name": "service_config_suppression_transaction.state.log.replication.factor",
+          "value": "true"
+        },
+        {
+          "name": "offsets.topic.replication.factor",
+          "value": "1"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "kafka-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "log.dirs",
+              "variable": "kafka-KAFKA_BROKER-BASE-log.dirs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hbase",
+      "serviceType": "HBASE",
+      "serviceConfigs": [
+        {
+          "name": "hbase_security_authentication",
+          "value": "kerberos"
+        },
+        {
+          "name": "hbase_security_authorization",
+          "value": "true"
+        },
+        {
+          "name": "hbase_wal_dir",
+          "value": "/hbase-wals"
+        },
+        {
+          "name": "service_config_suppression_hadoop_secure_web_ui",
+          "value": "true"
+        },
+        {
+          "name": "hbase_restserver_security_authentication",
+          "value": "kerberos"
+        },
+        {
+          "name": "hbase_thriftserver_security_authentication",
+          "value": "auth-conf"
+        },
+        {
+          "name": "hbase_security_authentication_spnego_admin_groups",
+          "value": "_c_datahub_adminhbase"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hbase-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hbase-REGIONSERVER-BASE",
+          "roleType": "REGIONSERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "hbase_bucketcache_ioengine",
+              "value": ""
+            }
+          ]
+        },
+        {
+          "refName": "hbase-MASTER-BASE",
+          "roleType": "MASTER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hbase-HBASETHRIFTSERVER-BASE",
+          "roleType": "HBASETHRIFTSERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE",
+      "serviceConfigs": [
+        {
+          "name": "hive_metastore_database_password",
+          "variable": "hive-hive_metastore_database_password"
+        },
+        {
+          "name": "hive_warehouse_external_directory",
+          "value": "s3a://cb-group/cdp/warehouse/tablespace/external/hive"
+        },
+        {
+          "name": "jdbc_url_override",
+          "value": "jdbc:postgresql://doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site:5432/hive?sslmode=verify-full&sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "value": "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property><property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>hive.metastore.try.direct.sql</name><value>true</value></property>"
+        },
+        {
+          "name": "hive_metastore_database_host",
+          "variable": "hive-hive_metastore_database_host"
+        },
+        {
+          "name": "hive_metastore_enable_ldap_auth",
+          "value": "true"
+        },
+        {
+          "name": "hive_metastore_ldap_basedn",
+          "value": "cn=users,cn=accounts,dc=doktoric,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site"
+        },
+        {
+          "name": "hive_repl_replica_functions_root_dir",
+          "value": "s3a://cb-group/cdp/hive_replica_functions_dir"
+        },
+        {
+          "name": "hive_metastore_database_user",
+          "variable": "hive-hive_metastore_database_user"
+        },
+        {
+          "name": "hive_metastore_database_type",
+          "variable": "hive-hive_metastore_database_type"
+        },
+        {
+          "name": "hive_metastore_database_name",
+          "variable": "hive-hive_metastore_database_name"
+        },
+        {
+          "name": "hive_metastore_ldap_uri",
+          "value": "ldaps://ldap.doktoric.xcu2-8y8x.wl.cloudera.site:636"
+        },
+        {
+          "name": "hive_warehouse_directory",
+          "value": "s3a://cb-group/cdp/warehouse/tablespace/managed/hive"
+        },
+        {
+          "name": "hive_metastore_database_port",
+          "variable": "hive-hive_metastore_database_port"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true,
+          "configs": [
+            {
+              "name": "metastore_canary_health_enabled",
+              "value": "false"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "core_settings",
+      "serviceType": "CORE_SETTINGS",
+      "serviceConfigs": [
+        {
+          "name": "hadoop_security_authorization",
+          "value": "true"
+        },
+        {
+          "name": "hadoop_security_authentication",
+          "value": "kerberos"
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "idbroker",
+      "roleConfigGroupsRefNames": [
+        "knox-IDBROKER-BASE"
+      ],
+      "cardinality": 0
+    },
+    {
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "atlas-ATLAS_SERVER-BASE",
+        "hbase-GATEWAY-BASE",
+        "hbase-HBASETHRIFTSERVER-BASE",
+        "hbase-MASTER-BASE",
+        "hbase-REGIONSERVER-BASE",
+        "hdfs-BALANCER-BASE",
+        "hdfs-DATANODE-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "kafka-GATEWAY-BASE",
+        "kafka-KAFKA_BROKER-BASE",
+        "knox-KNOX_GATEWAY-BASE",
+        "ranger-RANGER_ADMIN-BASE",
+        "ranger-RANGER_TAGSYNC-BASE",
+        "ranger-RANGER_USERSYNC-BASE",
+        "solr-SOLR_SERVER-BASE",
+        "zookeeper-SERVER-BASE"
+      ],
+      "cardinality": 0
+    }
+  ],
+  "displayName": "doktorics-001",
+  "cmVersion": "7.13.1",
+  "instantiator": {
+    "clusterName": "doktorics-001",
+    "hosts": [
+      {
+        "hostName": "doktorics-001-idbroker0.tb-env2.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/eu-central-1a",
+        "hostTemplateRefName": "idbroker"
+      },
+      {
+        "hostName": "doktorics-001-master0.tb-env2.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/eu-central-1a",
+        "hostTemplateRefName": "master"
+      }
+    ],
+    "keepHostTemplates": true,
+    "lenient": true,
+    "enableKerberos": {},
+    "variables": [
+      {
+        "name": "hdfs-NAMENODE-BASE-dfs_name_dir_list",
+        "value": "/hadoopfs/fs1/namenode"
+      },
+      {
+        "name": "hdfs-SECONDARYNAMENODE-BASE-fs_checkpoint_dir_list",
+        "value": "/hadoopfs/fs1/namesecondary"
+      },
+      {
+        "name": "hive-hive_metastore_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "hive-hive_metastore_database_name",
+        "value": "hive"
+      },
+      {
+        "name": "hive-hive_metastore_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "hive-hive_metastore_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "hive-hive_metastore_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "hive-hive_metastore_database_user",
+        "value": "hive"
+      },
+      {
+        "name": "kafka-KAFKA_BROKER-BASE-log.dirs",
+        "value": "/hadoopfs/fs1/kafka"
+      },
+      {
+        "name": "knox-IDBROKER-BASE-idbroker_master_secret",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-KNOX_GATEWAY-BASE-gateway_master_secret",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-knox_gateway_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "knox-knox_gateway_database_name",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "knox-knox_gateway_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "knox-knox_gateway_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "knox-knox_gateway_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "knox-knox_gateway_database_user",
+        "value": "knox_gateway"
+      },
+      {
+        "name": "ranger-RANGER_USERSYNC-BASE-ranger_usersync_ldap_ldapbindpassword",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-keyadmin_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-ranger_database_host",
+        "value": "doktorics-001-master0.doktoric.xcu2-8y8x.wl.cloudera.site"
+      },
+      {
+        "name": "ranger-ranger_database_name",
+        "value": "ranger"
+      },
+      {
+        "name": "ranger-ranger_database_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-ranger_database_port",
+        "value": "5432"
+      },
+      {
+        "name": "ranger-ranger_database_type",
+        "value": "postgresql"
+      },
+      {
+        "name": "ranger-ranger_database_user",
+        "value": "ranger"
+      },
+      {
+        "name": "ranger-rangeradmin_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-rangertagsync_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "ranger-rangerusersync_user_password",
+        "value": "<changeme>"
+      },
+      {
+        "name": "solr-SOLR_SERVER-BASE-solr_data_dir",
+        "value": "/hadoopfs/fs1/solr"
+      },
+      {
+        "name": "zookeeper-SERVER-BASE-dataDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      },
+      {
+        "name": "zookeeper-SERVER-BASE-dataLogDir",
+        "value": "/hadoopfs/fs1/zookeeper"
+      }
+    ]
+  },
+  "repositories": [
+    "http://build-cache.vpc.cloudera.com/s3/build/67986116/cdh/7.x/parcels/"
+  ],
+  "clusterSpec": null,
+  "tags": [
+    {
+      "name": "_cldr_cb_clustertype",
+      "value": "SDX"
+    },
+    {
+      "name": "_cldr_cb_origin",
+      "value": "cloudbreak"
+    },
+    {
+      "name": "_cldr_cluster.core_settings.service_name",
+      "value": "core_settings"
+    }
+  ]
+}

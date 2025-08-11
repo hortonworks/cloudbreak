@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
 class Spark2UpgradeValidatorTest {
@@ -39,6 +40,9 @@ class Spark2UpgradeValidatorTest {
 
     @Mock
     private StackDto stack;
+
+    @Mock
+    private ClusterView clusterView;
 
     @Mock
     private Blueprint blueprint;
@@ -86,8 +90,8 @@ class Spark2UpgradeValidatorTest {
 
     @Test
     public void testValidateWhenLockComponentsIsFalseAndGoesTo719AndSpark2NotPresentedShouldNotThrowException() {
-        when(blueprint.getBlueprintJsonText()).thenReturn("");
-        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(clusterView.getExtendedBlueprintText()).thenReturn("");
+        when(stack.getCluster()).thenReturn(clusterView);
         when(cmTemplateService.isServiceTypePresent(any(), any())).thenReturn(false);
 
         underTest.validate(getServiceUpgradeValidationRequest(false));
@@ -107,8 +111,8 @@ class Spark2UpgradeValidatorTest {
     private void setupMockWhenException(String version, boolean spark2Presented) {
         when(targetImage.getVersion()).thenReturn(version);
         when(targetStatedImage.getImage()).thenReturn(targetImage);
-        when(blueprint.getBlueprintJsonText()).thenReturn("");
-        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(clusterView.getExtendedBlueprintText()).thenReturn("");
+        when(stack.getCluster()).thenReturn(clusterView);
         when(cmTemplateService.isServiceTypePresent(any(), any())).thenReturn(spark2Presented);
     }
 }
