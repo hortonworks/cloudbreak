@@ -31,6 +31,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
@@ -585,6 +586,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.mitigate.release.failure.7218P1100.enabled}")
     private boolean mitigateReleaseFailure7218P1100Enabled;
 
+    @Value("${auth.mock.tlsv13.only.enabled}")
+    private boolean tlsv13OnlyEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1099,6 +1103,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (mitigateReleaseFailure7218P1100Enabled) {
             builder.addEntitlements(createEntitlement(CDP_MITIGATE_RELEASE_FAILURE_7218P1100));
+        }
+        if (tlsv13OnlyEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_SUPPORTS_TLS_1_3_ONLY));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

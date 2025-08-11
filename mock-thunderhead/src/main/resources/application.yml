@@ -107,6 +107,7 @@ auth:
     configure.encryption.profile.enabled: false
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: false
+    tlsv13.only.enabled: false
 crn:
   partition: cdp
   region: us-west-1

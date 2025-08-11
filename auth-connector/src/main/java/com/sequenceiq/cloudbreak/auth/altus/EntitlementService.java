@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
@@ -621,5 +622,9 @@ public class EntitlementService {
 
     public boolean isZookeeperToKRaftMigrationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION);
+    }
+
+    public boolean isTlsv13OnlyEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_SUPPORTS_TLS_1_3_ONLY);
     }
 }

@@ -197,6 +197,9 @@ class EntitlementServiceTest {
 
                 {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, false},
                 {"CDP_MITIGATE_RELEASE_FAILURE_7218P1100", (EntitlementCheckFunction) EntitlementService::isMitigateReleaseFailure7218P1100Enabled, true},
+
+                {"CDP_CB_SUPPORTS_TLS_1_3_ONLY", (EntitlementCheckFunction) EntitlementService::isTlsv13OnlyEnabled, false},
+                {"CDP_CB_SUPPORTS_TLS_1_3_ONLY", (EntitlementCheckFunction) EntitlementService::isTlsv13OnlyEnabled, true},
         };
     }
 
