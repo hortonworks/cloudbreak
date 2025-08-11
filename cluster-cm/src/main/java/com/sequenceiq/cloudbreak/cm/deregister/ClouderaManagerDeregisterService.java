@@ -61,7 +61,7 @@ public class ClouderaManagerDeregisterService {
         String password = cluster.getCloudbreakClusterManagerPassword();
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         try {
-            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
             if (CMRepositoryVersionUtil.isRangerTearDownSupported(clouderaManagerRepoDetails)) {
                 deregisterServiceOnDataLake(stack, datalakeDto);
             } else if (!stack.getStatus().isStopState()) {

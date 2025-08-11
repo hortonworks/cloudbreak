@@ -369,7 +369,7 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     private Optional<String> getDatahubType(StackDtoDelegate stack) {
-        String blueprintJsonText = stack.getBlueprint().getBlueprintJsonText();
+        String blueprintJsonText = stack.getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintJsonText);
 
         return Optional.ofNullable(meteringServiceFieldResolver.resolveServiceFeature(cmTemplateProcessor));

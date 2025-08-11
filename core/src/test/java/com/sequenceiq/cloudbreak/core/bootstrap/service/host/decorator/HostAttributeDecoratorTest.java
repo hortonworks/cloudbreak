@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -55,13 +54,11 @@ public class HostAttributeDecoratorTest {
     @Test
     public void testAddHostAttributes() {
 
-        Blueprint blueprint = mock(Blueprint.class);
-        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getBlueprintJsonText()).thenReturn("");
         when(stackUtil.collectNodes(any())).thenReturn(Set.of(new Node(null, null, null, null, "fqdn1", "hg1"),
                 new Node(null, null, null, null, "fqdn2", "hg2"),
                 new Node(null, null, null, null, "fqdn3", "hg3"),
                 new Node(null, null, null, null, "fqdn4", null)));
-        when(blueprint.getBlueprintJsonText()).thenReturn("");
 
         Map<String, Map<String, ServiceAttributes>> yarnAttrs = new HashMap<>();
         yarnAttrs.put("hg3",

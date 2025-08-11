@@ -50,7 +50,7 @@ class StackToDependentHostGroupV4ResponseConverterTest {
     void testConvertWhenTheStackBlueprintIsNotNull() {
         StackDto stackDto = mock(StackDto.class, Answers.RETURNS_DEEP_STUBS);
         String blueprintText = "example blueprint";
-        when(stackDto.getBlueprint().getBlueprintJsonText()).thenReturn(blueprintText);
+        when(stackDto.getBlueprintJsonText()).thenReturn(blueprintText);
 
         DependentHostGroupsV4Response dependentHostGroupsV4Response = assertDoesNotThrow(() -> underTest.convert(stackDto, Set.of()));
 

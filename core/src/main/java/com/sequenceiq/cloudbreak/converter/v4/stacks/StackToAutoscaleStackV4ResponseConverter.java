@@ -38,7 +38,7 @@ public class StackToAutoscaleStackV4ResponseConverter {
             result.setClusterManagerIp(cluster.getClusterManagerIp());
             result.setUserNamePath(cluster.getCloudbreakClusterManagerUserSecretPath());
             result.setPasswordPath(cluster.getCloudbreakClusterManagerPasswordSecretPath());
-            result.setBluePrintText(source.getBlueprint().getBlueprintJsonText());
+            result.setBluePrintText(source.getBlueprintJsonText());
             result.setClusterStatus(source.getStatus());
         }
         return result;

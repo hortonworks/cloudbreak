@@ -414,7 +414,7 @@ public class UpdateNodeCountValidatorTest {
         Blueprint blueprint = mock(Blueprint.class);
 
         when(stack.getCluster()).thenReturn(cluster);
-        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getBlueprintJsonText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(blueprint.getBlueprintJsonText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(Set.of(TEST_COMPUTE_GROUP));

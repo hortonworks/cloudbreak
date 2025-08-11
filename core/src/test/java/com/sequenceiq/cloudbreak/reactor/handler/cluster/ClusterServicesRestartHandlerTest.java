@@ -81,6 +81,7 @@ public class ClusterServicesRestartHandlerTest {
         stack.setCloudPlatform("AWS");
         stack.setEnvironmentCrn("env");
         Cluster cluster = new Cluster();
+        cluster.setExtendedBlueprintText("{}");
         cluster.setBlueprint(new Blueprint());
         stack.setCluster(cluster);
 

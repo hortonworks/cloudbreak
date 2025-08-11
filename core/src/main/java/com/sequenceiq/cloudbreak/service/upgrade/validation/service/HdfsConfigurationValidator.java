@@ -58,7 +58,7 @@ public class HdfsConfigurationValidator implements ServiceUpgradeValidator {
     }
 
     private boolean hdfsServicePresentOnTheCluster(StackDto stack) {
-        Set<SupportedService> services = clusterTemplateGeneratorService.getServicesByBlueprint(stack.getBlueprint().getBlueprintJsonText()).getServices();
+        Set<SupportedService> services = clusterTemplateGeneratorService.getServicesByBlueprint(stack.getBlueprintJsonText()).getServices();
         if (services.stream().anyMatch(service -> HdfsRoles.HDFS.equalsIgnoreCase(service.getName()))) {
             return true;
         } else {

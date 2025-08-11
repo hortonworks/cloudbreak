@@ -278,7 +278,7 @@ public class AwsCloudInformationDecoratorTest {
     private void setUpStack(String loggerInstanceProfile, String idBrokerAssumer) {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("blueprint");
-        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(stack.getBlueprintJsonText()).thenReturn("blueprint");
         InstanceGroup master = new InstanceGroup();
         master.setGroupName("master");
         InstanceGroup idbroker = new InstanceGroup();

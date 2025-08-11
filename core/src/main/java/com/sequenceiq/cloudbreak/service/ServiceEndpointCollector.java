@@ -200,13 +200,7 @@ public class ServiceEndpointCollector {
     }
 
     private String getBlueprintString(StackDtoDelegate stackDto) {
-        String blueprintText = null;
-        if (!Strings.isNullOrEmpty(stackDto.getCluster().getExtendedBlueprintText())) {
-            blueprintText = stackDto.getCluster().getExtendedBlueprintText();
-        } else if (stackDto.getBlueprint() != null) {
-            blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
-        }
-        return blueprintText;
+        return stackDto.getBlueprintJsonText();
     }
 
     public Map<String, Collection<ClusterExposedServiceView>> prepareClusterExposedServicesViews(StackDtoDelegate stackDto) {

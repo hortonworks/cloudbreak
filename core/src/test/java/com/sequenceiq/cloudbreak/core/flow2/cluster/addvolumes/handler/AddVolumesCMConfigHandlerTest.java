@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigHandlerEvent;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
@@ -70,9 +68,7 @@ class AddVolumesCMConfigHandlerTest {
     void setUp() {
         handlerRequest = new AddVolumesCMConfigHandlerEvent(STACK_ID, "test", 2L, "gp2", 400L, CloudVolumeUsageType.GENERAL);
         doReturn(stackDto).when(stackDtoService).getById(eq(STACK_ID));
-        Blueprint bp = mock(Blueprint.class);
-        doReturn("test").when(bp).getBlueprintJsonText();
-        doReturn(bp).when(stackDto).getBlueprint();
+        doReturn("test").when(stackDto).getBlueprintJsonText();
         doReturn(cmTemplateProcessor).when(cmTemplateProcessorFactory).get(eq("test"));
         Map<String, Set<ServiceComponent>> serviceComponentsMap = Map.of("test", Set.of(ServiceComponent.of("test", "test")));
         doReturn(serviceComponentsMap).when(cmTemplateProcessor).getServiceComponentsByHostGroup();

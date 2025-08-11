@@ -37,7 +37,7 @@ public class HostAttributeDecorator {
 
     public Map<String, SaltPillarProperties> createHostAttributePillars(StackDto stackDto) {
         Set<Node> allNodes = stackUtil.collectNodes(stackDto);
-        BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stackDto.getBlueprint().getBlueprintJsonText());
+        BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stackDto.getBlueprintJsonText());
         Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
 
         Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes(blueprintVersion);

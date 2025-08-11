@@ -94,7 +94,7 @@ public class DeleteVolumesCMConfigHandler extends ExceptionCatcherEventHandler<D
     }
 
     private CmTemplateProcessor getTemplateProcessor(StackDto stackDto) {
-        String blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
+        String blueprintText = stackDto.getBlueprintJsonText();
         return cmTemplateProcessorFactory.get(blueprintText);
     }
 }

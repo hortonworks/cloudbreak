@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartResult;
@@ -58,11 +57,10 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterServicesRestartRequest> event) {
         ClusterServicesRestartRequest request = event.getData();
-        ClusterServicesRestartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
-            CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
+            CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack);
             if ((sdxBasicView.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()))
                     || request.isDatahubRefreshNeeded()) {
                 LOGGER.info("Deploying client config and restarting services");
@@ -81,8 +79,7 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
         }
     }
 
-    private CmTemplateProcessor getCmTemplateProcessor(Cluster cluster) {
-        String blueprintText = cluster.getBlueprint().getBlueprintJsonText();
-        return cmTemplateProcessorFactory.get(blueprintText);
+    private CmTemplateProcessor getCmTemplateProcessor(Stack stack) {
+        return cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
     }
 }

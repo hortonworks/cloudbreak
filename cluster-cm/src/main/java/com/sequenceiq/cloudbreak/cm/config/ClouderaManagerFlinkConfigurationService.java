@@ -63,6 +63,6 @@ public class ClouderaManagerFlinkConfigurationService {
     }
 
     private boolean isFLinkServicePresent(StackDtoDelegate stack) {
-        return cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprint().getBlueprintJsonText());
+        return cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText());
     }
 }

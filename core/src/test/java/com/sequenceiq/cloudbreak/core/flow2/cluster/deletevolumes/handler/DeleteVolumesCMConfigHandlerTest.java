@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesCMConfigEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -69,9 +67,7 @@ class DeleteVolumesCMConfigHandlerTest {
     void setUp() {
         doReturn(stackDto).when(stackDtoService).getById(STACK_ID);
         handlerEvent = new Event<>(new DeleteVolumesCMConfigEvent(STACK_ID, "test"));
-        Blueprint bp = mock(Blueprint.class);
-        doReturn("test blueprint").when(bp).getBlueprintJsonText();
-        doReturn(bp).when(stackDto).getBlueprint();
+        doReturn("test blueprint").when(stackDto).getBlueprintJsonText();
         doReturn(processor).when(cmTemplateProcessorFactory).get(any());
     }
 

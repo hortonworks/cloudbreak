@@ -7,6 +7,7 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,10 @@ public interface StackDtoDelegate {
     Long getWorkspaceId();
 
     Set<Resource> getResources();
+
+    default String getBlueprintJsonText() {
+        return Objects.requireNonNullElse(getCluster().getExtendedBlueprintText(), getBlueprint().getBlueprintJsonText());
+    }
 
     default String getOriginalName() {
         return getStack().getOriginalName();

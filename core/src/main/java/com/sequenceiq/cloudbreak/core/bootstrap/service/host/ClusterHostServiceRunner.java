@@ -582,7 +582,7 @@ public class ClusterHostServiceRunner {
                 stackDto.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
         boolean hybridEnabled = stack.isDatalake() && EnvironmentType.HYBRID_BASE.toString().equals(detailedEnvironmentResponse.getEnvironmentType());
         // Hive with remote HMS workaround - TODO remove after OPSAPS-73356
-        String blueprintJsonText = stackDto.getBlueprint().getBlueprintJsonText();
+        String blueprintJsonText = stackDto.getBlueprintJsonText();
         boolean hiveWithRemoteHiveMetastore = blueprintJsonText != null
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);

@@ -42,11 +42,7 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private boolean isNifiServicePresent(StackDto stack) {
-        return cmTemplateService.isServiceTypePresent(NIFI_SERVICE_TYPE, getBlueprintText(stack));
-    }
-
-    private String getBlueprintText(StackDto stack) {
-        return stack.getBlueprint().getBlueprintJsonText();
+        return cmTemplateService.isServiceTypePresent(NIFI_SERVICE_TYPE, stack.getBlueprintJsonText());
     }
 
     private void validateNifiWorkingDirectory(StackDto stack) {

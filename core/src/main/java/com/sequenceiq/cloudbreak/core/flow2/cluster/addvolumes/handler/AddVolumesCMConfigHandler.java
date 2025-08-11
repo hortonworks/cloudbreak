@@ -58,7 +58,7 @@ public class AddVolumesCMConfigHandler extends ExceptionCatcherEventHandler<AddV
         try {
             StackDto stack = stackDtoService.getById(stackId);
             LOGGER.debug("Updating CM config!");
-            String blueprintText = stack.getBlueprint().getBlueprintJsonText();
+            String blueprintText = stack.getBlueprintJsonText();
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
             List<String> hostTemplateRoleGroupNames = processor.getHostTemplateRoleNames(requestGroup);

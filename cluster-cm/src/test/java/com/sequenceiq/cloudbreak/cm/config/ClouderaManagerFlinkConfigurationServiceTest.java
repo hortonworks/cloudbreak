@@ -57,7 +57,7 @@ class ClouderaManagerFlinkConfigurationServiceTest {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
-        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprint().getBlueprintJsonText())).thenReturn(true);
+        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(true);
 
         underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
 
@@ -92,7 +92,7 @@ class ClouderaManagerFlinkConfigurationServiceTest {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
-        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprint().getBlueprintJsonText())).thenReturn(false);
+        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(false);
 
         underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
 
@@ -104,7 +104,7 @@ class ClouderaManagerFlinkConfigurationServiceTest {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
-        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprint().getBlueprintJsonText())).thenReturn(true);
+        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(true);
         doThrow(CloudbreakException.class).when(clouderaManagerConfigService).modifyServiceConfig(apiClient, stack.getName(), FLINK_SERVICE_TYPE,
                 Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
 

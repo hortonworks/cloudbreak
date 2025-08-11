@@ -343,7 +343,7 @@ public class TemplateValidatorAndUpdater {
     private boolean shouldValidateBasedOnGroupName(InstanceGroup instanceGroup, Stack stack) {
         return !(isIDBrokerInstanceGroup(instanceGroup, stack)
                 || isSdxComputeInstanceHostGroup(instanceGroup, stack.getType())
-                || isCoordinatorAndExecutorInstanceGroup(stack.getBlueprint().getBlueprintJsonText()));
+                || isCoordinatorAndExecutorInstanceGroup(stack.getBlueprintJsonText()));
     }
 
     private boolean needToCheckVolume(VolumeParameterType volumeParameterType, Object value) {

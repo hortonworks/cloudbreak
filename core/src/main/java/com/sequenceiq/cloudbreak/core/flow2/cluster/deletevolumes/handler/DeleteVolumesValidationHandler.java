@@ -60,7 +60,7 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
 
         StackDto stack = stackDtoService.getById(payload.getResourceId());
 
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
 
         boolean computeInstance = true;
         StringBuilder blackListedServices = new StringBuilder();

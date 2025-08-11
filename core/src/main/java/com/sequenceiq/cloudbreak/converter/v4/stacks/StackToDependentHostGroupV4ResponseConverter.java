@@ -30,9 +30,9 @@ public class StackToDependentHostGroupV4ResponseConverter {
     public DependentHostGroupsV4Response convert(StackDto stack, Set<String> hostGroups) {
         Map<String, Set<String>> dependentHostGroupsForHostGroup = Maps.newHashMap();
         Map<String, Set<String>> dependentComponentsForHostGroup = Maps.newHashMap();
-        if (stack.getBlueprint() != null && StringUtils.isNotEmpty(stack.getBlueprint().getBlueprintJsonText())) {
+        if (stack.getBlueprint() != null && StringUtils.isNotEmpty(stack.getBlueprintJsonText())) {
             LOGGER.debug("Adding dependent hostgroups with roles health to response");
-            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
             hostGroups.forEach(hg -> dependentHostGroupsForHostGroup.put(hg,
                     dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(processor, hg)));
             hostGroups.forEach(hg -> dependentComponentsForHostGroup.put(hg,

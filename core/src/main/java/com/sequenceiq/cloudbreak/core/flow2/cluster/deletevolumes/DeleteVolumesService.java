@@ -183,7 +183,7 @@ public class DeleteVolumesService {
     }
 
     public void unmountBlockStorageDisks(Stack stack, String requestGroup) throws Exception {
-        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
+        String blueprintText = stack.getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
         StackDto stackDto = stackDtoService.getById(stack.getId());

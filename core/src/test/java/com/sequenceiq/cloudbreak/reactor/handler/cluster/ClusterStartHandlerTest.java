@@ -50,7 +50,7 @@ class ClusterStartHandlerTest {
         stack.setCluster(cluster);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(stackService.getByIdWithListsInTransaction(clusterStartRequest.getStackId())).thenReturn(stack);
-        when(clusterStartHandlerService.getCmTemplateProcessor(cluster)).thenReturn(cmTemplateProcessor);
+        when(clusterStartHandlerService.getCmTemplateProcessor(stack)).thenReturn(cmTemplateProcessor);
         // WHEN
         underTest.accept(Event.wrap(clusterStartRequest));
         // THEN
@@ -73,7 +73,7 @@ class ClusterStartHandlerTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         Exception exception = new Exception("exception");
         when(stackService.getByIdWithListsInTransaction(clusterStartRequest.getStackId())).thenReturn(stack);
-        when(clusterStartHandlerService.getCmTemplateProcessor(cluster)).thenReturn(cmTemplateProcessor);
+        when(clusterStartHandlerService.getCmTemplateProcessor(stack)).thenReturn(cmTemplateProcessor);
         doThrow(exception).when(clusterStartHandlerService).startCluster(stack, cmTemplateProcessor, false);
         // WHEN
         underTest.accept(Event.wrap(clusterStartRequest));

@@ -41,7 +41,7 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
         ClusterStartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            CmTemplateProcessor blueprintProcessor = clusterStartHandlerService.getCmTemplateProcessor(stack.getCluster());
+            CmTemplateProcessor blueprintProcessor = clusterStartHandlerService.getCmTemplateProcessor(stack);
             clusterStartHandlerService.startCluster(stack, blueprintProcessor, request.isDatahubRefreshNeeded());
             clusterStartHandlerService.handleStopStartScalingFeature(stack, blueprintProcessor);
             result = new ClusterStartResult(request);

@@ -65,7 +65,7 @@ public class ComponentLocatorService {
     }
 
     private Map<String, List<String>> getFqdnsByComponents(StackDtoDelegate stackDto, Collection<String> componentNames) {
-        String blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
+        String blueprintText = stackDto.getBlueprintJsonText();
         BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         return getFqdnsByComponents(stackDto, processor, componentNames);
     }

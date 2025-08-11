@@ -55,7 +55,7 @@ public class FlinkUpgradeValidatorTest {
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         Cluster cluster = new Cluster();
         cluster.setName(CLUSTER_NAME);
-        lenient().when(stack.getBlueprint()).thenReturn(blueprint);
+        lenient().when(stack.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         lenient().when(stack.getCluster()).thenReturn(cluster);
     }
 

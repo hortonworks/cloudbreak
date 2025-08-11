@@ -266,6 +266,7 @@ public class OpdbServiceEndpointCollectorTest {
         try {
             String testBlueprint = FileReaderUtils.readFileFromClasspath("/defaults/blueprints/7.2.10/cdp-opdb.bp");
             blueprint.setBlueprintText(testBlueprint);
+            cluster.setExtendedBlueprintText(testBlueprint);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -289,6 +290,7 @@ public class OpdbServiceEndpointCollectorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDto.getGateway()).thenReturn(cluster.getGateway());
         when(stackDto.getBlueprint()).thenReturn(cluster.getBlueprint());
+        when(stackDto.getBlueprintJsonText()).thenReturn(cluster.getBlueprint().getBlueprintJsonText());
         when(stackDto.getOrchestrator()).thenReturn(cluster.getStack().getOrchestrator());
         when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
         return stackDto;

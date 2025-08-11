@@ -299,7 +299,7 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
     }
 
     private void setInitialBlueprintText(StackDto stackDto) {
-        clusterService.updateExtendedBlueprintText(stackDto.getCluster().getId(), stackDto.getBlueprint().getBlueprintJsonText());
+        clusterService.updateExtendedBlueprintText(stackDto.getCluster().getId(), stackDto.getBlueprintJsonText());
     }
 
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {

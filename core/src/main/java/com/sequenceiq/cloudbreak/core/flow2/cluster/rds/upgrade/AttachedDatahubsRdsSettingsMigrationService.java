@@ -173,7 +173,7 @@ public class AttachedDatahubsRdsSettingsMigrationService {
     }
 
     private CmTemplateProcessor getCmTemplateProcessor(StackDtoDelegate stackDto) {
-        String blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
+        String blueprintText = stackDto.getBlueprintJsonText();
         return cmTemplateProcessorFactory.get(blueprintText);
     }
 

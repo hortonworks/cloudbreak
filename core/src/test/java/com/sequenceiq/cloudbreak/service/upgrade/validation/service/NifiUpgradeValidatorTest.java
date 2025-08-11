@@ -59,9 +59,11 @@ public class NifiUpgradeValidatorTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         Cluster cluster = new Cluster();
+        cluster.setExtendedBlueprintText(BLUEPRINT_TEXT);
         cluster.setName(CLUSTER_NAME);
         lenient().when(stack.getBlueprint()).thenReturn(blueprint);
         lenient().when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(stack.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
     }
 
     @Test

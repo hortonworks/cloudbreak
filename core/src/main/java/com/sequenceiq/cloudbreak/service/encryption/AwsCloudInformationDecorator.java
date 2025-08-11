@@ -140,7 +140,7 @@ public class AwsCloudInformationDecorator implements CloudInformationDecorator {
 
     @Override
     public Map<String, List<String>> getUserdataSecretCryptographicPrincipalsForInstanceGroups(DetailedEnvironmentResponse environment, Stack stack) {
-        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
         Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
         Map<String, List<String>> cryptographicPrincipals = new HashMap<>();
         String crossAccountRoleArn = getCrossAccountRoleArnFromEnvironment(environment);

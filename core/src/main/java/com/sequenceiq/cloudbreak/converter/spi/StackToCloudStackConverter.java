@@ -335,7 +335,7 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         ClusterView cluster = stack.getCluster();
         if (cluster != null) {
-            String blueprintText = stack.getBlueprint() != null ? stack.getBlueprint().getBlueprintJsonText() : cluster.getExtendedBlueprintText();
+            String blueprintText = stack.getBlueprint() != null ? stack.getBlueprintJsonText() : cluster.getExtendedBlueprintText();
             if (blueprintText != null) {
                 CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
                 Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();

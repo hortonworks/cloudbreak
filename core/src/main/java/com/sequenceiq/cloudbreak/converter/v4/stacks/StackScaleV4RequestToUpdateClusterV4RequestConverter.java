@@ -34,7 +34,7 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter {
                 Stack stack = stackService.getByIdWithListsInTransaction(source.getStackId());
                 stack.getInstanceGroups().stream().filter(instanceGroup -> source.getGroup().equals(instanceGroup.getGroupName())).findFirst().ifPresentOrElse(
                         instanceGroup -> {
-                            String blueprintText = stack.getCluster().getBlueprint().getBlueprintJsonText();
+                            String blueprintText = stack.getBlueprintJsonText();
                             BlueprintTextProcessor blueprintTextProcessor =
                                     clusterDefinitionTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
                             boolean dataNodeComponentInHostGroup = blueprintTextProcessor.isComponentExistsInHostGroup("DATANODE",

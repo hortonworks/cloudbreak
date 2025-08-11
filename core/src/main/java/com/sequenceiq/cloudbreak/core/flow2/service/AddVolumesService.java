@@ -133,7 +133,7 @@ public class AddVolumesService {
     private VerticalScalingValidatorService verticalScalingValidatorService;
 
     public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
-        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
+        String blueprintText = stack.getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
         stopClouderaManagerServices(stack.getId(), requestGroup, hostTemplateServiceComponents);

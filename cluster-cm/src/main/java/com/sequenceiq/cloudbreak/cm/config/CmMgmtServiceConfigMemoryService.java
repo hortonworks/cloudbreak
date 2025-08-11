@@ -27,7 +27,7 @@ class CmMgmtServiceConfigMemoryService implements CmConfigServiceDelegate {
     @Override
     public void setConfigs(StackDtoDelegate stack, ApiRoleList apiRoleList) {
         Optional<ApiRole> serviceMonitor = getApiRole("SERVICEMONITOR", apiRoleList);
-        Set<String> components = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText())
+        Set<String> components = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText())
                 .getComponentsByHostGroup()
                 .values()
                 .stream()

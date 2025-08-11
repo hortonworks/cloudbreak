@@ -156,7 +156,7 @@ public class UpdateNodeCountValidator {
             }
         }
 
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
         Set<String> dependentComponents = dependentRolesHealthCheckService.getDependentComponentsForHostGroup(processor,
                 instanceGroup);
 
@@ -305,8 +305,7 @@ public class UpdateNodeCountValidator {
     }
 
     private Set<String> getComputeHostGroup(StackDto stack) {
-        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
-        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
         Versioned version = () -> templateProcessor.getVersion().get();
         return templateProcessor.getComputeHostGroups(version);
     }

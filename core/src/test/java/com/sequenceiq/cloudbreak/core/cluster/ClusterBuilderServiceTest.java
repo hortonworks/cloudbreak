@@ -131,10 +131,12 @@ class ClusterBuilderServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(mockBlueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
+        lenient().when(mockCluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         lenient().when(mockCluster.getId()).thenReturn(CLUSTER_ID);
         lenient().when(mockCluster.getProxyConfigCrn()).thenReturn(PROXY_CRN);
         lenient().when(mockCluster.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(mockStack.getBlueprint()).thenReturn(mockBlueprint);
+        lenient().when(mockStack.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         lenient().when(mockStack.getCluster()).thenReturn(mockCluster);
         lenient().when(mockStack.getStack()).thenReturn(stackView);
         lenient().when(mockInstanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);

@@ -69,7 +69,7 @@ class HdfsConfigurationValidatorTest {
     void before() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        lenient().when(stack.getBlueprint()).thenReturn(blueprint);
+        lenient().when(stack.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
     }
 
     @Test
