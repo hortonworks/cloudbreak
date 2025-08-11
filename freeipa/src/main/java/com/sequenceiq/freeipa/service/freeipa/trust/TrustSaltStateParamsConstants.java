@@ -11,6 +11,10 @@ public class TrustSaltStateParamsConstants {
 
     public static final String REALM = "realm";
 
+    public static final int MAX_RETRY = 5;
+
+    public static final int MAX_RETRY_ON_ERROR = 3;
+
     private TrustSaltStateParamsConstants() {
     }
 }

@@ -14,7 +14,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupConfigurationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupConfigurationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupConfigurationSuccess;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.CancelTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.cancel.CancelTrustService;
 
 @Component
 public class CancelTrustSetupConfigurationHandler extends ExceptionCatcherEventHandler<CancelTrustSetupConfigurationRequest> {

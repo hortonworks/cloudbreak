@@ -20,6 +20,11 @@ public enum TrustStatus {
             TRUST_SETUP_FINISH_REQUIRED,
             TRUST_SETUP_FINISH_FAILED);
 
+    public static final Collection<TrustStatus> SYNC_ENABLED_STATUSES = List.of(
+            TRUST_ACTIVE,
+            TRUST_BROKEN
+    );
+
     public boolean isCrossRealmFinishable() {
         return FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES.contains(this);
     }

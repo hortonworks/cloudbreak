@@ -1,11 +1,5 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
-
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -40,6 +34,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
@@ -65,12 +60,11 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     }
 
     public List<JobResource> findAllForAutoSync() {
-        return stackRepository.findAllRunningAndStatusNotIn(List.of(
-                REQUESTED,
-                CREATE_IN_PROGRESS,
-                STACK_AVAILABLE,
-                DELETE_IN_PROGRESS,
-                DELETE_COMPLETED));
+        return stackRepository.findAllRunningAndStatusNotIn(Status.FREEIPA_SYNC_DISABLED_STATUSES);
+    }
+
+    public List<JobResource> findAllWithCrossRealmTrustForAutoSync() {
+        return stackRepository.findAllRunningWithCrossRealmTrustAndStatusNotIn(Status.FREEIPA_SYNC_DISABLED_STATUSES, TrustStatus.SYNC_ENABLED_STATUSES);
     }
 
     public List<JobResource> findAllAliveForAutoSync(Set<Status> statusesNotIn) {

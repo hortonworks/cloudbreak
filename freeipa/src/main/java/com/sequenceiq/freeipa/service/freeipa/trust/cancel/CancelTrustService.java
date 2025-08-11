@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.trust.setup;
+package com.sequenceiq.freeipa.service.freeipa.trust.cancel;
 
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 

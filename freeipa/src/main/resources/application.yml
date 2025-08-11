@@ -420,6 +420,10 @@ provider-sync:
   enabled-providers: AZURE
   enabled: true
 
+cross-realm-trust:
+  status-sync:
+    enabled: true
+
 flow.trigger.node.heartbeat.validation.enabled: true
 
 wiam:

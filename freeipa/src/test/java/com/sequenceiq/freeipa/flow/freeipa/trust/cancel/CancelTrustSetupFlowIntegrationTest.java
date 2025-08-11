@@ -61,7 +61,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.handler.CancelTrustSetup
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.CancelTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.cancel.CancelTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;

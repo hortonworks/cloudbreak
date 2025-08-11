@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
@@ -69,10 +70,25 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
     List<Stack> findAllRunning();
 
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
-            "FROM Stack s " +
-            "WHERE s.terminated = -1 and s.stackStatus.status not in (:statuses)")
+    @Query("""
+            SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider
+            FROM Stack s
+            WHERE s.terminated = -1
+                AND s.stackStatus.status NOT IN (:statuses)
+    """)
     List<JobResource> findAllRunningAndStatusNotIn(@Param("statuses") Collection<Status> statuses);
+
+    @Query("""
+            SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider
+            FROM CrossRealmTrust t
+            LEFT JOIN t.stack s
+            WHERE s.terminated = -1
+                AND s.stackStatus.status NOT IN (:statuses)
+                AND t.trustStatus IN (:trustStatuses)
+    """)
+    List<JobResource> findAllRunningWithCrossRealmTrustAndStatusNotIn(
+            @Param("statuses") Collection<Status> statuses,
+            @Param("trustStatuses") Collection<TrustStatus> trustStatuses);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);

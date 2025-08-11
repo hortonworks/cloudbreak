@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.trust.setup;
+package com.sequenceiq.freeipa.service.freeipa.trust.cancel;
 
 import jakarta.inject.Inject;
 
@@ -11,10 +11,10 @@ import com.sequenceiq.freeipa.service.freeipa.user.AcceptResult;
 import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
-public class CancelCrossRealmAcceptor extends OperationAcceptor {
+public class CancelTrustAcceptor extends OperationAcceptor {
 
     @Inject
-    public CancelCrossRealmAcceptor(OperationRepository operationRepository) {
+    public CancelTrustAcceptor(OperationRepository operationRepository) {
         super(operationRepository);
     }
 

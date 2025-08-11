@@ -16,12 +16,16 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.sync.crossrealmtrust.CrossRealmTrustStatusSyncJobService;
 
 @Component("FinishTrustSetupFinishedAction")
 public class FinishTrustSetupFinishedAction extends AbstractFinishTrustSetupAction<StackEvent> {
 
     @Inject
     private OperationService operationService;
+
+    @Inject
+    private CrossRealmTrustStatusSyncJobService crossRealmTrustStatusSyncJobService;
 
     public FinishTrustSetupFinishedAction() {
         super(StackEvent.class);
@@ -33,6 +37,7 @@ public class FinishTrustSetupFinishedAction extends AbstractFinishTrustSetupActi
         updateStatuses(stack, DetailedStackStatus.TRUST_SETUP_FINISH_SUCCESSFUL, "Finish setting up cross-realm trust was successful",
                 TrustStatus.TRUST_ACTIVE);
         operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
+        crossRealmTrustStatusSyncJobService.schedule(stack.getId());
         sendEvent(context, new StackEvent(FINISH_TRUST_SETUP_FINISHED_EVENT.event(), payload.getResourceId()));
     }
 }

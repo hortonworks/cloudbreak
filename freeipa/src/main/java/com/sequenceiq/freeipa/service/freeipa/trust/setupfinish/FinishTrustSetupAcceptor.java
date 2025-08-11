@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.trust.setup;
+package com.sequenceiq.freeipa.service.freeipa.trust.setupfinish;
 
 import jakarta.inject.Inject;
 
@@ -11,10 +11,10 @@ import com.sequenceiq.freeipa.service.freeipa.user.AcceptResult;
 import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
-public class FinishCrossRealmAcceptor extends OperationAcceptor {
+public class FinishTrustSetupAcceptor extends OperationAcceptor {
 
     @Inject
-    public FinishCrossRealmAcceptor(OperationRepository operationRepository) {
+    public FinishTrustSetupAcceptor(OperationRepository operationRepository) {
         super(operationRepository);
     }
 

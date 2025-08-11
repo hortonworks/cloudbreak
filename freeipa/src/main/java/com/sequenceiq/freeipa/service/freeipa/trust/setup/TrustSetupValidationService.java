@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_DOMAIN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_IP;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 import static com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker.IPA_SERVER_TRUST_AD_PACKAGE;
 
@@ -31,10 +33,6 @@ public class TrustSetupValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustSetupValidationService.class);
 
     private static final String AD_DNS_VALIDATION_STATE = "trustsetup/validation/ad_dns_validation";
-
-    private static final int MAX_RETRY = 5;
-
-    private static final int MAX_RETRY_ON_ERROR = 3;
 
     @Inject
     private CrossRealmTrustService crossRealmTrustService;

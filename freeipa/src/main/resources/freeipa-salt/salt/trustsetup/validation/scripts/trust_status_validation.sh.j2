@@ -1,0 +1,5 @@
+#!/bin/bash
+
+kdestroy
+echo "$ADMIN_PASSWORD" | kinit admin
+kvno "ldap/${AD_FQDN}@${AD_REALM}"

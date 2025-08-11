@@ -97,6 +97,13 @@ public enum Status {
 
     public static final Collection<Status> FREEIPA_PROXY_CONFIG_MODIFIABLE_STATUSES = List.of(AVAILABLE, MODIFY_PROXY_CONFIG_FAILED);
 
+    public static final Collection<Status> FREEIPA_SYNC_DISABLED_STATUSES = List.of(
+            REQUESTED,
+            CREATE_IN_PROGRESS,
+            STACK_AVAILABLE,
+            DELETE_IN_PROGRESS,
+            DELETE_COMPLETED);
+
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
             .put(UPDATE_REQUESTED, UPDATE_FAILED)

@@ -65,6 +65,7 @@ import com.sequenceiq.freeipa.service.freeipa.trust.setup.AddTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.sync.crossrealmtrust.CrossRealmTrustStatusSyncJobService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -140,6 +141,9 @@ class FinishTrustSetupFlowIntegrationTest {
     @Inject
     private StackService stackService;
 
+    @MockBean
+    private CrossRealmTrustStatusSyncJobService crossRealmTrustStatusSyncJobService;
+
     private Stack stack;
 
     private InstanceMetaData instanceMetaData;
@@ -173,6 +177,7 @@ class FinishTrustSetupFlowIntegrationTest {
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_ACTIVE);
+        verify(crossRealmTrustStatusSyncJobService).schedule(STACK_ID);
     }
 
     @Test
