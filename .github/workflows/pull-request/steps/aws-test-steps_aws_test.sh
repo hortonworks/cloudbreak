@@ -32,7 +32,7 @@ set -ex -o pipefail
     then
       echo "no overriding label was provided, using configured suite"
     else
-      export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/e2e/aws-e2e-tests.yaml
+      export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/e2e/aws-distrox-tests.yaml
     fi
   
     echo "Run this test file: $INTEGRATIONTEST_SUITE_FILES"
