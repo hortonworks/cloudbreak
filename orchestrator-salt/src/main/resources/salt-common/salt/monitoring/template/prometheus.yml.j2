@@ -69,6 +69,7 @@ scrape_configs:
     tls_config:
        insecure_skip_verify: true
 {%- endif %}
+{%- if monitoring.enabled and monitoring.nodeExporterExists %}
   - job_name: node_exporter
     scheme: 'https'
     static_configs:
@@ -92,6 +93,7 @@ scrape_configs:
 {%- endif %}
     tls_config:
        insecure_skip_verify: true
+{%- endif %}
 {%- if (monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', [])) or monitoring.blackboxExporterCheckOnAllNodes %}
 {%- if blackboxClouderaUrls is defined and blackboxClouderaUrls and blackboxClouderaUrls|length > 0 %}
   - job_name: 'blackbox-cloudera'
