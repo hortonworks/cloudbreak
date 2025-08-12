@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.SHARED_SERVICE_DB_SE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SHARED_SERVICE_DB_SECRET_ROTATION_CONFIG_UPDATE_FINISHED_DL;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DH;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DL;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HIVE_SERVICE;
 
 import java.util.List;
 
@@ -23,7 +24,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -53,11 +57,14 @@ public class DatahubSharedServiceRotationService {
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     public void updateAllRelevantDatahub(StackDto datalake) {
         List<StackDto> datahubList = stackService.findAllByEnvironmentCrnAndStackType(datalake.getEnvironmentCrn(), List.of(WORKLOAD));
         datahubList.forEach(datahub -> {
             try {
-                if (clusterServicesRestartService.isHmsPresent(datahub)) {
+                if (isHmsPresent(datahub.getBlueprint())) {
                     stackUpdater.updateStackStatus(datahub.getId(), CONFIGURATION_UPDATE_IN_PROGRESS);
                     pillarUpdateOnDatahub(datahub, datalake);
                     cmServiceRestartOnDatahub(datahub, datalake);
@@ -74,7 +81,7 @@ public class DatahubSharedServiceRotationService {
     public void validateAllDatahubAvailable(StackDto datalake) {
         List<StackDto> datahubList = stackService.findAllByEnvironmentCrnAndStackType(datalake.getEnvironmentCrn(), List.of(WORKLOAD));
         if (!datahubList.stream()
-                .filter(datahub -> clusterServicesRestartService.isHmsPresent(datahub))
+                .filter(datahub -> isHmsPresent(datahub.getBlueprint()))
                 .allMatch(datahub -> Status.AVAILABLE.equals(datahub.getStatus()))) {
             throw new SecretRotationException("All Data Hub clusters in the environment should be available in order to " +
                     "rotate HMS database password properly!");
@@ -113,5 +120,10 @@ public class DatahubSharedServiceRotationService {
             StackDto datalake, ResourceEvent datalakeEvent) {
         flowMessageService.fireEventAndLog(datahub.getId(), eventType, datahubEvent);
         flowMessageService.fireEventAndLog(datalake.getId(), eventType, datalakeEvent, datahub.getResourceCrn());
+    }
+
+    private boolean isHmsPresent(Blueprint blueprint) {
+        CmTemplateProcessor cm = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
+        return cm.isServiceTypePresent(HIVE_SERVICE);
     }
 }
