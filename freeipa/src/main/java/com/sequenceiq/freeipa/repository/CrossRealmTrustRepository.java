@@ -22,4 +22,8 @@ public interface CrossRealmTrustRepository extends JpaRepository<CrossRealmTrust
     @Modifying
     @Query("UPDATE CrossRealmTrust trust SET trust.operationId = :operationId WHERE trust.stack.id = :stackId")
     int updateOperationIdByStackId(Long stackId, String operationId);
+
+    @Modifying
+    @Query("DELETE FROM CrossRealmTrust trust WHERE trust.stack.id = :stackId")
+    void deleteByStackId(Long stackId);
 }

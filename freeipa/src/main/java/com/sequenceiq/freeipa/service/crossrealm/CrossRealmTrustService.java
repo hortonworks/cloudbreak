@@ -39,4 +39,8 @@ public class CrossRealmTrustService {
     public void updateOperationIdByStackId(Long stackId, String operationId) {
         crossRealmTrustRepository.updateOperationIdByStackId(stackId, operationId);
     }
+
+    public void deleteByStackIdIfExists(Long stackId) {
+        crossRealmTrustRepository.deleteByStackId(stackId);
+    }
 }

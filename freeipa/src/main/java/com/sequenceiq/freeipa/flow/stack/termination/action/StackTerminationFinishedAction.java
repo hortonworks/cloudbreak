@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationContext;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.user.AuthDistributorService;
 
 @Component("StackTerminationFinishedAction")
@@ -32,6 +33,9 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
     @Inject
     private AuthDistributorService authDistributorService;
 
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
+
     public StackTerminationFinishedAction() {
         super(TerminateStackResult.class);
     }
@@ -42,6 +46,7 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
         LOGGER.info("Stack termination finished for stack: {}", stack.getId());
         configRegisters.forEach(configProvider -> configProvider.delete(stack));
         authDistributorService.removeAuthViewForEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
+        crossRealmTrustService.deleteByStackIdIfExists(stack.getId());
         stackTerminationService.finishStackTermination(context, payload);
         sendEvent(context);
     }
