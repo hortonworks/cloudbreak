@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPL
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +56,10 @@ public class FreeIpaAvailabilityAssertion {
 
     private static final String CHECK_DNS_LOOKUPS_CMD = "ping -c 2 %s | grep -q '%s'";
 
+    private static final int MAX_TOLERABLE_ERRORCOUNT = 3;
+
+    private static final Duration ASSERTION_ERROR_SLEEPDURATION = Duration.ofSeconds(5);
+
     @Value("${integrationtest.freeipaAvailability.operationTimeoutInMinutes:5}")
     private Integer operationTimeoutInMinutes;
 
@@ -93,8 +98,22 @@ public class FreeIpaAvailabilityAssertion {
             FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
             String environmentCrn = freeIpaTestDto.getResponse().getEnvironmentCrn();
             String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+            int errorCount = 0;
             while (ipaClient.getOperationV1Endpoint().getOperationStatus(testDto.getOperationId(), accountId).getStatus() == RUNNING) {
-                available().doAssertion(testContext, freeIpaTestDto, client);
+                try {
+                    available().doAssertion(testContext, freeIpaTestDto, client);
+                    errorCount = 0;
+                } catch (TestFailException ex) {
+                    errorCount++;
+                    LOGGER.warn("Freeipa availabilty assertion error during upgrade, tolerable count is {}, actual count is {}",
+                            MAX_TOLERABLE_ERRORCOUNT, errorCount, ex);
+                    if (errorCount >= MAX_TOLERABLE_ERRORCOUNT) {
+                        LOGGER.error("Freeipa availabilty assertion error count reached the maximum during upgrade, test will fail", ex);
+                        throw ex;
+                    } else {
+                        Thread.sleep(ASSERTION_ERROR_SLEEPDURATION);
+                    }
+                }
             }
             return testDto;
         };
@@ -210,7 +229,7 @@ public class FreeIpaAvailabilityAssertion {
             testContext.getExceptionMap().remove(awaitExceptionKey);
         } catch (Exception e) {
             LOGGER.error("CLEANUP test failed", e);
-//            throw new TestFailException("CLEANUP test failed with: " + e.getMessage(), e);
+            throw new TestFailException("CLEANUP test failed with: " + e.getMessage(), e);
         }
     }
 
