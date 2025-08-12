@@ -1033,6 +1033,21 @@ class CmTemplateProcessorTest {
         assertEquals(1, underTest.getHostTemplateRoleNames("worker").stream().filter("hdfs-DATANODE-BASE"::equals).count());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "hosttemplate-role-config-ref-names-null",
+            "hosttemplate-role-config-ref-names-missing",
+            "hosttemplate-role-config-ref-names-empty"})
+    void tesGetServiceComponentsByHostGroup(String caseInputFileSuffix) {
+        String inputFilePath = String.format("input/%s.bp", caseInputFileSuffix);
+        underTest = new CmTemplateProcessor(getBlueprintText(inputFilePath));
+
+        Map<String, Set<ServiceComponent>> serviceComponentsByHostGroup = underTest.getServiceComponentsByHostGroup();
+        assertThat(serviceComponentsByHostGroup).isNotEmpty();
+        assertThat(serviceComponentsByHostGroup).containsKey("raz_scale_out");
+        assertThat(serviceComponentsByHostGroup.get("raz_scale_out")).isEmpty();
+    }
+
     private static Stream<Arguments> testIsServiceTypePresentArguments() {
         return Stream.of(
                 Arguments.of(true, "input/de.bp", "HDFS"),

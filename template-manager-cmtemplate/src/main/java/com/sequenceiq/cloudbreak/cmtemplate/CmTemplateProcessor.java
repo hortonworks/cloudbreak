@@ -236,7 +236,10 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         Map<String, Set<ServiceComponent>> result = new HashMap<>();
         List<ApiClusterTemplateHostTemplate> hostTemplates = Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of());
         for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : hostTemplates) {
-            Set<ServiceComponent> components = apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames().stream()
+            List<String> roleConfigGroupsRefNames = ofNullable(apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames())
+                    .orElse(List.of());
+            Set<ServiceComponent> components = roleConfigGroupsRefNames
+                    .stream()
                     .map(rolesByRoleRef::get)
                     .filter(Objects::nonNull)
                     .collect(toSet());

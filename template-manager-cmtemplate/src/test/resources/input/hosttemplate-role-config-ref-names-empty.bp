@@ -1,0 +1,91 @@
+{
+    "cdhVersion": "7.2.18",
+    "cmVersion": "7.12.0.1000",
+    "displayName": "aws-test-92789f8926",
+    "hostTemplates": [
+        {
+            "cardinality": 1,
+            "refName": "auxiliary",
+            "roleConfigGroupsRefNames": [
+                "zookeeper-SERVER-BASE",
+                "cruise_control-CRUISE_CONTROL_SERVER-BASE"
+            ]
+        },
+        {
+            "cardinality": 0,
+            "refName": "raz_scale_out",
+            "roleConfigGroupsRefNames": []
+        }
+    ],
+    "products": [
+        {
+            "product": "CDH",
+            "version": "7.2.18-1.cdh7.2.18.p1000.66322570"
+        }
+    ],
+    "repositories": [
+        "http://build-cache.vpc.cloudera.com/s3/build/66322570/cdh/7.x/parcels/"
+    ],
+    "services": [
+        {
+            "refName": "zookeeper",
+            "roleConfigGroups": [
+                {
+                    "base": true,
+                    "configs": [
+                        {
+                            "name": "dataDir",
+                            "value": "/hadoopfs/fs1/zookeeper"
+                        },
+                        {
+                            "name": "dataLogDir",
+                            "value": "/hadoopfs/fs1/zookeeper"
+                        }
+                    ],
+                    "refName": "zookeeper-SERVER-BASE",
+                    "roleType": "SERVER"
+                }
+            ],
+            "serviceConfigs": [
+                {
+                    "name": "service_config_suppression_server_count_validator",
+                    "value": "true"
+                }
+            ],
+            "serviceType": "ZOOKEEPER"
+        },
+        {
+            "refName": "cruise_control",
+            "roleConfigGroups": [
+                {
+                    "base": true,
+                    "configs": [
+                        {
+                            "name": "self.healing.enabled",
+                            "value": "true"
+                        },
+                        {
+                            "name": "anomaly.notifier.class",
+                            "value": "com.linkedin.kafka.cruisecontrol.detector.notifier.SelfHealingNotifier"
+                        },
+                        {
+                            "name": "metric.anomaly.finder.class",
+                            "value": "com.cloudera.kafka.cruisecontrol.detector.EmptyBrokerAnomalyFinder"
+                        },
+                        {
+                            "name": "cpu.balance.threshold",
+                            "value": "1.5"
+                        },
+                        {
+                            "name": "disk.balance.threshold",
+                            "value": "1.5"
+                        }
+                    ],
+                    "refName": "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+                    "roleType": "CRUISE_CONTROL_SERVER"
+                }
+            ],
+            "serviceType": "CRUISE_CONTROL"
+        }
+    ]
+}
