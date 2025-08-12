@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.commands;
 
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.DEPLOY_CLUSTER_CLIENT_CONFIG_COMMAND_NAME;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +10,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Component
 public class SyncApiCommandPollerConfig {
-
-    private static final String DEPLOY_CLUSTER_CLIENT_CONFIG_COMMAND_NAME = "DeployClusterClientConfig";
 
     private final Integer interruptTimeoutSeconds;
 
@@ -26,7 +26,7 @@ public class SyncApiCommandPollerConfig {
         return interruptTimeoutSeconds;
     }
 
-    public boolean isSyncApiCommandPollingEnaabled(String resourceCrn) {
+    public boolean isSyncApiCommandPollingEnabled(String resourceCrn) {
         return entitlementService.useCmSyncCommandPoller(Crn.safeFromString(resourceCrn).getAccountId());
     }
 
