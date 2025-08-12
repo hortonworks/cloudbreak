@@ -28,7 +28,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCheckMetadata;
 
 @Component
@@ -82,7 +84,16 @@ public class GcpInstanceProvider {
         Compute compute = gcpComputeFactory.buildCompute(ac.getCloudCredential());
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         try {
-            String zone = cloudStack.getGroups().getFirst().getReferenceInstanceConfiguration().getAvailabilityZone();
+            String zone = cloudStack.getGroups().stream()
+                    .filter(group -> group.getInstances().size() > 0)
+                    .findFirst()
+                    .map(Group::getReferenceInstanceConfiguration)
+                    .map(CloudInstance::getAvailabilityZone)
+                    .orElse(null);
+            if (zone == null) {
+                LOGGER.debug("Cannot extract availabilityZone information from groups for resource: '{}'", resourceCrn);
+                return List.of();
+            }
             Compute.Instances gcpComputeInstances = compute.instances();
             Map<String, Instance> instances = Optional.ofNullable(gcpComputeInstances.list(projectId, zone)
                             .setFilter("labels." + gcpLabelUtil.transformLabelKeyOrValue(RESOURCE_CRN.key()) + " eq " +

@@ -95,7 +95,7 @@ class GcpInstanceProviderTest {
         lenient().when(cloudContext.getName()).thenReturn("stack");
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(compute.instances()).thenReturn(instancesMock);
+        lenient().when(compute.instances()).thenReturn(instancesMock);
         when(gcpComputeFactory.buildCompute(authenticatedContext.getCloudCredential())).thenReturn(compute);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(PROJECT_ID);
     }
@@ -146,6 +146,45 @@ class GcpInstanceProviderTest {
         assertThat(result).extracting(InstanceCheckMetadata::instanceId).containsExactlyInAnyOrder(INSTANCE_NAME1, INSTANCE_NAME2);
         assertThat(result).extracting(InstanceCheckMetadata::instanceType).containsExactlyInAnyOrder("n2-standard-4", "n1-standard-4");
         assertThat(result).extracting(InstanceCheckMetadata::status).containsExactlyInAnyOrder(InstanceStatus.STARTED, InstanceStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void testCollectCdpInstancesWithEmptyFirstGroup() throws IOException {
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudInstance cloudInstance = mock(CloudInstance.class);
+        CloudInstance skeleton = mock(CloudInstance.class);
+        Compute.Instances.List computeInstanceList = mock(Compute.Instances.List.class);
+        when(cloudInstance.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
+        when(cloudStack.getGroups()).thenReturn(List.of(Group.builder().withSkeleton(skeleton).build(),
+                Group.builder().withInstances(List.of(cloudInstance)).build()));
+        when(instancesMock.list(PROJECT_ID, AVAILABILITY_ZONE)).thenReturn(computeInstanceList);
+        when(computeInstanceList.setFilter(anyString())).thenReturn(computeInstanceList);
+        when(computeInstanceList.execute()).thenReturn(new InstanceList().setItems(List.of(
+                createInstance(INSTANCE_NAME1, MACHINE_TYPE_URL + "n2-standard-4", "RUNNING"),
+                createInstance(INSTANCE_NAME2, MACHINE_TYPE_URL + "n1-standard-4", "PROVISIONING")
+        )));
+        when(gcpLabelUtil.transformLabelKeyOrValue(DefaultApplicationTag.RESOURCE_CRN.key())).thenReturn(DefaultApplicationTag.RESOURCE_CRN.key());
+        when(gcpLabelUtil.transformLabelKeyOrValue(RESOURCE_CRN)).thenReturn(RESOURCE_CRN);
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, List.of());
+
+        verify(computeInstanceList).setFilter(filterCaptor.capture());
+        assertEquals("labels." + DefaultApplicationTag.RESOURCE_CRN.key() + " eq " + RESOURCE_CRN, filterCaptor.getValue());
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceId).containsExactlyInAnyOrder(INSTANCE_NAME1, INSTANCE_NAME2);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceType).containsExactlyInAnyOrder("n2-standard-4", "n1-standard-4");
+        assertThat(result).extracting(InstanceCheckMetadata::status).containsExactlyInAnyOrder(InstanceStatus.STARTED, InstanceStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void testCollectCdpInstancesWithEmptyAllGroups() throws IOException {
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudInstance skeleton = mock(CloudInstance.class);
+        when(cloudStack.getGroups()).thenReturn(List.of(Group.builder().withSkeleton(skeleton).build()));
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, List.of());
+
+        assertThat(result).hasSize(0);
     }
 
     @Test
