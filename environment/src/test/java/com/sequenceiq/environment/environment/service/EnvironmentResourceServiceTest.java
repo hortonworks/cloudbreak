@@ -3,14 +3,18 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -38,6 +42,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
@@ -241,6 +246,24 @@ class EnvironmentResourceServiceTest {
         environmentResourceServiceUnderTest.createAndUpdateSshKey(environment);
 
         assertNull(environment.getAuthentication().getPublicKeyId());
+    }
+
+    @Test
+    void getEncryptionProfileShouldNotThrowExceptionWhenProfileNameIsEmpty() {
+        Optional<EncryptionProfile> result = environmentResourceServiceUnderTest.getEncryptionProfile("", ACCOUNT_ID);
+
+        assertFalse(result.isPresent());
+        verify(encryptionProfileService, never()).getByNameAndAccountId(any(), any());
+    }
+
+    @Test
+    void getEncryptionProfileShouldThrowExceptionWhenProfileNameIsNotFound() {
+        when(encryptionProfileService.getByNameAndAccountId(any(), any())).thenThrow(NotFoundException.class);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> environmentResourceServiceUnderTest.getEncryptionProfile(
+                "ep-name", ACCOUNT_ID));
+
+        assertEquals("No Encryption Profile found with name [ep-name] in the account [accid].", ex.getMessage());
     }
 
     @Configuration

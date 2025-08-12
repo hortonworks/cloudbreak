@@ -231,13 +231,16 @@ public class EnvironmentResourceService {
 
     public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileName, String accountId) {
         EncryptionProfile encryptionProfile = null;
+
         if (StringUtils.isNotEmpty(encryptionProfileName)) {
             try {
                 encryptionProfile = encryptionProfileService.getByNameAndAccountId(encryptionProfileName, accountId);
             } catch (NotFoundException e) {
-                LOGGER.error("No EncryptionProfile found with name {} in the account {}.", encryptionProfileName, accountId);
+                throw new BadRequestException(String.format("No Encryption Profile found with name [%s] in the account [%s].",
+                        encryptionProfileName, accountId), e);
             }
         }
+
         return Optional.ofNullable(encryptionProfile);
     }
 }

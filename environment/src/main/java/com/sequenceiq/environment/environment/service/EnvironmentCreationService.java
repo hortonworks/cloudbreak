@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -185,7 +186,12 @@ public class EnvironmentCreationService {
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
-        environment.setEncryptionProfileName(creationDto.getEncryptionProfileName());
+
+        Optional<EncryptionProfile> encryptionProfileOp = environmentResourceService.getEncryptionProfile(creationDto.getEncryptionProfileName(),
+                creationDto.getAccountId());
+        if (encryptionProfileOp.isPresent()) {
+            environment.setEncryptionProfileName(encryptionProfileOp.get().getName());
+        }
         LOGGER.info("Environment is initialized for creation.");
         return environment;
     }
