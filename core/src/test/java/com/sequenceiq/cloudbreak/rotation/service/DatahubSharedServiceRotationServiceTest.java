@@ -25,7 +25,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -53,6 +56,12 @@ public class DatahubSharedServiceRotationServiceTest {
     @Mock
     private FlowMessageService flowMessageService;
 
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
     @InjectMocks
     private DatahubSharedServiceRotationService underTest;
 
@@ -67,14 +76,16 @@ public class DatahubSharedServiceRotationServiceTest {
         lenient().when(stackUpdater.updateStackStatus(any(), any())).thenReturn(mock(Stack.class));
         lenient().when(datahub.getId()).thenReturn(2L);
         lenient().when(datahub.getResourceCrn()).thenReturn("datahub");
+        lenient().when(datahub.getBlueprint()).thenReturn(new Blueprint());
         lenient().when(datalake.getEnvironmentCrn()).thenReturn("env");
         lenient().when(datalake.getId()).thenReturn(1L);
+        lenient().when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
     }
 
     @Test
     void testSuccessfulConfigUpdate() throws CloudbreakException {
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(any())).thenReturn(Boolean.TRUE);
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.TRUE);
         doNothing().when(clusterHostServiceRunner).updateClusterConfigs(any(), anyBoolean());
         doNothing().when(clusterServicesRestartService).refreshCluster(any());
 
@@ -88,7 +99,7 @@ public class DatahubSharedServiceRotationServiceTest {
     @Test
     void testSkippedConfigUpdate() throws CloudbreakException {
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(any())).thenReturn(Boolean.FALSE);
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.FALSE);
 
         underTest.updateAllRelevantDatahub(datalake);
 
@@ -99,7 +110,7 @@ public class DatahubSharedServiceRotationServiceTest {
     @Test
     void testFailedConfigUpdate() throws CloudbreakException {
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(any())).thenReturn(Boolean.TRUE);
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("failed")).when(clusterHostServiceRunner).updateClusterConfigs(any(), anyBoolean());
 
         underTest.updateAllRelevantDatahub(datalake);
@@ -111,8 +122,8 @@ public class DatahubSharedServiceRotationServiceTest {
 
     @Test
     void testSuccessfulDatahubStatusValidation() {
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.TRUE);
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(eq(datahub))).thenReturn(Boolean.TRUE);
         when(datahub.getStatus()).thenReturn(Status.AVAILABLE);
 
         underTest.validateAllDatahubAvailable(datalake);
@@ -123,7 +134,7 @@ public class DatahubSharedServiceRotationServiceTest {
     @Test
     void testSuccessfulDatahubStatusValidationIfStatusInvalidButHmsNotPresent() {
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(eq(datahub))).thenReturn(Boolean.FALSE);
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.FALSE);
 
         underTest.validateAllDatahubAvailable(datalake);
 
@@ -133,7 +144,7 @@ public class DatahubSharedServiceRotationServiceTest {
     @Test
     void testFailedfulDatahubStatusValidation() {
         when(stackService.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(datahub));
-        when(clusterServicesRestartService.isHmsPresent(eq(datahub))).thenReturn(Boolean.TRUE);
+        when(cmTemplateProcessor.isServiceTypePresent(any())).thenReturn(Boolean.TRUE);
         when(datahub.getStatus()).thenReturn(Status.UPDATE_IN_PROGRESS);
 
         assertThrows(SecretRotationException.class, () -> underTest.validateAllDatahubAvailable(datalake));
