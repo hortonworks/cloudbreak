@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -371,6 +372,7 @@ public class AzureCloudResourceService {
         networkAttributes.setResourceGroupName(networkResourceGroupName);
         networkAttributes.setNetworkId(networkName);
         networkAttributes.setCloudPlatform(cloudContext.getPlatform().value());
+        networkAttributes.setOutboundType(OutboundType.NOT_DEFINED);
         return networkAttributes;
     }
 }

@@ -77,16 +77,17 @@ public class ProviderSyncService {
                 .map(CloudResource::getDetailedInfo)
                 .toList());
         resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
-        setProviderSyncStatus(stack, syncedCloudResources);
+        setProviderSyncStatus(stack, syncedCloudResources, cloudResources);
     }
 
-    private void setProviderSyncStatus(StackDto stack, List<CloudResource> syncedCloudResources) {
+    private void setProviderSyncStatus(StackDto stack, List<CloudResource> syncedCloudResources, List<CloudResource> cloudResources) {
         Optional<SkuAttributes> hasBasicSku = hasBasicSku(syncedCloudResources);
         if (hasBasicSku.isPresent()) {
             LOGGER.info("Basic SKU migration is needed for {}, updating status", hasBasicSku.get());
             stackUpdater.addProviderState(stack.getId(), ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
-        } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent()) {
-            LOGGER.info("Outbound upgrade is needed for {}, updating status", shouldUpgradeOutbound(syncedCloudResources).get());
+        } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent() || shouldUpgradeOutbound(cloudResources).isPresent()) {
+            LOGGER.info("Outbound upgrade is needed for {}, updating status",
+                    shouldUpgradeOutbound(syncedCloudResources).or(() -> shouldUpgradeOutbound(cloudResources)));
             stackUpdater.addProviderState(stack.getId(), ProviderSyncState.OUTBOUND_UPGRADE_NEEDED);
         } else {
             LOGGER.debug("Provider sync have not detected errors for {}, cleaning up error states",

@@ -171,8 +171,7 @@ public class AzureLoadBalancerSyncer implements ProviderResourceSyncer<ResourceT
                 .findFirst();
         Optional<LoadBalancerSkuName> sku = getLoadBalancerSkuName(loadBalancer);
 
-        Optional<CloudResource> resource = loadBalancerResource;
-        CloudResource cloudResource = resource.orElseGet(() -> {
+        CloudResource cloudResource = loadBalancerResource.orElseGet(() -> {
             LOGGER.debug("Load balancer resource {} not found, creating new resource", loadBalancer.id());
             return CloudResource.builder()
                     .withType(AZURE_LOAD_BALANCER)
