@@ -181,7 +181,7 @@ integrationtest:
       volumeCount: 1
       volumeType: gp3
     arm64Instance:
-      type: m7g.2xlarge
+      type: m7g.4xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
