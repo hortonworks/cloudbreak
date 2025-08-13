@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -76,7 +75,7 @@ public class DatahubSharedServiceRotationServiceTest {
         lenient().when(stackUpdater.updateStackStatus(any(), any())).thenReturn(mock(Stack.class));
         lenient().when(datahub.getId()).thenReturn(2L);
         lenient().when(datahub.getResourceCrn()).thenReturn("datahub");
-        lenient().when(datahub.getBlueprint()).thenReturn(new Blueprint());
+        lenient().when(datahub.getBlueprintJsonText()).thenReturn("");
         lenient().when(datalake.getEnvironmentCrn()).thenReturn("env");
         lenient().when(datalake.getId()).thenReturn(1L);
         lenient().when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);

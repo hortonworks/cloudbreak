@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -64,7 +63,7 @@ public class DatahubSharedServiceRotationService {
         List<StackDto> datahubList = stackService.findAllByEnvironmentCrnAndStackType(datalake.getEnvironmentCrn(), List.of(WORKLOAD));
         datahubList.forEach(datahub -> {
             try {
-                if (isHmsPresent(datahub.getBlueprint())) {
+                if (isHmsPresent(datahub)) {
                     stackUpdater.updateStackStatus(datahub.getId(), CONFIGURATION_UPDATE_IN_PROGRESS);
                     pillarUpdateOnDatahub(datahub, datalake);
                     cmServiceRestartOnDatahub(datahub, datalake);
@@ -81,7 +80,7 @@ public class DatahubSharedServiceRotationService {
     public void validateAllDatahubAvailable(StackDto datalake) {
         List<StackDto> datahubList = stackService.findAllByEnvironmentCrnAndStackType(datalake.getEnvironmentCrn(), List.of(WORKLOAD));
         if (!datahubList.stream()
-                .filter(datahub -> isHmsPresent(datahub.getBlueprint()))
+                .filter(datahub -> isHmsPresent(datahub))
                 .allMatch(datahub -> Status.AVAILABLE.equals(datahub.getStatus()))) {
             throw new SecretRotationException("All Data Hub clusters in the environment should be available in order to " +
                     "rotate HMS database password properly!");
@@ -122,8 +121,8 @@ public class DatahubSharedServiceRotationService {
         flowMessageService.fireEventAndLog(datalake.getId(), eventType, datalakeEvent, datahub.getResourceCrn());
     }
 
-    private boolean isHmsPresent(Blueprint blueprint) {
-        CmTemplateProcessor cm = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
+    private boolean isHmsPresent(StackDto stack) {
+        CmTemplateProcessor cm = cmTemplateProcessorFactory.get(stack.getBlueprintJsonText());
         return cm.isServiceTypePresent(HIVE_SERVICE);
     }
 }
