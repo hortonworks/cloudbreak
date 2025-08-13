@@ -97,7 +97,7 @@ public class AltusMachineUserService implements DatabusCredentialProvider {
     }
 
     public void clearFluentMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
-        if (isDataBusCredentialAvailable(cluster)) {
+        if (telemetry != null && isDataBusCredentialAvailable(cluster)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> altusIAMService.clearMachineUser(machineUserName, Crn.safeFromString(stack.getResourceCrn()).getAccountId(),
@@ -107,7 +107,7 @@ public class AltusMachineUserService implements DatabusCredentialProvider {
 
     public void clearMonitoringMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (telemetry.isComputeMonitoringEnabled() || isMonitoringCredentialAvailable(cluster)) {
+        if (telemetry != null && (telemetry.isComputeMonitoringEnabled() || isMonitoringCredentialAvailable(cluster))) {
             String machineUserName = getMonitoringMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> altusIAMService.clearMachineUser(machineUserName, accountId));
