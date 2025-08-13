@@ -8,5 +8,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS terms_accountid_term_type_idx ON terms (accoun
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-ALTER TABLE terms DROP COLUMN term_type;
+-- Drop the composite index first
+DROP INDEX IF EXISTS terms_accountid_term_type_idx;
+
+-- Handle potential duplicate accountid entries before creating the unique index
+-- Keep only one record per accountid (the most recently created one)
+DELETE FROM terms a
+WHERE a.id < (
+    SELECT MAX(b.id)
+    FROM terms b
+    WHERE a.accountid = b.accountid
+);
+
+-- Now create the unique index on accountid
 CREATE UNIQUE INDEX IF NOT EXISTS terms_accountid_idx ON terms (accountid);
+
+-- Finally drop the term_type column
+ALTER TABLE terms DROP COLUMN term_type;
