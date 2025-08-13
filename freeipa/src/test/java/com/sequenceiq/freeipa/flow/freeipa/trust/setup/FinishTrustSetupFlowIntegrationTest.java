@@ -182,7 +182,7 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @Test
     public void testAddTrustFails() throws FreeIpaClientException {
-        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(addTrustService).addTrust(STACK_ID);
+        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(addTrustService).addAndValidateTrust(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 

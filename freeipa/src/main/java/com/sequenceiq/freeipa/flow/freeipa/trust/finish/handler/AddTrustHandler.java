@@ -34,7 +34,7 @@ public class AddTrustHandler extends ExceptionCatcherEventHandler<FinishTrustSet
     protected Selectable doAccept(HandlerEvent<FinishTrustSetupAddTrustRequest> event) {
         FinishTrustSetupAddTrustRequest request = event.getData();
         try {
-            addTrustService.addTrust(request.getResourceId());
+            addTrustService.addAndValidateTrust(request.getResourceId());
             return new FinishTrustSetupAddTrustSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to add trust on FreeIPA", e);
