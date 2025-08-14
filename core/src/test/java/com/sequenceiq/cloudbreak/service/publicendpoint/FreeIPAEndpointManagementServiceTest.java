@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -178,5 +181,45 @@ public class FreeIPAEndpointManagementServiceTest {
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
 
         verify(dnsV1Endpoint, times(1)).deleteDnsARecord(any(), any(), eq(loadBalancer.getEndpoint()));
+    }
+
+    @Test
+    public void testRegisterLoadBalancerDomainWithFreeIPAWhenFreeIPAThrowsException() {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+        loadBalancer.setDns("dns.aws.com");
+        loadBalancer.setEndpoint("cname");
+
+        when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+        doThrow(new RuntimeException("DNS Registration error")).when(dnsV1Endpoint).addDnsCnameRecordInternal(any(), any());
+
+        FreeIpaOperationFailedException ex = assertThrows(FreeIpaOperationFailedException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.registerLoadBalancerDomainWithFreeIPA(stack)));
+
+        assertEquals("Unable to register load balancer with FreeIPA", ex.getMessage());
+    }
+
+    @Test
+    public void testDeleteLoadBalancerWhenFreeIPAThrowsException() {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+        loadBalancer.setDns("dns.aws.com");
+        loadBalancer.setEndpoint("cname");
+
+        when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+        doThrow(new RuntimeException("DNS deletion error")).when(dnsV1Endpoint).deleteDnsCnameRecord(any(), any(), any());
+
+        FreeIpaOperationFailedException ex = assertThrows(FreeIpaOperationFailedException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.deleteLoadBalancerDomainFromFreeIPA(stack)));
+
+        assertEquals("Unable to delete load balancer domain from FreeIPA", ex.getMessage());
     }
 }

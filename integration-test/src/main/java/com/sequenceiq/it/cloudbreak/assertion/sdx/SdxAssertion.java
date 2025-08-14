@@ -23,12 +23,12 @@ import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
 public class SdxAssertion {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxAssertion.class);
 
-    private static final String VALIDATE_LOAD_BALANCER_CMD = "nslookup %s | grep -q '%s' && echo Success || echo Failure - $(hostname)";
+    private static final String VALIDATE_LOAD_BALANCER_CMD = "nslookup %s 2>&1 | tee ./nslookup_out | grep -q '%s' && " +
+            "echo Success || echo Failure - $(hostname) - $(grep -v '%s' ./nslookup_out)";
 
     private static final String VALIDATE_FILE_CONTENT_CMD = "sudo grep -Pq '%s' %s && echo Success || echo Failure";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxAssertion.class);
 
     @Inject
     private SshJClientActions sshJClientActions;
@@ -46,7 +46,7 @@ public class SdxAssertion {
 
         try {
             String resolveTo = sdxTestDto.getCloudPlatform().equals(CloudPlatform.AWS) ? loadBalancerResponse.getCloudDns() : loadBalancerResponse.getIp();
-            String cmd = String.format(VALIDATE_LOAD_BALANCER_CMD, loadBalancerResponse.getFqdn(), resolveTo);
+            String cmd = String.format(VALIDATE_LOAD_BALANCER_CMD, loadBalancerResponse.getFqdn(), resolveTo, resolveTo);
             Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnAllHosts(
                     sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), cmd, false, commonCloudProperties.getDefaultPrivateKeyFile());
 
@@ -55,10 +55,11 @@ public class SdxAssertion {
                     .stream()
                     .map(Pair::getValue)
                     .filter(value -> value != null && value.contains("Failure"))
-                    .collect(toList());
+                    .toList();
 
             if (!errors.isEmpty()) {
-                throw new RuntimeException("Loadbalancer is not resolvable. Error messages: " + errors);
+                throw new RuntimeException(String.format("Loadbalancer FQDN %s is not resolvable to %s. Error messages: ", loadBalancerResponse.getCloudDns(),
+                        resolveTo) + errors);
             }
         } catch (Exception e) {
             LOGGER.error("Error trying to check load balancer FQDN", e);
