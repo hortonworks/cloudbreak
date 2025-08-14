@@ -860,16 +860,7 @@ jobs:
           name: fedramp-integration-service-artifact
           retention-days: 5
           path: |
-            integration-test/cloudbreak.log
-            integration-test/datalake.log
-            integration-test/redbeams.log
-            integration-test/environment.log
-            integration-test/freeipa.log
-            integration-test/thunderhead-mock.log
-            integration-test/cluster-proxy.log
-            integration-test/cluster-proxy-health.log
-            integration-test/dev-gateway.log
-            integration-test/core-gateway.log
+            integration-test/integcb-logs.tar.gz
       - name: fedramp_integration_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -877,14 +868,7 @@ jobs:
           name: fedramp-integration-test-artifact
           retention-days: 5
           path: |
-            integration-test/integcb/Profile
-            integration-test/integcb/docker-compose.yml
-            integration-test/integcb/*revert.result
-            integration-test/test.out
-            integration-test/swagger-validation-result.out
-            integration-test/suites_log/*.log
-            integration-test/test-output/**/*
-            integration-test/dumps/*.hprof
+            integration-test/suites.tar.gz
   real-ums-test:
     permissions: write-all
     name: Real UMS Test
@@ -970,16 +954,7 @@ jobs:
           name: real-ums-test-artifact
           retention-days: 5
           path: |
-            integration-test/cloudbreak.log
-            integration-test/datalake.log
-            integration-test/redbeams.log
-            integration-test/environment.log
-            integration-test/freeipa.log
-            integration-test/thunderhead-mock.log
-            integration-test/cluster-proxy.log
-            integration-test/cluster-proxy-health.log
-            integration-test/dev-gateway.log
-            integration-test/core-gateway.log
+            integration-test/integcb-logs.tar.gz
       - name: real_ums_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -987,14 +962,7 @@ jobs:
           name: real-ums-test-artifact
           retention-days: 5
           path: |
-            integration-test/integcb/Profile
-            integration-test/integcb/docker-compose.yml
-            integration-test/integcb/*revert.result
-            integration-test/test.out
-            integration-test/swagger-validation-result.out
-            integration-test/suites_log/*.log
-            integration-test/test-output/**/*
-            integration-test/dumps/*.hprof
+            integration-test/suites.tar.gz
   aws-test:
     permissions: write-all
     name: Aws Test
@@ -1129,16 +1097,7 @@ jobs:
           name: aws-test-artifact
           retention-days: 5
           path: |
-            integration-test/cloudbreak.log
-            integration-test/datalake.log
-            integration-test/redbeams.log
-            integration-test/environment.log
-            integration-test/freeipa.log
-            integration-test/thunderhead-mock.log
-            integration-test/cluster-proxy.log
-            integration-test/cluster-proxy-health.log
-            integration-test/dev-gateway.log
-            integration-test/core-gateway.log
+            integration-test/integcb-logs.tar.gz
       - name: aws_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -1146,11 +1105,4 @@ jobs:
           name: aws-test-artifact
           retention-days: 5
           path: |
-            integration-test/integcb/Profile
-            integration-test/integcb/docker-compose.yml
-            integration-test/integcb/*revert.result
-            integration-test/test.out
-            integration-test/swagger-validation-result.out
-            integration-test/suites_log/*.log
-            integration-test/test-output/**/*
-            integration-test/dumps/*.hprof
+            integration-test/suites.tar.gz
