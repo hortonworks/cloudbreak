@@ -21,9 +21,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
@@ -41,11 +43,16 @@ class CmSyncImageUpdateServiceTest {
 
     private static final String TARGET_IMAGE_ID = "target-image-id";
 
+    private static final String STACK_VERSION = "7.3.1";
+
     @InjectMocks
     private CmSyncImageUpdateService underTest;
 
     @Mock
     private StackImageService stackImageService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @Mock
     private CmSyncImageFinderService cmSyncImageFinderService;
@@ -65,7 +72,7 @@ class CmSyncImageUpdateServiceTest {
         Set<Image> candidateImages = Set.of();
         Stack stack = createStack();
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = createTargetImage(TARGET_IMAGE_ID);
+        Image targetImage = createTargetImage(TARGET_IMAGE_ID, true);
 
         when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
         when(cmSyncImageFinderService.findTargetImageForImageSync(cmSyncOperationSummary, candidateImages, CURRENT_IMAGE_ID, stack.isDatalake()))
@@ -79,6 +86,29 @@ class CmSyncImageUpdateServiceTest {
         assertEquals(TARGET_IMAGE_ID, actualStatedImage.getImage().getUuid());
         assertEquals(IMAGE_CATALOG_NAME, actualStatedImage.getImageCatalogName());
         assertEquals(IMAGE_CATALOG_URL, actualStatedImage.getImageCatalogUrl());
+        verify(stackUpdater).updateStackVersion(STACK_ID, STACK_VERSION);
+    }
+
+    @Test
+    void testUpdateImageAfterCmSyncShouldSetNewImageWhenTargetImageIsPresentNoStackDetails() throws CloudbreakImageNotFoundException {
+        Set<Image> candidateImages = Set.of();
+        Stack stack = createStack();
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
+        Image targetImage = createTargetImage(TARGET_IMAGE_ID, false);
+
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
+        when(cmSyncImageFinderService.findTargetImageForImageSync(cmSyncOperationSummary, candidateImages, CURRENT_IMAGE_ID, stack.isDatalake()))
+                .thenReturn(Optional.of(targetImage));
+
+        underTest.updateImageAfterCmSync(stack, cmSyncOperationSummary, candidateImages);
+
+        ArgumentCaptor<StatedImage> argumentCaptor = ArgumentCaptor.forClass(StatedImage.class);
+        verify(stackImageService).replaceStackImageComponent(eq(stack), argumentCaptor.capture(), eq(currentImage));
+        StatedImage actualStatedImage = argumentCaptor.getValue();
+        assertEquals(TARGET_IMAGE_ID, actualStatedImage.getImage().getUuid());
+        assertEquals(IMAGE_CATALOG_NAME, actualStatedImage.getImageCatalogName());
+        assertEquals(IMAGE_CATALOG_URL, actualStatedImage.getImageCatalogUrl());
+        verify(stackUpdater, never()).updateStackVersion(any(), any());
     }
 
     @Test
@@ -86,7 +116,7 @@ class CmSyncImageUpdateServiceTest {
         Set<Image> candidateImages = Set.of();
         Stack stack = createStack();
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = createTargetImage(CURRENT_IMAGE_ID);
+        Image targetImage = createTargetImage(CURRENT_IMAGE_ID, false);
 
         when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
         when(cmSyncImageFinderService.findTargetImageForImageSync(cmSyncOperationSummary, candidateImages, CURRENT_IMAGE_ID, stack.isDatalake()))
@@ -112,8 +142,13 @@ class CmSyncImageUpdateServiceTest {
         verify(stackImageService, never()).replaceStackImageComponent(any(), any(), any());
     }
 
-    private Image createTargetImage(String imageId) {
-        return Image.builder().withUuid(imageId).build();
+    private Image createTargetImage(String imageId, boolean withImageDetails) {
+        Image.ImageBuilder imageBuilder = Image.builder()
+                .withUuid(imageId);
+        if (withImageDetails) {
+            imageBuilder.withStackDetails(new ImageStackDetails(STACK_VERSION, null, null));
+        }
+        return imageBuilder.build();
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {

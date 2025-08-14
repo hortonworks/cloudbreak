@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
@@ -26,6 +28,9 @@ public class CmSyncImageUpdateService {
     private StackImageService stackImageService;
 
     @Inject
+    private StackUpdater stackUpdater;
+
+    @Inject
     private CmSyncImageFinderService cmSyncImageFinderService;
 
     public void updateImageAfterCmSync(Stack stack, CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages) {
@@ -36,6 +41,8 @@ public class CmSyncImageUpdateService {
             if (!currentImage.getImageId().equals(targetImage.getUuid())) {
                 LOGGER.debug("Set new image to {}", targetImage.getUuid());
                 stackImageService.replaceStackImageComponent(stack, createStatedImage(targetImage, currentImage), currentImage);
+                getStackVersionFromImage(targetImage).ifPresentOrElse(version -> updateStackVersion(stack, version),
+                        () -> LOGGER.warn("Cluster runtime could not be upgraded for stack with id {}", stack.getId()));
             } else {
                 LOGGER.debug("Not necessary to update the image because the current image already contains all the required parcels.");
             }
@@ -44,8 +51,18 @@ public class CmSyncImageUpdateService {
         }
     }
 
+    private void updateStackVersion(Stack stack, String version) {
+        stackUpdater.updateStackVersion(stack.getId(), version);
+        LOGGER.debug("Cluster runtime version on stack [{}] is updated from {} to {}", stack.getName(), stack.getStackVersion(), version);
+    }
+
     private Optional<Image> findTargetImage(CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages, String currentImageId, boolean datalake) {
         return cmSyncImageFinderService.findTargetImageForImageSync(cmSyncResult, candidateImages, currentImageId, datalake);
+    }
+
+    private Optional<String> getStackVersionFromImage(Image image) {
+        return Optional.ofNullable(image.getStackDetails())
+                .map(ImageStackDetails::getVersion);
     }
 
     private StatedImage createStatedImage(Image targetImage, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
