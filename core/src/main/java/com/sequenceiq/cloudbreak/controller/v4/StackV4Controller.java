@@ -746,6 +746,12 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
+    public List<String> listAvailableJavaVersionsByCrnInternal(Long workspaceId, @ResourceCrn String crn) {
+        return stackOperationService.listAvailableJavaVersions(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @InternalOnly
     public FlowIdentifier updateRootVolumeByStackCrnInternal(Long workspaceId, @ResourceCrn String crn, DiskUpdateRequest rootDiskVolumesRequest,
             @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());

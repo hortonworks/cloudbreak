@@ -827,6 +827,14 @@ public interface DistroXV1Endpoint {
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
 
+    @GET
+    @Path("crn/{crn}/list_available_java_versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List available java versions on the DataHub by its CRN",
+            operationId = "listDataHubAvailableJavaVersionsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<String> listAvailableJavaVersionsByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+
     @PUT
     @Path("/name/{name}/modify_selinux/{selinuxMode}")
     @Consumes(MediaType.APPLICATION_JSON)

@@ -28,4 +28,11 @@ public class AllowableJavaConfigurations {
             throw new BadRequestException("The requested Java version " + version + " is not compatible with the runtime version " + runtimeVersion);
         }
     }
+
+    public List<String> listValidJavaVersions(String runtimeVersion) {
+        return javaVersions.stream()
+                .filter(javaConfiguration -> javaConfiguration.isRuntimeCompatible(runtimeVersion))
+                .map(javaConfiguration -> String.valueOf(javaConfiguration.getVersion()))
+                .toList();
+    }
 }

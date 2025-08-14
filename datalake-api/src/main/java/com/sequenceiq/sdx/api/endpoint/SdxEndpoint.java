@@ -553,6 +553,14 @@ public interface SdxEndpoint {
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
 
+    @GET
+    @Path("crn/{crn}/list_available_java_versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List available java versions on the DataLake by its CRN",
+            operationId = "listDataLakeAvailableJavaVersionsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<String> listAvailableJavaVersionsByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+
     @PUT
     @Path("/name/{name}/modify_root_volume")
     @Produces(MediaType.APPLICATION_JSON)

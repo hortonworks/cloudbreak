@@ -629,6 +629,12 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public List<String> listAvailableJavaVersionsByCrn(@ResourceCrn String crn) {
+        return sdxService.listAvailableJavaVersions(crn);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
     public FlowIdentifier updateRootVolumeByDatalakeName(@ResourceName String name, DiskUpdateRequest updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();

@@ -644,4 +644,9 @@ public class StackOperationService {
         return flowManager.triggerExternalDatabaseUserOperation(stack.getId(), stack.getResourceName(), stack.getResourceCrn(),
                 ExternalDatabaseUserOperation.valueOf(operation), DatabaseType.valueOf(dbType), dbUser);
     }
+
+    public List<String> listAvailableJavaVersions(NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return defaultJavaVersionUpdateValidator.listAvailableJavaVersions(stack);
+    }
 }

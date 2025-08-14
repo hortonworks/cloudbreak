@@ -895,6 +895,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public List<String> listAvailableJavaVersionsByCrn(@ResourceCrn String crn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return stackOperationService.listAvailableJavaVersions(nameOrCrn, accountId);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATAHUB)
     public FlowIdentifier modifySeLinuxByName(@ResourceName String name, SeLinux selinuxMode) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();

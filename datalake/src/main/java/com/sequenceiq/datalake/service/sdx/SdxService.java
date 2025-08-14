@@ -1975,4 +1975,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("SKU migration is only supported on Data Lakes running on the Azure platform");
         }
     }
+
+    public List<String> listAvailableJavaVersions(String crn) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.listAvailableJavaVersionsByCrnInternal(WORKSPACE_ID_DEFAULT, crn));
+    }
 }

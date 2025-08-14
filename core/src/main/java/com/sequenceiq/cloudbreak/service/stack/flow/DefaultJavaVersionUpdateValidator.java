@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static java.lang.Integer.parseInt;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +49,18 @@ public class DefaultJavaVersionUpdateValidator {
                 LOGGER.warn(message);
                 throw new BadRequestException(message);
             }
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            String message = String.format("Image information could not be found for the cluster with name '%s'", stack.getName());
+            LOGGER.warn(message);
+            throw new BadRequestException(message, e);
+        }
+    }
+
+    public List<String> listAvailableJavaVersions(StackDto stack) {
+        try {
+            Image image = imageService.getImage(stack.getId());
+            String runtimeVersion = getRuntimeVersion(stack, image);
+            return allowableJavaConfigurations.listValidJavaVersions(runtimeVersion);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             String message = String.format("Image information could not be found for the cluster with name '%s'", stack.getName());
             LOGGER.warn(message);

@@ -956,6 +956,15 @@ public interface StackV4Endpoint {
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
 
+    @GET
+    @Path("internal/crn/{crn}/list_available_java_versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List available java versions",
+            operationId = "listAvailableJavaVersionsByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<String> listAvailableJavaVersionsByCrnInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn);
+
     @PUT
     @Path("internal/crn/{crn}/modify_root_volume")
     @Produces(MediaType.APPLICATION_JSON)
