@@ -51,6 +51,8 @@ public class MockUserManagementServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenant:user:5678";
 
+    private static final String CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID = "0018000000ik5epAAA:Cloudera-Administration";
+
     @Mock
     private MockCrnService mockCrnService;
 
@@ -65,6 +67,96 @@ public class MockUserManagementServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    static Object[][] testGetWorkloadCredentialsDataProvider() {
+        return new Object[][]{
+                // userId, expectedWorkloadUsername
+                {"a592e3d7-8b53-40e5-80a4-6a1daf43d976", "a592e3d78b5340e580a46a1daf43d976"},
+                {"foo_bar", "foo_bar"},
+                {"foo+bar", "foobar"},
+                {"foo@bar", "foo"},
+                {"baz/FOO@bar", "foo"},
+        };
+    }
+
+    static Object[][] conditionalEntitlementDataProvider() {
+        return new Object[][]{
+                // testCaseName conditionFieldName condition entitlementName entitlementPresentExpected
+                {"enableBaseImages false", "enableBaseImages", false, "CDP_BASE_IMAGE", false},
+                {"enableBaseImages true", "enableBaseImages", true, "CDP_BASE_IMAGE", true},
+
+                {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
+                {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
+
+                {"microDutySdxEnabled false", "microDutySdxEnabled", false, "CDP_MICRO_DUTY_SDX", false},
+                {"microDutySdxEnabled true", "microDutySdxEnabled", true, "CDP_MICRO_DUTY_SDX", true},
+
+                {"enableAzureSingleResourceGroupDedicatedStorageAccount false", "enableAzureSingleResourceGroupDedicatedStorageAccount", false,
+                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", false},
+                {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
+                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
+
+                {"enableCloudIdentityMapping false", "enableCloudIdentityMapping", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
+                {"enableCloudIdentityMapping true", "enableCloudIdentityMapping", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
+
+                {"enableInternalRepositoryForUpgrade false", "enableInternalRepositoryForUpgrade", false, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", false},
+                {"enableInternalRepositoryForUpgrade true", "enableInternalRepositoryForUpgrade", true, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", true},
+
+                {"enableHbaseCloudStorage false", "enableHbaseCloudStorage", false, "CDP_SDX_HBASE_CLOUD_STORAGE", false},
+                {"enableHbaseCloudStorage true", "enableHbaseCloudStorage", true, "CDP_SDX_HBASE_CLOUD_STORAGE", true},
+
+                {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
+                {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
+
+                {"azureEndpointGatewayEnabled false", "azureEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", false},
+                {"azureEndpointGatewayEnabled true", "azureEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", true},
+
+                {"gcpEndpointGatewayEnabled false", "gcpEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", false},
+                {"gcpEndpointGatewayEnabled true", "gcpEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", true},
+
+                {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
+                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
+                {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,
+                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", true},
+
+                {"endpointGatewaySkipValidation false", "endpointGatewaySkipValidation", false, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", false},
+                {"endpointGatewaySkipValidation true", "endpointGatewaySkipValidation", true, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", true},
+
+                {"conclusionCheckerSendUserEvent false", "conclusionCheckerSendUserEvent", false, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", false},
+                {"conclusionCheckerSendUserEvent true", "conclusionCheckerSendUserEvent", true, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", true},
+
+                {"enableWorkloadIamSync false", "enableWorkloadIamSync", false, "WORKLOAD_IAM_SYNC", false},
+                {"enableWorkloadIamSync true", "enableWorkloadIamSync", true, "WORKLOAD_IAM_SYNC", true},
+
+                {"enableWorkloadIamSyncRouting false", "enableWorkloadIamSyncRouting", false, "WORKLOAD_IAM_USERSYNC_ROUTING", false},
+                {"enableWorkloadIamSyncRouting true", "enableWorkloadIamSyncRouting", true, "WORKLOAD_IAM_USERSYNC_ROUTING", true},
+
+                {"enableUsersyncEnforceGroupMemberLimit false", "enableUsersyncEnforceGroupMemberLimit", false,
+                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", false},
+                {"enableUsersyncEnforceGroupMemberLimit true", "enableUsersyncEnforceGroupMemberLimit", true,
+                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", true},
+
+                {"enableUsersyncSplitFreeIPAUserRetrieval false", "enableUsersyncSplitFreeIPAUserRetrieval", false,
+                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", false},
+                {"enableUsersyncSplitFreeIPAUserRetrieval true", "enableUsersyncSplitFreeIPAUserRetrieval", true,
+                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", true},
+
+                {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
+                {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
+
+                {"tlsv13Enabled false", "tlsv13Enabled", false, "CDP_CB_TLS_1_3", false},
+                {"tlsv13Enabled true", "tlsv13Enabled", true, "CDP_CB_TLS_1_3", true},
+
+                {"gcpSecureBootEnabled false", "gcpSecureBootEnabled", false, "CDP_CB_GCP_SECURE_BOOT", false},
+                {"gcpSecureBootEnabled true", "gcpSecureBootEnabled", true, "CDP_CB_GCP_SECURE_BOOT", true},
+
+                {"lakehouseOptimizerEnabled false", "lakehouseOptimizerEnabled", false, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", false},
+                {"lakehouseOptimizerEnabled true", "lakehouseOptimizerEnabled", true, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", true},
+
+                {"configureEncryptionProfileEnabled false", "configureEncryptionProfileEnabled", false, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", false},
+                {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true}
+        };
+    }
 
     @Test
     public void testSetLicenseShouldReturnACloudbreakLicense() throws IOException {
@@ -99,17 +191,6 @@ public class MockUserManagementServiceTest {
         String expected = "foo_bar22";
 
         assertThat(underTest.sanitizeWorkloadUsername(username)).isEqualTo(expected);
-    }
-
-    static Object[][] testGetWorkloadCredentialsDataProvider() {
-        return new Object[][]{
-                // userId, expectedWorkloadUsername
-                {"a592e3d7-8b53-40e5-80a4-6a1daf43d976", "a592e3d78b5340e580a46a1daf43d976"},
-                {"foo_bar", "foo_bar"},
-                {"foo+bar", "foobar"},
-                {"foo@bar", "foo"},
-                {"baz/FOO@bar", "foo"},
-        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -196,85 +277,6 @@ public class MockUserManagementServiceTest {
                 "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
-    static Object[][] conditionalEntitlementDataProvider() {
-        return new Object[][]{
-                // testCaseName conditionFieldName condition entitlementName entitlementPresentExpected
-                {"enableBaseImages false", "enableBaseImages", false, "CDP_BASE_IMAGE", false},
-                {"enableBaseImages true", "enableBaseImages", true, "CDP_BASE_IMAGE", true},
-
-                {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
-                {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
-
-                {"microDutySdxEnabled false", "microDutySdxEnabled", false, "CDP_MICRO_DUTY_SDX", false},
-                {"microDutySdxEnabled true", "microDutySdxEnabled", true, "CDP_MICRO_DUTY_SDX", true},
-
-                {"enableAzureSingleResourceGroupDedicatedStorageAccount false", "enableAzureSingleResourceGroupDedicatedStorageAccount", false,
-                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", false},
-                {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
-                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
-
-                {"enableCloudIdentityMapping false", "enableCloudIdentityMapping", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
-                {"enableCloudIdentityMapping true", "enableCloudIdentityMapping", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
-
-                {"enableInternalRepositoryForUpgrade false", "enableInternalRepositoryForUpgrade", false, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", false},
-                {"enableInternalRepositoryForUpgrade true", "enableInternalRepositoryForUpgrade", true, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", true},
-
-                {"enableHbaseCloudStorage false", "enableHbaseCloudStorage", false, "CDP_SDX_HBASE_CLOUD_STORAGE", false},
-                {"enableHbaseCloudStorage true", "enableHbaseCloudStorage", true, "CDP_SDX_HBASE_CLOUD_STORAGE", true},
-
-                {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
-                {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
-
-                {"azureEndpointGatewayEnabled false", "azureEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", false},
-                {"azureEndpointGatewayEnabled true", "azureEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", true},
-
-                {"gcpEndpointGatewayEnabled false", "gcpEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", false},
-                {"gcpEndpointGatewayEnabled true", "gcpEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", true},
-
-                {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
-                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
-                {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,
-                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", true},
-
-                {"endpointGatewaySkipValidation false", "endpointGatewaySkipValidation", false, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", false},
-                {"endpointGatewaySkipValidation true", "endpointGatewaySkipValidation", true, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", true},
-
-                {"conclusionCheckerSendUserEvent false", "conclusionCheckerSendUserEvent", false, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", false},
-                {"conclusionCheckerSendUserEvent true", "conclusionCheckerSendUserEvent", true, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", true},
-
-                {"enableWorkloadIamSync false", "enableWorkloadIamSync", false, "WORKLOAD_IAM_SYNC", false},
-                {"enableWorkloadIamSync true", "enableWorkloadIamSync", true, "WORKLOAD_IAM_SYNC", true},
-
-                {"enableWorkloadIamSyncRouting false", "enableWorkloadIamSyncRouting", false, "WORKLOAD_IAM_USERSYNC_ROUTING", false},
-                {"enableWorkloadIamSyncRouting true", "enableWorkloadIamSyncRouting", true, "WORKLOAD_IAM_USERSYNC_ROUTING", true},
-
-                {"enableUsersyncEnforceGroupMemberLimit false", "enableUsersyncEnforceGroupMemberLimit", false,
-                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", false},
-                {"enableUsersyncEnforceGroupMemberLimit true", "enableUsersyncEnforceGroupMemberLimit", true,
-                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", true},
-
-                {"enableUsersyncSplitFreeIPAUserRetrieval false", "enableUsersyncSplitFreeIPAUserRetrieval", false,
-                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", false},
-                {"enableUsersyncSplitFreeIPAUserRetrieval true", "enableUsersyncSplitFreeIPAUserRetrieval", true,
-                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", true},
-
-                {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
-                {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
-
-                {"tlsv13Enabled false", "tlsv13Enabled", false, "CDP_CB_TLS_1_3", false},
-                {"tlsv13Enabled true", "tlsv13Enabled", true, "CDP_CB_TLS_1_3", true},
-
-                {"gcpSecureBootEnabled false", "gcpSecureBootEnabled", false, "CDP_CB_GCP_SECURE_BOOT", false},
-                {"gcpSecureBootEnabled true", "gcpSecureBootEnabled", true, "CDP_CB_GCP_SECURE_BOOT", true},
-
-                {"lakehouseOptimizerEnabled false", "lakehouseOptimizerEnabled", false, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", false},
-                {"lakehouseOptimizerEnabled true", "lakehouseOptimizerEnabled", true, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", true},
-
-                {"configureEncryptionProfileEnabled false", "configureEncryptionProfileEnabled", false, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", false},
-                {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true}
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("conditionalEntitlementDataProvider")
     void getAccountTestIncludesConditionalEntitlement(String testCaseName, String conditionFieldName, boolean condition, String entitlementName,
@@ -354,6 +356,26 @@ public class MockUserManagementServiceTest {
         StatusRuntimeException statusRuntimeException = assertThrows(StatusRuntimeException.class, () -> underTest.getAccount(req, null));
 
         assertThat(statusRuntimeException).hasMessage("INVALID_ARGUMENT: This operation cannot be used with crn id");
+    }
 
+    @Test
+    void testGetAccountWhenClouderaManagerExternalAccountIdProvided() {
+        ReflectionTestUtils.setField(underTest, "cbLicense", VALID_LICENSE);
+        underTest.initializeWorkloadPasswordPolicy();
+
+        GetAccountRequest req = GetAccountRequest.newBuilder()
+                .setExternalAccountId(CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID)
+                .build();
+
+        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+
+        underTest.getAccount(req, observer);
+
+        assertThat(observer.getValues().size()).isEqualTo(1);
+        GetAccountResponse res = observer.getValues().get(0);
+        assertThat(res.hasAccount()).isTrue();
+        Account account = res.getAccount();
+        assertThat(account.getAccountId()).isEqualTo("cloudbreakadmin");
+        assertThat(account.getExternalAccountId()).isEqualTo(CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID);
     }
 }

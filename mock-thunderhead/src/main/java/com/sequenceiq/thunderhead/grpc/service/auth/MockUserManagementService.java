@@ -277,6 +277,11 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
 
+    // copy static value from thunderhead repository, ApiAccessConfiguration.java class
+    private static final String CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID = "0018000000ik5epAAA:Cloudera-Administration";
+
+    private static final String MOCK_CLOUDBREAKADMIN_ACCOUNT_ID = "cloudbreakadmin";
+
     private static final MacSigner SIGNATURE_VERIFIER = new MacSigner(MockUmsService.MAC_SIGNER_SECRET_KEY);
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
@@ -1139,11 +1144,19 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))
                                 .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
-                                .setAccountId(accountId)
-                                .setExternalAccountId("external-" + accountId)
+                                .setAccountId(getAccountId(request.getExternalAccountId(), accountId))
+                                .setExternalAccountId(getExternalAccountId(request.getExternalAccountId(), accountId))
                                 .build())
                         .build());
         responseObserver.onCompleted();
+    }
+
+    private String getExternalAccountId(String externalAccountId, String accountId) {
+        return CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID.equals(externalAccountId) ? externalAccountId : "external-" + accountId;
+    }
+
+    private String getAccountId(String externalAccountId, String accountId) {
+        return CLOUDERA_ADMINISTRATION_EXTERNAL_ACCOUNT_ID.equals(externalAccountId) ? MOCK_CLOUDBREAKADMIN_ACCOUNT_ID : accountId;
     }
 
     private Entitlement createEntitlement(String entitlement) {
