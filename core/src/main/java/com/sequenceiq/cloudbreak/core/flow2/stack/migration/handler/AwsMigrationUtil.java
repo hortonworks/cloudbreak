@@ -23,13 +23,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -64,6 +65,9 @@ public class AwsMigrationUtil {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     public boolean allInstancesDeletedFromCloudFormation(AuthenticatedContext ac, CloudResource cloudResource) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -106,8 +110,9 @@ public class AwsMigrationUtil {
 
     public void changeLoadBalancer(AuthenticatedContext ac) {
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = collectLoadBalancerMetadata(ac, ac.getCloudContext().getId());
-        StackView stack = stackDtoService.getStackViewById(ac.getCloudContext().getId());
-        metadataSetupService.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetadata);
+        StackDto stackDto = stackDtoService.getById(ac.getCloudContext().getId(), false);
+        metadataSetupService.saveLoadBalancerMetadata(stackDto.getStack(), cloudLoadBalancerMetadata);
+        gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stackDto);
     }
 
     private List<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AuthenticatedContext authenticatedContext, Long stackId) {
@@ -115,8 +120,7 @@ public class AwsMigrationUtil {
                 .map(LoadBalancer::getType)
                 .collect(Collectors.toList());
         List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, stackId);
-        CollectLoadBalancerMetadataCloudPlatformRequest request = new CollectLoadBalancerMetadataCloudPlatformRequest(authenticatedContext.getCloudContext(),
-                authenticatedContext.getCloudCredential(), loadBalancerTypes, cloudResources);
+        CollectLoadBalancerMetadataCloudPlatformRequest request = getCollectLoadBalancerMetadataRequest(authenticatedContext, loadBalancerTypes, cloudResources);
         eventBus.notify(request.selector(), Event.wrap(request));
         try {
             CollectLoadBalancerMetadataCloudPlatformResult res = request.await();
@@ -131,5 +135,11 @@ public class AwsMigrationUtil {
             LOGGER.error("Error while collect load balancer metadata", e);
             throw new OperationException(e);
         }
+    }
+
+    CollectLoadBalancerMetadataCloudPlatformRequest getCollectLoadBalancerMetadataRequest(AuthenticatedContext authenticatedContext,
+            List<LoadBalancerType> loadBalancerTypes, List<CloudResource> cloudResources) {
+        return new CollectLoadBalancerMetadataCloudPlatformRequest(authenticatedContext.getCloudContext(),
+                authenticatedContext.getCloudCredential(), loadBalancerTypes, cloudResources);
     }
 }
