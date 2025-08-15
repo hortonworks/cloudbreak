@@ -27,8 +27,15 @@ import com.sequenceiq.environment.tags.domain.AccountTag;
 @Service
 public class DefaultInternalAccountTagService {
 
-    @Value("${cb.account.tag.validator:^(?!microsoft|azure|aws|windows|\\s)[a-zA-Z0-9\\{\\-\\_\\}]*[^\\-\\_]$}")
-    private String accountTagPattern;
+    static final String DEFAULT_KEY_ACCOUNT_TAG_PATTERN = "^(?!microsoft|azure|windows|\\s)[a-z\\{][a-zA-Z0-9\\{\\-\\_\\}]*[a-zA-Z0-9}]$";
+
+    static final String DEFAULT_VALUE_ACCOUNT_TAG_PATTERN = "^[^\\s][a-zA-Z0-9\\{\\-\\_\\}]*[a-zA-Z0-9\\-\\_\\}]$";
+
+    @Value("${cb.account.tag.validator.key:" + DEFAULT_KEY_ACCOUNT_TAG_PATTERN)
+    private String keyAccountTagPattern;
+
+    @Value("${cb.account.tag.validator.value:" + DEFAULT_VALUE_ACCOUNT_TAG_PATTERN)
+    private String valueAccountValueTagPattern;
 
     @Value("${env.apply.internal.tags:true}")
     private boolean applyInternalTags;
@@ -91,18 +98,20 @@ public class DefaultInternalAccountTagService {
             }
         }
         for (AccountTag accountTag : accountTags) {
-            Pattern pattern = Pattern.compile(accountTagPattern);
-            Matcher keyMatcher = pattern.matcher(accountTag.getTagKey());
-            Matcher valueMatcher = pattern.matcher(accountTag.getTagValue());
+            Pattern keyPattern = Pattern.compile(keyAccountTagPattern);
+            Matcher keyMatcher = keyPattern.matcher(accountTag.getTagKey());
+            Pattern valuePattern = Pattern.compile(valueAccountValueTagPattern);
+            Matcher valueMatcher = valuePattern.matcher(accountTag.getTagValue());
             if (!keyMatcher.matches()) {
                 throw new BadRequestException(
-                        String.format("The key '%s' can not start with microsoft or azure or aws or windows "
-                                + "or space and can contains only '-' and '_' and '{' and '}' characters.", accountTag.getTagKey()));
+                        String.format("The key '%s' must start with a lowecase letter and can not start with microsoft or azure or windows "
+                                + "or space and can contains only '-', '_', upper/lowercase alphanumeric characters and variables in the format of "
+                                + "'{{{variable}}}'.", accountTag.getTagValue()));
             }
             if (!valueMatcher.matches()) {
                 throw new BadRequestException(
-                        String.format("The value '%s' can not start with microsoft or azure or aws or windows "
-                                + "or space and can contains only '-' and '_' and '{' and '}' characters.", accountTag.getTagValue()));
+                        String.format("The value '%s' can not start with space and can contains only '-' and '_', upper/lowercase alphanumeric characters "
+                                + "and variables in the format of '{{{variable}}}'.", accountTag.getTagValue()));
             }
             if (isAccountTagContainsTemplate(accountTag.getTagKey()) && isAccountTagInvalid(accountTag.getTagKey())) {
                 throw new BadRequestException(
@@ -116,7 +125,7 @@ public class DefaultInternalAccountTagService {
     }
 
     private boolean isAccountTagContainsTemplate(String template) {
-        return template.contains("{{{") || template.contains("}}}");
+        return template.contains("{") || template.contains("}");
     }
 
     private boolean isAccountTagInvalid(String template) {
