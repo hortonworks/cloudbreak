@@ -18,12 +18,12 @@ public abstract class AccountTagBase implements Serializable {
 
     @NotNull
     @Schema(description = TagDescription.KEY, requiredMode = Schema.RequiredMode.REQUIRED)
-    @Size(max = 127, min = 3, message = "The length of the key has to be in range of 3 to 127")
+    @Size(max = 63, min = 3, message = "The length of the key has to be in range of 3 to 63")
     private String key;
 
     @NotNull
     @Schema(description = TagDescription.VALUE, requiredMode = Schema.RequiredMode.REQUIRED)
-    @Size(max = 255, min = 3, message = "The length of the value has to be in range of 3 to 255")
+    @Size(max = 63, min = 3, message = "The length of the value has to be in range of 3 to 63")
     private String value;
 
     public String getValue() {
