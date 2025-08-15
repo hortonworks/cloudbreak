@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.migration.handler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -21,11 +27,15 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataCloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataCloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -76,6 +86,9 @@ public class AwsMigrationUtilTest {
 
     @Mock
     private EventBus eventBus;
+
+    @Mock
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     @Test
     public void testAllInstancesDeletedFromCloudFormationWhenASGroupNotFound() {
@@ -164,5 +177,22 @@ public class AwsMigrationUtilTest {
         Assertions.assertFalse(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id2");
+    }
+
+    @Test
+    void testChangeLoadbalancer() throws InterruptedException {
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getId()).thenReturn(0L);
+        AwsMigrationUtil spiedUnderTest = Mockito.spy(underTest);
+        CollectLoadBalancerMetadataCloudPlatformRequest collectLoadBalancerMetadataRequest = mock(CollectLoadBalancerMetadataCloudPlatformRequest.class);
+        doReturn(collectLoadBalancerMetadataRequest).when(spiedUnderTest).getCollectLoadBalancerMetadataRequest(any(), any(), any());
+        when(collectLoadBalancerMetadataRequest.await()).thenReturn(new CollectLoadBalancerMetadataCloudPlatformResult(0L, List.of()));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDtoService.getById(anyLong(), eq(Boolean.FALSE))).thenReturn(stackDto);
+
+        spiedUnderTest.changeLoadBalancer(ac);
+
+        verify(metadataSetupService, times(1)).saveLoadBalancerMetadata(any(), any());
+        verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(any());
     }
 }
