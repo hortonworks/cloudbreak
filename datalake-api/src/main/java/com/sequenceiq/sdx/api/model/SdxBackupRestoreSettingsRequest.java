@@ -2,7 +2,6 @@ package com.sequenceiq.sdx.api.model;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,27 +14,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxBackupRestoreSettingsRequest {
 
-    @NotNull
     @ValidLinuxDirectoryPath
-    @Schema(description = ModelDescriptions.BACKUP_TEMP_LOCATION, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = ModelDescriptions.BACKUP_TEMP_LOCATION)
     private String backupTempLocation;
 
-    @NotNull
     @Min(value = 0, message = "Value must be at least 0")
     @Max(value = 1440, message = "Value must not exceed 1440")
-    @Schema(description = ModelDescriptions.BACKUP_TIMEOUT_IN_MINUTES, requiredMode = Schema.RequiredMode.REQUIRED)
-    private int backupTimeoutInMinutes;
+    @Schema(description = ModelDescriptions.BACKUP_TIMEOUT_IN_MINUTES)
+    private Integer backupTimeoutInMinutes;
 
-    @NotNull
     @ValidLinuxDirectoryPath
-    @Schema(description = ModelDescriptions.RESTORE_TEMP_LOCATION, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = ModelDescriptions.RESTORE_TEMP_LOCATION)
     private String restoreTempLocation;
 
-    @NotNull
     @Min(value = 0, message = "Value must be at least 0")
     @Max(value = 1440, message = "Value must not exceed 1440")
-    @Schema(description = ModelDescriptions.RESTORE_TIMEOUT_IN_MINUTES, requiredMode = Schema.RequiredMode.REQUIRED)
-    private int restoreTimeoutInMinutes;
+    @Schema(description = ModelDescriptions.RESTORE_TIMEOUT_IN_MINUTES)
+    private Integer restoreTimeoutInMinutes;
 
     public String getBackupTempLocation() {
         return backupTempLocation;
@@ -45,11 +40,11 @@ public class SdxBackupRestoreSettingsRequest {
         this.backupTempLocation = backupTempLocation;
     }
 
-    public int getBackupTimeoutInMinutes() {
+    public Integer getBackupTimeoutInMinutes() {
         return backupTimeoutInMinutes;
     }
 
-    public void setBackupTimeoutInMinutes(int backupTimeoutInMinutes) {
+    public void setBackupTimeoutInMinutes(Integer backupTimeoutInMinutes) {
         this.backupTimeoutInMinutes = backupTimeoutInMinutes;
     }
 
@@ -61,11 +56,11 @@ public class SdxBackupRestoreSettingsRequest {
         this.restoreTempLocation = restoreTempLocation;
     }
 
-    public int getRestoreTimeoutInMinutes() {
+    public Integer getRestoreTimeoutInMinutes() {
         return restoreTimeoutInMinutes;
     }
 
-    public void setRestoreTimeoutInMinutes(int restoreTimeoutInMinutes) {
+    public void setRestoreTimeoutInMinutes(Integer restoreTimeoutInMinutes) {
         this.restoreTimeoutInMinutes = restoreTimeoutInMinutes;
     }
 

@@ -56,8 +56,6 @@ public class BackupRestoreSaltConfigGenerator {
     public static final List<DatabaseType> DEFAULT_BACKUP_DATABASE =
             List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC);
 
-    public static final String DEFAULT_LOCAL_BACKUP_DIR = "/var/tmp";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
 
     private static final String SKIP_COMPRESSION_VALUE = "0";

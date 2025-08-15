@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.sdx.BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
@@ -437,14 +438,21 @@ public class SdxBackupRestoreService {
         return new SdxDatabaseRestoreStatusResponse(convertSdxDatabaseDrStatus(drStatus.getStatus()), drStatus.getStatusReason());
     }
 
-    public void setDatabaseBackupRestoreSettings(SdxCluster sdxCluster, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+    public SdxBackupRestoreSettingsResponse setDatabaseBackupRestoreSettings(SdxCluster sdxCluster,
+            SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        SdxBackupRestoreSettings sdxBackupRestoreSettings = getSdxBackupRestoreSettings(sdxCluster.getCrn(), backupRestoreSettingsRequest);
-        sdxBackupRestoreSettingsRepository.save(sdxBackupRestoreSettings);
-    }
-
-    public SdxBackupRestoreSettings getDatabaseBackupRestoreSettings(String sdxClusterCrn) {
-        return sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxClusterCrn);
+        LOGGER.info("Setting database backup/restore settings for SDX cluster {} with settings {}.",
+                sdxCluster.getClusterName(), backupRestoreSettingsRequest);
+        SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
+        if (backupRestoreSettings != null) {
+            updateSdxBackupRestoreSettings(backupRestoreSettings, backupRestoreSettingsRequest);
+        } else {
+            backupRestoreSettings = getSdxBackupRestoreSettings(sdxCluster.getCrn(), backupRestoreSettingsRequest);
+        }
+        SdxBackupRestoreSettings savedSdxBackupRestoreSettings = sdxBackupRestoreSettingsRepository.save(backupRestoreSettings);
+        LOGGER.info("Database backup/restore settings for SDX cluster {} saved successfully: {}.", sdxCluster.getClusterName(),
+                savedSdxBackupRestoreSettings);
+        return getSdxBackupRestoreSettingsResponse(savedSdxBackupRestoreSettings);
     }
 
     public SdxBackupRestoreSettingsResponse getDatabaseBackupRestoreSettingsResponse(SdxCluster sdxCluster) {
@@ -467,12 +475,36 @@ public class SdxBackupRestoreService {
         }
     }
 
+    private void updateSdxBackupRestoreSettings(SdxBackupRestoreSettings sdxBackupRestoreSettings,
+            SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+        if (backupRestoreSettingsRequest.getBackupTempLocation() != null) {
+            sdxBackupRestoreSettings.setBackupTempLocation(backupRestoreSettingsRequest.getBackupTempLocation());
+        }
+        if (backupRestoreSettingsRequest.getBackupTimeoutInMinutes() != null) {
+            sdxBackupRestoreSettings.setBackupTimeoutInMinutes(backupRestoreSettingsRequest.getBackupTimeoutInMinutes());
+        }
+        if (backupRestoreSettingsRequest.getRestoreTempLocation() != null) {
+            sdxBackupRestoreSettings.setRestoreTempLocation(backupRestoreSettingsRequest.getRestoreTempLocation());
+        }
+        if (backupRestoreSettingsRequest.getRestoreTimeoutInMinutes() != null) {
+            sdxBackupRestoreSettings.setRestoreTimeoutInMinutes(backupRestoreSettingsRequest.getRestoreTimeoutInMinutes());
+        }
+    }
+
     private SdxBackupRestoreSettings getSdxBackupRestoreSettings(String clusterCrn, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
         SdxBackupRestoreSettings sdxBackupRestoreSettings = new SdxBackupRestoreSettings();
-        sdxBackupRestoreSettings.setBackupTempLocation(backupRestoreSettingsRequest.getBackupTempLocation());
-        sdxBackupRestoreSettings.setBackupTimeoutInMinutes(backupRestoreSettingsRequest.getBackupTimeoutInMinutes());
-        sdxBackupRestoreSettings.setRestoreTempLocation(backupRestoreSettingsRequest.getRestoreTempLocation());
-        sdxBackupRestoreSettings.setRestoreTimeoutInMinutes(backupRestoreSettingsRequest.getRestoreTimeoutInMinutes());
+        sdxBackupRestoreSettings.setBackupTempLocation(
+                Optional.ofNullable(backupRestoreSettingsRequest.getBackupTempLocation())
+                        .orElse(DEFAULT_LOCAL_BACKUP_DIR));
+        sdxBackupRestoreSettings.setBackupTimeoutInMinutes(
+                Optional.ofNullable(backupRestoreSettingsRequest.getBackupTimeoutInMinutes())
+                        .orElse(0));
+        sdxBackupRestoreSettings.setRestoreTempLocation(
+                Optional.ofNullable(backupRestoreSettingsRequest.getRestoreTempLocation())
+                        .orElse(DEFAULT_LOCAL_BACKUP_DIR));
+        sdxBackupRestoreSettings.setRestoreTimeoutInMinutes(
+                Optional.ofNullable(backupRestoreSettingsRequest.getRestoreTimeoutInMinutes())
+                        .orElse(0));
         sdxBackupRestoreSettings.setSdxClusterCrn(clusterCrn);
         return sdxBackupRestoreSettings;
     }

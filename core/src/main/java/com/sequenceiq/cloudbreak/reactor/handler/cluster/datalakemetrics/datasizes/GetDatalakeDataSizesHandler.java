@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datas
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesSubmissionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.GetDatalakeDataSizesRequest;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
+import com.sequenceiq.cloudbreak.sdx.BackupConstants;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -91,8 +92,8 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
     @Override
     protected Selectable doAccept(HandlerEvent<GetDatalakeDataSizesRequest> event) {
         GetDatalakeDataSizesRequest request = event.getData();
-        String tempBackupDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
-        String tempRestoreDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
+        String tempBackupDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
+        String tempRestoreDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
         Long stackId = request.getResourceId();
         StackDto stackDto = stackDtoService.getById(stackId);
         SdxBackupRestoreSettingsResponse sdxBackupRestoreSettingsResponse = sdxClientService.getBackupRestoreSettings(stackDto.getResourceCrn());

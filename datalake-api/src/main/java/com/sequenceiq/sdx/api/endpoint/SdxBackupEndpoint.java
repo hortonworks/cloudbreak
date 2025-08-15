@@ -102,7 +102,8 @@ public interface SdxBackupEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Set backup and restore settings for the datalake", operationId = "setBackupRestoreSettings",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void setBackupRestoreSettings(@PathParam("name") String name, @Valid @NotNull SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest);
+    SdxBackupRestoreSettingsResponse setBackupRestoreSettings(@PathParam("name") String name,
+            @Valid @NotNull SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest);
 
     @GET
     @Path("{name}/getBackupRestoreSettings")

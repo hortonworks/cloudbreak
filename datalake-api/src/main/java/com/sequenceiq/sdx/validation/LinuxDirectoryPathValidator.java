@@ -11,7 +11,7 @@ public class LinuxDirectoryPathValidator implements ConstraintValidator<ValidLin
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) {
-            return false;
+            return true;
         }
         String trimmed = value.trim();
         if (trimmed.isEmpty()) {

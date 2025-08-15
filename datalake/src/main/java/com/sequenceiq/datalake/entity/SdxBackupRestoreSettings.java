@@ -61,4 +61,15 @@ public class SdxBackupRestoreSettings {
     public void setRestoreTimeoutInMinutes(int restoreTimeoutInMinutes) {
         this.restoreTimeoutInMinutes = restoreTimeoutInMinutes;
     }
+
+    @Override
+    public String toString() {
+        return "SdxBackupRestoreSettings{" +
+                "sdxClusterCrn='" + sdxClusterCrn + '\'' +
+                ", backupTempLocation='" + backupTempLocation + '\'' +
+                ", backupTimeoutInMinutes=" + backupTimeoutInMinutes +
+                ", restoreTempLocation='" + restoreTempLocation + '\'' +
+                ", restoreTimeoutInMinutes=" + restoreTimeoutInMinutes +
+                '}';
+    }
 }

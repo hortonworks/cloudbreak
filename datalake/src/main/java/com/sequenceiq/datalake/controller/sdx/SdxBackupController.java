@@ -114,9 +114,9 @@ public class SdxBackupController implements SdxBackupEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
-    public void setBackupRestoreSettings(@ResourceName String name, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
+    public SdxBackupRestoreSettingsResponse setBackupRestoreSettings(@ResourceName String name, SdxBackupRestoreSettingsRequest backupRestoreSettingsRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        sdxBackupRestoreService.setDatabaseBackupRestoreSettings(sdxCluster, backupRestoreSettingsRequest);
+        return sdxBackupRestoreService.setDatabaseBackupRestoreSettings(sdxCluster, backupRestoreSettingsRequest);
     }
 
     @Override

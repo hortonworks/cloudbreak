@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRe
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
+import com.sequenceiq.cloudbreak.sdx.BackupConstants;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -75,8 +76,8 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
         LOGGER.debug("Restoring database on stack {}, backup id {}", stackId, request.getBackupId());
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
-            String tempBackupDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
-            String tempRestoreDir = BackupRestoreSaltConfigGenerator.DEFAULT_LOCAL_BACKUP_DIR;
+            String tempBackupDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
+            String tempRestoreDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
             ClusterView cluster = stackDto.getCluster();
             StackView stack = stackDto.getStack();
             SdxBackupRestoreSettingsResponse sdxBackupRestoreSettingsResponse = sdxClientService.getBackupRestoreSettings(stackDto.getResourceCrn());

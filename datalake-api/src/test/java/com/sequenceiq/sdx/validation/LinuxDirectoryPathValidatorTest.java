@@ -17,6 +17,7 @@ class LinuxDirectoryPathValidatorTest {
 
     @Test
     void validAbsolutePaths() {
+        assertTrue(validator.isValid(null, null));
         assertTrue(validator.isValid("/", null));
         assertTrue(validator.isValid("/home", null));
         assertTrue(validator.isValid("/var/log", null));
@@ -35,7 +36,6 @@ class LinuxDirectoryPathValidatorTest {
 
     @Test
     void invalidPaths() {
-        assertFalse(validator.isValid(null, null));
         assertFalse(validator.isValid("", null));
         assertFalse(validator.isValid(" ", null));
         assertFalse(validator.isValid("//double-slash", null));

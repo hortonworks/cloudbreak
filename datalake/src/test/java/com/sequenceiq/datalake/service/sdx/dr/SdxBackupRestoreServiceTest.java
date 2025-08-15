@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.entity.SdxBackupRestoreSettings;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
@@ -61,6 +62,7 @@ import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
+import com.sequenceiq.datalake.repository.SdxBackupRestoreSettingsRepository;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
@@ -72,6 +74,8 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupRestoreSettingsResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
@@ -129,6 +133,9 @@ public class SdxBackupRestoreServiceTest {
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private SdxBackupRestoreSettingsRepository sdxBackupRestoreSettingsRepository;
 
     @InjectMocks
     private SdxBackupRestoreService underTest;
@@ -806,6 +813,81 @@ public class SdxBackupRestoreServiceTest {
         sdxOperation.setStatus(SdxOperationStatus.SUCCEEDED);
         when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
         assertThrows(CloudbreakApiException.class, () -> underTest.getDatabaseRestoreStatus(sdxCluster, "0"));
+    }
+
+    @Test
+    public void setDatabaseBackupRestoreSettingsWhenSettingsExist() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxBackupRestoreSettings existingSettings = new SdxBackupRestoreSettings();
+        existingSettings.setBackupTempLocation("/backup/temp/location");
+        existingSettings.setRestoreTempLocation("/restore/temp/location");
+        existingSettings.setBackupTimeoutInMinutes(120);
+        existingSettings.setRestoreTimeoutInMinutes(180);
+        existingSettings.setSdxClusterCrn(sdxCluster.getCrn());
+
+        SdxBackupRestoreSettingsRequest settingsRequest = new SdxBackupRestoreSettingsRequest();
+        settingsRequest.setBackupTempLocation("/new/backup/temp/location");
+        settingsRequest.setBackupTimeoutInMinutes(90);
+
+        when(sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn())).thenReturn(existingSettings);
+        when(sdxBackupRestoreSettingsRepository.save(any(SdxBackupRestoreSettings.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SdxBackupRestoreSettingsResponse response = underTest.setDatabaseBackupRestoreSettings(sdxCluster, settingsRequest);
+
+        verify(sdxBackupRestoreSettingsRepository, times(1)).findBySdxClusterCrn(sdxCluster.getCrn());
+        verify(sdxBackupRestoreSettingsRepository, times(1)).save(any(SdxBackupRestoreSettings.class));
+
+        assertNotNull(response);
+        assertEquals("/new/backup/temp/location", response.getBackupTempLocation());
+        assertEquals(90, response.getBackupTimeoutInMinutes());
+        assertEquals("/restore/temp/location", response.getRestoreTempLocation());
+        assertEquals(180, response.getRestoreTimeoutInMinutes());
+    }
+
+    @Test
+    public void setDatabaseBackupRestoreSettingsWhenSettingsDoNotExist() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxBackupRestoreSettingsRequest settingsRequest = new SdxBackupRestoreSettingsRequest();
+        settingsRequest.setBackupTempLocation("/default/backup/temp/location");
+        settingsRequest.setRestoreTempLocation("/default/restore/temp/location");
+        settingsRequest.setBackupTimeoutInMinutes(60);
+        settingsRequest.setRestoreTimeoutInMinutes(120);
+
+        when(sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn())).thenReturn(null);
+        when(sdxBackupRestoreSettingsRepository.save(any(SdxBackupRestoreSettings.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SdxBackupRestoreSettingsResponse response = underTest.setDatabaseBackupRestoreSettings(sdxCluster, settingsRequest);
+
+        verify(sdxBackupRestoreSettingsRepository, times(1)).findBySdxClusterCrn(sdxCluster.getCrn());
+        verify(sdxBackupRestoreSettingsRepository, times(1)).save(any(SdxBackupRestoreSettings.class));
+
+        assertNotNull(response);
+        assertEquals("/default/backup/temp/location", response.getBackupTempLocation());
+        assertEquals(60, response.getBackupTimeoutInMinutes());
+        assertEquals("/default/restore/temp/location", response.getRestoreTempLocation());
+        assertEquals(120, response.getRestoreTimeoutInMinutes());
+    }
+
+    @Test
+    public void setDatabaseBackupRestoreSettingsWhenSettingsDoNotExistButNotEveryFieldSet() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        SdxBackupRestoreSettingsRequest settingsRequest = new SdxBackupRestoreSettingsRequest();
+        settingsRequest.setBackupTempLocation("/default/backup/temp/location");
+        settingsRequest.setBackupTimeoutInMinutes(60);
+
+        when(sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn())).thenReturn(null);
+        when(sdxBackupRestoreSettingsRepository.save(any(SdxBackupRestoreSettings.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SdxBackupRestoreSettingsResponse response = underTest.setDatabaseBackupRestoreSettings(sdxCluster, settingsRequest);
+
+        verify(sdxBackupRestoreSettingsRepository, times(1)).findBySdxClusterCrn(sdxCluster.getCrn());
+        verify(sdxBackupRestoreSettingsRepository, times(1)).save(any(SdxBackupRestoreSettings.class));
+
+        assertNotNull(response);
+        assertEquals("/default/backup/temp/location", response.getBackupTempLocation());
+        assertEquals(60, response.getBackupTimeoutInMinutes());
+        assertEquals("/var/tmp", response.getRestoreTempLocation());
+        assertEquals(0, response.getRestoreTimeoutInMinutes());
     }
 
     private SdxCluster getValidSdxCluster() {
