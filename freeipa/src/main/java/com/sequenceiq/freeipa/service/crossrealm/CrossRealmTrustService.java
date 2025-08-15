@@ -43,4 +43,8 @@ public class CrossRealmTrustService {
     public void deleteByStackIdIfExists(Long stackId) {
         crossRealmTrustRepository.deleteByStackId(stackId);
     }
+
+    public CrossRealmTrust save(CrossRealmTrust crossRealmTrust) {
+        return crossRealmTrustRepository.save(crossRealmTrust);
+    }
 }

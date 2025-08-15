@@ -28,6 +28,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -40,9 +41,9 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.repair.event.TrustRepairEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupEvent;
-import com.sequenceiq.freeipa.repository.CrossRealmTrustRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -60,7 +61,10 @@ public class TrustSetupService {
             TrustStatus.TRUST_SETUP_FINISH_FAILED);
 
     private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS = Set.of(TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
-            TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS, TrustStatus.TRUST_SETUP_FINISH_FAILED, TrustStatus.TRUST_ACTIVE);
+            TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS, TrustStatus.TRUST_SETUP_FINISH_FAILED, TrustStatus.TRUST_BROKEN, TrustStatus.TRUST_ACTIVE);
+
+    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_REPAIR_COMMANDS = Set.of(TrustStatus.TRUST_SETUP_FINISH_FAILED,
+            TrustStatus.TRUST_BROKEN, TrustStatus.TRUST_ACTIVE);
 
     @Inject
     private StackService stackService;
@@ -79,9 +83,6 @@ public class TrustSetupService {
 
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
-
-    @Inject
-    private CrossRealmTrustRepository crossRealmTrustRepository;
 
     @Inject
     private TrustCommandsGeneratorService trustCommandsGeneratorService;
@@ -111,7 +112,7 @@ public class TrustSetupService {
     }
 
     private void createOrUpdateCrossRealmConfigs(PrepareCrossRealmTrustRequest request, Stack stack) {
-        CrossRealmTrust crossRealmTrust = crossRealmTrustRepository.findByStackId(stack.getId())
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stack.getId())
                 .orElse(new CrossRealmTrust());
         crossRealmTrust.setStack(stack);
         crossRealmTrust.setEnvironmentCrn(request.getEnvironmentCrn());
@@ -125,7 +126,7 @@ public class TrustSetupService {
             crossRealmTrust.setTrustSecret(request.getTrustSecret());
         }
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
-        crossRealmTrust = crossRealmTrustRepository.save(crossRealmTrust);
+        crossRealmTrust = crossRealmTrustService.save(crossRealmTrust);
         LOGGER.debug("Saved cross-realm trust configuration: {}", crossRealmTrust);
     }
 
@@ -150,11 +151,11 @@ public class TrustSetupService {
     }
 
     public TrustSetupCommandsResponse getTrustCommands(String accountId, String environmentCrn, TrustCommandType trustCommandType) {
-        Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
         if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {
             throw new BadRequestException(stack.getName() + " trust is not in state, where trust setup commands can be generated. " +
-                    "Current state is " + stack.getStackStatus().getDetailedStackStatus() +
+                    "Current state is " + crossRealmTrust.getTrustStatus() +
                     ", required states: " + ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS);
         }
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
@@ -200,5 +201,23 @@ public class TrustSetupService {
             LOGGER.debug("No trust setup operation found");
             return false;
         }
+    }
+
+    public RepairCrossRealmTrustResponse repairTrust(String accountId, String environmentCrn) {
+        Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
+        if (!ENABLED_TRUSTSTATUSES_FOR_TRUST_REPAIR_COMMANDS.contains(crossRealmTrust.getTrustStatus())) {
+            throw new BadRequestException("Trust can not be repaired until it was set up and finished");
+        }
+
+        Operation operation = operationService.startOperation(accountId, OperationType.REPAIR_TRUST_SETUP, Set.of(environmentCrn), Set.of());
+        TrustRepairEvent trustSetupEvent = new TrustRepairEvent(stack.getId(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(trustSetupEvent.selector(), trustSetupEvent);
+
+        RepairCrossRealmTrustResponse response = new RepairCrossRealmTrustResponse();
+        response.setFlowIdentifier(flowIdentifier);
+        response.setOperationStatus(operationConverter.convert(operation));
+
+        return response;
     }
 }

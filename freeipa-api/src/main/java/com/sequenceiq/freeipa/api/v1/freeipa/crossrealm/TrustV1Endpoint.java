@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,5 +74,14 @@ public interface TrustV1Endpoint {
             operationId = "cancelCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
     CancelCrossRealmTrustResponse cancelByCrn(
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+
+    @POST
+    @Path("/repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.REPAIR_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "repairCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    RepairCrossRealmTrustResponse repairByCrn(
             @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 }

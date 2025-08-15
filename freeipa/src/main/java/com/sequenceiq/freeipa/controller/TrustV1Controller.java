@@ -19,6 +19,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
@@ -70,5 +71,12 @@ public class TrustV1Controller implements TrustV1Endpoint {
     public CancelCrossRealmTrustResponse cancelByCrn(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return trustSetupService.breakDownTrust(accountId, environmentCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public RepairCrossRealmTrustResponse repairByCrn(@ResourceCrn String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return trustSetupService.repairTrust(accountId, environmentCrn);
     }
 }

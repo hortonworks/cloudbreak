@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
@@ -51,7 +50,7 @@ class TrustSetupServiceTest {
         TrustSetupCommandsResponse expectedResponse = mock(TrustSetupCommandsResponse.class);
         StackStatus stackStatus = mock(StackStatus.class);
 
-        when(stackService.getFreeIpaStackWithMdcContext(envCrn, accountId)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(envCrn, accountId)).thenReturn(stack);
         when(crossRealmTrustService.getByStackId(stack.getId())).thenReturn(crossRealmTrust);
         when(crossRealmTrust.getTrustStatus()).thenReturn(TrustStatus.TRUST_ACTIVE);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
@@ -71,11 +70,9 @@ class TrustSetupServiceTest {
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
         StackStatus stackStatus = mock(StackStatus.class);
 
-        when(stackService.getFreeIpaStackWithMdcContext(envCrn, accountId)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(envCrn, accountId)).thenReturn(stack);
         when(crossRealmTrustService.getByStackId(stack.getId())).thenReturn(crossRealmTrust);
         when(crossRealmTrust.getTrustStatus()).thenReturn(TrustStatus.TRUST_SETUP_REQUIRED);
-        when(stack.getStackStatus()).thenReturn(stackStatus);
-        when(stackStatus.getDetailedStackStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> underTest.getTrustCommands(accountId, envCrn, TrustCommandType.SETUP));

@@ -17,6 +17,8 @@ public class FlowChainTriggers {
 
     public static final String ROOT_VOLUME_UPDATE_TRIGGER_EVENT = "ROOT_VOLUME_UPDATE_TRIGGER_EVENT";
 
+    public static final String REPAIR_TRUST_TRIGGER_EVENT = "REPAIR_TRUST_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

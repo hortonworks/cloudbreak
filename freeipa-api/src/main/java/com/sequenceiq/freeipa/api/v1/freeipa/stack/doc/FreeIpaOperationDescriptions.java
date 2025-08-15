@@ -29,6 +29,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String REPAIR = "Repair one or more instances";
     public static final String REBUILD = "Rebuild the FreeIPA cluster";
     public static final String CANCEL_CROSS_REALM_TRUST = "Cancel cross-realm trust of FreeIPA with an Active Directory Server";
+    public static final String REPAIR_CROSS_REALM_TRUST = "Repair cross-realm trust of FreeIPA with an Active Directory Server";
     public static final String SETUP_CROSS_REALM_TRUST = "Prepare cross-realm trust of FreeIPA with an Active Directory Server";
     public static final String SETUP_FINISH_CROSS_REALM_TRUST = "Finish setting up cross-realm trust of FreeIPA with an Active Directory Server";
     public static final String TRUST_SETUP_COMMANDS = "Get commands to be run for cross-realm trust setup";
