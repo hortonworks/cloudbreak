@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.tls;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -28,11 +26,11 @@ public class TlsSpecificationsHelper {
     }
 
     public static String[] getDefaultCipherSuiteList(CipherSuitesLimitType cipherSuitesLimitType) {
-        Set<String> referenceList = new HashSet<>();
+        List<String> referenceList = new ArrayList<>();
         switch (cipherSuitesLimitType) {
             case CipherSuitesLimitType.MINIMAL:
             case CipherSuitesLimitType.REDHAT_VERSION8:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
@@ -41,10 +39,10 @@ public class TlsSpecificationsHelper {
                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
                         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
                         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
-                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"));
+                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256");
                 break;
             case CipherSuitesLimitType.BLACKBOX_EXPORTER:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
@@ -52,10 +50,10 @@ public class TlsSpecificationsHelper {
                         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
                         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"));
+                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
                 break;
             case CipherSuitesLimitType.JAVA_INTERMEDIATE2018:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -73,10 +71,10 @@ public class TlsSpecificationsHelper {
                         "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
                         "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
                         "TLS_RSA_WITH_AES_128_CBC_SHA",
-                        "TLS_RSA_WITH_AES_256_CBC_SHA"));
+                        "TLS_RSA_WITH_AES_256_CBC_SHA");
                 break;
             case CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "ECDHE-ECDSA-AES128-GCM-SHA256",
                         "ECDHE-RSA-AES128-GCM-SHA256",
                         "ECDHE-ECDSA-AES256-GCM-SHA384",
@@ -94,11 +92,11 @@ public class TlsSpecificationsHelper {
                         "DHE-RSA-AES256-SHA256",
                         "DHE-RSA-AES256-SHA",
                         "AES128-SHA",
-                        "AES256-SHA"));
+                        "AES256-SHA");
                 break;
             case CipherSuitesLimitType.DEFAULT:
             default:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
@@ -112,7 +110,7 @@ public class TlsSpecificationsHelper {
                         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
                         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"));
+                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
                 break;
         }
         return referenceList.toArray(new String[0]);
@@ -120,13 +118,13 @@ public class TlsSpecificationsHelper {
     }
 
     public static List<String> getTlsCipherSuitesIanaList(String[] suites, CipherSuitesLimitType cipherSuitesLimitType) {
-        List<CipherSuite> givenSuites = validateCipherSuites(new HashSet<>(Arrays.stream(suites).toList()));
+        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(suites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
         return effectiveSuites.stream().map(CipherSuite::getIanaName).collect(Collectors.toList());
     }
 
     public static String getTlsCipherSuites(String[] suites, CipherSuitesLimitType cipherSuitesLimitType, String separator, boolean useIanaNames) {
-        List<CipherSuite> givenSuites = validateCipherSuites(new HashSet<>(Arrays.stream(suites).toList()));
+        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(suites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
         if (useIanaNames) {
             return effectiveSuites.stream().map(CipherSuite::getIanaName).collect(Collectors.joining(separator));
@@ -139,7 +137,7 @@ public class TlsSpecificationsHelper {
         return getTlsCipherSuites(suites, cipherSuitesLimitType, separator, false);
     }
 
-    private static List<CipherSuite> validateCipherSuites(Set<String> suites) {
+    private static List<CipherSuite> validateCipherSuites(List<String> suites) {
         List<CipherSuite> cipherSuites = List.of(
                 new CipherSuite("ADH-AES128-GCM-SHA256", "TLS_DH_anon_WITH_AES_128_GCM_SHA256"),
                 new CipherSuite("ADH-AES128-SHA", "TLS_DH_anon_WITH_AES_128_CBC_SHA"),
@@ -394,11 +392,11 @@ public class TlsSpecificationsHelper {
     }
 
     private static List<CipherSuite> getEffectiveCipherSuites(List<CipherSuite> givenSuites, CipherSuitesLimitType cipherSuitesLimitType) {
-        Set<String> referenceList = new HashSet<>();
+        List<String> referenceList = new ArrayList<>();
         switch (cipherSuitesLimitType) {
             case CipherSuitesLimitType.MINIMAL:
             case CipherSuitesLimitType.REDHAT_VERSION8:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -409,10 +407,10 @@ public class TlsSpecificationsHelper {
                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
                         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
                         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
-                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"));
+                        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256");
                 break;
             case CipherSuitesLimitType.BLACKBOX_EXPORTER:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
@@ -420,10 +418,10 @@ public class TlsSpecificationsHelper {
                         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
                         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"));
+                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
                 break;
             case CipherSuitesLimitType.JAVA_INTERMEDIATE2018:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                             "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
                             "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -441,10 +439,10 @@ public class TlsSpecificationsHelper {
                             "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
                             "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
                             "TLS_RSA_WITH_AES_128_CBC_SHA",
-                            "TLS_RSA_WITH_AES_256_CBC_SHA"));
+                            "TLS_RSA_WITH_AES_256_CBC_SHA");
                 break;
             case CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018:
-                referenceList = new LinkedHashSet<>(List.of(
+                referenceList = List.of(
                     "ECDHE-ECDSA-AES128-GCM-SHA256",
                             "ECDHE-RSA-AES128-GCM-SHA256",
                             "ECDHE-ECDSA-AES256-GCM-SHA384",
@@ -462,14 +460,14 @@ public class TlsSpecificationsHelper {
                             "DHE-RSA-AES256-SHA256",
                             "DHE-RSA-AES256-SHA",
                             "AES128-SHA",
-                            "AES256-SHA"));
+                            "AES256-SHA");
                 break;
             case CipherSuitesLimitType.DEFAULT:
             default:
-                referenceList = givenSuites.stream().map(CipherSuite::getIanaName).collect(Collectors.toSet());
+                referenceList = givenSuites.stream().map(CipherSuite::getIanaName).toList();
                 break;
         }
-        Set<String> finalReferenceList = referenceList;
+        List<String> finalReferenceList = referenceList;
         List<CipherSuite> effectiveSuites = givenSuites
                 .stream()
                 .filter(gs -> finalReferenceList.contains(gs.getIanaName()))
