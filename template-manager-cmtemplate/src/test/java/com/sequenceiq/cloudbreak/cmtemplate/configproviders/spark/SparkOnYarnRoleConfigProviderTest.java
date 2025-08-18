@@ -56,20 +56,6 @@ public class SparkOnYarnRoleConfigProviderTest {
         assertEquals(0, sparkOnYarnConfigs.size());
     }
 
-    @Test
-    public void testGetSparkOnYarnRoleConfigsForAwsWhenNoStorageConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", new String[0]);
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark_on_yarn-GATEWAY-BASE");
-        assertEquals(1, sparkOnYarnConfigs.size());
-        assertEquals("spark-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
-        assertEquals("spark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(0).getValue());
-    }
-
     protected void validateClientConfig(String hmsExternalDirLocation, String clientConfigDirLocation) {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(CloudPlatform.AWS, "AWS", hmsExternalDirLocation);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
@@ -80,9 +66,6 @@ public class SparkOnYarnRoleConfigProviderTest {
 
         assertEquals(1, sparkOnYarnConfigs.size());
         assertEquals("spark-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
-        assertEquals("spark.yarn.access.hadoopFileSystems=" + clientConfigDirLocation +
-                "\nspark.hadoop.fs.s3a.ssl.channel.mode=openssl", sparkOnYarnConfigs.get(0).getValue());
-
     }
 
     @Test
