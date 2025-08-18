@@ -2,6 +2,7 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 {% set tlsVersionsCommaSeparated = salt['pillar.get']('cluster:tlsVersionsCommaSeparated')%}
 {% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
+{% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",")%}
 
 install-cloudera-manager-server:
   pkg.installed:
@@ -39,6 +40,12 @@ setup_tls_chipher:
     - unless: grep "CMF_OVERRIDE_TLS_CIPHERS" /etc/cloudera-scm-server/cm.settings
 
 {% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True %}
+setup_ciphers:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - text: setsettings tls_ciphers {{ tlsCipherSuitesJavaIntermediateWithComma }}
+    - unless: grep "tls_ciphers" /etc/cloudera-scm-server/cm.settings
+
 setup_tls:
   file.append:
     - name: /etc/cloudera-scm-server/cm.settings
