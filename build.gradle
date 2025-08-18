@@ -472,7 +472,7 @@ class BuildInfoTask extends DefaultTask {
   private String determineProfileBasedOnGbnVersion() {
     String activeProfile = "dev"
     try {
-      def masterReleaseVersionResp = new URL('http://release.infra.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master')
+      def masterReleaseVersionResp = new URL('http://release.eng.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master')
               .getText('utf-8', connectTimeout: 5000, readTimeout: 5000)
       def json = new JsonSlurper().parseText(masterReleaseVersionResp)
       println "determine GBN version on master branch:" + json.version
@@ -483,7 +483,7 @@ class BuildInfoTask extends DefaultTask {
         activeProfile = "dev"
       }
     } catch (Exception ex) {
-      println "Could not query version of master branch from http://release.infra.cloudera.com, falling back to 'dev' profile!"
+      println "Could not query version of master branch from http://release.eng.cloudera.com, falling back to 'dev' profile!"
     }
     return activeProfile
   }

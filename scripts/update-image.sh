@@ -1,4 +1,4 @@
-NEW_IMAGE=$(curl https://release.infra.cloudera.com/hwre-api/latestimage\?image_name\=ubi8/cldr-openjdk-21-runtime-cis | jq .image_name --raw-output)
+NEW_IMAGE=$(curl https://release.eng.cloudera.com/hwre-api/latestimage\?image_name\=ubi8/cldr-openjdk-21-runtime-cis | jq .image_name --raw-output)
 echo "The latest image from RE is $NEW_IMAGE"
 
 cd ..

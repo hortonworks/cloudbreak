@@ -22,15 +22,15 @@ get_latest_version() {
     GIT_ACTIVE_BRANCH=$TARGET_BRANCH
     if [[ $GIT_ACTIVE_BRANCH = master* ]]
     then
-        LATEST_VERSION=$(curl "http://release.infra.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master" | jq -r '.version')
-        LATEST_TAG=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${LATEST_VERSION}&type=dev" | jq -r '.pass_list_versions[0]')
+        LATEST_VERSION=$(curl "http://release.eng.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master" | jq -r '.version')
+        LATEST_TAG=$(curl "http://release.eng.cloudera.com/hwre-api/listbuilds?stack=CB&release=${LATEST_VERSION}&type=dev" | jq -r '.pass_list_versions[0]')
     elif [[ $GIT_ACTIVE_BRANCH = rc-* ]]
     then
         CUT_VERSION=$(echo $GIT_ACTIVE_BRANCH | cut -f 2 -d '-')
-        LATEST_TAG=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${CUT_VERSION}.0&type=rc" | jq -r '.pass_list_versions[0]')
+        LATEST_TAG=$(curl "http://release.eng.cloudera.com/hwre-api/listbuilds?stack=CB&release=${CUT_VERSION}.0&type=rc" | jq -r '.pass_list_versions[0]')
     else
         CUT_VERSION=$(echo $GIT_ACTIVE_BRANCH | cut -f 2 -d '-')
-        LATEST_TAG=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${CUT_VERSION}" | jq -r '.pass_list_versions[0]')
+        LATEST_TAG=$(curl "http://release.eng.cloudera.com/hwre-api/listbuilds?stack=CB&release=${CUT_VERSION}" | jq -r '.pass_list_versions[0]')
     fi
     echo $LATEST_TAG
 }

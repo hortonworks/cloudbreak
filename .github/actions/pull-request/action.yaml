@@ -33,7 +33,7 @@ runs:
       uses: Kitchen/RE-thirdparty-actions/actions/vault@main
       with:
         tlsSkipVerify: true
-        url: https://re-vault.infra.cloudera.com/
+        url: https://re-vault.eng.cloudera.com/
         method: kubernetes
         path: rke_re_jenkins
         role: cb
