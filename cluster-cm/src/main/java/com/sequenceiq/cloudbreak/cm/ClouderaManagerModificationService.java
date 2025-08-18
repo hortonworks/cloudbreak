@@ -46,7 +46,6 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
-import com.cloudera.api.swagger.client.ApiCallback;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiBatchRequest;
@@ -122,6 +121,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private static final String HOST_TEMPLATE_NAME_TAG = "_cldr_cm_host_template_name";
 
+    private final StackDtoDelegate stack;
+
+    private final HttpClientConfig clientConfig;
+
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
@@ -184,10 +187,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
-
-    private final StackDtoDelegate stack;
-
-    private final HttpClientConfig clientConfig;
 
     private ApiClient v31Client;
 
@@ -364,18 +363,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ApiClient v46Client = buildv46ApiClient();
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(v46Client);
             Set<String> hostnamesFromCM = fetchHostNamesFromCm(v46Client);
-            startAsyncTagCalls(hostsResourceApi, hostnamesFromCM);
+            startTagCalls(hostsResourceApi, hostnamesFromCM);
         } else {
             LOGGER.info("Skipping host tagging. Cloudera Manager version needs to be equal or higher, than 7.6.0. Current version: [{}]",
                     clouderaManagerRepoDetails.getVersion());
         }
     }
 
-    private void startAsyncTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
+    private void startTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
         stack.getNotTerminatedInstanceMetaData()
                 .stream()
                 .filter(im -> hostnamesFromCM.contains(im.getDiscoveryFQDN()))
-                .forEach(im -> asyncTagHost(im.getDiscoveryFQDN(), hostsResourceApi, im.getInstanceGroupName()));
+                .forEach(im -> tagHost(im.getDiscoveryFQDN(), hostsResourceApi, im.getInstanceGroupName()));
     }
 
     private Set<String> fetchHostNamesFromCm(ApiClient v46Client) throws ApiException {
@@ -395,31 +394,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
+    private void tagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
         ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroupName);
         try {
-            ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
-                @Override
-                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
-                    LOGGER.error("Tagging failed for host [{}]: {}. Response headers: {}", hostname, e.getMessage(), map, e);
-                    throw new ClouderaManagerOperationFailedException("Host tagging failed for host: " + hostname, e);
-                }
-
-                @Override
-                public void onSuccess(List<ApiEntityTag> apiEntityTags, int i, Map<String, List<String>> map) {
-                    LOGGER.debug("Tagging successful for host: [{}]. Body: {}, headers: {}", hostname, apiEntityTags, map);
-                }
-
-                @Override
-                public void onUploadProgress(long l, long l1, boolean b) {
-                }
-
-                @Override
-                public void onDownloadProgress(long l, long l1, boolean b) {
-                }
-            };
             LOGGER.debug("Tagging host [{}] with [{}]", hostname, tag);
-            hostsResourceApi.addTagsAsync(hostname, List.of(tag), callback);
+            hostsResourceApi.addTags(hostname, List.of(tag));
+            LOGGER.debug("Tagging successful for host: [{}] with [{}]", hostname, tag);
         } catch (ApiException e) {
             LOGGER.error("Error while tagging host: [{}]", hostname, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
