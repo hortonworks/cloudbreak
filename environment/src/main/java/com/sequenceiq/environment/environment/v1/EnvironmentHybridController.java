@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.CancelCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.RepairCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.SetupCrossRealmTrustResponse;
 import com.sequenceiq.environment.credential.v1.converter.EnvironmentHybridConverter;
@@ -24,6 +25,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentModificationSer
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -101,5 +103,25 @@ public class EnvironmentHybridController implements EnvironmentHybridEndpoint {
                 accountId,
                 NameOrCrn.ofCrn(crn));
         return environmentHybridConverter.convertToCancelCrossRealmTrustResponse(flowIdentifier);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public RepairCrossRealmTrustResponse repairByName(@ResourceName String environmentName, RepairCrossRealmTrustRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        FlowIdentifier flowIdentifier = environmentModificationService.repairCrossRealmSetup(
+                accountId,
+                NameOrCrn.ofName(environmentName));
+        return environmentHybridConverter.convertToRepairCrossRealmTrustResponse(flowIdentifier);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public RepairCrossRealmTrustResponse repairByCrn(@ResourceCrn String crn, RepairCrossRealmTrustRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        FlowIdentifier flowIdentifier = environmentModificationService.repairCrossRealmSetup(
+                accountId,
+                NameOrCrn.ofCrn(crn));
+        return environmentHybridConverter.convertToRepairCrossRealmTrustResponse(flowIdentifier);
     }
 }

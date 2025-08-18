@@ -242,6 +242,15 @@ public class EnvironmentModificationService {
                 environment.getResourceCrn());
     }
 
+    public FlowIdentifier repairCrossRealmSetup(String accountId, NameOrCrn nameOrCrn) {
+        Environment environment = getEnvironment(accountId, nameOrCrn);
+        return environmentReactorFlowManager.triggerRepairCrossRealmTrust(
+                environment.getId(),
+                environment.getName(),
+                environment.getCreator(),
+                environment.getResourceCrn());
+    }
+
     public Environment getEnvironment(String accountId, NameOrCrn nameOrCrn) {
         if (nameOrCrn.hasCrn()) {
             return getEnvironmentByCrn(accountId, nameOrCrn.getCrn());

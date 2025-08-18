@@ -15,11 +15,13 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.environment.api.v1.environment.model.request.CancelCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.RepairCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.SetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -90,4 +92,24 @@ public interface EnvironmentHybridEndpoint {
     CancelCrossRealmTrustResponse cancelByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @Valid CancelCrossRealmTrustRequest request);
+
+    @POST
+    @Path("/cross_realm_trust/name/{name}/repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.REPAIR_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
+            operationId = "repairCrossRealmTrustV1ByName", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    RepairCrossRealmTrustResponse repairByName(
+            @PathParam("name") String environmentName,
+            @Valid RepairCrossRealmTrustRequest request);
+
+    @POST
+    @Path("/cross_realm_trust/crn/{crn}/repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.REPAIR_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
+            operationId = "repairCrossRealmTrustV1ByCrn", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    RepairCrossRealmTrustResponse repairByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @Valid RepairCrossRealmTrustRequest request);
 }

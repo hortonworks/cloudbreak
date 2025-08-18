@@ -22,7 +22,7 @@ public class TrustRepairEvent extends StackEvent {
 
     @Override
     public String toString() {
-        return "TrustSetupEvent{" +
+        return "TrustRepairEvent{" +
                 "operationId='" + operationId + '\'' +
                 '}';
     }

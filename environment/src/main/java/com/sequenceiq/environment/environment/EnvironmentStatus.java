@@ -221,6 +221,16 @@ public enum EnvironmentStatus {
     TRUST_SETUP_FINISH_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED),
 
+    // Cross Realm Trust repair FreeIPA
+    TRUST_REPAIR_VALIDATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_REPAIR_VALIDATION_IN_PROGRESS),
+    TRUST_REPAIR_VALIDATION_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_REPAIR_VALIDATION_FAILED),
+    TRUST_REPAIR_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_REPAIR_IN_PROGRESS),
+    TRUST_REPAIR_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_REPAIR_FAILED),
+
     // Enabel SeLinux FreeIPA
     ENABLE_SELINUX_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_IN_PROGRESS),
     ENABLE_SELINUX_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_SELINUX_VALIDATION_FAILED),

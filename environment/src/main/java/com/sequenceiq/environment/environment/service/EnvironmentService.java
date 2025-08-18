@@ -403,6 +403,9 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public void validateCancelCrossRealmSetup() {
     }
 
+    public void validateRepairCrossRealmSetup() {
+    }
+
     public void removeRemoteEnvironmentCrn(String environmentCrn) {
         environmentRepository.removeRemoteEnvironmentCrn(environmentCrn);
     }

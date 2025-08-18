@@ -21,7 +21,7 @@ import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
@@ -33,6 +33,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -204,26 +205,18 @@ public class FreeIpaService {
         }
     }
 
-    public FlowLogResponse getFlowStatus(String flowId) {
+    public FlowCheckResponse checkFlow(FlowIdentifier flowIdentifier) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         try {
-            LOGGER.debug("Getting FreeIPA Operation status for flowId {}", flowId);
-            return flowEndpoint.getLastFlowById(flowId);
+            LOGGER.debug("Getting FreeIPA Operation status for flowIdentifier {}", flowIdentifier);
+            return switch (flowIdentifier.getType()) {
+                case FLOW -> flowEndpoint.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+                case FLOW_CHAIN -> flowEndpoint.hasFlowRunningByChainId(flowIdentifier.getPollableId());
+                case NOT_TRIGGERED -> throw new IllegalStateException(String.format("FreeIPA flow %s is not triggered", flowIdentifier));
+            };
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowId, accountId, errorMessage, e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
-        }
-    }
-
-    public FlowCheckResponse getFlowCheckStatus(String flowId) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        try {
-            LOGGER.debug("Getting FreeIPA Operation status for flowId {}", flowId);
-            return flowEndpoint.hasFlowRunningByFlowId(flowId);
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowId, accountId, errorMessage, e);
+            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowIdentifier, accountId, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -267,19 +260,19 @@ public class FreeIpaService {
 
     public PrepareCrossRealmTrustResponse crossRealmPrepare(String environmentCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
         try {
-            LOGGER.debug("Calling FreeIPA cross realm prepare for environment {}", environmentCrn);
+            LOGGER.debug("Calling FreeIPA cross realm trust prepare for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> trustV1Endpoint.setup(prepareCrossRealmTrustRequest));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to prepare cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
+            LOGGER.error("Failed to prepare cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage);
         }
     }
 
-    public CancelCrossRealmTrustResponse crossCancel(String environmentCrn) {
+    public CancelCrossRealmTrustResponse crossRealmCancel(String environmentCrn) {
         try {
-            LOGGER.debug("Calling FreeIPA cross realm cancel for environment {}", environmentCrn);
+            LOGGER.debug("Calling FreeIPA cross realm trust cancel for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> trustV1Endpoint.cancelByCrn(environmentCrn));
         } catch (WebApplicationException e) {
@@ -288,20 +281,32 @@ public class FreeIpaService {
                 LOGGER.info("Cross realm trust was not set up yet for the environment: {}.", errorMessage);
                 return new CancelCrossRealmTrustResponse();
             }
-            LOGGER.error("Failed to cancel cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
+            LOGGER.error("Failed to cancel cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage);
         }
     }
 
     public FinishSetupCrossRealmTrustResponse crossRealmFinish(String environmentCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
         try {
-            LOGGER.debug("Calling FreeIPA cross realm finish for environment {}", environmentCrn);
+            LOGGER.debug("Calling FreeIPA cross realm trust finish for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> trustV1Endpoint.finishSetup(finishCrossRealmTrustRequest));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to finish cross realm on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
+            LOGGER.error("Failed to finish cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage);
+        }
+    }
+
+    public RepairCrossRealmTrustResponse crossRealmRepair(String environmentCrn) {
+        try {
+            LOGGER.debug("Calling FreeIPA cross realm trust repair for environment {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> trustV1Endpoint.repairByCrn(environmentCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to repair cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage);
         }
     }
 

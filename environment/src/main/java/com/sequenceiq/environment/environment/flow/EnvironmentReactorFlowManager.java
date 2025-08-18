@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.repair.event.EnvironmentCrossRealmTrustRepairStateSelectors.TRUST_REPAIR_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
 
@@ -36,6 +37,7 @@ import com.sequenceiq.environment.environment.flow.externalizedcluster.create.ev
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
+import com.sequenceiq.environment.environment.flow.hybrid.repair.event.EnvironmentCrossRealmTrustRepairEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
@@ -143,6 +145,20 @@ public class EnvironmentReactorFlowManager {
                         .build();
 
         return sendEvent(environmentCrossRealmTrustSetupFinishEvent, userCrn);
+    }
+
+    public FlowIdentifier triggerRepairCrossRealmTrust(long envId, String envName, String userCrn, String envCrn) {
+        LOGGER.info("Environment cross realm repair flow triggered.");
+        EnvironmentCrossRealmTrustRepairEvent environmentCrossRealmTrustRepairEvent =
+                EnvironmentCrossRealmTrustRepairEvent.builder()
+                        .withAccepted(new Promise<>())
+                        .withSelector(TRUST_REPAIR_VALIDATION_EVENT.selector())
+                        .withResourceId(envId)
+                        .withResourceName(envName)
+                        .withResourceCrn(envCrn)
+                        .build();
+
+        return sendEvent(environmentCrossRealmTrustRepairEvent, userCrn);
     }
 
     private Map<String, Object> getFlowTriggerUsercrn(String userCrn) {

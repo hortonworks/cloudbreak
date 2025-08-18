@@ -15,6 +15,7 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
@@ -22,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupC
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
@@ -123,7 +125,7 @@ public class FreeIpaPollerService {
                 Polling.stopAfterAttempt(verticalscaleAttempt)
                         .stopIfException(true)
                         .waitPeriodly(verticalscaleSleeptime, TimeUnit.SECONDS)
-                        .run(() -> freeipaPollerProvider.verticalScalePoller(envId, envCrn, response.getFlowIdentifier().getPollableId()));
+                        .run(() -> freeipaPollerProvider.verticalScalePoller(envId, envCrn, response.getFlowIdentifier()));
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA Vertical Scale timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA Vertical Scale timed out or error happened: " + e.getMessage());
@@ -133,45 +135,35 @@ public class FreeIpaPollerService {
 
     public void waitForCrossRealmTrustSetup(Long envId, String envCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
         PrepareCrossRealmTrustResponse response = freeIpaService.crossRealmPrepare(envCrn, prepareCrossRealmTrustRequest);
-        if (response.getFlowIdentifier() != null) {
-            try {
-                Polling.stopAfterAttempt(crossRealmAttempt)
-                        .stopIfException(true)
-                        .waitPeriodly(crossRealmSleeptime, TimeUnit.SECONDS)
-                        .run(() -> freeipaPollerProvider.crossRealmFlowCheck(envId, envCrn, response.getFlowIdentifier().getPollableId()));
-            } catch (PollerStoppedException e) {
-                LOGGER.warn("FreeIPA cross realm trust prepare timed out or error happened.", e);
-                throw new FreeIpaOperationFailedException("FreeIPAcross realm trust prepare timed out or error happened: " + e.getMessage());
-            }
-        }
+        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "setup");
     }
 
     public void waitForCrossRealmTrustCancel(Long envId, String envCrn) {
-        CancelCrossRealmTrustResponse response = freeIpaService.crossCancel(envCrn);
-        if (response.getFlowIdentifier() != null) {
-            try {
-                Polling.stopAfterAttempt(crossRealmAttempt)
-                        .stopIfException(true)
-                        .waitPeriodly(crossRealmSleeptime, TimeUnit.SECONDS)
-                        .run(() -> freeipaPollerProvider.crossRealmFlowCheck(envId, envCrn, response.getFlowIdentifier().getPollableId()));
-            } catch (PollerStoppedException e) {
-                LOGGER.warn("FreeIPA cross realm trust cancel timed out or error happened.", e);
-                throw new FreeIpaOperationFailedException("FreeIPAcross realm trust cancel timed out or error happened: " + e.getMessage());
-            }
-        }
+        CancelCrossRealmTrustResponse response = freeIpaService.crossRealmCancel(envCrn);
+        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "cancel");
     }
 
     public void waitForCrossRealmFinish(Long envId, String envCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
         FinishSetupCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
-        if (response.getFlowIdentifier() != null) {
+        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "finish");
+    }
+
+    public void waitForCrossRealmTrustRepair(Long envId, String envCrn) {
+        RepairCrossRealmTrustResponse response = freeIpaService.crossRealmRepair(envCrn);
+        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "repair");
+    }
+
+    private void pollCrosssRealmTrustFlow(Long envId, String envCrn, FlowIdentifier flowIdentifier, String operation) {
+        if (flowIdentifier != null) {
             try {
                 Polling.stopAfterAttempt(crossRealmAttempt)
                         .stopIfException(true)
                         .waitPeriodly(crossRealmSleeptime, TimeUnit.SECONDS)
-                        .run(() -> freeipaPollerProvider.crossRealmFlowCheck(envId, envCrn, response.getFlowIdentifier().getPollableId()));
+                        .run(() -> freeipaPollerProvider.crossRealmTrustPoller(envId, envCrn, flowIdentifier, operation));
             } catch (PollerStoppedException e) {
-                LOGGER.warn("FreeIPA cross realm trust finish timed out or error happened.", e);
-                throw new FreeIpaOperationFailedException("FreeIPAcross realm trust finish timed out or error happened: " + e.getMessage());
+                String message = String.format("FreeIPA cross realm trust %s timed out or error happened: %s", operation, e.getMessage());
+                LOGGER.warn(message, e);
+                throw new FreeIpaOperationFailedException(message);
             }
         }
     }

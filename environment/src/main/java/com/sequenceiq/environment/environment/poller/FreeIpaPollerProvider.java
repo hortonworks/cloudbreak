@@ -15,13 +15,11 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.StateStatus;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 @Component
@@ -150,103 +148,36 @@ public class FreeIpaPollerProvider {
         }
         OperationStatus operationStatus = freeIpaService.getOperationStatus(operationId);
         LOGGER.debug("Operation status: {}", operationStatus);
-        if (operationCompleted(operationStatus)) {
-            return AttemptResults.finishWith(null);
+        return switch (operationStatus.getStatus()) {
+            case REQUESTED, RUNNING -> AttemptResults.justContinue();
+            case COMPLETED -> AttemptResults.justFinish();
+            case TIMEDOUT -> AttemptResults.breakFor(operationName + " failed: timeout.");
+            case REJECTED -> AttemptResults.breakFor(operationName + " operation request was rejected.");
+            case FAILED -> AttemptResults.breakFor(operationName + " failed: " + operationStatus.getError());
+        };
+    }
+
+    public AttemptResult<Void> verticalScalePoller(Long envId, String envCrn, FlowIdentifier flowIdentifier) {
+        return flowPoller(envId, envCrn, flowIdentifier, "FreeIPA vertical scale");
+    }
+
+    public AttemptResult<Void> crossRealmTrustPoller(Long envId, String envCrn, FlowIdentifier flowIdentifier, String operation) {
+        return flowPoller(envId, envCrn, flowIdentifier, "FreeIPA cross realm trust " + operation);
+    }
+
+    private AttemptResult<Void> flowPoller(Long envId, String envCrn, FlowIdentifier flowIdentifier, String flowName) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
+        }
+        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaService.checkFlow(flowIdentifier));
+        LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowCheckResponse);
+        if (flowCheckResponse.getHasActiveFlow()) {
+            return AttemptResults.justContinue();
+        } else if (flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
+            return AttemptResults.breakFor(flowName + " failed.");
         } else {
-            return checkOperationStatus(operationStatus, operationName);
-        }
-    }
-
-    public AttemptResult<Void> verticalScalePoller(Long envId, String envCrn, String flowId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
-            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
-        }
-        FlowLogResponse flowLogResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                () ->  freeIpaService.getFlowStatus(flowId));
-        LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
-        return checkVerticalScaleStatus(flowLogResponse);
-    }
-
-    public AttemptResult<Void> crossRealmFlowCheck(Long envId, String envCrn, String flowId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
-            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
-        }
-        FlowLogResponse flowLogResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                () ->  freeIpaService.getFlowStatus(flowId));
-        LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
-        return checkCrossRealmStatus(flowLogResponse);
-    }
-
-    private boolean operationCompleted(OperationStatus operationStatus) {
-        return OperationState.COMPLETED == operationStatus.getStatus();
-    }
-
-    private boolean flowCompleted(FlowLogResponse flowLogResponse) {
-        return Boolean.TRUE.booleanValue() == flowLogResponse.getFinalized().booleanValue();
-    }
-
-    private AttemptResult<Void> checkOperationStatus(OperationStatus operationStatus, String operationName) {
-        OperationState state = operationStatus.getStatus();
-        switch (state) {
-            case REQUESTED:
-            case RUNNING:
-                return AttemptResults.justContinue();
-            case TIMEDOUT:
-                return AttemptResults.breakFor(operationName + " failed: timeout.");
-            case REJECTED:
-                return AttemptResults.breakFor(operationName + " operation request was rejected.");
-            case FAILED:
-                return AttemptResults.breakFor(operationName + " failed: " + operationStatus.getError());
-            default:
-                return AttemptResults.breakFor(operationName + " failed: unexpected operation status returned: " + state);
-        }
-    }
-
-    private AttemptResult<Void> checkVerticalScaleStatus(FlowLogResponse flowLogResponse) {
-        StateStatus state = flowLogResponse.getStateStatus();
-        if (flowCompleted(flowLogResponse) && state.equals(StateStatus.SUCCESSFUL)) {
-            FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> freeIpaService.getFlowCheckStatus(flowLogResponse.getFlowId()));
-            Boolean latestFlowFinalizedAndFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
-            if (latestFlowFinalizedAndFailed) {
-                return AttemptResults.breakFor("FreeIpa vertical scale failed.");
-            } else {
-                return AttemptResults.finishWith(null);
-            }
-        }
-        switch (state) {
-            case SUCCESSFUL:
-            case PENDING:
-                return AttemptResults.justContinue();
-            case FAILED:
-                return AttemptResults.breakFor("FreeIpa vertical scale failed.");
-            default:
-                return AttemptResults.breakFor("FreeIpa vertical scale failed: unexpected operation status returned: " + state);
-        }
-    }
-
-    private AttemptResult<Void> checkCrossRealmStatus(FlowLogResponse flowLogResponse) {
-        StateStatus state = flowLogResponse.getStateStatus();
-        if (flowCompleted(flowLogResponse) && state.equals(StateStatus.SUCCESSFUL)) {
-            FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> freeIpaService.getFlowCheckStatus(flowLogResponse.getFlowId()));
-            Boolean latestFlowFinalizedAndFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
-            if (latestFlowFinalizedAndFailed) {
-                return AttemptResults.breakFor("FreeIpa cross realm trust setup failed.");
-            } else {
-                return AttemptResults.finishWith(null);
-            }
-        }
-        switch (state) {
-            case SUCCESSFUL:
-            case PENDING:
-                return AttemptResults.justContinue();
-            case FAILED:
-                return AttemptResults.breakFor("FreeIpa trust setup failed.");
-            default:
-                return AttemptResults.breakFor("FreeIpa trust setup failed: unexpected operation status returned: " + state);
+            return AttemptResults.justFinish();
         }
     }
 

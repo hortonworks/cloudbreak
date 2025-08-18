@@ -813,7 +813,13 @@ public enum ResourceEvent {
     ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_FAILED("environment.setup.finish.cross.realm.trust.validation.failed"),
     ENVIRONMENT_SETUP_FINISH_TRUST_STARTED("environment.setup.finish.cross.realm.trust.started"),
     ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED("environment.setup.finish.cross.realm.trust.finished"),
-    ENVIRONMENT_SETUP_FINISH_TRUST_FAILED("environment.setup.finish.cross.realm.trust.failed");
+    ENVIRONMENT_SETUP_FINISH_TRUST_FAILED("environment.setup.finish.cross.realm.trust.failed"),
+
+    ENVIRONMENT_REPAIR_TRUST_VALIDATION_STARTED("environment.repair.cross.realm.trust.validation.started"),
+    ENVIRONMENT_REPAIR_TRUST_STARTED("environment.repair.cross.realm.trust.started"),
+    ENVIRONMENT_REPAIR_TRUST_FINISHED("environment.repair.cross.realm.trust.finished"),
+    ENVIRONMENT_REPAIR_TRUST_VALIDATION_FAILED("environment.repair.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_REPAIR_TRUST_FAILED("environment.repair.cross.realm.trust.failed");
 
     private final String message;
 

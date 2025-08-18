@@ -131,6 +131,11 @@ public enum EnvironmentStatus {
     TRUST_SETUP_FINISH_IN_PROGRESS("Cross Realm Trust setup finish in progress"),
     TRUST_SETUP_FINISH_FAILED("Cross Realm Trust setup finish failed"),
 
+    TRUST_REPAIR_VALIDATION_IN_PROGRESS("Cross Realm Trust repair validation in progress"),
+    TRUST_REPAIR_VALIDATION_FAILED("Cross Realm Trust repair validation failed"),
+    TRUST_REPAIR_IN_PROGRESS("Cross Realm Trust repair in progress"),
+    TRUST_REPAIR_FAILED("Cross Realm Trust repair failed"),
+
     ENABLE_SELINUX_VALIDATION_IN_PROGRESS("Validation for Enable SeLinux"),
     ENABLE_SELINUX_VALIDATION_FAILED("Validation for Enable SeLinux failed"),
     ENABLE_SELINUX_ON_FREEIPA_IN_PROGRESS("Enable SeLinux on FreeIPA"),

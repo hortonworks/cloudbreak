@@ -37,6 +37,9 @@ public enum MetricType implements Metric {
     ENV_TRUST_CANCEL_FINISHED("environment.cross.realm.trust.cancel.finished"),
     ENV_TRUST_CANCEL_FAILED("environment.cross.realm.trust.cancel.failed"),
 
+    ENV_TRUST_REPAIR_FINISHED("environment.cross.realm.trust.repair.finished"),
+    ENV_TRUST_REPAIR_FAILED("environment.cross.realm.trust.repair.failed"),
+
     ENV_ENABLE_SELINUX_FINISHED("environment.enable.selinux.finished"),
     ENV_ENABLE_SELINUX_FAILED("environment.enable.selinux.failed");
 
