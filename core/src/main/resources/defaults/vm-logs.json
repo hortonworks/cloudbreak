@@ -470,5 +470,13 @@
   {
     "path": "/var/log/ranger-raz/audit/*/spool/archive/*.log",
     "label": "raz_audit"
+  },
+  {
+    "path": "/var/log/dnf.log",
+    "label": "dnf_log"
+  },
+  {
+    "path": "/var/log/yum.log",
+    "label": "yum_log"
   }
 ]

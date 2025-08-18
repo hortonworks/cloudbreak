@@ -182,5 +182,13 @@
   {
     "path": "/var/log/audit/audit.log",
     "label": "audit_log"
+  },
+  {
+    "path": "/var/log/dnf.log",
+    "label": "dnf_log"
+  },
+  {
+    "path": "/var/log/yum.log",
+    "label": "yum_log"
   }
 ]
