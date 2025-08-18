@@ -88,7 +88,7 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
                     request.getBackupId(),
                     operationId,
                     request.getBackupLocation(),
-                    0,
+                    request.getDatabaseMaxDurationInMin(),
                     false);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Restore services stopped polling exited before timeout. Cause: ", userBreakException);

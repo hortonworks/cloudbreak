@@ -13,6 +13,9 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 
 public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBaseEvent {
+
+    private static final int DEFAULT_DATABASE_MAX_DURATION_IN_MIN = 90;
+
     private final String backupId;
 
     private final String restoreId;
@@ -61,7 +64,7 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
                 backupId,
                 restoreId,
                 triggerRestoreEvent.getBackupLocation(),
-                0,
+                DEFAULT_DATABASE_MAX_DURATION_IN_MIN,
                 triggerRestoreEvent.isValidationOnly());
     }
 

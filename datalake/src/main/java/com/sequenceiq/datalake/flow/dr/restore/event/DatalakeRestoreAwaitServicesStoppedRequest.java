@@ -6,62 +6,58 @@ import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeRestoreAwaitServicesStoppedRequest extends SdxEvent {
-    private final String operationId;
 
-    private final SdxOperation drStatus;
-
-    private final String backupLocation;
-
-    private final String backupId;
-
-    private final boolean validationOnly;
+    private final DatalakeRestoreParams datalakeRestoreParams;
 
     @JsonCreator
     public DatalakeRestoreAwaitServicesStoppedRequest(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonProperty("drStatus") SdxOperation drStatus,
-            @JsonProperty("operationId") String operationId,
-            @JsonProperty("backupLocation") String backupLocation,
-            @JsonProperty("backupId") String backupId,
-            @JsonProperty("validationOnly") boolean validationOnly) {
+            @JsonProperty("datalakeRestoreParams") DatalakeRestoreParams datalakeRestoreParams) {
         super(sdxId, userId);
-        this.operationId = operationId;
-        this.drStatus = drStatus;
-        this.backupLocation = backupLocation;
-        this.backupId = backupId;
-        this.validationOnly = validationOnly;
+        this.datalakeRestoreParams = datalakeRestoreParams;
     }
 
     public static DatalakeRestoreAwaitServicesStoppedRequest from(DatalakeDatabaseRestoreStartEvent startEvent) {
+        DatalakeRestoreParams params = new DatalakeRestoreParams(
+                startEvent.getRestoreId(),
+                startEvent.getDrStatus(),
+                startEvent.getBackupLocation(),
+                startEvent.getBackupId(),
+                startEvent.getDatabaseMaxDurationInMin(),
+                startEvent.isValidationOnly());
         return new DatalakeRestoreAwaitServicesStoppedRequest(
                 startEvent.getResourceId(),
                 startEvent.getUserId(),
-                startEvent.getDrStatus(),
-                startEvent.getRestoreId(),
-                startEvent.getBackupLocation(),
-                startEvent.getBackupId(),
-                startEvent.isValidationOnly()
+                params
         );
     }
 
     public SdxOperation getDrStatus() {
-        return drStatus;
+        return datalakeRestoreParams.getDrStatus();
     }
 
     public String getOperationId() {
-        return operationId;
+        return datalakeRestoreParams.getOperationId();
     }
 
     public String getBackupLocation() {
-        return backupLocation;
+        return datalakeRestoreParams.getBackupLocation();
     }
 
     public String getBackupId() {
-        return backupId;
+        return datalakeRestoreParams.getBackupId();
     }
 
     public boolean isValidationOnly() {
-        return validationOnly;
+        return datalakeRestoreParams.isValidationOnly();
+    }
+
+    public int getDatabaseMaxDurationInMin() {
+        return datalakeRestoreParams.getDatabaseMaxDurationInMin();
+    }
+
+    public DatalakeRestoreParams getDatalakeRestoreParams() {
+        return datalakeRestoreParams;
     }
 }

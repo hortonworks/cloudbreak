@@ -942,6 +942,7 @@ public class SdxBackupRestoreService {
 
     public long getTotalDurationInMin(String startTimeStamp, String endTimeStamp) {
         try {
+            LOGGER.info("The start time and end time for the datalake backup are {} and {} ", startTimeStamp, endTimeStamp);
             if (startTimeStamp == null || startTimeStamp.isEmpty() ||
                     endTimeStamp == null || endTimeStamp.isEmpty()) {
                 return 0;

@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow.dr.restore;
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -36,10 +37,12 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreAwaitServicesStoppedRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -197,7 +200,7 @@ public class DatalakeRestoreActionsTest {
         SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), event);
         Map<Object, Object> variables = spy(new HashMap<>());
         testSupport.doExecute(context, event, variables);
-        verify(variables).put("FULLDR_MAX_DURATION_IN_MIN", 150);
+        verify(variables).put("MAX_DURATION_IN_MIN", 150);
     }
 
     @Test
@@ -273,6 +276,45 @@ public class DatalakeRestoreActionsTest {
         testSupport.doExecute(context, mock(SdxEvent.class), variables);
 
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(datalakeStatusEnum), eq(event), anyString(), anyLong());
+    }
+
+    @Test
+    public void testAwaitServicesStoppedEmitsRequest() throws Exception {
+        AbstractAction action = (AbstractAction) underTest.datalakeRestoreAwaitingServicesStopped();
+        initActionPrivateFields(action);
+        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
+
+        SdxOperation dr = mock(SdxOperation.class);
+        DatalakeDatabaseRestoreStartEvent payload = new DatalakeDatabaseRestoreStartEvent(
+                DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT.event(),
+                OLD_SDX_ID,
+                dr,
+                USER_CRN,
+                BACKUP_ID,
+                RESTORE_ID,
+                BACKUP_LOCATION,
+                90,
+                true
+        );
+
+        SdxContext ctx = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), payload);
+        testSupport.doExecute(ctx, payload, new HashMap<>());
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(any(), captor.capture());
+
+        Object emitted = captor.getValue();
+        assertTrue(emitted instanceof DatalakeRestoreAwaitServicesStoppedRequest);
+        DatalakeRestoreAwaitServicesStoppedRequest req = (DatalakeRestoreAwaitServicesStoppedRequest) emitted;
+        assertEquals(OLD_SDX_ID, req.getResourceId());
+        assertEquals(USER_CRN, req.getUserId());
+        assertEquals(RESTORE_ID, req.getOperationId());
+        assertEquals(BACKUP_ID, req.getBackupId());
+        assertEquals(BACKUP_LOCATION, req.getBackupLocation());
+        assertEquals(90, req.getDatabaseMaxDurationInMin());
+        assertTrue(req.isValidationOnly());
+        assertTrue(req.getDatalakeRestoreParams() != null);
+        assertSame(dr, req.getDrStatus());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
