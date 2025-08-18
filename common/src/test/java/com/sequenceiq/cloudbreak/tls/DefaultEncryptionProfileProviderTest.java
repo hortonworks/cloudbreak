@@ -239,8 +239,8 @@ public class DefaultEncryptionProfileProviderTest {
 
     @Test
     public void testConvertCipherSuitesToIana() {
-        Set<String> result = underTest.convertCipherSuitesToIana(
-                Set.of(
+        List<String> result = underTest.convertCipherSuitesToIana(
+                List.of(
                         "ECDHE-ECDSA-AES128-GCM-SHA256",
                         "ECDHE-RSA-AES128-GCM-SHA256",
                         "ECDHE-ECDSA-AES256-GCM-SHA384",
@@ -285,7 +285,7 @@ public class DefaultEncryptionProfileProviderTest {
     @Test
     public void testConvertCipherSuitesToIanaDoesNotIgnoreNotAllowed() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> underTest.convertCipherSuitesToIana(
-                Set.of(
+                List.of(
                         "ECDHE-ECDSA-AES128-GCM-SHA256",
                         "NOT_ALLOWED"
                 )));

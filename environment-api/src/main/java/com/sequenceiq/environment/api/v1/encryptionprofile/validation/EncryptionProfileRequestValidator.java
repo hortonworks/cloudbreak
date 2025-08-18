@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.api.v1.encryptionprofile.validation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
@@ -25,9 +28,9 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
     @Override
     public boolean isValid(EncryptionProfileRequest request, ConstraintValidatorContext context) {
         Set<TlsVersion> tlsVersions = request.getTlsVersions();
-        Set<String> cipherSuites;
+        List<String> cipherSuites;
         try {
-            cipherSuites = defaultEncryptionProfileProvider.convertCipherSuitesToIana(request.getCipherSuites());
+            cipherSuites = defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CollectionUtils.emptyIfNull(request.getCipherSuites())));
         } catch (IllegalArgumentException e) {
             ValidatorUtil.addConstraintViolation(context, e.getMessage());
             return false;
