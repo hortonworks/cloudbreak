@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 
 @Component
 public class UpgradePathRestrictionService {
@@ -40,10 +41,11 @@ public class UpgradePathRestrictionService {
         }
 
         if (currentPatch == 1100) {
+            boolean fromOlderThan7218 = CMRepositoryVersionUtil.isVersionOlderThanLimited(() -> currentMajor, () -> "7.2.18");
             boolean from7218 = majorVersionEquals(currentMajor, "7.2.18");
             boolean to731 = majorVersionEquals(targetMajor, "7.3.1");
             boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
-            return from7218 && !to7218 && !(to731 && targetPatch >= 0 && targetPatch <= 400);
+            return fromOlderThan7218 || (from7218 && !to7218 && !(to731 && targetPatch >= 0 && targetPatch <= 400));
         }
 
         if (skipValidation(current, target)) {
