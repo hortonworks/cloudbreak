@@ -16,7 +16,7 @@ public class ImageCatalogMockService {
 
     private static final String NON_DEFAULT_IMAGE_UUID = "1a6eadd2-5B95-4EC9-B300-13dc43208b64";
 
-    private static final String PATCH_VERSION_POSTFIX = ".500";
+    private static final String PATCH_VERSION_POSTFIX = ".600";
 
     public String getImageCatalogByName(String name, String cbVersion, String runtimeVersion, String cmVersion, String defaultImageUuid,
             String nonDefaultImageUuid, String mockServerAddress) {
