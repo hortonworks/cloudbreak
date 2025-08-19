@@ -292,7 +292,8 @@ public class ImageService {
                 source.getOsType(),
                 source.getPackageVersions(),
                 true,
-                source.getArchitecture()
+                source.getArchitecture(),
+                source.getTags()
         );
     }
 

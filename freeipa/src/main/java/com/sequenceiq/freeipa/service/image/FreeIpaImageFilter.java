@@ -44,6 +44,7 @@ public class FreeIpaImageFilter {
             return candidateImages.stream()
                     .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
                     .filter(img -> supportedOsService.isSupported(img.getOs()))
+                    .filter(img -> filterTags(imageFilterSettings, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
                     .filter(img -> hasSameUuid(imageFilterSettings.currentImageId(), img) || isMatchingImageIdInRegion(imageFilterSettings, img))
@@ -53,6 +54,7 @@ public class FreeIpaImageFilter {
             List<Image> filteredImages = candidateImages.stream()
                     .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
                     .filter(img -> filterOs(imageFilterSettings, img))
+                    .filter(img -> filterTags(imageFilterSettings, img))
                     .filter(image -> imageFilterSettings.architecture() == null || architectureMatches(image, imageFilterSettings))
                     .toList();
             if (!filteredImages.isEmpty()) {
@@ -88,6 +90,17 @@ public class FreeIpaImageFilter {
                 (StringUtils.isBlank(imageFilterSettings.targetOs()) || imageFilterSettings.targetOs().equalsIgnoreCase(candidateImageOs))
                 && (majorOsUpgradeAllowed(imageFilterSettings, candidateImageOs)
                 || (candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs())));
+    }
+
+    private boolean filterTags(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
+        Map<String, String> tags = image.getTags();
+        Map<String, String> tagFilters = Optional.ofNullable(imageFilterSettings.tagFilters()).orElse(Map.of());
+        for (Map.Entry<String, String> tagFilter : tagFilters.entrySet()) {
+            if (tags.containsKey(tagFilter.getKey()) && !tagFilter.getValue().equals(tags.get(tagFilter.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean majorOsUpgradeAllowed(FreeIpaImageFilterSettings imageFilterSettings, String targetOs) {

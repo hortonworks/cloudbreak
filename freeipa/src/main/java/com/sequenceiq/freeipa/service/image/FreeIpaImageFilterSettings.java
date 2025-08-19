@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import java.util.Map;
+
 import com.sequenceiq.common.model.Architecture;
 
 public record FreeIpaImageFilterSettings(
@@ -10,7 +12,30 @@ public record FreeIpaImageFilterSettings(
         String region,
         String platform,
         boolean allowMajorOsUpgrade,
-        Architecture architecture) {
+        Architecture architecture,
+        Map<String, String> tagFilters) {
+
+    public FreeIpaImageFilterSettings(
+            String currentImageId,
+            String catalog,
+            String currentOs,
+            String targetOs,
+            String region,
+            String platform,
+            boolean allowMajorOsUpgrade,
+            Architecture architecture) {
+        this(
+                currentImageId,
+                catalog,
+                currentOs,
+                targetOs,
+                region,
+                platform,
+                allowMajorOsUpgrade,
+                architecture,
+                Map.of()
+        );
+    }
 
     /**
      * Creates a copy of the current record with only the currentImageId parameter.
@@ -28,7 +53,8 @@ public record FreeIpaImageFilterSettings(
                 this.region,
                 this.platform,
                 this.allowMajorOsUpgrade,
-                this.architecture
+                this.architecture,
+                this.tagFilters
         );
     }
 }

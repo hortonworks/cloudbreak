@@ -1,9 +1,12 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
+import static com.sequenceiq.freeipa.service.validation.SeLinuxValidationService.SELINUX_SUPPORTED_TAG;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -30,6 +34,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
@@ -91,9 +96,17 @@ public class UpgradeService {
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
             String currentOs) {
-        return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
-                stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
-                stack.getArchitecture());
+        if (Optional.ofNullable(stack.getSecurityConfig())
+                .map(SecurityConfig::getSeLinux)
+                .orElse(SeLinux.PERMISSIVE) == SeLinux.ENFORCING) {
+            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
+                    stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
+                    stack.getArchitecture(), Map.of(SELINUX_SUPPORTED_TAG, Boolean.TRUE.toString()));
+        } else {
+            return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
+                    stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
+                    stack.getArchitecture());
+        }
     }
 
     @SuppressWarnings("IllegalType")
@@ -182,9 +195,13 @@ public class UpgradeService {
 
     public FreeIpaUpgradeOptions collectUpgradeOptions(String accountId, String environmentCrn, String catalog, Boolean allowMajorOsUpgrade) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
+        Map<String, String> tagFilters = new HashMap<>();
+        if (SeLinux.ENFORCING.equals(stack.getSecurityConfig().getSeLinux())) {
+            tagFilters.put(SELINUX_SUPPORTED_TAG, Boolean.TRUE.toString());
+        }
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         String catalogForRequest = Optional.ofNullable(catalog).or(() -> Optional.ofNullable(currentImage.getCatalog())).orElse(currentImage.getCatalogName());
-        List<ImageInfoResponse> targetImages = getTargetImages(catalogForRequest, stack, currentImage, allowMajorOsUpgrade);
+        List<ImageInfoResponse> targetImages = getTargetImages(catalogForRequest, stack, currentImage, allowMajorOsUpgrade, tagFilters);
         return createFreeIpaUpgradeOptions(targetImages, currentImage);
     }
 
@@ -195,9 +212,10 @@ public class UpgradeService {
         return freeIpaUpgradeOptions;
     }
 
-    private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage, Boolean allowMajorOsUpgrade) {
+    private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage,
+            Boolean allowMajorOsUpgrade, Map<String, String> tagFilters) {
         LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", catalog);
-        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, catalog, currentImage, allowMajorOsUpgrade);
+        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, catalog, currentImage, allowMajorOsUpgrade, tagFilters);
         if (targetImages.isEmpty()) {
             Set<String> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
             LOGGER.debug("Target image is empty, if there is any instance on old image, return with current image");

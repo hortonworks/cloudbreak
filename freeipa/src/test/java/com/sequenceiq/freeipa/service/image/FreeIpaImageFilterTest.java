@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,7 +132,7 @@ class FreeIpaImageFilterTest {
     }
 
     @Test
-    public void testGetImageWithoutOsRedhat8() {
+    void testGetImageWithoutOsRedhat8() {
         Image image1 = createImage("image-1", CENTOS_7, AWS, REGION_1);
         Image image2 = createImage("image-2", REDHAT_8, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
@@ -145,13 +146,37 @@ class FreeIpaImageFilterTest {
         assertEquals("image-2", image.get().getUuid());
     }
 
+    @Test
+    void testFilterImagesWhereSelinuxNotSupported() {
+        Image image1 = createImage("image-1", REDHAT_8, AWS, REGION_1, Map.of("selinux-supported", "false", "other-tag", "value"));
+        Image image2 = createImage("image-2", REDHAT_8, AWS, REGION_1);
+        List<Image> candidateImages = List.of(image1, image2);
+
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, null, REGION_1, AWS, false,
+                Map.of("selinux-supported", "true"));
+
+        List<Image> result = underTest.filterImages(candidateImages, imageFilterSettings);
+
+        assertThat(result).hasSize(1);
+        assertEquals("image-2", result.getFirst().getUuid());
+    }
+
     private FreeIpaImageFilterSettings createImageFilterSettings(String currentOs, String targetOs, String region, String platform,
             boolean allowMajorOsUpgrade) {
-        return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade, Architecture.X86_64);
+        return createImageFilterSettings(currentOs, targetOs, region, platform, allowMajorOsUpgrade, Map.of());
+    }
+
+    private FreeIpaImageFilterSettings createImageFilterSettings(String currentOs, String targetOs, String region, String platform,
+            boolean allowMajorOsUpgrade, Map<String, String> tagFilters) {
+        return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade, Architecture.X86_64, tagFilters);
     }
 
     private Image createImage(String imageId, String os, String platform, String region) {
-        return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64");
+        return createImage(imageId, os, platform, region, Map.of());
+    }
+
+    private Image createImage(String imageId, String os, String platform, String region, Map<String, String> tags) {
+        return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64", tags);
     }
 
 }

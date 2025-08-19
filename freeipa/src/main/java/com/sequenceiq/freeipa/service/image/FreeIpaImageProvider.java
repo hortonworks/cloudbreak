@@ -70,15 +70,16 @@ public class FreeIpaImageProvider implements ImageProvider {
         return new FreeIpaImageFilterSettings(imageFilterSettings.currentImageId(),
                 StringUtils.isNotBlank(imageFilterSettings.catalog()) ? imageFilterSettings.catalog() : defaultCatalogUrl,
                 imageFilterSettings.currentOs(), imageFilterSettings.targetOs(),
-                imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade(), imageFilterSettings.architecture());
+                imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade(), imageFilterSettings.architecture(),
+                imageFilterSettings.tagFilters());
     }
 
     private Optional<Image> findImageForAppVersion(FreeIpaImageFilterSettings freeIpaImageFilterSettings, ImageCatalog catalog) {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
         List<Image> compatibleImages = freeIpaImageFilter.filterImages(catalog.getImages().getFreeipaImages(), freeIpaImageFilterSettings);
-        LOGGER.trace("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}",
+        LOGGER.trace("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}, tagFilters: {}",
                 compatibleImages.size(), freeIpaImageFilterSettings.currentImageId(), freeIpaImageFilterSettings.targetOs(), freeIpaImageFilterSettings.region(),
-                freeIpaImageFilterSettings.region());
+                freeIpaImageFilterSettings.platform(), freeIpaImageFilterSettings.tagFilters());
 
         return findImageInDefaults(versions, compatibleImages)
                 .or(() -> findImageByApplicationVersion(versions, compatibleImages))

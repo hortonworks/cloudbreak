@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -43,6 +43,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
+import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
@@ -95,6 +96,8 @@ public class EnvironmentValidatorService {
 
     private final Integer ipaMinimumInstanceCountByGroup;
 
+    private final SeLinuxValidationService seLinuxValidationService;
+
     public EnvironmentValidatorService(NetworkValidator networkValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -109,7 +112,8 @@ public class EnvironmentValidatorService {
             EncryptionKeyValidator encryptionKeyValidator,
             EnvironmentRecipeService recipeService,
             ManagedIdentityRoleValidator encryptionRoleValidator,
-            @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup) {
+            @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup,
+            SeLinuxValidationService seLinuxValidationService) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -125,6 +129,7 @@ public class EnvironmentValidatorService {
         this.recipeService = recipeService;
         this.ipaMinimumInstanceCountByGroup = ipaMinimumInstanceCountByGroup;
         this.encryptionRoleValidator = encryptionRoleValidator;
+        this.seLinuxValidationService = seLinuxValidationService;
     }
 
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
@@ -280,17 +285,21 @@ public class EnvironmentValidatorService {
             validationResultBuilder.error("FreeIpa deployment requests can not have both image id and image os parameters set.");
         }
         validateArchitecture(freeIpaCreation, accountId, validationResultBuilder);
-        if (freeIpaCreation.getSeLinux() != null
-                && SeLinux.ENFORCING.equals(freeIpaCreation.getSeLinux())
-                && !entitlementService.isCdpSecurityEnforcingSELinux(accountId)) {
-            validationResultBuilder.error("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
-        }
+        validateSeLinux(freeIpaCreation, validationResultBuilder);
         return validationResultBuilder.build();
     }
 
     private void validateArchitecture(FreeIpaCreationDto freeIpaCreation, String accountId, ValidationResultBuilder validationResultBuilder) {
         if (Architecture.ARM64.equals(freeIpaCreation.getArchitecture()) && !entitlementService.isDataLakeArmEnabled(accountId)) {
             validationResultBuilder.error("Your account is not entitled to use arm64 instances.");
+        }
+    }
+
+    private void validateSeLinux(FreeIpaCreationDto freeIpaCreation, ValidationResultBuilder validationResultBuilder) {
+        try {
+            seLinuxValidationService.validateSeLinuxEntitlementGrantedForFreeipaCreation(freeIpaCreation);
+        } catch (CloudbreakServiceException e) {
+            validationResultBuilder.error(e.getMessage());
         }
     }
 

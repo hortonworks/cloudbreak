@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,10 +15,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -42,6 +47,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
@@ -58,9 +64,9 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 @ExtendWith(MockitoExtension.class)
 class UpgradeServiceTest {
 
-    public static final String ACCOUNT_ID = "accId";
+    private static final String ACCOUNT_ID = "accId";
 
-    public static final String ENVIRONMENT_CRN = "ENV_CRN";
+    private static final String ENVIRONMENT_CRN = "ENV_CRN";
 
     private static final String IMAGE_CATALOG = "cat";
 
@@ -94,8 +100,9 @@ class UpgradeServiceTest {
     @InjectMocks
     private UpgradeService underTest;
 
-    @Test
-    public void testUpgradeTriggered() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpgradeTriggered(boolean selinuxEnforcing) {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setCatalog("requestCatalog");
@@ -104,6 +111,9 @@ class UpgradeServiceTest {
         String triggeredVariant = "triggeredVariant";
 
         Stack stack = mock(Stack.class);
+        SecurityConfig securityConfig = mock(SecurityConfig.class);
+        when(securityConfig.getSeLinux()).thenReturn(selinuxEnforcing ? SeLinux.ENFORCING : SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
@@ -146,11 +156,15 @@ class UpgradeServiceTest {
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
         ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
         verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());
-        assertEquals("requestCatalog", imageFilterSettingsArgumentCaptor.getValue().catalog());
+        FreeIpaImageFilterSettings freeIpaImageFilterSettings = imageFilterSettingsArgumentCaptor.getValue();
+        assertEquals("requestCatalog", freeIpaImageFilterSettings.catalog());
+        if (selinuxEnforcing) {
+            assertThat(freeIpaImageFilterSettings.tagFilters()).containsAllEntriesOf(Map.of("selinux-supported", "true"));
+        }
     }
 
     @Test
-    public void testUpgradeTriggerFailed() {
+    void testUpgradeTriggerFailed() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -196,7 +210,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeTriggeredWithInstancesOnOldImage() {
+    void testUpgradeTriggeredWithInstancesOnOldImage() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -269,7 +283,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeTriggeredWithVerticalScaleRequest() {
+    void testUpgradeTriggeredWithVerticalScaleRequest() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -330,7 +344,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeTriggeredWithBackup() {
+    void testUpgradeTriggeredWithBackup() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -402,7 +416,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testImageSettingsCreatedIfMissingAndUpgradeTriggered() {
+    void testImageSettingsCreatedIfMissingAndUpgradeTriggered() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
 
@@ -441,7 +455,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testFailureWhenNoPrimaryGateway() {
+    void testFailureWhenNoPrimaryGateway() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -460,7 +474,7 @@ class UpgradeServiceTest {
     }
 
     @Test
-    public void testFailureIfOperationFailedToStart() {
+    void testFailureIfOperationFailedToStart() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
@@ -511,8 +525,9 @@ class UpgradeServiceTest {
         return Set.of(im1, im2, im3);
     }
 
-    @Test
-    public void testUpgradeOptionsWithCatalogSet() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpgradeOptionsWithCatalogSet(boolean selinuxEnforcing) {
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -520,18 +535,26 @@ class UpgradeServiceTest {
         currentImage.setCatalogName("catName");
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(stack, "cat2", currentImage, true)).thenReturn(List.of(targetImage));
+        SecurityConfig securityConfig = new SecurityConfig();
+        stack.setSecurityConfig(securityConfig);
+        if (selinuxEnforcing) {
+            securityConfig.setSeLinux(SeLinux.ENFORCING);
+            when(imageService.findTargetImages(stack, "cat2", currentImage, true, Map.of("selinux-supported", "true"))).thenReturn(List.of(targetImage));
+        } else {
+            securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+            when(imageService.findTargetImages(stack, "cat2", currentImage, true, Map.of())).thenReturn(List.of(targetImage));
+        }
 
         FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, "cat2", true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
-        assertEquals(targetImage, result.getImages().get(0));
-        verify(imageService).findTargetImages(stack, "cat2", currentImage, true);
+        assertEquals(targetImage, result.getImages().getFirst());
     }
 
-    @Test
-    public void testUpgradeOptionsCatalogFromCurrentImage() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpgradeOptionsCatalogFromCurrentImage(boolean selinuxEnforcing) {
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -539,31 +562,46 @@ class UpgradeServiceTest {
         currentImage.setCatalogName(IMAGE_CATALOG);
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true)).thenReturn(List.of(targetImage));
+        SecurityConfig securityConfig = new SecurityConfig();
+        stack.setSecurityConfig(securityConfig);
+        if (selinuxEnforcing) {
+            securityConfig.setSeLinux(SeLinux.ENFORCING);
+            when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true, Map.of("selinux-supported", "true"))).thenReturn(List.of(targetImage));
+        } else {
+            securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+            when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true, Map.of())).thenReturn(List.of(targetImage));
+        }
 
         FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null, true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
-        assertEquals(targetImage, result.getImages().get(0));
-        verify(imageService).findTargetImages(stack, IMAGE_CATALOG, currentImage, true);
+        assertEquals(targetImage, result.getImages().getFirst());
     }
 
-    @Test
-    public void testUpgradeOptionsCatalogNameFromCurrentImage() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpgradeOptionsCatalogNameFromCurrentImage(boolean selinuxEnforcing) {
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         ImageInfoResponse currentImage = new ImageInfoResponse();
         currentImage.setCatalogName(IMAGE_CATALOG);
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true)).thenReturn(List.of(targetImage));
+        SecurityConfig securityConfig = new SecurityConfig();
+        stack.setSecurityConfig(securityConfig);
+        if (selinuxEnforcing) {
+            securityConfig.setSeLinux(SeLinux.ENFORCING);
+            when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true, Map.of("selinux-supported", "true"))).thenReturn(List.of(targetImage));
+        } else {
+            securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+            when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true, Map.of())).thenReturn(List.of(targetImage));
+        }
 
         FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null, true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
-        assertEquals(targetImage, result.getImages().get(0));
-        verify(imageService).findTargetImages(stack, IMAGE_CATALOG, currentImage, true);
+        assertEquals(targetImage, result.getImages().getFirst());
     }
 }

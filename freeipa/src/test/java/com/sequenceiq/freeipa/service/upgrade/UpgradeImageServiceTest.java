@@ -1,10 +1,12 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -52,7 +54,7 @@ class UpgradeImageServiceTest {
     private UpgradeImageService underTest;
 
     @Test
-    public void testSelectImage() {
+    void testSelectImage() {
         Image image = createImage("now", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImageWrapperAndName(imageFilterSettings)).thenReturn(Pair.of(imageWrapper, "imageName"));
@@ -67,7 +69,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testCurrentImage() {
+    void testCurrentImage() {
         Stack stack = new Stack();
         stack.setId(1L);
         ImageEntity imageEntity = new ImageEntity();
@@ -88,7 +90,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImages() {
+    void testFindTargetImages() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
@@ -110,7 +112,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesNoNewerImage() {
+    void testFindTargetImagesNoNewerImage() {
         Stack stack = new Stack();
         Image image = createImage("2021-07-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
@@ -126,7 +128,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesImageWithSameId() {
+    void testFindTargetImagesImageWithSameId() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
@@ -142,7 +144,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesCurrentImageMissingDate() {
+    void testFindTargetImagesCurrentImageMissingDate() {
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
@@ -178,7 +180,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesCurrentImageMissingDateAndNoDateFromCatalog() {
+    void testFindTargetImagesCurrentImageMissingDateAndNoDateFromCatalog() {
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
@@ -207,7 +209,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesCurrentImageMissingDateAndNoImageFoundInCatalog() {
+    void testFindTargetImagesCurrentImageMissingDateAndNoImageFoundInCatalog() {
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
@@ -234,7 +236,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesImageWithWrongDateFormatIgnored() {
+    void testFindTargetImagesImageWithWrongDateFormatIgnored() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
@@ -259,7 +261,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesRhel8Added() {
+    void testFindTargetImagesRhel8Added() {
         Stack stack = new Stack();
         stack.setRegion("region");
         stack.setArchitecture(Architecture.X86_64);
@@ -296,7 +298,7 @@ class UpgradeImageServiceTest {
     }
 
     @Test
-    public void testFindTargetImagesRhel8NotAdded() {
+    void testFindTargetImagesRhel8NotAdded() {
         Stack stack = new Stack();
         stack.setRegion("region");
         Image image = createImage("2021-09-01", DEFAULT_OS);
@@ -320,6 +322,31 @@ class UpgradeImageServiceTest {
         assertEquals(image.getOs(), imageInfoResponse.getOs());
     }
 
+    @Test
+    void testFindTargetImagesWithTagFilters() {
+        Stack stack = mock(Stack.class);
+        stack.setRegion("region");
+        Image image1 = createImage("2021-09-01", DEFAULT_OS, Map.of("tag1", "value1"));
+        ImageWrapper imageWrapper1 = ImageWrapper.ofFreeipaImage(image1, CATALOG_URL);
+        Image image2 = createImage("2021-09-01", DEFAULT_OS, Map.of("tag1", "not-value1", "tag2", "value2"));
+        ImageWrapper imageWrapper2 = ImageWrapper.ofFreeipaImage(image2, CATALOG_URL);
+        when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(false)))
+                .thenReturn(List.of(Pair.of(imageWrapper1, "imageName1"), Pair.of(imageWrapper2, "imageName2")));
+
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setDate("2021-08-21");
+        currentImage.setId("111-222");
+
+        List<ImageInfoResponse> result = underTest.findTargetImages(stack, CATALOG_URL, currentImage, false, Map.of("tag1", "value1", "tag2", "value2"));
+
+        assertThat(result).hasSize(1);
+        ImageInfoResponse imageInfoResponse = result.getFirst();
+        assertEquals(imageWrapper1.getCatalogName(), imageInfoResponse.getCatalogName());
+        assertEquals(imageWrapper1.getCatalogUrl(), imageInfoResponse.getCatalog());
+        assertEquals(image1.getDate(), imageInfoResponse.getDate());
+        assertEquals(image1.getUuid(), imageInfoResponse.getId());
+    }
+
     /**
      * To ensure {@link UpgradeImageService#fetchDefaultOsImageIfNotPresentInTargets} is updated
      * More fresh image must have higher ordinal or the method should be updated
@@ -333,7 +360,11 @@ class UpgradeImageServiceTest {
     }
 
     private Image createImage(String date, String os) {
-        return new Image(123L, date, "desc", os, UUID.randomUUID().toString(), Map.of(), "magicOs", Map.of(), false, "x86_64");
+        return createImage(date, os, Map.of());
+    }
+
+    private Image createImage(String date, String os, Map<String, String> tags) {
+        return new Image(123L, date, "desc", os, UUID.randomUUID().toString(), Map.of(), "magicOs", Map.of(), false, "x86_64", tags);
     }
 
     private void setDefaultOsToRhel8() {

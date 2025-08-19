@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -37,9 +39,10 @@ import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLi
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 
 @ExtendWith(MockitoExtension.class)
-public class SeLinuxModificationServiceTest {
+class SeLinuxModificationServiceTest {
 
     private static final String ENVIRONMENT_CRN = "environment_crn";
 
@@ -61,6 +64,9 @@ public class SeLinuxModificationServiceTest {
 
     @Mock
     private FreeIpaFlowManager flowManager;
+
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
 
     @InjectMocks
     private SeLinuxModificationService underTest;
@@ -122,5 +128,16 @@ public class SeLinuxModificationServiceTest {
                 underTest.modifySeLinuxByCrn(ENVIRONMENT_CRN, ACCOUNT_ID, SeLinux.ENFORCING));
         assertTrue(exception.getMessage().startsWith("Couldn't start Freeipa SELinux enablement flow: test"));
         verify(operationService).failOperation(ACCOUNT_ID, "test-op", "Couldn't start Freeipa SELinux enablement flow: test");
+    }
+
+    @Test
+    void testModifySeLinuxByCrnWhenNotEntitled() {
+        doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxEntitlementGranted(SeLinux.ENFORCING);
+
+        assertThrows(BadRequestException.class, () -> underTest.modifySeLinuxByCrn(ENVIRONMENT_CRN, ACCOUNT_ID, SeLinux.ENFORCING));
+
+        verifyNoInteractions(stackService);
+        verifyNoInteractions(operationService);
+        verifyNoInteractions(flowManager);
     }
 }

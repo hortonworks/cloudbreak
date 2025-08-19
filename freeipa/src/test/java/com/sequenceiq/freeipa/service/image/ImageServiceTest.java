@@ -41,7 +41,7 @@ import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReader
 import com.sequenceiq.freeipa.repository.ImageRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class ImageServiceTest {
+class ImageServiceTest {
 
     private static final String DEFAULT_PLATFORM = "aws";
 
@@ -113,7 +113,7 @@ public class ImageServiceTest {
     private ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsCaptor;
 
     @Test
-    public void testDetermineImageNameFound() {
+    void testDetermineImageNameFound() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.determineImageName(DEFAULT_PLATFORM, REGION, image));
@@ -121,7 +121,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testDetermineImageNameFoundDefaultPreferred() {
+    void testDetermineImageNameFoundDefaultPreferred() {
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
                 Map.of(
@@ -133,7 +133,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testDetermineImageNameFoundDefaultMock() {
+    void testDetermineImageNameFoundDefaultMock() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("mock",
                 Map.of(DEFAULT_REGION, "mockimage")));
 
@@ -142,7 +142,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testDetermineImageNameFoundNoMpEntitlement() {
+    void testDetermineImageNameFoundNoMpEntitlement() {
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap("azure",
                 Map.of(
@@ -154,7 +154,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testDetermineImageNameNotFound() {
+    void testDetermineImageNameNotFound() {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
@@ -164,7 +164,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testGetImageGivenIdInputNotFound() {
+    void testGetImageGivenIdInputNotFound() {
         FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, DEFAULT_OS, DEFAULT_OS, REGION, DEFAULT_PLATFORM,
                 false, Architecture.X86_64);
 
@@ -178,7 +178,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testImageChange() {
+    void testImageChange() {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(REGION);
@@ -214,7 +214,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testImageCreate() {
+    void testImageCreate() {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(DEFAULT_REGION);
@@ -233,7 +233,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testImageFetch() {
+    void testImageFetch() {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(DEFAULT_REGION);
@@ -251,7 +251,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testRevert() {
+    void testRevert() {
         ImageEntity originalImage = new ImageEntity();
         originalImage.setImageName(EXISTING_ID);
         originalImage.setImageId(IMAGE_UUID);
@@ -303,7 +303,7 @@ public class ImageServiceTest {
         when(imageRepository.getByStack(stack)).thenReturn(imageEntity);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true, "x86_64");
+        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true, "x86_64", Map.of());
         ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(image, IMAGE_CATALOG);
         when(imageProvider.getImage(any())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");

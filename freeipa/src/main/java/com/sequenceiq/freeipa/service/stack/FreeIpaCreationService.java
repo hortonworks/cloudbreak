@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -67,6 +68,7 @@ import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzValidator;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
+import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
@@ -143,6 +145,9 @@ public class FreeIpaCreationService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -186,6 +191,7 @@ public class FreeIpaCreationService {
         }
         measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());
+        validateSeLinux(stack, imageWrapperStringPair.getLeft().getImage());
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);
@@ -213,6 +219,15 @@ public class FreeIpaCreationService {
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);
+        }
+    }
+
+    private void validateSeLinux(Stack stack, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image image) {
+        try {
+            seLinuxValidationService.validateSeLinuxEntitlementGranted(stack);
+            seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, image);
+        } catch (CloudbreakServiceException e) {
+            throw new BadRequestException(e);
         }
     }
 

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +13,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +34,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -64,6 +60,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
+import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
@@ -77,57 +74,60 @@ import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersD
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class EnvironmentCreationServiceTest {
 
     private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
 
-    @MockBean
+    @Mock
     private EnvironmentService environmentService;
 
-    @MockBean
+    @Mock
     private EnvironmentValidatorService validatorService;
 
-    @MockBean
+    @Mock
     private EnvironmentResourceService environmentResourceService;
 
-    @MockBean
+    @Mock
     private EnvironmentDtoConverter environmentDtoConverter;
 
-    @MockBean
+    @Mock
     private EnvironmentReactorFlowManager reactorFlowManager;
 
-    @MockBean
+    @Mock
     private AuthenticationDtoConverter authenticationDtoConverter;
 
-    @MockBean
+    @Mock
     private ParametersService parametersService;
 
-    @MockBean
+    @Mock
     private NetworkService networkService;
 
     @Mock
     private ValidationResultBuilder validationResult;
 
-    @MockBean
+    @Mock
     private GrpcUmsClient grpcUmsClient;
 
-    @MockBean
+    @Mock
     private CloudNetworkService cloudNetworkService;
 
-    @MockBean
+    @Mock
     private LoadBalancerEntitlementService loadBalancerEntitlementService;
 
-    @MockBean
+    @Mock
     private EnvironmentRecipeService recipeService;
 
-    @MockBean
+    @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
-    @MockBean
+    @Mock
     private EntitlementService entitlementService;
 
-    @Inject
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
+
+    @InjectMocks
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
     @Captor
@@ -157,9 +157,9 @@ class EnvironmentCreationServiceTest {
 
     @BeforeEach
     void setUp() {
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
-        when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
-        when(validatorService.validateTags(any(EnvironmentCreationDto.class))).thenReturn(ValidationResult.empty());
+        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
+        lenient().when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
+        lenient().when(validatorService.validateTags(any(EnvironmentCreationDto.class))).thenReturn(ValidationResult.empty());
     }
 
     @Test
@@ -202,9 +202,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
         when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         if (valid) {
             environmentCreationServiceUnderTest.create(environmentCreationDto);
@@ -260,7 +258,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
@@ -313,7 +310,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
@@ -373,10 +369,8 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
         when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEnabled);
-        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
@@ -427,7 +421,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
@@ -484,9 +477,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentArgumentCaptor.capture())).thenReturn(environment);
-        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
@@ -530,11 +521,7 @@ class EnvironmentCreationServiceTest {
         when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
-        when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
@@ -578,12 +565,8 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(validationResultBuilder);
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(environmentDtoConverter.environmentToLocationDto(any(Environment.class))).thenReturn(LocationDto.builder().withName("loc").build());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
-        when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
@@ -627,7 +610,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.save(any())).thenReturn(environment);
         verify(validatorService, never()).validateFreeIpaCreation(any(), any());
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
@@ -667,7 +649,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
@@ -706,7 +687,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.save(any())).thenReturn(environment);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
@@ -745,7 +725,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
@@ -787,7 +766,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
         when(entitlementService.hybridCloudEnabled(ACCOUNT_ID)).thenReturn(true);
 
@@ -800,10 +778,4 @@ class EnvironmentCreationServiceTest {
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
         verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
     }
-
-    @Configuration
-    @Import(EnvironmentCreationService.class)
-    static class Config {
-    }
-
 }

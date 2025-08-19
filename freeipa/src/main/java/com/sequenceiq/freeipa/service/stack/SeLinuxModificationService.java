@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -31,6 +32,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 
 @Service
 public class SeLinuxModificationService {
@@ -54,6 +56,9 @@ public class SeLinuxModificationService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
+
     public void modifySeLinuxOnAllNodes(Stack stack) throws CloudbreakOrchestratorException {
         LOGGER.debug("Modifying SeLinux to {} on stack for FreeIpa - {}", stack.getResourceCrn());
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
@@ -66,6 +71,7 @@ public class SeLinuxModificationService {
     }
 
     public ModifySeLinuxResponse modifySeLinuxByCrn(String environmentCrn, String accountId, SeLinux selinuxMode) {
+        validateSelinux(selinuxMode);
         LOGGER.debug("Starting flow for modifying SeLinux to {} on stack for FreeIpa - {}", selinuxMode, environmentCrn);
         Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
         Operation operation = operationService.startOperation(accountId, OperationType.MODIFY_SELINUX_MODE,
@@ -79,6 +85,14 @@ public class SeLinuxModificationService {
             LOGGER.error("Couldn't start SELinux enablement flow", e);
             operationService.failOperation(accountId, operation.getOperationId(), "Couldn't start Freeipa SELinux enablement flow: " + e.getMessage());
             throw new CloudbreakServiceException("Couldn't start Freeipa SELinux enablement flow: " + e.getMessage() + ", exception : " + e);
+        }
+    }
+
+    private void validateSelinux(SeLinux targetSelinuxMode) {
+        try {
+            seLinuxValidationService.validateSeLinuxEntitlementGranted(targetSelinuxMode);
+        } catch (CloudbreakServiceException e) {
+            throw new BadRequestException(e);
         }
     }
 }

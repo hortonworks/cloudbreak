@@ -36,7 +36,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaImageProviderTest {
+class FreeIpaImageProviderTest {
 
     private static final String DEFAULT_CATALOG_URL = "https://cloudbreak-imagecatalog.s3.amazonaws.com/freeipa-image-catalog.json";
 
@@ -94,7 +94,7 @@ public class FreeIpaImageProviderTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         setupImageCatalogProvider();
         lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
         lenient().when(preferredOsService.getDefaultOs()).thenReturn(DEFAULT_OS);
@@ -107,7 +107,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenNoInputWithInvalidAppVersion() {
+    void testGetImageGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
 
@@ -117,7 +117,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagePreferNewerImageWithOs() {
+    void testGetImagePreferNewerImageWithOs() {
         when(preferredOsService.getDefaultOs()).thenReturn(REDHAT8);
         when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
@@ -129,19 +129,19 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenNoInputWithGbnAppVersion() {
+    void testGetImageGivenNoInputWithGbnAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-b1", null);
         doTestGetImageGivenNoInput();
     }
 
     @Test
-    public void testGetImageGivenNoInputWithVersionNotInCatalog() {
+    void testGetImageGivenNoInputWithVersionNotInCatalog() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.20.0-dev.2", null);
         doTestGetImageGivenNoInput();
     }
 
     @Test
-    public void testGetImagesGivenNoInputWithInvalidAppVersion() {
+    void testGetImagesGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
 
@@ -161,7 +161,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenAllInput() {
+    void testGetImageGivenAllInput() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
 
         ImageWrapper imageWrapper = underTest.getImage(imageFilterSettings).get();
@@ -175,7 +175,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenAllInput() {
+    void testGetImagesGivenAllInput() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -191,7 +191,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesWhenMajorOsUpgradeIsEnabled() {
+    void testGetImagesWhenMajorOsUpgradeIsEnabled() {
         when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, REDHAT8, true);
 
@@ -201,7 +201,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenAllInputNonExistentOS() {
+    void testGetImageGivenAllInputNonExistentOS() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, NON_EXISTING_OS, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -212,7 +212,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenAllInputNonExistentOS() {
+    void testGetImagesGivenAllInputNonExistentOS() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, NON_EXISTING_OS, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -228,7 +228,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenIdInputFound() {
+    void testGetImageGivenIdInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
 
         ImageWrapper imageWrapper = underTest.getImage(imageFilterSettings).get();
@@ -242,7 +242,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenIdInputFound() {
+    void testGetImagesGivenIdInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -258,7 +258,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenUuidInputFound() {
+    void testGetImageGivenUuidInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -267,7 +267,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenUuidInputFound() {
+    void testGetImagesGivenUuidInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -283,7 +283,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenIdInputNotFound() {
+    void testGetImageGivenIdInputNotFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, null, false);
 
         Optional<ImageWrapper> result = underTest.getImage(imageFilterSettings);
@@ -292,7 +292,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenIdInputNotFound() {
+    void testGetImagesGivenIdInputNotFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -301,7 +301,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImageGivenUuidInputFoundWithNotDefaultOs() {
+    void testGetImageGivenUuidInputFoundWithNotDefaultOs() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -310,7 +310,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesGivenUuidInputNotFoundWithNotDefaultOs() {
+    void testGetImagesGivenUuidInputNotFoundWithNotDefaultOs() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -319,7 +319,7 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
-    public void testGetImagesNoInput() {
+    void testGetImagesNoInput() {
         when(supportedOsService.isSupported(any())).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 

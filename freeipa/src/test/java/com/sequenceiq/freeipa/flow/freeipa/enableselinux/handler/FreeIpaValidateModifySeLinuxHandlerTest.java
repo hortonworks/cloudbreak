@@ -4,7 +4,9 @@ import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaMod
 import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.MODIFY_SELINUX_FREEIPA_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,7 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -35,9 +39,10 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateModifySeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaValidateModifySeLinuxHandlerTest {
+class FreeIpaValidateModifySeLinuxHandlerTest {
 
     private FreeIpaValidateModifySeLinuxHandlerEvent event;
 
@@ -49,6 +54,9 @@ public class FreeIpaValidateModifySeLinuxHandlerTest {
 
     @Mock
     private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
 
     @InjectMocks
     private FreeIpaValidateModifySeLinuxHandler underTest;
@@ -85,7 +93,7 @@ public class FreeIpaValidateModifySeLinuxHandlerTest {
     }
 
     @Test
-    void testFreeIpaValidateEnableSeLinuxHandlerImageValidationFailed() throws CloudbreakOrchestratorFailedException {
+    void testFreeIpaValidateEnableSeLinuxHandlerImageValidationFailedBecauseDifferentImages() throws CloudbreakOrchestratorFailedException {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
         when(instanceMetaData1.getImage()).thenReturn(new Json("{\"imageName\":\"ami-03f1c0e9e1e12c120\",\"userdata\":{\"CORE\":\"\",\"GATEWAY\":\"\"}," +
@@ -104,6 +112,42 @@ public class FreeIpaValidateModifySeLinuxHandlerTest {
                 underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
         assertEquals("The images on the FreeIpa instances are different, please consider upgrading the instances to the same image.",
                 exception.getMessage());
+        verifyNoInteractions(gatewayConfigService);
+        verifyNoInteractions(hostOrchestrator);
+    }
+
+    @Test
+    void testFreeIpaValidateEnableSeLinuxHandlerImageValidationFailedBecauseNotEntitled() {
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
+        when(instanceMetaData.getImage()).thenReturn(new Json("{\"imageName\":\"ami-03f1c0e9e1e12c120\",\"userdata\":{\"CORE\":\"\",\"GATEWAY\":\"\"}," +
+                "\"os\":\"redhat8\",\"osType\":\"redhat8\"," +
+                "\"imageCatalogUrl\":\"https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json\",\"imageCatalogName\":null," +
+                "\"imageId\":\"784cb6a3-5f54-4359-962e-c196897abc7f\",\"packageVersions\":{\"source-image\":\"ami-039ce2eddc1949546\"}," +
+                "\"date\":\"2023-11-23\",\"created\":null}"));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxEntitlementGranted(stack);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
+
+        verifyNoInteractions(gatewayConfigService);
+        verifyNoInteractions(hostOrchestrator);
+    }
+
+    @Test
+    void testFreeIpaValidateEnableSeLinuxHandlerImageValidationFailedBecauseImageDoesNotSupportSeLinux() {
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
+        when(instanceMetaData.getImage()).thenReturn(new Json("{\"imageName\":\"ami-03f1c0e9e1e12c120\",\"userdata\":{\"CORE\":\"\",\"GATEWAY\":\"\"}," +
+                "\"os\":\"redhat8\",\"osType\":\"redhat8\"," +
+                "\"imageCatalogUrl\":\"https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json\",\"imageCatalogName\":null," +
+                "\"imageId\":\"784cb6a3-5f54-4359-962e-c196897abc7f\",\"packageVersions\":{\"source-image\":\"ami-039ce2eddc1949546\"}," +
+                "\"date\":\"2023-11-23\",\"created\":null}"));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxSupportedOnTargetImage(eq(stack), any(Image.class));
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.doAccept(new HandlerEvent<>(new Event<>(event))));
+
         verifyNoInteractions(gatewayConfigService);
         verifyNoInteractions(hostOrchestrator);
     }

@@ -28,7 +28,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @ExtendWith(MockitoExtension.class)
-public class CoreImageProviderTest {
+class CoreImageProviderTest {
 
     private static final long WORKSPACE_ID_DEFAULT = 0L;
 
@@ -68,7 +68,7 @@ public class CoreImageProviderTest {
     private CoreImageProvider victim;
 
     @Test
-    public void shouldReturnEmptyInCaseOfException() throws Exception {
+    void shouldReturnEmptyInCaseOfException() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenThrow(new RuntimeException());
 
@@ -78,7 +78,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
+    void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null)).thenReturn(null);
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
@@ -87,7 +87,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void shouldReturnResult() throws Exception {
+    void shouldReturnResult() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenReturn(anImagesResponse());
         when(freeIpaImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -111,7 +111,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void testGetImagesdReturnsEmptyListWhenFreeImagesNull() throws Exception {
+    void testGetImagesdReturnsEmptyListWhenFreeImagesNull() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenReturn(new ImagesV4Response());
 
@@ -121,7 +121,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
+    void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenThrow(new WebApplicationException());
 
@@ -131,7 +131,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
+    void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenThrow(new Exception());
 
@@ -141,7 +141,7 @@ public class CoreImageProviderTest {
     }
 
     @Test
-    public void testGetImages() throws Exception {
+    void testGetImages() throws Exception {
         ImagesV4Response imagesV4Response = new ImagesV4Response();
         imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))

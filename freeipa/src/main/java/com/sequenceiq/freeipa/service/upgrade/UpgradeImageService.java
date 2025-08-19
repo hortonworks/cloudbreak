@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -74,6 +75,11 @@ public class UpgradeImageService {
     }
 
     public List<ImageInfoResponse> findTargetImages(Stack stack, String catalog, ImageInfoResponse currentImage, Boolean allowMajorOsUpgrade) {
+        return findTargetImages(stack, catalog, currentImage, allowMajorOsUpgrade, Map.of());
+    }
+
+    public List<ImageInfoResponse> findTargetImages(Stack stack, String catalog, ImageInfoResponse currentImage,
+            Boolean allowMajorOsUpgrade, Map<String, String> tagFilters) {
         Optional<String> currentImageDate = getCurrentImageDate(stack, currentImage);
         List<Pair<ImageWrapper, String>> imagesWrapperAndName = imageService.fetchImagesWrapperAndName(stack, catalog, currentImage.getOs(),
                 allowMajorOsUpgrade);
@@ -81,6 +87,7 @@ public class UpgradeImageService {
                 .filter(imageWrapperAndName -> currentImageDate.isPresent()
                         && isCandidateImageNewerThanCurrent(imageWrapperAndName.getLeft(), currentImageDate.get()))
                 .filter(imageWrapperAndName -> !currentImage.getId().equals(imageWrapperAndName.getLeft().getImage().getUuid()))
+                .filter(imageWrapperAndName -> filterBasedOnTags(tagFilters, imageWrapperAndName))
                 .map(this::convertImageWrapperAndNameToImageInfoResponse)
                 .collect(Collectors.toList());
         fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages).ifPresent(targetImages::add);
@@ -121,6 +128,16 @@ public class UpgradeImageService {
         }
     }
 
+    private boolean filterBasedOnTags(Map<String, String> tagFilters, Pair<ImageWrapper, String> imageWrapperAndName) {
+        Map<String, String> tags = imageWrapperAndName.getLeft().getImage().getTags();
+        for (Map.Entry<String, String> tagFilter : tagFilters.entrySet()) {
+            if (tags.containsKey(tagFilter.getKey()) && !tagFilter.getValue().equals(tags.get(tagFilter.getKey()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private Optional<String> getCurrentImageDate(Stack stack, ImageInfoResponse currentImage) {
         if (StringUtils.isNotBlank(currentImage.getDate())) {
             LOGGER.debug("Current image has a date field filled with {}", currentImage.getDate());
@@ -146,6 +163,6 @@ public class UpgradeImageService {
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
         return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), currentImage.getOs(), stack.getRegion(),
-                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false, stack.getArchitecture());
+                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false, stack.getArchitecture(), Map.of());
     }
 }

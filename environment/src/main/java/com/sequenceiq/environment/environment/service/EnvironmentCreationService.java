@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -36,6 +36,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
+import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
@@ -76,6 +77,8 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
+    private final SeLinuxValidationService seLinuxValidationService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -90,7 +93,8 @@ public class EnvironmentCreationService {
             LoadBalancerEntitlementService loadBalancerEntitlementService,
             EnvironmentRecipeService recipeService,
             OwnerAssignmentService ownerAssignmentService,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            SeLinuxValidationService seLinuxValidationService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -102,6 +106,7 @@ public class EnvironmentCreationService {
         this.recipeService = recipeService;
         this.ownerAssignmentService = ownerAssignmentService;
         this.entitlementService = entitlementService;
+        this.seLinuxValidationService = seLinuxValidationService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -150,11 +155,12 @@ public class EnvironmentCreationService {
     }
 
     private void validateSecurity(EnvironmentCreationDto creationDto) {
-        if (creationDto.getFreeIpaCreation() != null
-                && creationDto.getFreeIpaCreation().getSeLinux() != null
-                && SeLinux.ENFORCING.equals(creationDto.getFreeIpaCreation().getSeLinux())
-                && !entitlementService.isCdpSecurityEnforcingSELinux(creationDto.getAccountId())) {
-            throw new BadRequestException("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
+        if (creationDto.getFreeIpaCreation() != null) {
+            try {
+                seLinuxValidationService.validateSeLinuxEntitlementGrantedForFreeipaCreation(creationDto.getFreeIpaCreation());
+            } catch (CloudbreakServiceException e) {
+                throw new BadRequestException(e);
+            }
         }
     }
 

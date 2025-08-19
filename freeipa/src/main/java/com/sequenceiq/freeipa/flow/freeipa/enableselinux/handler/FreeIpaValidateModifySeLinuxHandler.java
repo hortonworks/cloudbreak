@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -31,6 +30,7 @@ import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLi
 import com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaValidateModifySeLinuxHandlerEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
 
 @Component
 public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHandler<FreeIpaValidateModifySeLinuxHandlerEvent> {
@@ -47,6 +47,9 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
 
     @Override
     public String selector() {
@@ -87,25 +90,25 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
 
     private void validateImageOnFreeIpa(Stack stack) {
         List<Image> imagesList = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .map(InstanceMetaData::getImage).map(this::convertJsonImageToImage)
+                .map(InstanceMetaData::getImage)
+                .map(imageJson -> imageJson.getSilent(Image.class))
                 .toList();
-        List<String> imageIdsList = imagesList.stream().map(Image::getImageId).toList();
-        boolean areAllImagesIdentical = imageIdsList.stream().allMatch(s -> s.equals(imageIdsList.getFirst()));
-        boolean centos7Image = imagesList.stream().map(Image::getOs).toList().stream()
-                .anyMatch(s -> s.equalsIgnoreCase(OsType.CENTOS7.getOs()));
+        boolean areAllImagesIdentical = imagesList.stream()
+                .map(Image::getImageId)
+                .distinct()
+                .count() == 1;
         if (!areAllImagesIdentical) {
             LOGGER.warn("The images on the FreeIpa instances are different, please consider upgrading the instances to the same image for Stack - {}.",
                     stack.getResourceCrn());
             throw new CloudbreakRuntimeException("The images on the FreeIpa instances are different, " +
                     "please consider upgrading the instances to the same image.");
         }
-        if (centos7Image) {
+        Image image = imagesList.getFirst();
+        if (OsType.CENTOS7.getOs().equalsIgnoreCase(image.getOs())) {
             LOGGER.warn("The centos7 OS installed on instances is not supported for SELinux 'ENFORCING' mode for Stack - {}.", stack.getResourceCrn());
             throw new CloudbreakRuntimeException("The centos7 OS installed on instances is not supported for SELinux 'ENFORCING' mode.");
         }
-    }
-
-    private Image convertJsonImageToImage(Json imageJson) {
-        return imageJson.getSilent(Image.class);
+        seLinuxValidationService.validateSeLinuxEntitlementGranted(stack);
+        seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, image);
     }
 }

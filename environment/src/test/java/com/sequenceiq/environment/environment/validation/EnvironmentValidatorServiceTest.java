@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
@@ -45,6 +47,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
+import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
@@ -99,6 +102,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private EnvironmentRecipeService recipeService;
 
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
+
     private EnvironmentValidatorService underTest;
 
     private static Stream<Arguments> freeIpaCreationArguments() {
@@ -151,7 +157,8 @@ class EnvironmentValidatorServiceTest {
                 encryptionKeyValidator,
                 recipeService,
                 encryptionRoleValidator,
-                1);
+                1,
+                seLinuxValidationService);
     }
 
     @Test
@@ -480,20 +487,19 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThresholdWithOutEnforcedSeLinuxNoEntitlementGranted() {
-        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(false);
         FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
                 .withSeLinux(SeLinux.ENFORCING)
                 .build();
+        CloudbreakServiceException e = new CloudbreakServiceException("No SELinux for you!");
+        doThrow(e).when(seLinuxValidationService).validateSeLinuxEntitlementGrantedForFreeipaCreation(freeIpaCreationDto);
 
         ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertTrue(validationResult.hasError());
-        assertEquals("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.",
-                validationResult.getErrors().get(0));
+        assertEquals("No SELinux for you!", validationResult.getErrors().getFirst());
     }
 
     @Test
     void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThresholdWithEnforcedSeLinuxNoEntitlementGranted() {
-        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
         FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
                 .withSeLinux(SeLinux.ENFORCING)
                 .build();
