@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -648,6 +649,21 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(1))
                 .deleteDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(gatewayIp)));
+    }
+
+    @Test
+    void testDeleteDnsEntryShouldNotBeCalledWhenEndpointNameIsNotSpecified() {
+        Stack stackMock = mock(Stack.class);
+        InstanceMetadataView instanceMetadataViewMock = mock(InstanceMetadataView.class);
+        when(stackMock.getPrimaryGatewayInstance()).thenReturn(instanceMetadataViewMock);
+        when(instanceMetadataViewMock.getPublicIpWrapper()).thenReturn("publicIpWrapper");
+        when(instanceMetadataViewMock.getShortHostname()).thenReturn(null);
+        String envName = "anEnvName";
+
+        String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stackMock, envName));
+
+        Assertions.assertNull(result);
+        verifyNoInteractions(dnsManagementService);
     }
 
     @Test

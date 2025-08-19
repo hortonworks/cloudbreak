@@ -208,6 +208,10 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             return null;
         }
         String endpointName = getEndpointNameForStack(stack);
+        if (endpointName == null || endpointName.isEmpty()) {
+            LOGGER.info("No endpoint name for stack, we skip the dns entry deletion.");
+            return null;
+        }
         LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environmentName, ip);
         getDnsManagementService().deleteDnsEntryWithIp(accountId, endpointName, environmentName, false, List.of(ip));
         return ip;
