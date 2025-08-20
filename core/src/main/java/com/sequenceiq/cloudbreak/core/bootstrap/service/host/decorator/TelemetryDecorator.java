@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -129,7 +128,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setTelemetry(telemetry);
         DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
         EncryptionProfileResponse encryptionProfileResponse = environmentResponse.getEncryptionProfile();
-        Map<String, Set<String>> userCipherSuits =
+        Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);

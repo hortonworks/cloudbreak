@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.encryptionprofile.v1.converter;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,8 +40,8 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
         return response;
     }
 
-    private Map<String, Set<String>> getCipherSuiteMap(
-            Set<String> cipherSuites,
+    private Map<String, List<String>> getCipherSuiteMap(
+            List<String> cipherSuites,
             Set<TlsVersion> tlsVersions) {
         if (shouldReturnEmptyMap(cipherSuites)) {
             return Collections.emptyMap();
@@ -49,23 +51,23 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
                 TlsVersion::getVersion,
                 tlsVersion -> {
                     Set<String> availableCiphers = encryptionProfileConfig.getAvailableCiphers(tlsVersion);
-                    Set<String> filteredCiphers = cipherSuites.stream()
+                    List<String> filteredCiphers = cipherSuites.stream()
                             .filter(availableCiphers::contains)
-                            .collect(Collectors.toSet());
+                            .collect(Collectors.toList());
                     return filteredCiphers;
                 }
         ));
     }
 
-    private Map<String, Set<String>> getClouderaCipherSuiteMap(Set<TlsVersion> tlsVersions) {
+    private Map<String, List<String>> getClouderaCipherSuiteMap(Set<TlsVersion> tlsVersions) {
 
         return tlsVersions.stream().collect(Collectors.toMap(
                 TlsVersion::getVersion,
-                tlsVersion -> encryptionProfileConfig.getRequiredCiphers(tlsVersion)
+                tlsVersion -> new ArrayList<>(encryptionProfileConfig.getRequiredCiphers(tlsVersion))
         ));
     }
 
-    private boolean shouldReturnEmptyMap(Set<String> cipherSuites) {
+    private boolean shouldReturnEmptyMap(List<String> cipherSuites) {
         return (cipherSuites == null || cipherSuites.isEmpty());
     }
 

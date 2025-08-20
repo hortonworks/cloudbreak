@@ -10,8 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,10 +46,10 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         encryptionProfile.setResourceStatus(ResourceStatus.USER_MANAGED);
 
         encryptionProfile.setTlsVersions(new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3)));
-        encryptionProfile.setCipherSuites(new HashSet<>(Arrays.asList(
+        encryptionProfile.setCipherSuites(Arrays.asList(
                 "TLS_AES_128_GCM_SHA256",
                 "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-        )));
+        ));
 
     }
 
@@ -69,9 +69,9 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         assertThat(response.getCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
 
-        Map<String, Set<String>> expectedCipherMap = new HashMap<>();
-        expectedCipherMap.put("TLSv1.2", new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
-        expectedCipherMap.put("TLSv1.3", new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+        Map<String, List<String>> expectedCipherMap = new HashMap<>();
+        expectedCipherMap.put("TLSv1.2", Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+        expectedCipherMap.put("TLSv1.3", Arrays.asList("TLS_AES_128_GCM_SHA256"));
 
         assertThat(response.getCipherSuites()).isEqualTo(expectedCipherMap);
     }
@@ -84,7 +84,7 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         // TLS 1.3 supports a different one
         when(encryptionProfileConfig.getRequiredCiphers(TlsVersion.TLS_1_3))
                 .thenReturn(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
-        encryptionProfile.setCipherSuites(Collections.emptySet());
+        encryptionProfile.setCipherSuites(Collections.emptyList());
 
         EncryptionProfileResponse response = converter.convert(encryptionProfile);
 
@@ -93,16 +93,16 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         assertThat(response.getCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
         assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
 
-        Map<String, Set<String>> expectedCipherMap = new HashMap<>();
-        expectedCipherMap.put("TLSv1.2", new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
-        expectedCipherMap.put("TLSv1.3", new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+        Map<String, List<String>> expectedCipherMap = new HashMap<>();
+        expectedCipherMap.put("TLSv1.2", Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+        expectedCipherMap.put("TLSv1.3", Arrays.asList("TLS_AES_128_GCM_SHA256"));
 
         assertThat(response.getClouderaInternalCipherSuites()).isEqualTo(expectedCipherMap);
     }
 
     @Test
     void testConvertEmptyCipherSuitesReturnEmptyMap() {
-        encryptionProfile.setCipherSuites(Collections.emptySet());
+        encryptionProfile.setCipherSuites(Collections.emptyList());
 
         EncryptionProfileResponse response = converter.convert(encryptionProfile);
 

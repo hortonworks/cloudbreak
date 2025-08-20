@@ -224,8 +224,8 @@ public class TelemetryConfigServiceTest {
         EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCipherSuites(
                 Map.of(
-                        "TLSv1.2", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
-                        "TLSv1.3", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+                        "TLSv1.2", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
+                        "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
         detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
@@ -259,8 +259,8 @@ public class TelemetryConfigServiceTest {
         EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCipherSuites(
                 Map.of(
-                        "TLSv1.2", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
-                        "TLSv1.3", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+                        "TLSv1.2", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
+                        "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
         detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);

@@ -133,33 +133,31 @@ public class DefaultEncryptionProfileProvider {
 
     }
 
-    public String getTlsCipherSuites(Map<String, Set<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType, String separator,
+    public String getTlsCipherSuites(Map<String, List<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType, String separator,
             boolean useIanaNames) {
         String[] userCipherSuits = getCipherSuitAsArray(userEncryptionProfileMap);
         return getTlsCipherSuites(userCipherSuits, cipherSuitesLimitType, separator, useIanaNames);
     }
 
     public List<String> getTlsCipherSuitesIanaList(String[] userSuites, CipherSuitesLimitType cipherSuitesLimitType) {
-        String[] suites = userSuites;
-        if (suites == null || suites.length == 0) {
-            suites = getDefaultCipherSuiteList(cipherSuitesLimitType);
+        if (userSuites == null || userSuites.length == 0) {
+            userSuites = getDefaultCipherSuiteList(cipherSuitesLimitType);
         }
-        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(suites).toList());
+        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(userSuites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
         return effectiveSuites.stream().map(CipherSuite::ianaName).collect(Collectors.toList());
     }
 
-    public List<String> getTlsCipherSuitesIanaList(Map<String, Set<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType) {
+    public List<String> getTlsCipherSuitesIanaList(Map<String, List<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType) {
         String[] userCipherSuits = getCipherSuitAsArray(userEncryptionProfileMap);
         return getTlsCipherSuitesIanaList(userCipherSuits, cipherSuitesLimitType);
     }
 
     private String getTlsCipherSuites(String[] userSuites, CipherSuitesLimitType cipherSuitesLimitType, String separator, boolean useIanaNames) {
-        String[] suites = userSuites;
-        if (suites == null || suites.length == 0) {
-            suites = getDefaultCipherSuiteList(cipherSuitesLimitType);
+        if (userSuites == null || userSuites.length == 0) {
+            userSuites = getDefaultCipherSuiteList(cipherSuitesLimitType);
         }
-        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(suites).toList());
+        List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(userSuites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
         if (useIanaNames) {
             return effectiveSuites.stream().map(CipherSuite::ianaName).collect(Collectors.joining(separator));
@@ -172,20 +170,20 @@ public class DefaultEncryptionProfileProvider {
         return getTlsCipherSuites(suites, cipherSuitesLimitType, separator, false);
     }
 
-    public Map<String, Set<String>> getAllCipherSuitesAvailableByTlsVersion() {
+    public Map<String, List<String>> getAllCipherSuitesAvailableByTlsVersion() {
         return getCipherSuiteList()
                 .stream()
                 .flatMap(cipher -> cipher.tlsVersions()
                         .stream()
                         .map(tlsVersion -> Map.entry(tlsVersion, cipher.ianaName())))
                 .collect(Collectors.groupingBy(entry ->
-                        entry.getKey().getVersion(), TreeMap::new, Collectors.mapping(Entry::getValue, Collectors.toSet())));
+                        entry.getKey().getVersion(), TreeMap::new, Collectors.mapping(Entry::getValue, Collectors.toList())));
     }
 
-    public Map<String, Set<String>> getRecommendedCipherSuites() {
+    public Map<String, List<String>> getRecommendedCipherSuites() {
         return Map.of(
                 TLS_1_2.getVersion(),
-                Set.of(
+                List.of(
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                         "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256",
                         "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384",
@@ -200,7 +198,7 @@ public class DefaultEncryptionProfileProvider {
                         "TLS_ECCPWD_WITH_AES_256_GCM_SHA384"
                 ),
                 TLS_1_3.getVersion(),
-                Set.of(
+                List.of(
                         "TLS_AES_256_GCM_SHA384",
                         "TLS_AES_128_GCM_SHA256",
                         "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
@@ -220,7 +218,7 @@ public class DefaultEncryptionProfileProvider {
         );
     }
 
-    private String[] getCipherSuitAsArray(Map<String, Set<String>> userEncryptionProfileMap) {
+    private String[] getCipherSuitAsArray(Map<String, List<String>> userEncryptionProfileMap) {
         String[] userCipherSuits = null;
         if (userEncryptionProfileMap != null && !userEncryptionProfileMap.isEmpty()) {
             userCipherSuits = userEncryptionProfileMap
@@ -228,16 +226,19 @@ public class DefaultEncryptionProfileProvider {
                     .stream()
                     .sorted(Entry.comparingByKey())
                     .map(Entry::getValue)
-                    .flatMap(Set::stream)
+                    .flatMap(List::stream)
                     .toArray(String[]::new);
         }
         return userCipherSuits;
     }
 
     private List<CipherSuite> validateCipherSuites(List<String> suites) {
-        return getCipherSuiteList()
-                .stream()
-                .filter(cs -> suites.contains(cs.ianaName()))
+        Map<String, CipherSuite> validCipherSuites = getCipherSuiteList().stream()
+                .collect(Collectors.toMap(CipherSuite::ianaName, cs -> cs));
+
+        return suites.stream()
+                .filter(validCipherSuites::containsKey)
+                .map(validCipherSuites::get)
                 .toList();
     }
 

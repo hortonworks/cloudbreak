@@ -2,6 +2,7 @@ package com.sequenceiq.environment.encryptionprofile;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -21,7 +22,7 @@ public class EncryptionProfileTestConstants {
 
     public static final Set<TlsVersion> TLS_VERSIONS = new HashSet<>(Arrays.asList(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3));
 
-    public static final Set<String> CIPHER_SUITES = new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"));
+    public static final List<String> CIPHER_SUITES = Arrays.asList("TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384");
 
     public static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudbreak:encryptionProfile:ecb891ca-18f2-406f-9958-99da466fd0f2";
 

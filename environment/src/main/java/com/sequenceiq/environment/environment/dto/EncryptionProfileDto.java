@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
@@ -15,7 +16,7 @@ public class EncryptionProfileDto implements AccountAwareResource {
 
     private Set<TlsVersion> tlsVersions;
 
-    private Set<String> cipherSuites;
+    private List<String> cipherSuites;
 
     private String accountId;
 
@@ -47,11 +48,11 @@ public class EncryptionProfileDto implements AccountAwareResource {
         this.description = description;
     }
 
-    public Set<String> getCipherSuites() {
+    public List<String> getCipherSuites() {
         return cipherSuites;
     }
 
-    public void setCipherSuites(Set<String> cipherSuites) {
+    public void setCipherSuites(List<String> cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
 
@@ -110,7 +111,7 @@ public class EncryptionProfileDto implements AccountAwareResource {
 
         private Set<TlsVersion> tlsVersions;
 
-        private Set<String> cipherSuites;
+        private List<String> cipherSuites;
 
         private String accountId;
 
@@ -146,7 +147,7 @@ public class EncryptionProfileDto implements AccountAwareResource {
             return this;
         }
 
-        public Builder withCipherSuites(Set<String> cipherSuites) {
+        public Builder withCipherSuites(List<String> cipherSuites) {
             this.cipherSuites = cipherSuites;
             return this;
         }

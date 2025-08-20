@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,10 +38,10 @@ public class EncryptionProfileResponse {
     private Set<String> tlsVersions;
 
     @Schema(description = EncryptionProfileModelDescription.TLS_CIPHER_SUITES, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Map<String, Set<String>> cipherSuites;
+    private Map<String, List<String>> cipherSuites;
 
     @Schema(description = EncryptionProfileModelDescription.CLOUDERA_TLS_CIPHER_SUITES, requiredMode = Schema.RequiredMode.REQUIRED)
-    private Map<String, Set<String>> clouderaInternalCipherSuites;
+    private Map<String, List<String>> clouderaInternalCipherSuites;
 
     @Schema(description = EncryptionProfileModelDescription.STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private String status;
@@ -53,19 +54,19 @@ public class EncryptionProfileResponse {
         this.tlsVersions = tlsVersions;
     }
 
-    public Map<String, Set<String>> getCipherSuites() {
+    public Map<String, List<String>> getCipherSuites() {
         return cipherSuites;
     }
 
-    public void setCipherSuites(Map<String, Set<String>> cipherSuites) {
+    public void setCipherSuites(Map<String, List<String>> cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
 
-    public Map<String, Set<String>> getClouderaInternalCipherSuites() {
+    public Map<String, List<String>> getClouderaInternalCipherSuites() {
         return clouderaInternalCipherSuites;
     }
 
-    public void setClouderaInternalCipherSuites(Map<String, Set<String>> clouderaInternalCipherSuites) {
+    public void setClouderaInternalCipherSuites(Map<String, List<String>> clouderaInternalCipherSuites) {
         this.clouderaInternalCipherSuites = clouderaInternalCipherSuites;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class FreeIpaEncryptionConfigView {
                 Optional.ofNullable(encryptionProfileResponse)
                 .map(EncryptionProfileResponse::getTlsVersions)
                 .orElse(null);
-        Map<String, Set<String>> userCipherSuits =
+        Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                 .map(EncryptionProfileResponse::getCipherSuites)
                 .orElse(null);

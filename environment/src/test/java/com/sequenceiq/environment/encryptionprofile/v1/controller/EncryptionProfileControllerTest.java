@@ -228,12 +228,12 @@ public class EncryptionProfileControllerTest {
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
         when(encryptionProfileService.listCiphersByTlsVersion()).thenReturn(Set.of(
                 new TlsVersionResponse(TlsVersion.TLS_1_2.getVersion(),
-                        Set.of("TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256",
+                        Arrays.asList("TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256",
                                 "TLS_ECCPWD_WITH_AES_128_CCM_SHA256",
                                 "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256",
                                 "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256",
                                 "TLS_AES_128_CCM_8_SHA256", "TLS_AES_128_CCM_SHA256"),
-                        Set.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256",
+                        List.of("TLS_AES_256_GCM_SHA384", "TLS_AES_128_GCM_SHA256",
                                 "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                                 "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256",
                                 "TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384",
@@ -249,7 +249,7 @@ public class EncryptionProfileControllerTest {
                                 "TLS_CHACHA20_POLY1305_SHA256"
                         )
                 ),
-                new TlsVersionResponse(TlsVersion.TLS_1_3.getVersion(), Set.of(), Set.of())
+                new TlsVersionResponse(TlsVersion.TLS_1_3.getVersion(), Arrays.asList(), List.of())
         ));
 
         CipherSuitesByTlsVersionResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.listCiphersByTlsVersion());

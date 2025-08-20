@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.encryptionprofile.domain;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -14,7 +15,7 @@ import jakarta.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
-import com.sequenceiq.cloudbreak.common.database.StringSetToStringConverter;
+import com.sequenceiq.cloudbreak.common.database.StringListToStringConverter;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.encryptionprofile.converter.ResourceStatusConverter;
 import com.sequenceiq.environment.encryptionprofile.converter.TlsVersionConverter;
@@ -37,9 +38,9 @@ public class EncryptionProfileBase implements Serializable, AuthResource, Accoun
     @Column(name = "tls_versions", nullable = false)
     private Set<TlsVersion> tlsVersions;
 
-    @Convert(converter = StringSetToStringConverter.class)
+    @Convert(converter = StringListToStringConverter.class)
     @Column(name = "cipher_suites", length = 1000000, columnDefinition = "TEXT")
-    private Set<String> cipherSuites;
+    private List<String> cipherSuites;
 
     @Column(nullable = false)
     private String accountId;
@@ -80,11 +81,11 @@ public class EncryptionProfileBase implements Serializable, AuthResource, Accoun
         this.tlsVersions = tlsVersions;
     }
 
-    public Set<String> getCipherSuites() {
+    public List<String> getCipherSuites() {
         return cipherSuites;
     }
 
-    public void setCipherSuites(Set<String> cipherSuites) {
+    public void setCipherSuites(List<String> cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
 

@@ -7,8 +7,6 @@ import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTest
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,8 +28,8 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertName() {
-        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CIPHER_SUITES)))
-                .thenReturn(new ArrayList<>(CIPHER_SUITES));
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+                .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
                 EncryptionProfileTestConstants.getTestEncryptionProfileRequest());
@@ -41,8 +39,8 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertDescription() {
-        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CIPHER_SUITES)))
-                .thenReturn(new ArrayList<>(CIPHER_SUITES));
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+                .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
                 EncryptionProfileTestConstants.getTestEncryptionProfileRequest());
@@ -52,8 +50,8 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertTlsVersions() {
-        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CIPHER_SUITES)))
-                .thenReturn(new ArrayList<>(CIPHER_SUITES));
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+                .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
                 EncryptionProfileTestConstants.getTestEncryptionProfileRequest());
@@ -64,8 +62,8 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertCipherSuites() {
-        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CIPHER_SUITES)))
-                .thenReturn(new ArrayList<>(CIPHER_SUITES));
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+                .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
                 EncryptionProfileTestConstants.getTestEncryptionProfileRequest());

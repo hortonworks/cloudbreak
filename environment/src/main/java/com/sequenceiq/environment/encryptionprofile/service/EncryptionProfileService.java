@@ -2,6 +2,7 @@ package com.sequenceiq.environment.encryptionprofile.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,12 +161,12 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     public Set<TlsVersionResponse> listCiphersByTlsVersion() {
-        Map<String, Set<String>> ciphersByTls = defaultEncryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
-        Map<String, Set<String>> recommendedCipherSuites = defaultEncryptionProfileProvider.getRecommendedCipherSuites();
+        Map<String, List<String>> ciphersByTls = defaultEncryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, List<String>> recommendedCipherSuites = defaultEncryptionProfileProvider.getRecommendedCipherSuites();
 
         return ciphersByTls.entrySet()
                 .stream()
-                .map(entry -> new TlsVersionResponse(entry.getKey(), entry.getValue(), recommendedCipherSuites.get(entry.getKey())))
+                .map(entry -> new TlsVersionResponse(entry.getKey(), new ArrayList<>(entry.getValue()), recommendedCipherSuites.get(entry.getKey())))
                 .collect(Collectors.toSet());
     }
 }

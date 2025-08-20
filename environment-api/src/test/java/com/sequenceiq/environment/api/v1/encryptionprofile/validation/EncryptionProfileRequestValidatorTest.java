@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,8 +112,7 @@ public class EncryptionProfileRequestValidatorTest {
         tls.add(TlsVersion.TLS_1_3);
         request.setTlsVersions(tls);
 
-        Set<String> ciphers = new HashSet<>();
-        ciphers.add("TLS_AES_128_GCM_SHA256");
+        List<String> ciphers = Arrays.asList("TLS_AES_128_GCM_SHA256");
         request.setCipherSuites(ciphers);
 
         boolean result = validator.isValid(request, context);
@@ -126,8 +126,7 @@ public class EncryptionProfileRequestValidatorTest {
         tls.add(TlsVersion.TLS_1_2);
         request.setTlsVersions(tls);
 
-        Set<String> ciphers = new HashSet<>();
-        ciphers.add("INVALID_CIPHER");
+        List<String> ciphers = Arrays.asList("INVALID_CIPHER");
         request.setCipherSuites(ciphers);
 
         boolean result = validator.isValid(request, context);
@@ -142,8 +141,7 @@ public class EncryptionProfileRequestValidatorTest {
         tls.add(TlsVersion.TLS_1_2);
         request.setTlsVersions(tls);
 
-        Set<String> ciphers = new HashSet<>();
-        ciphers.add("TLS_CHACHA20_POLY1305_SHA256");
+        List<String> ciphers = Arrays.asList("TLS_CHACHA20_POLY1305_SHA256");
         request.setCipherSuites(ciphers);
 
         boolean result = validator.isValid(request, context);

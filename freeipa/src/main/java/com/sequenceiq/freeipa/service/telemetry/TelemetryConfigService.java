@@ -140,7 +140,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         telemetryContext.setNodeStatusContext(nodeStatusContext);
         DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
         EncryptionProfileResponse encryptionProfileResponse = environmentResponse.getEncryptionProfile();
-        Map<String, Set<String>> userCipherSuits =
+        Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);

@@ -596,7 +596,7 @@ public class ClusterHostServiceRunner {
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getTlsVersions)
                         .orElse(null);
-        Map<String, Set<String>> userCipherSuits =
+        Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);
@@ -870,7 +870,7 @@ public class ClusterHostServiceRunner {
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getTlsVersions)
                         .orElse(null);
-        Map<String, Set<String>> userCipherSuits =
+        Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);

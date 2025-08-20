@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.tls;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,22 +25,22 @@ public class DefaultEncryptionProfileProviderTest {
     @Test
     public void testgetCipherSuiteString() {
 
-        String assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER, ",");
+        String assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.BLACKBOX_EXPORTER, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA," +
                 "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", assertValue);
 
-        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.REDHAT_VERSION8, ",");
+        assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.REDHAT_VERSION8, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", assertValue);
 
-        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.MINIMAL, ",");
+        assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.MINIMAL, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", assertValue);
 
-        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ",");
+        assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.JAVA_INTERMEDIATE2018, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA," +
@@ -47,13 +48,13 @@ public class DefaultEncryptionProfileProviderTest {
                 "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA," +
                 "TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA", assertValue);
 
-        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, ",");
+        assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018, ",");
         assertEquals("ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384," +
                 "DHE-RSA-AES128-GCM-SHA256,DHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-AES128-SHA256,ECDHE-ECDSA-AES128-SHA,ECDHE-RSA-AES128-SHA," +
                 "ECDHE-ECDSA-AES256-SHA384,ECDHE-ECDSA-AES256-SHA,ECDHE-RSA-AES256-SHA,DHE-RSA-AES128-SHA256,DHE-RSA-AES128-SHA,DHE-RSA-AES256-SHA256," +
                 "DHE-RSA-AES256-SHA,AES128-SHA,AES256-SHA", assertValue);
 
-        assertValue = underTest.getCipherSuiteString(DefaultEncryptionProfileProvider.CipherSuitesLimitType.DEFAULT, ",");
+        assertValue = underTest.getCipherSuiteString(CipherSuitesLimitType.DEFAULT, ",");
         assertEquals("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384," +
                 "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256," +
                 "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_256_CBC_SHA256," +
@@ -209,7 +210,7 @@ public class DefaultEncryptionProfileProviderTest {
 
     @Test
     public void testGetAllCipherSuitesAvailableByTlsVersion() {
-        Map<String, Set<String>> result = underTest.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, List<String>> result = underTest.getAllCipherSuitesAvailableByTlsVersion();
 
         assertTrue(result.containsKey(TlsVersion.TLS_1_2.getVersion()));
         assertTrue(result.containsKey(TlsVersion.TLS_1_3.getVersion()));
@@ -220,7 +221,7 @@ public class DefaultEncryptionProfileProviderTest {
 
     @Test
     public void testGetRecommendedCipherSuites() {
-        Map<String, Set<String>> result = underTest.getRecommendedCipherSuites();
+        Map<String, List<String>> result = underTest.getRecommendedCipherSuites();
 
         assertTrue(result.containsKey(TlsVersion.TLS_1_2.getVersion()));
         assertTrue(result.containsKey(TlsVersion.TLS_1_3.getVersion()));
@@ -291,5 +292,11 @@ public class DefaultEncryptionProfileProviderTest {
                 )));
 
         assertEquals("The following cipher(s) are not allowed: [NOT_ALLOWED]", ex.getMessage());
+    }
+
+    @Test
+    public void testGetTlsCipherSuitesIanaListEnsureOrdering() {
+        List<String> assertValue = underTest.getTlsCipherSuitesIanaList(new String[0], CipherSuitesLimitType.BLACKBOX_EXPORTER);
+        assertThat(assertValue).isEqualTo(List.of(underTest.getDefaultCipherSuiteList(CipherSuitesLimitType.BLACKBOX_EXPORTER)));
     }
 }

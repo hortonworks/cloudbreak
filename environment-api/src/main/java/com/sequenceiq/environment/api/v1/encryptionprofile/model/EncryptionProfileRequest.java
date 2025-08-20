@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 
+import java.util.List;
 import java.util.Set;
 
 import jakarta.validation.constraints.Pattern;
@@ -36,7 +37,7 @@ public class EncryptionProfileRequest {
     private Set<TlsVersion> tlsVersions;
 
     @Schema(description = EncryptionProfileModelDescription.CIPHER_SUITES)
-    private Set<String> cipherSuites;
+    private List<String> cipherSuites;
 
     public String getName() {
         return name;
@@ -62,11 +63,11 @@ public class EncryptionProfileRequest {
         this.tlsVersions = tlsVersions;
     }
 
-    public Set<String> getCipherSuites() {
+    public List<String> getCipherSuites() {
         return cipherSuites;
     }
 
-    public void setCipherSuites(Set<String> cipherSuites) {
+    public void setCipherSuites(List<String> cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
 

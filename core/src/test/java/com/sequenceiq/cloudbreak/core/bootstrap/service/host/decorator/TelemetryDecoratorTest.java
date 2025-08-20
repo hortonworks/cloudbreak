@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -216,8 +215,8 @@ public class TelemetryDecoratorTest {
         EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCipherSuites(
             Map.of(
-                "TLSv1.2", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
-                "TLSv1.3", Set.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+                "TLSv1.2", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"),
+                "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
             )
         );
         detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);

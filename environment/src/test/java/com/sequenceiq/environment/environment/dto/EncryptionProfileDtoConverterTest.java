@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.dto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ class EncryptionProfileDtoConverterTest {
                 .withResourceCrn("crn")
                 .withAccountId("accountId")
                 .withTlsVersions(Arrays.stream(TlsVersion.values()).collect(Collectors.toSet()))
-                .withCipherSuites(Set.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"))
+                .withCipherSuites(Arrays.asList("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"))
                 .build();
 
         EncryptionProfile result = underTest.dtoToEncryptionProfile(dto);
@@ -46,7 +45,7 @@ class EncryptionProfileDtoConverterTest {
         encryptionProfile.setResourceCrn("crn");
         encryptionProfile.setAccountId("accountId");
         encryptionProfile.setTlsVersions(Arrays.stream(TlsVersion.values()).collect(Collectors.toSet()));
-        encryptionProfile.setCipherSuites(Set.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+        encryptionProfile.setCipherSuites(Arrays.asList("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
 
         EncryptionProfileDto result = underTest.encryptionProfileToDto(encryptionProfile);
 
