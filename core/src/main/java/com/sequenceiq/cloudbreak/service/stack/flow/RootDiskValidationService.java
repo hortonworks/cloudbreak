@@ -15,6 +15,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -116,8 +117,14 @@ public class RootDiskValidationService {
     }
 
     private Template getTemplate(StackDto stackDto, String group) {
-        InstanceGroupDto instanceGroupDto = stackDto.getInstanceGroupByInstanceGroupName(group);
-        return instanceGroupDto.getInstanceGroup().getTemplate();
+        List<InstanceGroupDto> instanceGroups = stackDto.getInstanceGroupDtos();
+        for (InstanceGroupDto instanceGroup : instanceGroups) {
+            String groupName = instanceGroup.getInstanceGroup().getGroupName().toLowerCase(Locale.ROOT);
+            if (groupName.equalsIgnoreCase(group)) {
+                return instanceGroup.getInstanceGroup().getTemplate();
+            }
+        }
+        return new Template();
     }
 
     private boolean updateSizeRequired(int updateSize, Template template, Integer defaultRootVolumeSize) {

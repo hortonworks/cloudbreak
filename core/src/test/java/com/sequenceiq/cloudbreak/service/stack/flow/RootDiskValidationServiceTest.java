@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -67,9 +68,10 @@ class RootDiskValidationServiceTest {
         when(template.getRootVolumeSize()).thenReturn(400);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        when(instanceGroupView.getGroupName()).thenReturn(TEST_GROUP);
         when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
         when(instanceGroupView.getTemplate()).thenReturn(template);
-        when(stackDto.getInstanceGroupByInstanceGroupName(anyString())).thenReturn(instanceGroupDto);
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateRootDiskResourcesForGroup(stackDto, TEST_GROUP, "gp2", 400));
@@ -91,8 +93,9 @@ class RootDiskValidationServiceTest {
         template.setRootVolumeSize(400);
         InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
         when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
+        when(instanceGroupView.getGroupName()).thenReturn(TEST_GROUP);
         when(instanceGroupView.getTemplate()).thenReturn(template);
-        when(stackDto.getInstanceGroupByInstanceGroupName(TEST_GROUP)).thenReturn(instanceGroupDto);
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
 
         underTest.validateRootDiskResourcesForGroup(stackDto, TEST_GROUP, "gp2", 400);
     }

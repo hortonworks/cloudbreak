@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
@@ -540,6 +542,7 @@ public class StackOperationService {
     }
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
+        convertInputGroupToLowerCase(updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
     }
@@ -585,9 +588,13 @@ public class StackOperationService {
     }
 
     public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
+        convertInputGroupToLowerCase(updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        Set<String> selectedNodes = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup())
-                .getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
+        InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup());
+        if (instanceGroupDto == null) {
+            throw new BadRequestException("Unknown Instance Group: Instance Group provided in the request is not present on Stack.");
+        }
+        Set<String> selectedNodes = instanceGroupDto.getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = clusterRepairService.validateRepair(
                 ManualClusterRepairMode.NODE_ID, stack.getId(), selectedNodes, false);
         if (repairValidationResult.isError()) {
@@ -648,5 +655,9 @@ public class StackOperationService {
     public List<String> listAvailableJavaVersions(NameOrCrn nameOrCrn, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return defaultJavaVersionUpdateValidator.listAvailableJavaVersions(stack);
+    }
+
+    private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {
+        updateRequest.getGroup().toLowerCase(Locale.ROOT);
     }
 }

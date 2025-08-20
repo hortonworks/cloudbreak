@@ -596,6 +596,7 @@ class StackOperationServiceTest {
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        updateRequest.setGroup("TEST");
         underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
 
         verify(flowManager).triggerStackUpdateDisks(stack, updateRequest);
@@ -681,6 +682,20 @@ class StackOperationServiceTest {
     }
 
     @Test
+    void testRootVolumeDiskUpdateBadRequestForNullInstanceGroupDto() throws Exception {
+        StackDto stack = mock(StackDto.class);
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("Test");
+        when(stack.getInstanceGroupByInstanceGroupName("Test")).thenReturn(null);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
+
+        assertEquals("Unknown Instance Group: Instance Group provided in the request is not present on Stack.", exception.getMessage());
+    }
+
+    @Test
     void testRootVolumeDiskUpdateThrowsBadRequestForValidation() throws Exception {
         StackDto stack = mock(StackDto.class);
         when(stack.getId()).thenReturn(STACK_ID);
@@ -693,6 +708,7 @@ class StackOperationServiceTest {
                 Result.error(new RepairValidation(List.of("Test validation error")));
         when(clusterRepairService.validateRepair(eq(NODE_ID), eq(STACK_ID), any(Set.class), eq(false))).thenReturn(repairValidationResult);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(diskUpdateRequest.getGroup()).thenReturn("TEST");
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
 
         assertEquals("Test validation error", exception.getMessage());
