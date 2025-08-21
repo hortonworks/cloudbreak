@@ -4,7 +4,11 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_STARTED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -22,7 +26,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
@@ -52,8 +58,9 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
 
         LOGGER.debug("Creating flow trigger event queue for upgrade preparation with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(createUpgradeValidationTriggerEvent(upgradeTriggerEvent));
-        flowEventChain.add(createClusterUpgradePreparationTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getFullSyncEvent(event));
+        flowEventChain.addAll(createUpgradeValidationTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(createClusterUpgradePreparationTriggerEvent(upgradeTriggerEvent));
         return new FlowTriggerEventQueue(getName(), upgradeTriggerEvent, flowEventChain);
     }
 
@@ -70,12 +77,32 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
         }
     }
 
-    private ClusterUpgradeValidationTriggerEvent createUpgradeValidationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
-        return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(), false, false, false);
+    private List<Selectable> createUpgradeValidationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
+        List<Selectable> syncEvents = new ArrayList<>();
+        syncEvents.add(
+                new ClusterUpgradeValidationTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        event.getImageChangeDto().getImageId(),
+                        false,
+                        false,
+                        false
+                )
+        );
+        return syncEvents;
     }
 
-    private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
-        return new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(), event.getRuntimeVersion());
+    private List<Selectable> createClusterUpgradePreparationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
+        List<Selectable> syncEvents = new ArrayList<>();
+        syncEvents.add(
+                new ClusterUpgradePreparationTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        event.getImageChangeDto(),
+                        event.getRuntimeVersion()
+                )
+        );
+        return syncEvents;
     }
 
     private UpgradePreparationChainTriggerEvent replaceEventForUpgradePreparationForRhel(Image helperImage, UpgradePreparationChainTriggerEvent event) {
@@ -89,5 +116,15 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
                 originalImageChangeDto.getImageCatalogName(),
                 originalImageChangeDto.getImageCatalogUrl()));
         return event;
+    }
+
+    private List<Selectable> getFullSyncEvent(UpgradePreparationChainTriggerEvent event) {
+        LOGGER.info("Add sync events for full sync");
+        List<Selectable> syncEvents = new ArrayList<>();
+
+        syncEvents.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
+        syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
+
+        return syncEvents;
     }
 }

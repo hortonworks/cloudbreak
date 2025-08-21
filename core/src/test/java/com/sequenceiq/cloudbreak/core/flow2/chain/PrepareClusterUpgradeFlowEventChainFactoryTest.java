@@ -6,6 +6,8 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -59,7 +62,9 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
                 .thenReturn(Optional.empty());
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(2, flowChainQueue.getQueue().size());
+        assertEquals(4, flowChainQueue.getQueue().size());
+
+        assertSyncEvents(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
         assertUpgradeValidationEvent(flowChainQueue, IMAGE_ID);
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
 
@@ -74,9 +79,22 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
                 .thenReturn(Optional.of(helperImage));
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(2, flowChainQueue.getQueue().size());
+        assertEquals(4, flowChainQueue.getQueue().size());
+        assertSyncEvents(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
         assertUpgradeValidationEvent(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
         assertUpdatePreparationEvent(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
+    }
+
+    private void assertSyncEvents(FlowTriggerEventQueue flowChainQueue, String imageId) {
+        Selectable syncStackEvent = flowChainQueue.getQueue().remove();
+        assertEquals(STACK_SYNC_EVENT.event(), syncStackEvent.selector());
+        assertEquals(STACK_ID, syncStackEvent.getResourceId());
+        assertInstanceOf(StackEvent.class, syncStackEvent);
+
+        Selectable syncClusterEvent = flowChainQueue.getQueue().remove();
+        assertEquals(CLUSTER_SYNC_EVENT.event(), syncClusterEvent.selector());
+        assertEquals(STACK_ID, syncClusterEvent.getResourceId());
+        assertInstanceOf(StackEvent.class, syncClusterEvent);
     }
 
     private void assertUpgradeValidationEvent(FlowTriggerEventQueue flowChainQueue, String imageId) {
