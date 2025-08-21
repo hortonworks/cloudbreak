@@ -72,7 +72,7 @@ dependencies {
   implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
   implementation group:  'javax.annotation',             name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
   implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: protobufVersion
-  implementation group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.12.7'
+  implementation group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.13.0'
   implementation group:  'com.google.code.gson',         name: 'gson',                           version: gsonVersion
   implementation group:   'io.swagger',                  name: 'swagger-annotations',            version: '1.6.15'
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

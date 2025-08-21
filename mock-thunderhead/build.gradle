@@ -78,7 +78,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'org.openapitools',           name: 'jackson-databind-nullable', version: jacksonDatabindNullable
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.12.7'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.13.0'
     implementation group: 'com.h2database', name: 'h2', version: h2databaseVersion
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
