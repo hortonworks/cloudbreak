@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
@@ -386,8 +387,10 @@ public class TlsSpecificationsHelper {
                 new CipherSuite("TLS_FALLBACK_SCSV", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV")
         );
 
-        return cipherSuites.stream()
-                .filter(cs -> suites.contains(cs.getIanaName()))
+        return suites.stream()
+                .filter(suite -> cipherSuites.stream().map(CipherSuite::getIanaName).toList().contains(suite))
+                .map(suite ->
+                        cipherSuites.stream().filter(cipherSuite -> StringUtils.equals(cipherSuite.getIanaName(), suite)).findFirst().orElseThrow())
                 .toList();
     }
 
