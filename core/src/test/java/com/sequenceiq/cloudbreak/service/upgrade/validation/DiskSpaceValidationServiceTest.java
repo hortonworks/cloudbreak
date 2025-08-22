@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +35,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +57,9 @@ class DiskSpaceValidationServiceTest {
     @Mock
     private ResourceService resourceService;
 
+    @Mock
+    private InstanceMetaDataService mockInstanceMetaDataService;
+
     @InjectMocks
     private DiskSpaceValidationService underTest;
 
@@ -66,7 +74,7 @@ class DiskSpaceValidationServiceTest {
     @BeforeEach
     void before() {
         stack = createStack();
-        gatewayConfigs = Collections.emptyList();
+        gatewayConfigs = emptyList();
         nodes = Collections.emptySet();
         freeSpaceByNodes = createFreeSpaceByNodesMap("91000", "170000");
 
@@ -74,6 +82,7 @@ class DiskSpaceValidationServiceTest {
         when(stackUtil.collectNodesWithDiskData(stack)).thenReturn(nodes);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
         lenient().when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(freeSpaceByNodes);
+        lenient().when(mockInstanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(emptyList());
     }
 
     @Test
@@ -107,6 +116,19 @@ class DiskSpaceValidationServiceTest {
         when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(createFreeSpaceByNodesMap("23423423", "false"));
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 100L));
         assertEquals("Failed to get free disk space from nodes: [host2]", exception.getMessage());
+        verifyMocks();
+    }
+
+    @Test
+    void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreStoppedInstances() {
+        String stoppedInstanceId = "some-instance-id";
+        InstanceMetadataView stoppedInstance = mock(InstanceMetadataView.class);
+        when(stoppedInstance.getInstanceStatus()).thenReturn(STOPPED);
+        when(stoppedInstance.getInstanceId()).thenReturn(stoppedInstanceId);
+        when(mockInstanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(List.of(stoppedInstance));
+        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 100L));
+        assertEquals("Failed to get free disk space from nodes due to their stopped state: [" + stoppedInstanceId + "]. " +
+                "Please start these instances and retry this operation.", exception.getMessage());
         verifyMocks();
     }
 

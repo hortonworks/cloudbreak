@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -53,6 +56,9 @@ public class DiskSpaceValidationService {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
     public void validateFreeSpaceForUpgrade(Stack stack, long requiredFreeSpace) {
         Map<String, Double> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
         LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", requiredFreeSpace, freeDiskSpaceByNodes);
@@ -81,10 +87,27 @@ public class DiskSpaceValidationService {
                 failedNodes.add(freeDiskSpaceByNode.getKey());
             }
         }
-        if (!failedNodes.isEmpty()) {
-            throw new UpgradeValidationFailedException(String.format("Failed to get free disk space from nodes: %s", failedNodes));
-        }
+
+        verifyFreeDiskSpaceCheckResultAndInstanceState(stack.getId(), failedNodes);
         return freeDiskSpaceByNodes;
+    }
+
+    private void verifyFreeDiskSpaceCheckResultAndInstanceState(final Long stackId, final List<String> failedNodes) {
+        List<String> stoppedInstances = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackId)
+                .stream()
+                .filter(metadata -> metadata.getInstanceStatus() == STOPPED)
+                .map(InstanceMetadataView::getInstanceId)
+                .toList();
+        final String msgBase = "Failed to get free disk space from nodes";
+        if (!stoppedInstances.isEmpty() & failedNodes.isEmpty()) {
+            throw new UpgradeValidationFailedException(String.format("%s due to their stopped state: %s. " +
+                    "Please start these instances and retry this operation.", msgBase, stoppedInstances));
+        } else if (stoppedInstances.isEmpty() && !failedNodes.isEmpty()) {
+            throw new UpgradeValidationFailedException(String.format("%s: %s", msgBase, failedNodes));
+        } else if (!stoppedInstances.isEmpty()) {
+            throw new UpgradeValidationFailedException(String.format("%s because the following nodes are stopped: %s" +
+                    ", and the following ones are in bad condition: %s", msgBase, stoppedInstances, failedNodes));
+        }
     }
 
     private Map<String, String> getNotEligibleNodes(Map<String, Double> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetadataView> gatewayInstances) {
