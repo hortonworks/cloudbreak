@@ -297,6 +297,38 @@ public class CommonClusterManagerProperties {
 
         private String targetDatabaseMajorVersion;
 
+        private Map<String, DatabaseVersionProperties> matrix;
+
+        public String getOriginalDatabaseMajorVersion() {
+            return originalDatabaseMajorVersion;
+        }
+
+        public void setOriginalDatabaseMajorVersion(String originalDatabaseMajorVersion) {
+            this.originalDatabaseMajorVersion = originalDatabaseMajorVersion;
+        }
+
+        public String getTargetDatabaseMajorVersion() {
+            return targetDatabaseMajorVersion;
+        }
+
+        public void setTargetDatabaseMajorVersion(String targetDatabaseMajorVersion) {
+            this.targetDatabaseMajorVersion = targetDatabaseMajorVersion;
+        }
+
+        public Map<String, DatabaseVersionProperties> getMatrix() {
+            return matrix;
+        }
+
+        public void setMatrix(Map<String, DatabaseVersionProperties> matrix) {
+            this.matrix = matrix;
+        }
+    }
+
+    public static class DatabaseVersionProperties {
+        private String originalDatabaseMajorVersion;
+
+        private String targetDatabaseMajorVersion;
+
         public String getOriginalDatabaseMajorVersion() {
             return originalDatabaseMajorVersion;
         }
