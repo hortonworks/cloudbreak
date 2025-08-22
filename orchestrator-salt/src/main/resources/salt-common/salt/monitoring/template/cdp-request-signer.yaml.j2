@@ -35,9 +35,14 @@ tls:
   {# Configuring the list of ciphersuites used is only available from version 1.3.7 onwards.
   Supported ciphersuites are listed in https://github.infra.cloudera.com/thunderhead/cdp-infra-tools/blob/master/cdp-request-signer/src/main/resources/proxy/models.go #}
   cipher_suites:
-  {% for suite in monitoring.tlsCipherSuitesBlackBoxExporter %}
-    - {{ suite }}
-  {% endfor %}
+    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+    - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+    - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+    - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+    - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
 auth:
   username: "{{ monitoring.requestSignerUser }}"
   password: "{{ monitoring.localPassword }}"

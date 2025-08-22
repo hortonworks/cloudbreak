@@ -5,9 +5,14 @@ tls_server_config:
   {# Please make sure all listed ciphersuites are supported in the given go version of each node-exporter used.
      Please test the list with each node-exporter version in use, and branch the list based on the version if needed! #}
   cipher_suites:
-  {% for suite in monitoring.tlsCipherSuitesBlackBoxExporter %}
-    - {{ suite }}
-  {% endfor %}
+    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+    - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+    - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+    - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+    - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
 {%- if monitoring.localPassword %}
 {%- set command = '/opt/salt/scripts/monitoring-secret-handler.sh ' + monitoring.nodeExporterUser + ' /opt/node_exporter/node_pwd /opt/node_exporter/basic_auth_cred' %}
 {%- set basic_auth_str = salt['cmd.run'](command)  %}
