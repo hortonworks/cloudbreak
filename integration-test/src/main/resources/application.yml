@@ -124,6 +124,10 @@ integrationtest:
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
+    latest:
+      runtimeVersion: "7.3.2"
+      originalDatabaseMajorVersion: "14"
+      targetDatabaseMajorVersion: "17"
   privateEndpointEnabled: false
   java:
     supportedVersions: 8,17

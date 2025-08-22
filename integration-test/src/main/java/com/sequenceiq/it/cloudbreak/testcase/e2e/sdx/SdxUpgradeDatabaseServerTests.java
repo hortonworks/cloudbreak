@@ -48,25 +48,47 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
             then = "SDX upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgrade(TestContext testContext) {
+        String originalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion();
+        TargetMajorVersion targetMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
+
+        testSDXDatabaseUpgrade(testContext, null, originalDatabaseMajorVersion, targetMajorVersion);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster with specified runtime in available state",
+            when = "upgrade called on the SDX cluster",
+            then = "SDX upgrade database server should be successful, the cluster should be up and running"
+    )
+    public void testSDXDatabaseUpgradeWithRuntime(TestContext testContext) {
+        String latestOriginalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getLatestOriginalDatabaseMajorVersion();
+        TargetMajorVersion latestTargetMajorVersion = sdxUpgradeDatabaseTestUtil.getLatestTargetMajorVersion();
+        String latestRuntimeVersion = sdxUpgradeDatabaseTestUtil.getLatestRuntimeVersion();
+
+        testSDXDatabaseUpgrade(testContext, latestRuntimeVersion, latestOriginalDatabaseMajorVersion, latestTargetMajorVersion);
+    }
+
+    public void testSDXDatabaseUpgrade(TestContext testContext, String runtimeVersion, String originalDatabaseMajorVersion,
+            TargetMajorVersion targetDatabaseMajorVersion) {
         createEnvironmentWithFreeIpa(testContext);
         String sdx = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-        sdxDatabaseRequest.setDatabaseEngineVersion(sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion());
+        sdxDatabaseRequest.setDatabaseEngineVersion(originalDatabaseMajorVersion);
         sdxDatabaseRequest = testContext.getCloudProvider().extendDBRequestWithProviderParams(sdxDatabaseRequest);
-
-        TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
         testContext
                 .given(sdx, SdxTestDto.class)
                     .withCloudStorage()
+                    .withRuntimeVersion(runtimeVersion)
                     .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .given(SdxUpgradeDatabaseServerTestDto.class)
-                    .withTargetMajorVersion(targetDatabaseMajorVersion)
+                .withTargetMajorVersion(targetDatabaseMajorVersion)
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.upgradeDatabaseServer(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))

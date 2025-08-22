@@ -111,7 +111,20 @@ public class SdxUpgradeDatabaseTestUtil {
         return parseTargetMajorVersion(versionString);
     }
 
-    private TargetMajorVersion parseTargetMajorVersion(String versionString) {
+    public String getLatestOriginalDatabaseMajorVersion() {
+        return commonClusterManagerProperties.getUpgradeDatabaseServer().getLatest().getOriginalDatabaseMajorVersion();
+    }
+
+    public TargetMajorVersion getLatestTargetMajorVersion() {
+        String versionString = commonClusterManagerProperties.getUpgradeDatabaseServer().getLatest().getTargetDatabaseMajorVersion();
+        return parseTargetMajorVersion(versionString);
+    }
+
+    public String getLatestRuntimeVersion() {
+        return commonClusterManagerProperties.getUpgradeDatabaseServer().getLatest().getRuntimeVersion();
+    }
+
+    TargetMajorVersion parseTargetMajorVersion(String versionString) {
         try {
             return TargetMajorVersion.valueOf("VERSION" + versionString);
         } catch (Exception exception) {

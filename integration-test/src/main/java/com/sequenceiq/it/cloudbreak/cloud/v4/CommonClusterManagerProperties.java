@@ -297,6 +297,8 @@ public class CommonClusterManagerProperties {
 
         private String targetDatabaseMajorVersion;
 
+        private DatabaseVersionProperties latest;
+
         public String getOriginalDatabaseMajorVersion() {
             return originalDatabaseMajorVersion;
         }
@@ -311,6 +313,46 @@ public class CommonClusterManagerProperties {
 
         public void setTargetDatabaseMajorVersion(String targetDatabaseMajorVersion) {
             this.targetDatabaseMajorVersion = targetDatabaseMajorVersion;
+        }
+
+        public DatabaseVersionProperties getLatest() {
+            return latest;
+        }
+
+        public void setLatest(DatabaseVersionProperties latest) {
+            this.latest = latest;
+        }
+    }
+
+    public static class DatabaseVersionProperties {
+        private String runtimeVersion;
+
+        private String originalDatabaseMajorVersion;
+
+        private String targetDatabaseMajorVersion;
+
+        public String getOriginalDatabaseMajorVersion() {
+            return originalDatabaseMajorVersion;
+        }
+
+        public void setOriginalDatabaseMajorVersion(String originalDatabaseMajorVersion) {
+            this.originalDatabaseMajorVersion = originalDatabaseMajorVersion;
+        }
+
+        public String getTargetDatabaseMajorVersion() {
+            return targetDatabaseMajorVersion;
+        }
+
+        public void setTargetDatabaseMajorVersion(String targetDatabaseMajorVersion) {
+            this.targetDatabaseMajorVersion = targetDatabaseMajorVersion;
+        }
+
+        public String getRuntimeVersion() {
+            return runtimeVersion;
+        }
+
+        public void setRuntimeVersion(String runtimeVersion) {
+            this.runtimeVersion = runtimeVersion;
         }
     }
 }
