@@ -58,6 +58,10 @@ public class ImageFilterParams {
         this.getAllImages = getAllImages;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getTargetImageId() {
         return targetImageId;
     }
@@ -147,5 +151,114 @@ public class ImageFilterParams {
     public int hashCode() {
         return Objects.hash(currentImage, lockComponents, replaceVms, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
                 imageCatalogPlatform, cloudPlatform, region, getAllImages, targetImageId);
+    }
+
+    public static final class Builder {
+
+        private String targetImageId;
+
+        private Image currentImage;
+
+        private String imageCatalogName;
+
+        private boolean lockComponents;
+
+        private boolean replaceVms;
+
+        private Map<String, String> stackRelatedParcels;
+
+        private StackType stackType;
+
+        private Blueprint blueprint;
+
+        private Long stackId;
+
+        private InternalUpgradeSettings internalUpgradeSettings;
+
+        private ImageCatalogPlatform imageCatalogPlatform;
+
+        private String cloudPlatform;
+
+        private String region;
+
+        private boolean getAllImages;
+
+        private Builder() {
+        }
+
+        public Builder withTargetImageId(String targetImageId) {
+            this.targetImageId = targetImageId;
+            return this;
+        }
+
+        public Builder withCurrentImage(Image currentImage) {
+            this.currentImage = currentImage;
+            return this;
+        }
+
+        public Builder withImageCatalogName(String imageCatalogName) {
+            this.imageCatalogName = imageCatalogName;
+            return this;
+        }
+
+        public Builder withLockComponents(boolean lockComponents) {
+            this.lockComponents = lockComponents;
+            return this;
+        }
+
+        public Builder withReplaceVms(boolean replaceVms) {
+            this.replaceVms = replaceVms;
+            return this;
+        }
+
+        public Builder withStackRelatedParcels(Map<String, String> stackRelatedParcels) {
+            this.stackRelatedParcels = stackRelatedParcels;
+            return this;
+        }
+
+        public Builder withStackType(StackType stackType) {
+            this.stackType = stackType;
+            return this;
+        }
+
+        public Builder withBlueprint(Blueprint blueprint) {
+            this.blueprint = blueprint;
+            return this;
+        }
+
+        public Builder withStackId(Long stackId) {
+            this.stackId = stackId;
+            return this;
+        }
+
+        public Builder withInternalUpgradeSettings(InternalUpgradeSettings internalUpgradeSettings) {
+            this.internalUpgradeSettings = internalUpgradeSettings;
+            return this;
+        }
+
+        public Builder withImageCatalogPlatform(ImageCatalogPlatform imageCatalogPlatform) {
+            this.imageCatalogPlatform = imageCatalogPlatform;
+            return this;
+        }
+
+        public Builder withCloudPlatform(String cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder withRegion(String region) {
+            this.region = region;
+            return this;
+        }
+
+        public Builder withGetAllImages(boolean getAllImages) {
+            this.getAllImages = getAllImages;
+            return this;
+        }
+
+        public ImageFilterParams build() {
+            return new ImageFilterParams(targetImageId, currentImage, imageCatalogName, lockComponents, replaceVms, stackRelatedParcels, stackType, blueprint,
+                    stackId, internalUpgradeSettings, imageCatalogPlatform, cloudPlatform, region, getAllImages);
+        }
     }
 }

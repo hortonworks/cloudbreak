@@ -12,6 +12,10 @@ public class UpgradeValidationFailedException extends RuntimeException {
         super(message, cause);
     }
 
+    public UpgradeValidationFailedException(Throwable cause) {
+        super(cause);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

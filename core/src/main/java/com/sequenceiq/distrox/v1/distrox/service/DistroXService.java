@@ -27,16 +27,19 @@ import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.security.SecurityV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
@@ -86,6 +89,9 @@ public class DistroXService {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
 
     public StackV4Response post(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -137,6 +143,7 @@ public class DistroXService {
             validateAzureDatabaseType(request.getExternalDatabase());
         }
         validateLoadBalancerSku(request.getAzure());
+        validateSeLinuxEntitlement(request);
     }
 
     private void validateLoadBalancerSku(AzureDistroXV1Parameters azure) {
@@ -192,4 +199,11 @@ public class DistroXService {
                 });
     }
 
+    private void validateSeLinuxEntitlement(DistroXV1Request request) {
+        SeLinux seLinuxModeFromRequest = Optional.ofNullable(request.getSecurity())
+                .map(SecurityV1Request::getSeLinux)
+                .map(SeLinux::fromStringWithFallback)
+                .orElse(SeLinux.PERMISSIVE);
+        seLinuxValidationService.validateSeLinuxEntitlementGranted(seLinuxModeFromRequest);
+    }
 }

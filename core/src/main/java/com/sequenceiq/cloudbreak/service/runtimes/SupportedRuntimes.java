@@ -44,7 +44,7 @@ public class SupportedRuntimes {
         try {
             if (Strings.isNullOrEmpty(latestSupportedRuntime)) {
                 List<String> defaultImageCatalogRuntimeVersions = imageCatalogService.getRuntimeVersionsFromDefault();
-                LOGGER.debug("Define latest supported runtime by available runtimes in the default image catalog ('%s').",
+                LOGGER.debug("Define latest supported runtime by available runtimes in the default image catalog ('{}').",
                         String.join(",", defaultImageCatalogRuntimeVersions));
 
                 Optional<String> latestRuntime = defaultImageCatalogRuntimeVersions.stream().findFirst();

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvai
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class })
@@ -85,5 +86,7 @@ public class UpgradeImageFilterConfigTest {
         @MockBean
         private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
 
+        @MockBean
+        private SeLinuxValidationService seLinuxValidationService;
     }
 }

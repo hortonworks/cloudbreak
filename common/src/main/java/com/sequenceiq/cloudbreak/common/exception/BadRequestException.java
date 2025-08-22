@@ -12,6 +12,10 @@ public class BadRequestException extends RuntimeException {
         super(message, cause);
     }
 
+    public BadRequestException(Throwable cause) {
+        super(cause);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

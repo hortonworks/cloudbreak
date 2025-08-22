@@ -10,11 +10,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -44,17 +46,20 @@ import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.security.SecurityV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
@@ -113,6 +118,9 @@ class DistroXServiceTest {
 
     @Mock
     private KerberosConfigService kerberosConfigService;
+
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
 
     @InjectMocks
     private DistroXService underTest;
@@ -557,6 +565,30 @@ class DistroXServiceTest {
         request.setAzure(new AzureDistroXV1Parameters());
 
         doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+    }
+
+    @Test
+    void testShouldThrowExceptionWhenSeLinuxEntitlementNotGranted() {
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(ENV_NAME);
+        SecurityV1Request securityV1Request = new SecurityV1Request();
+        securityV1Request.setSeLinux("ENFORCING");
+        request.setSecurity(securityV1Request);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(START_DATAHUB_STARTED);
+        envResponse.setCrn(CRN);
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxEntitlementGranted(SeLinux.ENFORCING);
+
+        assertThrows(CloudbreakServiceException.class, () -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)));
+
+        verifyNoInteractions(fedRampModificationService);
+        verifyNoInteractions(stackOperations);
     }
 
     private DistroXV1Request createDistroXV1RequestForAzureSingleServerRejectionTest(

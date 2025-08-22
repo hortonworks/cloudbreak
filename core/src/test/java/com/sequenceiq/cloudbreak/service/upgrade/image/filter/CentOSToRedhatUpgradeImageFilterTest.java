@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
-class CentosToRedHatUpgradeImageFilterTest {
+class CentOSToRedhatUpgradeImageFilterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 

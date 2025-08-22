@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -100,7 +101,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
-public class StackCreatorServiceTest {
+class StackCreatorServiceTest {
 
     private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
 
@@ -221,6 +222,9 @@ public class StackCreatorServiceTest {
     @Mock
     private StackV4RequestToStackConverter stackV4RequestToStackConverter;
 
+    @Mock
+    private SeLinuxValidationService seLinuxValidationService;
+
     static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
         return new Object[][]{
                 // testCaseName subnetId availabilityZone
@@ -238,7 +242,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void shouldThrowBadRequestWhenStackNameAlreadyExists() {
+    void shouldThrowBadRequestWhenStackNameAlreadyExists() {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
@@ -415,7 +419,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageShouldReturnFalseWhenCmRequestIsNotPresentAndPlatformIsNotYarn() {
+    void testShouldUseBaseCMImageShouldReturnFalseWhenCmRequestIsNotPresentAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
 
         boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, AWS_PLATFORM);
@@ -424,7 +428,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageShouldReturnTrueWhenCmRequestIsNotPresentAndPlatformIsYarn() {
+    void testShouldUseBaseCMImageShouldReturnTrueWhenCmRequestIsNotPresentAndPlatformIsYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
 
         boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, YARN_PLATFORM);
@@ -433,7 +437,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsNotYarn() {
+    void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
@@ -446,7 +450,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsYarn() {
+    void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
@@ -459,7 +463,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProductsAndPlatformIsNotYarn() {
+    void testShouldUseBaseCMImageWithProductsAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -476,7 +480,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProductsAndPlatformIsYarn() {
+    void testShouldUseBaseCMImageWithProductsAndPlatformIsYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -493,7 +497,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsNotYarn() {
+    void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -512,7 +516,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsYarn() {
+    void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -531,7 +535,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testFillInstanceMetadataWhenMaster() {
+    void testFillInstanceMetadataWhenMaster() {
         Stack stack = new Stack();
         InstanceGroup masterGroup = getARequestGroup("master", 1, InstanceGroupType.GATEWAY);
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
@@ -552,7 +556,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testFillInstanceMetadataWhenManager() {
+    void testFillInstanceMetadataWhenManager() {
         Stack stack = new Stack();
         InstanceGroup managerGroup = getARequestGroup("manager", 1, InstanceGroupType.GATEWAY);
         InstanceGroup gatewayGroup = getARequestGroup("gateway", 2, InstanceGroupType.CORE);
@@ -674,7 +678,7 @@ public class StackCreatorServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider")
-    public void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobin(String testCaseName, String subnetId, String availabilityZone) {
+    void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobin(String testCaseName, String subnetId, String availabilityZone) {
         Stack stack = new Stack();
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
@@ -689,7 +693,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback() {
+    void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback() {
         Stack stack = new Stack();
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(workerGroup));
@@ -707,7 +711,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndNotDistroXRequest() {
+    void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndNotDistroXRequest() {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
 
@@ -717,7 +721,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndDistroXRequest() {
+    void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndDistroXRequest() {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
 
@@ -727,7 +731,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndDistroXRequest() {
+    void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndDistroXRequest() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
 
@@ -737,7 +741,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndNotDistroXRequest() {
+    void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndNotDistroXRequest() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
 
@@ -747,7 +751,7 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenStackTypeIsNullAndNotDistroXRequest() {
+    void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenStackTypeIsNullAndNotDistroXRequest() {
         Stack stack = new Stack();
         stack.setType(null);
 

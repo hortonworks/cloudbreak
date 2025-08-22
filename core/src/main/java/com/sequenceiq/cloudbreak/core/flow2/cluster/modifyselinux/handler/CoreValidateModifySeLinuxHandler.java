@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -47,6 +48,9 @@ public class CoreValidateModifySeLinuxHandler extends ExceptionCatcherEventHandl
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CoreValidateModifySeLinuxHandlerEvent.class);
@@ -58,31 +62,34 @@ public class CoreValidateModifySeLinuxHandler extends ExceptionCatcherEventHandl
     }
 
     @Override
-    public Selectable doAccept(HandlerEvent<CoreValidateModifySeLinuxHandlerEvent> enableSeLinuxEventEvent) {
-        CoreValidateModifySeLinuxHandlerEvent eventData = enableSeLinuxEventEvent.getData();
-        LOGGER.debug("Validating if the SeLinux on instances are set to PERMISSIVE mode.");
+    public Selectable doAccept(HandlerEvent<CoreValidateModifySeLinuxHandlerEvent> enableSeLinuxEvent) {
+        CoreValidateModifySeLinuxHandlerEvent eventData = enableSeLinuxEvent.getData();
+        seLinuxValidationService.validateSeLinuxEntitlementGranted(eventData.getSelinuxMode());
         Stack stack = stackService.getByIdWithListsInTransaction(eventData.getResourceId());
-        validateImageOnStack(stack);
+        validateImageOnStack(stack, eventData.getSelinuxMode());
         validateSeLinuxMode(stack);
         return new CoreModifySeLinuxEvent(CoreModifySeLinuxStateSelectors.MODIFY_SELINUX_CORE_EVENT.selector(), eventData.getResourceId(),
                 eventData.getSelinuxMode());
     }
 
-    private void validateImageOnStack(Stack stack) {
+    private void validateImageOnStack(Stack stack, SeLinux seLinuxModeFromRequest) {
         List<Image> imagesList = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .map(InstanceMetaData::getImage).map(json -> json.getSilent(Image.class))
+                .map(InstanceMetaData::getImage)
+                .map(json -> json.getSilent(Image.class))
                 .toList();
-        List<String> imageIdsList = imagesList.stream().map(Image::getImageName).toList();
-        boolean centos7Image = imagesList.stream().map(Image::getOs).toList().stream()
-                .anyMatch(s -> s.equalsIgnoreCase(OsType.CENTOS7.getOs()));
-        boolean areAllImagesIdentical = imageIdsList.stream().allMatch(s -> s.equals(imageIdsList.getFirst()));
+        boolean areAllImagesIdentical = imagesList.stream()
+                .map(Image::getImageName)
+                .distinct()
+                .count() == 1;
         if (!areAllImagesIdentical) {
             throw new CloudbreakRuntimeException("The images on the instances are different, please consider upgrading the instances to the same image.");
         }
-        if (centos7Image) {
+        Image image = imagesList.getFirst();
+        if (OsType.CENTOS7.getOs().equalsIgnoreCase(image.getOs())) {
             LOGGER.warn("The centos7 OS installed on instances is not supported for SELinux 'ENFORCING' mode for Stack - {}.", stack.getResourceCrn());
             throw new CloudbreakRuntimeException("The centos7 OS installed on instances is not supported for SELinux 'ENFORCING' mode.");
         }
+        seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(seLinuxModeFromRequest, image);
     }
 
     private void  validateSeLinuxMode(Stack stack) {

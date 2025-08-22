@@ -37,6 +37,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.BaseSecurityV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -87,6 +88,7 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -94,6 +96,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -184,6 +187,9 @@ public class StackCreatorService {
     @Inject
     private SecurityConfigService securityConfigService;
 
+    @Inject
+    private SeLinuxValidationService seLinuxValidationService;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         long start = System.currentTimeMillis();
@@ -205,6 +211,7 @@ public class StackCreatorService {
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
         validateArchitecture(stackRequest, distroxRequest, workspace.getId());
+        validateSeLinuxEntitlement(stackRequest);
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -276,6 +283,7 @@ public class StackCreatorService {
                 );
                 securityConfigService.validateRequest(stackRequest.getSecurity(), accountId);
                 securityConfigService.create(stack, stackRequest.getSecurity());
+                seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, imgFromCatalog.getImage());
 
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);
@@ -370,6 +378,14 @@ public class StackCreatorService {
                 }
             }
         }
+    }
+
+    private void validateSeLinuxEntitlement(StackV4Request stackRequest) {
+        SeLinux seLinuxModeFromRequest = Optional.ofNullable(stackRequest.getSecurity())
+                .map(BaseSecurityV4::getSeLinux)
+                .map(SeLinux::fromStringWithFallback)
+                .orElse(SeLinux.PERMISSIVE);
+        seLinuxValidationService.validateSeLinuxEntitlementGranted(seLinuxModeFromRequest);
     }
 
     private boolean isCodRequest(StackV4Request stackRequest) {

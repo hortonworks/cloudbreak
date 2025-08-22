@@ -15,11 +15,39 @@ public record UpgradeImageInfo(Image currentImage, StatedImage targetStatedImage
         this.targetStatedImage = targetStatedImage;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public Image getCurrentImage() {
         return currentImage;
     }
 
     public StatedImage getTargetStatedImage() {
         return targetStatedImage;
+    }
+
+    public static final class Builder {
+
+        private Image currentImage;
+
+        private StatedImage targetStatedImage;
+
+        private Builder() {
+        }
+
+        public Builder withCurrentImage(Image currentImage) {
+            this.currentImage = currentImage;
+            return this;
+        }
+
+        public Builder withTargetStatedImage(StatedImage targetStatedImage) {
+            this.targetStatedImage = targetStatedImage;
+            return this;
+        }
+
+        public UpgradeImageInfo build() {
+            return new UpgradeImageInfo(currentImage, targetStatedImage);
+        }
     }
 }
