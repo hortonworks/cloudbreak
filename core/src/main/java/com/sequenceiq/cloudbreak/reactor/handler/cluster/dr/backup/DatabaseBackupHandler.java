@@ -109,7 +109,10 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             if (event.getData().isDryRun()) {
                 hostOrchestrator.backupDryRunValidation(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
             } else {
-                hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
+                int timeout = Objects.nonNull(sdxBackupRestoreSettingsResponse) && sdxBackupRestoreSettingsResponse.getBackupTimeoutInMinutes() > 0 ?
+                        sdxBackupRestoreSettingsResponse.getBackupTimeoutInMinutes() : request.getDatabaseMaxDurationInMin();
+                LOGGER.info("Backing-up database with timeout {}, databaseMaxDurationInMin: {}", timeout, request.getDatabaseMaxDurationInMin());
+                hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, timeout);
             }
 
             result = new DatabaseBackupSuccess(stackId, event.getData().isDryRun());

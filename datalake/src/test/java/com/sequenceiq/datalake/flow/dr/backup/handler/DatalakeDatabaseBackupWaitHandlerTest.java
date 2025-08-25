@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.dr.BackupRestoreTimeoutService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -38,6 +40,9 @@ public class DatalakeDatabaseBackupWaitHandlerTest {
     @Mock
     private SdxBackupRestoreService sdxBackupRestoreService;
 
+    @Mock
+    private BackupRestoreTimeoutService backupRestoreTimeoutService;
+
     @InjectMocks
     private DatalakeDatabaseBackupWaitHandler underTest;
 
@@ -48,6 +53,8 @@ public class DatalakeDatabaseBackupWaitHandlerTest {
 
     @Test
     public void testSuccessfulPolling() {
+        when(backupRestoreTimeoutService.getBackupTimeout(sdxId, duration, 0, 0)).thenReturn(duration);
+
         DatalakeDatabaseBackupWaitRequest datalakeDatabaseBackupWaitRequest =
                 new DatalakeDatabaseBackupWaitRequest(sdxId, userId, operationId, duration);
         SdxEvent result = (SdxEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(datalakeDatabaseBackupWaitRequest)));
@@ -58,6 +65,8 @@ public class DatalakeDatabaseBackupWaitHandlerTest {
 
     @Test
     public void testUserBreakExceptionWhilePolling() {
+        when(backupRestoreTimeoutService.getBackupTimeout(sdxId, duration, 0, 0)).thenReturn(duration);
+
         DatalakeDatabaseBackupWaitRequest datalakeDatabaseBackupWaitRequest =
                 new DatalakeDatabaseBackupWaitRequest(sdxId, userId, operationId, duration);
         doThrow(new UserBreakException()).
@@ -74,6 +83,9 @@ public class DatalakeDatabaseBackupWaitHandlerTest {
 
     @Test
     public void testPollerStoppedExceptionWhilePolling() {
+        when(backupRestoreTimeoutService.getBackupTimeout(sdxId, duration, 0, 0)).thenReturn(duration);
+        when(sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(sdxId)).thenReturn("");
+
         DatalakeDatabaseBackupWaitRequest datalakeDatabaseBackupWaitRequest =
                 new DatalakeDatabaseBackupWaitRequest(sdxId, userId, operationId, duration);
         doThrow(new PollerStoppedException()).
@@ -84,6 +96,26 @@ public class DatalakeDatabaseBackupWaitHandlerTest {
                         new HandlerEvent<>(new Event<>(datalakeDatabaseBackupWaitRequest)));
 
         assertTrue(result.getException().getMessage().contains("Database backup timed out after 120 minutes"));
+        assertEquals(PollerStoppedException.class, result.getException().getClass());
+        assertEquals(sdxId, result.getResourceId());
+        assertEquals(userId, result.getUserId());
+    }
+
+    @Test
+    public void testPollerStoppedExceptionWithCustomTimeout() {
+        when(backupRestoreTimeoutService.getBackupTimeout(sdxId, duration, 0, 0)).thenReturn(50);
+        when(sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(sdxId)).thenReturn("");
+
+        DatalakeDatabaseBackupWaitRequest datalakeDatabaseBackupWaitRequest =
+                new DatalakeDatabaseBackupWaitRequest(sdxId, userId, operationId, duration);
+        doThrow(new PollerStoppedException()).
+                when(sdxBackupRestoreService).waitCloudbreakFlow(eq(sdxId), any(PollingConfig.class),
+                        eq("Database backup"));
+        DatalakeDatabaseBackupFailedEvent result =
+                (DatalakeDatabaseBackupFailedEvent) underTest.doAccept(
+                        new HandlerEvent<>(new Event<>(datalakeDatabaseBackupWaitRequest)));
+
+        assertTrue(result.getException().getMessage().contains("Database backup timed out after 50 minutes"));
         assertEquals(PollerStoppedException.class, result.getException().getClass());
         assertEquals(sdxId, result.getResourceId());
         assertEquals(userId, result.getUserId());
