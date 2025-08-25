@@ -218,7 +218,8 @@ public class ExternalDatabaseService {
         String databaseCrn = cluster.getDatabaseServerCrn();
         try {
             if (externalDatabaseReferenceExist(databaseCrn)) {
-                redbeamsClient.turnOnSslOnProvider(databaseCrn);
+                FlowIdentifier flowIdentifier = redbeamsClient.turnOnSslOnProvider(databaseCrn);
+                pollUntilFlowFinished(databaseCrn, flowIdentifier);
             }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);

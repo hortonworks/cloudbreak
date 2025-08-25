@@ -103,8 +103,15 @@ public class RedbeamsClientService {
         }
     }
 
-    public void turnOnSslOnProvider(String crn) {
-        // TODO this will be implemented in the next phase
+    public FlowIdentifier turnOnSslOnProvider(String crn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> redbeamsServerEndpoint.turnOnSslEnforcementOnProviderByCrnInternal(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to turn on certificate DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
     }
 
     public FlowIdentifier rotateSslCert(String crn) {
@@ -120,8 +127,8 @@ public class RedbeamsClientService {
 
     public DatabaseServerStatusV4Response migrateRdsToTls(String crn) {
         try {
-            // TODO this will be implemented in the next phase
-            return null;
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> redbeamsServerEndpoint.migrateDatabaseToSslByCrnInternal(crn, ThreadBasedUserCrnProvider.getUserCrn()));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to migrate DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);

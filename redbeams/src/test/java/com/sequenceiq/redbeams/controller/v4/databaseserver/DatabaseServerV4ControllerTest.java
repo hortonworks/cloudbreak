@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -436,6 +438,27 @@ public class DatabaseServerV4ControllerTest {
         UpgradeDatabaseResponse upgradeDatabaseResponse = new UpgradeDatabaseResponse();
         upgradeDatabaseResponse.setCurrentVersion(MajorVersion.VERSION_10);
         return upgradeDatabaseResponse;
+    }
+
+    @Test
+    public void testMigrateDatabaseToSslByCrnInternal() {
+        DBStack savedDBStack = new DBStack();
+        when(redbeamsRotateSslService.migrateDatabaseServerSslCertFromNonSslToSsl(SERVER_CRN)).thenReturn(savedDBStack);
+        when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack)).thenReturn(allocateResponse);
+        DatabaseServerStatusV4Response response = underTest.migrateDatabaseToSslByCrnInternal(SERVER_CRN, USER_CRN);
+
+        verify(redbeamsRotateSslService).migrateDatabaseServerSslCertFromNonSslToSsl(SERVER_CRN);
+        assertEquals(allocateResponse, response);
+    }
+
+    @Test
+    public void testTurnOnSslByCrnInternal() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "1");
+        when(redbeamsRotateSslService.turnOnSsl(SERVER_CRN)).thenReturn(flowIdentifier);
+        FlowIdentifier response = underTest.turnOnSslEnforcementOnProviderByCrnInternal(SERVER_CRN);
+
+        verify(redbeamsRotateSslService).turnOnSsl(SERVER_CRN);
+        assertEquals("1", response.getPollableId());
     }
 
 }

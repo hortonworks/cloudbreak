@@ -274,6 +274,15 @@ public interface DatabaseServerV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
+    @Path("internal/crn/{crn}/turn_on_ssl_enforcement_on_provider")
+    @Operation(summary = DatabaseServerOpDescription.TURN_ON_DB_SSL, description = DatabaseServerNotes.TURN_ON_DB_SSL,
+            operationId = "turnOnSslEnforcementOnProviderByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier turnOnSslEnforcementOnProviderByCrnInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn);
+
+    @PUT
     @Path("{crn}/rotate_ssl_cert")
     @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
             operationId = "rotateDatabaseServerSSLCert",

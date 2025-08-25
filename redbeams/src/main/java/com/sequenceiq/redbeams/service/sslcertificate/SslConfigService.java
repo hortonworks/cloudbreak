@@ -39,8 +39,24 @@ public class SslConfigService {
     private SslConfigRepository repository;
 
     public SslConfig createSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
-        SslConfig sslConfig = new SslConfig();
-        if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
+        return getSslConfig(source.getSslConfig() == null ? SslMode.DISABLED : source.getSslConfig().getSslMode(), dbStack, Optional.empty());
+    }
+
+    public void createSslConfig(SslMode sslMode, DBStack dbStack) {
+        if (dbStack.getSslConfig() == null || emptySslCertificates(dbStack)) {
+            getSslConfig(sslMode, dbStack, repository.findById(dbStack.getSslConfig()));
+        }
+    }
+
+    private boolean emptySslCertificates(DBStack dbStack) {
+        return fetchById(dbStack.getSslConfig())
+                .map(sslConfig -> sslConfig.getSslCertificates().isEmpty())
+                .orElse(true);
+    }
+
+    private SslConfig getSslConfig(SslMode sslMode, DBStack dbStack, Optional<SslConfig> sslConfigOptional) {
+        SslConfig sslConfig = sslConfigOptional.orElse(new SslConfig());
+        if (sslEnabled && SslMode.isEnabled(sslMode)) {
             LOGGER.info("SSL is enabled and has been requested. Setting up SslConfig for DBStack.");
             String cloudPlatform = dbStack.getCloudPlatform();
             String region = dbStack.getRegion();

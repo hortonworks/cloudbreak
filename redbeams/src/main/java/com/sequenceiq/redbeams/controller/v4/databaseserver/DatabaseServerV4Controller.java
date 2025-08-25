@@ -207,12 +207,21 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     public DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
-        return null;
+        DBStack dbStack = redbeamsRotateSslService.migrateDatabaseServerSslCertFromNonSslToSsl(crn);
+        return dbStackToDatabaseServerStatusV4ResponseConverter.convert(dbStack);
     }
 
     @Override
     @InternalOnly
-    public void enforceSslOnDatabaseByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
+    public void enforceSslOnDatabaseByCrnInternal(
+            @ResourceCrn String crn,
+            @InitiatorUserCrn String initiatorUserCrn) {
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier turnOnSslEnforcementOnProviderByCrnInternal(@ResourceCrn String crn) {
+        return redbeamsRotateSslService.turnOnSsl(crn);
     }
 
     @Override

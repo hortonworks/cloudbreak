@@ -42,6 +42,9 @@ public enum Status {
     VALIDATE_UPGRADE_REQUESTED,
     VALIDATE_UPGRADE_IN_PROGRESS,
     VALIDATE_UPGRADE_FAILED,
+    DB_SSL_MIGRATION_COMPLETED,
+    DB_SSL_MIGRATION_IN_PROGRESS,
+    DB_SSL_MIGRATION_FAILED,
     UNKNOWN;
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
@@ -63,10 +66,11 @@ public enum Status {
             .put(WAIT_FOR_SYNC, AVAILABLE)
             .put(SSL_ROTATE_REQUESTED, SSL_ROTATE_FAILED)
             .put(SSL_ROTATE_IN_PROGRESS, SSL_ROTATE_FAILED)
+            .put(DB_SSL_MIGRATION_IN_PROGRESS, DB_SSL_MIGRATION_FAILED)
             .build();
 
     private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(
-            AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED, VALIDATE_UPGRADE_FAILED);
+            AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED, VALIDATE_UPGRADE_FAILED, DB_SSL_MIGRATION_COMPLETED);
 
     public boolean isAvailable() {
         return IS_AVAILABLE_LIST.contains(valueOf(name()));
@@ -157,7 +161,8 @@ public enum Status {
                  VALIDATE_UPGRADE_IN_PROGRESS,
                  WAIT_FOR_SYNC,
                  SSL_ROTATE_IN_PROGRESS,
-                 SSL_ROTATE_REQUESTED -> true;
+                 SSL_ROTATE_REQUESTED,
+                 DB_SSL_MIGRATION_IN_PROGRESS -> true;
             default -> false;
         };
     }

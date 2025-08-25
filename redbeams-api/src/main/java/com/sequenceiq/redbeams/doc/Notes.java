@@ -102,6 +102,8 @@ public final class Notes {
                 "Query latest certificate for provider and region";
         public static final String RETRY = "Retries the latest failed operation";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
+        public static final String TURN_ON_DB_SSL =
+                "Turns on SSL/TLS connection for the database server. The database will refresh with SSL turned on after restart.";
         private DatabaseServerNotes() {
         }
     }

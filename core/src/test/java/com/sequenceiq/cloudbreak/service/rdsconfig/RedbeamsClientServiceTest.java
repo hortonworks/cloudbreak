@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -257,5 +258,33 @@ class RedbeamsClientServiceTest {
         when(redBeamsFlowEndpoint.getLastFlowByResourceCrn(eq(DATABASE_SERVER_CRN))).thenThrow(new WebApplicationException("error", Response.Status.NOT_FOUND));
         FlowLogResponse lastFlow = underTest.getLastFlowId(DATABASE_SERVER_CRN);
         assertNull(lastFlow);
+    }
+
+    @Test
+    void turnOnSslOnProvider() {
+        underTest.turnOnSslOnProvider("crn");
+        verify(redbeamsServerEndpoint).turnOnSslEnforcementOnProviderByCrnInternal(eq("crn"));
+    }
+
+    @Test
+    void turnOnSslOnProviderThrowsException() {
+        doThrow(new ProcessingException("Test")).when(redbeamsServerEndpoint).turnOnSslEnforcementOnProviderByCrnInternal(eq("crn"));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.turnOnSslOnProvider("crn"));
+        verify(redbeamsServerEndpoint).turnOnSslEnforcementOnProviderByCrnInternal(eq("crn"));
+        assertEquals("Failed to turn on certificate DatabaseServer with CRN crn", exception.getMessage());
+    }
+
+    @Test
+    void migrateRdsToTls() {
+        underTest.migrateRdsToTls("crn");
+        verify(redbeamsServerEndpoint).migrateDatabaseToSslByCrnInternal(eq("crn"), any(String.class));
+    }
+
+    @Test
+    void migrateRdsToTlsThrowsException() {
+        doThrow(new ProcessingException("Test")).when(redbeamsServerEndpoint).migrateDatabaseToSslByCrnInternal(eq("crn"), any(String.class));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.migrateRdsToTls("crn"));
+        verify(redbeamsServerEndpoint).migrateDatabaseToSslByCrnInternal(eq("crn"), any(String.class));
+        assertEquals("Failed to migrate DatabaseServer with CRN crn", exception.getMessage());
     }
 }
