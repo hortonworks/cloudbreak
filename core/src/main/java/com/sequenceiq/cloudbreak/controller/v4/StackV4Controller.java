@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -137,6 +138,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private StackMigrateRdsService migrateRdsService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -718,7 +722,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public MigrateDatabaseV1Response migrateDatabaseByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
-        return null;
+        return migrateRdsService.migrateRds(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

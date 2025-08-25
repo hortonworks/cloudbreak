@@ -97,6 +97,7 @@ public class Notes {
     public static final String CLUSTER_CO2_NOTES = "CO2 cost of clusters";
     public static final String ROTATE_RDS_CERTIFICATE_NOTES = "Rotate the public certificate of the RDS";
     public static final String MIGRATE_DATABASE_TO_SSL_NOTES = "Migrate Database to SSL";
+    public static final String MIGRATE_RDS_CERTIFICATE_NOTES = "Migrate the public certificate of the RDS";
     private Notes() {
     }
 }

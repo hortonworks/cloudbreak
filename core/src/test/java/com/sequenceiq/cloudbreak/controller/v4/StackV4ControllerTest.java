@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCc
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
@@ -77,6 +78,9 @@ class StackV4ControllerTest {
 
     @Mock
     private StackRotateRdsCertificateService stackRotateRdsCertificateService;
+
+    @Mock
+    private StackMigrateRdsService migrateRdsService;
 
     @InjectMocks
     private StackV4Controller underTest;
@@ -238,5 +242,13 @@ class StackV4ControllerTest {
         });
 
         verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofCrn(STACK_CRN), diskUpdateRequest, "hortonworks");
+    }
+
+    @Test
+    void testMigrateDatabaseByCrnInternal() {
+        doAs(USER_CRN, () -> {
+            underTest.migrateDatabaseByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
+        });
+        verify(migrateRdsService).migrateRds(NameOrCrn.ofCrn(STACK_CRN), "hortonworks");
     }
 }

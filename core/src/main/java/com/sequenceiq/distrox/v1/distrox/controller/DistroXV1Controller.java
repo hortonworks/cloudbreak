@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
+import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
@@ -196,6 +197,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackMigrateRdsService migrateRdsService;
 
     @Override
     @FilterListBasedOnPermissions
@@ -483,13 +487,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public MigrateDatabaseV1Response migrateDatabaseToSslByName(@ResourceName String name) {
-        return null;
+        return migrateRdsService.migrateRds(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public MigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ResourceCrn String crn) {
-        return null;
+        return migrateRdsService.migrateRds(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

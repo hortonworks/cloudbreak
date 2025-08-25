@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -92,6 +93,9 @@ class DistroXV1ControllerTest {
 
     @Mock
     private StackRotateRdsCertificateService stackRotateRdsCertificateService;
+
+    @Mock
+    private StackMigrateRdsService migrateRdsService;
 
     @Captor
     private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
@@ -346,5 +350,29 @@ class DistroXV1ControllerTest {
             }
         });
         verify(stackOperationService).triggerModifySELinux(NameOrCrn.ofCrn(CRN), "accountId", SeLinux.ENFORCING);
+    }
+
+    @Test
+    void testMigrateDatabaseToSslByName() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.migrateDatabaseToSslByName(NAME);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(migrateRdsService).migrateRds(NameOrCrn.ofName(NAME), "accountId");
+    }
+
+    @Test
+    void testMigrateDatabaseToSslByCrn() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.migrateDatabaseToSslByCrn(CRN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(migrateRdsService).migrateRds(NameOrCrn.ofCrn(CRN), "accountId");
     }
 }
