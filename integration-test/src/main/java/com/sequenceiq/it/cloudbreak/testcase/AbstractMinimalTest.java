@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.MeasuredTestContext.createMea
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -106,13 +107,14 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
+        String methodName = method.getName();
         LOGGER.info("Creating Test Label at Mapped Diagnostic Context. " +
                 "This label is used for the Cloud Storage path of the E2E tests', based on " +
-                "suite and case names...");
-        testInformationService.setTestInformation(new TestInformation(method.getDeclaringClass().getSimpleName(), method.getName()));
-        MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
+                "suite and case names... Method name: '{}.{}', params: '{}'", method.getDeclaringClass().getName(), methodName, Arrays.toString(params));
+        testInformationService.setTestInformation(new TestInformation(method.getDeclaringClass().getSimpleName(), methodName));
+        MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + methodName);
         TestContext testContext = (TestContext) params[0];
-        testContext.setTestMethodName(method.getName());
+        testContext.setTestMethodName(methodName);
         collectTestCaseDescription(testContext, method, params);
     }
 

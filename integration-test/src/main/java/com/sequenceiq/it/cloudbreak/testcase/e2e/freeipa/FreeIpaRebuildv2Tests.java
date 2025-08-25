@@ -41,6 +41,11 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        super.setupTest(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",

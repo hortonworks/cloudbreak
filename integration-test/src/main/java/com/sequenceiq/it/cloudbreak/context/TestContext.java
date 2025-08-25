@@ -98,7 +98,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private final Map<String, Capture> captures = new HashMap<>();
 
-    private Map<String, Object> contextParameters = new HashMap<>();
+    private volatile Map<String, Object> contextParameters = new HashMap<>();
 
     private TestContext testContext;
 
