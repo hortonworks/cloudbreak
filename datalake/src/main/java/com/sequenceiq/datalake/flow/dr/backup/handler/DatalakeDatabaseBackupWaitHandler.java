@@ -19,6 +19,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailed
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupInProgressEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.dr.BackupRestoreTimeoutService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -38,6 +39,9 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
+    @Inject
+    private BackupRestoreTimeoutService backupRestoreTimeoutService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatalakeDatabaseBackupWaitRequest.class);
@@ -53,7 +57,8 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
         DatalakeDatabaseBackupWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
-        int duration = request.getDatabaseMaxDurationInMin() == 0 ? durationInMinutes : request.getDatabaseMaxDurationInMin();
+        int duration = backupRestoreTimeoutService.getBackupTimeout(sdxId, request.getDatabaseMaxDurationInMin(), durationInMinutes, 0);
+        LOGGER.info("Timeout duration for database backup set to {} minutes.", duration);
         Selectable response;
         try {
             LOGGER.info("Start polling datalake database backup for id: {} with timeout duration: {}", sdxId, duration);

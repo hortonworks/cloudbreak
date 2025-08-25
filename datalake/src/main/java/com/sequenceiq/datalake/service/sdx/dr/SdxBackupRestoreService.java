@@ -465,6 +465,10 @@ public class SdxBackupRestoreService {
         return getSdxBackupRestoreSettingsResponse(backupRestoreSettings);
     }
 
+    public SdxBackupRestoreSettings getSdxBackupRestoreSettings(SdxCluster sdxCluster) {
+        return sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());
+    }
+
     public void deleteDatabaseBackupRestoreSettings(SdxCluster sdxCluster) {
         MDCBuilder.buildMdcContext(sdxCluster);
         SdxBackupRestoreSettings backupRestoreSettings = sdxBackupRestoreSettingsRepository.findBySdxClusterCrn(sdxCluster.getCrn());

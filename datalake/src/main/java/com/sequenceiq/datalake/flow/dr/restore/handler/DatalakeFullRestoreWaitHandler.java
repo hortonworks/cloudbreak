@@ -19,6 +19,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequ
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.dr.BackupRestoreTimeoutService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -32,11 +33,14 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
     @Value("${sdx.stack.restore.status.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.restore.status.duration_min:90}")
+    @Value("${sdx.stack.restore.status.duration_min:240}")
     private int durationInMinutes;
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private BackupRestoreTimeoutService backupRestoreTimeoutService;
 
     @Override
     public String selector() {
@@ -54,7 +58,8 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
-        int duration = request.getFullDrMaxDurationInMin() <= durationInMinutes ? durationInMinutes : request.getFullDrMaxDurationInMin();
+        int duration = backupRestoreTimeoutService.getRestoreTimeout(sdxId, request.getFullDrMaxDurationInMin(), durationInMinutes, 0);
+        LOGGER.info("Timeout duration for full restore set to {} minutes.", duration);
         try {
             LOGGER.info("Start polling datalake full restore status for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
