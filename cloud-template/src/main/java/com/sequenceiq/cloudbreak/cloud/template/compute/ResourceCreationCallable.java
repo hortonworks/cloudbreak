@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.common.api.type.ResourceType;
 
-public class ResourceCreationCallable implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
+public class ResourceCreationCallable implements Callable<List<CloudResourceStatus>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCreationCallable.class);
 
@@ -74,7 +74,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
     }
 
     @Override
-    public ResourceRequestResult<List<CloudResourceStatus>> call() {
+    public List<CloudResourceStatus> call() {
         List<CloudResourceStatus> results = new ArrayList<>();
         String stackName = auth.getCloudContext().getName();
         for (CloudInstance instance : instances) {
@@ -113,7 +113,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
             LOGGER.debug("Finished creating all compute resources for instance: '{}' stack: '{}'", instance, stackName);
         }
 
-        return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
+        return results;
     }
 
     private List<CloudResourceStatus> createComputeResources(CloudInstance instance, Long privateId, ComputeResourceBuilder<ResourceBuilderContext> builder) {

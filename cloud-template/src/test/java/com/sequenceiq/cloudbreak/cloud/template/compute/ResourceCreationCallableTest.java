@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -97,10 +96,8 @@ class ResourceCreationCallableTest {
         when(syncPollingScheduler.schedule(any(), anyInt(), anyInt(), anyInt())).thenReturn(List.of(new CloudResourceStatus(resource1, ResourceStatus.FAILED)));
         when(syncPollingScheduler.schedule(any(), anyInt(), anyInt(), anyInt())).thenReturn(List.of(new CloudResourceStatus(resource2, ResourceStatus.CREATED)));
 
-        ResourceRequestResult<List<CloudResourceStatus>> result = underTest.call();
+        List<CloudResourceStatus> resourceStatuses = underTest.call();
 
-        assertEquals(FutureResult.SUCCESS, result.getStatus());
-        List<CloudResourceStatus> resourceStatuses = result.getResult();
         assertThat(resourceStatuses).hasSize(2);
         assertThat(resourceStatuses).allMatch(resourceStatus -> ResourceStatus.CREATED.equals(resourceStatus.getStatus()));
         verify(resourceBuilders, times(1)).compute(eq(Variant.variant("AWS")));
@@ -120,10 +117,8 @@ class ResourceCreationCallableTest {
         when(resourceBuilders.compute(eq(Variant.variant("AWS")))).thenReturn(List.of(computeResourceBuilder1, computeResourceBuilder2));
         when(syncPollingScheduler.schedule(any(), anyInt(), anyInt(), anyInt())).thenReturn(List.of(new CloudResourceStatus(resource1, ResourceStatus.FAILED)));
 
-        ResourceRequestResult<List<CloudResourceStatus>> result = underTest.call();
+        List<CloudResourceStatus> resourceStatuses = underTest.call();
 
-        assertEquals(FutureResult.SUCCESS, result.getStatus());
-        List<CloudResourceStatus> resourceStatuses = result.getResult();
         assertThat(resourceStatuses).hasSize(1);
         assertThat(resourceStatuses).extracting(CloudResourceStatus::getStatus).containsExactly(ResourceStatus.FAILED);
         verify(resourceBuilders, times(1)).compute(eq(Variant.variant("AWS")));

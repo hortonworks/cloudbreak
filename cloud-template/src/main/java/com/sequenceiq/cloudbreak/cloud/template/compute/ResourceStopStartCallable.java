@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
-public class ResourceStopStartCallable implements Callable<ResourceRequestResult<List<CloudVmInstanceStatus>>> {
+public class ResourceStopStartCallable implements Callable<List<CloudVmInstanceStatus>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceStopStartCallable.class);
 
@@ -37,11 +37,11 @@ public class ResourceStopStartCallable implements Callable<ResourceRequestResult
     }
 
     @Override
-    public ResourceRequestResult<List<CloudVmInstanceStatus>> call() throws InstanceResourceStopStartException {
+    public List<CloudVmInstanceStatus> call() throws InstanceResourceStopStartException {
         PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
         if (CANCELLED.equals(pollGroup)) {
             LOGGER.debug("Polling is cancelled for stop/start operation for instances: {}", instances);
-            return new ResourceRequestResult<>(FutureResult.SUCCESS, null);
+            return null;
         }
         List<CloudVmInstanceStatus> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
@@ -57,7 +57,7 @@ public class ResourceStopStartCallable implements Callable<ResourceRequestResult
                 throw new InstanceResourceStopStartException(msg, ex, instance, context.isBuild());
             }
         }
-        return new ResourceRequestResult<>(FutureResult.SUCCESS, result);
+        return result;
     }
 
 }

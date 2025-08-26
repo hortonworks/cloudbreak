@@ -92,13 +92,13 @@ class ResourceStopStartCallableTest {
             when(builder.stop(context, auth, cloudInstance)).thenReturn(cloudVmInstanceStatus);
         }
 
-        ResourceRequestResult<List<CloudVmInstanceStatus>> actualStatuses = assertDoesNotThrow(() -> underTest.call());
+        List<CloudVmInstanceStatus> actualStatuses = assertDoesNotThrow(() -> underTest.call());
 
         if (startContext) {
             verify(builder, times(1)).start(context, auth, cloudInstance);
         } else {
             verify(builder, times(1)).stop(context, auth, cloudInstance);
         }
-        Assertions.assertTrue(actualStatuses.getResult().contains(cloudVmInstanceStatus));
+        Assertions.assertTrue(actualStatuses.contains(cloudVmInstanceStatus));
     }
 }

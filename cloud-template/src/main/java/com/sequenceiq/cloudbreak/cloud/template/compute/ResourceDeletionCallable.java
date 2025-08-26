@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
-public class ResourceDeletionCallable implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
+public class ResourceDeletionCallable implements Callable<List<CloudResourceStatus>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceDeletionCallable.class);
 
@@ -51,7 +51,7 @@ public class ResourceDeletionCallable implements Callable<ResourceRequestResult<
     }
 
     @Override
-    public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
+    public List<CloudResourceStatus> call() throws Exception {
         LOGGER.debug("Deleting compute resource {}", resource);
         if (resource.getStatus().resourceExists()) {
             CloudResource deletedResource;
@@ -60,23 +60,23 @@ public class ResourceDeletionCallable implements Callable<ResourceRequestResult<
             } catch (PreserveResourceException ignored) {
                 LOGGER.info("Preserve resource for later use.");
                 CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.CREATED);
-                return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
+                return Collections.singletonList(status);
             } catch (Exception e) {
                 LOGGER.info("Exception during deleting cloud resource {}", resource, e);
                 CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.FAILED, e.getMessage());
-                return new ResourceRequestResult<>(FutureResult.FAILED, Collections.singletonList(status));
+                return Collections.singletonList(status);
             }
             if (deletedResource != null) {
                 PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory
                         .newPollResourceTask(builder, auth, Collections.singletonList(deletedResource), context, cancellable);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 deleteResource();
-                return new ResourceRequestResult<>(FutureResult.SUCCESS, pollerResult);
+                return pollerResult;
             }
         }
         deleteResource();
         CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.DELETED);
-        return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
+        return Collections.singletonList(status);
     }
 
     private void deleteResource() {

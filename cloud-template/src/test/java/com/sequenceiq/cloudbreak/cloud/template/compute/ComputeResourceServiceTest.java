@@ -116,7 +116,7 @@ class ComputeResourceServiceTest {
             ResourceStopStartCallable resourceStopStartCallable = mock(ResourceStopStartCallable.class);
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = payload.getInstances().stream()
                     .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED)).toList();
-            when(resourceStopStartCallable.call()).thenReturn(new ResourceRequestResult<>(FutureResult.SUCCESS, cloudVmInstanceStatuses));
+            when(resourceStopStartCallable.call()).thenReturn(cloudVmInstanceStatuses);
             return resourceStopStartCallable;
         });
         CloudInstance cloudInstance1 = mock(CloudInstance.class);
@@ -191,8 +191,8 @@ class ComputeResourceServiceTest {
         when(resourceActionFactory.buildDeletionCallable(any())).thenAnswer(invocation -> {
             ResourceDeletionCallablePayload payload = invocation.getArgument(0, ResourceDeletionCallablePayload.class);
             ResourceDeletionCallable deletionCallable = mock(ResourceDeletionCallable.class);
-            ResourceRequestResult<List<CloudResourceStatus>> resourceRequestResult = new ResourceRequestResult<>(FutureResult.SUCCESS,
-                    List.of(new CloudResourceStatus(payload.getResource(), ResourceStatus.DELETED, payload.getResource().getPrivateId())));
+            List<CloudResourceStatus> resourceRequestResult =
+                    List.of(new CloudResourceStatus(payload.getResource(), ResourceStatus.DELETED, payload.getResource().getPrivateId()));
             when(deletionCallable.call()).thenReturn(resourceRequestResult);
             return deletionCallable;
         });
@@ -232,9 +232,8 @@ class ComputeResourceServiceTest {
         when(resourceActionFactory.buildDeletionCallable(any())).thenAnswer(invocation -> {
             ResourceDeletionCallablePayload payload = invocation.getArgument(0, ResourceDeletionCallablePayload.class);
             ResourceDeletionCallable deletionCallable = mock(ResourceDeletionCallable.class);
-            ResourceRequestResult<List<CloudResourceStatus>> resourceRequestResult = new ResourceRequestResult<>(FutureResult.FAILED,
-                    List.of(new CloudResourceStatus(payload.getResource(), ResourceStatus.FAILED, "No permission to delete.",
-                            payload.getResource().getPrivateId())));
+            List<CloudResourceStatus> resourceRequestResult = List.of(new CloudResourceStatus(payload.getResource(), ResourceStatus.FAILED,
+                    "No permission to delete.", payload.getResource().getPrivateId()));
             when(deletionCallable.call()).thenReturn(resourceRequestResult);
             return deletionCallable;
         });
@@ -265,7 +264,7 @@ class ComputeResourceServiceTest {
             List<CloudResourceStatus> cloudResourceStatuses = payload.getInstances().stream().map(instance -> new CloudResourceStatus(
                     newResource(instance.getInstanceId(), instance.getTemplate().getGroupName(), ResourceType.AWS_INSTANCE, CommonStatus.CREATED),
                     ResourceStatus.CREATED)).toList();
-            when(creationCallable.call()).thenReturn(new ResourceRequestResult<>(FutureResult.SUCCESS, cloudResourceStatuses));
+            when(creationCallable.call()).thenReturn(cloudResourceStatuses);
             return creationCallable;
         });
         List<Boolean> rollbackContextBuildValue = new ArrayList<>();
@@ -306,7 +305,7 @@ class ComputeResourceServiceTest {
             List<CloudResourceStatus> cloudResourceStatuses = payload.getInstances().stream().map(instance -> new CloudResourceStatus(
                     newResource(instance.getInstanceId(), instance.getTemplate().getGroupName(), ResourceType.AWS_INSTANCE, CommonStatus.CREATED),
                     ResourceStatus.CREATED)).toList();
-            when(creationCallable.call()).thenReturn(new ResourceRequestResult<>(FutureResult.SUCCESS, cloudResourceStatuses));
+            when(creationCallable.call()).thenReturn(cloudResourceStatuses);
             return creationCallable;
         });
 
