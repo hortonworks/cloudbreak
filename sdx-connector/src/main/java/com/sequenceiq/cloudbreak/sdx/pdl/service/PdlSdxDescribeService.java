@@ -81,7 +81,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
                 return Optional.of(SdxBasicView.builder()
                         .withName(privateDatalakeDetails.getDatalakeName())
                         .withCrn(environment.getCrn())
-                        .withRuntime(environment.getCdpRuntimeVersion())
+                        .withRuntime(StringUtils.substringBefore(environment.getCdpRuntimeVersion(), "-"))
                         .withRazEnabled(privateDatalakeDetails.getEnableRangerRaz())
                         .withCreated(privateDatalakeDetails.getCreationTimeEpochMillis())
                         .withPlatform(TargetPlatform.PDL)
