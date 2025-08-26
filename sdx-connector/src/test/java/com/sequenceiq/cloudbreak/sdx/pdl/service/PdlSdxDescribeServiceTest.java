@@ -199,7 +199,7 @@ public class PdlSdxDescribeServiceTest {
     @Test
     public void testGetSdxByEnvironmentCrnDataLakeAvailable() {
         when(environment.getCrn()).thenReturn(PDL_CRN);
-        when(environment.getCdpRuntimeVersion()).thenReturn(CDP_RUNTIME);
+        when(environment.getCdpRuntimeVersion()).thenReturn(CDP_RUNTIME + "-1.cdh7.3.1.p400.67986116");
         when(privateDatalakeDetails.getDatalakeName()).thenReturn(DATALAKE_NAME);
         when(privateDatalakeDetails.getEnableRangerRaz()).thenReturn(ENABLE_RANGER_RAZ);
         when(privateDatalakeDetails.getCreationTimeEpochMillis()).thenReturn(CREATED);
