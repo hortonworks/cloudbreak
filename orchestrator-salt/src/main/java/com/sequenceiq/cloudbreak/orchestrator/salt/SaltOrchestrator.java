@@ -839,6 +839,18 @@ public class SaltOrchestrator implements HostOrchestrator {
                 new GrainAddRunner(saltStateService, freeIpaMasterHostnames, allNodes, FREEIPA_MASTER_ROLE), exitCriteriaModel, exitCriteria);
     }
 
+    public void switchFreeIpaMasterToPrimaryGateway(GatewayConfig primaryGateway, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            selectNewMasterReplacement(sc, primaryGateway, Set.of(), Set.of(primaryGateway.getHostname()), allNodes, exitCriteriaModel, new HashSet<>(1));
+            executeSingleSaltState(Set.of(primaryGateway.getHostname()), exitCriteriaModel, Optional.empty(), Optional.empty(), sc,
+                    "freeipa.promote-replica-to-master");
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during switching FreeIPA master to Primary Gateway", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
     private void selectNewMasterReplacement(SaltConnector sc, GatewayConfig primaryGateway, Set<String> unassignedHostnames,
             Set<String> existingFreeIpaReplicaHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, Set<String> freeIpaMasterHostnames)
             throws Exception {
@@ -851,6 +863,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 new GrainAddRunner(saltStateService, freeIpaMasterHostnames, allNodes, FREEIPA_MASTER_REPLACEMENT_ROLE), exitCriteriaModel, exitCriteria);
         saltCommandRunner.runModifyGrainCommand(sc,
                 new GrainRemoveRunner(saltStateService, freeIpaMasterHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel, exitCriteria);
+        saltCommandRunner.runModifyGrainCommand(sc,
+                new GrainRemoveRunner(saltStateService, freeIpaMasterHostnames, allNodes, FREEIPA_MASTER_ROLE), exitCriteriaModel, exitCriteria);
     }
 
     private Optional<String> choosePrimaryGatewayAsMasterReplacement(GatewayConfig primaryGateway, Set<String> existingFreeIpaReplicaHostnames) {

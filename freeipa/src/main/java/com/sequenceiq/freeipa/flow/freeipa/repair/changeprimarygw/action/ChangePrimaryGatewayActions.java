@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryG
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.SwitchFreeIpaMasterToPrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionRequest;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.failure.ClusterProxyUpdateRegistrationFailedToChangePrimaryGatewayFailureEventConverter;
@@ -158,6 +159,19 @@ public class ChangePrimaryGatewayActions {
                     request = new HealthCheckSuccess(stack.getId(), null);
                 }
 
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "CHANGE_PRIMARY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_STATE")
+    public Action<?, ?> switchFreeIpaMasterToPrimaryGateway() {
+        return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Switching FreeIPA CRL Master To Primary Gateway");
+                Selectable request = new SwitchFreeIpaMasterToPrimaryGatewayEvent(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
         };

@@ -11,6 +11,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangeP
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SELECTION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SELECTION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_STATE;
@@ -20,6 +21,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangeP
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_SELECTION;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_STATE_STARTING;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.INIT_STATE;
 
@@ -55,9 +57,13 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
                     .event(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FINISHED_EVENT)
                     .failureEvent(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FAILED_EVENT)
 
-                    .from(CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_STATE).to(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE)
+                    .from(CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_STATE).to(CHANGE_PRIMARY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_FINISHED_EVENT)
                     .failureEvent(CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_FAILED_EVENT)
+
+                    .from(CHANGE_PRIMARY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_STATE).to(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE)
+                    .event(CHANGE_PRIMARY_GATEWAY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_FINISHED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE).to(FINAL_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT)

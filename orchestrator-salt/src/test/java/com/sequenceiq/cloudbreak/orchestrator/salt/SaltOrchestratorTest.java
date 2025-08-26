@@ -205,7 +205,7 @@ class SaltOrchestratorTest {
 
     @Test
     void bootstrapTest() throws Exception {
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
@@ -282,7 +282,7 @@ class SaltOrchestratorTest {
     @Test
     void bootstrapNewNodesTest() throws Exception {
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
-        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel, false);
 
@@ -688,7 +688,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(replica1, List.of(replica1, replica2), Set.of(replicaNode1, replicaNode2), exitCriteriaModel);
 
         ArgumentCaptor<ModifyGrainBase> modifyGrainCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
-        verify(saltCommandRunner, times(2)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
+        verify(saltCommandRunner, times(3)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
         List<ModifyGrainBase> modifyGrains = modifyGrainCaptor.getAllValues();
         GrainAddRunner addReplacementRole = (GrainAddRunner) modifyGrains.get(0);
         assertEquals("freeipa_primary_replacement", addReplacementRole.getValue());
@@ -749,7 +749,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.installFreeIpa(newInstance, List.of(newInstance, replica2), Set.of(newInstanceNode, replicaNode2), exitCriteriaModel);
 
         ArgumentCaptor<ModifyGrainBase> modifyGrainCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
-        verify(saltCommandRunner, times(2)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
+        verify(saltCommandRunner, times(3)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
         List<ModifyGrainBase> modifyGrains = modifyGrainCaptor.getAllValues();
         GrainAddRunner addReplacementRole = (GrainAddRunner) modifyGrains.get(0);
         assertEquals("freeipa_primary_replacement", addReplacementRole.getValue());
@@ -1075,5 +1075,63 @@ class SaltOrchestratorTest {
         assertEquals("cloudera.agent.agent-stop", stopAgentStateRunner.getState());
         StateRunner startAgentStateRunner = (StateRunner) allValues.get(1).getSaltJobRunner();
         assertEquals("cloudera.agent.start", startAgentStateRunner.getState());
+    }
+
+    @Test
+    void testSwitchFreeIpaMasterToPrimaryGateway() throws Exception {
+        // Given
+        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
+
+        // When
+        saltOrchestrator.switchFreeIpaMasterToPrimaryGateway(gatewayConfig, targets, exitCriteriaModel);
+
+        // Then
+        verify(saltService).createSaltConnector(gatewayConfig);
+        verify(saltCommandRunner, times(3)).runModifyGrainCommand(eq(saltConnector), any(ModifyGrainBase.class), eq(exitCriteriaModel), eq(exitCriteria));
+        verify(saltRunner).runnerWithConfiguredErrorCount(any(SaltJobIdTracker.class), eq(exitCriteria), eq(exitCriteriaModel));
+        verify(callable).call();
+    }
+
+    @Test
+    void testSwitchFreeIpaMasterToPrimaryGatewayThrowsExceptionWhenSaltConnectorFails() throws Exception {
+        // Given
+        when(saltService.createSaltConnector(gatewayConfig)).thenThrow(new RuntimeException("Salt connector creation failed"));
+
+        // When & Then
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.switchFreeIpaMasterToPrimaryGateway(gatewayConfig, targets, exitCriteriaModel));
+
+        assertEquals("Salt connector creation failed", exception.getMessage());
+        verify(saltService).createSaltConnector(gatewayConfig);
+    }
+
+    @Test
+    void testSwitchFreeIpaMasterToPrimaryGatewayThrowsExceptionWhenGrainModificationFails() throws Exception {
+        // Given
+        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
+        doThrow(new RuntimeException("Grain modification failed"))
+                .when(saltCommandRunner).runModifyGrainCommand(eq(saltConnector), any(ModifyGrainBase.class), eq(exitCriteriaModel), eq(exitCriteria));
+
+        // When & Then
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.switchFreeIpaMasterToPrimaryGateway(gatewayConfig, targets, exitCriteriaModel));
+
+        assertEquals("Grain modification failed", exception.getMessage());
+        verify(saltService).createSaltConnector(gatewayConfig);
+    }
+
+    @Test
+    void testSwitchFreeIpaMasterToPrimaryGatewayThrowsExceptionWhenStateExecutionFails() throws Exception {
+        // Given
+        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
+        when(callable.call()).thenThrow(new RuntimeException("State execution failed"));
+
+        // When & Then
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.switchFreeIpaMasterToPrimaryGateway(gatewayConfig, targets, exitCriteriaModel));
+
+        assertEquals("State execution failed", exception.getMessage());
+        verify(saltService).createSaltConnector(gatewayConfig);
+        verify(saltCommandRunner, times(3)).runModifyGrainCommand(eq(saltConnector), any(ModifyGrainBase.class), eq(exitCriteriaModel), eq(exitCriteria));
     }
 }

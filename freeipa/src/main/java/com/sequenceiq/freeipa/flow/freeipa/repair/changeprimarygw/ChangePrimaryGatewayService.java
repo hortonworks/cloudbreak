@@ -42,13 +42,12 @@ public class ChangePrimaryGatewayService {
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
     public Optional<String> getPrimaryGatewayInstanceId(Stack stack) {
-        Optional<String> primaryGatewayInstanceId = Optional.empty();
         try {
-            primaryGatewayInstanceId = Optional.of(gatewayConfigService.getPrimaryGatewayConfig(stack).getInstanceId());
+            return Optional.of(gatewayConfigService.getPrimaryGatewayConfig(stack).getInstanceId());
         } catch (NotFoundException e) {
             LOGGER.debug("No active primary gateway found");
+            return Optional.empty();
         }
-        return primaryGatewayInstanceId;
     }
 
     public String selectNewPrimaryGatewayInstanceId(Stack stack, List<String> repairInstanceIds) {
