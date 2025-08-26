@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScal
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_START_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_HANDLER;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER;
 
@@ -69,7 +70,7 @@ public class DatalakeHorizontalScaleActions {
                 } catch (Exception e) {
                     LOGGER.warn("Datalake horizontal scale validation failed. Datalake {}. Error message: {}", payload.getResourceId(), e.getMessage());
                     DatalakeHorizontalScaleFlowEvent failedPayload = new DatalakeHorizontalScaleFlowEvent(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(),
-                            payload.getResourceId(), payload.getSdxName(), payload.getResourceCrn(), payload.getUserId(), payload.getFlowId(),
+                            payload.getResourceId(), payload.getSdxName(), payload.getResourceCrn(), payload.getUserId(),
                             payload.getScaleRequest(), payload.getCommandId(), e);
                     sendEvent(context, DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(), failedPayload);
                 }
@@ -82,7 +83,7 @@ public class DatalakeHorizontalScaleActions {
                 eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_HORIZONTAL_SCALE_VALIDATION_FAILED,
                         List.of(message));
                 return new DatalakeHorizontalScaleSdxEvent(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(), payload.getResourceId(), payload.getSdxName(),
-                        payload.getUserId(), payload.getResourceCrn(), payload.getScaleRequest(), ex, payload.getFlowId(), payload.getCommandId());
+                        payload.getUserId(), payload.getResourceCrn(), payload.getScaleRequest(), ex, payload.getCommandId());
             }
         };
     }
@@ -103,15 +104,7 @@ public class DatalakeHorizontalScaleActions {
                 LOGGER.info("Horizontal scale starts in group of {} with desired count {}", scaleRequest.getGroup(), scaleRequest.getDesiredCount());
                 String flowId = sdxHorizontalScalingService.triggerScalingFlow(sdxCluster, scaleRequest);
                 LOGGER.info("Put scaling flow triggered for datalake horizontal scale. FlowId: {}", flowId);
-                DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = new DatalakeHorizontalScaleFlowEventBuilder()
-                        .setResourceId(payload.getResourceId())
-                        .setResourceName(payload.getSdxName())
-                        .setResourceCrn(payload.getResourceCrn())
-                        .setUserId(payload.getUserId())
-                        .setScaleRequest(payload.getScaleRequest())
-                        .setFlowId(flowId)
-                        .setSelector(DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER.selector());
-                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER.selector(), resultEventBuilder.build());
+                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_WAIT_EVENT.selector(), payload);
             }
 
             @Override
@@ -119,6 +112,33 @@ public class DatalakeHorizontalScaleActions {
                 LOGGER.warn("Datalake horizontal scale failed to create new instance.", ex);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_FAILED,
                         "Failed to create new instance",
+                        payload.getResourceId());
+                return payload;
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_WAIT_FOR_HORIZONTAL_SCALE_STATE")
+    public Action<?, ?> datalakeWaitForHorizontalScale() {
+        return new AbstractSdxAction<>(DatalakeHorizontalScaleSdxEvent.class) {
+            @Override
+            protected void doExecute(SdxContext context, DatalakeHorizontalScaleSdxEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Wait for Datalake Horizontal scale.");
+                DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = new DatalakeHorizontalScaleFlowEventBuilder()
+                        .setResourceId(payload.getResourceId())
+                        .setResourceName(payload.getSdxName())
+                        .setResourceCrn(payload.getResourceCrn())
+                        .setUserId(payload.getUserId())
+                        .setScaleRequest(payload.getScaleRequest())
+                        .setSelector(DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER.selector());
+                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER.selector(), resultEventBuilder.build());
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeHorizontalScaleSdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                LOGGER.warn("Failed to wait for Datalake horizontal scale.", ex);
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_FAILED,
+                        "Failed to wait for horizontal scale",
                         payload.getResourceId());
                 return payload;
             }

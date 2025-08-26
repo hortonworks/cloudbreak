@@ -12,8 +12,6 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
 
     private final String userId;
 
-    private final String flowId;
-
     private final BigDecimal commandId;
 
     private final DatalakeHorizontalScaleRequest scaleRequest;
@@ -27,13 +25,11 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
             @JsonProperty("resourceName") String resourceName,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("userId") String userId,
-            @JsonProperty("flowId") String flowId,
             @JsonProperty("scaleRequest") DatalakeHorizontalScaleRequest scaleRequest,
             @JsonProperty("commandId") BigDecimal commandId,
             @JsonProperty("exception") Exception exception) {
         super(selector, resourceId, resourceName, resourceCrn);
         this.userId = userId;
-        this.flowId = flowId;
         this.scaleRequest = scaleRequest;
         this.commandId = commandId;
         this.exception = exception;
@@ -45,17 +41,12 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
                 .setResourceName(event.getResourceName())
                 .setResourceCrn(event.getResourceCrn())
                 .setUserId(event.getUserId())
-                .setFlowId(event.getFlowId())
                 .setSelector(event.selector())
                 .setException(event.getException());
     }
 
     public String getUserId() {
         return userId;
-    }
-
-    public String getFlowId() {
-        return flowId;
     }
 
     public BigDecimal getCommandId() {
@@ -76,8 +67,6 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
 
         private String userId;
 
-        private String flowId;
-
         private BigDecimal commandId;
 
         private DatalakeHorizontalScaleRequest scaleRequest;
@@ -94,11 +83,6 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
 
         public DatalakeHorizontalScaleFlowEventBuilder setUserId(String userId) {
             this.userId = userId;
-            return this;
-        }
-
-        public DatalakeHorizontalScaleFlowEventBuilder setFlowId(String flowId) {
-            this.flowId = flowId;
             return this;
         }
 
@@ -144,7 +128,6 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
                     resourceName,
                     resourceCrn,
                     userId,
-                    flowId,
                     scaleRequest,
                     commandId,
                     exception);

@@ -15,8 +15,6 @@ public class DatalakeHorizontalScaleSdxEvent extends SdxEvent {
 
     private final Exception exception;
 
-    private final String flowId;
-
     private final BigDecimal commandId;
 
     @JsonCreator
@@ -28,13 +26,11 @@ public class DatalakeHorizontalScaleSdxEvent extends SdxEvent {
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("scaleRequest") DatalakeHorizontalScaleRequest scaleRequest,
             @JsonProperty("exception") Exception exception,
-            @JsonProperty("flowId") String flowId,
             @JsonProperty("commandId") BigDecimal commandId) {
         super(selector, sdxId, resourceName, userId);
         this.resourceCrn = resourceCrn;
         this.scaleRequest = scaleRequest;
         this.exception = exception;
-        this.flowId = flowId;
         this.commandId = commandId;
     }
 
@@ -49,10 +45,6 @@ public class DatalakeHorizontalScaleSdxEvent extends SdxEvent {
     @Override
     public Exception getException() {
         return exception;
-    }
-
-    public String getFlowId() {
-        return flowId;
     }
 
     public BigDecimal getCommandId() {

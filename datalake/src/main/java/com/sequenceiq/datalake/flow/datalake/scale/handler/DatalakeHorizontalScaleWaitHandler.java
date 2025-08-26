@@ -61,18 +61,18 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
                     .withStopPollingIfExceptionOccurred(true);
             cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
                     sdxCluster, pollingConfig);
+            DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
+                    .datalakeHorizontalScaleFlowEventBuilderFactory(data)
+                    .setSelector(DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT.selector());
+            LOGGER.info("Polling finished for cluster: {}", sdxCluster.getCrn());
+            eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
         } catch (SdxWaitException e) {
-            LOGGER.info("Flow failed. Waiting for Datalake Horizontal timed out.", e);
+            LOGGER.info("Flow failed. Waiting for Datalake Horizontal scaling timed out.", e);
 
             DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(data)
                     .setSelector(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector());
             eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
         }
-        LOGGER.info("Polling finished for flow. Id: {}", data.getFlowId());
-        DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
-                .datalakeHorizontalScaleFlowEventBuilderFactory(data)
-                .setSelector(DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT.selector());
-        eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
     }
 }

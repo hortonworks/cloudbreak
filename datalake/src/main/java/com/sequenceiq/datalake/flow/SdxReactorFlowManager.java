@@ -401,7 +401,7 @@ public class SdxReactorFlowManager {
         String selector = DATALAKE_HORIZONTAL_SCALE_EVENT.selector();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeHorizontalScaleSdxEvent sdxEvent = new DatalakeHorizontalScaleSdxEvent(selector, sdxCluster.getId(), sdxCluster.getName(), userId,
-                sdxCluster.getResourceCrn(), scaleRequest, null, null, null);
+                sdxCluster.getResourceCrn(), scaleRequest, null, null);
         return notify(selector, sdxEvent, sdxCluster.getClusterName());
     }
 

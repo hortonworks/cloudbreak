@@ -94,6 +94,11 @@ public class SdxHorizontalScalingService {
             throw new RuntimeException("Cannot find stack on Cloudbreak side.", e);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            if (errorMessage.contains("is currently in 'UPDATE_IN_PROGRESS' status")) {
+                LOGGER.warn("Flow already running in core, possibly datalake flow was restarted, return with last flow chain id: {}.",
+                        sdxCluster.getLastCbFlowChainId());
+                return sdxCluster.getLastCbFlowChainId();
+            }
             LOGGER.info("Cannot horizontal scale stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException(errorMessage);
         } catch (ProcessingException e) {

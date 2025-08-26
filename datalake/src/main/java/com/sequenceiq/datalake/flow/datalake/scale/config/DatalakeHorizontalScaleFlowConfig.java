@@ -7,12 +7,14 @@ import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScal
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_START_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_START_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_VALIDATION_STATE;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_WAIT_FOR_HORIZONTAL_SCALE_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.INIT_STATE;
 
@@ -45,6 +47,11 @@ public class DatalakeHorizontalScaleFlowConfig extends AbstractFlowConfiguration
                     .defaultFailureEvent()
 
                     .from(DATALAKE_HORIZONTAL_SCALE_START_STATE)
+                    .to(DATALAKE_WAIT_FOR_HORIZONTAL_SCALE_STATE)
+                    .event(DATALAKE_HORIZONTAL_SCALE_WAIT_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(DATALAKE_WAIT_FOR_HORIZONTAL_SCALE_STATE)
                     .to(DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_STATE)
                     .event(DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT)
                     .failureEvent(DATALAKE_HORIZONTAL_SCALE_CM_RESTART_FAILED_EVENT)

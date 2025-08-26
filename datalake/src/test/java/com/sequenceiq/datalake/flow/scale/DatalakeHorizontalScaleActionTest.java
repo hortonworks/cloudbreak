@@ -96,16 +96,16 @@ public class DatalakeHorizontalScaleActionTest {
         scaleRequest.setGroup("solr_scale_out");
         DatalakeHorizontalScaleSdxEvent datalakeHorizontalScaleSdxEvent = new DatalakeHorizontalScaleSdxEvent(
                 DATALAKE_HORIZONTAL_SCALE_EVENT.selector(),
-                SDX_ID, SDX_NAME, USER_CRN, DATALAKE_CRN, scaleRequest, null, FLOW_ID, null
+                SDX_ID, SDX_NAME, USER_CRN, DATALAKE_CRN, scaleRequest, null, null
         );
         AbstractAction action = (AbstractAction) underTest.datalakeHorizontalScaleStart();
         initActionPrivateFields(action);
         AbstractActionTestSupport abstractActionTestSupport = new AbstractActionTestSupport<>(action);
         SdxContext sdxContext = SdxContext.from(new FlowParameters(FLOW_ID, USER_CRN), datalakeHorizontalScaleSdxEvent);
         abstractActionTestSupport.doExecute(sdxContext, datalakeHorizontalScaleSdxEvent, new HashMap<>());
-        ArgumentCaptor<DatalakeHorizontalScaleFlowEvent> captor = ArgumentCaptor.forClass(DatalakeHorizontalScaleFlowEvent.class);
+        ArgumentCaptor<DatalakeHorizontalScaleSdxEvent> captor = ArgumentCaptor.forClass(DatalakeHorizontalScaleSdxEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
-        DatalakeHorizontalScaleFlowEvent value = captor.getValue();
+        DatalakeHorizontalScaleSdxEvent value = captor.getValue();
         assertEquals(SDX_ID, value.getResourceId());
         assertEquals(USER_CRN, value.getUserId());
         assertEquals(DATALAKE_CRN, value.getResourceCrn());
@@ -122,7 +122,7 @@ public class DatalakeHorizontalScaleActionTest {
         scaleRequest.setGroup("master");
         DatalakeHorizontalScaleSdxEvent datalakeHorizontalScaleSdxEvent = new DatalakeHorizontalScaleSdxEvent(
                 DATALAKE_HORIZONTAL_SCALE_EVENT.selector(),
-                SDX_ID, SDX_NAME, USER_CRN, DATALAKE_CRN, scaleRequest, null, FLOW_ID, null
+                SDX_ID, SDX_NAME, USER_CRN, DATALAKE_CRN, scaleRequest, null, null
         );
         AbstractAction action = (AbstractAction) underTest.datalakeHorizontalScaleValidationStart();
         initActionPrivateFields(action);
@@ -148,7 +148,7 @@ public class DatalakeHorizontalScaleActionTest {
         scaleRequest.setGroup("master");
         DatalakeHorizontalScaleFlowEvent datalakeHorizontalScaleSdxEvent = new DatalakeHorizontalScaleFlowEvent(
                 DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(),
-                SDX_ID, SDX_NAME, DATALAKE_CRN, USER_CRN, FLOW_ID, scaleRequest, null, null
+                SDX_ID, SDX_NAME, DATALAKE_CRN, USER_CRN, scaleRequest, null, null
         );
         AbstractAction action = (AbstractAction) underTest.datalakeHorizontalScaleFailed();
         initActionPrivateFields(action);
@@ -172,7 +172,7 @@ public class DatalakeHorizontalScaleActionTest {
         scaleRequest.setGroup("master");
         DatalakeHorizontalScaleFlowEvent datalakeHorizontalScaleSdxEvent = new DatalakeHorizontalScaleFlowEvent(
                 DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(),
-                SDX_ID, SDX_NAME, DATALAKE_CRN, USER_CRN, FLOW_ID, scaleRequest, null, new BadRequestException("")
+                SDX_ID, SDX_NAME, DATALAKE_CRN, USER_CRN, scaleRequest, null, new BadRequestException("")
         );
         AbstractAction action = (AbstractAction) underTest.datalakeHorizontalScaleFailed();
         initActionPrivateFields(action);

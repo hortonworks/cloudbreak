@@ -95,7 +95,6 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
                 .setResourceCrn(event.getResourceCrn())
                 .setScaleRequest(event.getScaleRequest())
                 .setException(exception)
-                .setFlowId(event.getFlowId())
                 .setCommandId(event.getCommandId())
                 .build();
     }

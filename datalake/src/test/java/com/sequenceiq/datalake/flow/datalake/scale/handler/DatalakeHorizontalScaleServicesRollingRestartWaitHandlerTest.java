@@ -57,7 +57,6 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandlerTest {
                 new DatalakeHorizontalScaleFlowEventBuilder()
                         .setResourceId(sdxId)
                         .setUserId(userId)
-                        .setFlowId(operationId)
                         .build();
 
         SdxCluster sdxCluster = mock(SdxCluster.class);

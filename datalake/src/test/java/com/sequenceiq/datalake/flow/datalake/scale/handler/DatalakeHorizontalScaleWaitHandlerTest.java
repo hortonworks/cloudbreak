@@ -51,7 +51,7 @@ class DatalakeHorizontalScaleWaitHandlerTest {
         DatalakeHorizontalScaleRequest datalakeHorizontalScaleRequest = new DatalakeHorizontalScaleRequest();
         DatalakeHorizontalScaleFlowEvent horizontalScaleFlowEvent = new DatalakeHorizontalScaleFlowEvent("selector",
                 1L, "dl", "crn:crn",
-                "userId", "flowId",
+                "userId",
                 datalakeHorizontalScaleRequest,
                 new BigDecimal(1), new Exception("TestException"));
         Event<DatalakeHorizontalScaleFlowEvent> event = new Event<>(horizontalScaleFlowEvent);
