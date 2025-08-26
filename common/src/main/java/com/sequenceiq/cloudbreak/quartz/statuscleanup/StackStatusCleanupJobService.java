@@ -40,6 +40,10 @@ public class StackStatusCleanupJobService implements JobSchedulerService {
     @Inject
     private StackStatusCleanupConfig stackStatusCleanUpConfig;
 
+    public boolean isCleanupEnabled() {
+        return stackStatusCleanUpConfig.isEnabled();
+    }
+
     public void schedule() {
         JobDetail jobDetail = buildJobDetail();
         JobKey jobKey = jobDetail.getKey();

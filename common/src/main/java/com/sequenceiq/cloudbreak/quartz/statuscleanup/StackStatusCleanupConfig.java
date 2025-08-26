@@ -15,6 +15,9 @@ public class StackStatusCleanupConfig {
     @Value("${stackstatuscleanup.limit:100}")
     private int limit;
 
+    @Value("${stackstatuscleanup.enabled:false}")
+    private boolean enabled;
+
     public int getIntervalInSeconds() {
         return intervalInSeconds;
     }
@@ -25,5 +28,9 @@ public class StackStatusCleanupConfig {
 
     public int getLimit() {
         return limit;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 }
