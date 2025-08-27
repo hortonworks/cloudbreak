@@ -15,17 +15,26 @@ source /bin/activate_salt_env
 for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
-  if [[ ! -e ${tokendir}/agent_token_generated ]]; then
+  token_file="${tokendir}/agent_token_generated"
+  regenerate=true
+  if [[ -e "$token_file" ]]; then
+    # Check if the file is less than 1 hour old
+    if find "$token_file" -mmin -60 | grep -q .; then
+      regenerate=false
+    fi
+  fi
+  if [[ "$regenerate" == true ]]; then
     HOSTNAME=" --hostname ${fqdn} "
     if [ -n "$LOADBALANCER_SAN" ]; then
       PATTERN=" --hostname-pattern (${fqdn}|${LOADBALANCER_SAN}) "
       HOSTNAME=${PATTERN//./\\.}
     fi
+    rm -rf ${tokendir}
     mkdir -p ${tokendir}
     /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output ${tokendir}/cmagent.token $HOSTNAME --lifetime 3600
-    echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_generated
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> "$token_file"
   else
-    echo "CM agnet token generation for ${fqdn} will be skipped as it was already generated in ${tokendir}."
+    echo "CM agent token generation for ${fqdn} will be skipped as it was already generated in ${tokendir} and is not older than 1 hour."
   fi
 done
 
