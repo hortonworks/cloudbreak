@@ -43,21 +43,21 @@ public class ClusterManagerUpgradeManagementService {
     @Inject
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
-    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled)
+    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary)
             throws CloudbreakOrchestratorException, CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
-        stopClusterServicesIfNecessary(rollingUpgradeEnabled, clusterManagerUpgradeNecessary, stackDto);
+        stopClusterServicesIfNecessary(rollingUpgradeEnabled, runtimeUpgradeNecessary, stackDto);
         if (clusterManagerUpgradeNecessary) {
-            clusterUpgradeService.upgradeClusterManager(stackDto.getId());
+            clusterUpgradeService.upgradeClusterManager(stackId);
             clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo);
             validateCmVersionAfterUpgrade(stackDto, clouderaManagerRepo);
+            startClusterManagerServices(stackDto);
+            reconfigureClusterManager(stackDto);
         } else {
             LOGGER.debug("Skipping Cloudera Manager upgrade because the version {} is already installed.", clouderaManagerRepo.getFullVersion());
         }
-        startClusterServices(stackDto);
-        reconfigureClusterManager(stackDto);
     }
 
     private boolean isClusterManagerUpgradeNecessary(String targetVersion, StackDto stackDto) {
@@ -93,18 +93,17 @@ public class ClusterManagerUpgradeManagementService {
         return StringUtils.removeEnd(version, "p");
     }
 
-    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean clusterManagerUpgradeNecessary, StackDto stackDto)
-            throws CloudbreakException {
-        if (rollingUpgradeEnabled || !clusterManagerUpgradeNecessary) {
-            LOGGER.debug("Not necessary to stop services because the rolling upgrade option is: {} or cluster manager upgrade is not necessary: {}",
-                    rollingUpgradeEnabled, !clusterManagerUpgradeNecessary);
-        } else {
+    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, StackDto stackDto) throws CloudbreakException {
+        if (runtimeUpgradeNecessary && !rollingUpgradeEnabled) {
             LOGGER.debug("Stopping cluster services.");
             clusterApiConnectors.getConnector(stackDto).stopCluster(true);
+        } else {
+            LOGGER.debug("Not necessary to stop services because the rolling upgrade option is: {} or runtime upgrade is necessary: {}",
+                    rollingUpgradeEnabled, runtimeUpgradeNecessary);
         }
     }
 
-    private void startClusterServices(StackDto stackDto) throws CloudbreakException {
+    private void startClusterManagerServices(StackDto stackDto) throws CloudbreakException {
         LOGGER.debug("Starting cluster manager services after CM upgrade.");
         clusterApiConnectors.getConnector(stackDto).startClusterManagerAndAgents();
     }
