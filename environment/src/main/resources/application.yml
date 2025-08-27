@@ -76,6 +76,11 @@ cdp.structuredevent:
     contentlogging: true
 environment:
   cert.dir: /certs/
+  account:
+      tag:
+          validator:
+              key: ^(?!microsoft|azure|windows|\s)[a-z\{][a-zA-Z0-9\{\-_\}]*[a-zA-Z0-9\}]$
+              value: ^[^\s][a-zA-Z0-9\{\-\_\}]*[a-zA-Z0-9\-\_\}]$
   structuredevent:
     rest:
       enabled: true

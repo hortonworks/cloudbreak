@@ -1,27 +1,37 @@
 package com.sequenceiq.environment.tags.service;
 
-import static com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService.DEFAULT_KEY_ACCOUNT_TAG_PATTERN;
-import static com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService.DEFAULT_VALUE_ACCOUNT_TAG_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.environment.tags.domain.AccountTag;
+import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagServiceTest.TestAppContext;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = TestAppContext.class)
 public class DefaultInternalAccountTagServiceTest {
 
     private final DefaultInternalAccountTagService underTest = new DefaultInternalAccountTagService(new CloudbreakResourceReaderService());
+
+    @Value("${environment.account.tag.validator.key}")
+    private String keyAccountTagPattern;
+
+    @Value("${environment.account.tag.validator.value}")
+    private String valueAccountValueTagPattern;
 
     // @formatter:off
     // CHECKSTYLE:OFF
@@ -88,8 +98,8 @@ public class DefaultInternalAccountTagServiceTest {
     @BeforeEach
     public void before() {
         ReflectionTestUtils.setField(underTest, "applyInternalTags", false);
-        ReflectionTestUtils.setField(underTest, "keyAccountTagPattern", DEFAULT_KEY_ACCOUNT_TAG_PATTERN);
-        ReflectionTestUtils.setField(underTest, "valueAccountValueTagPattern", DEFAULT_VALUE_ACCOUNT_TAG_PATTERN);
+        ReflectionTestUtils.setField(underTest, "keyAccountTagPattern", keyAccountTagPattern);
+        ReflectionTestUtils.setField(underTest, "valueAccountValueTagPattern", valueAccountValueTagPattern);
     }
 
     @ParameterizedTest(name = "When key={0} and value={1} should be valid: {2}")
@@ -112,5 +122,28 @@ public class DefaultInternalAccountTagServiceTest {
 
         accountTagList.add(accountTag);
         return accountTagList;
+    }
+
+    @Configuration
+    @ComponentScan(basePackages = "com.sequenceiq.cloudbreak",
+            useDefaultFilters = false,
+            includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE,
+                    value = {}
+            ))
+    @PropertySource("classpath:application.yml")
+    static class TestAppContext {
+        @Value("${environment.account.tag.validator.key}")
+        private String keyAccountTagPattern;
+
+        @Value("${environment.account.tag.validator.value}")
+        private String valueAccountValueTagPattern;
+
+        public String getKeyAccountTagPattern() {
+            return keyAccountTagPattern;
+        }
+
+        public String getValueAccountValueTagPattern() {
+            return valueAccountValueTagPattern;
+        }
     }
 }
