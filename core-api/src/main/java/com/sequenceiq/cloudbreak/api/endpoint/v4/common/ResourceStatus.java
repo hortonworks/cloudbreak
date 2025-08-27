@@ -14,4 +14,8 @@ public enum ResourceStatus {
     public boolean isNonDefault() {
         return !DEFAULT.equals(this);
     }
+
+    public boolean isUserManaged() {
+        return USER_MANAGED.equals(this);
+    }
 }

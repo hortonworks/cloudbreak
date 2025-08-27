@@ -135,7 +135,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn);
         Optional<DetailedEnvironmentResponse> environment = getEnvironment(environmentCrn);
         Optional<String> cloudPlatformByCrn = environment.map(EnvironmentBaseResponse::getCloudPlatform);
-        Boolean hybridEnv = environment.map(env -> EnvironmentType.HYBRID.name().equalsIgnoreCase(env.getEnvironmentType())).orElse(null);
+        Boolean hybridEnvironment = environment.map(env -> EnvironmentType.HYBRID.name().equalsIgnoreCase(env.getEnvironmentType())).orElse(null);
         Optional<String> runtimeVersion = sdxBasicView.stream()
                 .map(SdxBasicView::runtime)
                 .filter(e -> !Strings.isNullOrEmpty(e))
@@ -146,7 +146,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 cloudPlatformByCrn.orElse(null),
                 runtimeVersion.orElse(null),
                 internalTenant,
-                hybridEnv);
+                hybridEnvironment);
         Set<ClusterTemplateViewV4Response> result = clusterTemplateViews.stream()
                 .map(s -> clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
