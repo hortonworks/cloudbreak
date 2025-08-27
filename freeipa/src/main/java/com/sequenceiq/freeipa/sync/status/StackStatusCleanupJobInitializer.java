@@ -15,6 +15,10 @@ public class StackStatusCleanupJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        stackStatusCleanUpJobService.schedule();
+        if (stackStatusCleanUpJobService.isCleanupEnabled()) {
+            stackStatusCleanUpJobService.schedule();
+        } else {
+            stackStatusCleanUpJobService.unschedule();
+        }
     }
 }
