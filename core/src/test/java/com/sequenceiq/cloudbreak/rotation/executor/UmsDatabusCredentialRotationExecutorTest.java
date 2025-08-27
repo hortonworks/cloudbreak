@@ -18,15 +18,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 
@@ -46,9 +45,6 @@ public class UmsDatabusCredentialRotationExecutorTest {
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
-
-    @Mock
-    private ClusterService clusterService;
 
     @InjectMocks
     private UmsDatabusCredentialRotationExecutor underTest;
@@ -115,14 +111,12 @@ public class UmsDatabusCredentialRotationExecutorTest {
 
     private void mockStack() {
         StackDto stack = mock(StackDto.class);
-        Cluster cluster = mock(Cluster.class);
+        ClusterView clusterView = mock(ClusterView.class);
         String secret = "{\"machineUserName\":\"user\"}";
-        lenient().when(cluster.getDatabusCredential()).thenReturn(secret);
+        lenient().when(clusterView.getDatabusCredential()).thenReturn(secret);
         lenient().when(stack.getStack()).thenReturn(mock(StackView.class));
-        when(cluster.getDatabusCredentialSecret()).thenReturn(new Secret(secret, "path"));
-        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterView.getDatabusCredentialSecret()).thenReturn(new Secret(secret, "path"));
+        when(stack.getCluster()).thenReturn(clusterView);
         when(stackDtoService.getByCrn(any())).thenReturn(stack);
-        when(clusterService.getCluster(any())).thenReturn(cluster);
-        when(clusterService.save(any())).thenReturn(cluster);
     }
 }

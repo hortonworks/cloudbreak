@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -21,8 +20,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMC
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMCARotationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -47,9 +44,6 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
     @Inject
     private SecretRotationSaltService saltService;
 
-    @Inject
-    private ClusterService clusterService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterCMCARotationRequest.class);
@@ -66,14 +60,8 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
         try {
             if (CertificateRotationType.ALL.equals(request.getCertificateRotationType())) {
                 StackDto stackDto = stackDtoService.getById(request.getResourceId());
-                Cluster cluster = clusterService.getCluster(stackDto.getCluster().getId());
-                String newTrustStoreVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
-                String newKeyStorePwdVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
-                cluster.setTrustStorePwdSecret(new SecretProxy(newTrustStoreVaultSecretJson));
-                cluster.setKeyStorePwdSecret(new SecretProxy(newKeyStorePwdVaultSecretJson));
-                clusterService.save(cluster);
+                uncachedSecretServiceForRotation.update(stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                uncachedSecretServiceForRotation.update(stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
                 Map<String, SaltPillarProperties> saltPillarPropertiesMap =
                         Map.of("cloudera-manager-autotls", clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(stackDto.getCluster()));
                 saltService.updateSaltPillar(stackDto, saltPillarPropertiesMap);

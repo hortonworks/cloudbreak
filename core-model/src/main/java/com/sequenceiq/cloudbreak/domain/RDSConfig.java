@@ -154,10 +154,6 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         this.connectionUserName = new Secret(connectionUserName);
     }
 
-    public void setConnectionUserNameSecret(Secret connectionUserName) {
-        this.connectionUserName = connectionUserName;
-    }
-
     public String getConnectionPassword() {
         return connectionPassword.getRaw();
     }
@@ -172,10 +168,6 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
 
     public void setConnectionPassword(String connectionPassword) {
         this.connectionPassword = new Secret(connectionPassword);
-    }
-
-    public void setConnectionPasswordSecret(Secret connectionPassword) {
-        this.connectionPassword = connectionPassword;
     }
 
     public Long getCreationDate() {

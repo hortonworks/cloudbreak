@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.COMPUTE_MONITORING_CREDENTIALS;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
@@ -19,7 +17,6 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.rotation.computemonitoring.service.FreeipaMonitoringCredentialsRotationService;
@@ -43,14 +40,9 @@ public class FreeipaMonitoringCredentialRotationContextProvider implements Rotat
                 .withRotationJob(() -> rotationService.updateMonitoringCredentials(stack))
                 .withRollbackJob(() -> rotationService.updateMonitoringCredentials(stack))
                 .build();
-        Map<String, String> newSecretMap = Map.of(stack.getCdpNodeStatusMonitorPasswordSecret().getSecret(), PasswordUtil.generatePassword());
-        Map<String, Consumer<String>> secretUpdaterMap = Map.of(stack.getCdpNodeStatusMonitorPasswordSecret().getSecret(),
-                vaultSecretJson -> stack.setCdpNodeStatusMonitorPasswordSecret(new SecretProxy(vaultSecretJson)));
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of(stack.getCdpNodeStatusMonitorPasswordSecret().getSecret(), PasswordUtil.generatePassword()))
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> stackService.save(stack)))
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 VAULT, vaultRotationContext);

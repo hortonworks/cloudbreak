@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -93,10 +92,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         }
         String modifiedUserData = userDataReplacer.getUserData();
         ccmUserDataService.saveOrUpdateStackCcmParameters(stack, updatedInvertingProxyAgent, modifiedUserData, hmacKey, newInvertingProxyCert);
-        String newGwVaultSecretJson =
-                uncachedSecretServiceForRotation.putRotation(image.getGatewayUserdataSecret().getSecret(), modifiedUserData);
-        image.setGatewayUserdataSecret(new SecretProxy(newGwVaultSecretJson));
-        imageService.save(image);
+        uncachedSecretServiceForRotation.putRotation(image.getGatewayUserdataSecret().getSecret(), modifiedUserData);
     }
 
     @Override
@@ -109,10 +105,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         if (gatewayUserDataSecret.isRotation()) {
             String newAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
             ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), newAccessKeyId);
-            String newGwVaultSecretJson =
-                    uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getBackupSecret());
-            image.setGatewayUserdataSecret(new SecretProxy(newGwVaultSecretJson));
-            imageService.save(image);
+            uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getBackupSecret());
         } else {
             LOGGER.warn("Gateway user data is not in rotation state in Vault, rollback is not possible, return without errors.");
         }
@@ -128,10 +121,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         if (gatewayUserDataSecret.isRotation()) {
             String originalAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getBackupSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
             ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), originalAccessKeyId);
-            String newGwVaultSecretJson =
-                    uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getSecret());
-            image.setGatewayUserdataSecret(new SecretProxy(newGwVaultSecretJson));
-            imageService.save(image);
+            uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getSecret());
         } else {
             LOGGER.warn("Gateway user data is not in rotation state in Vault, finalize is not possible, return without errors.");
         }

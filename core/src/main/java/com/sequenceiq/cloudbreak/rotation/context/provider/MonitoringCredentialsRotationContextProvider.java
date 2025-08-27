@@ -4,15 +4,12 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.COMPUTE_MO
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -21,19 +18,15 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.MonitoringCredentialsRotationService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Component
 public class MonitoringCredentialsRotationContextProvider implements RotationContextProvider {
 
     @Inject
     private StackDtoService stackService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private MonitoringCredentialsRotationService rotationService;
@@ -47,23 +40,13 @@ public class MonitoringCredentialsRotationContextProvider implements RotationCon
                 .withRotationJob(() -> rotationService.updateMonitoringCredentials(stackDto))
                 .withRollbackJob(() -> rotationService.updateMonitoringCredentials(stackDto))
                 .build();
-        Cluster cluster = clusterService.getClusterByStackResourceCrn(resourceCrn);
-        Map<String, String> newSecretMap = Map.of(
-                cluster.getCloudbreakClusterManagerMonitoringUserSecret().getSecret(), rotationService.getCmMonitoringUser(),
-                cluster.getCloudbreakClusterManagerMonitoringPasswordSecret().getSecret(), PasswordUtil.generatePassword(),
-                cluster.getCdpNodeStatusMonitorPasswordSecret().getSecret(), PasswordUtil.generatePassword());
-        Map<String, Consumer<String>> secretUpdaterMap = Map.of(
-                cluster.getCloudbreakClusterManagerMonitoringUserSecret().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerMonitoringUserSecret(new SecretProxy(vaultSecretJson)),
-                cluster.getCloudbreakClusterManagerMonitoringPasswordSecret().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerMonitoringPasswordSecret(new SecretProxy(vaultSecretJson)),
-                cluster.getCdpNodeStatusMonitorPasswordSecret().getSecret(),
-                vaultSecretJson -> cluster.setCdpNodeStatusMonitorPasswordSecret(new SecretProxy(vaultSecretJson)));
+        ClusterView cluster = stackDto.getCluster();
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of(
+                        cluster.getCloudbreakClusterManagerMonitoringUserSecret().getSecret(), rotationService.getCmMonitoringUser(),
+                        cluster.getCloudbreakClusterManagerMonitoringPasswordSecret().getSecret(), PasswordUtil.generatePassword(),
+                        cluster.getCdpNodeStatusMonitorPasswordSecret().getSecret(), PasswordUtil.generatePassword()))
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> clusterService.save(cluster)))
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 VAULT, vaultRotationContext);

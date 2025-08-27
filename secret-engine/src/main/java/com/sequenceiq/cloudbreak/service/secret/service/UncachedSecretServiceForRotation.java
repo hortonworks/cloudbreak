@@ -42,25 +42,22 @@ public class UncachedSecretServiceForRotation {
         this.vaultSecretConverter = vaultSecretConverter;
     }
 
-    public String putRotation(String vaultSecretJson, String newValue) {
+    public String putRotation(String vaultSecretJson, String newValue) throws Exception {
         String oldSecretRaw = get(vaultSecretJson);
         return updateRotation(vaultSecretJson, oldSecretRaw, newValue);
     }
 
-    public String update(String vaultSecretJson, String newValue) {
+    public String update(String vaultSecretJson, String newValue) throws Exception {
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(vaultSecret.getPath(), vaultSecret.getVersion(),
-                Map.of(VaultConstants.FIELD_SECRET, newValue)));
+        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(vaultSecret.getPath(), Map.of(VaultConstants.FIELD_SECRET, newValue)));
         LOGGER.info("Secret on path {} have been updated.", vaultSecret.getPath());
         return result;
     }
 
-    public String updateRotation(String vaultSecretJson, String oldValue, String newValue) {
-        VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        String fullPath = vaultSecret.getPath();
-        Integer version = vaultSecret.getVersion();
+    public String updateRotation(String vaultSecretJson, String oldValue, String newValue) throws Exception {
+        String fullPath = vaultSecretConverter.convert(vaultSecretJson).getPath();
         Map<String, String> secretValue = Map.of(VaultConstants.FIELD_SECRET, newValue, VaultConstants.FIELD_BACKUP, oldValue);
-        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullPath, version, secretValue));
+        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullPath, secretValue));
         LOGGER.info("Secret on path {} have been updated. ", fullPath);
         return result;
     }

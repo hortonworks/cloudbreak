@@ -132,10 +132,6 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
         this.saltBootSignPrivateKey = new Secret(saltBootSignPrivateKey);
     }
 
-    public void setSaltBootSignPrivateKeySecret(Secret saltBootSignPrivateKey) {
-        this.saltBootSignPrivateKey = saltBootSignPrivateKey;
-    }
-
     public Secret getSaltBootSignPrivateKeySecret() {
         return saltBootSignPrivateKey;
     }
@@ -152,20 +148,12 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
         this.saltPassword = new Secret(saltPassword);
     }
 
-    public void setSaltPasswordSecret(Secret saltPassword) {
-        this.saltPassword = saltPassword;
-    }
-
     public String getSaltBootPassword() {
         return saltBootPassword.getRaw();
     }
 
     public void setSaltBootPassword(String saltBootPassword) {
         this.saltBootPassword = new Secret(saltBootPassword);
-    }
-
-    public void setSaltBootPasswordSecret(Secret saltBootPassword) {
-        this.saltBootPassword = saltBootPassword;
     }
 
     public Secret getSaltBootPasswordSecret() {
@@ -178,10 +166,6 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
 
     public void setSaltMasterPrivateKey(String saltMasterPrivateKey) {
         this.saltMasterPrivateKey = new Secret(saltMasterPrivateKey);
-    }
-
-    public void setSaltMasterPrivateKeySecret(Secret saltMasterPrivateKey) {
-        this.saltMasterPrivateKey = saltMasterPrivateKey;
     }
 
     public Secret getSaltMasterPrivateKeySecret() {
@@ -236,10 +220,6 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
 
     public void setSaltSignPrivateKey(String saltSignPrivateKey) {
         this.saltSignPrivateKey = new Secret(saltSignPrivateKey);
-    }
-
-    public void setSaltSignPrivateKeySecret(Secret saltSignPrivateKey) {
-        this.saltSignPrivateKey = saltSignPrivateKey;
     }
 
     public Secret getSaltSignPrivateKeySecret() {

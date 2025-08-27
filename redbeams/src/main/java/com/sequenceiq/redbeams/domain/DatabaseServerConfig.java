@@ -211,10 +211,6 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
         this.connectionPassword = new Secret(connectionPassword);
     }
 
-    public void setConnectionPasswordSecret(Secret connectionPassword) {
-        this.connectionPassword = connectionPassword;
-    }
-
     public Long getCreationDate() {
         return creationDate;
     }

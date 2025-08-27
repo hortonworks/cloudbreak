@@ -148,10 +148,6 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signKey = new Secret(signKey);
     }
 
-    public void setSignKeySecret(Secret signKey) {
-        this.signKey = signKey;
-    }
-
     public String getSignPub() {
         return Optional.ofNullable(signPubSecret)
                 .map(Secret::getRaw)
@@ -166,14 +162,6 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signPub = signPub;
     }
 
-    public void setSignPubSecret(Secret signPub) {
-        if (signPub != null) {
-            this.signPubSecret = signPub;
-        }
-        //remove this in future releases
-        this.signPub = signPub.getRaw();
-    }
-
     public String getSignCert() {
         return Optional.ofNullable(signCertSecret)
                 .map(Secret::getRaw)
@@ -186,14 +174,6 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         }
         //remove this in future releases
         this.signCert = signCert;
-    }
-
-    public void setSignCertSecret(Secret signCert) {
-        if (signCert != null) {
-            this.signCertSecret = signCert;
-        }
-        //remove this in future releases
-        this.signCert = signCert.getRaw();
     }
 
 }

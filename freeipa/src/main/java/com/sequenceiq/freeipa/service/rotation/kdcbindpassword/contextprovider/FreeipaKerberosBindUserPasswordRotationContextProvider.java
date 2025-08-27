@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_USER_PASSWORD;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
@@ -20,20 +18,15 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
-import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Service;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.rotation.context.FreeIpaUserPasswordRotationContext;
 
 @Component
 public class FreeipaKerberosBindUserPasswordRotationContextProvider implements RotationContextProvider {
-
-    @Inject
-    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private KerberosConfigV1Service kerberosConfigV1Service;
@@ -52,14 +45,9 @@ public class FreeipaKerberosBindUserPasswordRotationContextProvider implements R
             if (!StringUtils.equals(clusterName, kerberosConfig.getClusterName())) {
                 throw new SecretRotationException("There is no kerberos config for the given cluster name.");
             }
-            Map<String, String> newSecretMap = Map.of(kerberosConfig.getPasswordSecret(), FreeIpaPasswordUtil.generatePassword());
-            Map<String, Consumer<String>> secretUpdaterMap = Map.of(kerberosConfig.getPasswordSecret(),
-                    vaultSecretJson -> kerberosConfig.setPasswordSecret(new SecretProxy(vaultSecretJson)));
             VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                     .withResourceCrn(resourceCrn)
-                    .withNewSecretMap(newSecretMap)
-                    .withEntitySaverList(List.of(() -> kerberosConfigService.save(kerberosConfig)))
-                    .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
+                    .withVaultPathSecretMap(Map.of(kerberosConfig.getPasswordSecret(), FreeIpaPasswordUtil.generatePassword()))
                     .build();
             FreeIpaUserPasswordRotationContext freeIpaUserPasswordRotationContext = FreeIpaUserPasswordRotationContext.builder()
                     .withUserName(uncachedSecretServiceForRotation.get(kerberosConfig.getPrincipalSecret()))

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -57,20 +55,17 @@ public class SaltSignKeyPairRotationContextProvider implements RotationContextPr
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
+        String saltSignPrivateKeySecretPath = saltSecurityConfig.getSaltSignPrivateKeySecret().getSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
-                .put(VAULT, getVaultRotationContext(resourceCrn, saltSecurityConfig))
+                .put(VAULT, getVaultRotationContext(resourceCrn, saltSignPrivateKeySecretPath))
                 .put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn, stack.getId()))
                 .build();
     }
 
-    private VaultRotationContext getVaultRotationContext(String resourceCrn, SaltSecurityConfig saltSecurityConfig) {
-        Map<String, String> newSecretMap = Map.of(saltSecurityConfig.getSaltSignPrivateKeySecret().getSecret(), PkiUtil.generatePemPrivateKeyInBase64());
+    private VaultRotationContext getVaultRotationContext(String resourceCrn, String saltSignPrivateKeySecretPath) {
         return VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> saltSecurityConfigService.save(saltSecurityConfig)))
-                .withEntitySecretFieldUpdaterMap(Map.of(saltSecurityConfig.getSaltSignPrivateKeySecret().getSecret(),
-                        vaultSecretJson -> saltSecurityConfig.setSaltSignPrivateKeySecret(new SecretProxy(vaultSecretJson))))
+                .withVaultPathSecretMap(Map.of(saltSignPrivateKeySecretPath, PkiUtil.generatePemPrivateKeyInBase64()))
                 .build();
     }
 

@@ -9,7 +9,6 @@ import static java.lang.String.format;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
 import com.sequenceiq.cloudbreak.service.TokenCertInfo;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -67,23 +65,14 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
                 .map(gatewayService::putLegacyFieldsIntoVaultIfNecessary)
                 .map(gw -> gatewayService.putLegacyTokenCertIntoVaultIfNecessary(gw, readConfigResponse))
                 .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
-        Gateway fullGateway = gatewayService.getById(gateway.getId()).orElseThrow(() -> new SecretRotationException("Gateway cannot be found!"));
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
         validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getTokenKeySecret().getSecret());
 
         result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(),
-                getGatewaySignSecretMap(stack.getStack(), readConfigResponse, fullGateway, newGatewaySecrets),
-                List.of(() -> gatewayService.save(fullGateway)),
-                Map.of(fullGateway.getSignKeySecret().getSecret(), vaultSecretJson -> fullGateway.setSignKeySecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getSignPubSecret().getSecret(), vaultSecretJson -> fullGateway.setSignPubSecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getSignCertSecret().getSecret(), vaultSecretJson -> fullGateway.setSignCertSecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenCertSecret().getSecret(), vaultSecretJson -> fullGateway.setTokenCertSecretJson(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenPubSecret().getSecret(), vaultSecretJson -> fullGateway.setTokenPubSecretJson(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenKeySecret().getSecret(), vaultSecretJson -> fullGateway.setTokenKeySecretJson(new SecretProxy(vaultSecretJson))
-                )));
-        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), fullGateway, stack));
+                getGatewaySignSecretMap(stack.getStack(), readConfigResponse, gateway, newGatewaySecrets)));
+        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), gateway, stack));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
-        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway));
+        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), gateway.getTokenKeySecret().getSecret()));
         return result;
     }
 
@@ -130,10 +119,11 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         return customJobRotationContextBuilder.build();
     }
 
-    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway) {
+    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, String knoxSecretJson) {
+        String knoxSecretPath = clusterProxyRotationService.generateClusterProxySecretFormat(knoxSecretJson);
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withKnoxSecretPath(() -> clusterProxyRotationService.generateClusterProxySecretFormat(gateway.getTokenKeySecret().getSecret()))
+                .withKnoxSecretPath(knoxSecretPath)
                 .build();
     }
 

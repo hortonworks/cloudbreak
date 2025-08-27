@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotation
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -31,10 +30,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMC
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMCARotationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -52,9 +51,6 @@ public class ClusterCMCARotationHandlerTest {
 
     @Mock
     private SecretRotationSaltService saltService;
-
-    @Mock
-    private ClusterService clusterService;
 
     @InjectMocks
     private ClusterCMCARotationHandler underTest;
@@ -97,16 +93,11 @@ public class ClusterCMCARotationHandlerTest {
         doNothing().when(saltService).updateSaltPillar(any(), any());
         when(clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(any())).thenReturn(new SaltPillarProperties(null, null));
         StackDto stackDto = mock(StackDto.class);
-        Cluster cluster = mock(Cluster.class);
+        ClusterView clusterView = mock(ClusterView.class);
         InstanceMetadataView imdView = mock(InstanceMetadataView.class);
-        when(stackDto.getCluster()).thenReturn(cluster);
-        when(clusterService.getCluster(any())).thenReturn(cluster);
-        when(cluster.getId()).thenReturn(1L);
-        when(cluster.getKeyStorePwdSecret()).thenReturn(new Secret("raw", "secret1"));
-        when(cluster.getTrustStorePwdSecret()).thenReturn(new Secret("raw", "secret2"));
-        doNothing().when(cluster).setTrustStorePwdSecret(any());
-        doNothing().when(cluster).setKeyStorePwdSecret(any());
-        when(clusterService.save(cluster)).thenReturn(cluster);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getKeyStorePwdSecret()).thenReturn(new Secret("raw", "secret1"));
+        when(clusterView.getTrustStorePwdSecret()).thenReturn(new Secret("raw", "secret2"));
         when(stackDto.getPrimaryGatewayInstance()).thenReturn(imdView);
         when(imdView.getDiscoveryFQDN()).thenReturn("host");
         when(stackDtoService.getById(any())).thenReturn(stackDto);

@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -85,7 +84,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         Secret saltBootPasswordSecret = saltSecurityConfig.getSaltBootPasswordSecret();
         Secret saltBootPrivateKeySecret = saltSecurityConfig.getSaltBootSignPrivateKeySecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
-                .put(VAULT, getVaultRotationContext(resourceCrn, saltBootPasswordSecret, saltBootPrivateKeySecret, saltSecurityConfig))
+                .put(VAULT, getVaultRotationContext(resourceCrn, saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(CUSTOM_JOB, getSaltPublicKeyUpdateJob(resourceCrn, saltBootPrivateKeySecret.getSecret()))
                 .put(SALTBOOT_CONFIG, getSaltBootRotationContext(stack, saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(USER_DATA, getUserDataRotationContext(stack, saltBootPasswordSecret, saltBootPrivateKeySecret))
@@ -158,22 +157,14 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                 .replace("$PUBLIC_KEY", BASE64.encode(PkiUtil.getPublicKeyDer(new String(BASE64.decode(privateKey)))));
     }
 
-    private VaultRotationContext getVaultRotationContext(String resourceCrn, Secret saltBootPasswordSecret, Secret saltBootPrivateKeySecret,
-            SaltSecurityConfig saltSecurityConfig) {
-        ImmutableMap<String, String> newSecretMap = ImmutableMap.<String, String>builder()
-                .put(saltBootPasswordSecret.getSecret(), PasswordUtil.generatePassword())
-                .put(saltBootPrivateKeySecret.getSecret(),
-                        BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes()))
-                .build();
+    private VaultRotationContext getVaultRotationContext(String resourceCrn, Secret saltBootPasswordSecret, Secret saltBootPrivateKeySecret) {
         return VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> saltSecurityConfigService.save(saltSecurityConfig)))
-                .withEntitySecretFieldUpdaterMap(Map.of(
-                        saltBootPasswordSecret.getSecret(),
-                        vaultSecretJson -> saltSecurityConfig.setSaltBootPasswordSecret(new SecretProxy(vaultSecretJson)),
-                        saltBootPrivateKeySecret.getSecret(),
-                        vaultSecretJson -> saltSecurityConfig.setSaltBootSignPrivateKeySecret(new SecretProxy(vaultSecretJson))))
+                .withVaultPathSecretMap(ImmutableMap.<String, String>builder()
+                        .put(saltBootPasswordSecret.getSecret(), PasswordUtil.generatePassword())
+                        .put(saltBootPrivateKeySecret.getSecret(),
+                                BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes()))
+                        .build())
                 .build();
     }
 

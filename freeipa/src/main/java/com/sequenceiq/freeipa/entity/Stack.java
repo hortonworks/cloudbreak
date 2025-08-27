@@ -375,10 +375,6 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.databusCredential = new Secret(databusCredential);
     }
 
-    public void setDatabusCredentialSecret(Secret databusCredential) {
-        this.databusCredential = databusCredential;
-    }
-
     public String getMonitoringCredential() {
         return monitoringCredential.getRaw();
     }
@@ -397,10 +393,6 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     public void setCdpNodeStatusMonitorPassword(String cdpNodeStatusMonitorPassword) {
         this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
-    }
-
-    public void setCdpNodeStatusMonitorPasswordSecret(Secret cdpNodeStatusMonitorPassword) {
-        this.cdpNodeStatusMonitorPassword = cdpNodeStatusMonitorPassword;
     }
 
     public String getOwner() {

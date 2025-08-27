@@ -25,7 +25,7 @@ public interface RotationContextProvider {
 
     default Set<String> getVaultSecretsForRollback(String resourceCrn, Map<SecretRotationStep, ? extends RotationContext> contexts) {
         if (getSecret().getSteps().contains(VAULT)) {
-            return ((VaultRotationContext) contexts.get(VAULT)).getNewSecretMap().keySet();
+            return ((VaultRotationContext) contexts.get(VAULT)).getVaultPathSecretMap().keySet();
         } else {
             return getVaultSecretsForRollback(resourceCrn);
         }

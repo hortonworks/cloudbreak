@@ -9,14 +9,11 @@ import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretException
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.ROLLBACK_FAILURE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.ROTATION_FAILURE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.getCustomJobRunnableByProperties;
-import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -30,20 +27,14 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 @Component
 public class DatahubDemoSecretRotationContextProvider implements RotationContextProvider {
 
-    private static final Logger LOGGER = getLogger(DatahubDemoSecretRotationContextProvider.class);
-
     @Inject
     private StackDtoService stackDtoService;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContextsWithProperties(String resourceCrn, Map<String, String> additionalProperties) {
-        Map<String, String> newSecretMap = Map.of(stackDtoService.getByCrn(resourceCrn).getCluster().getAttributesSecret().getSecret(), "{}");
         return Map.of(VAULT, VaultRotationContext.builder()
                         .withResourceCrn(resourceCrn)
-                        .withNewSecretMap(newSecretMap)
-                        .withEntitySecretFieldUpdaterMap(Map.of(stackDtoService.getByCrn(resourceCrn).getCluster().getAttributesSecret().getSecret(),
-                                vaultSecretJson -> LOGGER.info("You cannot control me!")))
-                        .withEntitySaverList(List.of(() -> LOGGER.info("You cannot save me!")))
+                        .withVaultPathSecretMap(Map.of(stackDtoService.getByCrn(resourceCrn).getCluster().getAttributesSecret().getSecret(), "{}"))
                         .build(),
                 CUSTOM_JOB, CustomJobRotationContext.builder()
                         .withResourceCrn(resourceCrn)

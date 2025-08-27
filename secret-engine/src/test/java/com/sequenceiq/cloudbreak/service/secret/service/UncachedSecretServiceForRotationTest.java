@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -65,7 +64,7 @@ public class UncachedSecretServiceForRotationTest {
 
     @AfterEach
     public void tearDown() {
-        verify(persistentEngine, times(0)).getWithCache(anyString(), anyInt());
+        verify(persistentEngine, times(0)).getWithCache(anyString());
     }
 
     @Test
@@ -109,7 +108,7 @@ public class UncachedSecretServiceForRotationTest {
     @Test
     void testGetLatestSecretByPathAndFieldPath() {
         Map<String, String> value = Collections.singletonMap(VaultConstants.FIELD_SECRET, "hello");
-        when(persistentEngine.getWithoutCache(eq("path"))).thenReturn(value);
+        when(persistentEngine.getWithoutCache("path")).thenReturn(value);
 
         String result = underTest.getBySecretPath("path", "secret");
 
@@ -120,7 +119,7 @@ public class UncachedSecretServiceForRotationTest {
     @Test
     void testGetLatestCPSecretByPathAndFieldPath() {
         Map<String, String> value = Collections.singletonMap("clusterProxyKey", "value");
-        when(persistentEngine.getWithoutCache(eq("path"))).thenReturn(value);
+        when(persistentEngine.getWithoutCache("path")).thenReturn(value);
 
         String result = underTest.getBySecretPath("path", "clusterProxyKey");
 
@@ -136,12 +135,12 @@ public class UncachedSecretServiceForRotationTest {
         String oldSecretValue = "oldSecretValue";
 
         when(persistentEngine.getWithoutCache("app/path")).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, oldSecretValue));
-        when(persistentEngine.put(anyString(), anyInt(), any())).thenReturn("updatedSecret");
+        when(persistentEngine.put(anyString(), any())).thenReturn("updatedSecret");
 
         String result = underTest.putRotation(vaultSecretJson, newValue);
 
         verify(persistentEngine, times(1)).getWithoutCache(anyString());
-        verify(persistentEngine, times(1)).put(anyString(), anyInt(), any());
+        verify(persistentEngine, times(1)).put(anyString(), any());
         assertEquals("updatedSecret", result);
     }
 
@@ -151,11 +150,11 @@ public class UncachedSecretServiceForRotationTest {
                 "\"path\":\"app/path\",\"version\":1}";
         String newValue = "newSecretValue";
 
-        when(persistentEngine.put(anyString(), anyInt(), any())).thenReturn("updatedSecret");
+        when(persistentEngine.put(anyString(), any())).thenReturn("updatedSecret");
 
         String result = underTest.update(vaultSecretJson, newValue);
 
-        verify(persistentEngine, times(1)).put(anyString(), anyInt(), any());
+        verify(persistentEngine, times(1)).put(anyString(), any());
         assertEquals("updatedSecret", result);
     }
 

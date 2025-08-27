@@ -243,10 +243,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.signKey = new Secret(signKey);
     }
 
-    public void setSignKeySecret(Secret signKey) {
-        this.signKey = signKey;
-    }
-
     public String getSignCert() {
         return Optional.ofNullable(signCertSecret)
                 .map(Secret::getRaw)
@@ -256,12 +252,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     public void setSignCert(String signCert) {
         if (signCert != null) {
             this.signCertSecret = new Secret(signCert);
-        }
-    }
-
-    public void setSignCertSecret(Secret signCert) {
-        if (signCert != null) {
-            this.signCertSecret = signCert;
         }
     }
 
@@ -277,12 +267,6 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
-    public void setSignPubSecret(Secret signPub) {
-        if (signPub != null) {
-            this.signPubSecret = signPub;
-        }
-    }
-
     public String getTokenCert() {
         return Optional.ofNullable(tokenCertSecret)
                 .map(Secret::getRaw)
@@ -294,32 +278,15 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.tokenCert = tokenCert;
     }
 
-    public void setTokenCertSecretJson(Secret tokenCert) {
-        this.tokenCert = tokenCert.getRaw();
-        this.tokenCertSecret = tokenCert;
-    }
-
     public void setTokenKeySecret(String tokenPrivateKey) {
         if (tokenPrivateKey != null) {
             this.tokenKeySecret = new Secret(tokenPrivateKey);
         }
     }
 
-    public void setTokenKeySecretJson(Secret tokenPrivateKey) {
-        if (tokenPrivateKey != null) {
-            this.tokenKeySecret = tokenPrivateKey;
-        }
-    }
-
     public void setTokenPubSecret(String tokenPublicKey) {
         if (tokenPublicKey != null) {
             this.tokenPubSecret = new Secret(tokenPublicKey);
-        }
-    }
-
-    public void setTokenPubSecretJson(Secret tokenPublicKey) {
-        if (tokenPublicKey != null) {
-            this.tokenPubSecret = tokenPublicKey;
         }
     }
 

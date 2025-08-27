@@ -198,10 +198,6 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
         this.password = new Secret(password);
     }
 
-    public void setPasswordSecret(Secret password) {
-        this.password = password;
-    }
-
     public String getUrl() {
         return url;
     }

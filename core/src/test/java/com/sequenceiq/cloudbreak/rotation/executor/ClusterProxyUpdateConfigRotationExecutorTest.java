@@ -35,7 +35,7 @@ class ClusterProxyUpdateConfigRotationExecutorTest {
         when(stackDto.getId()).thenReturn(1L);
 
         underTest.rotate(new ClusterProxyUpdateConfigRotationContextBuilder().withResourceCrn("resource")
-                .withKnoxSecretPath(() -> "secretPath")
+                .withKnoxSecretPath("secretPath")
                 .build());
 
         verify(clusterProxyService).updateClusterConfigWithKnoxSecretLocation(1L, "secretPath");
@@ -47,7 +47,7 @@ class ClusterProxyUpdateConfigRotationExecutorTest {
         when(stackDto.getId()).thenReturn(1L);
 
         underTest.rollback(new ClusterProxyUpdateConfigRotationContextBuilder().withResourceCrn("resource")
-                .withKnoxSecretPath(() -> "secretPath")
+                .withKnoxSecretPath("secretPath")
                 .build());
 
         verify(clusterProxyService).updateClusterConfigWithKnoxSecretLocation(1L, "secretPath");

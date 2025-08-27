@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -52,13 +51,10 @@ public abstract class AbstractKnoxCertRotationProvider implements RotationContex
         return stack.getRunningInstanceMetaDataSet().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
     }
 
-    protected RotationContext getVaultRotationContext(String resourceCrn, Map<String, String> newSecrets, List<Runnable> entitySavers,
-            Map<String, Consumer<String>> secretUpdaterMap) {
+    protected RotationContext getVaultRotationContext(String resourceCrn, Map<String, String> secrets) {
         return VaultRotationContext.builder()
+                .withVaultPathSecretMap(secrets)
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecrets)
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
-                .withEntitySaverList(entitySavers)
                 .build();
     }
 
