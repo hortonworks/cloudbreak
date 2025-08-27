@@ -4,13 +4,16 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,9 +26,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
+import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
 
@@ -33,6 +38,10 @@ import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfil
 public class EncryptionProfileService implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileService.class);
+
+    private static final String RESERVED_NAME = "cdp_default";
+
+    private static final String DEFAULT_NAME = "cdp_default_fips_v1";
 
     private final EncryptionProfileRepository repository;
 
@@ -42,6 +51,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private final TransactionService transactionService;
 
+    private final EncryptionProfileProvider encryptionProfileProvider;
+
     private final DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     public EncryptionProfileService(
@@ -49,17 +60,22 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             RegionAwareCrnGenerator regionAwareCrnGenerator,
             OwnerAssignmentService ownerAssignmentService,
             TransactionService transactionService,
+            EncryptionProfileProvider encryptionProfileProvider,
             DefaultEncryptionProfileProvider defaultEncryptionProfileProvider
     ) {
         this.repository = repository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.ownerAssignmentService = ownerAssignmentService;
         this.transactionService = transactionService;
+        this.encryptionProfileProvider = encryptionProfileProvider;
         this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
     }
 
     public EncryptionProfile create(EncryptionProfile encryptionProfile, String accountId, String creator) {
         LOGGER.debug("Create encryption profile request has received: {}", encryptionProfile);
+        if (encryptionProfile.getName().toLowerCase(Locale.ROOT).startsWith(RESERVED_NAME)) {
+            throw new BadRequestException("Encryption Profile name cannot start with: " + RESERVED_NAME);
+        }
         repository.findByNameAndAccountId(encryptionProfile.getName(), accountId)
                 .map(EncryptionProfile::getName)
                 .ifPresent(name -> {
@@ -79,13 +95,56 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     public EncryptionProfile getByNameAndAccountId(String encryptionProfileName, String accountId) {
-        return repository.findByNameAndAccountId(encryptionProfileName, accountId)
-                .orElseThrow(notFound("Encryption profile", encryptionProfileName));
+        Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
+        if (StringUtils.isNotEmpty(encryptionProfileName)) {
+            return getEncryptionProfileByName(encryptionProfileName, accountId, defaultEncryptionProfileMap);
+        } else {
+            return getClouderaDefaultEncryptionProfile(defaultEncryptionProfileMap);
+        }
+    }
+
+    private EncryptionProfile getEncryptionProfileByName(String encryptionProfileName, String accountId, Map<String,
+            EncryptionProfile> defaultEncryptionProfileMap) {
+        Optional<EncryptionProfile> encryptionProfileOp = repository.findByNameAndAccountId(encryptionProfileName, accountId);
+        if (encryptionProfileOp.isPresent()) {
+            return encryptionProfileOp.get();
+        } else {
+            EncryptionProfile encryptionProfile = defaultEncryptionProfileMap.get(encryptionProfileName);
+            if (encryptionProfile == null) {
+                throw new NotFoundException("Encryption Profile not found with name: " + encryptionProfileName);
+            }
+            return encryptionProfile;
+        }
+    }
+
+    private EncryptionProfile getClouderaDefaultEncryptionProfile(Map<String, EncryptionProfile> defaultEncryptionProfileMap) {
+        return defaultEncryptionProfileMap.get(DEFAULT_NAME);
+    }
+
+    public String getClouderaDefaultEncryptionProfileName() {
+        return  DEFAULT_NAME;
+    }
+
+    public List<EncryptionProfile> getAllDefaultEncryptionProfiles() {
+        return defaultEncryptionProfileProvider
+                .defaultEncryptionProfilesByName()
+                .values()
+                .stream()
+                .collect(Collectors.toList());
     }
 
     public EncryptionProfile getByCrn(String encryptionProfileCrn) {
-        return repository.findByResourceCrn(encryptionProfileCrn)
-                .orElseThrow(notFound("Encryption profile with crn", encryptionProfileCrn));
+        Optional<EncryptionProfile> encryptionProfileOp = repository.findByResourceCrn(encryptionProfileCrn);
+        if (encryptionProfileOp.isPresent()) {
+            return encryptionProfileOp.get();
+        } else {
+            Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn();
+            EncryptionProfile encryptionProfile = defaultEncryptionProfileMap.get(encryptionProfileCrn);
+            if (encryptionProfile == null) {
+                throw new NotFoundException("Encryption Profile not found with Crn: " + encryptionProfileCrn);
+            }
+            return encryptionProfile;
+        }
     }
 
     public EncryptionProfile deleteByNameAndAccountId(String encryptionProfileName, String accountId) {
@@ -161,8 +220,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     public Set<TlsVersionResponse> listCiphersByTlsVersion() {
-        Map<String, List<String>> ciphersByTls = defaultEncryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
-        Map<String, List<String>> recommendedCipherSuites = defaultEncryptionProfileProvider.getRecommendedCipherSuites();
+        Map<String, List<String>> ciphersByTls = encryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
+        Map<String, List<String>> recommendedCipherSuites = encryptionProfileProvider.getRecommendedCipherSuites();
 
         return ciphersByTls.entrySet()
                 .stream()

@@ -229,7 +229,6 @@ public class EnvironmentResourceService {
         return supportedRawSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
     }
 
-    // TODO: If the default encryption profile with name cdp-default is not found, create and assign the default encryption profile.
     public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileName, String accountId) {
         EncryptionProfile encryptionProfile = null;
         if (StringUtils.isNotEmpty(encryptionProfileName)) {

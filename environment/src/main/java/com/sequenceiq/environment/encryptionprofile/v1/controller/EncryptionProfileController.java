@@ -35,7 +35,6 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 public class EncryptionProfileController extends NotificationController implements EncryptionProfileEndpoint {
-
     private final EncryptionProfileService encryptionProfileService;
 
     private final EncryptionProfileRequestToEncryptionProfileConverter encryptionProfileConverter;
@@ -82,9 +81,9 @@ public class EncryptionProfileController extends NotificationController implemen
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
     public EncryptionProfileResponse getByName(@ResourceName String encryptionProfileName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
         EncryptionProfile encryptionProfile = encryptionProfileService.getByNameAndAccountId(
                 encryptionProfileName, accountId);
+
         return encryptionProfileResponseConverter.convert(encryptionProfile);
     }
 

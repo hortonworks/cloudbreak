@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -36,7 +37,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
-import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
@@ -49,6 +50,7 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -80,7 +82,7 @@ class FreeIpaConfigServiceTest {
 
     private static final String ACCOUNT = "testAccount";
 
-    private static final String TLS_VERSIONS = "TLSv1.2 TLSv1.3";
+    private static final String TLS_VERSIONS = "TLSv1.2,TLSv1.3";
 
     private static final String TLS_CIPHERSUITES = "CIPHERSUITES";
 
@@ -126,7 +128,10 @@ class FreeIpaConfigServiceTest {
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Mock
-    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+    private EncryptionProfileProvider encryptionProfileProvider;
+
+    @Mock
+    private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
 
     @InjectMocks
     private FreeIpaConfigService underTest;
@@ -173,9 +178,8 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(encryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
@@ -195,12 +199,11 @@ class FreeIpaConfigServiceTest {
         assertEquals(CloudPlatform.AWS.name(), freeIpaConfigView.getBackup().getPlatform());
         assertEquals(expectedHosts, freeIpaConfigView.getHosts());
         assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
-        assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertTrue(freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
-        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
-        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsCommaSeparated"));
     }
 
     @Test
@@ -240,9 +243,8 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(encryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
 
@@ -263,12 +265,11 @@ class FreeIpaConfigServiceTest {
         assertEquals(CloudPlatform.AWS.name(), freeIpaConfigView.getBackup().getPlatform());
         assertEquals(expectedHosts, freeIpaConfigView.getHosts());
         assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
-        assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertTrue(freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
-        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
-        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsCommaSeparated"));
         Map<String, Object> lbConf = (Map<String, Object>) freeIpaConfigView.toMap().get("loadBalancer");
         assertEquals(loadBalancer.getEndpoint(), lbConf.get("endpoint"));
         assertEquals(loadBalancer.getFqdn(), lbConf.get("fqdn"));
@@ -298,9 +299,8 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(encryptionProfileProvider.getTlsVersions(any(), eq(","))).thenReturn("TLSv1.2,TLSv1.3");
+        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
@@ -308,12 +308,11 @@ class FreeIpaConfigServiceTest {
 
         assertEquals(expectedCcmv2Enabled, freeIpaConfigView.isCcmv2Enabled());
         assertEquals(expectedCcmV2JumpgateEnabled, freeIpaConfigView.isCcmv2JumpgateEnabled());
-        assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertFalse(freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
-        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
-        assertEquals(TLS_VERSIONS.replace(' ', ','), encryptionMap.get("tlsVersionsCommaSeparated"));
+        assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsCommaSeparated"));
     }
 
     // @formatter:off

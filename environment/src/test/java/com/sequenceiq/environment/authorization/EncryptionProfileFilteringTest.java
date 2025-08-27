@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -12,9 +14,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponses;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
@@ -25,6 +29,9 @@ import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfi
 class EncryptionProfileFilteringTest {
 
     private static final EncryptionProfile ENCRYPTION_PROFILE = EncryptionProfileTestConstants.getTestEncryptionProfile();
+
+    private static final EncryptionProfile DEFAULT_ENCRYPTION_PROFILE =
+            EncryptionProfileTestConstants.getTestEncryptionProfile("cdp_default", ResourceStatus.DEFAULT);
 
     @Mock
     private EncryptionProfileService encryptionProfileService;
@@ -37,13 +44,13 @@ class EncryptionProfileFilteringTest {
     @BeforeEach
     void setUp() {
         encryptionProfileResponseConverter = mock(EncryptionProfileToEncryptionProfileResponseConverter.class);
+        encryptionProfileService = mock(EncryptionProfileService.class);
         EncryptionProfileResponse mockResponse = new EncryptionProfileResponse();
         mockResponse.setName(EncryptionProfileTestConstants.NAME);
         mockResponse.setCrn(EncryptionProfileTestConstants.ENCRYPTION_PROFILE_CRN);
+
         when(encryptionProfileResponseConverter.convert(any()))
                 .thenReturn(mockResponse);
-
-        encryptionProfileService = mock(EncryptionProfileService.class);
         when(encryptionProfileService.getEncryptionProfilesAsAuthorizationResources())
                 .thenReturn(Arrays.asList(
                         new ResourceWithId(1L, "test-crn-1"),
@@ -53,6 +60,7 @@ class EncryptionProfileFilteringTest {
                 .thenReturn(Arrays.asList(ENCRYPTION_PROFILE, ENCRYPTION_PROFILE));
         when(encryptionProfileService.findAllById(anyList()))
                 .thenReturn(Arrays.asList(ENCRYPTION_PROFILE, ENCRYPTION_PROFILE));
+        when(encryptionProfileService.getAllDefaultEncryptionProfiles()).thenReturn(List.of(DEFAULT_ENCRYPTION_PROFILE));
 
         underTest = new EncryptionProfileFiltering(encryptionProfileService, encryptionProfileResponseConverter);
     }
@@ -70,7 +78,7 @@ class EncryptionProfileFilteringTest {
     @Test
     void testGetAll() {
         EncryptionProfileResponses response = underTest.getAll(Collections.EMPTY_MAP);
-        assertThat(response.getResponses()).hasSize(1);
+        assertThat(response.getResponses()).hasSize(3);
         assertThat(response.getResponses().iterator().next().getName())
                 .isEqualTo(EncryptionProfileTestConstants.NAME);
     }
@@ -78,8 +86,21 @@ class EncryptionProfileFilteringTest {
     @Test
     void testFilterByIds() {
         EncryptionProfileResponses response = underTest.filterByIds(Arrays.asList(1L, 2L), Collections.EMPTY_MAP);
-        assertThat(response.getResponses()).hasSize(1);
+        assertThat(response.getResponses()).hasSize(3);
         assertThat(response.getResponses().iterator().next().getName())
                 .isEqualTo(EncryptionProfileTestConstants.NAME);
+    }
+
+    @Test
+    void testGetAllWithDefaultEncryptionProfile() {
+        EncryptionProfileResponses response = underTest.getAll(Collections.emptyMap());
+
+        assertThat(response.getResponses()).hasSize(3);
+        ArgumentCaptor<EncryptionProfile> captor = ArgumentCaptor.forClass(EncryptionProfile.class);
+        verify(encryptionProfileResponseConverter, times(3)).convert(captor.capture());
+        List<EncryptionProfile> arguments = captor.getAllValues();
+        assertThat(arguments.get(0).getResourceStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
+        assertThat(arguments.get(1).getResourceStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
+        assertThat(arguments.get(2).getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
     }
 }

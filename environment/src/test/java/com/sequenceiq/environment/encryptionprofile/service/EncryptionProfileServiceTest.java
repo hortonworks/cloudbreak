@@ -1,10 +1,14 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.ACCOUNT_ID;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.CREATOR;
+import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DEFAULT_ENCRYPTION_PROFILE_CRN;
+import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DEFAULT_ENCRYPTION_PROFILE_NAME;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.ENCRYPTION_PROFILE_CRN;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.NAME;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.USER_CRN;
+import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.getTestEncryptionProfile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,13 +19,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.JDBCException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
+import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
 
@@ -57,6 +65,9 @@ public class EncryptionProfileServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -121,6 +132,16 @@ public class EncryptionProfileServiceTest {
     }
 
     @Test
+    void testCreateFailsIfNameIsNotAllowed() {
+        assertThatThrownBy(() -> underTest.create(getTestEncryptionProfile("cdp_default_new", USER_MANAGED), ACCOUNT_ID, CREATOR))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Encryption Profile name cannot start with: cdp_default");
+
+        verify(repository, never()).save(any());
+        verify(ownerAssignmentService, never()).assignResourceOwnerRoleIfEntitled(any(), any());
+    }
+
+    @Test
     void testGetByNameAndAccountId() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
 
@@ -139,9 +160,36 @@ public class EncryptionProfileServiceTest {
 
         assertThatThrownBy(() -> underTest.getByNameAndAccountId(NAME, ACCOUNT_ID))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Encryption profile '" + NAME + "' not found.");
+                .hasMessage("Encryption Profile not found with name: " + NAME);
 
         verify(repository).findByNameAndAccountId(NAME, ACCOUNT_ID);
+    }
+
+    @Test
+    void testGetByNameAndAccountIdWhenEncryptionProfileNameIsEmpty() {
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByName()).thenReturn(getDefaultEncryptionProfileNameMap());
+
+        EncryptionProfile result = underTest.getByNameAndAccountId(StringUtils.EMPTY, ACCOUNT_ID);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo(DEFAULT_ENCRYPTION_PROFILE_NAME);
+        assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
+
+        verify(repository, never()).findByNameAndAccountId(any(), any());
+    }
+
+    @Test
+    void testGetByNameAndAccountIdWhenEncryptionProfileIsTheDefaultName() {
+        when(repository.findByNameAndAccountId(DEFAULT_ENCRYPTION_PROFILE_NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByName()).thenReturn(getDefaultEncryptionProfileNameMap());
+
+        EncryptionProfile result = underTest.getByNameAndAccountId(DEFAULT_ENCRYPTION_PROFILE_NAME, ACCOUNT_ID);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo(DEFAULT_ENCRYPTION_PROFILE_NAME);
+        assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
+
+        verify(repository).findByNameAndAccountId(DEFAULT_ENCRYPTION_PROFILE_NAME, ACCOUNT_ID);
     }
 
     @Test
@@ -163,9 +211,23 @@ public class EncryptionProfileServiceTest {
 
         assertThatThrownBy(() -> underTest.getByCrn(ENCRYPTION_PROFILE_CRN))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Encryption profile with crn '" + ENCRYPTION_PROFILE_CRN + "' not found.");
+                .hasMessage("Encryption Profile not found with Crn: " + ENCRYPTION_PROFILE_CRN);
 
         verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
+    }
+
+    @Test
+    void testGetByCrnWhenDefaultEncryptionProfileCrn() {
+        when(repository.findByResourceCrn(DEFAULT_ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
+
+        EncryptionProfile result = underTest.getByCrn(DEFAULT_ENCRYPTION_PROFILE_CRN);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getResourceCrn()).isEqualTo(DEFAULT_ENCRYPTION_PROFILE_CRN);
+        assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.DEFAULT);
+
+        verify(repository).findByResourceCrn(DEFAULT_ENCRYPTION_PROFILE_CRN);
     }
 
     @Test
@@ -316,5 +378,26 @@ public class EncryptionProfileServiceTest {
 
         verify(repository, never()).delete(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
+    }
+
+    private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {
+        Map<String, EncryptionProfile> defaultEncryptionProfileMap = new HashMap<>();
+        EncryptionProfile defaultEncryptionProfile = new EncryptionProfile();
+        defaultEncryptionProfile.setName(DEFAULT_ENCRYPTION_PROFILE_NAME);
+        defaultEncryptionProfile.setResourceStatus(ResourceStatus.DEFAULT);
+        defaultEncryptionProfileMap.put(DEFAULT_ENCRYPTION_PROFILE_NAME, defaultEncryptionProfile);
+
+        return defaultEncryptionProfileMap;
+    }
+
+    private Map<String, EncryptionProfile> getDefaultEncryptionProfileCrnMap() {
+        Map<String, EncryptionProfile> defaultEncryptionProfileMap = new HashMap<>();
+        EncryptionProfile defaultEncryptionProfile = new EncryptionProfile();
+        defaultEncryptionProfile.setName(DEFAULT_ENCRYPTION_PROFILE_NAME);
+        defaultEncryptionProfile.setResourceCrn(DEFAULT_ENCRYPTION_PROFILE_CRN);
+        defaultEncryptionProfile.setResourceStatus(ResourceStatus.DEFAULT);
+        defaultEncryptionProfileMap.put(DEFAULT_ENCRYPTION_PROFILE_CRN, defaultEncryptionProfile);
+
+        return defaultEncryptionProfileMap;
     }
 }

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +35,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -72,7 +71,7 @@ public class EncryptionProfileControllerTest {
     private EncryptionProfileToEncryptionProfileResponseConverter responseConverter;
 
     @Mock
-    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     @InjectMocks
     private EncryptionProfileController controller;
@@ -149,7 +148,7 @@ public class EncryptionProfileControllerTest {
     public void testList() {
         EncryptionProfileResponse response1 = new EncryptionProfileResponse();
         EncryptionProfileResponse response2 = new EncryptionProfileResponse();
-        EncryptionProfileResponses expectedResponses = new EncryptionProfileResponses(new HashSet<>(Arrays.asList(response1, response2)));
+        EncryptionProfileResponses expectedResponses = new EncryptionProfileResponses(Arrays.asList(response1, response2));
 
         when(encryptionProfileFiltering.filterResources(any(), any(), any()))
                 .thenReturn(expectedResponses);

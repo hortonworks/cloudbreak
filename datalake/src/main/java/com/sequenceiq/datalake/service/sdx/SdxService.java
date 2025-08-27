@@ -192,6 +192,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
+    private static final String DEFAULT_ENCRYPTION_PROFILE_NAME = "cdp_default";
+
     @Inject
     private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
 
@@ -1594,10 +1596,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             }
         }
 
+        if (isNotEmpty(environment.getEncryptionProfileName()) &&
+                !environment.getEncryptionProfileName().startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME) &&
+                !sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())) {
+            validationBuilder.error(String.format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above",
+                    clusterRequest.getRuntime()));
+        }
+
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+
     }
 
     private void validateImage(SdxClusterRequest clusterRequest, ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response,
@@ -1818,8 +1828,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
         Set<String> resourceCrnSet = new LinkedHashSet<>(resourceCrns);
         List<SdxCluster> clusters = sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(
-                getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()),
-                resourceCrnSet);
+                getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()), resourceCrnSet);
         Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
         clusters.forEach(cluster -> resourceCrnWithEnvCrn.put(cluster.getCrn(), Optional.ofNullable(cluster.getEnvCrn())));
         return resourceCrnWithEnvCrn;

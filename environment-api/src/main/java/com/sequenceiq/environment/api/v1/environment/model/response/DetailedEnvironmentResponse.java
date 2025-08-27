@@ -9,7 +9,6 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -163,7 +162,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String remoteEnvironmentCrn;
 
-        private EncryptionProfileResponse encryptionProfile;
+        private String encryptionProfileName;
 
         private Builder() {
         }
@@ -388,8 +387,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withEncryptionProfile(EncryptionProfileResponse encryptionProfile) {
-            this.encryptionProfile = encryptionProfile;
+        public Builder withEncryptionProfileName(String encryptionProfileName) {
+            this.encryptionProfileName = encryptionProfileName;
             return this;
         }
 
@@ -438,7 +437,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             detailedEnvironmentResponse.setEnvironmentType(environmentType);
             detailedEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
-            detailedEnvironmentResponse.setEncryptionProfile(encryptionProfile);
+            detailedEnvironmentResponse.setEncryptionProfileName(encryptionProfileName);
             return detailedEnvironmentResponse;
         }
     }
