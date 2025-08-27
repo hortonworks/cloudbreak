@@ -310,7 +310,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(v31Client);
 
             startClusterManagerAndAgents();
-            stopServicesIfNecessary(rollingUpgradeEnabled);
             tagHostsWithHostTemplateName();
             disableKnoxAutorestart(rollingUpgradeEnabled);
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
@@ -339,13 +338,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } catch (ApiException e) {
             LOGGER.error("Could not upgrade Cloudera Runtime services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
-    }
-
-    private void stopServicesIfNecessary(boolean rollingUpgradeEnabled) throws CloudbreakException, ApiException {
-        if (!rollingUpgradeEnabled) {
-            ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
-            stopWithRunningCm(false, stack.getCluster(), clustersResourceApi);
         }
     }
 
