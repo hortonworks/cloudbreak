@@ -45,11 +45,12 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 
 @Service
-public class DistroXService {
+public class DistroXCreateService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXCreateService.class);
 
     @Inject
     private StackOperations stackOperations;
@@ -93,7 +94,7 @@ public class DistroXService {
     @Inject
     private SeLinuxValidationService seLinuxValidationService;
 
-    public StackV4Response post(DistroXV1Request request, boolean internalRequest) {
+    public StackV4Response create(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
         validate(request, internalRequest);
         fedRampModificationService.prepare(request, workspace.getTenant().getName());
@@ -114,20 +115,57 @@ public class DistroXService {
         }
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(request.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
+        validateEnvironment(request, environment);
+        validateIdentityManagement(request, environment);
+        validateDatalake(environment);
+        validateImageRequest(request.getImage());
+        if (entitlementService.isSingleServerRejectEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            validateAzureDatabaseType(request.getExternalDatabase());
+        }
+        validateLoadBalancerSku(request.getAzure());
+        validateSeLinuxEntitlement(request);
+    }
+
+    private void validateEnvironment(DistroXV1Request request, DetailedEnvironmentResponse environment) {
         if (environment.getEnvironmentStatus().isDeleteInProgress()) {
             throw new BadRequestException(format("'%s' Environment can not be delete in progress state.", request.getEnvironmentName()));
         }
+    }
+
+    private void validateIdentityManagement(DistroXV1Request request, DetailedEnvironmentResponse environment) {
         String environmentCrn = environment.getCrn();
         try {
             DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(environmentCrn);
-            if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {
-                throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
-                        environment.getName()));
-            }
+            validateFreeipa(environment, freeipa);
         } catch (CloudbreakServiceException e) {
             LOGGER.warn("Failed to fetch FreeIPA for the environment: {}: {}", environmentCrn, e.getMessage());
-            validaLdapAndKerberosSettings(environmentCrn, request.getName());
+            validateLdapAndKerberosSettings(environmentCrn, request.getName());
         }
+    }
+
+    private void validateFreeipa(DetailedEnvironmentResponse environment, DescribeFreeIpaResponse freeipa) {
+        if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {
+            throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
+                    environment.getName()));
+        }
+        if (freeipa.getTrust() != null && StringUtils.isNotBlank(freeipa.getTrust().getTrustStatus())
+                && !TrustStatus.valueOf(freeipa.getTrust().getTrustStatus()).isActive()) {
+            throw new BadRequestException(format("Cross realm trust must be active when launching Data Hub in the '%s' Environment.",
+                    environment.getName()));
+        }
+    }
+
+    private void validateLdapAndKerberosSettings(String environmentCrn, String clusterName) {
+        if (!ldapConfigService.isLdapConfigExistsForEnvironment(environmentCrn, clusterName)) {
+            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register an LDAP config");
+        }
+        if (!kerberosConfigService.isKerberosConfigExistsForEnvironment(environmentCrn, clusterName)) {
+            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register a Kerberos config");
+        }
+    }
+
+    private void validateDatalake(DetailedEnvironmentResponse environment) {
+        String environmentCrn = environment.getCrn();
         Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environmentCrn);
         if (sdxCrnsWithAvailability.isEmpty()) {
             throw new BadRequestException(format("Data Lake stack cannot be found for environment: %s (%s)",
@@ -136,14 +174,6 @@ public class DistroXService {
         if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
-        validateImageRequest(request.getImage());
-
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (entitlementService.isSingleServerRejectEnabled(accountId)) {
-            validateAzureDatabaseType(request.getExternalDatabase());
-        }
-        validateLoadBalancerSku(request.getAzure());
-        validateSeLinuxEntitlement(request);
     }
 
     private void validateLoadBalancerSku(AzureDistroXV1Parameters azure) {
@@ -157,15 +187,6 @@ public class DistroXService {
                                 + "azure-basic-load-balancer-will-be-retired-on-30-september-2025-upgrade-to-standard-load-balancer");
                     }
                 });
-    }
-
-    private void validaLdapAndKerberosSettings(String environmentCrn, String clusterName) {
-        if (!ldapConfigService.isLdapConfigExistsForEnvironment(environmentCrn, clusterName)) {
-            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register an LDAP config");
-        }
-        if (!kerberosConfigService.isKerberosConfigExistsForEnvironment(environmentCrn, clusterName)) {
-            throw new BadRequestException("If you want to provision a Data Hub without FreeIPA then please register a Kerberos config");
-        }
     }
 
     private Predicate<StatusCheckResult> isSdxAvailable() {

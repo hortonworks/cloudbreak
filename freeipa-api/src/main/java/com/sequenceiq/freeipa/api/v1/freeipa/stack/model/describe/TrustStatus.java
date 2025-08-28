@@ -28,4 +28,8 @@ public enum TrustStatus {
     public boolean isCrossRealmFinishable() {
         return FREEIPA_CROSS_REALM_SETUP_FINISH_ENABLE_STATUSES.contains(this);
     }
+
+    public boolean isActive() {
+        return this == TRUST_ACTIVE;
+    }
 }

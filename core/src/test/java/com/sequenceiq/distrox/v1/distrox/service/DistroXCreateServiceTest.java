@@ -66,10 +66,13 @@ import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 
 @ExtendWith(MockitoExtension.class)
-class DistroXServiceTest {
+class DistroXCreateServiceTest {
 
     private static final Long USER_ID = 123456L;
 
@@ -123,7 +126,7 @@ class DistroXServiceTest {
     private SeLinuxValidationService seLinuxValidationService;
 
     @InjectMocks
-    private DistroXService underTest;
+    private DistroXCreateService underTest;
 
     @BeforeEach
     void setUp() {
@@ -144,7 +147,7 @@ class DistroXServiceTest {
         r.setEnvironmentName(invalidEnvNameValue);
         when(environmentClientService.getByName(invalidEnvNameValue)).thenReturn(null);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
 
         assertEquals("No environment name provided hence unable to obtain some important data", err.getMessage());
 
@@ -169,7 +172,7 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -196,7 +199,7 @@ class DistroXServiceTest {
 
             when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
-            BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+            BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
 
             assertEquals(String.format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.", envName),
                     err.getMessage());
@@ -206,6 +209,40 @@ class DistroXServiceTest {
             verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
             verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = TrustStatus.class, names = {"TRUST_ACTIVE"}, mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("When the environment's freeipa has trust configured but it is not active")
+    void testFreeipaWithNonActiveTrust(TrustStatus trustStatus) {
+        String envName = "someAwesomeExistingButNotAvailableEnvironment";
+        DistroXV1Request r = new DistroXV1Request();
+        r.setEnvironmentName(envName);
+
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCrn(CRN);
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setName(envName);
+
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(Status.AVAILABLE);
+        TrustResponse trust = new TrustResponse();
+        trust.setTrustStatus(trustStatus.name());
+        freeipa.setTrust(trust);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+
+        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
+
+        assertEquals(String.format("Cross realm trust must be active when launching Data Hub in the '%s' Environment.", envName),
+                err.getMessage());
+
+        verify(environmentClientService, calledOnce()).getByName(any());
+        verify(environmentClientService, calledOnce()).getByName(eq(envName));
+        verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
+        verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
     }
 
     @Test
@@ -231,7 +268,7 @@ class DistroXServiceTest {
         lenient().when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of(DATALAKE_CRN));
         lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST)));
 
         assertEquals("'someAwesomeEnvironment' Environment can not be delete in progress state.", err.getMessage());
     }
@@ -258,7 +295,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
-        doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(ENV_NAME);
@@ -293,7 +330,7 @@ class DistroXServiceTest {
         when(ldapConfigService.isLdapConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
 
-        doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST));
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(envName);
@@ -324,7 +361,7 @@ class DistroXServiceTest {
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST)));
 
         assertEquals("If you want to provision a Data Hub without FreeIPA then please register an LDAP config", err.getMessage());
     }
@@ -348,7 +385,7 @@ class DistroXServiceTest {
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenThrow(CloudbreakServiceException.class);
         when(ldapConfigService.isLdapConfigExistsForEnvironment("crn", clusterName)).thenReturn(true);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.post(r, NOT_INTERNAL_REQUEST)));
+        BadRequestException err = assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.create(r, NOT_INTERNAL_REQUEST)));
 
         assertEquals("If you want to provision a Data Hub without FreeIPA then please register a Kerberos config", err.getMessage());
     }
@@ -368,7 +405,7 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of());
 
-        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+        assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", ENV_NAME, envResponse.getCrn());
 
@@ -390,7 +427,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
-        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+        assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Data Lake stacks of environment should be available.");
 
@@ -418,7 +455,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -444,7 +481,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
 
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
@@ -473,7 +510,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
-        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+        assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image request can not have both image id and os parameters set.");
 
@@ -504,7 +541,7 @@ class DistroXServiceTest {
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(imageOsService.isSupported(any())).thenReturn(false);
 
-        assertThatThrownBy(() -> underTest.post(request, NOT_INTERNAL_REQUEST))
+        assertThatThrownBy(() -> underTest.create(request, NOT_INTERNAL_REQUEST))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image os 'os' is not supported in your account.");
 
@@ -515,7 +552,7 @@ class DistroXServiceTest {
     void testWithSingleServerWhenSingleServerRejectEnabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, true);
 
-        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)))
+        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
                         "Check documentation for more information: " +
@@ -525,7 +562,7 @@ class DistroXServiceTest {
     @Test
     void testWithSingleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.SINGLE_SERVER, false);
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
 
     }
@@ -533,14 +570,14 @@ class DistroXServiceTest {
     @Test
     void testWithFlexibleServerWhenSingleServerRejectEnabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
     void testWithFlexibleServerWhenSingleServerRejectDisabled() {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, false);
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
 
     }
@@ -552,7 +589,7 @@ class DistroXServiceTest {
         azureDistroXV1Parameters.setLoadBalancerSku(LoadBalancerSku.BASIC);
         request.setAzure(azureDistroXV1Parameters);
 
-        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)))
+        assertThatThrownBy(() -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("The Basic SKU type is no longer supported for Load Balancers. Please use the Standard SKU to provision a Load Balancer. "
                         + "Check documentation for more information: https://azure.microsoft.com/en-gb/updates?id="
@@ -564,7 +601,7 @@ class DistroXServiceTest {
         DistroXV1Request request = createDistroXV1RequestForAzureSingleServerRejectionTest(AzureDatabaseType.FLEXIBLE_SERVER, true);
         request.setAzure(new AzureDistroXV1Parameters());
 
-        doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST));
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
     }
 
     @Test
@@ -585,7 +622,7 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         doThrow(CloudbreakServiceException.class).when(seLinuxValidationService).validateSeLinuxEntitlementGranted(SeLinux.ENFORCING);
 
-        assertThrows(CloudbreakServiceException.class, () -> doAs(ACTOR, () -> underTest.post(request, NOT_INTERNAL_REQUEST)));
+        assertThrows(CloudbreakServiceException.class, () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
 
         verifyNoInteractions(fedRampModificationService);
         verifyNoInteractions(stackOperations);

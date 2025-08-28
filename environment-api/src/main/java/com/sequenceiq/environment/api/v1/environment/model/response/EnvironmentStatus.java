@@ -165,14 +165,16 @@ public enum EnvironmentStatus {
             START_DATAHUB_STARTED,
             START_SYNCHRONIZE_USERS_STARTED,
             START_FREEIPA_STARTED,
-            FREEIPA_STALE
+            FREEIPA_STALE,
+            TRUST_BROKEN
     );
 
     private static final Set<EnvironmentStatus> STOPPABLE_STATUSES = Set.of(
             AVAILABLE,
             STOP_DATALAKE_STARTED,
             STOP_DATAHUB_STARTED,
-            STOP_FREEIPA_STARTED
+            STOP_FREEIPA_STARTED,
+            TRUST_BROKEN
     );
 
     private static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(

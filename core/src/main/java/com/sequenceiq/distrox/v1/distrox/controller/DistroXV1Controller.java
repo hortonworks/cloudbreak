@@ -119,7 +119,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackS
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.RotateRdsCertificateConverter;
-import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
+import com.sequenceiq.distrox.v1.distrox.service.DistroXCreateService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
@@ -180,7 +180,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private StackOperationService stackOperationService;
 
     @Inject
-    private DistroXService distroxService;
+    private DistroXCreateService distroxCreateService;
 
     @Inject
     private DataHubFiltering dataHubFiltering;
@@ -222,13 +222,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(path = "cluster.blueprintName", type = NAME, action = DESCRIBE_CLUSTER_TEMPLATE)
     @CheckPermissionByRequestProperty(path = "allRecipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
     public StackV4Response post(@RequestObject DistroXV1Request request) {
-        return distroxService.post(request, false);
+        return distroxCreateService.create(request, false);
     }
 
     @Override
     @InternalOnly
     public StackV4Response postInternal(@InitiatorUserCrn String initiatorUserCrn, String accountId, DistroXV1Request request) {
-        return distroxService.post(request, true);
+        return distroxCreateService.create(request, true);
     }
 
     @Override
