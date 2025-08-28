@@ -60,8 +60,8 @@ public class TestUpgradeCandidateProvider {
             String runtimeVersion, Architecture architecture) {
         List<ImageV4Response> allCdhImage = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAllImages())
                 .stream().filter(hasArchitecture(architecture)).toList();
-        List<ImageV4Response> advertisedCdhImages = getCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient.getV4WithAdvertisedImages())
-                .stream().filter(hasArchitecture(architecture)).toList();
+        List<ImageV4Response> advertisedCdhImages = getDefaultCdhImagesByRuntime(testContext, runtimeVersion, imageCatalogTestClient
+                .getImagesByNameV4(testContext.getCloudPlatform(), true)).stream().filter(hasArchitecture(architecture)).toList();
 
         for (int i = 0; i < advertisedCdhImages.size(); i++) {
             ImageV4Response targetImage = advertisedCdhImages.get(advertisedCdhImages.size() - i - 1);
@@ -96,8 +96,33 @@ public class TestUpgradeCandidateProvider {
         return cdhImages;
     }
 
+    private List<ImageV4Response> getDefaultCdhImagesByRuntime(TestContext testContext, String runtimeVersion, Action<ImageCatalogTestDto,
+            CloudbreakClient> action) {
+        List<ImageV4Response> cdhImages = new ArrayList<>();
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .when(action)
+                .then((context, entity, cloudbreakClient) -> {
+                    List<ImageV4Response> sortedImages = getDefaultImagesByRuntimeAndCloudProvider(testContext, runtimeVersion, entity);
+                    cdhImages.addAll(sortedImages);
+                    return entity;
+                })
+                .validate();
+        LOGGER.info("Found images for runtime {}: {}", runtimeVersion, cdhImages.stream().map(ImageBasicInfoV4Response::getUuid).toList());
+        return cdhImages;
+    }
+
     private List<ImageV4Response> getImagesByRuntimeAndCloudProvider(TestContext testContext, String currentUpgradeRuntimeVersion, ImageCatalogTestDto entity) {
         return entity.getResponse().getImages().getCdhImages().stream()
+                .filter(image -> image.getVersion().equals(currentUpgradeRuntimeVersion)
+                        && image.getImageSetsByProvider().containsKey(testContext.getCloudProvider().getCloudPlatform().name().toLowerCase()))
+                .sorted(Comparator.comparing(ImageV4Response::getCreated))
+                .toList();
+    }
+
+    private List<ImageV4Response> getDefaultImagesByRuntimeAndCloudProvider(TestContext testContext, String currentUpgradeRuntimeVersion,
+            ImageCatalogTestDto entity) {
+        return entity.getResponseByProvider().getCdhImages().stream()
                 .filter(image -> image.getVersion().equals(currentUpgradeRuntimeVersion)
                         && image.getImageSetsByProvider().containsKey(testContext.getCloudProvider().getCloudPlatform().name().toLowerCase()))
                 .sorted(Comparator.comparing(ImageV4Response::getCreated))

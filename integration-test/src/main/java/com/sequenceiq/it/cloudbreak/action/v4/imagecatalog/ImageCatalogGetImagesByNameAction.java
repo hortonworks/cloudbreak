@@ -21,11 +21,18 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTes
 
     private String stackName;
 
+    private boolean defaultOnly;
+
     public ImageCatalogGetImagesByNameAction() {
     }
 
     public ImageCatalogGetImagesByNameAction(CloudPlatform platform) {
         this.platform = platform;
+    }
+
+    public ImageCatalogGetImagesByNameAction(CloudPlatform platform, boolean defaultOnly) {
+        this.platform = platform;
+        this.defaultOnly = defaultOnly;
     }
 
     public ImageCatalogGetImagesByNameAction(String stackName) {
@@ -52,9 +59,10 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTes
     private ImagesV4Response getImagesV4Response(ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient, ImageCatalogV4Endpoint imageCatalogV4Endpoint)
             throws Exception {
         return StringUtils.isNotEmpty(stackName)
-                ? imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), stackName, null, null, null, false, false, null)
-                : imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), null, platform.name(), null, null, false, false,
-                null);
+                ? imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), stackName, null, null,
+                null, false, defaultOnly, null)
+                : imageCatalogV4Endpoint.getImagesByName(cloudbreakClient.getWorkspaceId(), entity.getName(), null, platform.name(),
+                null, null, false, defaultOnly, null);
     }
 }
 

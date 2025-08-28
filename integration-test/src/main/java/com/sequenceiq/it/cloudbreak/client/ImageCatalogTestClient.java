@@ -50,6 +50,10 @@ public class ImageCatalogTestClient {
         return new ImageCatalogGetImagesByNameAction();
     }
 
+    public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4(CloudPlatform cloudPlatform, boolean defaultOnly) {
+        return new ImageCatalogGetImagesByNameAction(cloudPlatform, defaultOnly);
+    }
+
     public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4(String stackName) {
         return new ImageCatalogGetImagesByNameAction(stackName);
     }
