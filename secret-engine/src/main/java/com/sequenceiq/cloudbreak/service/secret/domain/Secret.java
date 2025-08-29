@@ -34,8 +34,4 @@ public class Secret implements Serializable {
     public String getSecret() {
         return secret;
     }
-
-    public void cacheEvict() {
-
-    }
 }

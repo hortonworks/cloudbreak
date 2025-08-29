@@ -36,7 +36,11 @@ public class GatewayService {
     }
 
     public Optional<GatewayView> getByClusterId(Long clusterId) {
-        return Optional.ofNullable(repository.findByClusterId(clusterId).orElse(null));
+        return Optional.ofNullable(repository.findViewByClusterId(clusterId).orElse(null));
+    }
+
+    public Optional<Gateway> getById(Long id) {
+        return repository.findById(id);
     }
 
     public void generateAndUpdateSignKeys(GatewayView gateway) {

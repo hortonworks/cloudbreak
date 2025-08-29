@@ -217,6 +217,10 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountAwar
         this.bindPassword = new Secret(bindPassword);
     }
 
+    public void setBindPasswordSecret(Secret bindPassword) {
+        this.bindPassword = bindPassword;
+    }
+
     public DirectoryType getDirectoryType() {
         return directoryType;
     }

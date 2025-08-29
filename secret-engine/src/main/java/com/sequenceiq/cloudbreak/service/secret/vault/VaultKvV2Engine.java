@@ -74,28 +74,26 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    @Cacheable(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public Map<String, String> getWithCache(String fullSecretPath) {
-        return get(fullSecretPath);
+    @Cacheable(cacheNames = VaultConstants.CACHE_NAME, key = "{#fullSecretPath, #version}")
+    public Map<String, String> getWithCache(String fullSecretPath, Integer version) {
+        return get(fullSecretPath, version);
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
     public Map<String, String> getWithoutCache(String fullSecretPath) {
-        return get(fullSecretPath);
+        return get(fullSecretPath, null);
     }
 
-    @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public void cacheEvict(String fullSecretPath) {
-        LOGGER.trace("Cache evicted for vault path [{}]", fullSecretPath);
-    }
-
-    private Map<String, String> get(@NotNull String fullSecretPath) {
+    private Map<String, String> get(@NotNull String fullSecretPath, @NotNull Integer version) {
         validatePathPattern(fullSecretPath);
         long start = System.currentTimeMillis();
         Map<String, String> ret = null;
-        Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(fullSecretPath);
+        Versioned<Map<String, Object>> response;
+        if (version != null) {
+            response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(fullSecretPath, Versioned.Version.from(version));
+        } else {
+            response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(fullSecretPath);
+        }
         if (response != null && response.getData() != null) {
             ret = new HashMap<>();
             for (String field : response.getData().keySet()) {
@@ -109,8 +107,8 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public String put(String fullSecretPath, Map<String, String> value) {
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "{#fullSecretPath, #currentVersion}")
+    public String put(String fullSecretPath, Integer currentVersion, Map<String, String> value) {
         validatePathOwnedByApp(fullSecretPath, "store");
         long start = System.currentTimeMillis();
         LOGGER.info("Storing secret to {}", fullSecretPath);
@@ -138,8 +136,8 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public void delete(String fullSecretPath) {
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "{#fullSecretPath, #version}")
+    public void delete(String fullSecretPath, Integer version) {
         validatePathOwnedByApp(fullSecretPath, "delete");
         deleteAllVersionsOfSecret(fullSecretPath);
     }

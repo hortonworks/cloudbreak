@@ -18,16 +18,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.user.AdminUserService;
-import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +48,9 @@ class FreeIpaAdminPasswordRotationExecutorTest {
     @Mock
     private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
+    @Mock
+    private FreeIpaService freeIpaService;
+
     @InjectMocks
     private FreeIpaAdminPasswordRotationExecutor rotationExecutor;
 
@@ -55,13 +61,14 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, oldPassword);
         Stack stack = mock(Stack.class);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
@@ -77,15 +84,15 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, null);
         Stack stack = mock(Stack.class);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         SecretRotationException e = assertThrows(SecretRotationException.class,
                 () -> rotationExecutor.rotate(rotationContext));
@@ -100,13 +107,14 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, oldPassword);
         Stack stack = mock(Stack.class);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
@@ -125,12 +133,13 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, oldPassword);
         Stack stack = mock(Stack.class);
+
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
@@ -151,13 +160,14 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, oldPassword);
         Stack stack = mock(Stack.class);
         FreeIpaClientException exception = new FreeIpaClientException("Error");
+
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
@@ -175,10 +185,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         String newPassword = "new-password";
         String adminPasswordSecret = "adminPasswordSecret";
 
-        FreeIpaAdminPasswordRotationContext rotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withAdminPasswordSecret(adminPasswordSecret)
-                .build();
+        RotationContext rotationContext = new RotationContext(resourceCrn);
         RotationSecret rotationSecret = new RotationSecret(newPassword, oldPassword);
         Stack stack = mock(Stack.class);
         FreeIpaClientException exception = new FreeIpaClientException("Error");
@@ -186,6 +193,9 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
         when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         doThrow(exception).when(freeIpaClientFactory).getFreeIpaClientForStack(eq(stack));
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret(adminPasswordSecret, adminPasswordSecret));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         CloudbreakRuntimeException e = assertThrows(CloudbreakRuntimeException.class,
                 () -> rotationExecutor.rollback(rotationContext));

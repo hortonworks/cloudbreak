@@ -2,7 +2,9 @@ package com.sequenceiq.freeipa.service.rotation.adminpassword.contextprovider;
 
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
@@ -16,14 +18,13 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaDefaultPillarGenerator;
-import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -45,18 +46,22 @@ public class FreeIpaAdminPasswordRotationContextProvider implements RotationCont
         Stack stackByResourceCrn = stackService.getByEnvironmentCrnAndAccountId(environmentCrnAsString, environmentCrn.getAccountId());
         FreeIpa freeIpa = freeIpaService.findByStack(stackByResourceCrn);
         String newPassword = FreeIpaPasswordUtil.generatePassword();
-        Map<String, String> vaultPathMap = Maps.newHashMap();
-        Secret adminPasswordSecret = freeIpa.getAdminPasswordSecret();
-        vaultPathMap.put(adminPasswordSecret.getSecret(), newPassword);
+
+        Map<String, String> newSecretMap = Maps.newHashMap();
+        newSecretMap.put(freeIpa.getAdminPasswordSecret().getSecret(), newPassword);
+
+        Map<String, Consumer<String>> secretUpdaterMap = Maps.newHashMap();
+        secretUpdaterMap.put(freeIpa.getAdminPasswordSecret().getSecret(),
+                vaultSecretJson -> freeIpa.setAdminPassword(new SecretProxy(vaultSecretJson)));
+
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(environmentCrnAsString)
-                .withVaultPathSecretMap(vaultPathMap)
+                .withNewSecretMap(newSecretMap)
+                .withEntitySaverList(List.of(() -> freeIpaService.save(freeIpa)))
+                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
                 .build();
 
-        FreeIpaAdminPasswordRotationContext freeipaAdminPasswordRotationContext = FreeIpaAdminPasswordRotationContext.builder()
-                .withResourceCrn(environmentCrnAsString)
-                .withAdminPasswordSecret(adminPasswordSecret.getSecret())
-                .build();
+        RotationContext freeipaAdminPasswordRotationContext = new RotationContext(environmentCrnAsString);
 
         SaltPillarUpdateRotationContext freeipaPillarRotationContext = SaltPillarUpdateRotationContext.builder()
                 .withEnvironmentCrn(environmentCrnAsString)

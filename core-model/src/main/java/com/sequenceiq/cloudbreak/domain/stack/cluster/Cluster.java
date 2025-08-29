@@ -427,6 +427,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.databusCredential = new Secret(databusCredential);
     }
 
+    public void setDatabusCredentialSecret(Secret databusCredential) {
+        this.databusCredential = databusCredential;
+    }
+
     public String getMonitoringCredential() {
         return monitoringCredential.getRaw();
     }
@@ -477,8 +481,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.cloudbreakClusterManagerUser = new Secret(cloudbreakClusterManagerUser);
     }
 
+    public void setCloudbreakClusterManagerUserSecret(Secret cloudbreakClusterManagerUser) {
+        this.cloudbreakClusterManagerUser = cloudbreakClusterManagerUser;
+    }
+
     public void setCloudbreakClusterManagerMonitoringUser(String cloudbreakClusterManagerMonitoringUser) {
         this.cloudbreakClusterManagerMonitoringUser = new Secret(cloudbreakClusterManagerMonitoringUser);
+    }
+
+    public void setCloudbreakClusterManagerMonitoringUserSecret(Secret cloudbreakClusterManagerMonitoringUser) {
+        this.cloudbreakClusterManagerMonitoringUser = cloudbreakClusterManagerMonitoringUser;
     }
 
     public String getCloudbreakClusterManagerPassword() {
@@ -551,12 +563,24 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         cloudbreakClusterManagerPassword = new Secret(password);
     }
 
+    public void setCloudbreakClusterManagerPasswordSecret(Secret password) {
+        cloudbreakClusterManagerPassword = password;
+    }
+
     public void setCloudbreakClusterManagerMonitoringPassword(String cloudbreakClusterManagerMonitoringPassword) {
         this.cloudbreakClusterManagerMonitoringPassword = new Secret(cloudbreakClusterManagerMonitoringPassword);
     }
 
+    public void setCloudbreakClusterManagerMonitoringPasswordSecret(Secret cloudbreakClusterManagerMonitoringPassword) {
+        this.cloudbreakClusterManagerMonitoringPassword = cloudbreakClusterManagerMonitoringPassword;
+    }
+
     public void setCdpNodeStatusMonitorPassword(String cdpNodeStatusMonitorPassword) {
         this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
+    }
+
+    public void setCdpNodeStatusMonitorPasswordSecret(Secret cdpNodeStatusMonitorPassword) {
+        this.cdpNodeStatusMonitorPassword = cdpNodeStatusMonitorPassword;
     }
 
     @Override
@@ -568,6 +592,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         dpClusterManagerUser = new Secret(user);
     }
 
+    public void setDpClusterManagerUserSecret(Secret user) {
+        dpClusterManagerUser = user;
+    }
+
     @Override
     public Secret getDpClusterManagerPasswordSecret() {
         return dpClusterManagerPassword;
@@ -575,6 +603,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setDpClusterManagerPassword(String password) {
         dpClusterManagerPassword = new Secret(password);
+    }
+
+    public void setDpClusterManagerPasswordSecret(Secret password) {
+        dpClusterManagerPassword = password;
     }
 
     public String getKeyStorePwd() {
@@ -586,6 +618,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.keyStorePwd = new Secret(keyStorePwd);
     }
 
+    public void setKeyStorePwdSecret(Secret keyStorePwd) {
+        this.keyStorePwd = keyStorePwd;
+    }
+
     public String getTrustStorePwd() {
         String pwd = getIfNotNull(trustStorePwd, Secret::getRaw);
         return isNotEmpty(pwd) ? pwd : getCloudbreakClusterManagerPassword();
@@ -593,6 +629,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setTrustStorePwd(String trustStorePwd) {
         this.trustStorePwd = new Secret(trustStorePwd);
+    }
+
+    public void setTrustStorePwdSecret(Secret trustStorePwd) {
+        this.trustStorePwd = trustStorePwd;
     }
 
     public Boolean getTopologyValidation() {

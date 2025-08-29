@@ -38,7 +38,7 @@ public class ClusterProxyUpdateConfigRotationExecutor extends AbstractRotationEx
 
     private void updateClusterProxyConfig(ClusterProxyUpdateConfigRotationContext rotationContext) {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        clusterProxyService.updateClusterConfigWithKnoxSecretLocation(stackDto.getId(), rotationContext.getKnoxSecretPath());
+        clusterProxyService.updateClusterConfigWithKnoxSecretLocation(stackDto.getId(), rotationContext.getKnoxSecretPath().get());
     }
 
     @Override

@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static java.lang.String.format;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -66,9 +68,14 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
         //not yet supported in CM - OPSAPS-65182
         newIdBroker.setMasterSecret(idBroker.getMasterSecret());
 
-        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(), Map.of(idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey(),
-                idBroker.getSignPubSecret().getSecret(), newIdBroker.getSignPub(),
-                idBroker.getSignCertSecret().getSecret(), newIdBroker.getSignCert())));
+        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(),
+                Map.of(idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey(),
+                    idBroker.getSignPubSecret().getSecret(), newIdBroker.getSignPub(),
+                    idBroker.getSignCertSecret().getSecret(), newIdBroker.getSignCert()),
+                List.of(() -> idBrokerService.save(idBroker)),
+                Map.of(idBroker.getSignKeySecret().getSecret(), vaultSecretJson -> idBroker.setSignKeySecret(new SecretProxy(vaultSecretJson)),
+                        idBroker.getSignPubSecret().getSecret(), vaultSecretJson -> idBroker.setSignPubSecret(new SecretProxy(vaultSecretJson)),
+                        idBroker.getSignCertSecret().getSecret(), vaultSecretJson -> idBroker.setSignCertSecret(new SecretProxy(vaultSecretJson)))));
         result.put(SALT_PILLAR, getSaltPillarRotationContext(stack.getResourceCrn(), clusterHostServiceRunner.getIdBrokerPillarProperties(newIdBroker)));
         result.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack, gatewayConfigService, exitCriteriaProvider.get(stack)));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));

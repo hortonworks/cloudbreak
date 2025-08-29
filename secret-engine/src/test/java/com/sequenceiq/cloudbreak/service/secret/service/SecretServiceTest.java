@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -71,12 +72,12 @@ public class SecretServiceTest {
     @Test
     public void testPutOk() throws Exception {
         Map<String, String> value = Collections.singletonMap(VaultConstants.FIELD_SECRET, "value");
-        when(persistentEngine.put("appPath/key", value)).thenReturn("secret");
+        when(persistentEngine.put("appPath/key", null, value)).thenReturn("secret");
         when(persistentEngine.appPath()).thenReturn("appPath/");
 
         String result = underTest.put("key", "value");
 
-        verify(persistentEngine, times(1)).put(eq("appPath/key"), eq(value));
+        verify(persistentEngine, times(1)).put(eq("appPath/key"), any(), eq(value));
         assertEquals("secret", result);
     }
 
@@ -87,7 +88,7 @@ public class SecretServiceTest {
 
     @Test
     public void testGetSecretStringNull() {
-        when(persistentEngine.getWithCache(anyString())).thenReturn(null);
+        when(persistentEngine.getWithCache(anyString(), anyInt())).thenReturn(null);
 
         String result = underTest.get(SECRET_JSON);
 
@@ -99,7 +100,7 @@ public class SecretServiceTest {
     @Test
     public void testGetSecretOk() {
 
-        when(persistentEngine.getWithCache("app/path")).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
+        when(persistentEngine.getWithCache("app/path", 1)).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
 
         String result = underTest.get(SECRET_JSON);
 
@@ -110,25 +111,25 @@ public class SecretServiceTest {
     public void testDeleteByVaultSecretJsonNullSecret() {
         underTest.deleteByVaultSecretJson(null);
 
-        verify(persistentEngine, times(0)).delete(anyString());
+        verify(persistentEngine, times(0)).delete(anyString(), anyInt());
     }
 
     @Test
     public void testDeleteByVaultSecretJsonSecretOk() {
         underTest.deleteByVaultSecretJson(SECRET_JSON);
 
-        verify(persistentEngine, times(1)).delete(anyString());
+        verify(persistentEngine, times(1)).delete(anyString(), anyInt());
     }
 
     @Test
     public void testGetByResponse() {
         SecretResponse secretResponse = new SecretResponse("enginePath", "secretPath", 1);
 
-        when(persistentEngine.getWithCache(anyString())).thenReturn(Map.of(VaultConstants.FIELD_SECRET, "secretValue"));
+        when(persistentEngine.getWithCache(anyString(), anyInt())).thenReturn(Map.of(VaultConstants.FIELD_SECRET, "secretValue"));
 
         String result = underTest.getByResponse(secretResponse);
 
-        verify(persistentEngine, times(1)).getWithCache(anyString());
+        verify(persistentEngine, times(1)).getWithCache(anyString(), anyInt());
         assertEquals("secretValue", result);
     }
 
@@ -138,7 +139,7 @@ public class SecretServiceTest {
 
         underTest.deleteByPathPostfix(pathPostfix);
 
-        verify(persistentEngine, times(1)).delete(anyString());
+        verify(persistentEngine, times(1)).delete(anyString(), any());
     }
 
     @Test

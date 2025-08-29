@@ -28,16 +28,13 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
-import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -59,9 +56,6 @@ class FreeIpaSecretRotationServiceTest {
     @Mock
     private SecretRotationValidationService secretRotationValidationService;
 
-    @Mock
-    private FreeIpaService freeIpaService;
-
     @InjectMocks
     private FreeIpaSecretRotationService underTest;
 
@@ -80,9 +74,6 @@ class FreeIpaSecretRotationServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "chain-id");
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setAdminPassword(new Secret(""));
-        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
 
         FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
         request.setExecutionType(RotationFlowExecutionType.ROTATE);
