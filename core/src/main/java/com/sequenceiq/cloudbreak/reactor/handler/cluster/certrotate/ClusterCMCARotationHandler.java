@@ -68,14 +68,14 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
                 StackDto stackDto = stackDtoService.getById(request.getResourceId());
                 Cluster cluster = clusterService.getCluster(stackDto.getCluster().getId());
                 String newTrustStoreVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                        uncachedSecretServiceForRotation.update(cluster.getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
                 String newKeyStorePwdVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                        uncachedSecretServiceForRotation.update(cluster.getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
                 cluster.setTrustStorePwdSecret(new SecretProxy(newTrustStoreVaultSecretJson));
                 cluster.setKeyStorePwdSecret(new SecretProxy(newKeyStorePwdVaultSecretJson));
                 clusterService.save(cluster);
                 Map<String, SaltPillarProperties> saltPillarPropertiesMap =
-                        Map.of("cloudera-manager-autotls", clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(stackDto.getCluster()));
+                        Map.of("cloudera-manager-autotls", clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(cluster));
                 saltService.updateSaltPillar(stackDto, saltPillarPropertiesMap);
                 saltService.executeSaltState(stackDto, Set.of(stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN()),
                         List.of("cloudera.manager.rotate.cmca-renewal"));
