@@ -77,7 +77,7 @@ base:
     - postgresql.disaster_recovery
     - postgresql.upgrade
     - atlas.check_atlas_updated
-{{ include_if_exists('postgresql', 'backup-restore-config') }}
+{{ include_if_exists('postgresql', 'backup_restore_config') }}
 
   'roles:knox_gateway':
     - match: grain
