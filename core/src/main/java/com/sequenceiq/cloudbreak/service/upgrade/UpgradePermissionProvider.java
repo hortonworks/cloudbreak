@@ -42,10 +42,12 @@ public class UpgradePermissionProvider {
         VersionComparisonContext currentImageVersions = versionComparisonContextFactory.buildForStack(filterParams.getCurrentImage().getPackageVersions(),
                 filterParams.getStackRelatedParcels());
         VersionComparisonContext candidateImageVersions = versionComparisonContextFactory.buildForStack(candidateImage);
+        VersionComparisonContext candidateImageVersionsBasedOnReleaseVersion = versionComparisonContextFactory.buildForStackBasedOnReleaseVersion(
+                candidateImage);
         return isRuntimeVersionSupported(candidateImage)
                 && permitByComponentVersion(currentImageVersions, candidateImageVersions,
-                    checkUpgradeMatrix(currentImageVersions, candidateImageVersions, filterParams))
-                && permitByUpgradePatchRestriction(currentImageVersions, candidateImageVersions);
+                checkUpgradeMatrix(currentImageVersions, candidateImageVersions, filterParams))
+                && permitByUpgradePatchRestriction(currentImageVersions, candidateImageVersionsBasedOnReleaseVersion);
     }
 
     private boolean checkUpgradeMatrix(VersionComparisonContext currentImageVersionContext, VersionComparisonContext candidateImageVersionContext,
