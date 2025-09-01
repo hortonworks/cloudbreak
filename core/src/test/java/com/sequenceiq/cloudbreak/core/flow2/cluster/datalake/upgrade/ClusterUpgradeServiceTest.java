@@ -15,6 +15,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -22,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -260,5 +264,15 @@ public class ClusterUpgradeServiceTest {
         underTest.initUpgradeCluster(STACK_ID, StatedImage.statedImage(image, null, null), false);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, V_7_0_2, IMAGE_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
+    }
+
+    @Test
+    void testIsRuntimeUpgradeNecessaryShouldReturnTrueWhenThereAreUpgradeCandidates() {
+        assertTrue(underTest.isRuntimeUpgradeNecessary(Set.of(new ClouderaManagerProduct())));
+    }
+
+    @Test
+    void testIsRuntimeUpgradeNecessaryShouldReturnFalseWhenThereAreNoUpgradeCandidates() {
+        assertFalse(underTest.isRuntimeUpgradeNecessary(Collections.emptySet()));
     }
 }

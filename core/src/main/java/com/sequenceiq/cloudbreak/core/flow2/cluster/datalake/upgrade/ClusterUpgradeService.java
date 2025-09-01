@@ -17,9 +17,11 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -88,6 +91,10 @@ public class ClusterUpgradeService {
                 && currentImagePackages.get(STACK.getKey()).equals(targetImagePackages.get(STACK.getKey()))
                 && StringUtils.isNoneBlank(currentImagePackages.get(CDH_BUILD_NUMBER.getKey()), targetImagePackages.get(CDH_BUILD_NUMBER.getKey()))
                 && !currentImagePackages.get(CDH_BUILD_NUMBER.getKey()).equals(targetImagePackages.get(CDH_BUILD_NUMBER.getKey()));
+    }
+
+    public boolean isRuntimeUpgradeNecessary(Set<ClouderaManagerProduct> upgradeCandidateProducts) {
+        return CollectionUtils.isNotEmpty(upgradeCandidateProducts);
     }
 
     private Optional<String> getStackVersionFromImage(Image image) {
