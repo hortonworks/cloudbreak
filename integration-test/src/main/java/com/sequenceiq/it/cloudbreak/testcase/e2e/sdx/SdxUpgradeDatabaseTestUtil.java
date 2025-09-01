@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties.DatabaseVersionProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -112,13 +111,7 @@ public class SdxUpgradeDatabaseTestUtil {
         return parseTargetMajorVersion(versionString);
     }
 
-    public Map<String, DatabaseVersionProperties> getUpgradeDatabaseServerMatrix() {
-        Map<String, DatabaseVersionProperties> matrix = commonClusterManagerProperties.getUpgradeDatabaseServer().getMatrix();
-        LOGGER.info("Configuration matrix content: {}", matrix);
-        return matrix;
-    }
-
-    TargetMajorVersion parseTargetMajorVersion(String versionString) {
+    private TargetMajorVersion parseTargetMajorVersion(String versionString) {
         try {
             return TargetMajorVersion.valueOf("VERSION" + versionString);
         } catch (Exception exception) {

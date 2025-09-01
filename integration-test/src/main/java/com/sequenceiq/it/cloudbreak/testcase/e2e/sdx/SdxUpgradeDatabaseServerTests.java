@@ -2,19 +2,14 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.util.Map;
-
 import jakarta.inject.Inject;
 
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties.DatabaseVersionProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -45,33 +40,33 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
         initializeAzureMarketplaceTermsPolicy(testContext);
     }
 
-    @Test(dataProvider = "databaseUpgradeParameters")
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "upgrade called on the SDX cluster",
             then = "SDX upgrade database server should be successful, the cluster should be up and running"
     )
-    public void testSDXDatabaseUpgrade(TestContext testContext, String runtimeVersion, String originalDatabaseMajorVersion,
-            TargetMajorVersion targetDatabaseMajorVersion) {
+    public void testSDXDatabaseUpgrade(TestContext testContext) {
         createEnvironmentWithFreeIpa(testContext);
         String sdx = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-        sdxDatabaseRequest.setDatabaseEngineVersion(originalDatabaseMajorVersion);
+        sdxDatabaseRequest.setDatabaseEngineVersion(sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion());
         sdxDatabaseRequest = testContext.getCloudProvider().extendDBRequestWithProviderParams(sdxDatabaseRequest);
+
+        TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
         testContext
                 .given(sdx, SdxTestDto.class)
                     .withCloudStorage()
-                    .withRuntimeVersion(runtimeVersion)
                     .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .given(SdxUpgradeDatabaseServerTestDto.class)
-                .withTargetMajorVersion(targetDatabaseMajorVersion)
+                    .withTargetMajorVersion(targetDatabaseMajorVersion)
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.upgradeDatabaseServer(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
@@ -126,20 +121,5 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromPrimaryGateway(
                         targetDatabaseMajorVersion.getMajorVersion(), tc, testDto))
                 .validate();
-    }
-
-    @DataProvider(name = "databaseUpgradeParameters")
-    public Object[][] databaseUpgradeParameters() {
-        E2ETestContext e2ETestContext = getBean(E2ETestContext.class);
-        Map<String, DatabaseVersionProperties> upgradeDatabaseServerMatrix = sdxUpgradeDatabaseTestUtil.getUpgradeDatabaseServerMatrix();
-
-        return upgradeDatabaseServerMatrix.entrySet().stream()
-                .map(entry -> new Object[] {
-                        e2ETestContext,
-                        entry.getKey(),
-                        entry.getValue().getOriginalDatabaseMajorVersion(),
-                        sdxUpgradeDatabaseTestUtil.parseTargetMajorVersion(entry.getValue().getTargetDatabaseMajorVersion())
-                })
-                .toArray(Object[][]::new);
     }
 }

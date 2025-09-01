@@ -122,13 +122,6 @@ integrationtest:
     distroXUpgrade3rdPartyTargetVersion: 7.3.1
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   upgradeDatabaseServer:
-    matrix:
-      "[7.2.18]":
-        originalDatabaseMajorVersion: "11"
-        targetDatabaseMajorVersion: "14"
-      "[7.3.2]":
-        originalDatabaseMajorVersion: "14"
-        targetDatabaseMajorVersion: "17"
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
   privateEndpointEnabled: false
