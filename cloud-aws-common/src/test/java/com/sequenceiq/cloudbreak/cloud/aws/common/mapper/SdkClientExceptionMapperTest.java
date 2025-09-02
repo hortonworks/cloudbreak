@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.net.SocketTimeoutException;
 
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.BeforeEach;
@@ -162,6 +167,18 @@ class SdkClientExceptionMapperTest {
         assertEquals(Retry.ActionFailedException.class, actual.getClass());
         assertEquals("Cannot execute method: methodName. Unable to unmarshall response (Could not parse XML response.). " +
                 "Response Code: 200, Response Text: OK", actual.getMessage());
+    }
+
+    @Test
+    void testMapMessageWhenSocketTimedOutBecauseOfReadTimeOut() {
+        String message = "Unable to unmarshall response (Could not parse XML response.). Response Code: 200, Response Text: OK";
+        SdkClientException e = SdkClientException.create("Could not parse XML response.", new SocketTimeoutException("Read timed out"));
+
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals("Cannot execute method: methodName. Failed to communicate with AWS provider: Read timed out", actual.getMessage());
+        verify(awsEncodedAuthorizationFailureMessageDecoder, never()).decodeAuthorizationFailureMessageIfNeeded(any(), any(), any());
     }
 
     @Test

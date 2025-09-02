@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.mapper;
 
+import java.net.SocketTimeoutException;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.Signature;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +32,17 @@ public class SdkClientExceptionMapper {
     private AwsEncodedAuthorizationFailureMessageDecoder awsEncodedAuthorizationFailureMessageDecoder;
 
     public RuntimeException map(AwsCredentialView awsCredentialView, String region, SdkException e, Signature signature) {
-        String message = awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, region, e.getMessage());
         String methodName = signature.getName();
+        Optional<Throwable> socketTimeoutException = ExceptionUtils.getThrowableList(e)
+                .stream()
+                .filter(SocketTimeoutException.class::isInstance)
+                .findFirst();
+        if (socketTimeoutException.isPresent()) {
+            String message = addMethodNameIfNotContains("Failed to communicate with AWS provider: " + socketTimeoutException.get().getMessage(), methodName);
+            return new ActionFailedException(message);
+        }
+
+        String message = awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, region, e.getMessage());
         if (!message.equals(e.getMessage())) {
             message = addMethodNameIfNotContains(message, methodName);
             return new CloudConnectorException(message, e);
