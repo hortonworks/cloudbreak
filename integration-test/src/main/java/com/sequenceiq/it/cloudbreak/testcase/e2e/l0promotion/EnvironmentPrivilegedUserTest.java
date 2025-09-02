@@ -45,7 +45,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentPrivilegedUserTest.class);
 
-    private static final String LIST_RULES_FLAG = "-l";
+    private static final String CHECK_IF_ROOT_COMMAND = "whoami | grep \"root\"";
 
     private static final String CHANGE_USER_TO_ROOT_COMMAND = "su";
 
@@ -119,7 +119,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(), LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(), CHECK_IF_ROOT_COMMAND);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .given(UmsTestDto.class)
@@ -136,7 +136,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                     Set<String> ipAddresses = getIpAddresses(tc);
                     sshSudoCommandActions.executeCommand(ipAddresses, null, null, SSSD_RESTART, SSSD_STATUS);
                     tc.waitingFor(Duration.ofMinutes(2), "Waiting for SSSD to be synchronized has been interrupted");
-                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, tc.getWorkloadPassword(), LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, tc.getWorkloadPassword(), CHECK_IF_ROOT_COMMAND);
                     return testDto;
                 })
                 .validate();
