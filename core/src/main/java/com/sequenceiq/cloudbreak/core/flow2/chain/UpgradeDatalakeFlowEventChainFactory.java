@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
@@ -22,14 +23,19 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
@@ -48,6 +54,9 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
@@ -71,6 +80,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getImageUpdateTriggerEvent(upgradeTriggerEvent));
         flowEventChain.addAll(getClusterUpgradeTriggerEvent(upgradeTriggerEvent));
 
         return new FlowTriggerEventQueue(getName(), upgradeTriggerEvent, flowEventChain);
@@ -108,6 +118,20 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
 
         return syncEvents;
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image findImage(Long stackId) {
+        try {
+            return componentConfigProviderService.getImage(stackId);
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new NotFoundException("Image not found for stack", e);
+        }
+    }
+
+    private List<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(ClusterUpgradeTriggerEvent event) {
+        com.sequenceiq.cloudbreak.cloud.model.Image image = findImage(event.getResourceId());
+        ImageChangeDto imageChangeDto = new ImageChangeDto(event.getResourceId(), event.getImageId(), image.getImageCatalogName(), image.getImageCatalogUrl());
+        return List.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageChangeDto));
     }
 
     private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event) {
