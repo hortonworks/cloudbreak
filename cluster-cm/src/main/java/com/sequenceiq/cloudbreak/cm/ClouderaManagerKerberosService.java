@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,6 +20,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.model.ClouderaManagerClientConfigDeployRequest;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -56,7 +54,7 @@ public class ClouderaManagerKerberosService {
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
     @Inject
-    private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
+    private ClouderaManagerClientConfigDeployService clouderaManagerClientConfigDeployService;
 
     public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, StackDtoDelegate stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
@@ -70,9 +68,14 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
-            List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null).getItems();
-            BigDecimal deployClusterConfigId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
-            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfigId);
+            clouderaManagerClientConfigDeployService.deployAndPollClientConfig(
+                    ClouderaManagerClientConfigDeployRequest.builder()
+                            .pollerMessage("Configure for kerberos")
+                            .clustersResourceApi(clustersResourceApi)
+                            .client(client)
+                            .stack(stack)
+                            .build()
+            );
             modificationService.startCluster();
         }
     }

@@ -120,9 +120,8 @@ public class ClouderaManagerSyncApiCommandIdProvider {
             throws ApiException, CloudbreakException {
         future.cancel(true);
         LOGGER.debug("{} command took too much time. Start command ID query by listing active commands", commandName);
-        clouderaManagerPollingServiceProvider.checkSyncApiCommandId(
-                stack, api.getApiClient(), commandName, lastSyncApiCommandId,
-                syncApiCommandRetriever);
+        clouderaManagerPollingServiceProvider
+                .checkSyncApiCommandId(stack, api.getApiClient(), commandName, lastSyncApiCommandId, syncApiCommandRetriever);
         Optional<BigDecimal> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack.getStack());
         if (finalCommandId.isPresent()) {
             LOGGER.debug("Get final command ID after timeout: {}", finalCommandId.get());
