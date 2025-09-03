@@ -313,12 +313,10 @@ class DistroXV1ControllerTest {
         List<String> serviceTypes = List.of("HIVE", "RANGER");
         Set<StackViewV4Response> stackViewV4ResponseSet = Set.of();
         Set<StackViewV4Response> result = Set.of();
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
         StackViewV4Responses stackViewV4Responses = mock(StackViewV4Responses.class);
         when(stackViewV4Responses.getResponses()).thenReturn(stackViewV4ResponseSet);
         when(datahubFiltering.filterResources(Crn.safeFromString(TEST_USER_CRN), DESCRIBE_DATAHUB, Map.of())).thenReturn(stackViewV4Responses);
-        when(stackOperations.filterByServiceTypesPresent(WORKSPACE_ID, stackViewV4ResponseSet, serviceTypes)).thenReturn(result);
+        when(stackOperations.filterByServiceTypesPresent(stackViewV4ResponseSet, serviceTypes)).thenReturn(result);
 
         StackViewV4Responses response = doAs(TEST_USER_CRN, () -> distroXV1Controller.listByServiceTypes(serviceTypes));
 

@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestTo
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -219,14 +218,16 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return new StackViewV4Responses(stackViewResponses);
     }
 
-    public Set<StackViewV4Response> filterByServiceTypesPresent(Long workspaceId, Set<StackViewV4Response> stackViewResponses, List<String> serviceTypes) {
-        Set<Long> blueprintIds = blueprintService.findAllByWorkspaceIdWithServiceTypesPresent(workspaceId, serviceTypes).stream()
-                .map(Blueprint::getId)
+    public Set<StackViewV4Response> filterByServiceTypesPresent(Set<StackViewV4Response> stackViewResponses, List<String> serviceTypes) {
+        List<StackDto> stacks = stackDtoService.findAllByResourceCrnInWithoutResources(stackViewResponses.stream().map(StackViewV4Response::getCrn).toList());
+        List<String> stackResourceCrnsWithAnyOfTheServiceTypes = stacks.stream()
+                .filter(stack -> blueprintService.anyOfTheServiceTypesPresentOnBlueprint(stack.getBlueprintJsonText(), serviceTypes))
+                .map(StackDto::getResourceCrn)
+                .toList();
+        LOGGER.info("Stacks with any of these service types '{}': {}", serviceTypes, stackResourceCrnsWithAnyOfTheServiceTypes);
+        return stackViewResponses.stream()
+                .filter(s -> stackResourceCrnsWithAnyOfTheServiceTypes.contains(s.getCrn()))
                 .collect(Collectors.toSet());
-        Set<StackViewV4Response> result = stackViewResponses.stream()
-                .filter(s -> blueprintIds.contains(s.getCluster().getBlueprint().getId()))
-                .collect(Collectors.toSet());
-        return result;
     }
 
     public StackV4Response post(Long workspaceId, CloudbreakUser cloudbreakUser, @Valid StackV4Request request, boolean distroxRequest) {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -26,12 +27,13 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -41,7 +43,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -51,16 +52,17 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -101,6 +103,9 @@ class StackOperationsTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterCommonService clusterCommonService;
@@ -144,6 +149,9 @@ class StackOperationsTest {
 
     @Mock
     private BlueprintService blueprintService;
+
+    @Captor
+    private ArgumentCaptor<List<String>> stringListCaptor;
 
     @BeforeEach
     void setUp() {
@@ -373,26 +381,37 @@ class StackOperationsTest {
     @Test
     void testFilterByServiceTypesPresent() {
         List<String> serviceTypes = List.of("service1", "service2");
-        Blueprint blueprint2 = mock(Blueprint.class);
-        when(blueprint2.getId()).thenReturn(2L);
-        when(blueprintService.findAllByWorkspaceIdWithServiceTypesPresent(WORKSPACE_ID, serviceTypes)).thenReturn(Set.of(blueprint2));
-        StackViewV4Response stackViewV4Response1 = mock(StackViewV4Response.class);
-        ClusterViewV4Response clusterViewV4Response1 = mock(ClusterViewV4Response.class);
-        BlueprintV4ViewResponse blueprintV4ViewResponse1 = mock(BlueprintV4ViewResponse.class);
-        when(blueprintV4ViewResponse1.getId()).thenReturn(1L);
-        when(clusterViewV4Response1.getBlueprint()).thenReturn(blueprintV4ViewResponse1);
-        when(stackViewV4Response1.getCluster()).thenReturn(clusterViewV4Response1);
-        StackViewV4Response stackViewV4Response2 = mock(StackViewV4Response.class);
-        ClusterViewV4Response clusterViewV4Response2 = mock(ClusterViewV4Response.class);
-        BlueprintV4ViewResponse blueprintV4ViewResponse2 = mock(BlueprintV4ViewResponse.class);
-        when(blueprintV4ViewResponse2.getId()).thenReturn(2L);
-        when(clusterViewV4Response2.getBlueprint()).thenReturn(blueprintV4ViewResponse2);
-        when(stackViewV4Response2.getCluster()).thenReturn(clusterViewV4Response2);
-        Set<StackViewV4Response> stackViewV4Responses = Set.of(stackViewV4Response1, stackViewV4Response2);
+        StackViewV4Response stackViewV4Response1 = getStackViewV4Response("crn1");
+        StackViewV4Response stackViewV4Response2 = getStackViewV4Response("crn2");
+        StackViewV4Response stackViewV4Response3 = getStackViewV4Response("crn3");
+        StackViewV4Response stackViewV4Response4 = getStackViewV4Response("crn4");
+        Set<StackViewV4Response> stackViewV4Responses = Set.of(stackViewV4Response1, stackViewV4Response2, stackViewV4Response3, stackViewV4Response4);
+        StackDto stackDto1 = getStackDto("crn1", "blueprint1");
+        StackDto stackDto2 = getStackDto("crn2", "blueprint2");
+        StackDto stackDto3 = getStackDto("crn3", "blueprint1");
+        StackDto stackDto4 = getStackDto("crn4", "blueprint2");
+        when(stackDtoService.findAllByResourceCrnInWithoutResources(anyList())).thenReturn(List.of(stackDto1, stackDto2, stackDto3, stackDto4));
+        when(blueprintService.anyOfTheServiceTypesPresentOnBlueprint("blueprint1", serviceTypes)).thenReturn(false);
+        when(blueprintService.anyOfTheServiceTypesPresentOnBlueprint("blueprint2", serviceTypes)).thenReturn(true);
 
-        Set<StackViewV4Response> result = underTest.filterByServiceTypesPresent(WORKSPACE_ID, stackViewV4Responses, serviceTypes);
+        Set<StackViewV4Response> result = underTest.filterByServiceTypesPresent(stackViewV4Responses, serviceTypes);
 
-        assertThat(result).containsExactlyInAnyOrder(stackViewV4Response2);
+        verify(stackDtoService).findAllByResourceCrnInWithoutResources(stringListCaptor.capture());
+        assertThat(stringListCaptor.getValue()).containsExactlyInAnyOrder("crn1", "crn2", "crn3", "crn4");
+        assertThat(result).containsExactlyInAnyOrder(stackViewV4Response2, stackViewV4Response4);
+    }
+
+    private static StackViewV4Response getStackViewV4Response(String resourceCrn) {
+        StackViewV4Response stackViewV4Response = mock(StackViewV4Response.class);
+        when(stackViewV4Response.getCrn()).thenReturn(resourceCrn);
+        return stackViewV4Response;
+    }
+
+    private StackDto getStackDto(String resourceCrn, String blueprintJsonText) {
+        StackDto stackDto = mock();
+        lenient().when(stackDto.getResourceCrn()).thenReturn(resourceCrn);
+        when(stackDto.getBlueprintJsonText()).thenReturn(blueprintJsonText);
+        return stackDto;
     }
 
 }

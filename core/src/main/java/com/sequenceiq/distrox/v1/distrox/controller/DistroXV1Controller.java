@@ -211,7 +211,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         if (!CollectionUtils.isEmpty(serviceTypes)) {
             Set<StackViewV4Response> stackViewV4Responses = new HashSet<>(
                     dataHubFiltering.filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), DESCRIBE_DATAHUB, Map.of()).getResponses());
-            result = stackOperations.filterByServiceTypesPresent(getWorkspaceIdForCurrentUser(), stackViewV4Responses, serviceTypes);
+            result = stackOperations.filterByServiceTypesPresent(stackViewV4Responses, serviceTypes);
         }
         return new StackViewV4Responses(result);
     }

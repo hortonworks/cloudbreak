@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -115,7 +116,7 @@ class StackDtoServiceTest {
     private AvailabilityZoneView az2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(stackViewDelegate.getId()).thenReturn(ID1);
         when(clusterViewDelegate.getId()).thenReturn(ID1);
 
@@ -133,7 +134,7 @@ class StackDtoServiceTest {
     }
 
     @Test
-    public void testGetByName() {
+    void testGetByName() {
         when(stackDtoRepository.findByName("account1", "stack1")).thenReturn(Optional.of(stackViewDelegate));
         when(clusterDtoRepository.findByStackId(anyLong())).thenReturn(Optional.of(clusterViewDelegate));
         when(workspaceService.getByIdWithoutAuth(any())).thenReturn(new Workspace());
@@ -156,7 +157,7 @@ class StackDtoServiceTest {
     }
 
     @Test
-    public void testGetInstanceMetadataByInstanceGroup() {
+    void testGetInstanceMetadataByInstanceGroup() {
         when(instanceGroupService.getInstanceGroupViewByStackId(anyLong())).thenReturn(List.of(group1, group2));
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instance1, instance2));
 
@@ -170,7 +171,7 @@ class StackDtoServiceTest {
     }
 
     @Test
-    public void testGetSdxBasicView() {
+    void testGetSdxBasicView() {
         when(stackDtoRepository.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(stackViewDelegate));
         when(clusterDtoRepository.findByStackId(anyLong())).thenReturn(Optional.of(clusterViewDelegate));
         when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.18"));
@@ -183,7 +184,7 @@ class StackDtoServiceTest {
     }
 
     @Test
-    public void testGetSdxBasicViewReturnsInTheCorrectOrder() {
+    void testGetSdxBasicViewReturnsInTheCorrectOrder() {
         StackViewDelegate stack1 = mock(StackViewDelegate.class);
         StackViewDelegate stack2 = mock(StackViewDelegate.class);
         StackViewDelegate stack3 = mock(StackViewDelegate.class);
@@ -201,5 +202,18 @@ class StackDtoServiceTest {
 
         assertTrue(sdx.isPresent());
         assertEquals("stack2", sdx.get().name());
+    }
+
+    @Test
+    void testFindAllByResourceCrnInWithoutResources() {
+        when(stackViewDelegate.getResourceCrn()).thenReturn("crn1");
+        when(stackDtoRepository.findAllByResourceCrnIn(List.of("crn1"))).thenReturn(List.of(stackViewDelegate));
+        when(clusterDtoRepository.findByStackId(anyLong())).thenReturn(Optional.of(clusterViewDelegate));
+        when(workspaceService.getByIdWithoutAuth(any())).thenReturn(new Workspace());
+
+        List<StackDto> result = underTest.findAllByResourceCrnInWithoutResources(List.of("crn1"));
+
+        verifyNoInteractions(resourceService);
+        assertEquals("crn1", result.getFirst().getResourceCrn());
     }
 }

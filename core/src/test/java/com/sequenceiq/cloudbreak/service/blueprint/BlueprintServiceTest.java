@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.StringContains.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -340,7 +340,7 @@ class BlueprintServiceTest {
         try {
             underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Three", getWorkspace());
         } catch (NotFoundException e) {
-            assertThat(e.getMessage(), containsString("Three"));
+            assertThat(e.getMessage()).containsSequence("Three");
         }
 
         verify(blueprintRepository).findByNameAndWorkspaceId("Three", 1L);
@@ -574,26 +574,18 @@ class BlueprintServiceTest {
     }
 
     @Test
-    void testFindAllByWorkspaceIdWithServiceTypesPresent() {
-        Blueprint blueprint1 = mock(Blueprint.class);
-        when(blueprint1.getBlueprintJsonText()).thenReturn("blueprint1");
-        when(cmTemplateProcessorFactory.get("blueprint1")).thenReturn(mock(CmTemplateProcessor.class));
-        Blueprint blueprint2 = mock(Blueprint.class);
-        when(blueprint2.getBlueprintJsonText()).thenReturn("blueprint2");
-        CmTemplateProcessor cmTemplateProcessor2 = mock(CmTemplateProcessor.class);
+    void testAnyOfTheServiceTypesPresentOnBlueprint() {
+        when(cmTemplateProcessorFactory.get("blueprint1")).thenReturn(mock());
+        CmTemplateProcessor cmTemplateProcessor2 = mock();
         when(cmTemplateProcessor2.isServiceTypePresent("HIVE")).thenReturn(false);
         when(cmTemplateProcessor2.isServiceTypePresent("HBASE")).thenReturn(true);
         when(cmTemplateProcessorFactory.get("blueprint2")).thenReturn(cmTemplateProcessor2);
-        Blueprint blueprint3 = mock(Blueprint.class);
-        when(blueprint3.getBlueprintJsonText()).thenReturn("blueprint3");
         when(cmTemplateProcessorFactory.get("blueprint3")).thenThrow(BlueprintProcessingException.class);
-        Set<Blueprint> blueprintsInDB = Set.of(blueprint1, blueprint2, blueprint3);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintsInDB);
 
-        Set<Blueprint> result = underTest.findAllByWorkspaceIdWithServiceTypesPresent(1L, List.of("HIVE", "HBASE"));
 
-        assertEquals(1, result.size());
-        assertEquals(blueprint2, result.stream().findFirst().get());
+        assertFalse(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint1", List.of("HIVE", "HBASE")));
+        assertTrue(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint2", List.of("HIVE", "HBASE")));
+        assertFalse(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint3", List.of("HIVE", "HBASE")));
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, DetailedStackStatus detailedStackStatus) {

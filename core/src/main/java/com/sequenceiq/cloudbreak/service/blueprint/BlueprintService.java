@@ -279,19 +279,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspaceWithoutUpdate(workspace);
     }
 
-    @Measure(BlueprintService.class)
-    public Set<Blueprint> findAllByWorkspaceIdWithServiceTypesPresent(Long workspaceId, List<String> serviceTypes) {
-        return findAllByWorkspaceIdWithoutUpdate(workspaceId).stream()
-                .filter(b -> {
-                    try {
-                        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(b.getBlueprintJsonText());
-                        return serviceTypes.stream().anyMatch(cmTemplateProcessor::isServiceTypePresent);
-                    } catch (BlueprintProcessingException e) {
-                        LOGGER.warn("Failed to process blueprint with id: {}", b.getId(), e);
-                        return false;
-                    }
-                })
-                .collect(Collectors.toSet());
+    public boolean anyOfTheServiceTypesPresentOnBlueprint(String blueprintText, List<String> serviceTypes) {
+        try {
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
+            return serviceTypes.stream().anyMatch(cmTemplateProcessor::isServiceTypePresent);
+        } catch (BlueprintProcessingException e) {
+            LOGGER.warn("Failed to process blueprint.", e);
+            return false;
+        }
     }
 
     @Measure(BlueprintService.class)
@@ -312,6 +307,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspaceWithoutUpdate(workspace);
     }
 
+    @Measure(BlueprintService.class)
     public Set<Blueprint> getAllAvailableInWorkspaceWithoutUpdate(Workspace workspace) {
         return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
