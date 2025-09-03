@@ -6,11 +6,11 @@ import static com.sequenceiq.periscope.api.model.ActivityStatus.SCALING_FLOW_SUC
 import static com.sequenceiq.periscope.api.model.ActivityStatus.UPSCALE_TRIGGER_SUCCESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +27,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -37,6 +40,7 @@ import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.ScalingActivity;
+import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.repository.ScalingActivityRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +52,8 @@ class ScalingActivityServiceTest {
 
     private static final String TEST_ACTIVITY_REASON = "triggerReason";
 
+    private static final String TEST_TENANT = "tenant";
+
     private static final String TEST_ACTIVITY_REASON_2 = "triggerReason2";
 
     private static final String TEST_FLOW_ID = "36d52d56-bcc7-434a-8468-1d2d66eba0a9";
@@ -58,13 +64,8 @@ class ScalingActivityServiceTest {
 
     private static final String CLOUDBREAK_STACK_NAME = "testCluster";
 
-    private static final String TEST_TENANT = "tenant";
-
     @InjectMocks
     private ScalingActivityService underTest;
-
-    @Mock
-    private ClusterService clusterService;
 
     @Mock
     private ScalingActivityRepository scalingActivityRepository;
@@ -76,6 +77,12 @@ class ScalingActivityServiceTest {
     private PeriscopeMetricService metricService;
 
     @Mock
+    private ClusterService clusterService;
+
+    @Mock
+    private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Mock
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Captor
@@ -85,12 +92,14 @@ class ScalingActivityServiceTest {
     void testGetResourceCrnByResourceName() {
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(TEST_TENANT);
         when(clusterService.findOneByStackNameAndTenant(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
-                underTest.getResourceCrnByResourceName(CLOUDBREAK_STACK_NAME)));
-
+        AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(autoscaleStackV4Response);
+        when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.AVAILABLE);
         Cluster cluster = getCluster();
+        when(clusterService.create(autoscaleStackV4Response)).thenReturn(cluster);
+
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
-        when(clusterService.findOneByStackNameAndTenant(CLOUDBREAK_STACK_NAME, TEST_TENANT)).thenReturn(Optional.of(cluster));
         assertEquals(CLOUDBREAK_STACK_CRN, ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnByResourceName(CLOUDBREAK_STACK_NAME)));
     }
