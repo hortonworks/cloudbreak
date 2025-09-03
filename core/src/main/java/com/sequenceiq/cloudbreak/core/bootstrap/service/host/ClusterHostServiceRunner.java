@@ -938,6 +938,7 @@ public class ClusterHostServiceRunner {
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMaster());
             gateway.put("envAccessGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS));
+            gateway.put("knoxAdminGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN));
             gateway.put("autoscaleMachineUser", CrnEncoder.generateMd5EncodedAutoscaleMachineUser(stackDto.getEnvironmentCrn(), true));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway, stackDto.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
