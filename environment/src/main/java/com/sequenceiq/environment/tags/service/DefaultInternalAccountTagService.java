@@ -27,17 +27,13 @@ import com.sequenceiq.environment.tags.domain.AccountTag;
 @Service
 public class DefaultInternalAccountTagService {
 
-    static final String DEFAULT_KEY_ACCOUNT_TAG_PATTERN = "^(?!microsoft|azure|windows|\\s)[a-z\\{][a-zA-Z0-9\\{\\-\\_\\}]*[a-zA-Z0-9}]$";
-
-    static final String DEFAULT_VALUE_ACCOUNT_TAG_PATTERN = "^[^\\s][a-zA-Z0-9\\{\\-\\_\\}]*[a-zA-Z0-9\\-\\_\\}]$";
-
-    @Value("${cb.account.tag.validator.key:" + DEFAULT_KEY_ACCOUNT_TAG_PATTERN)
+    @Value("${environment.account.tag.validator.key}")
     private String keyAccountTagPattern;
 
-    @Value("${cb.account.tag.validator.value:" + DEFAULT_VALUE_ACCOUNT_TAG_PATTERN)
+    @Value("${environment.account.tag.validator.value}")
     private String valueAccountValueTagPattern;
 
-    @Value("${env.apply.internal.tags:true}")
+    @Value("${environment.apply.internal.tags:true}")
     private boolean applyInternalTags;
 
     private AccountTagResponses internalAccountTagResponses;

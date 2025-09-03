@@ -1,6 +1,6 @@
 {%- set local_backup_dir = salt['pillar.get']('backup_restore_config:temp_backup_dir', '/var/tmp') %}
 
- include:
+include:
   - datalake_metrics.get_free_space
 
 get_free_space:

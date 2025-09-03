@@ -1,10 +1,10 @@
 package com.sequenceiq.periscope.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -19,8 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
@@ -43,8 +45,6 @@ class YarnRecommendationServiceTest {
 
     private static final String TEST_CLUSTERCRN = "testCrn";
 
-    private static final String TEST_CLUSTER_NAME = "testName";
-
     private static final String TEST_MACHINE_USER_CRN = "testMachineUserCrn";
 
     private static final String TEST_ACCOUNT_ID = "accid";
@@ -60,6 +60,8 @@ class YarnRecommendationServiceTest {
     private static final Integer CONNECTION_TIME = 5000;
 
     private static final Integer READ_TIME = 10000;
+
+    private static final String TEST_CLUSTER_NAME = "testName";
 
     private String tenant = "testTenant";
 
@@ -91,11 +93,13 @@ class YarnRecommendationServiceTest {
     void testGetResourceCrnByResourceName() {
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
-                underTest.getResourceCrnByResourceName(TEST_CLUSTER_NAME)));
-
+        AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenReturn(autoscaleStackV4Response);
+        when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.AVAILABLE);
         Cluster cluster = getACluster();
-        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.of(cluster));
+        when(clusterService.create(autoscaleStackV4Response)).thenReturn(cluster);
+
         assertEquals(TEST_CLUSTERCRN, ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnByResourceName(TEST_CLUSTER_NAME)));
     }

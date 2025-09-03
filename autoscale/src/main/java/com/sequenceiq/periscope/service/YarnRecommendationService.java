@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +18,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -61,12 +64,20 @@ public class YarnRecommendationService implements AuthorizationResourceCrnProvid
     @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
         return clusterService.findOneByStackNameAndTenant(clusterName, restRequestThreadLocalService.getCloudbreakTenant())
-                .orElseThrow(NotFoundException.notFound("Cluster", clusterName)).getStackCrn();
+                .orElseGet(() -> fetchClusterFromCBUsingName(clusterName)).getStackCrn();
     }
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
         return clusterService.findOneByStackCrnAndTenant(resourceCrn, restRequestThreadLocalService.getCloudbreakTenant()).map(Cluster::getEnvironmentCrn);
+    }
+
+    protected Cluster fetchClusterFromCBUsingName(String stackName) {
+        String accountId = restRequestThreadLocalService.getCloudbreakTenant();
+        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
+                .filter(stack -> WORKLOAD.equals(stack.getStackType()) && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
+                .map(stack -> clusterService.create(stack))
+                .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
 
     public List<String> getRecommendationFromYarn(String clusterCrn) throws Exception {
