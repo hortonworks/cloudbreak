@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.RDS_CONFIG_PASSWORD;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.RDS_CONFIG_USERNAME;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,6 +26,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
 import com.sequenceiq.cloudbreak.domain.converter.RdsSslModeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -146,6 +151,7 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         return connectionUserName.getRaw();
     }
 
+    @SecretGetter(marker = RDS_CONFIG_USERNAME)
     public String getConnectionUserNameSecret() {
         return connectionUserName.getSecret();
     }
@@ -154,6 +160,7 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         this.connectionUserName = new Secret(connectionUserName);
     }
 
+    @SecretSetter(marker = RDS_CONFIG_USERNAME)
     public void setConnectionUserNameSecret(Secret connectionUserName) {
         this.connectionUserName = connectionUserName;
     }
@@ -162,6 +169,7 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         return connectionPassword.getRaw();
     }
 
+    @SecretGetter(marker = RDS_CONFIG_PASSWORD)
     public String getConnectionPasswordSecret() {
         return connectionPassword.getSecret();
     }
@@ -174,6 +182,7 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         this.connectionPassword = new Secret(connectionPassword);
     }
 
+    @SecretSetter(marker = RDS_CONFIG_PASSWORD)
     public void setConnectionPasswordSecret(Secret connectionPassword) {
         this.connectionPassword = connectionPassword;
     }

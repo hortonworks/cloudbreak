@@ -1,5 +1,10 @@
 package com.sequenceiq.freeipa.entity;
 
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.SALT_BOOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.SALT_BOOT_SIGN_PRIVATE_KEY;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.SALT_MASTER_PRIVATE_KEY;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.SALT_SIGN_PRIVATE_KEY;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -11,6 +16,9 @@ import jakarta.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -110,6 +118,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltPasswordVault.getRaw();
     }
 
+    @SecretSetter(marker = SecretMarker.SALT_PASSWORD)
     public void setSaltPasswordVault(Secret saltPasswordVault) {
         this.saltPasswordVault = saltPasswordVault;
     }
@@ -118,6 +127,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltPasswordVault = new Secret(saltPasswordVault);
     }
 
+    @SecretGetter(marker = SecretMarker.SALT_PASSWORD)
     public String getSaltPasswordVaultSecret() {
         return saltPasswordVault.getSecret();
     }
@@ -151,10 +161,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltSignPrivateKeyVault = new Secret(saltSignPrivateKeyVault);
     }
 
+    @SecretSetter(marker = SALT_SIGN_PRIVATE_KEY)
     public void setSaltSignPrivateKeyVault(Secret saltSignPrivateKeyVault) {
         this.saltSignPrivateKeyVault = saltSignPrivateKeyVault;
     }
 
+    @SecretGetter(marker = SALT_SIGN_PRIVATE_KEY)
     public String getSaltSignPrivateKeyVaultSecret() {
         return saltSignPrivateKeyVault.getSecret();
     }
@@ -184,6 +196,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltMasterPrivateKeyVault.getRaw();
     }
 
+    @SecretSetter(marker = SALT_MASTER_PRIVATE_KEY)
     public void setSaltMasterPrivateKeyVault(Secret saltMasterPrivateKeyVault) {
         this.saltMasterPrivateKeyVault = saltMasterPrivateKeyVault;
     }
@@ -192,6 +205,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltMasterPrivateKeyVault = new Secret(saltMasterPrivateKeyVault);
     }
 
+    @SecretGetter(marker = SALT_MASTER_PRIVATE_KEY)
     public String getSaltMasterPrivateKeyVaultSecret() {
         return saltMasterPrivateKeyVault.getSecret();
     }
@@ -200,6 +214,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltBootPasswordVault.getRaw();
     }
 
+    @SecretSetter(marker = SALT_BOOT_PASSWORD)
     public void setSaltBootPasswordVault(Secret saltBootPasswordVault) {
         this.saltBootPasswordVault = saltBootPasswordVault;
     }
@@ -208,6 +223,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltBootPasswordVault = new Secret(saltBootPasswordVault);
     }
 
+    @SecretGetter(marker = SALT_BOOT_PASSWORD)
     public String getSaltBootPasswordVaultSecret() {
         return saltBootPasswordVault.getSecret();
     }
@@ -216,6 +232,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltBootSignPrivateKeyVault.getRaw();
     }
 
+    @SecretSetter(marker = SALT_BOOT_SIGN_PRIVATE_KEY)
     public void setSaltBootSignPrivateKeyVault(Secret saltBootSignPrivateKeyVault) {
         this.saltBootSignPrivateKeyVault = saltBootSignPrivateKeyVault;
     }
@@ -224,6 +241,7 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltBootSignPrivateKeyVault = new Secret(saltBootSignPrivateKeyVault);
     }
 
+    @SecretGetter(marker = SALT_BOOT_SIGN_PRIVATE_KEY)
     public String getSaltBootSignPrivateKeyVaultSecret() {
         return saltBootSignPrivateKeyVault.getSecret();
     }

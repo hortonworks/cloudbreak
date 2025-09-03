@@ -11,11 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Transactional(Transactional.TxType.REQUIRED)
-public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobResourceRepository<DBStack, Long> {
+public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobResourceRepository<DBStack, Long>, VaultRotationAwareRepository {
 
     Optional<DBStack> findByNameAndEnvironmentId(String name, String environmentId);
 
@@ -36,4 +37,9 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobReso
             "FROM DBStack d " +
             "WHERE d.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Override
+    default Class<DBStack> getEntityClass() {
+        return DBStack.class;
+    }
 }

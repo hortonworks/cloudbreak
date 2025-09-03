@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
@@ -25,8 +23,7 @@ import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyReRegisterRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -37,9 +34,6 @@ public class CBCMAdminPasswordRotationContextProvider implements RotationContext
     private static final String CB_USER_PREFIX = "cb";
 
     private static final String MGMT_USER_PREFIX = "mgmt";
-
-    @Inject
-    private StackDtoService stackService;
 
     @Inject
     private ClusterService clusterService;
@@ -55,27 +49,14 @@ public class CBCMAdminPasswordRotationContextProvider implements RotationContext
         String newMgmtUser = MGMT_USER_PREFIX + new SimpleDateFormat(DATETIMEFORMAT).format(new Date());
         String newMgmtPassword = PasswordUtil.generatePassword();
 
-        Map<String, String> newSecretMap = Maps.newHashMap();
-        newSecretMap.put(cluster.getCloudbreakClusterManagerUserSecretObject().getSecret(), newCbUser);
-        newSecretMap.put(cluster.getCloudbreakClusterManagerPasswordSecretObject().getSecret(), newCbPassword);
-        newSecretMap.put(cluster.getDpClusterManagerUserSecret().getSecret(), newMgmtUser);
-        newSecretMap.put(cluster.getDpClusterManagerPasswordSecret().getSecret(), newMgmtPassword);
-
-        Map<String, Consumer<String>> secretUpdaterMap = Maps.newHashMap();
-        secretUpdaterMap.put(cluster.getCloudbreakClusterManagerUserSecretObject().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerUserSecret(new SecretProxy(vaultSecretJson)));
-        secretUpdaterMap.put(cluster.getCloudbreakClusterManagerPasswordSecretObject().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerPasswordSecret(new SecretProxy(vaultSecretJson)));
-        secretUpdaterMap.put(cluster.getDpClusterManagerUserSecret().getSecret(),
-                vaultSecretJson -> cluster.setDpClusterManagerUserSecret(new SecretProxy(vaultSecretJson)));
-        secretUpdaterMap.put(cluster.getDpClusterManagerPasswordSecret().getSecret(),
-                vaultSecretJson -> cluster.setDpClusterManagerPasswordSecret(new SecretProxy(vaultSecretJson)));
-
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
-                .withEntitySaverList(List.of(() -> clusterService.save(cluster)))
+                .withNewSecretMap(Map.of(cluster, Map.of(
+                        SecretMarker.CB_CLUSTER_MANAGER_USER, newCbUser,
+                        SecretMarker.CB_CLUSTER_MANAGER_PASSWORD, newCbPassword,
+                        SecretMarker.DP_CLUSTER_MANAGER_USER, newMgmtUser,
+                        SecretMarker.DP_CLUSTER_MANAGER_PASSWORD, newMgmtPassword
+                )))
                 .build();
 
         CMUserRotationContext cmUserRotationContext = CMUserRotationContext.builder()

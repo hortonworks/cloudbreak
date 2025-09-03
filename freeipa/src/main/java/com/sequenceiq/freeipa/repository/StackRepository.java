@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepos
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -30,7 +31,7 @@ import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 
 @Transactional(REQUIRED)
 @EntityType(entityClass = Stack.class)
-public interface StackRepository extends AccountAwareResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
+public interface StackRepository extends AccountAwareResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long>, VaultRotationAwareRepository {
 
     @Override
     @Query("SELECT s FROM Stack s WHERE s.id = :id")
@@ -209,5 +210,10 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :id")
     Optional<String> findEnvironmentCrnByStackId(@Param("id") Long id);
+
+    @Override
+    default Class<Stack> getEntityClass() {
+        return Stack.class;
+    }
 
 }

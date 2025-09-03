@@ -15,6 +15,9 @@ import jakarta.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -209,6 +212,7 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountAwar
         return bindPassword.getRaw();
     }
 
+    @SecretGetter(marker = SecretMarker.LDAP_CONFIG_BIND_PWD)
     public String getBindPasswordSecret() {
         return bindPassword.getSecret();
     }
@@ -217,6 +221,7 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountAwar
         this.bindPassword = new Secret(bindPassword);
     }
 
+    @SecretSetter(marker = SecretMarker.LDAP_CONFIG_BIND_PWD)
     public void setBindPasswordSecret(Secret bindPassword) {
         this.bindPassword = bindPassword;
     }

@@ -25,6 +25,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -203,6 +206,7 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
         return connectionPassword.getRaw();
     }
 
+    @SecretGetter(marker = SecretMarker.DBSERVER_CONFIG_ROOT_PWD)
     public String getConnectionPasswordSecret() {
         return connectionPassword.getSecret();
     }
@@ -211,6 +215,7 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
         this.connectionPassword = new Secret(connectionPassword);
     }
 
+    @SecretSetter(marker = SecretMarker.DBSERVER_CONFIG_ROOT_PWD)
     public void setConnectionPasswordSecret(Secret connectionPassword) {
         this.connectionPassword = connectionPassword;
     }

@@ -8,8 +8,10 @@ import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
+
 @Transactional(TxType.REQUIRED)
-public interface KerberosConfigRepository extends JpaRepository<KerberosConfig, Long> {
+public interface KerberosConfigRepository extends JpaRepository<KerberosConfig, Long>, VaultRotationAwareRepository {
 
     Optional<KerberosConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(String accountId, String environmentCrn);
 
@@ -18,4 +20,9 @@ public interface KerberosConfigRepository extends JpaRepository<KerberosConfig, 
     List<KerberosConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
 
     Optional<KerberosConfig> findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(String accountId, String environmentCrn, String clusterName);
+
+    @Override
+    default Class<KerberosConfig> getEntityClass() {
+        return KerberosConfig.class;
+    }
 }

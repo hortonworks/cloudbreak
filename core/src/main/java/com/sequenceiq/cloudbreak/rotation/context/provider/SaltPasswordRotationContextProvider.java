@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -26,8 +25,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
-import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -48,20 +46,13 @@ public class SaltPasswordRotationContextProvider implements RotationContextProvi
     @Inject
     private SecretRotationSaltService secretRotationSaltService;
 
-    @Inject
-    private SaltSecurityConfigService saltSecurityConfigService;
-
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        Map<String, String> newSecretMap = Map.of(saltSecurityConfig.getSaltPasswordSecret(), PasswordUtil.generatePassword());
         return Map.of(VAULT, VaultRotationContext.builder()
                         .withResourceCrn(resourceCrn)
-                        .withNewSecretMap(newSecretMap)
-                        .withEntitySaverList(List.of(() -> saltSecurityConfigService.save(saltSecurityConfig)))
-                        .withEntitySecretFieldUpdaterMap(Map.of(saltSecurityConfig.getSaltPasswordSecret(),
-                                vaultSecretJson -> saltSecurityConfig.setSaltPasswordSecret(new SecretProxy(vaultSecretJson))))
+                        .withNewSecretMap(Map.of(saltSecurityConfig, Map.of(SecretMarker.SALT_PASSWORD, PasswordUtil.generatePassword())))
                         .build(),
                 CUSTOM_JOB, getCustomJobRotationContext(stack));
     }

@@ -8,8 +8,10 @@ import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
+
 @Transactional(TxType.REQUIRED)
-public interface LdapConfigRepository extends JpaRepository<LdapConfig, Long> {
+public interface LdapConfigRepository extends JpaRepository<LdapConfig, Long>, VaultRotationAwareRepository {
 
     Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(String accountId, String environmentCrn);
 
@@ -18,4 +20,9 @@ public interface LdapConfigRepository extends JpaRepository<LdapConfig, Long> {
     List<LdapConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
 
     Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(String accountId, String environmentCrn, String clusterName);
+
+    @Override
+    default Class<LdapConfig> getEntityClass() {
+        return LdapConfig.class;
+    }
 }

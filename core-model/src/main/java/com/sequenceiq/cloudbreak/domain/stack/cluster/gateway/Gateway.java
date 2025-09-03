@@ -26,6 +26,9 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.GatewayTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.SSOTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -190,16 +193,19 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.GATEWAY_SIGN_KEY)
     public Secret getSignKeySecret() {
         return signKey;
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.GATEWAY_SIGN_CERT)
     public Secret getSignCertSecret() {
         return signCertSecret;
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.GATEWAY_SIGN_PUB)
     public Secret getSignPubSecret() {
         return signPubSecret;
     }
@@ -243,6 +249,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.signKey = new Secret(signKey);
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_SIGN_KEY)
     public void setSignKeySecret(Secret signKey) {
         this.signKey = signKey;
     }
@@ -259,6 +266,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_SIGN_CERT)
     public void setSignCertSecret(Secret signCert) {
         if (signCert != null) {
             this.signCertSecret = signCert;
@@ -277,6 +285,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_SIGN_PUB)
     public void setSignPubSecret(Secret signPub) {
         if (signPub != null) {
             this.signPubSecret = signPub;
@@ -294,6 +303,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.tokenCert = tokenCert;
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_TOKEN_CERT)
     public void setTokenCertSecretJson(Secret tokenCert) {
         this.tokenCert = tokenCert.getRaw();
         this.tokenCertSecret = tokenCert;
@@ -305,6 +315,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_TOKEN_KEY)
     public void setTokenKeySecretJson(Secret tokenPrivateKey) {
         if (tokenPrivateKey != null) {
             this.tokenKeySecret = tokenPrivateKey;
@@ -317,6 +328,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
+    @SecretSetter(marker = SecretMarker.GATEWAY_TOKEN_PUB)
     public void setTokenPubSecretJson(Secret tokenPublicKey) {
         if (tokenPublicKey != null) {
             this.tokenPubSecret = tokenPublicKey;
@@ -329,6 +341,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
+    @SecretGetter(marker = SecretMarker.GATEWAY_TOKEN_CERT)
     public Secret getTokenCertSecret() {
         return tokenCertSecret;
     }
@@ -338,10 +351,12 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         return tokenCert;
     }
 
+    @SecretGetter(marker = SecretMarker.GATEWAY_TOKEN_PUB)
     public Secret getTokenPubSecret() {
         return tokenPubSecret;
     }
 
+    @SecretGetter(marker = SecretMarker.GATEWAY_TOKEN_KEY)
     public Secret getTokenKeySecret() {
         return tokenKeySecret;
     }

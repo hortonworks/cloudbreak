@@ -13,13 +13,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.RedbeamsResourceCrnAndNameView;
 
 @EntityType(entityClass = DatabaseServerConfig.class)
 @Transactional(TxType.REQUIRED)
-public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseServerConfig, Long> {
+public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseServerConfig, Long>, VaultRotationAwareRepository {
 
     Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
 
@@ -52,4 +53,9 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
     List<Crn> findResourceCrnsByNames(@Param("names") Collection<String> names);
 
     List<DatabaseServerConfig> findByEnvironmentIdAndClusterCrn(String environmentId, String clusterCrn);
+
+    @Override
+    default Class<DatabaseServerConfig> getEntityClass() {
+        return DatabaseServerConfig.class;
+    }
 }

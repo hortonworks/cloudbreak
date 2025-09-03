@@ -44,6 +44,9 @@ import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -391,6 +394,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         return getIfNotNull(cdpNodeStatusMonitorPassword, Secret::getRaw);
     }
 
+    @SecretGetter(marker = SecretMarker.NODE_STATUS_MONITOR_PWD)
     public Secret getCdpNodeStatusMonitorPasswordSecret() {
         return cdpNodeStatusMonitorPassword;
     }
@@ -399,6 +403,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
     }
 
+    @SecretSetter(marker = SecretMarker.NODE_STATUS_MONITOR_PWD)
     public void setCdpNodeStatusMonitorPasswordSecret(Secret cdpNodeStatusMonitorPassword) {
         this.cdpNodeStatusMonitorPassword = cdpNodeStatusMonitorPassword;
     }

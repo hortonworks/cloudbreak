@@ -17,13 +17,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BaseBlueprintClusterView;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
-public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long>, JpaRepository<Cluster, Long> {
+public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long>, JpaRepository<Cluster, Long>, VaultRotationAwareRepository {
 
     @Override
     Cluster save(Cluster entity);
@@ -117,4 +118,9 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     void updateDbSslCert(@Param("clusterId") Long clusterId,
             @Param("dbSslRootCertBundle") String dbSslRootCertBundle,
             @Param("dbSslEnabled") Boolean dbSslEnabled);
+
+    @Override
+    default Class<Cluster> getEntityClass() {
+        return Cluster.class;
+    }
 }

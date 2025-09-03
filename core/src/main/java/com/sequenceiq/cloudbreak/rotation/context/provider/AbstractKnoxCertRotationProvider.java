@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceRoleRestartRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -50,16 +48,6 @@ public abstract class AbstractKnoxCertRotationProvider implements RotationContex
 
     private Set<String> collectNodes(StackDto stack) {
         return stack.getRunningInstanceMetaDataSet().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
-    }
-
-    protected RotationContext getVaultRotationContext(String resourceCrn, Map<String, String> newSecrets, List<Runnable> entitySavers,
-            Map<String, Consumer<String>> secretUpdaterMap) {
-        return VaultRotationContext.builder()
-                .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecrets)
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
-                .withEntitySaverList(entitySavers)
-                .build();
     }
 
     protected RotationContext getSaltPillarRotationContext(String resourceCrn, SaltPillarProperties pillarProperties) {

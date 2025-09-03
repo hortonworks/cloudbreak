@@ -8,8 +8,8 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -30,11 +30,12 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyUpdateConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
 import com.sequenceiq.cloudbreak.service.TokenCertInfo;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -71,16 +72,12 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
         validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getTokenKeySecret().getSecret());
 
-        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(),
-                getGatewaySignSecretMap(stack.getStack(), readConfigResponse, fullGateway, newGatewaySecrets),
-                List.of(() -> gatewayService.save(fullGateway)),
-                Map.of(fullGateway.getSignKeySecret().getSecret(), vaultSecretJson -> fullGateway.setSignKeySecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getSignPubSecret().getSecret(), vaultSecretJson -> fullGateway.setSignPubSecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getSignCertSecret().getSecret(), vaultSecretJson -> fullGateway.setSignCertSecret(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenCertSecret().getSecret(), vaultSecretJson -> fullGateway.setTokenCertSecretJson(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenPubSecret().getSecret(), vaultSecretJson -> fullGateway.setTokenPubSecretJson(new SecretProxy(vaultSecretJson)),
-                        fullGateway.getTokenKeySecret().getSecret(), vaultSecretJson -> fullGateway.setTokenKeySecretJson(new SecretProxy(vaultSecretJson))
-                )));
+        VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
+                .withResourceCrn(stack.getResourceCrn())
+                .withNewSecretMap(getGatewaySignSecretMap(stack.getStack(), readConfigResponse, fullGateway, newGatewaySecrets))
+                .build();
+
+        result.put(VAULT, vaultRotationContext);
         result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), fullGateway, stack));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
         result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway));
@@ -97,23 +94,25 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         return StringUtils.isNotBlank(readConfigResponse.getKnoxSecretRef());
     }
 
-    private Map<String, String> getGatewaySignSecretMap(StackView stack, ReadConfigResponse readConfigResponse,
-            GatewayView gateway, GatewayView newGatewaySecrets) {
-        Map<String, String> result = new HashMap<>();
-        Map<String, String> signSecretMap = Map.of(gateway.getSignKeySecret().getSecret(), newGatewaySecrets.getSignKey(),
-                gateway.getSignPubSecret().getSecret(), newGatewaySecrets.getSignPub(),
-                gateway.getSignCertSecret().getSecret(), newGatewaySecrets.getSignCert());
+    private Map<Gateway, Map<SecretMarker, String>> getGatewaySignSecretMap(StackView stack, ReadConfigResponse readConfigResponse,
+            Gateway fullGateway, GatewayView newGatewaySecrets) {
+        Map<SecretMarker, String> result = new EnumMap<>(SecretMarker.class);
+        Map<SecretMarker, String> signSecretMap = Map.of(
+                SecretMarker.GATEWAY_SIGN_KEY, newGatewaySecrets.getSignKey(),
+                SecretMarker.GATEWAY_SIGN_PUB, newGatewaySecrets.getSignPub(),
+                SecretMarker.GATEWAY_SIGN_CERT, newGatewaySecrets.getSignCert());
 
-        Map<String, String> tokenSecretMap = Collections.emptyMap();
+        Map<SecretMarker, String> tokenSecretMap = Collections.emptyMap();
         if (shouldGenerateNewTokenCert(readConfigResponse)) {
             TokenCertInfo tokenCertInfo = clusterProxyRotationService.generateTokenCert();
-            tokenSecretMap = Map.of(gateway.getTokenCertSecret().getSecret(), tokenCertInfo.base64DerCert(),
-                    gateway.getTokenPubSecret().getSecret(), tokenCertInfo.publicKey(),
-                    gateway.getTokenKeySecret().getSecret(), tokenCertInfo.privateKey());
+            tokenSecretMap = Map.of(
+                    SecretMarker.GATEWAY_TOKEN_CERT, tokenCertInfo.base64DerCert(),
+                    SecretMarker.GATEWAY_TOKEN_PUB, tokenCertInfo.publicKey(),
+                    SecretMarker.GATEWAY_TOKEN_KEY, tokenCertInfo.privateKey());
         }
         result.putAll(signSecretMap);
         result.putAll(tokenSecretMap);
-        return result;
+        return Map.of(fullGateway, result);
     }
 
     private RotationContext getCustomJobRotationContext(String resourceCrn, GatewayView gateway, StackDto stackDto) {

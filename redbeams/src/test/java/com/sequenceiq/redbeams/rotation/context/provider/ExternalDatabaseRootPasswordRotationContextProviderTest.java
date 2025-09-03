@@ -2,12 +2,14 @@ package com.sequenceiq.redbeams.rotation.context.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -56,11 +59,9 @@ class ExternalDatabaseRootPasswordRotationContextProviderTest {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
         DatabaseServer databaseServer = mock(DatabaseServer.class);
-        when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD_SECRET);
         dbStack.setDatabaseServer(databaseServer);
         when(dbStackService.getByCrn(eq(RESOURCE_CRN))).thenReturn(dbStack);
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
-        when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD_SECRET);
         when(databaseServerConfigService.getByCrn(eq(RESOURCE_CRN))).thenReturn(databaseServerConfig);
         when(passwordGeneratorService.generatePassword(eq(Optional.of(CloudPlatform.AWS)))).thenReturn(NEW_PASSWORD);
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
@@ -70,10 +71,10 @@ class ExternalDatabaseRootPasswordRotationContextProviderTest {
         assertThat(contexts.get(CommonSecretRotationStep.VAULT)).isInstanceOf(VaultRotationContext.class);
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(CommonSecretRotationStep.VAULT);
         assertEquals(RESOURCE_CRN, vaultRotationContext.getResourceCrn());
-        Map<String, String> vaultPathSecretMap = vaultRotationContext.getNewSecretMap();
-        assertThat(vaultPathSecretMap).containsOnlyKeys(ROOT_PASSWORD_SECRET, CONNECTION_PASSWORD_SECRET);
-        assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(ROOT_PASSWORD_SECRET));
-        assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(CONNECTION_PASSWORD_SECRET));
+        Map<?, Map<SecretMarker, String>> vaultPathSecretMap = vaultRotationContext.getNewSecretMap();
+        assertTrue(vaultPathSecretMap.keySet().containsAll(Set.of(databaseServerConfig, dbStack)));
+        assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(databaseServerConfig).values().iterator().next());
+        assertEquals(NEW_PASSWORD, vaultPathSecretMap.get(dbStack).values().iterator().next());
 
         assertThat(contexts.get(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD)).isInstanceOf(RotationContext.class);
         RotationContext providerDatabaseRootPasswordRotationContext = contexts.get(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD);

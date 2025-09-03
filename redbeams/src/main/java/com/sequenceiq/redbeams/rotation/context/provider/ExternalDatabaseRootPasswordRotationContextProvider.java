@@ -1,7 +1,6 @@
 package com.sequenceiq.redbeams.rotation.context.provider;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,7 +15,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep;
@@ -43,20 +42,11 @@ public class ExternalDatabaseRootPasswordRotationContextProvider implements Rota
         DBStack dbStack = dbStackService.getByCrn(resourceCrn);
         DatabaseServerConfig databaseServerConfig = databaseServerConfigService.getByCrn(resourceCrn);
         String newPassword = passwordGeneratorService.generatePassword(Optional.of(CloudPlatform.valueOf(dbStack.getCloudPlatform())));
-        Map<String, String> newSecretMap = new HashMap<>();
-        newSecretMap.put(dbStack.getDatabaseServer().getRootPasswordSecret(), newPassword);
-        newSecretMap.put(databaseServerConfig.getConnectionPasswordSecret(), newPassword);
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(
-                        () -> databaseServerConfigService.update(databaseServerConfig),
-                        () -> dbStackService.save(dbStack)))
-                .withEntitySecretFieldUpdaterMap(Map.of(
-                        dbStack.getDatabaseServer().getRootPasswordSecret(),
-                        vaultSecretJson -> dbStack.getDatabaseServer().setRootPasswordSecret(new SecretProxy(vaultSecretJson)),
-                        databaseServerConfig.getConnectionPasswordSecret(),
-                        vaultSecretJson -> databaseServerConfig.setConnectionPasswordSecret(new SecretProxy(vaultSecretJson))
+                .withNewSecretMap(Map.of(
+                        dbStack, Map.of(SecretMarker.DBSTACK_ROOT_PWD, newPassword),
+                        databaseServerConfig, Map.of(SecretMarker.DBSERVER_CONFIG_ROOT_PWD, newPassword)
                 ))
                 .build();
         contexts.put(CommonSecretRotationStep.VAULT, vaultRotationContext);

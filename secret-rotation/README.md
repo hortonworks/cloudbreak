@@ -39,6 +39,10 @@ Rotation framework has been created based on this idea.
   - in finalize phase we should remove the old secret (with corresponding user)
 - the flow engine ensures that we can continue the execution of rotation even if the service has been restarted in the meantime, though we need to ensure that every rotation step execution in every phase (rotate, rollback, finalize) is idempotent and multiple execution of them will give the same result
 
+## Vault
+- Vault has a central role in secret rotation, since most of these sensitive values are stored in Vault.
+- Please check README under secret-engine module for further details about how to rotate sensitive data in Vault.
+
 ## Example
 - Rotation: CM admin user of a datahub cluster
   - CloudbreakSecretType: CLOUDBREAK_CM_ADMIN_PASSWORD value in the enum

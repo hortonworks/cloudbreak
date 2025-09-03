@@ -10,12 +10,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
 
 @Transactional(Transactional.TxType.REQUIRED)
-public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
+public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long>, VaultRotationAwareRepository {
 
     Optional<FreeIpa> getByStack(Stack stack);
 
@@ -33,4 +34,9 @@ public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(f.id, f.stack.environmentCrn) " +
             "FROM FreeIpa f WHERE f.stack.accountId = :accountId AND f.stack.terminated = -1")
     List<ResourceWithId> findAllAsAuthorizationResources(@Param("accountId") String accountId);
+
+    @Override
+    default Class<FreeIpa> getEntityClass() {
+        return FreeIpa.class;
+    }
 }

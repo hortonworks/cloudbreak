@@ -10,12 +10,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.view.delegate.GatewayViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = Gateway.class)
 @Transactional(TxType.REQUIRED)
-public interface GatewayRepository extends CrudRepository<Gateway, Long> {
+public interface GatewayRepository extends CrudRepository<Gateway, Long>, VaultRotationAwareRepository {
 
     @Query("SELECT g.id as id, " +
             "g.gatewayType as gatewayType, " +
@@ -39,4 +40,9 @@ public interface GatewayRepository extends CrudRepository<Gateway, Long> {
             "LEFT JOIN g.topologies gt " +
             "WHERE c.id = :clusterId")
     Optional<GatewayViewDelegate> findViewByClusterId(@Param("clusterId") Long clusterId);
+
+    @Override
+    default Class<Gateway> getEntityClass() {
+        return Gateway.class;
+    }
 }

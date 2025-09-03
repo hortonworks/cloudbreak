@@ -1,7 +1,14 @@
 package com.sequenceiq.cloudbreak.rotation.secret.vault;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil.getVaultSecretJson;
+import static com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil.saveEntity;
+import static com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil.setNewSecret;
+
+import java.util.Map;
+
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.function.TriConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -10,7 +17,9 @@ import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 
 @Component
@@ -23,66 +32,79 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
 
     @Override
     protected void rotate(VaultRotationContext rotationContext) throws Exception {
-        rotationContext.getNewSecretMap().forEach((vaultSecretJson, newSecret) -> {
-            if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
-                LOGGER.info("Adding new secret to vault path {}", vaultSecretJson);
-                String newVaultSecretJson = uncachedSecretServiceForRotation.putRotation(vaultSecretJson, newSecret);
-                rotationContext.getEntitySecretFieldUpdaterMap()
-                        .getOrDefault(vaultSecretJson, vaultSecretJsonInput ->
-                                LOGGER.error("Cannot update secret json {} for entity, since no method provided for it.", vaultSecretJsonInput))
-                        .accept(newVaultSecretJson);
-            }
+        rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
+            performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
+                if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
+                    LOGGER.info("Adding new secret to vault path {}", vaultSecretJson);
+                    String newVaultSecretJson = uncachedSecretServiceForRotation.putRotation(vaultSecretJson, newValue);
+                    setNewSecret(entity, marker, new SecretProxy(newVaultSecretJson));
+                }
+            });
+            saveEntity(entity);
         });
-        rotationContext.getEntitySaverList().forEach(Runnable::run);
     }
 
     @Override
     protected void rollback(VaultRotationContext rotationContext) throws Exception {
-        rotationContext.getNewSecretMap().forEach((vaultSecretJson, newSecret) -> {
-            RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
-            if (rotationSecret.isRotation()) {
-                LOGGER.info("Removing new secret from vault path {}", vaultSecretJson);
-                String rolledBackVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getBackupSecret());
-                rotationContext.getEntitySecretFieldUpdaterMap()
-                        .getOrDefault(vaultSecretJson, vaultSecretJsonInput ->
-                                LOGGER.error("Cannot update secret json {} for entity, since no method provided for it.", vaultSecretJsonInput))
-                        .accept(rolledBackVaultSecretJson);
-            }
+        rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
+            performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
+                RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
+                if (rotationSecret.isRotation()) {
+                    LOGGER.info("Removing new secret from vault path {}", vaultSecretJson);
+                    String rolledBackVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getBackupSecret());
+                    setNewSecret(entity, marker, new SecretProxy(rolledBackVaultSecretJson));
+                }
+            });
+            saveEntity(entity);
         });
-        rotationContext.getEntitySaverList().forEach(Runnable::run);
     }
 
     @Override
     protected void finalizeRotation(VaultRotationContext rotationContext) throws Exception {
-        rotationContext.getNewSecretMap().forEach((vaultSecretJson, newSecret) -> {
-            RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
-            if (rotationSecret.isRotation()) {
-                LOGGER.info("Removing old secret from vault path {}", vaultSecretJson);
-                String finalizedVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getSecret());
-                rotationContext.getEntitySecretFieldUpdaterMap()
-                        .getOrDefault(vaultSecretJson, vaultSecretJsonInput ->
-                                LOGGER.error("Cannot update secret json {} for entity, since no method provided for it.", vaultSecretJsonInput))
-                        .accept(finalizedVaultSecretJson);
-            }
+        rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
+            performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
+                RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
+                if (rotationSecret.isRotation()) {
+                    LOGGER.info("Removing old secret from vault path {}", vaultSecretJson);
+                    String finalizedVaultSecretJson = uncachedSecretServiceForRotation.update(vaultSecretJson, rotationSecret.getSecret());
+                    setNewSecret(entity, marker, new SecretProxy(finalizedVaultSecretJson));
+                }
+            });
+            saveEntity(entity);
         });
-        rotationContext.getEntitySaverList().forEach(Runnable::run);
     }
 
     @Override
     protected void preValidate(VaultRotationContext rotationContext) throws Exception {
-        rotationContext.getNewSecretMap().forEach((vaultSecretJson, newSecret) -> {
-            if (!uncachedSecretServiceForRotation.isSecret(vaultSecretJson)) {
-                throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultSecretJson));
-            }
+        rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
+            performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
+                if (!uncachedSecretServiceForRotation.isSecret(vaultSecretJson)) {
+                    throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultSecretJson));
+                }
+            });
         });
     }
 
     @Override
     protected void postValidate(VaultRotationContext rotationContext) throws Exception {
-        rotationContext.getNewSecretMap().forEach((vaultSecretJson, newSecret) -> {
-            if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
-                String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultSecretJson);
-                throw new SecretRotationException(message);
+        rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
+            performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
+                if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
+                    String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultSecretJson);
+                    throw new SecretRotationException(message);
+                }
+            });
+        });
+    }
+
+    private void performVaultRotationPhase(Map<SecretMarker, String> markerMap, Object entity,
+            TriConsumer<SecretMarker, String, String> consumer) {
+        markerMap.forEach((marker, newValue) -> {
+            try {
+                String vaultSecretJson = getVaultSecretJson(entity, marker);
+                consumer.accept(marker, newValue, vaultSecretJson);
+            } catch (Exception e) {
+                throw new SecretRotationException(e);
             }
         });
     }

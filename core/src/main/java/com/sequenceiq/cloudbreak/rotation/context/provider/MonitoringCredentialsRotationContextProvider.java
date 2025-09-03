@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.COMPUTE_MO
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
@@ -22,7 +20,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.MonitoringCredentialsRotationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -48,22 +46,13 @@ public class MonitoringCredentialsRotationContextProvider implements RotationCon
                 .withRollbackJob(() -> rotationService.updateMonitoringCredentials(stackDto))
                 .build();
         Cluster cluster = clusterService.getClusterByStackResourceCrn(resourceCrn);
-        Map<String, String> newSecretMap = Map.of(
-                cluster.getCloudbreakClusterManagerMonitoringUserSecret().getSecret(), rotationService.getCmMonitoringUser(),
-                cluster.getCloudbreakClusterManagerMonitoringPasswordSecret().getSecret(), PasswordUtil.generatePassword(),
-                cluster.getCdpNodeStatusMonitorPasswordSecret().getSecret(), PasswordUtil.generatePassword());
-        Map<String, Consumer<String>> secretUpdaterMap = Map.of(
-                cluster.getCloudbreakClusterManagerMonitoringUserSecret().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerMonitoringUserSecret(new SecretProxy(vaultSecretJson)),
-                cluster.getCloudbreakClusterManagerMonitoringPasswordSecret().getSecret(),
-                vaultSecretJson -> cluster.setCloudbreakClusterManagerMonitoringPasswordSecret(new SecretProxy(vaultSecretJson)),
-                cluster.getCdpNodeStatusMonitorPasswordSecret().getSecret(),
-                vaultSecretJson -> cluster.setCdpNodeStatusMonitorPasswordSecret(new SecretProxy(vaultSecretJson)));
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> clusterService.save(cluster)))
-                .withEntitySecretFieldUpdaterMap(secretUpdaterMap)
+                .withNewSecretMap(Map.of(cluster, Map.of(
+                        SecretMarker.NODE_STATUS_MONITOR_PWD, PasswordUtil.generatePassword(),
+                        SecretMarker.CLUSTER_MANAGER_MONITORING_PWD, PasswordUtil.generatePassword(),
+                        SecretMarker.CLUSTER_MANAGER_MONITORING_USER, rotationService.getCmMonitoringUser()
+                )))
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 VAULT, vaultRotationContext);

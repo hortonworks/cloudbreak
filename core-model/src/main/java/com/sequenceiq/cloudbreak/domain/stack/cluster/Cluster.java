@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.CLUSTER_MANAGER_MONITORING_PWD;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.CLUSTER_MANAGER_MONITORING_USER;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.NODE_STATUS_MONITOR_PWD;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -41,6 +44,9 @@ import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -468,11 +474,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.CB_CLUSTER_MANAGER_USER)
     public Secret getCloudbreakClusterManagerUserSecretObject() {
         return cloudbreakClusterManagerUser;
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.CB_CLUSTER_MANAGER_PASSWORD)
     public Secret getCloudbreakClusterManagerPasswordSecretObject() {
         return cloudbreakClusterManagerPassword;
     }
@@ -481,6 +489,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.cloudbreakClusterManagerUser = new Secret(cloudbreakClusterManagerUser);
     }
 
+    @SecretSetter(marker = SecretMarker.CB_CLUSTER_MANAGER_USER)
     public void setCloudbreakClusterManagerUserSecret(Secret cloudbreakClusterManagerUser) {
         this.cloudbreakClusterManagerUser = cloudbreakClusterManagerUser;
     }
@@ -489,6 +498,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.cloudbreakClusterManagerMonitoringUser = new Secret(cloudbreakClusterManagerMonitoringUser);
     }
 
+    @SecretSetter(marker = CLUSTER_MANAGER_MONITORING_USER)
     public void setCloudbreakClusterManagerMonitoringUserSecret(Secret cloudbreakClusterManagerMonitoringUser) {
         this.cloudbreakClusterManagerMonitoringUser = cloudbreakClusterManagerMonitoringUser;
     }
@@ -498,16 +508,19 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     @Override
+    @SecretGetter(marker = CLUSTER_MANAGER_MONITORING_USER)
     public Secret getCloudbreakClusterManagerMonitoringUserSecret() {
         return cloudbreakClusterManagerMonitoringUser;
     }
 
     @Override
+    @SecretGetter(marker = CLUSTER_MANAGER_MONITORING_PWD)
     public Secret getCloudbreakClusterManagerMonitoringPasswordSecret() {
         return cloudbreakClusterManagerMonitoringPassword;
     }
 
     @Override
+    @SecretGetter(marker = NODE_STATUS_MONITOR_PWD)
     public Secret getCdpNodeStatusMonitorPasswordSecret() {
         return cdpNodeStatusMonitorPassword;
     }
@@ -563,6 +576,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         cloudbreakClusterManagerPassword = new Secret(password);
     }
 
+    @SecretSetter(marker = SecretMarker.CB_CLUSTER_MANAGER_PASSWORD)
     public void setCloudbreakClusterManagerPasswordSecret(Secret password) {
         cloudbreakClusterManagerPassword = password;
     }
@@ -571,6 +585,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.cloudbreakClusterManagerMonitoringPassword = new Secret(cloudbreakClusterManagerMonitoringPassword);
     }
 
+    @SecretSetter(marker = CLUSTER_MANAGER_MONITORING_PWD)
     public void setCloudbreakClusterManagerMonitoringPasswordSecret(Secret cloudbreakClusterManagerMonitoringPassword) {
         this.cloudbreakClusterManagerMonitoringPassword = cloudbreakClusterManagerMonitoringPassword;
     }
@@ -579,11 +594,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
     }
 
+    @SecretSetter(marker = NODE_STATUS_MONITOR_PWD)
     public void setCdpNodeStatusMonitorPasswordSecret(Secret cdpNodeStatusMonitorPassword) {
         this.cdpNodeStatusMonitorPassword = cdpNodeStatusMonitorPassword;
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.DP_CLUSTER_MANAGER_USER)
     public Secret getDpClusterManagerUserSecret() {
         return dpClusterManagerUser;
     }
@@ -592,11 +609,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         dpClusterManagerUser = new Secret(user);
     }
 
+    @SecretSetter(marker = SecretMarker.DP_CLUSTER_MANAGER_USER)
     public void setDpClusterManagerUserSecret(Secret user) {
         dpClusterManagerUser = user;
     }
 
     @Override
+    @SecretGetter(marker = SecretMarker.DP_CLUSTER_MANAGER_PASSWORD)
     public Secret getDpClusterManagerPasswordSecret() {
         return dpClusterManagerPassword;
     }
@@ -605,6 +624,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         dpClusterManagerPassword = new Secret(password);
     }
 
+    @SecretSetter(marker = SecretMarker.DP_CLUSTER_MANAGER_PASSWORD)
     public void setDpClusterManagerPasswordSecret(Secret password) {
         dpClusterManagerPassword = password;
     }

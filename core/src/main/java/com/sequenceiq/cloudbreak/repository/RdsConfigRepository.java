@@ -12,13 +12,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @EntityType(entityClass = RDSConfig.class)
 @Transactional(TxType.REQUIRED)
-public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConfig, Long> {
+public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConfig, Long>, VaultRotationAwareRepository {
 
     @Override
     @Query("SELECT r FROM RDSConfig r WHERE r.workspace.id = :workspaceId AND r.status = 'USER_MANAGED'")
@@ -67,4 +68,9 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Modifying
     @Query("UPDATE RDSConfig r SET r.sslMode = 'ENABLED' WHERE r.id = :id")
     void enableSsl(@Param("id") Long id);
+
+    @Override
+    default Class<RDSConfig> getEntityClass() {
+        return RDSConfig.class;
+    }
 }

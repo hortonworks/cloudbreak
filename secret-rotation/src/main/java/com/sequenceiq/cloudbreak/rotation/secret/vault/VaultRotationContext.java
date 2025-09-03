@@ -1,42 +1,24 @@
 package com.sequenceiq.cloudbreak.rotation.secret.vault;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 
 public class VaultRotationContext extends RotationContext {
 
-    private final Map<String, Consumer<String>> entitySecretFieldUpdaterMap;
-
-    private final Map<String, String> newSecretMap;
-
-    private final List<Runnable> entitySaverList;
+    private final Map<? extends Object, Map<SecretMarker, String>> newSecretMap;
 
     private VaultRotationContext(String resourceCrn,
-            Map<String, Consumer<String>> entitySecretFieldUpdaterMap,
-            Map<String, String> newSecretMap,
-            List<Runnable> entitySaverList) {
+            Map<? extends Object, Map<SecretMarker, String>> newSecretMap) {
         super(resourceCrn);
-        this.entitySecretFieldUpdaterMap = MapUtils.emptyIfNull(entitySecretFieldUpdaterMap);
         this.newSecretMap = MapUtils.emptyIfNull(newSecretMap);
-        this.entitySaverList = ListUtils.emptyIfNull(entitySaverList);
     }
 
-    public Map<String, Consumer<String>> getEntitySecretFieldUpdaterMap() {
-        return entitySecretFieldUpdaterMap;
-    }
-
-    public Map<String, String> getNewSecretMap() {
+    public Map<? extends Object, Map<SecretMarker, String>> getNewSecretMap() {
         return newSecretMap;
-    }
-
-    public List<Runnable> getEntitySaverList() {
-        return entitySaverList;
     }
 
     public static VaultRotationContextBuilder builder() {
@@ -54,34 +36,20 @@ public class VaultRotationContext extends RotationContext {
 
         private String resourceCrn;
 
-        private Map<String, Consumer<String>> entitySecretFieldUpdaterMap;
-
-        private Map<String, String> newSecretMap;
-
-        private List<Runnable> entitySaverList;
+        private Map<? extends Object, Map<SecretMarker, String>> newSecretMap;
 
         public VaultRotationContextBuilder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public VaultRotationContextBuilder withEntitySecretFieldUpdaterMap(Map<String, Consumer<String>> entitySecretFieldUpdaterMap) {
-            this.entitySecretFieldUpdaterMap = entitySecretFieldUpdaterMap;
-            return this;
-        }
-
-        public VaultRotationContextBuilder withNewSecretMap(Map<String, String> newSecretMap) {
+        public VaultRotationContextBuilder withNewSecretMap(Map<? extends Object, Map<SecretMarker, String>> newSecretMap) {
             this.newSecretMap = newSecretMap;
             return this;
         }
 
-        public VaultRotationContextBuilder withEntitySaverList(List<Runnable> entitySaverList) {
-            this.entitySaverList = entitySaverList;
-            return this;
-        }
-
         public VaultRotationContext build() {
-            return new VaultRotationContext(resourceCrn, entitySecretFieldUpdaterMap, newSecretMap, entitySaverList);
+            return new VaultRotationContext(resourceCrn, newSecretMap);
         }
 
         @Override

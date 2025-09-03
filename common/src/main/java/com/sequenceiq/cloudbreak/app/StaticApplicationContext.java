@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.app;
 
+import java.util.Collection;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
@@ -28,6 +30,10 @@ public class StaticApplicationContext {
         } else {
             return defaultValue;
         }
+    }
+
+    public static <T> Collection<T> getAllMatchingBeans(Class<T> requiredType) {
+        return context.getBeansOfType(requiredType).values();
     }
 
 }

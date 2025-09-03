@@ -10,6 +10,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -81,6 +84,7 @@ public class FreeIpa implements AccountIdAwareResource {
         this.adminGroupName = adminGroupName;
     }
 
+    @SecretGetter(marker = SecretMarker.FREEIPA_ADMIN_PASSWORD)
     public Secret getAdminPasswordSecret() {
         return adminPassword;
     }
@@ -89,6 +93,7 @@ public class FreeIpa implements AccountIdAwareResource {
         return adminPassword.getRaw();
     }
 
+    @SecretSetter(marker = SecretMarker.FREEIPA_ADMIN_PASSWORD)
     public void setAdminPassword(Secret adminPassword) {
         this.adminPassword = adminPassword;
     }

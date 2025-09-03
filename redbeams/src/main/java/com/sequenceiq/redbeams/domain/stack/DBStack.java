@@ -26,7 +26,11 @@ import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -335,6 +339,16 @@ public class DBStack {
 
     public void setSslConfig(Long sslConfig) {
         this.sslConfig = sslConfig;
+    }
+
+    @SecretGetter(marker = SecretMarker.DBSTACK_ROOT_PWD)
+    public String getRootPasswordSecret() {
+        return databaseServer.getRootPasswordSecret();
+    }
+
+    @SecretSetter(marker = SecretMarker.DBSTACK_ROOT_PWD)
+    public void setRootPasswordSecret(Secret rootPasswordSecret) {
+        databaseServer.setRootPasswordSecret(rootPasswordSecret);
     }
 
     public DBStack copy() {

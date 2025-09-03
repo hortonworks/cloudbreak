@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -94,7 +93,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairContextProviderProvidesAllContextData() {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
 
         assertInstanceOf(VaultRotationContext.class, contexts.get(CommonSecretRotationStep.VAULT));
@@ -104,7 +102,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobRotationPhase() throws CloudbreakException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         when(stack.getId()).thenReturn(STACK_ID);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
@@ -118,7 +115,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobRollbackPhase() throws CloudbreakException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         when(stack.getId()).thenReturn(STACK_ID);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
@@ -132,7 +128,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobRollbackPhaseFailed() throws CloudbreakException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         when(stack.getId()).thenReturn(STACK_ID);
         doThrow(new CloudbreakException("very serious error")).when(clusterBootstrapper).bootstrapMachines(eq(STACK_ID), eq(Boolean.TRUE));
 
@@ -149,7 +144,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobPreValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
         doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
@@ -166,7 +160,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobPostValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
         doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
@@ -184,7 +177,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     void testSaltSignKeyPairCustomJobFinalizePhase() {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
         saltSecurityConfig.setSaltSignPublicKey("salt sign public key");
-        when(saltSecurityConfig.getSaltSignPrivateKeySecret()).thenReturn(new Secret(OLD_PRIVATE_KEY, PRIVATE_KEY_VAULT_PATH));
         when(stack.getId()).thenReturn(STACK_ID);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);

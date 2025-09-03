@@ -4,12 +4,15 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil;
 
 public interface RotationContextProvider {
 
@@ -25,7 +28,14 @@ public interface RotationContextProvider {
 
     default Set<String> getVaultSecretsForRollback(String resourceCrn, Map<SecretRotationStep, ? extends RotationContext> contexts) {
         if (getSecret().getSteps().contains(VAULT)) {
-            return ((VaultRotationContext) contexts.get(VAULT)).getNewSecretMap().keySet();
+            return MapUtils.emptyIfNull(((VaultRotationContext) contexts.get(VAULT)).getNewSecretMap()).entrySet()
+                    .stream()
+                    .map(entry -> MapUtils.emptyIfNull(entry.getValue()).keySet()
+                            .stream()
+                            .map(marker -> VaultRotationReflectionUtil.getVaultSecretJson(entry.getKey(), marker))
+                            .collect(Collectors.toSet()))
+                    .flatMap(Set::stream)
+                    .collect(Collectors.toSet());
         } else {
             return getVaultSecretsForRollback(resourceCrn);
         }

@@ -11,6 +11,9 @@ import jakarta.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -190,6 +193,7 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
         return password.getRaw();
     }
 
+    @SecretGetter(marker = SecretMarker.KERBEROS_CONFIG_BIND_USER_PWD)
     public String getPasswordSecret() {
         return password.getSecret();
     }
@@ -198,6 +202,7 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
         this.password = new Secret(password);
     }
 
+    @SecretSetter(marker = SecretMarker.KERBEROS_CONFIG_BIND_USER_PWD)
     public void setPasswordSecret(Secret password) {
         this.password = password;
     }

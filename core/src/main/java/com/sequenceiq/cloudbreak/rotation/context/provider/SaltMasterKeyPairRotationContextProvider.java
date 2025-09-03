@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -31,7 +30,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
+import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -80,13 +79,9 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
     }
 
     private VaultRotationContext getVaultRotationContext(String resourceCrn, SaltSecurityConfig saltSecurityConfig) {
-        Map<String, String> newSecretMap = Map.of(saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret(), PkiUtil.generatePemPrivateKeyInBase64());
         return VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withNewSecretMap(newSecretMap)
-                .withEntitySaverList(List.of(() -> saltSecurityConfigService.save(saltSecurityConfig)))
-                .withEntitySecretFieldUpdaterMap(Map.of(saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret(),
-                        vaultSecretJson -> saltSecurityConfig.setSaltMasterPrivateKeySecret(new SecretProxy(vaultSecretJson))))
+                .withNewSecretMap(Map.of(saltSecurityConfig, Map.of(SecretMarker.SALT_MASTER_PRIVATE_KEY, PkiUtil.generatePemPrivateKeyInBase64())))
                 .build();
     }
 

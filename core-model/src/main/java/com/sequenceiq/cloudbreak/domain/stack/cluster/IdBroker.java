@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.IDBROKER_SIGN_CERT;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.IDBROKER_SIGN_KEY;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.IDBROKER_SIGN_PUB;
+
 import java.util.Optional;
 
 import jakarta.persistence.Convert;
@@ -12,6 +16,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -112,14 +118,17 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         return signKey.getRaw();
     }
 
+    @SecretGetter(marker = IDBROKER_SIGN_KEY)
     public Secret getSignKeySecret() {
         return signKey;
     }
 
+    @SecretGetter(marker = IDBROKER_SIGN_CERT)
     public Secret getSignCertSecret() {
         return signCertSecret;
     }
 
+    @SecretGetter(marker = IDBROKER_SIGN_PUB)
     public Secret getSignPubSecret() {
         return signPubSecret;
     }
@@ -148,6 +157,7 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signKey = new Secret(signKey);
     }
 
+    @SecretSetter(marker = IDBROKER_SIGN_KEY)
     public void setSignKeySecret(Secret signKey) {
         this.signKey = signKey;
     }
@@ -166,6 +176,7 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signPub = signPub;
     }
 
+    @SecretSetter(marker = IDBROKER_SIGN_PUB)
     public void setSignPubSecret(Secret signPub) {
         if (signPub != null) {
             this.signPubSecret = signPub;
@@ -188,6 +199,7 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signCert = signCert;
     }
 
+    @SecretSetter(marker = IDBROKER_SIGN_CERT)
     public void setSignCertSecret(Secret signCert) {
         if (signCert != null) {
             this.signCertSecret = signCert;

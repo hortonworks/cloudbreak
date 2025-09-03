@@ -112,7 +112,7 @@ class GatewayCertRotationContextProviderTest {
         assertEquals("KNOX", roleRestartContext.getServiceType());
         assertEquals("KNOX_GATEWAY", roleRestartContext.getRoleType());
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(VAULT);
-        assertEquals(3, vaultRotationContext.getNewSecretMap().size());
+        assertEquals(3, vaultRotationContext.getNewSecretMap().values().iterator().next().size());
     }
 
     @Test
@@ -123,7 +123,7 @@ class GatewayCertRotationContextProviderTest {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
 
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(VAULT);
-        assertEquals(6, vaultRotationContext.getNewSecretMap().size());
+        assertEquals(6, vaultRotationContext.getNewSecretMap().values().iterator().next().size());
     }
 
     @Test
