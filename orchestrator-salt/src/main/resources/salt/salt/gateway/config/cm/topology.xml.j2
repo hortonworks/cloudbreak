@@ -217,6 +217,10 @@
                  <name>{{ aclsauthz_prefix ~ "ssb-sse-ws.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
+            <param>
+                <name>{{ aclsauthz_prefix ~ "clientid.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:knoxAdminGroup') }};*</value>
+            </param>
          </provider>
     {%- endif %}
          <provider>
@@ -973,4 +977,20 @@
     </service>
     {%- endif %}
     {%- endif %}
+
+    <service>
+        <role>CLIENTID</role>
+        <param>
+            <name>clientid.knox.token.exp.server-managed</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>clientid.knox.token.user.limit.exceeded.action</name>
+            <value>RETURN_ERROR</value>
+        </param>
+        <param>
+            <name>clientid.knox.token.limit.per.user</name>
+            <value>-1</value>
+        </param>
+    </service>
 </topology>
