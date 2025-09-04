@@ -126,7 +126,7 @@ public class CentosToRedHatUpgradeAvailabilityService {
         Optional.of(targetImage.getStackDetails().getRepo().getStack().get(REPOSITORY_VERSION))
                 .ifPresent(cdhVersion -> stackRelatedParcelsFromTargetImage.put(CDH.name(), cdhVersion));
         stackRelatedParcelsFromTargetImage.putAll(targetImagePackageVersions.entrySet().stream()
-                .filter(entry -> stackRelatedParcels.contains(entry.getKey()))
+                .filter(entry -> stackRelatedParcels.stream().anyMatch(stackRelatedParcel -> entry.getKey().equalsIgnoreCase(stackRelatedParcel)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         LOGGER.debug("The following parcels are required from the target image: {}", stackRelatedParcelsFromTargetImage);
         return stackRelatedParcelsFromTargetImage;
