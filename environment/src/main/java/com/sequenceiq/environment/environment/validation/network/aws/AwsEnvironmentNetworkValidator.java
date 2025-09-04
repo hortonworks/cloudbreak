@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network.aws;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,10 +56,9 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             if (CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds())) {
                 Map<String, CloudSubnet> cloudLoadBalancerSubnetMetadata =
                         cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto);
-                if (subnetsNotFoundInVpc(resultBuilder, "Endpoint gateway subnet IDs",
-                        environmentDto, networkDto.getEndpointGatewaySubnetMetas(), cloudLoadBalancerSubnetMetadata)) {
-                    return;
-                }
+                subnetsNotFoundInVpc(resultBuilder, "Endpoint gateway subnet IDs", environmentDto, networkDto.getEndpointGatewaySubnetMetas(),
+                        cloudLoadBalancerSubnetMetadata);
+                subnetsHaveDifferentAvailabilityZones(resultBuilder, environmentDto, cloudLoadBalancerSubnetMetadata);
             }
         }
     }
@@ -112,6 +112,30 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             return true;
         }
         return false;
+    }
+
+    private void subnetsHaveDifferentAvailabilityZones(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
+            Map<String, CloudSubnet> cloudLoadBalancerSubnetMetadata) {
+        Map<String, List<CloudSubnet>> zonesWithMultipleCloudSubnets = cloudLoadBalancerSubnetMetadata.values()
+                .stream()
+                .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone))
+                .entrySet()
+                .stream()
+                .filter(cloudSubnetListByAvailabilityZone -> cloudSubnetListByAvailabilityZone.getValue().size() > 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        if (!zonesWithMultipleCloudSubnets.isEmpty()) {
+            String errorWithSubnetsByZones = zonesWithMultipleCloudSubnets.entrySet().stream()
+                    .map(subnetListByZone -> String.format("subnets '%s' are from zone '%s'",
+                            subnetListByZone.getValue().stream().map(CloudSubnet::getId).collect(Collectors.joining(", ")),
+                            subnetListByZone.getKey()))
+                    .collect(Collectors.joining(", "));
+            String message = String.format("Environment '%s' has been requested with invalid public endpoint access gateway setup. "
+                            + "The selected subnets must have different Availability Zones, which means select one subnet per zone only. But %s.",
+                    environmentDto.getName(), errorWithSubnetsByZones);
+            LOGGER.info(message);
+            resultBuilder.error(message);
+        }
     }
 
     @Override

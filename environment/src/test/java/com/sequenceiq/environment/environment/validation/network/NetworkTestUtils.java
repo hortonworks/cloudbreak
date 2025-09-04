@@ -97,9 +97,13 @@ public class NetworkTestUtils {
     }
 
     public static CloudSubnet getCloudSubnet(String availabilityZone) {
+        return getCloudSubnet(availabilityZone, "eu-west-1");
+    }
+
+    public static CloudSubnet getCloudSubnet(String availabilityZone, String subnetId) {
         return new CloudSubnet.Builder()
-                .id("eu-west-1")
-                .name("name")
+                .id(subnetId)
+                .name(subnetId)
                 .availabilityZone(availabilityZone)
                 .cidr("cidr")
                 .build();

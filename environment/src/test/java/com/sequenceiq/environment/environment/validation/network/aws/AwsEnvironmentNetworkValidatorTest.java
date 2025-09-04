@@ -134,7 +134,7 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenNetworkHasNoNetworkIdAndNoCidr() {
+    void testValidateDuringFlowWhenNetworkHasNoNetworkIdAndNoCidr() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, null, null, 1, RegistrationType.EXISTING);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
@@ -148,7 +148,7 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenNetworkHasOneSubnet() {
+    void testValidateDuringFlowWhenNetworkHasOneSubnet() {
         int amountOfSubnets = 1;
         AwsParams awsParams = getAwsParams();
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null,
@@ -187,7 +187,7 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenNetworkHasTwoSubnetSubnetMetasHasThreeSubnets() {
+    void testValidateDuringFlowWhenNetworkHasTwoSubnetSubnetMetasHasThreeSubnets() {
         AwsParams awsParams = getAwsParams();
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2, RegistrationType.EXISTING);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
@@ -207,12 +207,12 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenNetworkHasTwoSubnetsWithSameAvailabilityZone() {
+    void testValidateDuringFlowWhenNetworkHasTwoSubnetsWithSameAvailabilityZone() {
         AwsParams awsParams = getAwsParams();
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, awsParams, null, awsParams.getVpcId(), null, 2, RegistrationType.EXISTING);
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
         for (int i = 0; i < 2; i++) {
-            subnetMetas.put("key" + i, NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+            subnetMetas.put("key" + i, NetworkTestUtils.getCloudSubnet("eu-west-1-a", "name"));
         }
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
@@ -287,11 +287,11 @@ class AwsEnvironmentNetworkValidatorTest {
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
-        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
-        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-b"));
 
         Map<String, CloudSubnet> endpointGwSubnetMetas = new HashMap<>();
-        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
+        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
 
         when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
         when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto)).thenReturn(endpointGwSubnetMetas);
@@ -306,6 +306,36 @@ class AwsEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringFlowWhenEndpointGatewaySubnetIdInVPC() {
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 4, 4, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName(ENV_NAME);
+        environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        Map<String, CloudSubnet> subnetMetas = new HashMap<>();
+        subnetMetas.put("subnet0", NetworkTestUtils.getCloudSubnet("eu-west-1-a", "subnet0"));
+        subnetMetas.put("subnet1", NetworkTestUtils.getCloudSubnet("eu-west-1-b", "subnet1"));
+        subnetMetas.put("subnet2", NetworkTestUtils.getCloudSubnet("eu-west-1-b",  "subnet2"));
+        subnetMetas.put("subnet4", NetworkTestUtils.getCloudSubnet("eu-west-1-a", "subnet4"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getFormattedErrors())
+                .startsWith("Environment 'someenv' has been requested with invalid public endpoint access gateway setup. The selected subnets must have " +
+                        "different Availability Zones, which means select one subnet per zone only. But")
+                .contains("are from zone 'eu-west-1-b'")
+                .contains("are from zone 'eu-west-1-a'");
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEndpointGatewaySubnetIdInVPCAndOneSubnetPerAZ() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 2, 2, RegistrationType.EXISTING);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
@@ -315,12 +345,12 @@ class AwsEnvironmentNetworkValidatorTest {
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
-        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
-        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-b"));
 
         Map<String, CloudSubnet> endpointGwSubnetMetas = new HashMap<>();
-        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
-        endpointGwSubnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        endpointGwSubnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-b"));
 
         when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
         when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto)).thenReturn(endpointGwSubnetMetas);
