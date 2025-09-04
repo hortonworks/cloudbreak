@@ -128,18 +128,12 @@ public interface StackDtoDelegate {
     Long getFullNodeCount();
 
     default List<Resource> getDiskResources() {
-        switch (getStack().getPlatformVariant()) {
-            case CloudConstants.AWS:
-            case CloudConstants.AWS_NATIVE:
-            case CloudConstants.AWS_NATIVE_GOV:
-                return getResourcesByType(ResourceType.AWS_VOLUMESET);
-            case CloudConstants.GCP:
-                return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
-            case CloudConstants.AZURE:
-                return ResourceUtil.getLatestResourceByInstanceId(getResourcesByType(ResourceType.AZURE_VOLUMESET));
-            default:
-                return List.of();
-        }
+        return switch (getStack().getPlatformVariant()) {
+            case CloudConstants.AWS, CloudConstants.AWS_NATIVE, CloudConstants.AWS_NATIVE_GOV -> getResourcesByType(ResourceType.AWS_VOLUMESET);
+            case CloudConstants.GCP -> getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
+            case CloudConstants.AZURE -> ResourceUtil.getLatestResourceByInstanceId(getResourcesByType(ResourceType.AZURE_VOLUMESET));
+            default -> List.of();
+        };
     }
 
     default List<Resource> getResourcesByType(ResourceType resourceType) {

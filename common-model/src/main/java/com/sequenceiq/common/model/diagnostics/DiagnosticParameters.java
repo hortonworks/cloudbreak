@@ -100,9 +100,9 @@ public class DiagnosticParameters {
                 .map(Date::getTime).orElse(null));
         parameters.put("endTime", Optional.ofNullable(endTime)
                 .map(Date::getTime).orElse(null));
-        parameters.put(HOST_GROUPS_FILTER, Optional.ofNullable(hostGroups).orElse(null));
-        parameters.put(HOSTS_FILTER, Optional.ofNullable(hosts).orElse(null));
-        parameters.put(EXCLUDE_HOSTS_FILTER, Optional.ofNullable(excludeHosts).orElse(null));
+        parameters.put(HOST_GROUPS_FILTER, hostGroups);
+        parameters.put(HOSTS_FILTER, hosts);
+        parameters.put(EXCLUDE_HOSTS_FILTER, excludeHosts);
         parameters.put("includeSaltLogs", Optional.ofNullable(includeSaltLogs).orElse(false));
         parameters.put("includeSarOutput", Optional.ofNullable(includeSarOutput).orElse(false));
         parameters.put("includeNginxReport", Optional.ofNullable(includeNginxReport).orElse(false));
@@ -126,9 +126,7 @@ public class DiagnosticParameters {
         parameters.put("supportBundleDbusAppName", supportBundleDbusAppName);
         parameters.put("statusReason", statusReason);
         if (cloudStorageDiagnosticsParameters != null) {
-            for (Map.Entry<String, Object> cloudStorageEntry : cloudStorageDiagnosticsParameters.toMap().entrySet()) {
-                parameters.put(cloudStorageEntry.getKey(), cloudStorageEntry.getValue());
-            }
+            parameters.putAll(cloudStorageDiagnosticsParameters.toMap());
         }
         Map<String, Object> fileCollector = new HashMap<>();
         if (StringUtils.isEmpty(root)) {

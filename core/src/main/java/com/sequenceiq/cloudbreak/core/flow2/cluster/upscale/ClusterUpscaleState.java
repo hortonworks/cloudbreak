@@ -7,6 +7,7 @@ import com.sequenceiq.flow.core.RestartAction;
 public enum ClusterUpscaleState implements FlowState {
     INIT_STATE,
     UPLOAD_UPSCALE_RECIPES_STATE,
+    UPSCALE_PREFLIGHT_CHECK_STATE,
     CHECK_HOST_METADATA_STATE,
     RECONFIGURE_KEYTABS_STATE,
     UPSCALING_CLUSTER_MANAGER_STATE,

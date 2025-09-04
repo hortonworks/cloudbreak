@@ -160,20 +160,13 @@ public interface StackView extends MdcContextInfoProvider {
     }
 
     default ResourceType getDiskResourceType() {
-        switch (getPlatformVariant()) {
-            case CloudConstants.AWS:
-            case CloudConstants.AWS_NATIVE:
-            case CloudConstants.AWS_NATIVE_GOV:
-                return ResourceType.AWS_VOLUMESET;
-            case CloudConstants.GCP:
-                return ResourceType.GCP_ATTACHED_DISKSET;
-            case CloudConstants.AZURE:
-                return ResourceType.AZURE_VOLUMESET;
-            case CloudConstants.MOCK:
-                return ResourceType.MOCK_VOLUME;
-            default:
-                return null;
-        }
+        return switch (getPlatformVariant()) {
+            case CloudConstants.AWS, CloudConstants.AWS_NATIVE, CloudConstants.AWS_NATIVE_GOV -> ResourceType.AWS_VOLUMESET;
+            case CloudConstants.GCP -> ResourceType.GCP_ATTACHED_DISKSET;
+            case CloudConstants.AZURE -> ResourceType.AZURE_VOLUMESET;
+            case CloudConstants.MOCK -> ResourceType.MOCK_VOLUME;
+            default -> null;
+        };
     }
 
     default boolean isStopInProgress() {

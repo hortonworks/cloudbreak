@@ -82,6 +82,10 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 
+    void runPreflightCheck(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_IN_PROGRESS, "Running preflight check on new hosts.");
+    }
+
     void stopClusterManagementServer(long stackId) {
         sendMessage(stackId, CLUSTER_STOP_MANAGEMENT_SERVER_STARTED, "Stopping cluster management server.");
     }

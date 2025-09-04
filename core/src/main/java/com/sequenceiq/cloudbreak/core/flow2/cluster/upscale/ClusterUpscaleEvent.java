@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopClusterComponents
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
@@ -32,6 +33,7 @@ public enum ClusterUpscaleEvent implements FlowEvent {
     RECONFIGURE_KEYTABS_FAILED_EVENT(EventSelectorUtil.selector(KeytabConfigurationFailed.class)),
     CHECK_HOST_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleCheckHostMetadataResult.class)),
     CHECK_HOST_METADATA_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleCheckHostMetadataResult.class)),
+    PREFLIGHT_CHECK_FINISHED_EVENT(EventSelectorUtil.selector(PreFlightCheckSuccess.class)),
 
     CLUSTER_MANAGER_REGENERATE_KERBEROS_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(RegenerateKerberosKeytabsResult.class)),
     CLUSTER_MANAGER_GATHER_INSTALLED_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariGatherInstalledComponentsResult.class)),

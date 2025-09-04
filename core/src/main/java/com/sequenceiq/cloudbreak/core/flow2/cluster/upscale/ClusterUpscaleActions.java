@@ -51,6 +51,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
@@ -117,11 +119,28 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "RECONFIGURE_KEYTABS_STATE")
-    public Action<?, ?> configureKeytabsAction() {
+    @Bean(name = "UPSCALE_PREFLIGHT_CHECK_STATE")
+    public Action<?, ?> preFlightCheckAction() {
         return new AbstractClusterUpscaleAction<>(UploadUpscaleRecipesResult.class) {
+
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
+                clusterUpscaleFlowService.runPreflightCheck(context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterUpscaleContext context) {
+                return new PreFlightCheckRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "RECONFIGURE_KEYTABS_STATE")
+    public Action<?, ?> configureKeytabsAction() {
+        return new AbstractClusterUpscaleAction<>(PreFlightCheckSuccess.class) {
+            @Override
+            protected void doExecute(ClusterUpscaleContext context, PreFlightCheckSuccess payload, Map<Object, Object> variables) {
                 if (context.isSinglePrimaryGateway() && ClusterManagerType.CLOUDERA_MANAGER.equals(context.getClusterManagerType())) {
                     KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(context.getStackId(), context.isRepair());
                     sendEvent(context, keytabConfigurationRequest.selector(), keytabConfigurationRequest);

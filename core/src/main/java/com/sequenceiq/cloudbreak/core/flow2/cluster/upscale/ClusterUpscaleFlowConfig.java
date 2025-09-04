@@ -30,6 +30,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.PREFLIGHT_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.RECONFIGURE_KEYTABS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.RECONFIGURE_KEYTABS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.UPLOAD_UPSCALE_RECIPES_FAILED_EVENT;
@@ -56,6 +57,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.RECONFIGURE_KEYTABS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPLOAD_UPSCALE_RECIPES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALE_PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_MANAGER_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_MANAGER_STATE;
 
@@ -80,9 +82,14 @@ public class ClusterUpscaleFlowConfig extends StackStatusFinalizerAbstractFlowCo
                     .noFailureEvent()
 
                     .from(UPLOAD_UPSCALE_RECIPES_STATE)
-                    .to(RECONFIGURE_KEYTABS_STATE)
+                    .to(UPSCALE_PREFLIGHT_CHECK_STATE)
                     .event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_UPSCALE_RECIPES_FAILED_EVENT)
+
+                    .from(UPSCALE_PREFLIGHT_CHECK_STATE)
+                    .to(RECONFIGURE_KEYTABS_STATE)
+                    .event(PREFLIGHT_CHECK_FINISHED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(RECONFIGURE_KEYTABS_STATE)
                     .to(CHECK_HOST_METADATA_STATE)

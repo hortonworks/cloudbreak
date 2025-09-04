@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.PreFlightCheckValidationService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -30,9 +29,6 @@ public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperati
     @Inject
     private StackService stackService;
 
-    @Inject
-    private PreFlightCheckValidationService preFlightCheckValidationService;
-
     @Override
     public Selectable executeOperation(HandlerEvent<DiagnosticsCollectionEvent> event) throws Exception {
         DiagnosticsCollectionEvent data = event.getData();
@@ -40,11 +36,7 @@ public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperati
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
         Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
-        if (preFlightCheckValidationService.preFlightCheckSupported(stack.getId(), stack.getEnvironmentCrn())) {
-            diagnosticsFlowService.nodeStatusNetworkReport(stack);
-        } else {
-            LOGGER.info("Preflight checks will fail based on current setup of the cluster, skipping.");
-        }
+        diagnosticsFlowService.nodeStatusNetworkReport(stack);
         return DiagnosticsCollectionEvent.builder()
                 .withResourceCrn(resourceCrn)
                 .withResourceId(resourceId)
