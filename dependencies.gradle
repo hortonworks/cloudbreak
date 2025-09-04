@@ -98,7 +98,7 @@ ext {
   hikariCPVersion = '5.0.1'
 
   // Crypto
-  bouncycastleFipsVersion = '2.1.0'
+  bouncycastleFipsVersion = '2.1.1'
   bouncycastlePkixFipsVersion = '2.1.9'
   bouncycastleUtilFipsVersion = '2.1.4'
 
