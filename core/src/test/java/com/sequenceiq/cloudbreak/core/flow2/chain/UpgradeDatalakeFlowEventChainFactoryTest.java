@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
@@ -24,16 +23,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
@@ -48,10 +44,6 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     private static final String IMAGE_ID = "imageId";
 
     private static final long STACK_ID = 1L;
-
-    private static final String IMAGE_CATALOG_NAME = "dev";
-
-    private static final String IMAGE_CATALOG_URL = "http://dev.catalog.url";
 
     @InjectMocks
     private UpgradeDatalakeFlowEventChainFactory underTest;
@@ -68,23 +60,14 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     @Mock
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
-    @Mock
-    private ComponentConfigProviderService componentConfigProviderService;
-
     @Test
     void testInitEvent() {
         assertEquals(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
     }
 
     @Test
-    void testCreateFlowTriggerEventQueue() throws Exception {
+    void testCreateFlowTriggerEventQueue() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
-        Image targetImage = Image.builder()
-                .withImageId(IMAGE_ID)
-                .withImageCatalogName(IMAGE_CATALOG_NAME)
-                .withImageCatalogUrl(IMAGE_CATALOG_URL)
-                .build();
-        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(targetImage);
         String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(
@@ -93,28 +76,16 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(
                 new ClusterUpgradeTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
 
-        assertEquals(7, flowTriggerQueue.getQueue().size());
+        assertEquals(6, flowTriggerQueue.getQueue().size());
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
         assertSyncTriggerEvent(flowTriggerQueue);
         assertClusterSyncTriggerEvent(flowTriggerQueue);
         assertClusterUpgradeValidationTriggerEvent(flowTriggerQueue);
         assertSaltSecretRotationTriggerEvent(flowTriggerQueue);
         assertSaltUpdateTriggerEvent(flowTriggerQueue);
-        assertImageUpdateTriggerEvent(flowTriggerQueue);
         assertClusterUpgradeTriggerEvent(flowTriggerQueue);
         flowTriggerQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue);
-    }
-
-    private void assertImageUpdateTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
-        Selectable event = flowTriggerEventQueue.getQueue().remove();
-        assertEquals(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getSelector());
-        assertEquals(STACK_ID, event.getResourceId());
-        assertInstanceOf(StackImageUpdateTriggerEvent.class, event);
-        StackImageUpdateTriggerEvent triggerEvent = (StackImageUpdateTriggerEvent) event;
-        assertEquals(IMAGE_ID, triggerEvent.getNewImageId());
-        assertEquals(IMAGE_CATALOG_NAME, triggerEvent.getImageCatalogName());
-        assertEquals(IMAGE_CATALOG_URL, triggerEvent.getImageCatalogUrl());
     }
 
     private void assertClusterSyncTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
