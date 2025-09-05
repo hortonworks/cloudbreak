@@ -176,7 +176,7 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
         when(lockedComponentChecker.isUpgradePermitted(image1, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
         when(lockedComponentChecker.isUpgradePermitted(image2, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
 
-        assertFalse(underTest.isHelperImageAvailable(List.of(image1, image2, image3, image4), targetImage, STACK_RELATED_PARCELS));
+        assertFalse(underTest.isHelperImageAvailable(List.of(image1, image2, image3, image4), targetImage, Set.of("cdh", "CFM")));
 
         verify(lockedComponentChecker, times(2)).isUpgradePermitted(any(), anyMap(), anyString());
     }
