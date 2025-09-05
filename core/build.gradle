@@ -171,7 +171,7 @@ dependencies {
   implementation group: 'org.springframework.retry',          name: 'spring-retry'
 
   implementation group: 'org.apache.commons',                 name: 'commons-collections4'
-  implementation group: 'org.apache.commons',                 name: 'commons-lang3'
+  implementation group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion
   implementation group: 'org.freemarker',                     name: 'freemarker'
   implementation group: 'org.postgresql',                     name: 'postgresql'
   implementation group: 'org.bouncycastle',                   name: 'bc-fips',                     version: bouncycastleFipsVersion
@@ -198,7 +198,6 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonVersion
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '2.0.0'
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.37.1'
-  implementation group: 'org.apache.commons',                 name: 'commons-lang3',                    version: '3.18.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
