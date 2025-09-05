@@ -25,6 +25,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -33,6 +34,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
 public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractCommonChainAction<UpscaleState, UpscaleFlowEvent, StackContext, P> {
 
@@ -51,6 +53,9 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     protected AbstractUpscaleAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -121,5 +126,15 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
             variant = stack.getPlatformvariant();
         }
         return variant;
+    }
+
+    protected void setNodeCountToInstanceGroup(Map<Object, Object> variables, Stack stack) {
+        if (!isRepair(variables)) {
+            int nodeCount = getInstanceCountByGroup(variables);
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                instanceGroup.setNodeCount(nodeCount);
+                instanceGroupService.save(instanceGroup);
+            }
+        }
     }
 }

@@ -122,7 +122,6 @@ import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.InstanceGroupAttributeAndStackTemplateUpdater;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
@@ -158,9 +157,6 @@ public class FreeIpaUpscaleActions {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private InstanceGroupService instanceGroupService;
 
     @Inject
     private PrivateIdProvider privateIdProvider;
@@ -616,13 +612,7 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Upscale update metadata");
-                if (!isRepair(variables)) {
-                    int nodeCount = getInstanceCountByGroup(variables);
-                    for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                        instanceGroup.setNodeCount(nodeCount);
-                        instanceGroupService.save(instanceGroup);
-                    }
-                }
+                setNodeCountToInstanceGroup(variables, stack);
                 sendEvent(context, UPSCALE_UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -748,6 +738,9 @@ public class FreeIpaUpscaleActions {
             @Inject
             private InstanceMetaDataService instanceMetaDataService;
 
+            @Inject
+            private EnvironmentService environmentService;
+
             @Override
             protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpscaleState, UpscaleFlowEvent> stateContext,
                     UpscaleFailureEvent payload) {
@@ -770,6 +763,10 @@ public class FreeIpaUpscaleActions {
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
+                }
+                setNodeCountToInstanceGroup(variables, stack);
+                if (!isChainedAction(variables)) {
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataSet().size());
                 }
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());

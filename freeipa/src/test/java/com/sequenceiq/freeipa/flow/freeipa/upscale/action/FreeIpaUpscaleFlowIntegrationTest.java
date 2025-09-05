@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
@@ -58,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.handler.ProvisionValidationHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -296,8 +300,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
         im0.setInstanceStatus(InstanceStatus.CREATED);
         im0.setPrivateId(0L);
         im0.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        masterIg.setInstanceMetaData(Set.of(im0));
-        stack.setInstanceGroups(Set.of(masterIg));
+        masterIg.setInstanceMetaData(new HashSet<>(List.of(im0)));
+        stack.setInstanceGroups(new HashSet<>(List.of(masterIg)));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
@@ -390,6 +394,32 @@ class FreeIpaUpscaleFlowIntegrationTest {
                 eq("Upscale failed during [Adding instances]. Reason: MP image failure"), any(),
                 failureCaptor.capture());
         assertEquals("MP image failure", failureCaptor.getValue().stream().toList().getFirst().getAdditionalDetails().get("statusReason"));
+    }
+
+    @Test
+    public void testUpscaleFailedNodeCountChanged() throws Exception {
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(any(), anyList(), anyList())).thenAnswer(new Answer<Stack>() {
+            @Override
+            public Stack answer(InvocationOnMock invocation) throws Throwable {
+                List<CloudInstance> argument = invocation.getArgument(1, List.class);
+                for (CloudInstance cloudInstance : argument) {
+                    InstanceMetaData im = new InstanceMetaData();
+                    im.setPrivateId(1L);
+                    im.setInstanceStatus(InstanceStatus.REQUESTED);
+                    stack.getInstanceGroups().stream().findFirst().get().getInstanceMetaData().add(im);
+                }
+                return stack;
+            }
+        });
+
+        when(stackUpdater.updateStackStatus((Stack) any(), any(), eq("Installing FreeIPA"))).thenThrow(new IllegalArgumentException("Upscale failed."));
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        assertEquals(2, stack.getInstanceGroups().stream().findFirst().get().getNodeCount());
+        verify(environmentService).setFreeIpaNodeCount(stack.getEnvironmentCrn(), 2);
+
     }
 
     private void testFlow() {
