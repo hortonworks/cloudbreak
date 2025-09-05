@@ -52,7 +52,7 @@ public class FreeIpaStackHealthDetailsService {
 
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
-        List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
+        Set<InstanceMetaData> instances = stack.getNotTerminatedInstanceMetaDataSet();
 
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
 
@@ -136,7 +136,7 @@ public class FreeIpaStackHealthDetailsService {
     }
 
     private Map<String, String> getNameIdMap(Stack stack) {
-        return stack.getInstanceGroups().stream().flatMap(ig -> ig.getInstanceMetaData().stream())
+        return stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .filter(im -> Objects.nonNull(im.getDiscoveryFQDN()) && Objects.nonNull(im.getInstanceId()))
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getInstanceId));
     }

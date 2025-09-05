@@ -197,14 +197,16 @@ class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     void testNodeDeletedOnProvider() throws Exception {
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getDeletedStack());
-        setupMockExecutorServiceWithSingleFuture(createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.TERMINATED, List.of()));
+        Stack deletedStack = getDeletedStack();
+        deletedStack.getAllInstanceMetaDataList().forEach(im -> im.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(deletedStack);
+        setupMockExecutorServiceWithSingleFuture(createNodeHealthDetails(INSTANCE_ID1, HOST1, InstanceStatus.DELETED_ON_PROVIDER_SIDE, List.of()));
 
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
 
-        assertEquals(Status.UNHEALTHY, response.getStatus());
+        assertEquals(Status.DELETED_ON_PROVIDER_SIDE, response.getStatus());
         assertFalse(response.getNodeHealthDetails().isEmpty());
-        assertSame(InstanceStatus.TERMINATED, response.getNodeHealthDetails().stream().findFirst().get().getStatus());
+        assertSame(InstanceStatus.DELETED_ON_PROVIDER_SIDE, response.getNodeHealthDetails().stream().findFirst().get().getStatus());
 
         verifyBasicMockInteractions();
         verifyExecutorServiceInvocation(1);

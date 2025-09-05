@@ -146,8 +146,7 @@ public class RepairInstancesService {
     }
 
     private Map<String, InstanceMetaData> getAllInstancesFromStack(Stack stack) {
-        return stack.getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaData().stream())
+        return stack.getAllInstanceMetaDataList().stream()
                 .filter(instanceMetaData -> Objects.nonNull(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toMap(InstanceMetaData::getInstanceId, Function.identity()));
     }
