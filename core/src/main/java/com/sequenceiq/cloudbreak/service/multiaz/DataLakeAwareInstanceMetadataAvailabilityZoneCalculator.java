@@ -99,7 +99,7 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (notMasterAndNotAuxiliaryGroup(instanceGroup)) {
-                updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackSubnetId));
+                updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackSubnetId, stack.getNetwork()));
             }
         }
         Optional<InstanceGroup> masterInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER);
@@ -110,8 +110,16 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
             auxiliaryInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
             LOGGER.info("Auxiliary/Master instance group's meta data: {}", mergedInstanceMetaData);
             Set<String> availabilityZones = masterInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
-            updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Master/Auxiliary",
-                    masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get(), stackSubnetId));
+            updatedInstancesMetaData.addAll(
+                    populateAvailabilityZoneOfInstances(
+                            availabilityZones,
+                            mergedInstanceMetaData,
+                            "Master/Auxiliary",
+                            masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get(),
+                            stackSubnetId,
+                            stack.getNetwork()
+                    )
+            );
             updateInstancesMetaData(updatedInstancesMetaData);
         } else {
             LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.MASTER.getName(),

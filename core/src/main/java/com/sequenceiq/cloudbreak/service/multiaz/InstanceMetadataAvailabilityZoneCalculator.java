@@ -2,13 +2,12 @@ package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupSubnetCollector;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -71,6 +72,9 @@ public class InstanceMetadataAvailabilityZoneCalculator {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private InstanceGroupSubnetCollector instanceGroupSubnetCollector;
 
     private static InstanceGroupDto getInstanceGroupDtoByGroupName(StackDtoDelegate stack, String hostGroupName) {
         return stack.getInstanceGroupDtos().stream()
@@ -123,7 +127,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             String stackLevelSubnetId = getStackSubnetIdIfExists(stack);
             Set<InstanceMetaData> instancesToBeUpdated = new HashSet<>();
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                instancesToBeUpdated.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackLevelSubnetId));
+                instancesToBeUpdated.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackLevelSubnetId, stack.getNetwork()));
             }
             updateInstancesMetaData(instancesToBeUpdated);
         } else {
@@ -131,13 +135,13 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         }
     }
 
-    protected Set<InstanceMetaData> populateAvailabilityZonesOnGroup(InstanceGroup instanceGroup, String stackLevelSubnetId) {
+    protected Set<InstanceMetaData> populateAvailabilityZonesOnGroup(InstanceGroup instanceGroup, String stackLevelSubnetId, Network network) {
         String groupName = instanceGroup.getGroupName();
         Set<String> availabilityZonesForGroup = instanceGroup.getAvailabilityZones();
         if (CollectionUtils.isNotEmpty(availabilityZonesForGroup)) {
             LOGGER.info("Availability zones to distribute the instances over: '{}' for group: '{}'", availabilityZonesForGroup, groupName);
             Set<InstanceMetaData> instancesInGroup = instanceGroup.getNotDeletedInstanceMetaDataSet();
-            return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instancesInGroup, groupName, instanceGroup, stackLevelSubnetId);
+            return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instancesInGroup, groupName, instanceGroup, stackLevelSubnetId, network);
         } else {
             String msg = String.format("Multi-AZ is enabled for the stack, but no availability zone is available for the group: '%s'", groupName);
             LOGGER.warn(msg);
@@ -146,7 +150,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     protected Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
-            String groupName, InstanceGroup instanceGroup, String stackLevelSubnetId) {
+            String groupName, InstanceGroup instanceGroup, String stackLevelSubnetId, Network network) {
         Set<InstanceMetaData> updatedInstances = new HashSet<>();
         Map<String, Long> zoneToNodeCountMap = getAvailabilityZoneNodeCountMap(availabilityZonesForGroup, instanceMetaDataSet);
         LOGGER.debug("Initialized zoneToNodeCountMap {} for group '{}'", zoneToNodeCountMap, groupName);
@@ -155,7 +159,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 .map(InstanceGroup::getInstanceGroupNetwork)
                 .map(InstanceGroupNetwork::getCloudPlatform);
         if (optCloudPlatform.isPresent() && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(optCloudPlatform.get())) {
-            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(instanceGroup);
+            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(instanceGroup, network);
             populateSubnetUsageGroupedByAzMap(subnetUsageGroupedByAzMap, subnetAzMap);
         }
         for (InstanceMetaData instance : instanceMetaDataSet) {
@@ -196,12 +200,12 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 .orElse(null);
     }
 
-    private Map<String, String> getSubnetAzMapFromEnvironment(InstanceGroup instanceGroup) {
+    private Map<String, String> getSubnetAzMapFromEnvironment(InstanceGroup instanceGroup, Network network) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(instanceGroup.getStack().getEnvironmentCrn());
-        List<String> subnetIds = (List<String>) instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(SUBNET_IDS);
-        Map<String, String> subnetAzMap = subnetIds.stream()
-                .collect(Collectors.toMap(subnetId -> subnetId,
-                        subnetId -> detailedEnvironmentResponse.getNetwork().getSubnetMetas().get(subnetId).getAvailabilityZone()));
+        Map<String, CloudSubnet> subnetMetas = detailedEnvironmentResponse.getNetwork().getSubnetMetas();
+        Map<String, String> subnetAzMap = instanceGroupSubnetCollector.collect(instanceGroup, network)
+                .stream()
+                .collect(toMap(subnetId -> subnetId, subnetId -> subnetMetas.get(subnetId).getAvailabilityZone()));
         return subnetAzMap;
     }
 
@@ -222,7 +226,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     private Map<String, Long> getAvailabilityZoneNodeCountMap(Set<String> availabilityZones, Set<InstanceMetaData> instances) {
-        return availabilityZones.stream().collect(Collectors.toMap(Function.identity(),
+        return availabilityZones.stream().collect(toMap(Function.identity(),
                 availabilityZone -> countInstancesForAvailabilityZone(instances, availabilityZone)));
     }
 
@@ -301,7 +305,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             if (StringUtils.isNotEmpty(zoneFromDisk)) {
                 LOGGER.info("Setting availability zone to '{}' for instance with FQDN '{}' in group '{}' during repair", zoneFromDisk, discoveryFQDN,
                         hostGroupName);
-                setSubnet(im, stackView, zoneFromDisk, stackLevelSubnetId);
+                setSubnet(im, stack, zoneFromDisk, stackLevelSubnetId);
                 im.setAvailabilityZone(zoneFromDisk);
                 im.setRackId("/" +
                         (isNullOrEmpty(zoneFromDisk) ?
@@ -321,14 +325,21 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                     .map(InstanceMetaData::getInstanceGroup)
                     .get();
             updatedInstances.addAll(
-                    populateAvailabilityZoneOfInstances(zonesOfInstanceGroup, notDeletedInstancesForGroup, hostGroupName, instanceGroup, stackLevelSubnetId));
+                    populateAvailabilityZoneOfInstances(
+                            zonesOfInstanceGroup,
+                            notDeletedInstancesForGroup,
+                            hostGroupName, instanceGroup,
+                            stackLevelSubnetId,
+                            stack.getNetwork()
+                    )
+            );
         }
         return updatedInstances;
     }
 
-    private void setSubnet(InstanceMetaData im, StackView stackView, String zoneFromDisk, String stackLevelSubnetId) {
-        if (ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stackView.getCloudPlatform())) {
-            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(im.getInstanceGroup());
+    private void setSubnet(InstanceMetaData im, StackDtoDelegate stackDtoDelegate, String zoneFromDisk, String stackLevelSubnetId) {
+        if (ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stackDtoDelegate.getCloudPlatform())) {
+            Map<String, String> subnetAzMap = getSubnetAzMapFromEnvironment(im.getInstanceGroup(), stackDtoDelegate.getNetwork());
             String subnetId = subnetAzMap.entrySet().stream()
                     .filter(e -> e.getValue().equals(zoneFromDisk))
                     .map(Map.Entry::getKey)
@@ -350,7 +361,14 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 .findFirst()
                 .map(InstanceMetaData::getInstanceGroup)
                 .get();
-        return populateAvailabilityZoneOfInstances(zonesOfInstanceGroup, notDeletedInstancesForGroup, hostGroupName, instanceGroup, stackLevelSubnetId);
+        return populateAvailabilityZoneOfInstances(
+                zonesOfInstanceGroup,
+                notDeletedInstancesForGroup,
+                hostGroupName,
+                instanceGroup,
+                stackLevelSubnetId,
+                stack.getNetwork()
+        );
     }
 
     private Set<String> getZonesOfInstanceGroupOrFromScaleDetails(StackDtoDelegate stack, Long instanceGroupId,
