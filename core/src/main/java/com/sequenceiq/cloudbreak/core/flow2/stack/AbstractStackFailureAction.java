@@ -8,8 +8,10 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -24,6 +26,8 @@ import com.sequenceiq.flow.core.PayloadConverter;
 
 public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent>
         extends AbstractStackAction<S, E, StackFailureContext, StackFailureEvent> {
+
+    public static final String CONCLUSION_CHECKER_TYPE_KEY = "ConclusionCheckerType";
 
     @Inject
     private StackDtoService stackDtoService;
@@ -40,7 +44,7 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
         flow.setFlowFailed(payload.getException());
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         ProvisionType provisionType = (ProvisionType) variables.getOrDefault(PROVISION_TYPE, ProvisionType.REGULAR);
-        return new StackFailureContext(flowParameters, stack, stack.getId(), provisionType);
+        return new StackFailureContext(flowParameters, stack, stack.getId(), provisionType, getConclusionCheckerType(variables));
     }
 
     @Override
@@ -52,5 +56,10 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
     protected void initPayloadConverterMap(List<PayloadConverter<StackFailureEvent>> payloadConverters) {
         payloadConverters.add(new CloudPlatformResponseToStackFailureConverter());
         payloadConverters.add(new ClusterPlatformResponseToStackFailureConverter());
+    }
+
+    protected ConclusionCheckerType getConclusionCheckerType(Map<Object, Object> variables) {
+        Object conclusionCheckerType = MapUtils.emptyIfNull(variables).getOrDefault(CONCLUSION_CHECKER_TYPE_KEY, ConclusionCheckerType.DEFAULT);
+        return conclusionCheckerType instanceof ConclusionCheckerType ? (ConclusionCheckerType) conclusionCheckerType : ConclusionCheckerType.DEFAULT;
     }
 }

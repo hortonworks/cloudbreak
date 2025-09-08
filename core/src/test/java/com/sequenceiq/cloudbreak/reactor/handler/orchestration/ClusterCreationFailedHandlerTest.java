@@ -6,9 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterCreationFailedRequest;
-import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,16 +33,12 @@ class ClusterCreationFailedHandlerTest {
     @Mock
     private ConclusionCheckerService conclusionCheckerService;
 
-    @Mock
-    private StackStatusService stackStatusService;
-
     @InjectMocks
     private ClusterCreationFailedHandler underTest;
 
     @Test
     public void testHandleClusterCreationFailedRequestBeforeSaltBootstrap() {
-        when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY)));
-        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
+        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID, ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP);
         HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
@@ -59,10 +51,7 @@ class ClusterCreationFailedHandlerTest {
 
     @Test
     public void testHandleClusterCreationFailedRequestAfterSaltBootstrap() {
-        when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(
-                List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY),
-                        createStackStatus(DetailedStackStatus.VALIDATING_CLOUD_STORAGE_ON_VM)));
-        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
+        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID, ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP);
         HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
@@ -75,10 +64,7 @@ class ClusterCreationFailedHandlerTest {
 
     @Test
     public void testHandleClusterCreationFailedRequestAfterStartingClusterServices() {
-        when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(
-                List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY), createStackStatus(DetailedStackStatus.COLLECTING_HOST_METADATA),
-                        createStackStatus(DetailedStackStatus.STARTING_CLUSTER_SERVICES)));
-        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
+        ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID, ConclusionCheckerType.DEFAULT);
         HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);

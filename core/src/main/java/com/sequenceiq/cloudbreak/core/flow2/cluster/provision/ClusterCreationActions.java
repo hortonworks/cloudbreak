@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -166,6 +167,7 @@ public class ClusterCreationActions {
             protected void prepareExecution(ProvisionEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(PROVISION_TYPE, payload.getProvisionType());
+                variables.put(AbstractStackFailureAction.CONCLUSION_CHECKER_TYPE_KEY, ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP);
             }
 
             @Override
@@ -207,7 +209,7 @@ public class ClusterCreationActions {
         return new AbstractStackCreationAction<>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackCreationContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
-                // UNUSED STEP
+                variables.put(AbstractStackFailureAction.CONCLUSION_CHECKER_TYPE_KEY, ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP);
                 sendEvent(context);
             }
 
@@ -368,6 +370,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(ClusterCreationViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingClusterServices(context.getStackId());
+                variables.put(AbstractStackFailureAction.CONCLUSION_CHECKER_TYPE_KEY, ConclusionCheckerType.DEFAULT);
                 sendEvent(context);
             }
 
@@ -768,7 +771,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new ClusterCreationFailedRequest(context.getStackId());
+                return new ClusterCreationFailedRequest(context.getStackId(), context.getConclusionCheckerType());
             }
         };
     }
