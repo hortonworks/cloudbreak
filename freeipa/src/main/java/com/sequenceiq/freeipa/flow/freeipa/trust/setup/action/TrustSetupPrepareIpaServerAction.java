@@ -22,6 +22,7 @@ public class TrustSetupPrepareIpaServerAction extends AbstractTrustSetupAction<T
     @Override
     protected void doExecute(StackContext context, TrustSetupValidationSuccess payload, Map<Object, Object> variables) throws Exception {
         updateStatuses(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Prepare IPA server", TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        updateOperation(context.getStack(), getOperationId(variables), payload.getTaskResults());
         PrepareIpaServerRequest request = new PrepareIpaServerRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }

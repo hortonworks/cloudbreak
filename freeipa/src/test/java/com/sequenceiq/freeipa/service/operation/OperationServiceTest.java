@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.repository.OperationRepository;
@@ -42,8 +46,7 @@ class OperationServiceTest {
     @InjectMocks
     private OperationService underTest;
 
-    @Mock
-    private Operation operation;
+    private Operation operation = new Operation();
 
     @Test
     void getOperationForAccountIdAndOperationIdFound() {
@@ -77,4 +80,61 @@ class OperationServiceTest {
                 .isInstanceOf(NotFoundException.class);
     }
 
+    @Test
+    public void testUpdateOperation() {
+        ArrayList<SuccessDetails> origSuccessDetails = new ArrayList<>();
+        origSuccessDetails.add(new SuccessDetails());
+        ArrayList<FailureDetails> origFailureDetails = new ArrayList<>();
+        origFailureDetails.add(new FailureDetails());
+        operation.setFailureList(origFailureDetails);
+        operation.setSuccessList(origSuccessDetails);
+        when(operationRepository.findByOperationIdAndAccountId(OPERATION_ID, ACCOUNT_ID)).thenReturn(Optional.of(operation));
+        when(operationRepository.save(operation)).thenReturn(operation);
+        ArrayList<SuccessDetails> successDetails = new ArrayList<>();
+        successDetails.add(new SuccessDetails());
+        ArrayList<FailureDetails> failureDetails = new ArrayList<>();
+        failureDetails.add(new FailureDetails());
+        Operation actualOperation = underTest.updateOperation(ACCOUNT_ID, OPERATION_ID, successDetails, failureDetails);
+        Assertions.assertEquals(2, actualOperation.getSuccessList().size());
+        Assertions.assertEquals(2, actualOperation.getFailureList().size());
+    }
+
+    @Test
+    public void testCompleteOperation() {
+        operation.setStartTime(System.currentTimeMillis());
+        when(operationRepository.findByOperationIdAndAccountId(OPERATION_ID, ACCOUNT_ID)).thenReturn(Optional.of(operation));
+        when(operationRepository.save(operation)).thenReturn(operation);
+        ArrayList<SuccessDetails> successDetails = new ArrayList<>();
+        successDetails.add(new SuccessDetails());
+        ArrayList<FailureDetails> failureDetails = new ArrayList<>();
+        failureDetails.add(new FailureDetails());
+        Operation actualOperation = underTest.completeOperation(ACCOUNT_ID, OPERATION_ID, successDetails, failureDetails);
+        Assertions.assertEquals(1, actualOperation.getSuccessList().size());
+        Assertions.assertEquals(1, actualOperation.getFailureList().size());
+    }
+
+    @Test
+    public void testFailOperation() {
+        ArrayList<SuccessDetails> origSuccessDetails = new ArrayList<>();
+        origSuccessDetails.add(new SuccessDetails());
+        origSuccessDetails.add(new SuccessDetails());
+        ArrayList<FailureDetails> origFailureDetails = new ArrayList<>();
+        origFailureDetails.add(new FailureDetails());
+        origFailureDetails.add(new FailureDetails());
+        operation.setFailureList(origFailureDetails);
+        operation.setSuccessList(origSuccessDetails);
+        operation.setStartTime(System.currentTimeMillis());
+        when(operationRepository.findByOperationIdAndAccountId(OPERATION_ID, ACCOUNT_ID)).thenReturn(Optional.of(operation));
+        when(operationRepository.save(operation)).thenReturn(operation);
+        ArrayList<SuccessDetails> successDetails = new ArrayList<>();
+        successDetails.add(new SuccessDetails());
+        successDetails.add(new SuccessDetails());
+        ArrayList<FailureDetails> failureDetails = new ArrayList<>();
+        failureDetails.add(new FailureDetails());
+        failureDetails.add(new FailureDetails());
+        failureDetails.add(new FailureDetails());
+        Operation actualOperation = underTest.failOperation(ACCOUNT_ID, OPERATION_ID, "failed", successDetails, failureDetails);
+        Assertions.assertEquals(4, actualOperation.getSuccessList().size());
+        Assertions.assertEquals(5, actualOperation.getFailureList().size());
+    }
 }

@@ -38,22 +38,16 @@ public class SuccessDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         SuccessDetails that = (SuccessDetails) o;
-
-        return Objects.equals(environment, that.environment);
-
+        return Objects.equals(environment, that.environment) && Objects.equals(additionalDetails, that.additionalDetails);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment);
+        return Objects.hash(environment, additionalDetails);
     }
 
     @Override

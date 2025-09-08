@@ -62,6 +62,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.finish.handler.AddTrustHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.AddTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -240,7 +241,8 @@ class FinishTrustSetupFlowIntegrationTest {
             FinishTrustSetupAddTrustAction.class,
             FinishTrustSetupFinishedAction.class,
             AddTrustHandler.class,
-            CrossRealmTrustService.class
+            CrossRealmTrustService.class,
+            TaskResultConverter.class
     })
     static class Config {
         @MockBean

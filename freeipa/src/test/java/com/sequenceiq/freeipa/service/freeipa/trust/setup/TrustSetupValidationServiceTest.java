@@ -9,20 +9,27 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
@@ -47,32 +54,44 @@ class TrustSetupValidationServiceTest {
     @InjectMocks
     private TrustSetupValidationService underTest;
 
+    private MockedStatic<OrchestratorExceptionAnalyzer> orchestratorExceptionAnalyzer;
+
+    @BeforeEach
+    void setupTest() {
+        orchestratorExceptionAnalyzer = Mockito.mockStatic(OrchestratorExceptionAnalyzer.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        orchestratorExceptionAnalyzer.close();
+    }
+
     @Test
     void testValidateReturnsErrorWhenNoCrossRealmInfoProvided() {
         Long stackId = 1L;
         when(crossRealmTrustService.getByStackIdIfExists(stackId)).thenReturn(Optional.empty());
 
-        ValidationResult result = underTest.validateTrustSetup(stackId);
+        TaskResults results = underTest.validateTrustSetup(stackId);
 
-        assertTrue(result.hasError());
-        assertEquals("No cross realm information is provided", result.getErrors().get(0));
+        assertTrue(results.hasErrors());
+        assertEquals("No cross realm information is provided", results.getErrors().get(0).message());
     }
 
     @Test
     void testValidateWhenNoValidationError() {
         setup();
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
-        ValidationResult validationResult = underTest.validateTrustSetup(4L);
+        TaskResults validationResult = underTest.validateTrustSetup(4L);
         assertEquals(0L, validationResult.getErrors().size());
     }
 
     @Test
     void testValidateWhenMissingPackage() throws Exception {
         setup();
-        ValidationResult validationResult = underTest.validateTrustSetup(4L);
+        TaskResults validationResult = underTest.validateTrustSetup(4L);
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
-                validationResult.getErrors().get(0));
+                validationResult.getErrors().get(0).message());
     }
 
     @Test
@@ -81,10 +100,26 @@ class TrustSetupValidationServiceTest {
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         doThrow(new RuntimeException("DNS validation error")).when(hostOrchestrator).runOrchestratorState(any());
 
-        ValidationResult result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1, result.getErrors().size());
-        assertEquals("DNS validation error", result.getErrors().get(0));
+        assertEquals("DNS validation error", result.getErrors().get(0).message());
+    }
+
+    @Test
+    void testValidateWhenDnsValidationFailureWithParams() throws Exception {
+        setup();
+        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
+        CloudbreakOrchestratorFailedException orchestratorException = new CloudbreakOrchestratorFailedException("Dns validation error");
+        doThrow(orchestratorException).when(hostOrchestrator).runOrchestratorState(any());
+        Map<String, String> params = Map.of("key1", "value1", "key2", "value2");
+        when(OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException)).thenReturn(params);
+
+        TaskResults result = underTest.validateTrustSetup(4L);
+
+        assertEquals(1, result.getErrors().size());
+        assertEquals(result.getErrors().get(0).message(), "Dns validation failed: Dns validation error");
+        assertEquals(params, result.getErrors().get(0).additionalParams());
     }
 
     @Test
@@ -92,12 +127,12 @@ class TrustSetupValidationServiceTest {
         setup();
         doThrow(new RuntimeException("DNS validation error")).when(hostOrchestrator).runOrchestratorState(any());
 
-        ValidationResult result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(2L, result.getErrors().size());
-        assertEquals("DNS validation error", result.getErrors().get(0));
         assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
-                result.getErrors().get(1));
+                result.getErrors().get(0).message());
+        assertEquals("DNS validation error", result.getErrors().get(1).message());
     }
 
     private void setup() {

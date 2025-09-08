@@ -10,6 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,7 +38,6 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -48,6 +49,8 @@ import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
@@ -68,6 +71,10 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.ValidationHandler
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultType;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ConfigureDnsServerService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.PrepareIpaServerService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService;
@@ -180,7 +187,8 @@ class TrustSetupFlowIntegrationTest {
 
     @Test
     void testPrepareCrossRealmTrustWhenSuccessful() {
-        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults()
+                .addTaskResult(new TaskResult(TaskResultType.INFO, "Success", Map.of())));
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -193,6 +201,18 @@ class TrustSetupFlowIntegrationTest {
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService, times(3)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        SuccessDetails successDetails = new SuccessDetails(ENVIRONMENT_CRN);
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Success"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Ipa server preparation finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Dns configuration finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).completeOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
     }
 
     @Test
@@ -208,22 +228,36 @@ class TrustSetupFlowIntegrationTest {
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        FailureDetails failureDetails = new FailureDetails(ENVIRONMENT_CRN, "Cross-realm validation failed");
+        operationUpdateVerify.verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID,
+                "Failed to prepare cross-realm trust FreeIPA: Cross-realm validation failed", List.of(),
+                List.of(failureDetails));
     }
 
     @Test
     public void testValidationFailsWithValidationError() {
-        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().error("error").build());
+        when(validationService.validateTrustSetup(STACK_ID))
+                .thenReturn(new TaskResults()
+                        .addTaskResult(new TaskResult(TaskResultType.ERROR, "error", Map.of()))
+                        .addTaskResult(new TaskResult(TaskResultType.ERROR, "error2", Map.of())));
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
-                "Failed to prepare cross-realm trust FreeIPA: error");
+                "Failed to prepare cross-realm trust FreeIPA: 1. error\n2. error2");
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        operationUpdateVerify.verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID,
+                "Failed to prepare cross-realm trust FreeIPA: 1. error\n2. error2", List.of(),
+                List.of(new FailureDetails(ENVIRONMENT_CRN, "error"), new FailureDetails(ENVIRONMENT_CRN, "error2")));
     }
 
     @Test
     public void testPrepareIpaServerFails() throws CloudbreakOrchestratorFailedException {
-        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
         doThrow(new CloudbreakServiceException("Prepare IPA server failed")).when(prepareIpaServerService).prepareIpaServer(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
@@ -236,11 +270,18 @@ class TrustSetupFlowIntegrationTest {
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService, times(2)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(), List.of());
+        FailureDetails failureDetails = new FailureDetails(ENVIRONMENT_CRN, "Prepare IPA server failed");
+        operationUpdateVerify.verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID,
+                "Failed to prepare cross-realm trust FreeIPA: Prepare IPA server failed", List.of(),
+                List.of(failureDetails));
     }
 
     @Test
     public void testConfigureDnsServerFails() throws Exception {
-        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(ValidationResult.builder().build());
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
         doThrow(new CloudbreakServiceException("Configure DNS server failed")).when(configureDnsServerService).configureDnsServer(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
@@ -254,6 +295,17 @@ class TrustSetupFlowIntegrationTest {
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService, times(3)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(), List.of());
+        SuccessDetails successDetails = new SuccessDetails(ENVIRONMENT_CRN);
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Ipa server preparation finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        FailureDetails failureDetails = new FailureDetails(ENVIRONMENT_CRN, "Configure DNS server failed");
+        operationUpdateVerify.verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID,
+                "Failed to prepare cross-realm trust FreeIPA: Configure DNS server failed", List.of(),
+                List.of(failureDetails));
     }
 
     private void testFlow() {
@@ -302,7 +354,8 @@ class TrustSetupFlowIntegrationTest {
             ValidationHandler.class,
             PrepareIpaServerHandler.class,
             ConfigureDnsHandler.class,
-            CrossRealmTrustService.class
+            CrossRealmTrustService.class,
+            TaskResultConverter.class
     })
     static class Config {
         @MockBean

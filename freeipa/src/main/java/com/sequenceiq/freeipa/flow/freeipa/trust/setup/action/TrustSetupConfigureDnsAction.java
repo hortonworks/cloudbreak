@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setup.action;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.OperationConstants;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.ConfigureDnsFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.ConfigureDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.PrepareIpaServerSuccess;
@@ -22,6 +24,7 @@ public class TrustSetupConfigureDnsAction extends AbstractTrustSetupAction<Prepa
     @Override
     protected void doExecute(StackContext context, PrepareIpaServerSuccess payload, Map<Object, Object> variables) throws Exception {
         updateStatuses(context.getStack(), DetailedStackStatus.TRUST_SETUP_IN_PROGRESS, "Configuring DNS", TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        updateOperation(context.getStack(), getOperationId(variables), List.of(OperationConstants.IPASERVER_PREPARATION_SUCCEEDED));
         ConfigureDnsRequest request = new ConfigureDnsRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }

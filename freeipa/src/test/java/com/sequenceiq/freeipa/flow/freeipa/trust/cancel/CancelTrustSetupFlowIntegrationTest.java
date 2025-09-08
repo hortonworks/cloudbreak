@@ -63,6 +63,7 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.cancel.CancelTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -236,7 +237,8 @@ class CancelTrustSetupFlowIntegrationTest {
             CancelTrustSetupFinishedAction.class,
             CancelTrustService.class,
             CrossRealmTrustService.class,
-            CancelTrustSetupConfigurationHandler.class
+            CancelTrustSetupConfigurationHandler.class,
+            TaskResultConverter.class
     })
     static class Config {
         @MockBean

@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -63,11 +65,19 @@ public class OperationService {
         }
     }
 
+    public Operation updateOperation(String accountId, String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
+        Operation operation = getOperationForAccountIdAndOperationId(accountId, operationId);
+        operation.setSuccessList(mergeCollections(operation.getSuccessList(), success));
+        operation.setFailureList(mergeCollections(operation.getFailureList(), failure));
+        LOGGER.info("Operation updated: {}.", operation);
+        return operationRepository.save(operation);
+    }
+
     public Operation completeOperation(String accountId, String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
         Operation operation = getOperationForAccountIdAndOperationId(accountId, operationId);
         operation.setStatus(OperationState.COMPLETED);
-        operation.setSuccessList(List.copyOf(success));
-        operation.setFailureList(List.copyOf(failure));
+        operation.setSuccessList(mergeCollections(operation.getSuccessList(), success));
+        operation.setFailureList(mergeCollections(operation.getFailureList(), failure));
         operation.setEndTime(System.currentTimeMillis());
         LOGGER.info("Operation completed: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
@@ -79,8 +89,8 @@ public class OperationService {
         operation.setStatus(OperationState.FAILED);
         operation.setError(failureMessage);
         operation.setEndTime(System.currentTimeMillis());
-        operation.setSuccessList(List.copyOf(success));
-        operation.setFailureList(List.copyOf(failure));
+        operation.setSuccessList(mergeCollections(operation.getSuccessList(), success));
+        operation.setFailureList(mergeCollections(operation.getFailureList(), failure));
         LOGGER.warn("Operation failed: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
     }
@@ -164,5 +174,13 @@ public class OperationService {
         operation.setError(reason);
         LOGGER.warn("Operation rejected: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
+    }
+
+    private <E> List<E> mergeCollections(Collection<E> firstCollection, Collection<E> secondCollection) {
+        if (CollectionUtils.isNotEmpty(secondCollection)) {
+            return Stream.concat(firstCollection.stream(), secondCollection.stream()).toList();
+        } else {
+            return List.copyOf(firstCollection);
+        }
     }
 }

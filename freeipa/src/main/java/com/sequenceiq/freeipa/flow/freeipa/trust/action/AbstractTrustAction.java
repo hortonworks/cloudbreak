@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.action;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -23,6 +24,9 @@ import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -47,6 +51,12 @@ public abstract class AbstractTrustAction<S extends FlowState, E extends FlowEve
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
 
+    @Inject
+    private OperationService operationService;
+
+    @Inject
+    private TaskResultConverter taskResultConverter;
+
     protected AbstractTrustAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -63,6 +73,18 @@ public abstract class AbstractTrustAction<S extends FlowState, E extends FlowEve
     protected void updateStatuses(Stack stack, DetailedStackStatus detailedStackStatus, String statusReason, TrustStatus trustStatus) {
         stackUpdater.updateStackStatus(stack, detailedStackStatus, statusReason);
         crossRealmTrustService.updateTrustStateByStackId(stack.getId(), trustStatus);
+    }
+
+    protected void updateOperation(Stack stack, String operationId, TaskResults taskResults) {
+        operationService.updateOperation(stack.getAccountId(), operationId,
+                taskResultConverter.convertSuccessfulTasks(taskResults.getSuccessfulTasks(), stack.getEnvironmentCrn()),
+                taskResultConverter.convertFailedTasks(taskResults.getErrors(), stack.getEnvironmentCrn()));
+    }
+
+    protected void updateOperation(Stack stack, String operationId, List<String> successfulTasks) {
+        operationService.updateOperation(stack.getAccountId(), operationId, successfulTasks.stream()
+                .map(task -> taskResultConverter.convertSuccessfulTaskResult(task, stack.getEnvironmentCrn()))
+                .toList(), List.of());
     }
 
     protected void setOperationId(Stack stack, Map<Object, Object> variables, String operationId) {
