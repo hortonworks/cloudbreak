@@ -34,12 +34,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIpaProvisionState, FreeIpaProvisionEvent>
+public class FreeIpaProvisionFlowConfig extends StackStatusFinalizerAbstractFlowConfig<FreeIpaProvisionState, FreeIpaProvisionEvent>
         implements RetryableFlowConfiguration<FreeIpaProvisionEvent> {
 
     private static final FreeIpaProvisionEvent[] FREEIPA_INIT_EVENTS = {FREEIPA_PROVISION_EVENT};

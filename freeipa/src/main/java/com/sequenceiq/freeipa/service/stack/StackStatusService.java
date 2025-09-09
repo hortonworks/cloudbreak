@@ -8,23 +8,24 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
-import com.sequenceiq.cloudbreak.quartz.statuscleanup.StackStatusCleanupService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.repository.StackStatusRepository;
 
 @Service
-public class StackStatusService implements StackStatusCleanupService {
+public class StackStatusService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusService.class);
 
     private static final String ID_FIELD_NAME = "id";
+
+    @Value("${stackstatuscleanup.limit:100}")
+    private int statusCleanupLimit;
 
     @Inject
     private StackStatusRepository repository;
@@ -45,10 +46,11 @@ public class StackStatusService implements StackStatusCleanupService {
         repository.deleteAllByStackIdAndStatusNot(stackId, preservedStatus);
     }
 
-    @Override
-    public void cleanupByTimestamp(int limit, long timestampBefore) {
-        PageRequest pageRequest = PageRequest.of(0, limit, Sort.by(ID_FIELD_NAME).ascending());
-        List<StackStatus> removableStatuses = repository.findAllByCreatedLessThan(timestampBefore, pageRequest).getContent();
+    public void cleanupByStackId(Long stackId) {
+        List<StackStatus> stackStatusesById = repository.findAllByStackIdOrderByCreatedDesc(stackId);
+        List<StackStatus> removableStatuses = stackStatusesById.stream()
+                .skip(statusCleanupLimit)
+                .toList();
         LOGGER.debug("Removing stack statuses, count: {}.", removableStatuses.size());
         repository.deleteAll(removableStatuses);
     }

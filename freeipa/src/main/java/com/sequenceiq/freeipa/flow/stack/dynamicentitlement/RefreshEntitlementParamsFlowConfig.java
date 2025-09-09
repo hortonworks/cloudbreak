@@ -14,11 +14,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class RefreshEntitlementParamsFlowConfig extends AbstractFlowConfiguration<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent> {
+public class RefreshEntitlementParamsFlowConfig extends StackStatusFinalizerAbstractFlowConfig<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent> {
     private static final List<Transition<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent>> TRANSITIONS =
             new Builder<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent>()
                     .defaultFailureEvent(REFRESH_ENTITLEMENT_FAILURE_EVENT)

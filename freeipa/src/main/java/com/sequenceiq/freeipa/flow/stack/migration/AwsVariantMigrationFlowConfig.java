@@ -20,9 +20,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class AwsVariantMigrationFlowConfig extends AbstractFlowConfiguration<AwsVariantMigrationFlowState, AwsVariantMigrationEvent>
+public class AwsVariantMigrationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<AwsVariantMigrationFlowState, AwsVariantMigrationEvent>
         implements RetryableFlowConfiguration<AwsVariantMigrationEvent> {
 
     private static final List<Transition<AwsVariantMigrationFlowState, AwsVariantMigrationEvent>> TRANSITIONS =

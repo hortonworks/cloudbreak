@@ -36,13 +36,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.api.model.operation.OperationType;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 
 @Component
-public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>
+public class DiagnosticsCollectionFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>
         implements RetryableFlowConfiguration<DiagnosticsCollectionStateSelectors> {
 
     private static final List<Transition<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>> TRANSITIONS

@@ -53,6 +53,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupConfigurationAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupFailedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupFinishedAction;
@@ -136,6 +137,9 @@ class CancelTrustSetupFlowIntegrationTest {
 
     @MockBean
     private CrossRealmTrustService crossRealmTrustService;
+
+    @MockBean
+    private StackStatusFinalizer stackStatusFinalizer;
 
     @Inject
     private StackService stackService;

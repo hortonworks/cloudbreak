@@ -52,6 +52,7 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmActions;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmContext;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
@@ -143,6 +144,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private FlowEventListener flowEventListener;
+
+    @MockBean
+    private StackStatusFinalizer stackStatusFinalizer;
 
     @BeforeEach
     public void setup() {

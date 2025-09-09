@@ -29,6 +29,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
@@ -88,8 +89,8 @@ class FreeIpaFlowInformationTest {
 
     @Test
     void testParallelFlows() {
-        Set<Class<? extends AbstractFlowConfiguration>> flowConfigs =
-                new Reflections("com.sequenceiq.freeipa.flow").getSubTypesOf(AbstractFlowConfiguration.class);
+        Set<Class<? extends StackStatusFinalizerAbstractFlowConfig>> flowConfigs =
+                new Reflections("com.sequenceiq.freeipa.flow").getSubTypesOf(StackStatusFinalizerAbstractFlowConfig.class);
         Set<String> initEvents = flowConfigs.stream()
                 .map(clazz -> {
                     try {

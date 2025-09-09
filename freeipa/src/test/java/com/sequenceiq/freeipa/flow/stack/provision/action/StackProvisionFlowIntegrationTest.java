@@ -88,6 +88,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
@@ -207,6 +208,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private FlowEventListener flowEventListener;
+
+    @MockBean
+    private StackStatusFinalizer stackStatusFinalizer;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

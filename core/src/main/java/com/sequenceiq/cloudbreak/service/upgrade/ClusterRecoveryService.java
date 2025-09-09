@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -33,6 +34,17 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 public class ClusterRecoveryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRecoveryService.class);
+
+    private static final DetailedStackStatus UPGRADE_SUCCESS_STATUS = DetailedStackStatus.CLUSTER_UPGRADE_FINISHED;
+
+    private static final DetailedStackStatus UPGRADE_FAILURE_STATUS = DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
+
+    private static final DetailedStackStatus RECOVER_SUCCESS_STATUS = DetailedStackStatus.CLUSTER_RECOVERY_FINISHED;
+
+    private static final DetailedStackStatus RECOVERY_FAILURE_STATUS = DetailedStackStatus.CLUSTER_RECOVERY_FAILED;
+
+    public static final Set<DetailedStackStatus> RECOVERY_STATUSES =
+            Set.of(UPGRADE_SUCCESS_STATUS, UPGRADE_FAILURE_STATUS, RECOVERY_FAILURE_STATUS, RECOVER_SUCCESS_STATUS);
 
     @Inject
     private StackService stackService;
@@ -68,10 +80,10 @@ public class ClusterRecoveryService {
         int lastUpgradeSuccess = getLastUpgradeSuccess(detailedStackStatusList);
         int lastUpgradeFailure = getLastUpgradeFailure(detailedStackStatusList);
         String logMessage =
-                Stream.of(createLogEntry(lastUpgradeSuccess, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED),
-                                createLogEntry(lastUpgradeFailure, DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
-                                createLogEntry(lastRecoverySuccess, DetailedStackStatus.CLUSTER_RECOVERY_FINISHED),
-                                createLogEntry(lastRecoveryFailure, DetailedStackStatus.CLUSTER_RECOVERY_FAILED))
+                Stream.of(createLogEntry(lastUpgradeSuccess, UPGRADE_SUCCESS_STATUS),
+                                createLogEntry(lastUpgradeFailure, UPGRADE_FAILURE_STATUS),
+                                createLogEntry(lastRecoverySuccess, RECOVER_SUCCESS_STATUS),
+                                createLogEntry(lastRecoveryFailure, RECOVERY_FAILURE_STATUS))
                         .flatMap(Optional::stream)
                         .collect(Collectors.joining(". "));
         LOGGER.debug(logMessage);

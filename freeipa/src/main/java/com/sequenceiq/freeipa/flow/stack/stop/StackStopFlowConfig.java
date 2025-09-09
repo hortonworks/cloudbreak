@@ -24,11 +24,11 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent> implements FreeIpaUseCaseAware {
+public class StackStopFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackStopState, StackStopEvent> implements FreeIpaUseCaseAware {
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)

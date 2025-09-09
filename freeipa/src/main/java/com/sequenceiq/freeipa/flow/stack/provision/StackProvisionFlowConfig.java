@@ -60,12 +60,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackProvisionState, StackProvisionEvent>
+public class StackProvisionFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackProvisionState, StackProvisionEvent>
         implements RetryableFlowConfiguration<StackProvisionEvent> {
     private static final List<Transition<StackProvisionState, StackProvisionEvent>> TRANSITIONS = new Builder<StackProvisionState, StackProvisionEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)

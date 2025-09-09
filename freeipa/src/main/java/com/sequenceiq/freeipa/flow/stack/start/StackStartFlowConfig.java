@@ -30,11 +30,11 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> implements FreeIpaUseCaseAware {
+public class StackStartFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackStartState, StackStartEvent> implements FreeIpaUseCaseAware {
 
     private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Builder<StackStartState, StackStartEvent>()
             .defaultFailureEvent(START_FAILURE_EVENT)

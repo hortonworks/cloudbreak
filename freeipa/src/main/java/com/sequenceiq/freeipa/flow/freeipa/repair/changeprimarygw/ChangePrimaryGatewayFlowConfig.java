@@ -29,10 +29,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> {
+public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> {
     private static final List<Transition<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent>> TRANSITIONS =
             new Transition.Builder<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)

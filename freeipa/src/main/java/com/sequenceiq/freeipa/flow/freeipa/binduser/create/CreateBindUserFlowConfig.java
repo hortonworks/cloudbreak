@@ -17,12 +17,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFlowEvent;
 
 @Component
-public class CreateBindUserFlowConfig extends AbstractFlowConfiguration<CreateBindUserState, CreateBindUserFlowEvent>
+public class CreateBindUserFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CreateBindUserState, CreateBindUserFlowEvent>
         implements RetryableFlowConfiguration<CreateBindUserFlowEvent> {
 
     private static final CreateBindUserFlowEvent[] INIT_EVENTS = {CREATE_BIND_USER_EVENT};

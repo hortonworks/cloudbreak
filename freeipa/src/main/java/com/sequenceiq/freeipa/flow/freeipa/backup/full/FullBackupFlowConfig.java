@@ -15,12 +15,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupState, FullBackupEvent> implements RetryableFlowConfiguration<FullBackupEvent> {
+public class FullBackupFlowConfig
+        extends StackStatusFinalizerAbstractFlowConfig<FullBackupState, FullBackupEvent>
+        implements RetryableFlowConfiguration<FullBackupEvent> {
 
     private static final List<Transition<FullBackupState, FullBackupEvent>> TRANSITIONS =
             new Builder<FullBackupState, FullBackupEvent>().defaultFailureEvent(FULL_BACKUP_FAILED_EVENT)

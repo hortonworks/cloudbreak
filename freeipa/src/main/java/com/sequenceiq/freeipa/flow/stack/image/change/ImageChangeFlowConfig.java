@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 
 @Component
-public class ImageChangeFlowConfig extends AbstractFlowConfiguration<ImageChangeState, ImageChangeEvents> {
+public class ImageChangeFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ImageChangeState, ImageChangeEvents> {
 
     private static final List<Transition<ImageChangeState, ImageChangeEvents>> TRANSITIONS = new Transition.Builder<ImageChangeState, ImageChangeEvents>()
             .defaultFailureEvent(ImageChangeEvents.IMAGE_CHANGE_FAILED_EVENT)

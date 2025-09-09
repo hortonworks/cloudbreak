@@ -70,11 +70,11 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleState, DownscaleFlowEvent>
+public class DownscaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DownscaleState, DownscaleFlowEvent>
         implements RetryableFlowConfiguration<DownscaleFlowEvent>, FreeIpaUseCaseAware {
     private static final List<Transition<DownscaleState, DownscaleFlowEvent>> TRANSITIONS =
             new Transition.Builder<DownscaleState, DownscaleFlowEvent>()

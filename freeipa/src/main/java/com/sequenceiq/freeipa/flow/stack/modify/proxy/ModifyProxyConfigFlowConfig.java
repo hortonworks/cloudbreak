@@ -16,12 +16,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfigEvent;
 
 @Component
-public class ModifyProxyConfigFlowConfig extends AbstractFlowConfiguration<ModifyProxyConfigState, ModifyProxyConfigEvent>
+public class ModifyProxyConfigFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ModifyProxyConfigState, ModifyProxyConfigEvent>
         implements RetryableFlowConfiguration<ModifyProxyConfigEvent> {
 
     private static final FlowEdgeConfig<ModifyProxyConfigState, ModifyProxyConfigEvent> EDGE_CONFIG =

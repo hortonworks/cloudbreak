@@ -23,6 +23,8 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 @Transactional(TxType.REQUIRED)
 public interface StackStatusRepository extends CrudRepository<StackStatus, Long>, PagingAndSortingRepository<StackStatus, Long> {
 
+    List<StackStatus> findAllByStackIdOrderByCreatedDesc(long stackId);
+
     Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId);
 
     @Query("SELECT COUNT(status) as count, st.status as status " +

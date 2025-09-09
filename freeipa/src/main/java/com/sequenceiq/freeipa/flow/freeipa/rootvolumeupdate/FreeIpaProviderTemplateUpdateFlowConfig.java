@@ -15,10 +15,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class FreeIpaProviderTemplateUpdateFlowConfig extends AbstractFlowConfiguration<FreeIpaProviderTemplateUpdateState,
+public class FreeIpaProviderTemplateUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<FreeIpaProviderTemplateUpdateState,
         FreeIpaProviderTemplateUpdateFlowEvent> {
 
     private static final List<Transition<FreeIpaProviderTemplateUpdateState, FreeIpaProviderTemplateUpdateFlowEvent>> TRANSITIONS =

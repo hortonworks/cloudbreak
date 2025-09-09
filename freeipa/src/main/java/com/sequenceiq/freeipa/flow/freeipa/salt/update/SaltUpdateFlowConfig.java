@@ -22,12 +22,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateState, SaltUpdateEvent>
+public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<SaltUpdateState, SaltUpdateEvent>
         implements RetryableFlowConfiguration<SaltUpdateEvent> {
 
     private static final List<Transition<SaltUpdateState, SaltUpdateEvent>> TRANSITIONS =

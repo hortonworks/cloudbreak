@@ -18,11 +18,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class RebootFlowConfig extends AbstractFlowConfiguration<RebootState, RebootEvent> {
+public class RebootFlowConfig extends StackStatusFinalizerAbstractFlowConfig<RebootState, RebootEvent> {
 
     private static final List<Transition<RebootState, RebootEvent>> TRANSITIONS = new Builder<RebootState, RebootEvent>()
             .defaultFailureEvent(REBOOT_FAILURE_EVENT)

@@ -37,5 +37,6 @@ public class StackStatusFinalizer extends FlowFinalizerCallback {
                                 "an application error or when the operation is cancelled.", stackStatus.getStatus()));
                     }
                 });
+        stackStatusService.cleanupByStackId(resourceId);
     }
 }

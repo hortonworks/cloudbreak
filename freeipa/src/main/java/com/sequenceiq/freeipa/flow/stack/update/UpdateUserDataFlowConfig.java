@@ -15,10 +15,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class UpdateUserDataFlowConfig extends AbstractFlowConfiguration<UpdateUserDataState, UpdateUserDataEvents> {
+public class UpdateUserDataFlowConfig extends StackStatusFinalizerAbstractFlowConfig<UpdateUserDataState, UpdateUserDataEvents> {
 
     private static final List<Transition<UpdateUserDataState, UpdateUserDataEvents>> TRANSITIONS =
             new Transition.Builder<UpdateUserDataState, UpdateUserDataEvents>()

@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
 public class FreeIpaTrustSetupFlowConfig
-        extends AbstractFlowConfiguration<FreeIpaTrustSetupState, FreeIpaTrustSetupFlowEvent>
+        extends StackStatusFinalizerAbstractFlowConfig<FreeIpaTrustSetupState, FreeIpaTrustSetupFlowEvent>
         implements RetryableFlowConfiguration<FreeIpaTrustSetupFlowEvent>, FreeIpaUseCaseAware {
 
     private static final List<Transition<FreeIpaTrustSetupState, FreeIpaTrustSetupFlowEvent>> TRANSITIONS =

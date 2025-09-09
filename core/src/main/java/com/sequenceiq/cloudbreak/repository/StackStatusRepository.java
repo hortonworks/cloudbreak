@@ -27,6 +27,8 @@ public interface StackStatusRepository extends CrudRepository<StackStatus, Long>
 
     List<StackStatus> findAllByStackIdOrderByCreatedAsc(long stackId);
 
+    List<StackStatus> findAllByStackIdOrderByCreatedDesc(long stackId);
+
     List<StackStatus> findAllByStackIdAndCreatedGreaterThanEqualOrderByCreatedDesc(long stackId, long created);
 
     @Query("SELECT COUNT(status) as count, st.status as status " +

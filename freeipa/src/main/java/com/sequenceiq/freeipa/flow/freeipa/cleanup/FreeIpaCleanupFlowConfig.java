@@ -31,12 +31,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaCleanupState, FreeIpaCleanupEvent>
+public class FreeIpaCleanupFlowConfig extends StackStatusFinalizerAbstractFlowConfig<FreeIpaCleanupState, FreeIpaCleanupEvent>
         implements RetryableFlowConfiguration<FreeIpaCleanupEvent> {
 
     private static final FreeIpaCleanupEvent[] FREEIPA_INIT_EVENTS = {CLEANUP_EVENT};

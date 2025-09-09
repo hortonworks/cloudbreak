@@ -19,12 +19,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class FreeIpaLoadBalancerProvisionFlowConfig extends AbstractFlowConfiguration<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>
+public class FreeIpaLoadBalancerProvisionFlowConfig
+        extends StackStatusFinalizerAbstractFlowConfig<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>
         implements RetryableFlowConfiguration<FreeIpaLoadBalancerCreationEvent> {
 
     private static final FreeIpaLoadBalancerCreationEvent[] INIT_EVENTS = { FREEIPA_LOAD_BALANCER_CREATION_EVENT };

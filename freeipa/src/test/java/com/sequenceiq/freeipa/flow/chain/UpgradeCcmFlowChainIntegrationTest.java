@@ -67,6 +67,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.update.action.UserDataUpdateActions;
 import com.sequenceiq.freeipa.flow.stack.update.handler.UpdateUserDataHandler;
@@ -173,6 +174,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private FlowEventListener flowEventListener;
+
+    @MockBean
+    private StackStatusFinalizer stackStatusFinalizer;
 
     @Mock
     private ResourceConnector resourcesApi;

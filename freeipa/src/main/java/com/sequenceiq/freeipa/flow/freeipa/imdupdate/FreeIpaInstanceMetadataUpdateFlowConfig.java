@@ -22,12 +22,13 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
 
 @Component
-public class FreeIpaInstanceMetadataUpdateFlowConfig extends AbstractFlowConfiguration<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>
+public class FreeIpaInstanceMetadataUpdateFlowConfig
+        extends StackStatusFinalizerAbstractFlowConfig<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>
         implements FreeIpaUseCaseAware {
     private static final List<Transition<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>> TRANSITIONS =
             new Builder<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>()

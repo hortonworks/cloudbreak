@@ -40,12 +40,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
+import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector;
 
 @Component
-public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmState, UpgradeCcmStateSelector>
+public class UpgradeCcmFlowConfig extends StackStatusFinalizerAbstractFlowConfig<UpgradeCcmState, UpgradeCcmStateSelector>
         implements RetryableFlowConfiguration<UpgradeCcmStateSelector> {
 
     private static final UpgradeCcmStateSelector[] INIT_EVENTS = { UPGRADE_CCM_TRIGGER_EVENT };
