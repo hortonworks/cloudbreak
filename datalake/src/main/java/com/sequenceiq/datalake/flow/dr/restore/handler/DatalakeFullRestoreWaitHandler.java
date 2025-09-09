@@ -73,7 +73,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Full restore poller stopped for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId,
-                new PollerStoppedException("Data lake restore timed out after " + durationInMinutes + " minutes"));
+                new PollerStoppedException("Data lake restore timed out after " + duration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Full restore polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
