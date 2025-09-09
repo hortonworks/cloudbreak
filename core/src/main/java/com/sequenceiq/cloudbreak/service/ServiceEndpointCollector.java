@@ -117,6 +117,9 @@ public class ServiceEndpointCollector {
     }
 
     public Map<String, Collection<ClusterExposedServiceV4Response>> prepareClusterExposedServices(StackDtoDelegate stackDto, String managerIp) {
+        if (stackDto.getBlueprint() == null) {
+            throw new NotFoundException("Cannot find blueprint for stack with crn: " + stackDto.getStack().getResourceCrn());
+        }
         String blueprintText = getBlueprintString(stackDto);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
         if (!Strings.isNullOrEmpty(blueprintText)) {
@@ -128,7 +131,7 @@ public class ServiceEndpointCollector {
                     cmTemplateProcessor.getAllComponents(),
                     entitlementService.getEntitlements(stackDto.getTenantName()));
             GatewayView gateway = stackDto.getGateway();
-            Optional<String> version = Optional.ofNullable(stackDto.getBlueprint()).map(Blueprint::getStackVersion);
+            Optional<String> version = Optional.ofNullable(stackDto.getStackVersion());
             BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocationEvenIfStopped(stackDto, processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));

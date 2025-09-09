@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -79,6 +80,20 @@ class ClusterStatusSyncHandlerTest {
 
         verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
         verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    void testOnApplicationEventWhenCBStatusDeletedAndPeriscopeClusterRunning() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenThrow(new NotFoundException("Stack not found for stackCrn: someCrn"));
+
+        try {
+            underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+        } catch (Exception ex) {
+            verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
+            assertEquals(ex.getMessage(), "Stack not found for stackCrn: someCrn");
+        }
     }
 
     @Test

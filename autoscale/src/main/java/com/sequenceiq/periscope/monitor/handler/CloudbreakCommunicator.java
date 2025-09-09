@@ -44,7 +44,12 @@ public class CloudbreakCommunicator {
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
     public StackV4Response getByCrn(String stackCrn) {
-        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().get(stackCrn);
+        try {
+            return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().get(stackCrn);
+        } catch (Exception ex) {
+            LOGGER.error("Stack not found for stackCrn: {}", stackCrn);
+            throw ex;
+        }
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
