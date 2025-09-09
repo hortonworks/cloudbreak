@@ -61,6 +61,9 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack);
+            if (request.isReallocateMemory()) {
+                apiConnectors.getConnector(stack).reallocateMemory();
+            }
             if ((sdxBasicView.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()))
                     || request.isDatahubRefreshNeeded()) {
                 LOGGER.info("Deploying client config and restarting services");

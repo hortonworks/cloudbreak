@@ -84,6 +84,10 @@ public interface ClusterApi {
         clusterModificationService().deployConfigAndRestartClusterServices(rollingRestart);
     }
 
+    default void reallocateMemory() throws Exception {
+        clusterModificationService().reallocateMemory();
+    }
+
     default Set<ParcelInfo> gatherInstalledParcels(String stackName) {
         return clusterModificationService().gatherInstalledParcels(stackName);
     }

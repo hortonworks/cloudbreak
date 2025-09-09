@@ -10,14 +10,18 @@ public class ClusterServicesRestartRequest extends ClusterPlatformRequest {
 
     private final boolean restartStaleServices;
 
+    private final boolean reallocateMemory;
+
     @JsonCreator
     public ClusterServicesRestartRequest(
             @JsonProperty("stackId") Long stackId,
             @JsonProperty("rollingRestart") boolean rollingRestart,
-            @JsonProperty("restartStaleServices") boolean restartStaleServices) {
+            @JsonProperty("restartStaleServices") boolean restartStaleServices,
+            @JsonProperty("reallocateMemory") boolean reallocateMemory) {
         super(stackId);
         this.rollingRestart = rollingRestart;
         this.restartStaleServices = restartStaleServices;
+        this.reallocateMemory = reallocateMemory;
     }
 
     public boolean isRollingRestart() {
@@ -26,5 +30,9 @@ public class ClusterServicesRestartRequest extends ClusterPlatformRequest {
 
     public boolean isRestartStaleServices() {
         return restartStaleServices;
+    }
+
+    public boolean isReallocateMemory() {
+        return reallocateMemory;
     }
 }

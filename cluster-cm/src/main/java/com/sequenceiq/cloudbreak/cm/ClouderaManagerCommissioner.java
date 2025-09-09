@@ -108,7 +108,7 @@ public class ClouderaManagerCommissioner {
 
         ApiCommand apiCommand;
         try {
-            apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand("recommission_with_start", body);
+            apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand(body, "recommission_with_start");
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                     .startPollingCmHostsRecommission(stack, client, apiCommand.getId());
             if (pollingResult.isExited()) {

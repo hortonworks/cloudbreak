@@ -161,7 +161,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
             ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics, databusEndpoint);
-            cmResourceApi.updateConfig("Adding telemetry settings.", apiConfigList);
+            cmResourceApi.updateConfig(apiConfigList, "Adding telemetry settings.");
 
             AltusCredential credentials = clouderaManagerDatabusService.getAltusCredential(stack, sdxStackCrn);
             Map<String, String> accountConfigs = new HashMap<>();
@@ -188,7 +188,7 @@ public class ClouderaManagerMgmtTelemetryService {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
             ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn, proxyConfig);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
-                    "Set configs for Telemetry publisher by CB", configList);
+                    configList, "Set configs for Telemetry publisher by CB");
         }
     }
 
@@ -214,7 +214,7 @@ public class ClouderaManagerMgmtTelemetryService {
                     ApiConfigList configList = makeApiConfigList(configsToUpdate);
                     try {
                         mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR),
-                                "Set service monitoring configs for CM metrics exporter by CB", configList);
+                                configList, "Set service monitoring configs for CM metrics exporter by CB");
                     } catch (ApiException e) {
                         if (e.getMessage() != null && e.getMessage().contains(IGNORE_CM_EXCEPTION)) {
                             LOGGER.info("Could not configure smon telemetry, because: {}", e.getMessage());

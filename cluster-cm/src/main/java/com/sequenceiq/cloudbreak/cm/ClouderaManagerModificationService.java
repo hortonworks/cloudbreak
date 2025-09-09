@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY;
@@ -58,6 +59,7 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
+import com.cloudera.api.swagger.model.ApiGenericResponse;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -93,6 +95,7 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTim
 import com.sequenceiq.cloudbreak.cm.model.ClouderaManagerClientConfigDeployRequest;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
@@ -195,6 +198,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private ApiClient v52Client;
 
+    private ApiClient v55Client;
+
     public ClouderaManagerModificationService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
@@ -214,6 +219,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             v52Client = clouderaManagerApiClientProvider.getV52Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V52 client!");
+        }
+        try {
+            v55Client = clouderaManagerApiClientProvider.getV55Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.warn("Client init failed for V55 client!");
         }
     }
 
@@ -583,6 +593,25 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         restartClouderaManagementServices(mgmtServiceResourceApi);
     }
 
+    @Override
+    public void reallocateMemory() throws Exception {
+        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+        if (CMRepositoryVersionUtil.isMemoryRelocationSupported(clouderaManagerRepoDetails.getVersion())) {
+            try {
+                List<ApiHost> hosts = getHostsFromCM();
+                ApiHostNameList items = new ApiHostNameList().items(hosts.stream().map(ApiHost::getHostname).collect(Collectors.toList()));
+                ApiGenericResponse apiGenericResponse = clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemory(items);
+                LOGGER.info("Reallocate response: {}", apiGenericResponse);
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
+            } catch (ApiException e) {
+                LOGGER.error("Error during memory reallocation! ", e);
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_FAILED);
+            }
+        } else {
+            LOGGER.info("Memory relocation is not supported for Cloudera Manager version: {}", clouderaManagerRepoDetails.getVersion());
+        }
+    }
+
     @VisibleForTesting
     void deployConfigAndRefreshCMStaleServices(ClustersResourceApi clustersResourceApi, boolean forced) throws ApiException, CloudbreakException {
         LOGGER.debug("Redeploying client configurations and refreshing stale services in Cloudera Manager.");
@@ -709,11 +738,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_10_0)) {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v52Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, true, START_ROLES_ON_UPSCALED_NODES, body);
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, true, START_ROLES_ON_UPSCALED_NODES);
             } else {
                 HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(v31Client);
                 applyHostTemplateCommand = hostTemplatesResourceApi
-                        .applyHostTemplate(stack.getName(), hostGroupName, false, START_ROLES_ON_UPSCALED_NODES, body);
+                        .applyHostTemplate(stack.getName(), hostGroupName, body, false, START_ROLES_ON_UPSCALED_NODES);
             }
             ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                     stack, v31Client, applyHostTemplateCommand.getId());
@@ -811,7 +840,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void validateBatchResponse(ApiBatchResponse batchResponse) {
-        if (batchResponse != null && batchResponse.getSuccess() != null && batchResponse.getItems() != null && batchResponse.getSuccess()) {
+        if (batchResponse != null && batchResponse.isSuccess() != null && batchResponse.getItems() != null && batchResponse.isSuccess()) {
             // batchResponse contains the updated ApiHost for each request as well, but we are going to ignore them here
             LOGGER.debug("Setting rack ID for hosts batch operation finished. Updated host count: [{}].", batchResponse.getItems().size());
         } else {
@@ -941,7 +970,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         apiConfig.setName("memory_overcommit_threshold");
         apiConfig.setValue("0.95");
         apiConfigList.addItemsItem(apiConfig);
-        allHostsResourceApi.updateConfig(null, apiConfigList);
+        allHostsResourceApi.updateConfig(apiConfigList, null);
     }
 
     @Override
@@ -1028,7 +1057,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
         if (startClusterCommand.isPresent()) {
             Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
-            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().getActive())) {
+            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().isActive())) {
                 return startClusterCommand.get();
             } else {
                 clusterCommandService.delete(startClusterCommand.get());

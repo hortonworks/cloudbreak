@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.service.sslcontext;
 
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
@@ -12,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -38,5 +43,33 @@ public class SSLContextProvider {
             LOGGER.info("Cannot create SSL context", e);
             throw new CloudbreakServiceException("Cannot create SSL context", e);
         }
+    }
+
+    public X509TrustManager createTrustManager(String serverCert, String clientCert) {
+
+        final X509Certificate trustedServerCert = PkiUtil.fromCertificatePem(serverCert);
+        final X509Certificate trustedClientCert = PkiUtil.fromCertificatePem(clientCert);
+
+        return new X509TrustManager() {
+
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[]{trustedServerCert};
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                if (chain == null || chain.length == 0 || !Objects.equals(chain[0], trustedClientCert)) {
+                    throw new CertificateException("Client certificate not trusted");
+                }
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                if (chain == null || chain.length == 0 || !Objects.equals(chain[0], trustedServerCert)) {
+                    throw new CertificateException("Server certificate not trusted");
+                }
+            }
+        };
     }
 }

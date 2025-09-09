@@ -15,12 +15,15 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
 
     private final boolean restartStaleServices;
 
+    private final boolean reallocateMemory;
+
     public ClusterServicesRestartTriggerEvent(String selector, Long stackId, boolean refreshNeeded,
-            boolean rollingRestart, boolean restartStaleServices) {
+            boolean rollingRestart, boolean restartStaleServices, boolean reallocateMemory) {
         super(selector, stackId);
         this.refreshNeeded = refreshNeeded;
         this.rollingRestart = rollingRestart;
         this.restartStaleServices = restartStaleServices;
+        this.reallocateMemory = reallocateMemory;
     }
 
     @JsonCreator
@@ -30,11 +33,13 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
             @JsonProperty("refreshNeeded") boolean refreshNeeded,
             @JsonProperty("rollingRestart") boolean rollingRestart,
             @JsonProperty("restartStaleServices") boolean restartStaleServices,
+            @JsonProperty("reallocateMemory") boolean reallocateMemory,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.refreshNeeded = refreshNeeded;
         this.rollingRestart = rollingRestart;
         this.restartStaleServices = restartStaleServices;
+        this.reallocateMemory = reallocateMemory;
     }
 
     public boolean isRefreshNeeded() {
@@ -47,5 +52,9 @@ public class ClusterServicesRestartTriggerEvent extends StackEvent {
 
     public boolean isRestartStaleServices() {
         return restartStaleServices;
+    }
+
+    public boolean isReallocateMemory() {
+        return reallocateMemory;
     }
 }

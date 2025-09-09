@@ -17,11 +17,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cm.model.CommandResource;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.squareup.okhttp.HttpUrl;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
+
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public abstract class AbstractCommandTableResource {
 
@@ -46,7 +47,7 @@ public abstract class AbstractCommandTableResource {
                     .execute();
             if (response.code() >= ERROR_CODES_FROM) {
                 LOGGER.debug("{} request against Cloudera Manager API returned with status code: {}, response: {}",
-                        request.httpUrl().toString(), response, response.code());
+                        request.url(), response, response.code());
                 throw new CloudbreakException(
                         String.format("%s request against CM API returned with status code: %d",
                                 getUriPath(), response.code()));
@@ -82,12 +83,12 @@ public abstract class AbstractCommandTableResource {
         String[] authNames = new String[]{"basic"};
         enhanceRequestParams(headers, queryParams, headerParams);
         Request defaultRequest = apiClient.buildRequest(path, "GET", queryParams, null,
-                headerParams, new HashMap<>(), authNames, null);
+                null, headerParams, new HashMap<>(), authNames, null);
         return createRequestFromDefaultRequest(defaultRequest);
     }
 
     private Request createRequestFromDefaultRequest(Request defaultRequest) {
-        HttpUrl defaultHttpUrl = defaultRequest.httpUrl();
+        HttpUrl defaultHttpUrl = defaultRequest.url();
         HttpUrl.Builder httpUrlBuilder = new HttpUrl.Builder()
                 .username(defaultHttpUrl.username())
                 .password(defaultHttpUrl.password())

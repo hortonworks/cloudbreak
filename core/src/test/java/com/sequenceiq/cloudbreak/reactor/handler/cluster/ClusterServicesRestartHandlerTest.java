@@ -92,10 +92,22 @@ public class ClusterServicesRestartHandlerTest {
     @Test
     public void testRefreshNeeded() throws Exception {
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(true);
-        underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false)));
+        underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false, false)));
 
         verify(clusterServicesRestartService).refreshClusterOnRestart(any(), any(), any(), eq(false));
         verifyNoInteractions(apiConnectors);
+    }
+
+    @Test
+    public void testReallocateMemory() throws Exception {
+        when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
+        when(connector.clusterModificationService()).thenReturn(clusterModificationService);
+        underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), true, false, true)));
+
+        verify(connector, times(1)).reallocateMemory();
+        verify(clusterModificationService, times(1)).rollingRestartServices(false);
+        verify(clusterModificationService, times(0)).restartClusterServices();
+
     }
 
     @Test
@@ -103,7 +115,7 @@ public class ClusterServicesRestartHandlerTest {
         when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
-        underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false)));
+        underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false, false)));
 
         verify(clusterServicesRestartService, times(0)).refreshClusterOnRestart(any(), any(), any(), eq(false));
         verify(clusterModificationService).restartClusterServices();

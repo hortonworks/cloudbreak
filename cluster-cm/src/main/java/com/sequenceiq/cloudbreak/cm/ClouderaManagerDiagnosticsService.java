@@ -104,15 +104,13 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
             } else {
                 LOGGER.debug("PHONE_HOME is not set properly for sending data to Cloudera Support, value: {}, updating it ...",
                         globalPhoneHomeConfig);
-                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination)",
-                        createPhoneHomeConfig(true));
+                resourceApi.updateConfig(createPhoneHomeConfig(true), "Update phone home setting for diagnostics (support destination)");
             }
         } else {
             if (globalPhoneHomeConfig) {
                 LOGGER.debug("PHONE_HOME is not set properly for NOT sending data to Cloudera Support (only to cloud storage), " +
                                 "value: {}, updating it ...", globalPhoneHomeConfig);
-                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination)",
-                        createPhoneHomeConfig(false));
+                resourceApi.updateConfig(createPhoneHomeConfig(false), "Update phone home setting for diagnostics (support destination)");
             } else {
                 LOGGER.debug("PHONE_HOME is set properly for sending data to cloud storage only, value: {}", globalPhoneHomeConfig);
             }
@@ -124,14 +122,14 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
         if (DiagnosticsDestination.SUPPORT.equals(destination)) {
             if (!globalPhoneHomeConfig) {
                 LOGGER.debug("As PHONE_HOME value was different before diagnostics, setting its value back to false.");
-                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination) - post update",
-                        createPhoneHomeConfig(globalPhoneHomeConfig));
+                resourceApi.updateConfig(createPhoneHomeConfig(globalPhoneHomeConfig),
+                        "Update phone home setting for diagnostics (support destination) - post update");
             }
         } else {
             if (globalPhoneHomeConfig) {
                 LOGGER.debug("As PHONE_HOME value was different before diagnostics, setting its value back to true.");
-                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination) - post update",
-                        createPhoneHomeConfig(globalPhoneHomeConfig));
+                resourceApi.updateConfig(createPhoneHomeConfig(globalPhoneHomeConfig),
+                        "Update phone home setting for diagnostics (support destination) - post update");
             }
         }
     }

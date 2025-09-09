@@ -164,7 +164,7 @@ dependencies {
   implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
   implementation group:  'org.apache.commons',           name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group:  'org.opentest4j',               name: 'opentest4j',                     version: '1.3.0'
-  implementation group: 'com.squareup.okhttp',           name: 'okhttp',                         version: '2.7.5'
+  implementation group: 'com.squareup.okhttp3',          name: 'okhttp',                         version: okhttpVersion
   implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
 
   implementation(group: "org.junit.vintage",             name: "junit-vintage-engine",           version: junitJupiterVersion) {
@@ -175,9 +175,7 @@ dependencies {
     exclude group: "velocity"
   }
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  implementation (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion) {
-    transitive = false
-  }
+  implementation (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion)
   implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.40.0') {
     exclude group: "net.i2p.crypto"
   }

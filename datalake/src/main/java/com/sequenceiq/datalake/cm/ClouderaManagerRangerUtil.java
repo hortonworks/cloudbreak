@@ -196,8 +196,7 @@ public class ClouderaManagerRangerUtil {
             rangerUserSyncRoleNames.forEach(rangerUserSyncRoleName -> {
                 try {
                     rolesResourceApi.updateRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME,
-                            "Updating Azure Cloud Identity Mapping through Cloudbreak",
-                            configList);
+                            configList, "Updating Azure Cloud Identity Mapping through Cloudbreak");
                 } catch (ApiException e) {
                     throw new CloudbreakServiceException(e);
                 }

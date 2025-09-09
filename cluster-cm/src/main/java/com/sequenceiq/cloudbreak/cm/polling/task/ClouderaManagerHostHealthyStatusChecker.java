@@ -111,7 +111,7 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
                 lastHeartBeat = Instant.parse(apiHost.getLastHeartbeat());
             }
             ApiHealthSummary healthSummary = apiHost.getHealthSummary();
-            boolean inMaintenance = Boolean.TRUE.equals(apiHost.getMaintenanceMode());
+            boolean inMaintenance = Boolean.TRUE.equals(apiHost.isMaintenanceMode());
             ApiCommissionState commissionState = apiHost.getCommissionState();
             LOGGER.trace("CM info for: [{}]: lastHeatbeat={}, lastHeartbeatInstant={}, healthSummary={}, commissionState={}, maint={}",
                     hostname, apiHost.getLastHeartbeat(), lastHeartBeat, healthSummary, commissionState, inMaintenance);

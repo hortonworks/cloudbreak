@@ -36,7 +36,7 @@ public class SetDefaultJavaVersionFlowChainFactory implements FlowEventChainFact
         }
         if (event.isRestartServices()) {
             flowEventChain.add(new ClusterServicesRestartTriggerEvent(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event(), event.getResourceId(), true,
-                    event.isRollingRestart(), false, event.accepted()));
+                    event.isRollingRestart(), false, true, event.accepted()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

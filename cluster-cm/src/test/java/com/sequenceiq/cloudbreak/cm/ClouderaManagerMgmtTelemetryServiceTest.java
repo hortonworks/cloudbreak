@@ -195,7 +195,7 @@ class ClouderaManagerMgmtTelemetryServiceTest {
 
             underTest.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry, SDX_STACK_CRN);
 
-            verify(cmResourceApi).updateConfig(eq("Adding telemetry settings."), apiConfigListCaptor.capture());
+            verify(cmResourceApi).updateConfig(apiConfigListCaptor.capture(), eq("Adding telemetry settings."));
             verify(externalAccountService).createExternalAccount(eq("cb-altus-access"), eq("cb-altus-access"), eq("ALTUS_ACCESS_KEY_AUTH"),
                     accountConfigsMapCaptor.capture(), eq(apiClient));
             ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
@@ -261,8 +261,8 @@ class ClouderaManagerMgmtTelemetryServiceTest {
 
             underTest.updateTelemetryConfigs(stack, apiClient, telemetry, SDX_CONTEXT_NAME, SDX_STACK_CRN, proxyConfig);
 
-            verify(mgmtRoleConfigGroupsResourceApi).updateConfig(eq("MGMT-TELEMETRYPUBLISHER-BASE"), eq("Set configs for Telemetry publisher by CB"),
-                    apiConfigListCaptor.capture());
+            verify(mgmtRoleConfigGroupsResourceApi).updateConfig(eq("MGMT-TELEMETRYPUBLISHER-BASE"), apiConfigListCaptor.capture(),
+                    eq("Set configs for Telemetry publisher by CB"));
             ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
             assertTrue(containsSafatyValveWithValue(apiConfigList, "databus.header.sdx.name", SDX_CONTEXT_NAME));
             assertTrue(containsSafatyValveWithValue(apiConfigList, "databus.header.sdx.id", "mystack"));
@@ -297,7 +297,7 @@ class ClouderaManagerMgmtTelemetryServiceTest {
             verify(clouderaManagerApiFactory, never()).getMgmtRoleConfigGroupsResourceApi(any(ApiClient.class));
             verify(cmTemplateProcessorFactory, never()).get(anyString());
             verify(meteringServiceFieldResolver, never()).resolveServiceFeature(any(CmTemplateProcessor.class));
-            verify(mgmtRoleConfigGroupsResourceApi, never()).updateConfig(anyString(), anyString(), any(ApiConfigList.class));
+            verify(mgmtRoleConfigGroupsResourceApi, never()).updateConfig(anyString(), any(ApiConfigList.class), anyString());
         }
     }
 
@@ -316,8 +316,8 @@ class ClouderaManagerMgmtTelemetryServiceTest {
         underTest.updateServiceMonitorConfigs(stack, apiClient, telemetry);
 
         verify(mgmtRoleConfigGroupsResourceApi).readConfig("MGMT-SERVICEMONITOR-BASE", "FULL");
-        verify(mgmtRoleConfigGroupsResourceApi).updateConfig(eq("MGMT-SERVICEMONITOR-BASE"),
-                eq("Set service monitoring configs for CM metrics exporter by CB"), apiConfigListCaptor.capture());
+        verify(mgmtRoleConfigGroupsResourceApi).updateConfig(eq("MGMT-SERVICEMONITOR-BASE"), apiConfigListCaptor.capture(),
+                eq("Set service monitoring configs for CM metrics exporter by CB"));
         ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
         assertTrue(containsConfigWithValue(apiConfigList, "prometheus_metrics_endpoint_username", "monitoringUser"));
         assertTrue(containsConfigWithValue(apiConfigList, "prometheus_metrics_endpoint_password", "monitoringPassword"));
