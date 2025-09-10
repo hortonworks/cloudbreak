@@ -27,7 +27,8 @@ public enum ImagePackageVersion {
     CDP_PROMETHEUS("cdp-prometheus"),
     PSQL10("psql10", "PostgreSQL 10"),
     PSQL11("psql11", "PostgreSQL 11"),
-    PSQL14("psql14", "PostgreSQL 14");
+    PSQL14("psql14", "PostgreSQL 14"),
+    RELEASE_VERSION_TAG("release-version", "Release version tag");
 
     public static final Set<ImagePackageVersion> PSQL_VERSIONS = Set.of(PSQL10, PSQL11, PSQL14);
 
