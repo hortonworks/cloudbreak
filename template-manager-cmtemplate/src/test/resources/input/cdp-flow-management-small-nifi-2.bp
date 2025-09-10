@@ -176,10 +176,6 @@
                 "value": "500000"
               },
               {
-                "name": "nifi.nar.hotfix.provider.enabled",
-                "value": "true"
-              },
-              {
                 "name": "nifi.ldap.url",
                 "value": "${LDAP_URL}"
               },
