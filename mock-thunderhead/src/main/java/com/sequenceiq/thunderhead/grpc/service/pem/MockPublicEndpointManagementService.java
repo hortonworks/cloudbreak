@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.dns.LegacyEnvironmentNameBasedDomainNameProvider;
 import com.sequenceiq.thunderhead.entity.PublicCertGen;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
-import com.sequenceiq.thunderhead.repository.PublicCertGenRespository;
+import com.sequenceiq.thunderhead.repository.PublicCertGenRepository;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -37,7 +37,7 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
     private LegacyEnvironmentNameBasedDomainNameProvider environmentNameBasedDomainNameProvider;
 
     @Inject
-    private PublicCertGenRespository publicCertGenRespository;
+    private PublicCertGenRepository publicCertGenRepository;
 
     @Override
     public void generateManagedDomainNames(PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request,
@@ -70,7 +70,7 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
         publicCertGen.setCrn(request.getClusterCrn());
         publicCertGen.setEnvironmentName(request.getEnvironmentName());
         publicCertGen.setCsr(Base64.getEncoder().encodeToString(request.getCsr().toByteArray()));
-        publicCertGenRespository.save(publicCertGen);
+        publicCertGenRepository.save(publicCertGen);
         PublicEndpointManagementProto.CertificateSigningResponse response = PublicEndpointManagementProto.CertificateSigningResponse.newBuilder()
                 .setWorkflowId(workflowId)
                 .build();
@@ -81,7 +81,7 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
     @Override
     public void pollCertificateSigning(PublicEndpointManagementProto.PollCertificateSigningRequest request,
             StreamObserver<PublicEndpointManagementProto.PollCertificateSigningResponse> responseObserver) {
-        Optional<PublicCertGen> byWorkFlowId = publicCertGenRespository.findByWorkFlowId(request.getWorkflowId());
+        Optional<PublicCertGen> byWorkFlowId = publicCertGenRepository.findByWorkFlowId(request.getWorkflowId());
         if (byWorkFlowId.isPresent()) {
             try {
                 byte[] csrBytes = Base64.getDecoder().decode(byWorkFlowId.get().getCsr());
@@ -97,7 +97,7 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
                                 .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
-                publicCertGenRespository.delete(byWorkFlowId.get());
+                publicCertGenRepository.delete(byWorkFlowId.get());
             } catch (Exception e) {
                 LOGGER.error("Failure during certificate generation, ", e);
                 responseObserver.onError(Status.INTERNAL.withCause(e).asException());

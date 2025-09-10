@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpClientConfig {
 
+    private static final String DEFAULT_CLUSTER_PROXY_SERVICE_NAME = "cb-internal";
+
     private final String apiAddress;
 
     private String serverCert;
@@ -13,6 +15,8 @@ public class HttpClientConfig {
     private String clientKey;
 
     private String clusterProxyUrl;
+
+    private String clusterProxyServiceName;
 
     private String clusterCrn;
 
@@ -28,8 +32,13 @@ public class HttpClientConfig {
     }
 
     public HttpClientConfig withClusterProxy(String clusterProxyUrl, String clusterCrn) {
+        return withClusterProxy(clusterProxyUrl, clusterCrn, DEFAULT_CLUSTER_PROXY_SERVICE_NAME);
+    }
+
+    public HttpClientConfig withClusterProxy(String clusterProxyUrl, String clusterCrn, String clusterProxyServiceName) {
         this.clusterProxyUrl = clusterProxyUrl;
         this.clusterCrn = clusterCrn;
+        this.clusterProxyServiceName = clusterProxyServiceName;
         return this;
     }
 
@@ -51,6 +60,10 @@ public class HttpClientConfig {
 
     public String getClusterProxyUrl() {
         return clusterProxyUrl;
+    }
+
+    public String getClusterProxyServiceName() {
+        return clusterProxyServiceName;
     }
 
     public String getClusterCrn() {

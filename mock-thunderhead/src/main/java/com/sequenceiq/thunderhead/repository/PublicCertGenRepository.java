@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.sequenceiq.thunderhead.entity.PublicCertGen;
 
 @Repository
-public interface PublicCertGenRespository extends CrudRepository<PublicCertGen, String> {
+public interface PublicCertGenRepository extends CrudRepository<PublicCertGen, String> {
 
     Optional<PublicCertGen> findByWorkFlowId(String workFlowId);
 }

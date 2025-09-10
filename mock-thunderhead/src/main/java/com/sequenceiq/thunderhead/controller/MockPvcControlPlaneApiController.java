@@ -56,13 +56,12 @@ public class MockPvcControlPlaneApiController {
                 Crn controlPlaneCrn = Crn.safeFromString(crn);
                 String pvControlPlaneAccountId = controlPlaneCrn.getResource();
                 String environmentResourceId = pvControlPlaneAccountId + "-" + i;
-                String environmentName = i + pvControlPlaneAccountId.substring(pvControlPlaneAccountId.lastIndexOf("-"));
                 Crn envCrn = regionAwareCrnGenerator.generateCrn(
                         CrnResourceDescriptor.ENVIRONMENT,
-                        environmentName + "/" + environmentResourceId,
+                        pvControlPlaneAccountId + "/" + environmentResourceId,
                         pvControlPlaneAccountId);
                 EnvironmentSummary mockRemoteEnvironmentResponse = new EnvironmentSummary();
-                mockRemoteEnvironmentResponse.setEnvironmentName(environmentName);
+                mockRemoteEnvironmentResponse.setEnvironmentName(environmentResourceId);
                 mockRemoteEnvironmentResponse.setCrn(envCrn.toString());
                 mockRemoteEnvironmentResponse.setCloudPlatform("OPENSHIFT");
                 mockRemoteEnvironmentResponse.setStatus("AVAILABLE");

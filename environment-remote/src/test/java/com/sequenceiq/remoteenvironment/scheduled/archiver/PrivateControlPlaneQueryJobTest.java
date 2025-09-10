@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionException;
 
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
-import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequests;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.scheduled.PrivateControlPlaneQueryJob;
@@ -28,7 +28,7 @@ import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 @ExtendWith(MockitoExtension.class)
 class PrivateControlPlaneQueryJobTest {
     @Mock
-    private GrpcRemoteClusterClient grpcRemoteClusterClient;
+    private RemoteClusterServiceClient grpcRemoteClusterClient;
 
     @Mock
     private PrivateControlPlaneService privateControlPlaneService;

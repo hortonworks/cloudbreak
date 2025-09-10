@@ -13,7 +13,7 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto;
-import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 
 @Service
 public class PrivateEnvironmentBaseClusterService {
@@ -23,11 +23,11 @@ public class PrivateEnvironmentBaseClusterService {
 
     private static final String DATA_CENTER_NAME_PATTERN = "%s_%s_datacenter";
 
-    private final GrpcRemoteClusterClient grpcRemoteClusterClient;
+    private final RemoteClusterServiceClient grpcRemoteClusterClient;
 
     private final Pattern compiledCmHostPattern;
 
-    public PrivateEnvironmentBaseClusterService(GrpcRemoteClusterClient grpcRemoteClusterClient) {
+    public PrivateEnvironmentBaseClusterService(RemoteClusterServiceClient grpcRemoteClusterClient) {
         this.grpcRemoteClusterClient = grpcRemoteClusterClient;
         this.compiledCmHostPattern = Pattern.compile(CM_HOST_PATTERN);
     }

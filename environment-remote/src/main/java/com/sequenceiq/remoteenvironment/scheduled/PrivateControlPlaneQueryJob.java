@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
-import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequest;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequests;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
@@ -34,7 +34,7 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(PrivateControlPlaneQueryJob.class);
 
     @Inject
-    private GrpcRemoteClusterClient grpcRemoteClusterClient;
+    private RemoteClusterServiceClient grpcRemoteClusterClient;
 
     @Inject
     private PrivateControlPlaneService privateControlPlaneService;

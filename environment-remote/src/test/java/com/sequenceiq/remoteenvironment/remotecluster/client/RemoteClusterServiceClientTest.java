@@ -18,12 +18,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceConfig;
 import com.sequenceiq.remotecluster.client.StubProvider;
 
 @ExtendWith(MockitoExtension.class)
 class RemoteClusterServiceClientTest {
+
+    @Mock
+    private ManagedChannelWrapper channelWrapper;
 
     @Mock
     private StubProvider stubProvider;
@@ -49,7 +53,7 @@ class RemoteClusterServiceClientTest {
         when(remoteClusterInternalBlockingStub.listAllPvcControlPlanes(any()))
                 .thenReturn(response1)
                 .thenReturn(response2);
-        when(stubProvider.newInternalStub(any(), any(), any(), any(), any())).thenReturn(remoteClusterInternalBlockingStub);
+        when(stubProvider.newRemoteClusterInternalStub(any(), any(), any(), any(), any())).thenReturn(remoteClusterInternalBlockingStub);
 
         List<PvcControlPlaneConfiguration> result = remoteClusterServiceClient.listAllPrivateControlPlanes();
 

@@ -107,8 +107,12 @@ public class ClouderaManagerApiClientProvider {
         try {
             ApiClient cmClient = new ApiClient();
             if (clientConfig.isClusterProxyEnabled()) {
-                cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cb-internal" + context);
-                cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
+                String basePath = String.format("%s/proxy/%s/%s%s",
+                    clientConfig.getClusterProxyUrl(), clientConfig.getClusterCrn(), clientConfig.getClusterProxyServiceName(), context);
+                cmClient.setBasePath(basePath);
+                if (StringUtils.isNotEmpty(userName)) {
+                    cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
+                }
                 cmClient.addDefaultHeader("Proxy-With-Timeout", clusterProxyTimeout.toString());
             } else if (port != null && !HostUtil.hasPort(clientConfig.getApiAddress())) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
@@ -123,8 +127,12 @@ public class ClouderaManagerApiClientProvider {
     }
 
     private ApiClient decorateClient(HttpClientConfig clientConfig, String userName, String password, ApiClient cmClient) throws Exception {
-        cmClient.setUsername(userName);
-        cmClient.setPassword(password);
+        if (StringUtils.isNotEmpty(userName)) {
+            cmClient.setUsername(userName);
+            if (StringUtils.isNotEmpty(password)) {
+                cmClient.setPassword(password);
+            }
+        }
         cmClient.setVerifyingSsl(true);
         try {
             if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {

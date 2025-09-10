@@ -1,0 +1,884 @@
+syntax = "proto3";
+
+package onpremises;
+
+import "options.proto";
+
+option go_package = "com/cloudera/cdp/protobuf";
+option java_outer_classname = "OnPremisesApiProto";
+option java_package = "com.cloudera.thunderhead.service.onpremises";
+option (options.FileExtension.audit) = true;
+
+// OnPremises Service :: OnPremises Service is a web service to manage the on-prem clusters and control planes.
+service OnPremisesApi {
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "onpremises"
+    camelcase: "OnPremises"
+  };
+  option (options.ServiceExtension.formFactor) = "private,public";
+
+  // TODO(@abkumar): Move PvC methods here.
+
+  // Lists all registered clusters. :: Lists all registered on-premise clusters.
+  rpc ListClusters(ListClustersRequest)
+      returns (ListClustersResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Register an existing cluster :: Register an existing cluster as an on-premise cluster.
+  rpc RegisterCluster(RegisterClusterRequest)
+      returns (RegisterClusterResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Get cluster details. :: Get details of a registered on-premise cluster.
+  rpc DescribeCluster(DescribeClusterRequest)
+      returns (DescribeClusterResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Update an existing cluster :: Update registration of an on-premise cluster.
+  rpc UpdateCluster(UpdateClusterRequest)
+      returns (UpdateClusterResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Extract clusters :: Extracts cluster information by using authenticated access to the cluster-manager.
+  rpc ExtractClusters(ExtractClustersRequest)
+      returns (ExtractClustersResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // List service details of a cluster. :: Gets the service details of a cluster.
+  rpc ListClusterServices(ListClusterServicesRequest)
+      returns (ListClusterServicesResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // List the locations and its details. :: List the locations and its details.
+  rpc ListLocations(ListLocationsRequest)
+      returns (ListLocationsResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Syncs the remote cluster data with the latest cluster service details. :: Syncs the remote cluster data with the latest cluster service details.
+  rpc SyncClusterData (SyncClusterDataRequest)
+      returns (SyncClusterDataResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Delete a cluster. :: Delete a cluster.
+  rpc DeleteCluster (DeleteClusterRequest)
+      returns (DeleteClusterResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // List partially registered clusters. :: API to list all the partially registered clusters.
+  rpc ListPartiallyRegisteredClusters (ListPartiallyRegisteredClustersRequest)
+      returns (ListPartiallyRegisteredClustersResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Set-up Cluster Connectivity. :: Sets the cluster connectivity for the unregistered cluster.
+  rpc SetupClusterConnectivity (SetupClusterConnectivityRequest)
+      returns (SetupClusterConnectivityResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Describes the partially registered cluster. :: Describes the partially registered cluster.
+  rpc DescribePartiallyRegisteredCluster (DescribePartiallyRegisteredClusterRequest)
+      returns (DescribePartiallyRegisteredClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Register agent API call. :: Registers the agent with cloudera manager.
+  rpc RegisterAgent (RegisterAgentRequest)
+      returns (RegisterAgentResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Extract the setup script. :: Extract the setup script for CCM_V2 installation.
+  rpc ExtractSetupScript (ExtractSetupScriptRequest)
+      returns (ExtractSetupScriptResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
+  rpc UpdateClusterState (UpdateClusterStateRequest)
+      returns (UpdateClusterStateResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+  // Check cluster connectivity. :: Checks the connection between CDP and Cloudera Manager.
+  rpc CheckClusterConnectivity (CheckClusterConnectivityRequest)
+      returns (CheckClusterConnectivityResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Delete partially registered cluster. :: Delete the partially registered cluster.
+  rpc DeletePartiallyRegisteredCluster (DeletePartiallyRegisteredClusterRequest)
+      returns (DeletePartiallyRegisteredClusterResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+}
+
+// Request object for the ListClusters method.
+message ListClustersRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The page size.
+  int32 pageSize = 1 [
+    (options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100
+  ];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+
+  // Manager type of the cluster.
+  ClusterManagerType.Value managerType = 3;
+  // Services in the cluster.
+  repeated string services = 4;
+  // Operator on which the filters should be applied.
+  ClusterQueryOperator.Value operator = 5;
+}
+
+// Response object for the ListClusters method.
+message ListClustersResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextPageToken = 1 [(options.FieldExtension.pagingOutputToken) = true];
+
+  // List of clusters.
+  repeated Cluster clusters = 2 [(options.FieldExtension.pagingResult) = true];
+}
+
+// Request object for the RegisterCluster method.
+message RegisterClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The data center name of the registered on-premise cluster.
+  string datacenterName = 2 [(options.FieldExtension.required) = true];
+
+  // The manager URI of the on-premise cluster.
+  string managerUri = 101 [(options.FieldExtension.required) = true];
+
+  // The user name for the cluster.
+  string username = 102;
+
+  // The password for the cluster.
+  string password = 103 [
+    (options.FieldExtension.sensitive) = true
+  ];
+
+  // Name of the cluster. Should match the name it uses in Cloudera Manager (or Ambari).
+  string name = 1;
+
+  // The location of the cluster.
+  int64 locationId = 104;
+
+  // Tags associated with the registration
+  repeated string tags = 105;
+
+  // Description of the onpremises cluster
+  string description = 106;
+
+  // The CRN of the Private Cloud environment.
+  string environmentCrn = 107;
+}
+
+// Response object for the RegisterCluster method.
+message RegisterClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of registered on-premise cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Request object for the UpdateCluster method.
+message UpdateClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of registered on-premise cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+
+  // The user name for the cluster.
+  string username = 102;
+
+  // The password for the cluster.
+  string password = 103 [(options.FieldExtension.sensitive) = true];
+
+  // The location of the cluster.
+  int64 locationId = 104;
+
+  // Tags associated with the registration
+  repeated string tags = 105;
+}
+
+// Response object for the UpdateCluster method.
+message UpdateClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // CRN of the registered on-premise cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Request object for the DescribeCluster method.
+message DescribeClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of the cluster.
+  string clusterCrn = 1;
+
+  // The clusterId of the registered cluster. (Deprecated: Use clusterCrn instead. It is present only for compatibility reasons.)
+  int64 id = 100 [
+    (options.FieldExtension.deprecated) = true,
+    (options.FieldExtension.hidden) = true,
+    (options.FieldExtension.hiddenReason) = 'FOR_CLOUDERA_USE_ONLY'
+  ];
+}
+
+// Response object for the DescribeCluster method.
+message DescribeClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Object containing cluster details.
+  Cluster cluster = 1;
+}
+
+// Request object for the ListClusterServices method.
+message ListClusterServicesRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // CRN of the registered on-premise cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+
+  // Name of the cluster in the cloudera-manager.
+  string clusterName = 2;
+
+  // CRN of the registered on-premise cluster.
+  string managerUri = 3;
+
+  // Username of the cloudera-manager.
+  string username = 4;
+
+  // Password of the cloudera-manager.
+  string password = 5 [(options.FieldExtension.sensitive) = true];
+}
+
+// Response object for the ListClusterServices method.
+message ListClusterServicesResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // List of service detail information.
+  repeated ClusterService services = 1;
+}
+
+// Request object for the ExtractClusters method.
+message ExtractClustersRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The manager URI of the on-premise cluster.
+  string managerUri = 101 [(options.FieldExtension.required) = true];
+
+  // The user name for the cluster.
+  string username = 102 [(options.FieldExtension.required) = true];
+
+  // The password for the cluster.
+  string password = 103 [
+    (options.FieldExtension.sensitive) = true,
+    (options.FieldExtension.required) = true
+  ];
+
+  // The CRN of the cluster.
+  string clusterCrn = 104;
+}
+
+// Response object for the ExtractClusters method.
+message ExtractClustersResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // List of clusters attached to the provided cluster-manager.
+  repeated ClusterDiscovered clusters = 1;
+}
+
+// Location request object containing the regex pattern.
+message ListLocationsRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The page size.
+  int32 pageSize = 1 [
+    (options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100
+  ];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+
+  // Regex pattern for location.
+  string query = 3;
+}
+
+// Location response object containing the location details.
+message ListLocationsResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string pageToken = 1 [(options.FieldExtension.pagingOutputToken) = true];
+
+  // Location response message.
+  repeated Location locations = 2 [(options.FieldExtension.pagingResult) = true];
+}
+
+// Response object for the SyncClusterData method.
+message SyncClusterDataResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Boolean object returning the status of the sync operation.
+  bool syncSuccessful = 1;
+}
+
+// Request object for the SyncClusterData method.
+message SyncClusterDataRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The CRN of the cluster on which the sync operation should be performed.
+  string clusterCrn = 1;
+}
+
+// Request for delete remote cluster.
+message DeleteClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The remote cluster name.
+  string name = 1;
+  // The remote cluster data center name.
+  string dcName = 2;
+}
+
+// Response for delete remote cluster.
+message DeleteClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Request object for listing the partially registered clusters.
+message ListPartiallyRegisteredClustersRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The page size.
+  int32 pageSize = 1 [
+    (options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100
+  ];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing the partially registered clusters.
+message ListPartiallyRegisteredClustersResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Details of the partially registered cluster data
+  repeated PartiallyRegisteredClusterData partiallyRegisteredClusterData = 1  [(options.FieldExtension.pagingResult) = true];
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object for extract setup script API.
+message ExtractSetupScriptRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Response object for extract setup script API.
+message ExtractSetupScriptResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Contents of the installer script.
+  string installerScript = 1;
+  // Path in which the RPM package of the agent is available. This RPM can be used on RHEL AND CENTOS 6.
+  string olderAgentRpmLocation = 2;
+  // Path in which the RPM package of the agent is available. This RPM can be used on SUSE, RHEL AND CENTOS 7 and above.
+  string latestAgentRpmLocation = 3;
+  // Path in which the Debian package of the agent is available. This debian can be used on UBUNTU 20.
+  string agentDebianLocation = 4;
+}
+
+// Request object for updating the state of the cluster.
+message UpdateClusterStateRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The CRN of the partially registered classic cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for updating the state of the cluster.
+message UpdateClusterStateResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Holds the boolean value of the outcome of the update operation.
+  bool status = 1;
+}
+
+// Request object for extract setup script API.
+message CheckClusterConnectivityRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The CRN of the cluster.
+  string clusterCrn = 1;
+  // The name of the service.
+  string serviceName = 2;
+
+}
+
+// Response object for extract setup script API.
+message CheckClusterConnectivityResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Request object for deleting the partially registered cluster API.
+message DeletePartiallyRegisteredClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The cluster CRN of the on-premise cluster.
+  string clusterCrn = 1;
+}
+
+// Response object for deleting the partially registered cluster API.
+message DeletePartiallyRegisteredClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Object holding the partially registered on-premise cluster data
+message PartiallyRegisteredClusterData {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The ID of the partially registered on-premise cluster.
+  int64 id = 1;
+  // The cluster CRN of the on-premise cluster.
+  string clusterCrn = 2;
+  // The datacenter name of the on-premise cluster.
+  string datacenterName = 3;
+  // The IP Address of the on-premise cluster (same as Cloudera Manager IP address).
+  string ipAddress = 4;
+  // The port at which the cloudera manager is accessible.
+  int32 port = 5;
+  // The name of the partially registered service. It will be either of CM or KNOX.
+  string serviceName = 6;
+  // The type of the partially registered cluster. It will be either CDPDC, CDH or HDP.
+  string clusterType = 7;
+  // Boolean value to determine if the cluster is secure.
+  bool isSecure = 8;
+  // State of the cluster connectivity of the partially registered cluster. It will be either FAILED, IN-PROGRESS, READY.
+  string clusterConnectivityState = 9;
+  // The CRN of the user who triggered the registration request.
+  string createdBy = 11;
+  // The time at which the registration was triggered.
+  int64 createdAt = 12 [(options.FieldExtension.datetime) = true];
+  // The time at which the registration was updated.
+  int64 updatedAt = 13 [(options.FieldExtension.datetime) = true];
+  // Boolean value to determine if this is the primary registration.
+  bool primary = 14;
+  // Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
+  string ccmVersion = 15;
+  // Registration Status of the partially registered on-premises cluster.
+  string registrationStatus = 16;
+  // CRN of the jumpgate agent.
+  string agentCrn = 17;
+  // CRN of the Private Cloud Control plane.
+  string pvcCrn = 18;
+  // URL Endpoint of Knox.
+  string knoxUrl = 19;
+}
+
+// Request for setupClusterConnectivity call.
+message SetupClusterConnectivityRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // IP Address of the CM cluster. This field is deprecated.
+  string ipAddress = 1 [(options.FieldExtension.deprecated) = true];
+
+  // Port on which the cluster is running. This field is deprecated.
+  int32 port = 2 [(options.FieldExtension.deprecated) = true];
+
+  // Datacenter name of the cluster.
+  string datacenterName = 3;
+
+  // Is the cluster secured by HTTPS. This field is deprecated.
+  bool isSecure = 4 [(options.FieldExtension.deprecated) = true];
+
+  // The type of the cluster.
+  ClusterType.Value clusterType = 5;
+
+  // Service name.
+  string serviceName = 6;
+
+  // IP Address of the knox service. This field is deprecated.
+  string knoxIpAddress = 7 [(options.FieldExtension.deprecated) = true];
+
+  // Port on which the knox service is running. This field is deprecated.
+  string knoxPort = 8 [(options.FieldExtension.deprecated) = true];
+
+  // URL of the knox service. This field is deprecated.
+  string knoxUrl = 9 [(options.FieldExtension.deprecated) = true];
+
+  // Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
+  bool isUpgrade = 10 [(options.FieldExtension.deprecated) = true];
+
+  // TLS type of the cluster. This field is deprecated.
+  string tlsType = 11 [(options.FieldExtension.deprecated) = true];
+
+  // URL of the cloudera manager
+  string cmUrl = 12;
+
+}
+
+// Response for setupClusterConnectivity call.
+message SetupClusterConnectivityResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Key ID or the CRN of the cluster
+  string keyId = 1;
+
+  // Status of the cluster connectivity setup.
+  string status = 2;
+
+  // Host name of the inverting proxy
+  string invertingProxyHostName = 3;
+
+  // Reason for the failure if any
+  string causeOfFailure = 4;
+
+  // Certificate of the inverting proxy
+  string certificate = 5;
+
+  // Agent CRN.
+  string agentCrn = 6;
+}
+
+// Request body for the partially registered cluster.
+message DescribePartiallyRegisteredClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Cluster CRN of the partially registered cluster.
+  string clusterCrn = 1;
+}
+
+// Response body for the partially registered cluster.
+message DescribePartiallyRegisteredClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Details of the partially registered cluster.
+  PartiallyRegisteredClusterData partiallyRegisteredClusterData = 1 ;
+}
+
+// Request body for register agent API.
+message RegisterAgentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The cluster CRN of the partially registered cluster.
+  string clusterCrn = 1;
+}
+
+// Response body for register agent API.
+message RegisterAgentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of the unregistered cluster.
+  string clusterCrn = 1;
+
+  // Status of the unregistered cluster.
+  string status = 2;
+
+  // The certificate of the unregistered cluster.
+  string certificate = 3;
+
+  // The CDP endpoint where the agent communicates.
+  string cdpEndpoint = 4;
+
+  // The details of the agent.
+  AgentDetails agentDetails = 5;
+}
+
+// Object containing the details of the agent.
+message AgentDetails {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of the registered agent.
+  string agentCrn = 1;
+
+  // The certificate used for the Agent.
+  string certificate = 2;
+
+  // The CRN of the cluster.
+  string clusterCrn = 3;
+
+  // Access key ID of the agent.
+  string accessKeyId = 4;
+
+  // Enciphered Access key of the agent.
+  string encipheredAccessKey = 5;
+
+  // Enciphered private key of the agent.
+  string encipheredPrivateKey = 6;
+
+}
+
+// Object containing the cluster information.
+message Cluster {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The clusterCrn of the registered cluster.
+  string clusterCrn = 1;
+  // The name of the registered cluster.
+  string name = 2;
+  // The data center name of the registered cluster.
+  string datacenterName = 3;
+  // The clusterId of the registered cluster.
+  int64 id = 4;
+  // The IP address of the registered cluster.
+  string ipAddress = 6;
+  // The type of the registered cluster.
+  ClusterType.Value clusterType = 7;
+  // The active status of the registered cluster.
+  ClusterState.Value state = 8;
+  // The description of the registered cluster.
+  string description = 11;
+  // The location of the registered cluster.
+  int64 locationId = 12;
+  // The time at which the cluster was registered.
+  int64 lastCreateTime = 13 [(options.FieldExtension.datetime) = true];
+  // The time at which the cluster was updated.
+  int64 lastUpdatedTime = 14 [(options.FieldExtension.datetime) = true];
+  // The time at which the cluster was updated. Its value is in Coordinated Universal Time.
+  int64 updatedUtc = 15 [(options.FieldExtension.datetime) = true];
+  // Details of cluster read from cluster-manager.
+  ClusterData data = 16;
+  // The Knox enablement of the registered cluster.
+  bool knoxEnabled = 17;
+  // The Knox url of the registered cluster.
+  string knoxUrl = 18;
+  // The user name of the cluster.
+  string username = 19;
+  // The password of the cluster.
+  string password = 20 [(options.FieldExtension.sensitive) = true];
+  // Indicates if the service should make untrusted connections (without verifying TLS) to the cluster.
+  bool allowUntrusted = 21;
+  // Indicates if the cluster is behind Knox gateway.
+  bool behindGateway = 22;
+  // The manager type of the registered cluster.
+  ClusterManagerType.Value managerType = 23;
+  // The manager URI of the registered cluster.
+  string managerUri = 24;
+  // The owner of the registered cluster.
+  string createdBy = 25;
+  // The connectivity version of the cluster.
+  string connectivityVersion = 26;
+  // Indicates if a cluster upgrade is in progress.
+  bool isUpgradeInProgress = 27;
+  // The key ID of the registered cluster.
+  string newKeyId = 28;
+  // The location of the data center.
+  Location location = 29;
+  // The properties of the particular cluster as a JSON string.
+  string properties = 30;
+  // The UUID of the CM Base Cluster.
+  string cmClusterUuid = 31;
+}
+
+// Object containing the service information.
+message ClusterService {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Name of the service.
+  string name = 1;
+  // Version of the service.
+  string version = 2;
+  // State of the service.
+  string state = 3;
+}
+
+// Object containing the discovered cluster information.
+message ClusterData {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The name of the cluster.
+  string name = 1;
+  // The version of the cluster.
+  string version = 2;
+  // The display name of the discovered cluster.
+  string displayName = 3;
+  // The cluster URL of the discovered cluster.
+  string url = 4;
+  // Indicates if the cluster is secured or not.
+  bool secured = 5;
+  // The Kerberos user of the cluster.
+  string kerberosUser = 6;
+  // The Kerberos ticket location of the cluster.
+  string kerberosTicketLocation = 7;
+  // The properties of the particular cluster as a JSON string.
+  string properties = 8;
+  // The stats of the discovered cluster.
+  string stats = 9;
+}
+
+// Object containing the location of the data center.
+message Location {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // ID of the location.
+  int64 id = 1;
+  // City in which the data center is located.
+  string city = 2;
+  // Province in which the data center is located.
+  string province = 3;
+  // Country in which the data center is located.
+  string country = 4;
+  // ISO2 of the location.
+  string iso2 = 5;
+  // Latitude of the location.
+  string latitude = 6;
+  // Longitude of the location.
+  string longitude = 7;
+}
+
+// Details of attached cluster.
+message ClusterDiscovered {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Name of cluster as returned from the cluster-manager.
+  string name = 1;
+}
+
+// State of the on-premise cluster.
+message ClusterState {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // Cluster yet to be synced.
+    TO_SYNC = 1;
+    // Cluster sync in-progress.
+    SYNC_IN_PROGRESS = 2;
+    // Cluster sync successful.
+    SYNCED = 3;
+    // Cluster sync error.
+    SYNC_ERROR = 4;
+    // Cluster Knox dependency verification successful.
+    KNOX_TOPOLOGY_DEP_VERIFIED = 5;
+    // Cluster Knox dependency verification pending.
+    KNOX_TOPOLOGY_DEP_PENDING = 6;
+  }
+}
+
+// Manager type of the cluster.
+message ClusterManagerType {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // Ambari as manager type.
+    AMBARI = 1;
+    // Cloudera Manager as manager type.
+    CLOUDERA_MANAGER = 2;
+  }
+}
+
+// The type of on-premise cluster.
+message ClusterType {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // Legacy HDP cluster.
+    HDP = 1;
+    // Legacy CDH Cluster.
+    CDH = 2;
+    // CDPDC Cluster.
+    CDPDC = 3;
+  }
+}
+
+// The type of operator.
+message ClusterQueryOperator {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // AND operator.
+    AND = 1;
+    // OR operator.
+    OR = 2;
+  }
+}

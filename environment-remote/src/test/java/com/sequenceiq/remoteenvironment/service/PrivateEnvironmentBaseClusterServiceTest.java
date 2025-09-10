@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest;
-import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 
 @ExtendWith(MockitoExtension.class)
 class PrivateEnvironmentBaseClusterServiceTest {
@@ -37,7 +37,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
     private static final String ENVIRONMENT_NAME = "aPrivateEnv";
 
     @Mock
-    private GrpcRemoteClusterClient grpcRemoteClusterClient;
+    private RemoteClusterServiceClient grpcRemoteClusterClient;
 
     @InjectMocks
     private PrivateEnvironmentBaseClusterService underTest;

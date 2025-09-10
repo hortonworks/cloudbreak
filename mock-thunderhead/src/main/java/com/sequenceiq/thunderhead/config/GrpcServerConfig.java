@@ -13,6 +13,7 @@ import com.sequenceiq.thunderhead.grpc.service.auth.MockPersonalResourceViewServ
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
 import com.sequenceiq.thunderhead.grpc.service.authdistributor.MockAuthDistributorService;
 import com.sequenceiq.thunderhead.grpc.service.cdl.MockCdlService;
+import com.sequenceiq.thunderhead.grpc.service.classiccluster.MockClassicClusterService;
 import com.sequenceiq.thunderhead.grpc.service.datalakedr.MockDatalakeDrService;
 import com.sequenceiq.thunderhead.grpc.service.metering.MockMeteringService;
 import com.sequenceiq.thunderhead.grpc.service.pem.MockPublicEndpointManagementService;
@@ -42,6 +43,9 @@ public class GrpcServerConfig {
 
     @Inject
     private MockRemoteClusterService mockRemoteClusterService;
+
+    @Inject
+    private MockClassicClusterService mockClassicClusterService;
 
     @Inject
     private MockServiceDiscoveryService mockServiceDiscoveryService;
@@ -74,6 +78,7 @@ public class GrpcServerConfig {
                 mockAuthDistributorService.bindService(),
                 mockMeteringService.bindService(),
                 mockRemoteClusterService.bindService(),
+                mockClassicClusterService.bindService(),
                 mockCdlService.bindService());
     }
 
