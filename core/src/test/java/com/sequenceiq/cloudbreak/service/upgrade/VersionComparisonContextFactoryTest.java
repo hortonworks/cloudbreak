@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.RELEASE_VERSION_TAG;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -29,6 +33,8 @@ class VersionComparisonContextFactoryTest {
 
     private static final int PATCH_VERSION = 100;
 
+    private static final String FULL_VERSION = VERSION + "-" + PATCH_VERSION;
+
     @Mock
     private CdhPatchVersionProvider cdhPatchVersionProvider;
 
@@ -49,13 +55,12 @@ class VersionComparisonContextFactoryTest {
 
     @Test
     void testBuildForStackWithImage() {
-        String fullVersion = VERSION + "-" + PATCH_VERSION;
         Image image = Image.builder()
                 .withVersion(VERSION)
-                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, fullVersion), null), null))
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, FULL_VERSION), null), null))
                 .withPackageVersions(Map.of(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString()))
                 .build();
-        when(cdhPatchVersionProvider.getPatchFromVersionString(fullVersion)).thenReturn(Optional.of(PATCH_VERSION));
+        when(cdhPatchVersionProvider.getPatchFromVersionString(FULL_VERSION)).thenReturn(Optional.of(PATCH_VERSION));
 
         VersionComparisonContext context = underTest.buildForStack(image);
 
@@ -66,20 +71,88 @@ class VersionComparisonContextFactoryTest {
 
     @Test
     void testBuildForStackWithMaps() {
-        String fullVersion = VERSION + "-" + PATCH_VERSION;
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.STACK.getKey(), VERSION);
         packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString());
 
         Map<String, String> stackRelatedParcels = new HashMap<>();
-        stackRelatedParcels.put("CDH", fullVersion);
+        stackRelatedParcels.put("CDH", FULL_VERSION);
 
-        when(cdhPatchVersionProvider.getPatchFromVersionString(fullVersion)).thenReturn(Optional.of(PATCH_VERSION));
+        when(cdhPatchVersionProvider.getPatchFromVersionString(FULL_VERSION)).thenReturn(Optional.of(PATCH_VERSION));
 
         VersionComparisonContext context = underTest.buildForStack(packageVersions, stackRelatedParcels);
 
         assertEquals(VERSION, context.getMajorVersion());
         assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
         assertEquals(BUILD_NUMBER, context.getBuildNumber());
+    }
+
+    @Test
+    void testBuildForStackBasedOnReleaseVersionWhenTheReleaseVersionIsPresentWithPatchVersion() {
+        Image image = Image.builder()
+                .withVersion(VERSION)
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, FULL_VERSION), null), null))
+                .withPackageVersions(Map.of(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString()))
+                .withTags(Map.of(RELEASE_VERSION_TAG.getKey(), VERSION + "." + PATCH_VERSION))
+                .build();
+
+        VersionComparisonContext context = underTest.buildForStackBasedOnReleaseVersion(image);
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
+        assertEquals(BUILD_NUMBER, context.getBuildNumber());
+        verifyNoInteractions(cdhPatchVersionProvider);
+    }
+
+    @Test
+    void testBuildForStackBasedOnReleaseVersionWhenTheReleaseVersionIsPresentWithOutPatchVersion() {
+        Image image = Image.builder()
+                .withVersion(VERSION)
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, FULL_VERSION), null), null))
+                .withPackageVersions(Map.of(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString()))
+                .withTags(Map.of(RELEASE_VERSION_TAG.getKey(), VERSION))
+                .build();
+
+        VersionComparisonContext context = underTest.buildForStackBasedOnReleaseVersion(image);
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertTrue(context.getPatchVersion().isEmpty());
+        assertEquals(BUILD_NUMBER, context.getBuildNumber());
+        verifyNoInteractions(cdhPatchVersionProvider);
+    }
+
+    @Test
+    void testBuildForStackBasedOnReleaseVersionShouldUseTheCDHVersionWhenReleaseVersionIsNotPresent() {
+        Image image = Image.builder()
+                .withVersion(VERSION)
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, FULL_VERSION), null), null))
+                .withPackageVersions(Map.of(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString()))
+                .build();
+        when(cdhPatchVersionProvider.getPatchFromVersionString(FULL_VERSION)).thenReturn(Optional.of(PATCH_VERSION));
+
+        VersionComparisonContext context = underTest.buildForStackBasedOnReleaseVersion(image);
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
+        assertEquals(BUILD_NUMBER, context.getBuildNumber());
+        verify(cdhPatchVersionProvider).getPatchFromVersionString(FULL_VERSION);
+    }
+
+    @Test
+    void testBuildForStackBasedOnReleaseVersionShouldUseTheCDHVersionWhenReleaseVersionFormatIsNotCorrect() {
+        Image image = Image.builder()
+                .withVersion(VERSION)
+                .withStackDetails(new ImageStackDetails(null, new StackRepoDetails(Map.of(REPOSITORY_VERSION, FULL_VERSION), null), null))
+                .withPackageVersions(Map.of(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER.toString()))
+                .withTags(Map.of(RELEASE_VERSION_TAG.getKey(), "7.3.2.1.400"))
+                .build();
+        when(cdhPatchVersionProvider.getPatchFromVersionString(FULL_VERSION)).thenReturn(Optional.of(PATCH_VERSION));
+
+        VersionComparisonContext context = underTest.buildForStackBasedOnReleaseVersion(image);
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
+        assertEquals(BUILD_NUMBER, context.getBuildNumber());
+        verify(cdhPatchVersionProvider).getPatchFromVersionString(FULL_VERSION);
     }
 }
