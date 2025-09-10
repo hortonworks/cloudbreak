@@ -65,7 +65,7 @@ public class ParcelService {
             Map<String, ClusterComponentView> cmProductMap = new HashMap<>();
             Set<ClouderaManagerProduct> cmProducts = new HashSet<>();
             for (ClusterComponentView clusterComponent : components) {
-                ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
+                ClouderaManagerProduct product = clusterComponent.getAttributes().getUnchecked(ClouderaManagerProduct.class);
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }

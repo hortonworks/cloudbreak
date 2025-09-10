@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-public class JsonUtilTest {
+class JsonUtilTest {
 
     private ObjectMapper getMapper() throws Exception {
         Field field = JsonUtil.class.getDeclaredField("MAPPER");
@@ -29,7 +29,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testMapperConfiguration() throws Exception {
+    void testMapperConfiguration() throws Exception {
         ObjectMapper mapper = getMapper();
 
         // Verify disabled features
@@ -47,7 +47,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testStrictMapperConfiguration() throws Exception {
+    void testStrictMapperConfiguration() throws Exception {
         ObjectMapper strictMapper = getStrictMapper();
 
         // Verify that STRICT_MAPPER inherits MAPPER's configuration

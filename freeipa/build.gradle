@@ -165,7 +165,6 @@ dependencies {
   testImplementation project(path: ':flow', configuration: 'tests')
 
   testImplementation group: 'com.hubspot.jinjava',         name: 'jinjava',                        version: jinjavaVersion
-  testImplementation group: 'net.sf.json-lib',             name: 'json-lib',                       version: '2.4',              classifier: 'jdk15'
   testImplementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',               version: jacksonVersion
 
   testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion

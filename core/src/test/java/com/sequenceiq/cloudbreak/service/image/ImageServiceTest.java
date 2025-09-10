@@ -700,7 +700,7 @@ public class ImageServiceTest {
             ComponentType componentType = component.getComponentType();
             assertTrue(EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS).contains(componentType));
             if (componentType == IMAGE) {
-                assertEquals(EXISTING_ID, component.getAttributes().getValue("imageName"));
+                assertEquals(EXISTING_ID, component.getAttributes().getString("imageName"));
             }
         }
     }

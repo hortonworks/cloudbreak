@@ -37,7 +37,6 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
   implementation group: 'org.openapitools',                 name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
-  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                                    name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.9.3'
   api group: 'org.reflections',                             name: 'reflections',                    version: '0.10.2'
@@ -70,7 +69,6 @@ dependencies {
   implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
   api group: 'io.swagger.core.v3',                          name: 'swagger-annotations-jakarta',    version: swaggerCoreVersion
   api group: 'io.swagger.core.v3',                          name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
-  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
   api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }

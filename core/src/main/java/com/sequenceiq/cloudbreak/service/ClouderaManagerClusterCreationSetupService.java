@@ -213,7 +213,7 @@ public class ClouderaManagerClusterCreationSetupService {
         } else {
             Set<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
                     .map(Component::getAttributes)
-                    .map(json -> json.getSilent(ClouderaManagerProduct.class))
+                    .map(json -> json.getUnchecked(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
             return filterParcelsIfNecessary(cluster, products);
         }
@@ -258,7 +258,7 @@ public class ClouderaManagerClusterCreationSetupService {
 
         boolean missingFromComponents = components.stream()
                 .filter(component -> component.getComponentType() == CDH_PRODUCT_DETAILS)
-                .map(component -> component.getAttributes().getSilent(ClouderaManagerProduct.class))
+                .map(component -> component.getAttributes().getUnchecked(ClouderaManagerProduct.class))
                 .noneMatch(product -> CDH.equals(product.getName()));
 
         return missingFromProducts && missingFromComponents;

@@ -400,7 +400,7 @@ class SdxServiceCreateSdxTest {
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
-        assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
+        assertEquals("tagecske", capturedSdx.getTags().getString("mytag"));
         assertEquals(CLUSTER_NAME, capturedSdx.getClusterName());
         assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         assertEquals("envir", capturedSdx.getEnvName());

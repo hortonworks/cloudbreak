@@ -99,7 +99,7 @@ class StackDownscaleServiceTest {
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();
-        assertEquals("master1.cloudera.site", attributes.getValue("discoveryFQDN"));
+        assertEquals("master1.cloudera.site", attributes.getString("discoveryFQDN"));
     }
 
     @Test
@@ -128,7 +128,7 @@ class StackDownscaleServiceTest {
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();
-        assertEquals("some.fqdn", attributes.getValue("discoveryFQDN"));
+        assertEquals("some.fqdn", attributes.getString("discoveryFQDN"));
     }
 
     @Test

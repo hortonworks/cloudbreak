@@ -34,12 +34,12 @@ public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
         GcpCredentialParameters response = new GcpCredentialParameters();
         doIfNotNull(source.getJson(), param -> {
             JsonParameters jsonParameters = getJson(param);
-            jsonParameters.setProjectId(rawJson.getValue(PROJECT_ID));
+            jsonParameters.setProjectId(rawJson.getString(PROJECT_ID));
             response.setJson(jsonParameters);
         });
         doIfNotNull(source.getP12(), param -> {
             P12Parameters p12Parameters = getP12(param);
-            p12Parameters.setProjectId(rawJson.getValue(PROJECT_ID));
+            p12Parameters.setProjectId(rawJson.getString(PROJECT_ID));
             response.setP12(p12Parameters);
         });
         return response;

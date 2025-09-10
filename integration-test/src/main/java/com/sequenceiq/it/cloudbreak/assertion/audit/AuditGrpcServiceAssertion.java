@@ -113,23 +113,23 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
     }
 
     private String getFlowState(AuditProto.CdpAuditEvent e) {
-        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("flowState");
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getString("flowState");
     }
 
     private String getCrn(AuditProto.CdpAuditEvent e) {
-        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("clusterCrn");
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getString("clusterCrn");
     }
 
     private String getFlowId(AuditProto.CdpAuditEvent e) {
-        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("flowId");
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getString("flowId");
     }
 
     private String getUserCrn(AuditProto.CdpAuditEvent e) {
-        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("userCrn");
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getString("userCrn");
     }
 
     private String getEnvironmentCrn(AuditProto.CdpAuditEvent e) {
-        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("environmentCrn");
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getString("environmentCrn");
     }
 
     private void checkRestEvents(List<AuditProto.CdpAuditEvent> restEvents, String eventName) {

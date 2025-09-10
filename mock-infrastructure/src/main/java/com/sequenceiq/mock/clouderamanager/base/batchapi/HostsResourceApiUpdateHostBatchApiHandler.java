@@ -48,7 +48,7 @@ public class HostsResourceApiUpdateHostBatchApiHandler extends AbstractBatchApiH
             LOGGER.debug("Processing request. MockUuid: [{}]. Request: {}", mockUuid, apiBatchRequestElement);
             String hostId = matcher.group(GROUP_HOST_ID);
             Json jsonFromRequestBody = new Json(apiBatchRequestElement.getBody());
-            ApiHost apiHostFromRequestBody = jsonFromRequestBody.getSilent(ApiHost.class);
+            ApiHost apiHostFromRequestBody = jsonFromRequestBody.getUnchecked(ApiHost.class);
             String rackId = apiHostFromRequestBody.getRackId();
             ApiHost apiHostFound = dataProviderService.getApiHost(mockUuid, hostId);
             apiHostFound.rackId(rackId);

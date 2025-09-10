@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
@@ -145,8 +146,8 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         if (template != null) {
             request = new InstanceTemplateRequest();
             request.setInstanceType(template.getInstanceType());
-            Integer spotPercentage = template.getAttributes().getValue(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE);
-            Double maxPrice = template.getAttributes().getValue(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE);
+            Integer spotPercentage = template.getAttributes().getInt(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE);
+            Double maxPrice = template.getAttributes().getDouble(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE);
             if (spotPercentage != null) {
                 LOGGER.debug("EC2 spot percentage found in the instances template attributes");
                 AwsInstanceTemplateParameters aws = new AwsInstanceTemplateParameters();
@@ -176,7 +177,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         InstanceGroupNetworkRequest request = null;
         if (instanceGroupNetwork != null) {
             request = new InstanceGroupNetworkRequest();
-            List<String> subnetIds = instanceGroupNetwork.getAttributes().getValue(NetworkConstants.SUBNET_IDS);
+            List<String> subnetIds = JsonUtil.readValue(instanceGroupNetwork.getAttributes().getJsonNode(NetworkConstants.SUBNET_IDS), List.class);
             if (subnetIds != null) {
                 LOGGER.debug("Subnet IDs found in instance group network");
                 InstanceGroupAwsNetworkParameters aws = new InstanceGroupAwsNetworkParameters();
@@ -233,7 +234,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         if (network != null) {
             request = new NetworkRequest();
             Optional<CloudPlatform> cloudPlatform = Optional.ofNullable(network.cloudPlatform())
-                    .or(() -> Optional.ofNullable(network.getAttributes().getValue(NetworkConstants.CLOUD_PLATFORM)))
+                    .or(() -> Optional.ofNullable(network.getAttributes().getString(NetworkConstants.CLOUD_PLATFORM)))
                     .map(CloudPlatform::valueOf);
             request.setNetworkCidrs(network.getNetworkCidrs());
             request.setOutboundInternetTraffic(network.getOutboundInternetTraffic());

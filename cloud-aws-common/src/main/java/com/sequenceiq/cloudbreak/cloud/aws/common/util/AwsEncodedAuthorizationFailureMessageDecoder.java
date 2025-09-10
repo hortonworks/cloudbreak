@@ -68,8 +68,8 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
         String decodedMessage = decodeAuthorizationMessageResponse.decodedMessage();
 
         Json authorizationError = new Json(decodedMessage);
-        String action = authorizationError.getValue("context.action");
-        String resource = authorizationError.getValue("context.resource");
+        String action = authorizationError.getString("context.action");
+        String resource = authorizationError.getString("context.resource");
 
         return String.format("Your AWS credential is not authorized to perform action %s on resource %s. " +
                 "Please contact your system administrator to update your AWS policy.", action, resource);

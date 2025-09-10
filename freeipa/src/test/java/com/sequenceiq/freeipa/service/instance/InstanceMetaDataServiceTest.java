@@ -189,7 +189,7 @@ public class InstanceMetaDataServiceTest {
                 .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
-        assertEquals(image.getImageId(), instanceMetaData.getImage().getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
+        assertEquals(image.getImageId(), instanceMetaData.getImage().getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
         verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
         verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData,
                 actualInstanceGroup, null);

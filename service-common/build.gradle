@@ -26,7 +26,6 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
-  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
   implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
   implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: jerseyCoreVersion
@@ -36,7 +35,6 @@ dependencies {
   implementation group: 'org.springframework',              name: 'spring-context',                 version: springFrameworkVersion
   implementation group: 'org.springframework',              name: 'spring-context-support',         version: springFrameworkVersion
   implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
-  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
   implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: aspectjVersion
   implementation group: 'org.aspectj',                      name: 'aspectjweaver',                  version: aspectjVersion

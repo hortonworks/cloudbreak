@@ -169,7 +169,7 @@ public class DBUpgradeMigrationServiceTest {
         com.sequenceiq.redbeams.domain.stack.DatabaseServer actual = dbStackArgumentCaptor.getValue().getDatabaseServer();
         assertEquals(storageSize, actual.getStorageSize());
         assertEquals(instanceType, actual.getInstanceType());
-        assertEquals("test", actual.getAttributes().getValue("key"));
+        assertEquals("test", actual.getAttributes().getString("key"));
     }
 
     private UpgradeDatabaseMigrationParams getMigrationParams() {

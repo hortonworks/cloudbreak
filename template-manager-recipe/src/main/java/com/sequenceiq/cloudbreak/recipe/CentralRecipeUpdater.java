@@ -23,18 +23,12 @@ public class CentralRecipeUpdater {
 
     public String getRecipeText(TemplatePreparationObject source, String recipeText) {
         try {
-            recipeText = updateRecipeConfiguration(source, recipeText);
+            return templateProcessor.process(recipeText, source, Maps.newHashMap());
         } catch (IOException e) {
             String message = String.format("Unable to update recipe with default properties which was: %s", recipeText);
             LOGGER.warn(message);
             throw new BlueprintProcessingException(message, e);
         }
-        return recipeText;
     }
 
-    private String updateRecipeConfiguration(TemplatePreparationObject source, String recipe)
-            throws IOException {
-        recipe = templateProcessor.process(recipe, source, Maps.newHashMap());
-        return recipe;
-    }
 }

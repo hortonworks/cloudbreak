@@ -1,8 +1,9 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ public class CredentialToCredentialV1ResponseConverterTest {
 
     @Test
     public void testCredentialToCredentialResponseConverterHasCreated() {
-        Assertions.assertNotNull(converterUnderTest.convert(CREDENTIAL).getCreated());
+        assertNotNull(converterUnderTest.convert(CREDENTIAL).getCreated());
     }
 
     @Configuration

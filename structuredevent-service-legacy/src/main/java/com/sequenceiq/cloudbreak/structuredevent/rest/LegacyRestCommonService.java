@@ -86,7 +86,7 @@ public class LegacyRestCommonService {
     private String getListValue(RestRequestDetails restRequest, Json requestJson, String path) {
         String method = restRequest.getMethod();
         if ("DELETE".equals(method)) {
-            List<String> values = requestJson.getValue(path);
+            List<String> values = JsonUtil.readValue(requestJson.getJsonNode(path), List.class);
             if (CollectionUtils.isNotEmpty(values)) {
                 return String.join(",", values);
             }
@@ -105,7 +105,7 @@ public class LegacyRestCommonService {
     }
 
     private String getValueFromJson(Json responseJson, String resourceCrn) {
-        return responseJson.getValue(resourceCrn);
+        return responseJson.getString(resourceCrn);
     }
 
     private void checkNameOrCrnProvided(RestRequestDetails restRequest, String resourceCrn, String name) {

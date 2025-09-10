@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,7 @@ import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 
 @ExtendWith(MockitoExtension.class)
-public class StackToCreateFreeIpaRequestConverterTest {
+class StackToCreateFreeIpaRequestConverterTest {
 
     private static final String ENVIRONMENT_CRN = "test:environment:crn";
 
@@ -144,8 +143,6 @@ public class StackToCreateFreeIpaRequestConverterTest {
     private static final Integer EC2_SPOT_PERCENTAGE = 0;
 
     private static final Double EC2_SPOT_MAX_PRICE = 0.0d;
-
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @InjectMocks
     private StackToCreateFreeIpaRequestConverter underTest;

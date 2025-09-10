@@ -1,52 +1,54 @@
 package com.sequenceiq.cloudbreak.template.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-import net.sf.json.JSONObject;
+class ModelConverterUtilsTest {
 
-@RunWith(Parameterized.class)
-public class ModelConverterUtilsTest {
+    private static final String MAP_CONVERTER_INPUTS = "model-converter-test/inputs/";
 
-    public static final String MAP_CONVERTER_INPUTS = "model-converter-test/inputs/";
+    private static final String MAP_CONVERTER_OUTPUTS = "model-converter-test/outputs/";
 
-    public static final String MAP_CONVERTER_OUTPUTS = "model-converter-test/outputs/";
-
-    private final String fileName;
-
-    public ModelConverterUtilsTest(String fileName) {
-        this.fileName = fileName;
+    static Stream<Arguments> testConvertArguments() {
+        return Stream.of(
+                Arguments.of("test_1.json"),
+                Arguments.of("test_2.json"),
+                Arguments.of("test_3.json")
+        );
     }
 
-    @Parameters(name = "{index}: modelConverterUtilsTest with file: {0}")
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"test_1.json"},
-                {"test_2.json"},
-        });
+    @MethodSource("testConvertArguments")
+    @ParameterizedTest
+    void testConvert(String fileName) throws IOException {
+        ObjectNode input = getJson(MAP_CONVERTER_INPUTS, fileName);
+        ObjectNode output = getJson(MAP_CONVERTER_OUTPUTS, fileName);
+
+        Map<String, Object> result = ModelConverterUtils.convert(JsonUtil.readValue(input, Map.class));
+
+        assertEquals(output, JsonUtil.createJsonTree(result));
     }
 
     @Test
-    public void test() throws IOException {
-        JSONObject input = getJson(MAP_CONVERTER_INPUTS, fileName);
-        JSONObject output = getJson(MAP_CONVERTER_OUTPUTS, fileName);
+    void testConvertNull() {
+        Map<String, Object> result = ModelConverterUtils.convert(null);
 
-        Map<String, Object> result = ModelConverterUtils.convert(input);
-
-        Assert.assertEquals(output, JSONObject.fromObject(result));
+        assertEquals(Map.of(), result);
     }
 
-    private JSONObject getJson(String folder, String fileName) throws IOException {
+    private ObjectNode getJson(String folder, String fileName) throws IOException {
         String content = FileReaderUtils.readFileFromClasspath(folder + fileName);
-        return JSONObject.fromObject(content);
+        return (ObjectNode) JsonUtil.readTree(content);
     }
 }

@@ -1,0 +1,39 @@
+{
+  "object1": {
+    "field1": "value1",
+    "field2": 123,
+    "nestedObject": {
+      "nestedField1": true,
+      "nestedField2": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "object2": {
+    "fieldA": "valueA",
+    "fieldB": 456.78,
+    "nullField": null
+  },
+  "arrayField": [
+    {
+      "itemField1": {
+        "subItemField": "itemValue1"
+      }
+    },
+    {
+      "itemField2": {
+        "subItemField": {
+          "deepNestedField": "itemValue2"
+        },
+        "anotherField": 789
+      }
+    },
+    [
+      "anotherArrayElement1",
+      "anotherArrayElement2"
+    ],
+    null
+  ]
+}

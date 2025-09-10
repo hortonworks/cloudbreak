@@ -475,7 +475,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private void processHostCertsBatchResponse(ApiClient client, ApiBatchResponse apiBatchResponse) {
         if (apiBatchResponse != null && apiBatchResponse.isSuccess() != null && apiBatchResponse.getItems() != null && apiBatchResponse.isSuccess()) {
             List<BigDecimal> ids = apiBatchResponse.getItems().stream()
-                    .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
+                    .map(bre -> new Json((String) bre.getResponse()).getUnchecked(ApiCommand.class).getId())
                     .collect(Collectors.toList());
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCommandList(stack, client, ids, "Rotate host certificates");
             if (pollingResult.isExited()) {

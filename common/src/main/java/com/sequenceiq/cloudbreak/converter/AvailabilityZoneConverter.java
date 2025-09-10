@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -27,7 +26,7 @@ public class AvailabilityZoneConverter {
 
     public Json getJsonAttributesWithAvailabilityZones(Set<String> zones, Json existingAttributes) {
         Json newAttributes = existingAttributes;
-        if (!CollectionUtils.isEmpty(zones)) {
+        if (zones != null && !zones.isEmpty()) {
             Map<String, Object> existingAttributesMap = (existingAttributes != null) ? existingAttributes.getMap() : new HashMap<>();
             existingAttributesMap.put(NetworkConstants.AVAILABILITY_ZONES, zones);
             newAttributes = new Json(existingAttributesMap);

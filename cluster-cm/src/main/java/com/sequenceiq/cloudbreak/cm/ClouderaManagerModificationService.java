@@ -1006,7 +1006,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(v31Client);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(v31Client);
         Set<String> usedParcelComponentNames = usedParcelComponents.stream()
-                .map(component -> component.getAttributes().getSilent(ClouderaManagerProduct.class).getName())
+                .map(component -> component.getAttributes().getUnchecked(ClouderaManagerProduct.class).getName())
                 .collect(Collectors.toSet());
         ParcelOperationStatus deactivateStatus = clouderaManagerParcelDecommissionService
                 .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), usedParcelComponentNames, parcelNamesFromImage);

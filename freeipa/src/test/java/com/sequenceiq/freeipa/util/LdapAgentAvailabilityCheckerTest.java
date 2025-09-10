@@ -86,7 +86,7 @@ class LdapAgentAvailabilityCheckerTest {
         when(instanceImage.getImageId()).thenReturn("different-image-id");
 
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
@@ -124,7 +124,7 @@ class LdapAgentAvailabilityCheckerTest {
         when(instanceImage.getImageId()).thenReturn(INSTANCE_IMAGE_ID);
 
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
@@ -156,7 +156,7 @@ class LdapAgentAvailabilityCheckerTest {
         when(instanceImage.getImageId()).thenReturn("different-image-id");
 
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
@@ -203,7 +203,7 @@ class LdapAgentAvailabilityCheckerTest {
         when(instanceImage.getImageId()).thenReturn("different-image-id");
 
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
@@ -250,7 +250,7 @@ class LdapAgentAvailabilityCheckerTest {
         when(instanceImage.getImageId()).thenReturn("different-image-id");
 
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(Image.class)).thenReturn(instanceImage);
         instanceMetaData.setImage(imageJson);
 
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);

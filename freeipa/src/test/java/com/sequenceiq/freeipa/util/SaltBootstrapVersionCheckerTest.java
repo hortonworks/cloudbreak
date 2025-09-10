@@ -93,7 +93,7 @@ class SaltBootstrapVersionCheckerTest {
         com.sequenceiq.cloudbreak.cloud.model.Image instanceImage = mock(com.sequenceiq.cloudbreak.cloud.model.Image.class);
         when(instanceImage.getImageId()).thenReturn("different-image-id");
         Json imageJson = mock(Json.class);
-        when(imageJson.getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class)).thenReturn(instanceImage);
+        when(imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class)).thenReturn(instanceImage);
         im1.setImage(imageJson);
 
 
@@ -101,7 +101,7 @@ class SaltBootstrapVersionCheckerTest {
         com.sequenceiq.cloudbreak.cloud.model.Image instanceImage2 = mock(com.sequenceiq.cloudbreak.cloud.model.Image.class);
         when(instanceImage2.getImageId()).thenReturn("some-id");
         Json imageJson2 = mock(Json.class);
-        when(imageJson2.getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class)).thenReturn(instanceImage2);
+        when(imageJson2.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class)).thenReturn(instanceImage2);
         im2.setImage(imageJson2);
 
         when(imageService.getImage(imageFilterSettings)).thenReturn(ImageWrapper.ofFreeipaImage(image, ""));

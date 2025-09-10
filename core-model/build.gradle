@@ -20,7 +20,6 @@ dependencies {
     implementation project(':structuredevent-model')
     implementation project(':workspace')
 
-    implementation group: 'net.sf.json-lib',                   name: 'json-lib',               version: '2.4',  classifier: 'jdk15'
     implementation group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
     implementation group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
     implementation group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'

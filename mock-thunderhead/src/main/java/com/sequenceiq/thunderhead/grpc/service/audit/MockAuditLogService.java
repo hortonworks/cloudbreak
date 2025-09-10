@@ -73,7 +73,7 @@ public class MockAuditLogService extends AuditGrpc.AuditImplBase {
         AuditProto.CdpServiceEvent.Builder builder = AuditProto.CdpServiceEvent.newBuilder();
         if (StringUtils.isNotEmpty(serviceEventData.getEventDetails())) {
             builder.setAdditionalServiceEventDetails(serviceEventData.getEventDetails());
-            String clusterCrn = new Json(serviceEventData.getEventDetails()).getValue("clusterCrn");
+            String clusterCrn = new Json(serviceEventData.getEventDetails()).getString("clusterCrn");
             if (clusterCrn != null) {
                 builder.addResourceCrn(clusterCrn);
                 return builder.build();

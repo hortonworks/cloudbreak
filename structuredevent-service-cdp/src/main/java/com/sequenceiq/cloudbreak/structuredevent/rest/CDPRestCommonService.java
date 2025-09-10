@@ -118,7 +118,7 @@ public class CDPRestCommonService {
     private String getValueFromJson(Json json, List<String> paths, Map<String, String> restParams, String idType) {
         String values = null;
         if (json.isArray() && idType.equals(restParams.get(ID_TYPE))) {
-            List<String> asList = json.asArray();
+            List<String> asList = JsonUtil.readValue(json, List.class);
             values = String.join(",", asList);
         } else if (json.isObject() && json.getMap() != null && json.getMap().containsKey("responses")) {
             values = ((Collection<Object>) json.getMap().get("responses"))
@@ -132,10 +132,10 @@ public class CDPRestCommonService {
     }
 
     private String getFirstPath(Json json, List<String> paths) {
-        String path = paths.stream().filter(p -> json.getValue(p) != null).findFirst().orElse(null);
+        String path = paths.stream().filter(p -> json.getString(p) != null).findFirst().orElse(null);
         String value = null;
         if (path != null) {
-            Object v = json.getValue(path);
+            Object v = json.get(path, Object.class);
             if (v instanceof Collection) {
                 value = ((Collection<Object>) v).stream().map(Object::toString).collect(Collectors.joining(","));
             } else {

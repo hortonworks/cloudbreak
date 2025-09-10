@@ -83,7 +83,7 @@ class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             network[0] = underTest.convertToLegacyNetwork(source, EU_AZ);
         });
-        assertEquals(network[0].getAttributes().getValue("subnetId"), "eu-west-1");
+        assertEquals("eu-west-1", network[0].getAttributes().getString("subnetId"));
         assertTrue(network[0].getNetworkCidrs().containsAll(NETWORK_CIDRS));
         assertEquals(source.getOutboundInternetTraffic(), network[0].getOutboundInternetTraffic());
     }
@@ -106,7 +106,7 @@ class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertEquals(PUBLIC_ID_1, network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
+        assertEquals(PUBLIC_ID_1, network[0].getAttributes().getString(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test
@@ -129,7 +129,7 @@ class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertEquals(PRIVATE_ID_1, network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
+        assertEquals(PRIVATE_ID_1, network[0].getAttributes().getString(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test
@@ -165,7 +165,7 @@ class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertNull(network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
+        assertNull(network[0].getAttributes().getString(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     private CloudSubnet getCloudSubnet(String availabilityZone) {

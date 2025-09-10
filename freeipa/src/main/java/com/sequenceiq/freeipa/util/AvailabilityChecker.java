@@ -105,7 +105,7 @@ public class AvailabilityChecker {
     protected boolean doesAllImageSupport(Stack stack, String packageName, Versioned supportedAfter) {
         Set<String> imageIdsInUse = stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
-                .map(imageJson -> imageJson.getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class))
+                .map(imageJson -> imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class))
                 .map(com.sequenceiq.cloudbreak.cloud.model.Image::getImageId)
                 .collect(Collectors.toSet());
         String currentImageId = getImageService().getImageForStack(stack).getUuid();

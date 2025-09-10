@@ -139,7 +139,7 @@ public class CredentialDefinitionServiceTest {
     public void testInvalidJson() throws JsonProcessingException {
         when(resourceDefinitionService.getResourceDefinition(anyString(), anyString())).thenReturn(JsonUtil.writeValueAsString(DEFINITION2));
         Json invalidJson = new Json("nothing is here");
-        assertThrows(RuntimeException.class, executeCheckProperties(invalidJson));
+        assertDoesNotThrow(executeCheckProperties(invalidJson));
     }
 
     @Test

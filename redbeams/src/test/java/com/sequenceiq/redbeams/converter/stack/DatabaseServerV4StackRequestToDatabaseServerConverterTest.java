@@ -183,9 +183,9 @@ class DatabaseServerV4StackRequestToDatabaseServerConverterTest {
         assertNotNull(databaseServer.getRootPassword());
         assertNotNull(databaseServer.getPort());
         if (cloudPlatform == CloudPlatform.AZURE) {
-            assertEquals("10", databaseServer.getAttributes().getValue("dbVersion"));
+            assertEquals("10", databaseServer.getAttributes().getString("dbVersion"));
         } else {
-            assertEquals("10", databaseServer.getAttributes().getValue("engineVersion"));
+            assertEquals("10", databaseServer.getAttributes().getString("engineVersion"));
         }
     }
 

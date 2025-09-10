@@ -227,7 +227,7 @@ public class StackRequestManifester {
         Optional.ofNullable(sdxCluster)
                 .map(SdxCluster::getSdxDatabase)
                 .map(SdxDatabase::getAttributes)
-                .map(attributes -> (boolean) attributes.getValue(DATABASE_SSL_ENABLED))
+                .map(attributes -> attributes.getBoolean(DATABASE_SSL_ENABLED))
                 .ifPresent(dbSslEnabled -> stackRequest.setDisableDbSslEnforcement(!dbSslEnabled));
     }
 

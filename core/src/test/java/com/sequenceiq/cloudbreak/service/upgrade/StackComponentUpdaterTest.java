@@ -68,18 +68,18 @@ class StackComponentUpdaterTest {
         assertEquals(3, componentCatcher.getValue().size());
         assertTrue(componentCatcher.getValue().stream().anyMatch(
                 component -> {
-                    Object version = component.getAttributes().getValue("version");
+                    String version = component.getAttributes().getString("version");
                     if (Objects.nonNull(version)) {
-                        return ((String) version).contains(TARGET_STACK_VERSION);
+                        return version.contains(TARGET_STACK_VERSION);
                     } else {
                         return false;
                     }
                 }));
         assertTrue(componentCatcher.getValue().stream().anyMatch(
                 component -> {
-                    Object userData = component.getAttributes().getValue("userdata");
+                    Map<String, String> userData = component.getAttributes().get("userdata", Map.class);
                     if (Objects.nonNull(userData)) {
-                        return ((Map<String, String>) userData).get(InstanceGroupType.GATEWAY.name()).contains("gw user data");
+                        return userData.get(InstanceGroupType.GATEWAY.name()).contains("gw user data");
                     } else {
                         return false;
                     }

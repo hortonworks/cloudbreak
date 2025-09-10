@@ -170,7 +170,7 @@ public class UpgradeService {
         LOGGER.debug("Instances for image check: {} and selected image: {}", allInstances, imageInfoResponse);
         HashSet<String> instancesWithOldImage = allInstances.stream().filter(im -> {
                     if (im.getImage() != null && StringUtils.isNotBlank(im.getImage().getValue())) {
-                        Image image = im.getImage().getSilent(Image.class);
+                        Image image = im.getImage().getUnchecked(Image.class);
                         return !(Objects.equals(image.getImageId(), imageInfoResponse.getId())
                                 && (Objects.equals(image.getImageCatalogName(), imageInfoResponse.getCatalog())
                                 || Objects.equals(image.getImageCatalogUrl(), imageInfoResponse.getCatalog())));

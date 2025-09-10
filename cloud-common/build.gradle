@@ -51,7 +51,6 @@ dependencies {
     implementation group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
     implementation group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
     implementation group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
-    implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
     implementation group: 'com.dyngr',                             name: 'polling',                        version: dyngrPollingVersion
 
     testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion

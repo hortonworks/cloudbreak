@@ -91,7 +91,7 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
     private void validateImageOnFreeIpa(Stack stack) {
         List<Image> imagesList = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
-                .map(imageJson -> imageJson.getSilent(Image.class))
+                .map(imageJson -> imageJson.getUnchecked(Image.class))
                 .toList();
         boolean areAllImagesIdentical = imagesList.stream()
                 .map(Image::getImageId)

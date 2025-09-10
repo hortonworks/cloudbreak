@@ -64,7 +64,7 @@ class StackRepositoryTest {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     private static Predicate<StackImageView> imageIdEquals(String imageId) {
-        return stackImageView -> imageId.equals(stackImageView.getImage().getSilent(Image.class).getImageId());
+        return stackImageView -> imageId.equals(stackImageView.getImage().getUnchecked(Image.class).getImageId());
     }
 
     @BeforeEach

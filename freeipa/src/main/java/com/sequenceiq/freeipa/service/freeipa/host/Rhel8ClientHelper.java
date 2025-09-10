@@ -25,7 +25,7 @@ public class Rhel8ClientHelper {
                     .filter(im -> Objects.nonNull(im.getImage()))
                     .filter(im -> StringUtils.isNotBlank(im.getImage().getValue()))
                     .filter(im -> {
-                        Image image = im.getImage().getSilent(Image.class);
+                        Image image = im.getImage().getUnchecked(Image.class);
                         return OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType());
                     })
                     .map(InstanceMetaData::getDiscoveryFQDN)
@@ -44,7 +44,7 @@ public class Rhel8ClientHelper {
                     .map(InstanceMetaData::getImage)
                     .filter(Objects::nonNull)
                     .filter(image -> StringUtils.isNotBlank(image.getValue()))
-                    .map(image -> image.getSilent(Image.class))
+                    .map(image -> image.getUnchecked(Image.class))
                     .anyMatch(image -> OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType()));
         } catch (Exception e) {
             LOGGER.warn("Couldn't identify if client is connected to RHEL8 or not for client: [{}]", freeIpaClient.getHostname(), e);

@@ -40,9 +40,9 @@ public class CredentialDefinitionService {
 
     private void processValues(Definition definition, Json json) {
         processValues(json, definition.getDefaultValues());
-        Object selector = json.getValue(SELECTOR);
+        String selector = json.getString(SELECTOR);
         if (selector != null) {
-            processValues(json, collectSelectorValues(definition, String.valueOf(selector)));
+            processValues(json, collectSelectorValues(definition, selector));
         }
     }
 
@@ -94,11 +94,11 @@ public class CredentialDefinitionService {
     }
 
     private String getProperty(Json json, String key, boolean optional) {
-        Object value = json.getValue(key);
+        String value = json.getString(key);
         if (value == null && !optional) {
             throw new MissingParameterException(String.format("Missing '%s' property!", key));
         }
-        return value == null ? null : String.valueOf(value);
+        return value == null ? null : value;
     }
 
 }

@@ -1,69 +1,67 @@
 package com.sequenceiq.cloudbreak.json;
 
-import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
-import net.sf.json.JSONObject;
-
-public class JsonTest {
+class JsonTest {
 
     @Test
-    public void testGetValueWithTwoDepth() throws JsonProcessingException {
+    void testGetValueWithTwoDepth() throws JsonProcessingException {
         Map<String, Map<String, String>> map = Map.of("depth1", Map.of("depth2", "value"));
 
         Json json = new Json(map);
 
-        String value = json.getValue("depth1.depth2");
+        String value = json.getString("depth1.depth2");
 
-        Assert.assertThat(value, is("value"));
+        assertEquals("value", value);
     }
 
     @Test
-    public void testGetValueWithTwoDepthAndInt() throws JsonProcessingException {
+    void testGetValueWithTwoDepthAndInt() throws JsonProcessingException {
         Map<String, Map<String, Integer>> map = Map.of("depth1", Map.of("depth2", 1));
 
         Json json = new Json(map);
 
-        Integer value = json.getValue("depth1.depth2");
+        Integer value = json.getInt("depth1.depth2");
 
-        Assert.assertThat(value, is(1));
+        assertEquals(1, value);
     }
 
     @Test
-    public void testGetValueWithThreeDepthAndInt() throws JsonProcessingException {
+    void testGetValueWithThreeDepthAndInt() throws JsonProcessingException {
         Map<String, Map<String, Map<String, String>>> map = Map.of("depth1", Map.of("depth2", Map.of("depth3", "value")));
 
         Json json = new Json(map);
 
-        String value = json.getValue("depth1.depth2.depth3");
+        String value = json.getString("depth1.depth2.depth3");
 
-        Assert.assertThat(value, is("value"));
+        assertEquals("value", value);
     }
 
     @Test
-    public void testGetValueWithTwoDepthAndObject() throws JsonProcessingException {
+    void testGetValueWithTwoDepthAndObject() throws JsonProcessingException {
         Map<String, Map<String, Map<String, String>>> map = Map.of("depth1", Map.of("depth2", Map.of("depth3", "value")));
 
         Json json = new Json(map);
 
-        JSONObject value = json.getValue("depth1.depth2");
+        JsonNode value = json.getJsonNode("depth1.depth2");
 
-        Assert.assertThat(value.toString(), is("{\"depth3\":\"value\"}"));
+        assertEquals("{\"depth3\":\"value\"}", value.toString());
     }
 
     @Test
-    public void test() {
+    void test() {
         String js = "{\"depth1\":{\"depth2\":\"value\"}}";
 
-        String value = new Json(js).getValue("depth1.depth2");
+        String value = new Json(js).getString("depth1.depth2");
 
-        Assert.assertThat(value, is("value"));
+        assertEquals("value", value);
     }
 }

@@ -75,7 +75,7 @@ public class CoreValidateModifySeLinuxHandler extends ExceptionCatcherEventHandl
     private void validateImageOnStack(Stack stack, SeLinux seLinuxModeFromRequest) {
         List<Image> imagesList = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
-                .map(json -> json.getSilent(Image.class))
+                .map(json -> json.getUnchecked(Image.class))
                 .toList();
         boolean areAllImagesIdentical = imagesList.stream()
                 .map(Image::getImageName)

@@ -1489,7 +1489,7 @@ class ClouderaManagerModificationServiceTest {
     private ClusterComponentView createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {
         ClusterComponentView component = new ClusterComponentView();
         Json attribute = mock(Json.class);
-        when(attribute.getSilent(ClouderaManagerProduct.class)).thenReturn(clouderaManagerProduct);
+        when(attribute.getUnchecked(ClouderaManagerProduct.class)).thenReturn(clouderaManagerProduct);
         component.setAttributes(attribute);
         return component;
     }

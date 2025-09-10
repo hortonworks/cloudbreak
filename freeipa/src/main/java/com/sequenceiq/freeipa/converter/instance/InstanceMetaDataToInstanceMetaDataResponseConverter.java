@@ -42,7 +42,7 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverter implements Conv
         metaDataJson.setAvailabilityZone(source.getAvailabilityZone());
         metaDataJson.setSubnetId(source.getSubnetId());
         if (source.getImage() != null && StringUtils.isNotBlank(source.getImage().getValue())) {
-            Image image = source.getImage().getSilent(Image.class);
+            Image image = source.getImage().getUnchecked(Image.class);
             metaDataJson.setImage(imageConverter.convert(image));
         }
         return metaDataJson;

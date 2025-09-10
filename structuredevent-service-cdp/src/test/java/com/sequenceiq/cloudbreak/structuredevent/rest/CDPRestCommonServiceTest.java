@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 
 @ExtendWith(MockitoExtension.class)
-public class CDPRestCommonServiceTest {
+class CDPRestCommonServiceTest {
 
     public static final String CLUSTER_NAME = "cluserName";
 
@@ -42,7 +42,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheMapParameterButExistInRequestAndResponse() {
+    void testWhenNameAndResourceCrnComeFromTheMapParameterButExistInRequestAndResponse() {
         Map<String, String> restParams = Map.of(CLUSTER_NAME, "name1", CLUSTER_CRN, "crn1");
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
@@ -59,7 +59,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheRequestBodyButExistInResponse() {
+    void testWhenNameAndResourceCrnComeFromTheRequestBodyButExistInResponse() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         request.setBody(new Json(Map.of("name", "name2", "resourceCrn", "crn2")).getValue());
@@ -75,7 +75,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheResponse() {
+    void testWhenNameAndResourceCrnComeFromTheResponse() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         RestResponseDetails response = new RestResponseDetails();
@@ -90,7 +90,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNamesAndCrnAreList() {
+    void testWhenNamesAndCrnAreList() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         request.setBody(new Json(Map.of("names", List.of("names1", "names2"), "crns", List.of("crns1", "crns2"))).getValue());
@@ -105,7 +105,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnNotExists() {
+    void testWhenNameAndResourceCrnNotExists() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         request.setMethod("POST");
@@ -120,7 +120,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheResponsesValue() {
+    void testWhenNameAndResourceCrnComeFromTheResponsesValue() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         RestResponseDetails response = new RestResponseDetails();
@@ -138,7 +138,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheOperationDetails() {
+    void testWhenNameAndResourceCrnComeFromTheOperationDetails() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         RestResponseDetails response = new RestResponseDetails();
@@ -159,7 +159,7 @@ public class CDPRestCommonServiceTest {
     }
 
     @Test
-    public void testWhenNameAndResourceCrnComeFromTheNameOrCrnProvider() {
+    void testWhenNameAndResourceCrnComeFromTheNameOrCrnProvider() {
         RestCallDetails restCallDetails = new RestCallDetails();
         RestRequestDetails request = new RestRequestDetails();
         RestResponseDetails response = new RestResponseDetails();

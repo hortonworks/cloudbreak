@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
@@ -29,8 +30,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkR
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
-
-import net.sf.json.JSONObject;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultInstanceGroupProviderTest {
@@ -76,8 +75,8 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test
@@ -88,7 +87,7 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test
@@ -99,9 +98,9 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test
@@ -112,8 +111,8 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
+        assertThat(attributes.getBoolean(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
     }
 
     @Test
@@ -124,8 +123,8 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
+        assertThat(attributes.getBoolean(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
     }
 
     @Test
@@ -135,8 +134,8 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyEncryptionKey");
-        assertThat(attributes.<Object>getValue("keyEncryptionMethod")).isEqualTo("KMS");
+        assertThat(attributes.getString(AzureInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyEncryptionKey");
+        assertThat(attributes.getString("keyEncryptionMethod")).isEqualTo("KMS");
     }
 
     @Test
@@ -144,11 +143,11 @@ class DefaultInstanceGroupProviderTest {
         Json attributes = underTest.createAttributes(CloudPlatform.AZURE, STACK_NM, IG_NAME);
 
         assertThat(attributes).isNotNull();
-        JSONObject availabilitySet = attributes.getValue(AVAILABILITY_SET);
+        JsonNode availabilitySet = attributes.getJsonNode(AVAILABILITY_SET);
 
-        assertThat(availabilitySet.getInt(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT)).isEqualTo(2);
-        assertThat(availabilitySet.getInt(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT)).isEqualTo(20);
-        assertThat(availabilitySet.getString(AzureInstanceGroupParameters.NAME)).isEqualTo(String.format("%s-%s-as-std", STACK_NM, IG_NAME));
+        assertThat(availabilitySet.get(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT).asInt()).isEqualTo(2);
+        assertThat(availabilitySet.get(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT).asInt()).isEqualTo(20);
+        assertThat(availabilitySet.get(AzureInstanceGroupParameters.NAME).asText()).isEqualTo(String.format("%s-%s-as-std", STACK_NM, IG_NAME));
     }
 
     @Test

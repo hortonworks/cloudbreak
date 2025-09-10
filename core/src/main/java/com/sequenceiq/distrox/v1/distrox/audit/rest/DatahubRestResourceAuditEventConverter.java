@@ -99,9 +99,9 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
         AuditEventName auditEventName = auditEventName(structuredEvent);
         if (stack.isPresent() && auditEventName == AuditEventName.RESIZE_DATAHUB_CLUSTER) {
             Json json = new Json(structuredEvent.getRestCall().getRestRequest().getBody());
-            String group = json.getValue("group");
+            String group = json.getString("group");
             HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.get().getCluster().getId(), group);
-            Integer desiredCount = json.getValue("desiredCount");
+            Integer desiredCount = json.getInt("desiredCount");
             Integer originalNodeCount = hostGroup.getInstanceGroup().getNodeCount();
             params.put("desiredCount", desiredCount);
             params.put("originalCount", originalNodeCount);

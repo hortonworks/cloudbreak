@@ -23,8 +23,6 @@ dependencies {
     implementation project(':secret-engine')
     implementation project(':workspace')
 
-    implementation group: 'net.sf.json-lib',               name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
-
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
     testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {

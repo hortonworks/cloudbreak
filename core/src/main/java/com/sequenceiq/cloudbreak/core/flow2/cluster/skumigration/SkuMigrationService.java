@@ -58,8 +58,8 @@ public class SkuMigrationService {
             String standardSkuMigrationParameter = stackDto.getParameters().get(STANDARD_SKU_MIGRATION_PARAMETER);
             LOGGER.info("Standard sku migration parameter: {}", standardSkuMigrationParameter);
             boolean multiAz = stackDto.getStack().isMultiAz();
-            boolean noPublicIp = stackDto.getNetwork().getAttributes().getValue(AzureConstants.NO_PUBLIC_IP) != null ?
-                    stackDto.getNetwork().getAttributes().getValue(AzureConstants.NO_PUBLIC_IP) : false;
+            boolean noPublicIp = stackDto.getNetwork().getAttributes().getBoolean(AzureConstants.NO_PUBLIC_IP) != null ?
+                    stackDto.getNetwork().getAttributes().getBoolean(AzureConstants.NO_PUBLIC_IP) : false;
             Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackDto.getId());
             boolean notStandardSkuLB = loadBalancers.stream().anyMatch(loadBalancer -> !STANDARD.equals(loadBalancer.getSku()));
             LOGGER.info("Load balancers for stack: {}. Not standard load balancer found: {}. multiAz: {}, noPublicIp: {}", loadBalancers, notStandardSkuLB,

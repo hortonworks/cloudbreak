@@ -75,8 +75,6 @@ public class AzureCredentialIntegrationTest {
 
     private static final String TEST_RESOURCE_CRN = String.format("crn:cdp:environments:us-west-1:%s:credential:asdasd", TEST_ACCOUNT_ID);
 
-    private static final String USER_CODE = "1234";
-
     private static final String VERIFICATION_URL = "http://cloudera.com";
 
     private EnvironmentServiceCrnEndpoints client;

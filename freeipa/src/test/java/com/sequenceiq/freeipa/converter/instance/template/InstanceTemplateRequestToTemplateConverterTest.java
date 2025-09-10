@@ -113,8 +113,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE)).isEqualTo(SPOT_PERCENTAGE);
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE)).isEqualTo(SPOT_MAX_PRICE);
+        assertThat(attributes.getInt(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE)).isEqualTo(SPOT_PERCENTAGE);
+        assertThat(attributes.getDouble(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE)).isEqualTo(SPOT_MAX_PRICE);
     }
 
     @Test
@@ -127,8 +127,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isNull();
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isNull();
+        assertThat(attributes.getBoolean(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isNull();
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isNull();
     }
 
     @Test
@@ -141,8 +141,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
+        assertThat(attributes.getBoolean(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
     }
 
     @Test
@@ -156,10 +156,10 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE)).isEqualTo(SPOT_PERCENTAGE);
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE)).isEqualTo(SPOT_MAX_PRICE);
+        assertThat(attributes.getBoolean(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
+        assertThat(attributes.getInt(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE)).isEqualTo(SPOT_PERCENTAGE);
+        assertThat(attributes.getDouble(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE)).isEqualTo(SPOT_MAX_PRICE);
     }
 
     @Test
@@ -172,8 +172,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getString(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test
@@ -186,8 +186,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isNull();
+        assertThat(attributes.getString(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isNull();
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isNull();
     }
 
     @Test
@@ -201,7 +201,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test
@@ -215,7 +215,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(false);
+        assertThat(attributes.getBoolean(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(false);
     }
 
     @Test
@@ -228,8 +228,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyEncryptionKey");
-        assertThat(attributes.<Object>getValue("keyEncryptionMethod")).isEqualTo("KMS");
+        assertThat(attributes.getString(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyEncryptionKey");
+        assertThat(attributes.getString("keyEncryptionMethod")).isEqualTo("KMS");
     }
 
     @Test
@@ -242,8 +242,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
-        assertThat(attributes.<Object>getValue("keyEncryptionMethod")).isNull();
+        assertThat(attributes.getString(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
+        assertThat(attributes.getString("keyEncryptionMethod")).isNull();
     }
 
     @Test
@@ -256,8 +256,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyAwsEncryptionKeyArn");
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
+        assertThat(attributes.getString(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyAwsEncryptionKeyArn");
+        assertThat(attributes.getString(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
     }
 
     private AwsInstanceTemplateParameters createAwsInstanceTemplateParameters(int spotPercentage, Double spotMaxPrice) {

@@ -30,8 +30,6 @@ import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import net.sf.json.JSONObject;
-
 public class JsonUtil {
 
     public static final String INVALID_JSON_CONTENT = "INVALID_JSON_CONTENT";
@@ -78,16 +76,6 @@ public class JsonUtil {
         return writeValueAsStringSilent(readValue(content, valueType), true);
     }
 
-    public static <T> T readValueFromGrpcJson(String content, Class<T> valueType) {
-        ObjectMapper mapper = getObjectMapperForGrpcJsonProcessing();
-        try {
-            return mapper.readValue(content, valueType);
-        } catch (JsonProcessingException e) {
-            LOGGER.warn("Failed to deserialize with Jackson: {}", content, e);
-            throw new IllegalStateException("Cannot convert Json string to object.", e);
-        }
-    }
-
     public static <T> T readValueUnchecked(String content, Class<T> valueType) {
         try {
             return MAPPER.readValue(content, valueType);
@@ -97,12 +85,12 @@ public class JsonUtil {
         }
     }
 
-    public static <T> T readValue(String content, TypeReference<T> valueTypeRef) throws IOException {
+    public static <T> T readValue(String content, TypeReference<T> valueTypeRef) throws JsonProcessingException {
         return MAPPER.readValue(content, valueTypeRef);
     }
 
-    public static <T> T readValue(Map<String, Object> map, Class<T> valueType) {
-        return MAPPER.convertValue(map, valueType);
+    public static <T> T readValue(Object fromValue, Class<T> valueType) {
+        return MAPPER.convertValue(fromValue, valueType);
     }
 
     public static <T> Optional<T> readValueOpt(String content, Class<T> valueType) {
@@ -172,17 +160,7 @@ public class JsonUtil {
         return MAPPER.readTree(content);
     }
 
-    public static JsonNode readTreeByArray(String content) throws IOException {
-        JSONObject jsonObject;
-        try {
-            jsonObject = JSONObject.fromObject(content);
-        } catch (Exception e) {
-            jsonObject = new JSONObject();
-        }
-        return MAPPER.readTree(jsonObject.toString());
-    }
-
-    public static JsonNode createJsonTree(Map<String, Object> map) {
+    public static ObjectNode createJsonTree(Map<String, Object> map) {
         ObjectNode rootNode = MAPPER.createObjectNode();
         map.forEach((key, value) -> rootNode.set(key, MAPPER.valueToTree(value)));
         return rootNode;
