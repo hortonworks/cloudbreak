@@ -45,13 +45,13 @@ cloud-azure/src/main/resources/definitions/                                     
 cloud-gcp/src/main/resources/definitions/                                       @cloudbreak/cloudbreak-wolf-backend
 
 
-# DB SSL related changes in core shall be assigned to lrodek
-core/**/ClusterDbCertRotationHandler.java                                       @lrodek
-core/**/DatabaseSslService*.java                                                @lrodek
-core/**/RedbeamsDbCertificateProvider*.java                                     @lrodek
-core-api/**/DatabaseServerSsl*.java                                             @lrodek
-core-model/**/DatabaseSslDetails*.java                                          @lrodek
-core-model/**/RdsSslMode.java                                                   @lrodek
+# DB SSL related changes in core shall be assigned to Duck
+core/**/ClusterDbCertRotationHandler.java                                       @cloudbreak/cloudbreak-duck
+core/**/DatabaseSslService*.java                                                @cloudbreak/cloudbreak-duck
+core/**/RedbeamsDbCertificateProvider*.java                                     @cloudbreak/cloudbreak-duck
+core-api/**/DatabaseServerSsl*.java                                             @cloudbreak/cloudbreak-duck
+core-model/**/DatabaseSslDetails*.java                                          @cloudbreak/cloudbreak-duck
+core-model/**/RdsSslMode.java                                                   @cloudbreak/cloudbreak-duck
 
 # Wolf team should review data hub blueprint changes
 core/src/main/resources/defaults/blueprints/                                    @cloudbreak/cloudbreak-wolf-backend
@@ -81,17 +81,17 @@ freeipa/                                                                        
 freeipa-api/                                                                    @cloudbreak/cloudbreak-duck
 freeipa-client/                                                                 @cloudbreak/cloudbreak-duck
 
-# DB SSL related changes in redbeams shall be assigned to lrodek
-redbeams/**/CertRotateInRedbeamsHandler*.java                                   @lrodek
-redbeams/**/DatabaseServerSslCertificate*.java                                  @lrodek
-redbeams/**/SslCertificateEntry*.java                                           @lrodek
-redbeams/**/SslConfig*.java                                                     @lrodek
-redbeams/**/SslContent*.java                                                    @lrodek
-redbeams/src/main/resources/certs/                                              @lrodek
-redbeams/src/test/resources/test_certs/                                         @lrodek
-redbeams/scripts/import-aws-rds-root-certs.sh                                   @lrodek
-redbeams-api/**/SslConfig*.java                                                 @lrodek
-redbeams-api/**/SslMode*.java                                                   @lrodek
+# DB SSL related changes in redbeams shall be assigned to Duck
+redbeams/**/CertRotateInRedbeamsHandler*.java                                   @cloudbreak/cloudbreak-duck
+redbeams/**/DatabaseServerSslCertificate*.java                                  @cloudbreak/cloudbreak-duck
+redbeams/**/SslCertificateEntry*.java                                           @cloudbreak/cloudbreak-duck
+redbeams/**/SslConfig*.java                                                     @cloudbreak/cloudbreak-duck
+redbeams/**/SslContent*.java                                                    @cloudbreak/cloudbreak-duck
+redbeams/src/main/resources/certs/                                              @cloudbreak/cloudbreak-duck
+redbeams/src/test/resources/test_certs/                                         @cloudbreak/cloudbreak-duck
+redbeams/scripts/import-aws-rds-root-certs.sh                                   @cloudbreak/cloudbreak-duck
+redbeams-api/**/SslConfig*.java                                                 @cloudbreak/cloudbreak-duck
+redbeams-api/**/SslMode*.java                                                   @cloudbreak/cloudbreak-duck
 
 # Duck team should review other redbeams related changes
 redbeams/                                                                       @cloudbreak/cloudbreak-duck
@@ -101,10 +101,10 @@ redbeams-api/                                                                   
 orchestrator-salt/src/main/resources/salt/salt/postgresql/disaster_recovery     @cloudbreak/cloudbreak-armadillo
 orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 @cloudbreak/cloudbreak-armadillo
 
-# DB SSL related changes in orchestrator-salt shall be assigned to lrodek
-orchestrator-salt/**/postgresql/root-certs.sls                                  @lrodek
-orchestrator-salt/**/postgresql/scripts/conf_pgsql_ssl.sh                       @lrodek
-orchestrator-salt/**/postgresql/scripts/create_embeddeddb_certificate.sh        @lrodek
+# DB SSL related changes in orchestrator-salt shall be assigned to Duck
+orchestrator-salt/**/postgresql/root-certs.sls                                  @cloudbreak/cloudbreak-duck
+orchestrator-salt/**/postgresql/scripts/conf_pgsql_ssl.sh                       @cloudbreak/cloudbreak-duck
+orchestrator-salt/**/postgresql/scripts/create_embeddeddb_certificate.sh        @cloudbreak/cloudbreak-duck
 
 core/src/main/java/com/sequenceiq/cloudbreak/service/upgrade/                   @tpopovics
 core/src/main/java/com/sequenceiq/cloudbreak/core/flow2/cluster/datalake/upgrade/ @tpopovics
