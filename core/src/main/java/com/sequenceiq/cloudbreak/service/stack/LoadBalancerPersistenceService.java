@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.repository.LoadBalancerRepository;
@@ -21,21 +22,26 @@ public class LoadBalancerPersistenceService {
     private LoadBalancerRepository repository;
 
     @Inject
+    private TransactionService transactionService;
+
+    @Inject
     private TargetGroupPersistenceService targetGroupPersistenceService;
 
     public LoadBalancer save(LoadBalancer loadBalancer) {
         return repository.save(loadBalancer);
     }
 
-    public void deleteByStackId(Long stackId) {
-        Set<LoadBalancer> loadBalancers = repository.findByStackId(stackId);
-        for (LoadBalancer loadBalancer : loadBalancers) {
-            LOGGER.debug("Cleanup targetgroups for loadBalancer {}", loadBalancer.getId());
-            for (TargetGroup targetGroup : loadBalancer.getTargetGroupSet()) {
-                targetGroupPersistenceService.delete(targetGroup.getId());
+    public void deleteByStackId(Long stackId) throws TransactionService.TransactionExecutionException {
+        transactionService.required(() -> {
+            Set<LoadBalancer> loadBalancers = repository.findByStackId(stackId);
+            for (LoadBalancer loadBalancer : loadBalancers) {
+                LOGGER.debug("Cleanup targetgroups for loadBalancer {}", loadBalancer.getId());
+                for (TargetGroup targetGroup : loadBalancer.getTargetGroupSet()) {
+                    targetGroupPersistenceService.delete(targetGroup.getId());
+                }
             }
-        }
-        repository.deleteByStackId(stackId);
+            repository.deleteByStackId(stackId);
+        });
     }
 
     public Iterable<LoadBalancer> saveAll(Iterable<LoadBalancer> loadBalancers) {

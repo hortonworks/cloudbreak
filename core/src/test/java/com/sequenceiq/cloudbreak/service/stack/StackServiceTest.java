@@ -288,6 +288,14 @@ class StackServiceTest {
     @Mock
     private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
 
+    static Object[][] testCreatePublicKeyDataProvider() {
+        return new Object[][]{
+                // platformVariant, fipsEnabledExpected
+                {VARIANT_VALUE, false},
+                {CloudConstants.AWS_NATIVE_GOV, true},
+        };
+    }
+
     @BeforeEach
     void setUp() throws Exception {
         underTest.nowSupplier = () -> MOCK_NOW;
@@ -491,14 +499,6 @@ class StackServiceTest {
         verify(stack, never()).setPlatformVariant(anyString());
         verify(stack).populateStackIdForComponents();
         verify(openSshPublicKeyValidator, never()).validate(anyString(), anyBoolean());
-    }
-
-    static Object[][] testCreatePublicKeyDataProvider() {
-        return new Object[][]{
-                // platformVariant, fipsEnabledExpected
-                {VARIANT_VALUE, false},
-                {CloudConstants.AWS_NATIVE_GOV, true},
-        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -845,7 +845,7 @@ class StackServiceTest {
     }
 
     @Test
-    void testDeleteArchivedByResourceCrn() {
+    void testDeleteArchivedByResourceCrn() throws TransactionExecutionException {
         String crn = "crn";
 
         Stack stackForTest = new Stack();
@@ -913,7 +913,7 @@ class StackServiceTest {
     }
 
     @Test
-    void testDeleteArchivedByResourceCrnWhenStackRepoDeleteCallFails() {
+    void testDeleteArchivedByResourceCrnWhenStackRepoDeleteCallFails() throws TransactionExecutionException {
         String crn = "crn";
 
         Stack stackForTest = new Stack();
