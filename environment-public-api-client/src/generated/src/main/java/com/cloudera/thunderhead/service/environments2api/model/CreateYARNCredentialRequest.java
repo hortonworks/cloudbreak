@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateYARNCredentialRequest.JSON_PROPERTY_ENDPOINT_VALUE,
   CreateYARNCredentialRequest.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateYARNCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_ENDPOINT_VALUE = "endpointValue";
+  @javax.annotation.Nonnull
   private String endpointValue;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public CreateYARNCredentialRequest() {
   }
 
-  public CreateYARNCredentialRequest credentialName(String credentialName) {
+  public CreateYARNCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * The name of the credential.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class CreateYARNCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public CreateYARNCredentialRequest endpointValue(String endpointValue) {
+  public CreateYARNCredentialRequest endpointValue(@javax.annotation.Nonnull String endpointValue) {
     
     this.endpointValue = endpointValue;
     return this;
   }
 
-   /**
+  /**
    * The endpoint of YARN.
    * @return endpointValue
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENDPOINT_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class CreateYARNCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEndpointValue(String endpointValue) {
+  public void setEndpointValue(@javax.annotation.Nonnull String endpointValue) {
     this.endpointValue = endpointValue;
   }
 
-
-  public CreateYARNCredentialRequest description(String description) {
+  public CreateYARNCredentialRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * A description for the credential.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class CreateYARNCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
+
 
   @Override
   public boolean equals(Object o) {

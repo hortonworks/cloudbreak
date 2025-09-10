@@ -34,33 +34,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdBrokerSyncStatus.JSON_PROPERTY_END_DATE,
   IdBrokerSyncStatus.JSON_PROPERTY_ERROR_DETAIL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class IdBrokerSyncStatus {
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private SyncStatus status;
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
+  @javax.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
+  @javax.annotation.Nullable
   private OffsetDateTime endDate;
 
   public static final String JSON_PROPERTY_ERROR_DETAIL = "errorDetail";
+  @javax.annotation.Nullable
   private String errorDetail;
 
   public IdBrokerSyncStatus() {
   }
 
-  public IdBrokerSyncStatus status(SyncStatus status) {
+  public IdBrokerSyncStatus status(@javax.annotation.Nonnull SyncStatus status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Get status
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -72,21 +76,20 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(SyncStatus status) {
+  public void setStatus(@javax.annotation.Nonnull SyncStatus status) {
     this.status = status;
   }
 
-
-  public IdBrokerSyncStatus startDate(OffsetDateTime startDate) {
+  public IdBrokerSyncStatus startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     
     this.startDate = startDate;
     return this;
   }
 
-   /**
+  /**
    * The date when the mappings sync started executing. Omitted if status is NEVER_RUN.
    * @return startDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -98,21 +101,20 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(OffsetDateTime startDate) {
+  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-
-  public IdBrokerSyncStatus endDate(OffsetDateTime endDate) {
+  public IdBrokerSyncStatus endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     
     this.endDate = endDate;
     return this;
   }
 
-   /**
+  /**
    * The date when the mappings sync completed or was terminated. Omitted if status is NEVER_RUN or RUNNING.
    * @return endDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -124,21 +126,20 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(OffsetDateTime endDate) {
+  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
 
-
-  public IdBrokerSyncStatus errorDetail(String errorDetail) {
+  public IdBrokerSyncStatus errorDetail(@javax.annotation.Nullable String errorDetail) {
     
     this.errorDetail = errorDetail;
     return this;
   }
 
-   /**
+  /**
    * The detail of the error. Omitted if status is not FAILED.
    * @return errorDetail
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR_DETAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -150,9 +151,10 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_ERROR_DETAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setErrorDetail(String errorDetail) {
+  public void setErrorDetail(@javax.annotation.Nullable String errorDetail) {
     this.errorDetail = errorDetail;
   }
+
 
   @Override
   public boolean equals(Object o) {

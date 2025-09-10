@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Instance.JSON_PROPERTY_DISCOVERY_F_Q_D_N,
   Instance.JSON_PROPERTY_PRIVATE_IP
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Instance {
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
+  @javax.annotation.Nullable
   private String instanceId;
 
   public static final String JSON_PROPERTY_DISCOVERY_F_Q_D_N = "discoveryFQDN";
+  @javax.annotation.Nullable
   private String discoveryFQDN;
 
   public static final String JSON_PROPERTY_PRIVATE_IP = "privateIp";
+  @javax.annotation.Nullable
   private String privateIp;
 
   public Instance() {
   }
 
-  public Instance instanceId(String instanceId) {
+  public Instance instanceId(@javax.annotation.Nullable String instanceId) {
     
     this.instanceId = instanceId;
     return this;
   }
 
-   /**
+  /**
    * ID of the instance
    * @return instanceId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceId(String instanceId) {
+  public void setInstanceId(@javax.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
   }
 
-
-  public Instance discoveryFQDN(String discoveryFQDN) {
+  public Instance discoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
     
     this.discoveryFQDN = discoveryFQDN;
     return this;
   }
 
-   /**
+  /**
    * The fully qualified domain name of the instance in the cluster.
    * @return discoveryFQDN
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDiscoveryFQDN(String discoveryFQDN) {
+  public void setDiscoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
     this.discoveryFQDN = discoveryFQDN;
   }
 
-
-  public Instance privateIp(String privateIp) {
+  public Instance privateIp(@javax.annotation.Nullable String privateIp) {
     
     this.privateIp = privateIp;
     return this;
   }
 
-   /**
+  /**
    * The private IP of the instance
    * @return privateIp
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateIp(String privateIp) {
+  public void setPrivateIp(@javax.annotation.Nullable String privateIp) {
     this.privateIp = privateIp;
   }
+
 
   @Override
   public boolean equals(Object o) {

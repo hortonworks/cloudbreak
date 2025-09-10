@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GCPCredentialProperties.JSON_PROPERTY_KEY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GCPCredentialProperties {
   public static final String JSON_PROPERTY_KEY_TYPE = "keyType";
+  @javax.annotation.Nullable
   private String keyType;
 
   public GCPCredentialProperties() {
   }
 
-  public GCPCredentialProperties keyType(String keyType) {
+  public GCPCredentialProperties keyType(@javax.annotation.Nullable String keyType) {
     
     this.keyType = keyType;
     return this;
   }
 
-   /**
+  /**
    * The GCP credential key type. Json is the only supported key type.
    * @return keyType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KEY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class GCPCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_KEY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKeyType(String keyType) {
+  public void setKeyType(@javax.annotation.Nullable String keyType) {
     this.keyType = keyType;
   }
+
 
   @Override
   public boolean equals(Object o) {

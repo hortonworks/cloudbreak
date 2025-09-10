@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ServiceEndPoint.JSON_PROPERTY_PORT,
   ServiceEndPoint.JSON_PROPERTY_URI
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ServiceEndPoint {
   public static final String JSON_PROPERTY_HOST = "host";
+  @javax.annotation.Nullable
   private String host;
 
   public static final String JSON_PROPERTY_PORT = "port";
+  @javax.annotation.Nullable
   private Integer port;
 
   public static final String JSON_PROPERTY_URI = "uri";
+  @javax.annotation.Nullable
   private String uri;
 
   public ServiceEndPoint() {
   }
 
-  public ServiceEndPoint host(String host) {
+  public ServiceEndPoint host(@javax.annotation.Nullable String host) {
     
     this.host = host;
     return this;
   }
 
-   /**
+  /**
    * The endpoints hostname or ip address.
    * @return host
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHost(String host) {
+  public void setHost(@javax.annotation.Nullable String host) {
     this.host = host;
   }
 
-
-  public ServiceEndPoint port(Integer port) {
+  public ServiceEndPoint port(@javax.annotation.Nullable Integer port) {
     
     this.port = port;
     return this;
   }
 
-   /**
+  /**
    * The endpoints port.
    * @return port
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPort(Integer port) {
+  public void setPort(@javax.annotation.Nullable Integer port) {
     this.port = port;
   }
 
-
-  public ServiceEndPoint uri(String uri) {
+  public ServiceEndPoint uri(@javax.annotation.Nullable String uri) {
     
     this.uri = uri;
     return this;
   }
 
-   /**
+  /**
    * The connection uri for the endpoint.
    * @return uri
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUri(String uri) {
+  public void setUri(@javax.annotation.Nullable String uri) {
     this.uri = uri;
   }
+
 
   @Override
   public boolean equals(Object o) {

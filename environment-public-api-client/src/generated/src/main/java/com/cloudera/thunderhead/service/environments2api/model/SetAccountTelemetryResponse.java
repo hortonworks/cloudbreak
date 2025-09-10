@@ -36,33 +36,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetAccountTelemetryResponse.JSON_PROPERTY_CLOUD_STORAGE_LOGGING,
   SetAccountTelemetryResponse.JSON_PROPERTY_RULES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetAccountTelemetryResponse {
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
+  @javax.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
+  @javax.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_RULES = "rules";
+  @javax.annotation.Nullable
   private List<AnonymizationRuleResponse> rules = new ArrayList<>();
 
   public SetAccountTelemetryResponse() {
   }
 
-  public SetAccountTelemetryResponse workloadAnalytics(Boolean workloadAnalytics) {
+  public SetAccountTelemetryResponse workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * Flag to enable account level workload analytics. (that will be used as a default for environment)
    * @return workloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -74,21 +78,20 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-
-  public SetAccountTelemetryResponse reportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public SetAccountTelemetryResponse reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
 
-   /**
+  /**
    * [Deprecated] Flag to enable account level deployment log collection. (that will be used as a default for environment)
    * @return reportDeploymentLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,21 +103,20 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-
-  public SetAccountTelemetryResponse cloudStorageLogging(Boolean cloudStorageLogging) {
+  public SetAccountTelemetryResponse cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
 
-   /**
+  /**
    * Flag to enable account level cloud storage logging. (that will be used as a default for environment)
    * @return cloudStorageLogging
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -126,12 +128,11 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-
-  public SetAccountTelemetryResponse rules(List<AnonymizationRuleResponse> rules) {
+  public SetAccountTelemetryResponse rules(@javax.annotation.Nullable List<AnonymizationRuleResponse> rules) {
     
     this.rules = rules;
     return this;
@@ -145,10 +146,10 @@ public class SetAccountTelemetryResponse {
     return this;
   }
 
-   /**
+  /**
    * List of anonymization rules that are applied on logs that are shipped to Cloudera
    * @return rules
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -160,9 +161,10 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRules(List<AnonymizationRuleResponse> rules) {
+  public void setRules(@javax.annotation.Nullable List<AnonymizationRuleResponse> rules) {
     this.rules = rules;
   }
+
 
   @Override
   public boolean equals(Object o) {

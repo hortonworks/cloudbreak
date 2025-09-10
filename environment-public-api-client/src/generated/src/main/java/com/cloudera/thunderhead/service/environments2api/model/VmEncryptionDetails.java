@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   VmEncryptionDetails.JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class VmEncryptionDetails {
   public static final String JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION = "enableSecretEncryption";
+  @javax.annotation.Nullable
   private Boolean enableSecretEncryption;
 
   public VmEncryptionDetails() {
   }
 
-  public VmEncryptionDetails enableSecretEncryption(Boolean enableSecretEncryption) {
+  public VmEncryptionDetails enableSecretEncryption(@javax.annotation.Nullable Boolean enableSecretEncryption) {
     
     this.enableSecretEncryption = enableSecretEncryption;
     return this;
   }
 
-   /**
+  /**
    * True if the secret encryption feature is enabled for the environment.
    * @return enableSecretEncryption
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class VmEncryptionDetails {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableSecretEncryption(Boolean enableSecretEncryption) {
+  public void setEnableSecretEncryption(@javax.annotation.Nullable Boolean enableSecretEncryption) {
     this.enableSecretEncryption = enableSecretEncryption;
   }
+
 
   @Override
   public boolean equals(Object o) {

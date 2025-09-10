@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListFreeipaSecretTypesRequest.JSON_PROPERTY_ENVIRONMENT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListFreeipaSecretTypesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public ListFreeipaSecretTypesRequest() {
   }
 
-  public ListFreeipaSecretTypesRequest environment(String environment) {
+  public ListFreeipaSecretTypesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The environment CRN where Freeipa is located.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class ListFreeipaSecretTypesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,17 +30,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvValidation.JSON_PROPERTY_SEVERITY,
   EnvValidation.JSON_PROPERTY_MESSAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvValidation {
   /**
    * The level of validation severity.
    */
   public enum SeverityEnum {
-    INFO("INFO"),
+    INFO(String.valueOf("INFO")),
     
-    WARNING("WARNING"),
+    WARNING(String.valueOf("WARNING")),
     
-    ERROR("ERROR");
+    ERROR(String.valueOf("ERROR"));
 
     private String value;
 
@@ -70,24 +70,26 @@ public class EnvValidation {
   }
 
   public static final String JSON_PROPERTY_SEVERITY = "severity";
+  @javax.annotation.Nullable
   private SeverityEnum severity;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nullable
   private String message;
 
   public EnvValidation() {
   }
 
-  public EnvValidation severity(SeverityEnum severity) {
+  public EnvValidation severity(@javax.annotation.Nullable SeverityEnum severity) {
     
     this.severity = severity;
     return this;
   }
 
-   /**
+  /**
    * The level of validation severity.
    * @return severity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SEVERITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,21 +101,20 @@ public class EnvValidation {
 
   @JsonProperty(JSON_PROPERTY_SEVERITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSeverity(SeverityEnum severity) {
+  public void setSeverity(@javax.annotation.Nullable SeverityEnum severity) {
     this.severity = severity;
   }
 
-
-  public EnvValidation message(String message) {
+  public EnvValidation message(@javax.annotation.Nullable String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * Validation message.
    * @return message
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -125,9 +126,10 @@ public class EnvValidation {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nullable String message) {
     this.message = message;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateSecurityAccessRequest.JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID,
   UpdateSecurityAccessRequest.JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateSecurityAccessRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID = "gatewayNodeSecurityGroupId";
+  @javax.annotation.Nonnull
   private String gatewayNodeSecurityGroupId;
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
+  @javax.annotation.Nonnull
   private String defaultSecurityGroupId;
 
   public UpdateSecurityAccessRequest() {
   }
 
-  public UpdateSecurityAccessRequest environment(String environment) {
+  public UpdateSecurityAccessRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or the CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateSecurityAccessRequest gatewayNodeSecurityGroupId(String gatewayNodeSecurityGroupId) {
+  public UpdateSecurityAccessRequest gatewayNodeSecurityGroupId(@javax.annotation.Nonnull String gatewayNodeSecurityGroupId) {
     
     this.gatewayNodeSecurityGroupId = gatewayNodeSecurityGroupId;
     return this;
   }
 
-   /**
+  /**
    * Security group ID where Knox-enabled hosts are placed.
    * @return gatewayNodeSecurityGroupId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setGatewayNodeSecurityGroupId(String gatewayNodeSecurityGroupId) {
+  public void setGatewayNodeSecurityGroupId(@javax.annotation.Nonnull String gatewayNodeSecurityGroupId) {
     this.gatewayNodeSecurityGroupId = gatewayNodeSecurityGroupId;
   }
 
-
-  public UpdateSecurityAccessRequest defaultSecurityGroupId(String defaultSecurityGroupId) {
+  public UpdateSecurityAccessRequest defaultSecurityGroupId(@javax.annotation.Nonnull String defaultSecurityGroupId) {
     
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
 
-   /**
+  /**
    * Security group ID for non-gateway nodes.
    * @return defaultSecurityGroupId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -118,9 +119,10 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDefaultSecurityGroupId(String defaultSecurityGroupId) {
+  public void setDefaultSecurityGroupId(@javax.annotation.Nonnull String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
+
 
   @Override
   public boolean equals(Object o) {

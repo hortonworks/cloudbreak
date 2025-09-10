@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GcpCredentialPrerequisitesResponse.JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GcpCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND = "serviceAccountCreationCommand";
+  @javax.annotation.Nonnull
   private String serviceAccountCreationCommand;
 
   public GcpCredentialPrerequisitesResponse() {
   }
 
-  public GcpCredentialPrerequisitesResponse serviceAccountCreationCommand(String serviceAccountCreationCommand) {
+  public GcpCredentialPrerequisitesResponse serviceAccountCreationCommand(@javax.annotation.Nonnull String serviceAccountCreationCommand) {
     
     this.serviceAccountCreationCommand = serviceAccountCreationCommand;
     return this;
   }
 
-   /**
+  /**
    * GCP CLI command to create service account encoded in base64.
    * @return serviceAccountCreationCommand
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class GcpCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setServiceAccountCreationCommand(String serviceAccountCreationCommand) {
+  public void setServiceAccountCreationCommand(@javax.annotation.Nonnull String serviceAccountCreationCommand) {
     this.serviceAccountCreationCommand = serviceAccountCreationCommand;
   }
+
 
   @Override
   public boolean equals(Object o) {

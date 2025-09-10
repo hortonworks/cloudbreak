@@ -30,16 +30,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CheckKubernetesConnectivityRequest.JSON_PROPERTY_KUBE_CONFIG,
   CheckKubernetesConnectivityRequest.JSON_PROPERTY_FORMAT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckKubernetesConnectivityRequest {
   public static final String JSON_PROPERTY_KUBE_CONFIG = "kubeConfig";
+  @javax.annotation.Nonnull
   private String kubeConfig;
 
   /**
    * Format of Kubernetes configuration file. Defaults to YAML.
    */
   public enum FormatEnum {
-    YAML("YAML");
+    YAML(String.valueOf("YAML"));
 
     private String value;
 
@@ -69,21 +70,22 @@ public class CheckKubernetesConnectivityRequest {
   }
 
   public static final String JSON_PROPERTY_FORMAT = "format";
+  @javax.annotation.Nullable
   private FormatEnum format;
 
   public CheckKubernetesConnectivityRequest() {
   }
 
-  public CheckKubernetesConnectivityRequest kubeConfig(String kubeConfig) {
+  public CheckKubernetesConnectivityRequest kubeConfig(@javax.annotation.Nonnull String kubeConfig) {
     
     this.kubeConfig = kubeConfig;
     return this;
   }
 
-   /**
+  /**
    * Content of Kubernetes configuration file as a text blob in YAML format.
    * @return kubeConfig
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -95,21 +97,20 @@ public class CheckKubernetesConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKubeConfig(String kubeConfig) {
+  public void setKubeConfig(@javax.annotation.Nonnull String kubeConfig) {
     this.kubeConfig = kubeConfig;
   }
 
-
-  public CheckKubernetesConnectivityRequest format(FormatEnum format) {
+  public CheckKubernetesConnectivityRequest format(@javax.annotation.Nullable FormatEnum format) {
     
     this.format = format;
     return this;
   }
 
-   /**
+  /**
    * Format of Kubernetes configuration file. Defaults to YAML.
    * @return format
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORMAT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -121,9 +122,10 @@ public class CheckKubernetesConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_FORMAT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFormat(FormatEnum format) {
+  public void setFormat(@javax.annotation.Nullable FormatEnum format) {
     this.format = format;
   }
+
 
   @Override
   public boolean equals(Object o) {

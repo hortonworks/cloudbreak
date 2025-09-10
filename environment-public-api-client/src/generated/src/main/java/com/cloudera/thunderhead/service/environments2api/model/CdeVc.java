@@ -33,36 +33,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdeVc.JSON_PROPERTY_STATUS,
   CdeVc.JSON_PROPERTY_VC_UI_URL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdeVc {
   public static final String JSON_PROPERTY_VC_ID = "vcId";
+  @javax.annotation.Nullable
   private String vcId;
 
   public static final String JSON_PROPERTY_VC_NAME = "vcName";
+  @javax.annotation.Nullable
   private String vcName;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
+  @javax.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_VC_UI_URL = "vcUiUrl";
+  @javax.annotation.Nullable
   private String vcUiUrl;
 
   public CdeVc() {
   }
 
-  public CdeVc vcId(String vcId) {
+  public CdeVc vcId(@javax.annotation.Nullable String vcId) {
     
     this.vcId = vcId;
     return this;
   }
 
-   /**
+  /**
    * Virtual Cluster ID.
    * @return vcId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -74,21 +79,20 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcId(String vcId) {
+  public void setVcId(@javax.annotation.Nullable String vcId) {
     this.vcId = vcId;
   }
 
-
-  public CdeVc vcName(String vcName) {
+  public CdeVc vcName(@javax.annotation.Nullable String vcName) {
     
     this.vcName = vcName;
     return this;
   }
 
-   /**
+  /**
    * Virtual Cluster Name.
    * @return vcName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,21 +104,20 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcName(String vcName) {
+  public void setVcName(@javax.annotation.Nullable String vcName) {
     this.vcName = vcName;
   }
 
-
-  public CdeVc clusterId(String clusterId) {
+  public CdeVc clusterId(@javax.annotation.Nullable String clusterId) {
     
     this.clusterId = clusterId;
     return this;
   }
 
-   /**
+  /**
    * Cluster ID of the CDE service that contains the virtual cluster.
    * @return clusterId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -126,21 +129,20 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(String clusterId) {
+  public void setClusterId(@javax.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-
-  public CdeVc status(String status) {
+  public CdeVc status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of the Virtual Cluster.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -152,21 +154,20 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public CdeVc vcUiUrl(String vcUiUrl) {
+  public CdeVc vcUiUrl(@javax.annotation.Nullable String vcUiUrl) {
     
     this.vcUiUrl = vcUiUrl;
     return this;
   }
 
-   /**
+  /**
    * Url for the Virtual Cluster UI.
    * @return vcUiUrl
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_UI_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -178,9 +179,10 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_UI_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcUiUrl(String vcUiUrl) {
+  public void setVcUiUrl(@javax.annotation.Nullable String vcUiUrl) {
     this.vcUiUrl = vcUiUrl;
   }
+
 
   @Override
   public boolean equals(Object o) {

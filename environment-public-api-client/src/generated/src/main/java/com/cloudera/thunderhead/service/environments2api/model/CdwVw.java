@@ -33,36 +33,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdwVw.JSON_PROPERTY_VW_TYPE,
   CdwVw.JSON_PROPERTY_DBC_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdwVw {
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_VW_TYPE = "vwType";
+  @javax.annotation.Nullable
   private String vwType;
 
   public static final String JSON_PROPERTY_DBC_ID = "dbcId";
+  @javax.annotation.Nullable
   private String dbcId;
 
   public CdwVw() {
   }
 
-  public CdwVw crn(String crn) {
+  public CdwVw crn(@javax.annotation.Nullable String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Virtual Warehouse.
    * @return crn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -74,21 +79,20 @@ public class CdwVw {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-
-  public CdwVw id(String id) {
+  public CdwVw id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * The ID of the Virtual Warehouse.
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,21 +104,20 @@ public class CdwVw {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public CdwVw name(String name) {
+  public CdwVw name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * Name of the Virtual Warehouse.
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -126,21 +129,20 @@ public class CdwVw {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public CdwVw vwType(String vwType) {
+  public CdwVw vwType(@javax.annotation.Nullable String vwType) {
     
     this.vwType = vwType;
     return this;
   }
 
-   /**
+  /**
    * The type of the Virtual Warehouse.
    * @return vwType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VW_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -152,21 +154,20 @@ public class CdwVw {
 
   @JsonProperty(JSON_PROPERTY_VW_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVwType(String vwType) {
+  public void setVwType(@javax.annotation.Nullable String vwType) {
     this.vwType = vwType;
   }
 
-
-  public CdwVw dbcId(String dbcId) {
+  public CdwVw dbcId(@javax.annotation.Nullable String dbcId) {
     
     this.dbcId = dbcId;
     return this;
   }
 
-   /**
+  /**
    * ID of Database Catalog that the Virtual Warehouse is attached to.
    * @return dbcId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DBC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -178,9 +179,10 @@ public class CdwVw {
 
   @JsonProperty(JSON_PROPERTY_DBC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDbcId(String dbcId) {
+  public void setDbcId(@javax.annotation.Nullable String dbcId) {
     this.dbcId = dbcId;
   }
+
 
   @Override
   public boolean equals(Object o) {

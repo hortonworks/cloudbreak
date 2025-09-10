@@ -85,93 +85,119 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAzureEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_SECURITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateAzureEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_REGION = "region";
+  @javax.annotation.Nonnull
   private String region;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
+  @javax.annotation.Nonnull
   private String publicKey;
 
   public static final String JSON_PROPERTY_SECURITY_ACCESS = "securityAccess";
+  @javax.annotation.Nonnull
   private SecurityAccessRequest securityAccess;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
+  @javax.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
+  @javax.annotation.Nonnull
   private AzureLogStorageRequest logStorage;
 
   public static final String JSON_PROPERTY_EXISTING_NETWORK_PARAMS = "existingNetworkParams";
+  @javax.annotation.Nullable
   private ExistingAzureNetworkRequest existingNetworkParams;
 
   public static final String JSON_PROPERTY_NEW_NETWORK_PARAMS = "newNetworkParams";
+  @javax.annotation.Nullable
   private CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ENABLE_TUNNEL = "enableTunnel";
+  @javax.annotation.Nullable
   private Boolean enableTunnel = true;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
+  @javax.annotation.Nullable
   private TunnelType tunnelType;
 
   public static final String JSON_PROPERTY_CCM_V2_TLS_TYPE = "ccmV2TlsType";
+  @javax.annotation.Nullable
   private CcmV2TlsType ccmV2TlsType;
 
   public static final String JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS = "enableWorkloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean enableWorkloadAnalytics;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
+  @javax.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
+  @javax.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
+  @javax.annotation.Nullable
   private AzureFreeIpaCreationRequest freeIpa;
 
   public static final String JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER = "enableComputeCluster";
+  @javax.annotation.Nullable
   private Boolean enableComputeCluster;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
+  @javax.annotation.Nullable
   private AzureComputeClusterConfigurationRequest computeClusterConfiguration;
 
   public static final String JSON_PROPERTY_IMAGE = "image";
+  @javax.annotation.Nullable
   private FreeIpaImageRequest image;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
+  @javax.annotation.Nullable
   private List<TagRequest> tags = new ArrayList<>();
 
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
+  @javax.annotation.Nullable
   private String proxyConfigName;
 
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
+  @javax.annotation.Nullable
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_DEDICATED_STORAGE_ACCOUNT = "dedicatedStorageAccount";
+  @javax.annotation.Nullable
   private Boolean dedicatedStorageAccount;
 
   public static final String JSON_PROPERTY_CREATE_PRIVATE_ENDPOINTS = "createPrivateEndpoints";
+  @javax.annotation.Nullable
   private Boolean createPrivateEndpoints;
 
   /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over the Internet. Defaults to PRIVATE which restricts the traffic to be internal to the VNet.
    */
   public enum EndpointAccessGatewaySchemeEnum {
-    PUBLIC("PUBLIC"),
+    PUBLIC(String.valueOf("PUBLIC")),
     
-    PRIVATE("PRIVATE");
+    PRIVATE(String.valueOf("PRIVATE"));
 
     private String value;
 
@@ -201,63 +227,78 @@ public class CreateAzureEnvironmentRequest {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
+  @javax.annotation.Nullable
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
+  @javax.annotation.Nullable
   private List<String> endpointAccessGatewaySubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ENCRYPTION_AT_HOST = "encryptionAtHost";
+  @javax.annotation.Nullable
   private Boolean encryptionAtHost;
 
   public static final String JSON_PROPERTY_USER_MANAGED_IDENTITY = "userManagedIdentity";
+  @javax.annotation.Nullable
   private String userManagedIdentity;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
+  @javax.annotation.Nullable
   private String encryptionUserManagedIdentity;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_URL = "encryptionKeyUrl";
+  @javax.annotation.Nullable
   private String encryptionKeyUrl;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "encryptionKeyResourceGroupName";
+  @javax.annotation.Nullable
   private String encryptionKeyResourceGroupName;
 
   public static final String JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE = "idBrokerMappingSource";
+  @javax.annotation.Nullable
   private String idBrokerMappingSource;
 
   public static final String JSON_PROPERTY_ENABLE_LOAD_BALANCERS = "enableLoadBalancers";
+  @javax.annotation.Nullable
   private Boolean enableLoadBalancers;
 
   public static final String JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER = "enableOutboundLoadBalancer";
+  @javax.annotation.Nullable
   private Boolean enableOutboundLoadBalancer;
 
   public static final String JSON_PROPERTY_AVAILABILITY_ZONES = "availabilityZones";
+  @javax.annotation.Nullable
   private List<String> availabilityZones = new ArrayList<>();
 
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
+  @javax.annotation.Nullable
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_DATA_SERVICES = "dataServices";
+  @javax.annotation.Nullable
   private DataServicesRequest dataServices;
 
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
+  @javax.annotation.Nullable
   private CustomDockerRegistryRequest customDockerRegistry;
 
   public static final String JSON_PROPERTY_SECURITY = "security";
+  @javax.annotation.Nullable
   private SecurityRequest security;
 
   public CreateAzureEnvironmentRequest() {
   }
 
-  public CreateAzureEnvironmentRequest environmentName(String environmentName) {
+  public CreateAzureEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment. Must contain only lowercase letters, numbers and hyphens.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -269,21 +310,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public CreateAzureEnvironmentRequest credentialName(String credentialName) {
+  public CreateAzureEnvironmentRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * Name of the credential to use for the environment.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -295,21 +335,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public CreateAzureEnvironmentRequest region(String region) {
+  public CreateAzureEnvironmentRequest region(@javax.annotation.Nonnull String region) {
     
     this.region = region;
     return this;
   }
 
-   /**
+  /**
    * The region of the environment.
    * @return region
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -321,21 +360,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRegion(String region) {
+  public void setRegion(@javax.annotation.Nonnull String region) {
     this.region = region;
   }
 
-
-  public CreateAzureEnvironmentRequest publicKey(String publicKey) {
+  public CreateAzureEnvironmentRequest publicKey(@javax.annotation.Nonnull String publicKey) {
     
     this.publicKey = publicKey;
     return this;
   }
 
-   /**
+  /**
    * Public SSH key string. The associated private key can be used to get root-level access to the Data Lake instance and Data Hub cluster instances.
    * @return publicKey
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -347,21 +385,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPublicKey(String publicKey) {
+  public void setPublicKey(@javax.annotation.Nonnull String publicKey) {
     this.publicKey = publicKey;
   }
 
-
-  public CreateAzureEnvironmentRequest securityAccess(SecurityAccessRequest securityAccess) {
+  public CreateAzureEnvironmentRequest securityAccess(@javax.annotation.Nonnull SecurityAccessRequest securityAccess) {
     
     this.securityAccess = securityAccess;
     return this;
   }
 
-   /**
+  /**
    * Get securityAccess
    * @return securityAccess
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -373,21 +410,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecurityAccess(SecurityAccessRequest securityAccess) {
+  public void setSecurityAccess(@javax.annotation.Nonnull SecurityAccessRequest securityAccess) {
     this.securityAccess = securityAccess;
   }
 
-
-  public CreateAzureEnvironmentRequest usePublicIp(Boolean usePublicIp) {
+  public CreateAzureEnvironmentRequest usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     
     this.usePublicIp = usePublicIp;
     return this;
   }
 
-   /**
+  /**
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -399,21 +435,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(Boolean usePublicIp) {
+  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-
-  public CreateAzureEnvironmentRequest logStorage(AzureLogStorageRequest logStorage) {
+  public CreateAzureEnvironmentRequest logStorage(@javax.annotation.Nonnull AzureLogStorageRequest logStorage) {
     
     this.logStorage = logStorage;
     return this;
   }
 
-   /**
+  /**
    * Get logStorage
    * @return logStorage
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -425,21 +460,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setLogStorage(AzureLogStorageRequest logStorage) {
+  public void setLogStorage(@javax.annotation.Nonnull AzureLogStorageRequest logStorage) {
     this.logStorage = logStorage;
   }
 
-
-  public CreateAzureEnvironmentRequest existingNetworkParams(ExistingAzureNetworkRequest existingNetworkParams) {
+  public CreateAzureEnvironmentRequest existingNetworkParams(@javax.annotation.Nullable ExistingAzureNetworkRequest existingNetworkParams) {
     
     this.existingNetworkParams = existingNetworkParams;
     return this;
   }
 
-   /**
+  /**
    * Get existingNetworkParams
    * @return existingNetworkParams
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXISTING_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -451,21 +485,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_EXISTING_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExistingNetworkParams(ExistingAzureNetworkRequest existingNetworkParams) {
+  public void setExistingNetworkParams(@javax.annotation.Nullable ExistingAzureNetworkRequest existingNetworkParams) {
     this.existingNetworkParams = existingNetworkParams;
   }
 
-
-  public CreateAzureEnvironmentRequest newNetworkParams(CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams) {
+  public CreateAzureEnvironmentRequest newNetworkParams(@javax.annotation.Nullable CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams) {
     
     this.newNetworkParams = newNetworkParams;
     return this;
   }
 
-   /**
+  /**
    * Get newNetworkParams
    * @return newNetworkParams
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NEW_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -477,21 +510,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_NEW_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNewNetworkParams(CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams) {
+  public void setNewNetworkParams(@javax.annotation.Nullable CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams) {
     this.newNetworkParams = newNetworkParams;
   }
 
-
-  public CreateAzureEnvironmentRequest description(String description) {
+  public CreateAzureEnvironmentRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * An description of the environment.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -503,21 +535,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public CreateAzureEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+  public CreateAzureEnvironmentRequest enableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
     
     this.enableTunnel = enableTunnel;
     return this;
   }
 
-   /**
+  /**
    * Whether to enable SSH tunneling for the environment.
    * @return enableTunnel
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -529,21 +560,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableTunnel(Boolean enableTunnel) {
+  public void setEnableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
     this.enableTunnel = enableTunnel;
   }
 
-
-  public CreateAzureEnvironmentRequest tunnelType(TunnelType tunnelType) {
+  public CreateAzureEnvironmentRequest tunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     
     this.tunnelType = tunnelType;
     return this;
   }
 
-   /**
+  /**
    * Get tunnelType
    * @return tunnelType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -555,21 +585,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTunnelType(TunnelType tunnelType) {
+  public void setTunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     this.tunnelType = tunnelType;
   }
 
-
-  public CreateAzureEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+  public CreateAzureEnvironmentRequest ccmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
 
-   /**
+  /**
    * Get ccmV2TlsType
    * @return ccmV2TlsType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -581,21 +610,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+  public void setCcmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     this.ccmV2TlsType = ccmV2TlsType;
   }
 
-
-  public CreateAzureEnvironmentRequest enableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+  public CreateAzureEnvironmentRequest enableWorkloadAnalytics(@javax.annotation.Nullable Boolean enableWorkloadAnalytics) {
     
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return enableWorkloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -607,21 +635,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+  public void setEnableWorkloadAnalytics(@javax.annotation.Nullable Boolean enableWorkloadAnalytics) {
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
   }
 
-
-  public CreateAzureEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+  public CreateAzureEnvironmentRequest workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return workloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -633,21 +660,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-
-  public CreateAzureEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public CreateAzureEnvironmentRequest reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
 
-   /**
+  /**
    * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -659,21 +685,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-
-  public CreateAzureEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+  public CreateAzureEnvironmentRequest cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, logs from the VMs will end up on the pre-defined cloud storage (enabled by default).
    * @return cloudStorageLogging
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -685,21 +710,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-
-  public CreateAzureEnvironmentRequest freeIpa(AzureFreeIpaCreationRequest freeIpa) {
+  public CreateAzureEnvironmentRequest freeIpa(@javax.annotation.Nullable AzureFreeIpaCreationRequest freeIpa) {
     
     this.freeIpa = freeIpa;
     return this;
   }
 
-   /**
+  /**
    * Get freeIpa
    * @return freeIpa
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -711,21 +735,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeIpa(AzureFreeIpaCreationRequest freeIpa) {
+  public void setFreeIpa(@javax.annotation.Nullable AzureFreeIpaCreationRequest freeIpa) {
     this.freeIpa = freeIpa;
   }
 
-
-  public CreateAzureEnvironmentRequest enableComputeCluster(Boolean enableComputeCluster) {
+  public CreateAzureEnvironmentRequest enableComputeCluster(@javax.annotation.Nullable Boolean enableComputeCluster) {
     
     this.enableComputeCluster = enableComputeCluster;
     return this;
   }
 
-   /**
+  /**
    * Enable compute clusters for environment
    * @return enableComputeCluster
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -737,21 +760,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableComputeCluster(Boolean enableComputeCluster) {
+  public void setEnableComputeCluster(@javax.annotation.Nullable Boolean enableComputeCluster) {
     this.enableComputeCluster = enableComputeCluster;
   }
 
-
-  public CreateAzureEnvironmentRequest computeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public CreateAzureEnvironmentRequest computeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
     
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
 
-   /**
+  /**
    * Get computeClusterConfiguration
    * @return computeClusterConfiguration
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -763,21 +785,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public void setComputeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
   }
 
-
-  public CreateAzureEnvironmentRequest image(FreeIpaImageRequest image) {
+  public CreateAzureEnvironmentRequest image(@javax.annotation.Nullable FreeIpaImageRequest image) {
     
     this.image = image;
     return this;
   }
 
-   /**
+  /**
    * Get image
    * @return image
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -789,12 +810,11 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImage(FreeIpaImageRequest image) {
+  public void setImage(@javax.annotation.Nullable FreeIpaImageRequest image) {
     this.image = image;
   }
 
-
-  public CreateAzureEnvironmentRequest tags(List<TagRequest> tags) {
+  public CreateAzureEnvironmentRequest tags(@javax.annotation.Nullable List<TagRequest> tags) {
     
     this.tags = tags;
     return this;
@@ -808,10 +828,10 @@ public class CreateAzureEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * Tags associated with the resources.
    * @return tags
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -823,21 +843,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTags(List<TagRequest> tags) {
+  public void setTags(@javax.annotation.Nullable List<TagRequest> tags) {
     this.tags = tags;
   }
 
-
-  public CreateAzureEnvironmentRequest proxyConfigName(String proxyConfigName) {
+  public CreateAzureEnvironmentRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     
     this.proxyConfigName = proxyConfigName;
     return this;
   }
 
-   /**
+  /**
    * Name of the proxy config to use for the environment.
    * @return proxyConfigName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -849,21 +868,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(String proxyConfigName) {
+  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
-
-  public CreateAzureEnvironmentRequest resourceGroupName(String resourceGroupName) {
+  public CreateAzureEnvironmentRequest resourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
     
     this.resourceGroupName = resourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * Name of an existing Azure resource group to be used for the environment. If it is not specified then new resource groups will be generated.
    * @return resourceGroupName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -875,21 +893,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceGroupName(String resourceGroupName) {
+  public void setResourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-
-  public CreateAzureEnvironmentRequest dedicatedStorageAccount(Boolean dedicatedStorageAccount) {
+  public CreateAzureEnvironmentRequest dedicatedStorageAccount(@javax.annotation.Nullable Boolean dedicatedStorageAccount) {
     
     this.dedicatedStorageAccount = dedicatedStorageAccount;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, a dedicated storage account will be used in a pre-defined resource group for storing the images in each region.
    * @return dedicatedStorageAccount
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEDICATED_STORAGE_ACCOUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -901,21 +918,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DEDICATED_STORAGE_ACCOUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDedicatedStorageAccount(Boolean dedicatedStorageAccount) {
+  public void setDedicatedStorageAccount(@javax.annotation.Nullable Boolean dedicatedStorageAccount) {
     this.dedicatedStorageAccount = dedicatedStorageAccount;
   }
 
-
-  public CreateAzureEnvironmentRequest createPrivateEndpoints(Boolean createPrivateEndpoints) {
+  public CreateAzureEnvironmentRequest createPrivateEndpoints(@javax.annotation.Nullable Boolean createPrivateEndpoints) {
     
     this.createPrivateEndpoints = createPrivateEndpoints;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, then Azure Postgres will be configured with Private Endpoint and a Private DNS Zone. When this is disabled, then Azure Service Endpoints will be created. The default value is disabled.
    * @return createPrivateEndpoints
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATE_PRIVATE_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -927,21 +943,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREATE_PRIVATE_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreatePrivateEndpoints(Boolean createPrivateEndpoints) {
+  public void setCreatePrivateEndpoints(@javax.annotation.Nullable Boolean createPrivateEndpoints) {
     this.createPrivateEndpoints = createPrivateEndpoints;
   }
 
-
-  public CreateAzureEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public CreateAzureEnvironmentRequest endpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
 
-   /**
+  /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over the Internet. Defaults to PRIVATE which restricts the traffic to be internal to the VNet.
    * @return endpointAccessGatewayScheme
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -953,12 +968,11 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-
-  public CreateAzureEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public CreateAzureEnvironmentRequest endpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
@@ -972,10 +986,10 @@ public class CreateAzureEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -987,21 +1001,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
-
-  public CreateAzureEnvironmentRequest encryptionAtHost(Boolean encryptionAtHost) {
+  public CreateAzureEnvironmentRequest encryptionAtHost(@javax.annotation.Nullable Boolean encryptionAtHost) {
     
     this.encryptionAtHost = encryptionAtHost;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, we will provision resources with host encrypted true flag.
    * @return encryptionAtHost
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_AT_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1013,21 +1026,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_AT_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionAtHost(Boolean encryptionAtHost) {
+  public void setEncryptionAtHost(@javax.annotation.Nullable Boolean encryptionAtHost) {
     this.encryptionAtHost = encryptionAtHost;
   }
 
-
-  public CreateAzureEnvironmentRequest userManagedIdentity(String userManagedIdentity) {
+  public CreateAzureEnvironmentRequest userManagedIdentity(@javax.annotation.Nullable String userManagedIdentity) {
     
     this.userManagedIdentity = userManagedIdentity;
     return this;
   }
 
-   /**
+  /**
    * User managed identity for encryption. (deprecated)
    * @return userManagedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1039,21 +1051,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserManagedIdentity(String userManagedIdentity) {
+  public void setUserManagedIdentity(@javax.annotation.Nullable String userManagedIdentity) {
     this.userManagedIdentity = userManagedIdentity;
   }
 
-
-  public CreateAzureEnvironmentRequest encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public CreateAzureEnvironmentRequest encryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
     return this;
   }
 
-   /**
+  /**
    * User managed identity for encryption.
    * @return encryptionUserManagedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1065,21 +1076,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public void setEncryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
   }
 
-
-  public CreateAzureEnvironmentRequest encryptionKeyUrl(String encryptionKeyUrl) {
+  public CreateAzureEnvironmentRequest encryptionKeyUrl(@javax.annotation.Nullable String encryptionKeyUrl) {
     
     this.encryptionKeyUrl = encryptionKeyUrl;
     return this;
   }
 
-   /**
+  /**
    * URL of the key which will be used to encrypt the Azure Managed Disks, if entitlement has been granted.
    * @return encryptionKeyUrl
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1091,21 +1101,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+  public void setEncryptionKeyUrl(@javax.annotation.Nullable String encryptionKeyUrl) {
     this.encryptionKeyUrl = encryptionKeyUrl;
   }
 
-
-  public CreateAzureEnvironmentRequest encryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public CreateAzureEnvironmentRequest encryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * Name of the existing Azure resource group hosting the Azure Key Vault containing customer managed key which will be used to encrypt the Azure Managed Disks. It is required only when the entitlement is granted and the resource group of the key vault is different from the resource group in which the environment is to be created. Omitting it implies that, the key vault containing the encryption key is present in the same resource group where the environment would be created.
    * @return encryptionKeyResourceGroupName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1117,21 +1126,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public void setEncryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
   }
 
-
-  public CreateAzureEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+  public CreateAzureEnvironmentRequest idBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
     
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
 
-   /**
+  /**
    * This is an optional field. This is for QE testing purposes and internal use only.
    * @return idBrokerMappingSource
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1143,21 +1151,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIdBrokerMappingSource(String idBrokerMappingSource) {
+  public void setIdBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
     this.idBrokerMappingSource = idBrokerMappingSource;
   }
 
-
-  public CreateAzureEnvironmentRequest enableLoadBalancers(Boolean enableLoadBalancers) {
+  public CreateAzureEnvironmentRequest enableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
     
     this.enableLoadBalancers = enableLoadBalancers;
     return this;
   }
 
-   /**
+  /**
    * Whether or not Knox and Oozie load balancers are enabled for all Data Lakes and Data Hubs in the environment. This will override the load balancer creation mode at the cluster level. The default behavior is to create load balancers on all Data Lakes, and on HA Data Hubs.
    * @return enableLoadBalancers
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1169,21 +1176,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableLoadBalancers(Boolean enableLoadBalancers) {
+  public void setEnableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
     this.enableLoadBalancers = enableLoadBalancers;
   }
 
-
-  public CreateAzureEnvironmentRequest enableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+  public CreateAzureEnvironmentRequest enableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
     return this;
   }
 
-   /**
+  /**
    * Whether or not outbound load balancers should be created for Azure environments. The default behavior is to not create the outbound load balancer.
    * @return enableOutboundLoadBalancer
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1195,12 +1201,11 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+  public void setEnableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
   }
 
-
-  public CreateAzureEnvironmentRequest availabilityZones(List<String> availabilityZones) {
+  public CreateAzureEnvironmentRequest availabilityZones(@javax.annotation.Nullable List<String> availabilityZones) {
     
     this.availabilityZones = availabilityZones;
     return this;
@@ -1214,10 +1219,10 @@ public class CreateAzureEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The zones of the environment in the given region.
    * @return availabilityZones
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1229,12 +1234,11 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAvailabilityZones(List<String> availabilityZones) {
+  public void setAvailabilityZones(@javax.annotation.Nullable List<String> availabilityZones) {
     this.availabilityZones = availabilityZones;
   }
 
-
-  public CreateAzureEnvironmentRequest flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public CreateAzureEnvironmentRequest flexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
@@ -1248,10 +1252,10 @@ public class CreateAzureEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
    * @return flexibleServerSubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1263,21 +1267,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public void setFlexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
   }
 
-
-  public CreateAzureEnvironmentRequest dataServices(DataServicesRequest dataServices) {
+  public CreateAzureEnvironmentRequest dataServices(@javax.annotation.Nullable DataServicesRequest dataServices) {
     
     this.dataServices = dataServices;
     return this;
   }
 
-   /**
+  /**
    * Get dataServices
    * @return dataServices
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1289,21 +1292,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDataServices(DataServicesRequest dataServices) {
+  public void setDataServices(@javax.annotation.Nullable DataServicesRequest dataServices) {
     this.dataServices = dataServices;
   }
 
-
-  public CreateAzureEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+  public CreateAzureEnvironmentRequest customDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
 
-   /**
+  /**
    * Get customDockerRegistry
    * @return customDockerRegistry
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1315,21 +1317,20 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCustomDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+  public void setCustomDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
   }
 
-
-  public CreateAzureEnvironmentRequest security(SecurityRequest security) {
+  public CreateAzureEnvironmentRequest security(@javax.annotation.Nullable SecurityRequest security) {
     
     this.security = security;
     return this;
   }
 
-   /**
+  /**
    * Get security
    * @return security
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1341,9 +1342,10 @@ public class CreateAzureEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurity(SecurityRequest security) {
+  public void setSecurity(@javax.annotation.Nullable SecurityRequest security) {
     this.security = security;
   }
+
 
   @Override
   public boolean equals(Object o) {

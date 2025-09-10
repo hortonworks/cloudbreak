@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListWarehousesForEnvRequest.JSON_PROPERTY_ENVIRONMENT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListWarehousesForEnvRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public ListWarehousesForEnvRequest() {
   }
 
-  public ListWarehousesForEnvRequest environment(String environment) {
+  public ListWarehousesForEnvRequest environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The environment Id to get the warehouses for.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class ListWarehousesForEnvRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureLogStorageRequest.JSON_PROPERTY_MANAGED_IDENTITY,
   AzureLogStorageRequest.JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureLogStorageRequest {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
+  @javax.annotation.Nonnull
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
+  @javax.annotation.Nonnull
   private String managedIdentity;
 
   public static final String JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE = "backupStorageLocationBase";
+  @javax.annotation.Nullable
   private String backupStorageLocationBase;
 
   public AzureLogStorageRequest() {
   }
 
-  public AzureLogStorageRequest storageLocationBase(String storageLocationBase) {
+  public AzureLogStorageRequest storageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
     
     this.storageLocationBase = storageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net. The filesystem must already exist and the storage account must be StorageV2.
    * @return storageLocationBase
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocationBase(String storageLocationBase) {
+  public void setStorageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-
-  public AzureLogStorageRequest managedIdentity(String managedIdentity) {
+  public AzureLogStorageRequest managedIdentity(@javax.annotation.Nonnull String managedIdentity) {
     
     this.managedIdentity = managedIdentity;
     return this;
   }
 
-   /**
+  /**
    * The managed identity associated with the logger. This identity should have Storage Blob Data Contributor role on the given storage account.
    * @return managedIdentity
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setManagedIdentity(String managedIdentity) {
+  public void setManagedIdentity(@javax.annotation.Nonnull String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
 
-
-  public AzureLogStorageRequest backupStorageLocationBase(String backupStorageLocationBase) {
+  public AzureLogStorageRequest backupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
     
     this.backupStorageLocationBase = backupStorageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net. The filesystem must already exist and the storage account must be StorageV2.
    * @return backupStorageLocationBase
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBackupStorageLocationBase(String backupStorageLocationBase) {
+  public void setBackupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
   }
+
 
   @Override
   public boolean equals(Object o) {

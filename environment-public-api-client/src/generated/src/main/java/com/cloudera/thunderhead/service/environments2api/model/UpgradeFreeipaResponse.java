@@ -32,30 +32,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpgradeFreeipaResponse.JSON_PROPERTY_ORIGINAL_IMAGE,
   UpgradeFreeipaResponse.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpgradeFreeipaResponse {
   public static final String JSON_PROPERTY_TARGET_IMAGE = "targetImage";
+  @javax.annotation.Nullable
   private ImageInfoResponse targetImage;
 
   public static final String JSON_PROPERTY_ORIGINAL_IMAGE = "originalImage";
+  @javax.annotation.Nullable
   private ImageInfoResponse originalImage;
 
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public UpgradeFreeipaResponse() {
   }
 
-  public UpgradeFreeipaResponse targetImage(ImageInfoResponse targetImage) {
+  public UpgradeFreeipaResponse targetImage(@javax.annotation.Nullable ImageInfoResponse targetImage) {
     
     this.targetImage = targetImage;
     return this;
   }
 
-   /**
+  /**
    * Get targetImage
    * @return targetImage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TARGET_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -67,21 +70,20 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_TARGET_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTargetImage(ImageInfoResponse targetImage) {
+  public void setTargetImage(@javax.annotation.Nullable ImageInfoResponse targetImage) {
     this.targetImage = targetImage;
   }
 
-
-  public UpgradeFreeipaResponse originalImage(ImageInfoResponse originalImage) {
+  public UpgradeFreeipaResponse originalImage(@javax.annotation.Nullable ImageInfoResponse originalImage) {
     
     this.originalImage = originalImage;
     return this;
   }
 
-   /**
+  /**
    * Get originalImage
    * @return originalImage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ORIGINAL_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,21 +95,20 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ORIGINAL_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOriginalImage(ImageInfoResponse originalImage) {
+  public void setOriginalImage(@javax.annotation.Nullable ImageInfoResponse originalImage) {
     this.originalImage = originalImage;
   }
 
-
-  public UpgradeFreeipaResponse operationId(String operationId) {
+  public UpgradeFreeipaResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -119,9 +120,10 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

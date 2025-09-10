@@ -32,30 +32,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetCliForCredentialRequest.JSON_PROPERTY_COMMAND_REQUEST_INPUT,
   GetCliForCredentialRequest.JSON_PROPERTY_COMMAND_RESPONSE_INPUT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetCliForCredentialRequest {
   public static final String JSON_PROPERTY_COMMAND_CLOUD_PROVIDER = "commandCloudProvider";
+  @javax.annotation.Nullable
   private CloudProviderType commandCloudProvider;
 
   public static final String JSON_PROPERTY_COMMAND_REQUEST_INPUT = "commandRequestInput";
+  @javax.annotation.Nullable
   private String commandRequestInput;
 
   public static final String JSON_PROPERTY_COMMAND_RESPONSE_INPUT = "commandResponseInput";
+  @javax.annotation.Nullable
   private String commandResponseInput;
 
   public GetCliForCredentialRequest() {
   }
 
-  public GetCliForCredentialRequest commandCloudProvider(CloudProviderType commandCloudProvider) {
+  public GetCliForCredentialRequest commandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
     
     this.commandCloudProvider = commandCloudProvider;
     return this;
   }
 
-   /**
+  /**
    * Get commandCloudProvider
    * @return commandCloudProvider
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -67,21 +70,20 @@ public class GetCliForCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandCloudProvider(CloudProviderType commandCloudProvider) {
+  public void setCommandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
     this.commandCloudProvider = commandCloudProvider;
   }
 
-
-  public GetCliForCredentialRequest commandRequestInput(String commandRequestInput) {
+  public GetCliForCredentialRequest commandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     
     this.commandRequestInput = commandRequestInput;
     return this;
   }
 
-   /**
+  /**
    * cloudbreak credential request object of the private API, encoded in base64
    * @return commandRequestInput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,21 +95,20 @@ public class GetCliForCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandRequestInput(String commandRequestInput) {
+  public void setCommandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     this.commandRequestInput = commandRequestInput;
   }
 
-
-  public GetCliForCredentialRequest commandResponseInput(String commandResponseInput) {
+  public GetCliForCredentialRequest commandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
     
     this.commandResponseInput = commandResponseInput;
     return this;
   }
 
-   /**
+  /**
    * cloudbreak credential response object of the private API, encoded in base64
    * @return commandResponseInput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -119,9 +120,10 @@ public class GetCliForCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandResponseInput(String commandResponseInput) {
+  public void setCommandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
     this.commandResponseInput = commandResponseInput;
   }
+
 
   @Override
   public boolean equals(Object o) {

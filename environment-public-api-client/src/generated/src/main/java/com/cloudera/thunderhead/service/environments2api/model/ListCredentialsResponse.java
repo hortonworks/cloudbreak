@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListCredentialsResponse.JSON_PROPERTY_CREDENTIALS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListCredentialsResponse {
   public static final String JSON_PROPERTY_CREDENTIALS = "credentials";
+  @javax.annotation.Nonnull
   private List<Credential> credentials = new ArrayList<>();
 
   public ListCredentialsResponse() {
   }
 
-  public ListCredentialsResponse credentials(List<Credential> credentials) {
+  public ListCredentialsResponse credentials(@javax.annotation.Nonnull List<Credential> credentials) {
     
     this.credentials = credentials;
     return this;
@@ -55,10 +56,10 @@ public class ListCredentialsResponse {
     return this;
   }
 
-   /**
+  /**
    * The credentials.
    * @return credentials
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIALS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,9 +71,10 @@ public class ListCredentialsResponse {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIALS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentials(List<Credential> credentials) {
+  public void setCredentials(@javax.annotation.Nonnull List<Credential> credentials) {
     this.credentials = credentials;
   }
+
 
   @Override
   public boolean equals(Object o) {

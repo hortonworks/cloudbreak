@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AttachedVolumeDetail.JSON_PROPERTY_VOLUME_TYPE,
   AttachedVolumeDetail.JSON_PROPERTY_SIZE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AttachedVolumeDetail {
   public static final String JSON_PROPERTY_COUNT = "count";
+  @javax.annotation.Nullable
   private Integer count;
 
   public static final String JSON_PROPERTY_VOLUME_TYPE = "volumeType";
+  @javax.annotation.Nullable
   private String volumeType;
 
   public static final String JSON_PROPERTY_SIZE = "size";
+  @javax.annotation.Nullable
   private Integer size;
 
   public AttachedVolumeDetail() {
   }
 
-  public AttachedVolumeDetail count(Integer count) {
+  public AttachedVolumeDetail count(@javax.annotation.Nullable Integer count) {
     
     this.count = count;
     return this;
   }
 
-   /**
+  /**
    * The number of volumes.
    * @return count
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_COUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCount(Integer count) {
+  public void setCount(@javax.annotation.Nullable Integer count) {
     this.count = count;
   }
 
-
-  public AttachedVolumeDetail volumeType(String volumeType) {
+  public AttachedVolumeDetail volumeType(@javax.annotation.Nullable String volumeType) {
     
     this.volumeType = volumeType;
     return this;
   }
 
-   /**
+  /**
    * The type of volumes.
    * @return volumeType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVolumeType(String volumeType) {
+  public void setVolumeType(@javax.annotation.Nullable String volumeType) {
     this.volumeType = volumeType;
   }
 
-
-  public AttachedVolumeDetail size(Integer size) {
+  public AttachedVolumeDetail size(@javax.annotation.Nullable Integer size) {
     
     this.size = size;
     return this;
   }
 
-   /**
+  /**
    * The size of each volume in GB.
    * @return size
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSize(Integer size) {
+  public void setSize(@javax.annotation.Nullable Integer size) {
     this.size = size;
   }
+
 
   @Override
   public boolean equals(Object o) {

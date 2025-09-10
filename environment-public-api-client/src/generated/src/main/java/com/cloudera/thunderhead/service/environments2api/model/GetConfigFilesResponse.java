@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetConfigFilesResponse.JSON_PROPERTY_VERSION_HASH,
   GetConfigFilesResponse.JSON_PROPERTY_FILE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetConfigFilesResponse {
   public static final String JSON_PROPERTY_VERSION_HASH = "versionHash";
+  @javax.annotation.Nullable
   private String versionHash;
 
   public static final String JSON_PROPERTY_FILE = "file";
+  @javax.annotation.Nullable
   private String _file;
 
   public GetConfigFilesResponse() {
   }
 
-  public GetConfigFilesResponse versionHash(String versionHash) {
+  public GetConfigFilesResponse versionHash(@javax.annotation.Nullable String versionHash) {
     
     this.versionHash = versionHash;
     return this;
   }
 
-   /**
+  /**
    * an opaque string (sha or similar) to detect config changes.
    * @return versionHash
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSION_HASH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class GetConfigFilesResponse {
 
   @JsonProperty(JSON_PROPERTY_VERSION_HASH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersionHash(String versionHash) {
+  public void setVersionHash(@javax.annotation.Nullable String versionHash) {
     this.versionHash = versionHash;
   }
 
-
-  public GetConfigFilesResponse _file(String _file) {
+  public GetConfigFilesResponse _file(@javax.annotation.Nullable String _file) {
     
     this._file = _file;
     return this;
   }
 
-   /**
+  /**
    * config files for the data lake including root cert and krb.conf
    * @return _file
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class GetConfigFilesResponse {
 
   @JsonProperty(JSON_PROPERTY_FILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFile(String _file) {
+  public void setFile(@javax.annotation.Nullable String _file) {
     this._file = _file;
   }
+
 
   @Override
   public boolean equals(Object o) {

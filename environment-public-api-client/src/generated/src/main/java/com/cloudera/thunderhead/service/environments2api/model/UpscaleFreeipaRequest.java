@@ -30,18 +30,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpscaleFreeipaRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   UpscaleFreeipaRequest.JSON_PROPERTY_TARGET_AVAILABILITY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpscaleFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   /**
    * The target FreeIPA availability type.
    */
   public enum TargetAvailabilityTypeEnum {
-    TWO_NODE_BASED("TWO_NODE_BASED"),
+    TWO_NODE_BASED(String.valueOf("TWO_NODE_BASED")),
     
-    HA("HA");
+    HA(String.valueOf("HA"));
 
     private String value;
 
@@ -71,21 +72,22 @@ public class UpscaleFreeipaRequest {
   }
 
   public static final String JSON_PROPERTY_TARGET_AVAILABILITY_TYPE = "targetAvailabilityType";
+  @javax.annotation.Nonnull
   private TargetAvailabilityTypeEnum targetAvailabilityType;
 
   public UpscaleFreeipaRequest() {
   }
 
-  public UpscaleFreeipaRequest environmentName(String environmentName) {
+  public UpscaleFreeipaRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +99,20 @@ public class UpscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public UpscaleFreeipaRequest targetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public UpscaleFreeipaRequest targetAvailabilityType(@javax.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
     
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
 
-   /**
+  /**
    * The target FreeIPA availability type.
    * @return targetAvailabilityType
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -123,9 +124,10 @@ public class UpscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTargetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public void setTargetAvailabilityType(@javax.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
   }
+
 
   @Override
   public boolean equals(Object o) {

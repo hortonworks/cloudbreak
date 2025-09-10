@@ -88,141 +88,181 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Environment.JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED,
   Environment.JSON_PROPERTY_SECURITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Environment {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nonnull
   private String crn;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private String status;
 
   public static final String JSON_PROPERTY_REGION = "region";
+  @javax.annotation.Nonnull
   private String region;
 
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
+  @javax.annotation.Nonnull
   private String cloudPlatform;
 
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_NETWORK = "network";
+  @javax.annotation.Nonnull
   private Network network;
 
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
+  @javax.annotation.Nonnull
   private LogStorage logStorage;
 
   public static final String JSON_PROPERTY_BACKUP_STORAGE = "backupStorage";
+  @javax.annotation.Nullable
   private BackupStorage backupStorage;
 
   public static final String JSON_PROPERTY_AUTHENTICATION = "authentication";
+  @javax.annotation.Nullable
   private Authentication authentication;
 
   public static final String JSON_PROPERTY_SECURITY_ACCESS = "securityAccess";
+  @javax.annotation.Nullable
   private SecurityAccess securityAccess;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_STATUS_REASON = "statusReason";
+  @javax.annotation.Nullable
   private String statusReason;
 
   public static final String JSON_PROPERTY_CREATED = "created";
+  @javax.annotation.Nullable
   private OffsetDateTime created;
 
   public static final String JSON_PROPERTY_CREATOR = "creator";
+  @javax.annotation.Nullable
   private String creator;
 
   public static final String JSON_PROPERTY_TUNNEL_ENABLED = "tunnelEnabled";
+  @javax.annotation.Nullable
   private Boolean tunnelEnabled;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
+  @javax.annotation.Nullable
   private TunnelType tunnelType;
 
   public static final String JSON_PROPERTY_AWS_DETAILS = "awsDetails";
+  @javax.annotation.Nullable
   private EnvironmentAwsDetails awsDetails;
 
   public static final String JSON_PROPERTY_AZURE_DETAILS = "azureDetails";
+  @javax.annotation.Nullable
   private EnvironmentAzureDetails azureDetails;
 
   public static final String JSON_PROPERTY_GCP_DETAILS = "gcpDetails";
+  @javax.annotation.Nullable
   private EnvironmentGcpDetails gcpDetails;
 
   public static final String JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS = "enableWorkloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean enableWorkloadAnalytics;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
+  @javax.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
+  @javax.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_FREEIPA = "freeipa";
+  @javax.annotation.Nullable
   private FreeipaDetails freeipa;
 
   public static final String JSON_PROPERTY_PROXY_CONFIG = "proxyConfig";
+  @javax.annotation.Nullable
   private ProxyConfig proxyConfig;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
+  @javax.annotation.Nullable
   private EnvironmentTags tags;
 
   public static final String JSON_PROPERTY_PARENT_ENVIRONMENT_NAME = "parentEnvironmentName";
+  @javax.annotation.Nullable
   private String parentEnvironmentName;
 
   public static final String JSON_PROPERTY_CLOUDBREAK_VERSION = "cloudbreakVersion";
+  @javax.annotation.Nullable
   private String cloudbreakVersion;
 
   public static final String JSON_PROPERTY_VM_ENCRYPTION_DETAILS = "vmEncryptionDetails";
+  @javax.annotation.Nullable
   private VmEncryptionDetails vmEncryptionDetails;
 
   public static final String JSON_PROPERTY_DATA_SERVICES = "dataServices";
+  @javax.annotation.Nullable
   private DataServices dataServices;
 
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
+  @javax.annotation.Nullable
   private CustomDockerRegistryResponse customDockerRegistry;
 
   public static final String JSON_PROPERTY_PVC_ENVIRONMENT_DETAILS = "pvcEnvironmentDetails";
+  @javax.annotation.Nullable
   private PvcEnvironmentDetails pvcEnvironmentDetails;
 
   public static final String JSON_PROPERTY_CDP_RUNTIME_VERSION = "cdpRuntimeVersion";
+  @javax.annotation.Nullable
   private String cdpRuntimeVersion;
 
   public static final String JSON_PROPERTY_CLOUDERA_MANAGER_VERSION = "clouderaManagerVersion";
+  @javax.annotation.Nullable
   private String clouderaManagerVersion;
 
   public static final String JSON_PROPERTY_CDP_PVC_VERSION = "cdpPvcVersion";
+  @javax.annotation.Nullable
   private String cdpPvcVersion;
 
   public static final String JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION = "awsComputeClusterConfiguration";
+  @javax.annotation.Nullable
   private AWSComputeClusterConfiguration awsComputeClusterConfiguration;
 
   public static final String JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION = "azureComputeClusterConfiguration";
+  @javax.annotation.Nullable
   private AzureComputeClusterConfiguration azureComputeClusterConfiguration;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED = "computeClusterEnabled";
+  @javax.annotation.Nullable
   private Boolean computeClusterEnabled;
 
   public static final String JSON_PROPERTY_SECURITY = "security";
+  @javax.annotation.Nullable
   private SecurityResponse security;
 
   public Environment() {
   }
 
-  public Environment environmentName(String environmentName) {
+  public Environment environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * Name of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -234,21 +274,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public Environment crn(String crn) {
+  public Environment crn(@javax.annotation.Nonnull String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * CRN of the environment.
    * @return crn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -260,21 +299,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nonnull String crn) {
     this.crn = crn;
   }
 
-
-  public Environment status(String status) {
+  public Environment status(@javax.annotation.Nonnull String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of the environment.
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -286,21 +324,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nonnull String status) {
     this.status = status;
   }
 
-
-  public Environment region(String region) {
+  public Environment region(@javax.annotation.Nonnull String region) {
     
     this.region = region;
     return this;
   }
 
-   /**
+  /**
    * Region of the environment.
    * @return region
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -312,21 +349,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRegion(String region) {
+  public void setRegion(@javax.annotation.Nonnull String region) {
     this.region = region;
   }
 
-
-  public Environment cloudPlatform(String cloudPlatform) {
+  public Environment cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     
     this.cloudPlatform = cloudPlatform;
     return this;
   }
 
-   /**
+  /**
    * Cloud platform of the environment.
    * @return cloudPlatform
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -338,21 +374,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(String cloudPlatform) {
+  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
 
-
-  public Environment credentialName(String credentialName) {
+  public Environment credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * Name of the credential of the environment.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -364,21 +399,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public Environment network(Network network) {
+  public Environment network(@javax.annotation.Nonnull Network network) {
     
     this.network = network;
     return this;
   }
 
-   /**
+  /**
    * Get network
    * @return network
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -390,21 +424,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_NETWORK)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetwork(Network network) {
+  public void setNetwork(@javax.annotation.Nonnull Network network) {
     this.network = network;
   }
 
-
-  public Environment logStorage(LogStorage logStorage) {
+  public Environment logStorage(@javax.annotation.Nonnull LogStorage logStorage) {
     
     this.logStorage = logStorage;
     return this;
   }
 
-   /**
+  /**
    * Get logStorage
    * @return logStorage
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -416,21 +449,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setLogStorage(LogStorage logStorage) {
+  public void setLogStorage(@javax.annotation.Nonnull LogStorage logStorage) {
     this.logStorage = logStorage;
   }
 
-
-  public Environment backupStorage(BackupStorage backupStorage) {
+  public Environment backupStorage(@javax.annotation.Nullable BackupStorage backupStorage) {
     
     this.backupStorage = backupStorage;
     return this;
   }
 
-   /**
+  /**
    * Get backupStorage
    * @return backupStorage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -442,21 +474,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBackupStorage(BackupStorage backupStorage) {
+  public void setBackupStorage(@javax.annotation.Nullable BackupStorage backupStorage) {
     this.backupStorage = backupStorage;
   }
 
-
-  public Environment authentication(Authentication authentication) {
+  public Environment authentication(@javax.annotation.Nullable Authentication authentication) {
     
     this.authentication = authentication;
     return this;
   }
 
-   /**
+  /**
    * Get authentication
    * @return authentication
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -468,21 +499,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthentication(Authentication authentication) {
+  public void setAuthentication(@javax.annotation.Nullable Authentication authentication) {
     this.authentication = authentication;
   }
 
-
-  public Environment securityAccess(SecurityAccess securityAccess) {
+  public Environment securityAccess(@javax.annotation.Nullable SecurityAccess securityAccess) {
     
     this.securityAccess = securityAccess;
     return this;
   }
 
-   /**
+  /**
    * Get securityAccess
    * @return securityAccess
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -494,21 +524,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityAccess(SecurityAccess securityAccess) {
+  public void setSecurityAccess(@javax.annotation.Nullable SecurityAccess securityAccess) {
     this.securityAccess = securityAccess;
   }
 
-
-  public Environment description(String description) {
+  public Environment description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * Description of the environment
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -520,21 +549,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public Environment statusReason(String statusReason) {
+  public Environment statusReason(@javax.annotation.Nullable String statusReason) {
     
     this.statusReason = statusReason;
     return this;
   }
 
-   /**
+  /**
    * The status reason.
    * @return statusReason
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -546,21 +574,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatusReason(String statusReason) {
+  public void setStatusReason(@javax.annotation.Nullable String statusReason) {
     this.statusReason = statusReason;
   }
 
-
-  public Environment created(OffsetDateTime created) {
+  public Environment created(@javax.annotation.Nullable OffsetDateTime created) {
     
     this.created = created;
     return this;
   }
 
-   /**
+  /**
    * Creation date
    * @return created
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -572,21 +599,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreated(OffsetDateTime created) {
+  public void setCreated(@javax.annotation.Nullable OffsetDateTime created) {
     this.created = created;
   }
 
-
-  public Environment creator(String creator) {
+  public Environment creator(@javax.annotation.Nullable String creator) {
     
     this.creator = creator;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the user who has created the given environment.
    * @return creator
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATOR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -598,21 +624,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CREATOR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreator(String creator) {
+  public void setCreator(@javax.annotation.Nullable String creator) {
     this.creator = creator;
   }
 
-
-  public Environment tunnelEnabled(Boolean tunnelEnabled) {
+  public Environment tunnelEnabled(@javax.annotation.Nullable Boolean tunnelEnabled) {
     
     this.tunnelEnabled = tunnelEnabled;
     return this;
   }
 
-   /**
+  /**
    * Whether tunneling is enabled for the environment.
    * @return tunnelEnabled
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TUNNEL_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -624,21 +649,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_TUNNEL_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTunnelEnabled(Boolean tunnelEnabled) {
+  public void setTunnelEnabled(@javax.annotation.Nullable Boolean tunnelEnabled) {
     this.tunnelEnabled = tunnelEnabled;
   }
 
-
-  public Environment tunnelType(TunnelType tunnelType) {
+  public Environment tunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     
     this.tunnelType = tunnelType;
     return this;
   }
 
-   /**
+  /**
    * Get tunnelType
    * @return tunnelType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -650,21 +674,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTunnelType(TunnelType tunnelType) {
+  public void setTunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     this.tunnelType = tunnelType;
   }
 
-
-  public Environment awsDetails(EnvironmentAwsDetails awsDetails) {
+  public Environment awsDetails(@javax.annotation.Nullable EnvironmentAwsDetails awsDetails) {
     
     this.awsDetails = awsDetails;
     return this;
   }
 
-   /**
+  /**
    * Get awsDetails
    * @return awsDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -676,21 +699,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDetails(EnvironmentAwsDetails awsDetails) {
+  public void setAwsDetails(@javax.annotation.Nullable EnvironmentAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
   }
 
-
-  public Environment azureDetails(EnvironmentAzureDetails azureDetails) {
+  public Environment azureDetails(@javax.annotation.Nullable EnvironmentAzureDetails azureDetails) {
     
     this.azureDetails = azureDetails;
     return this;
   }
 
-   /**
+  /**
    * Get azureDetails
    * @return azureDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -702,21 +724,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDetails(EnvironmentAzureDetails azureDetails) {
+  public void setAzureDetails(@javax.annotation.Nullable EnvironmentAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
   }
 
-
-  public Environment gcpDetails(EnvironmentGcpDetails gcpDetails) {
+  public Environment gcpDetails(@javax.annotation.Nullable EnvironmentGcpDetails gcpDetails) {
     
     this.gcpDetails = gcpDetails;
     return this;
   }
 
-   /**
+  /**
    * Get gcpDetails
    * @return gcpDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -728,21 +749,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpDetails(EnvironmentGcpDetails gcpDetails) {
+  public void setGcpDetails(@javax.annotation.Nullable EnvironmentGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
   }
 
-
-  public Environment enableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+  public Environment enableWorkloadAnalytics(@javax.annotation.Nullable Boolean enableWorkloadAnalytics) {
     
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return enableWorkloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -754,21 +774,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+  public void setEnableWorkloadAnalytics(@javax.annotation.Nullable Boolean enableWorkloadAnalytics) {
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
   }
 
-
-  public Environment workloadAnalytics(Boolean workloadAnalytics) {
+  public Environment workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return workloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -780,21 +799,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-
-  public Environment reportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public Environment reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
 
-   /**
+  /**
    * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -806,21 +824,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-
-  public Environment cloudStorageLogging(Boolean cloudStorageLogging) {
+  public Environment cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, logs from the VMs will end up on the pre-defined cloud storage (enabled by default).
    * @return cloudStorageLogging
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -832,21 +849,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-
-  public Environment freeipa(FreeipaDetails freeipa) {
+  public Environment freeipa(@javax.annotation.Nullable FreeipaDetails freeipa) {
     
     this.freeipa = freeipa;
     return this;
   }
 
-   /**
+  /**
    * Get freeipa
    * @return freeipa
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -858,21 +874,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeipa(FreeipaDetails freeipa) {
+  public void setFreeipa(@javax.annotation.Nullable FreeipaDetails freeipa) {
     this.freeipa = freeipa;
   }
 
-
-  public Environment proxyConfig(ProxyConfig proxyConfig) {
+  public Environment proxyConfig(@javax.annotation.Nullable ProxyConfig proxyConfig) {
     
     this.proxyConfig = proxyConfig;
     return this;
   }
 
-   /**
+  /**
    * Get proxyConfig
    * @return proxyConfig
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -884,21 +899,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfig(ProxyConfig proxyConfig) {
+  public void setProxyConfig(@javax.annotation.Nullable ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
   }
 
-
-  public Environment tags(EnvironmentTags tags) {
+  public Environment tags(@javax.annotation.Nullable EnvironmentTags tags) {
     
     this.tags = tags;
     return this;
   }
 
-   /**
+  /**
    * Get tags
    * @return tags
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -910,21 +924,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTags(EnvironmentTags tags) {
+  public void setTags(@javax.annotation.Nullable EnvironmentTags tags) {
     this.tags = tags;
   }
 
-
-  public Environment parentEnvironmentName(String parentEnvironmentName) {
+  public Environment parentEnvironmentName(@javax.annotation.Nullable String parentEnvironmentName) {
     
     this.parentEnvironmentName = parentEnvironmentName;
     return this;
   }
 
-   /**
+  /**
    * If the environment is a hybrid environment (on YCloud), this contains the name of the parent environment (on a cloud provider) tied to it.
    * @return parentEnvironmentName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PARENT_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -936,21 +949,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_PARENT_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setParentEnvironmentName(String parentEnvironmentName) {
+  public void setParentEnvironmentName(@javax.annotation.Nullable String parentEnvironmentName) {
     this.parentEnvironmentName = parentEnvironmentName;
   }
 
-
-  public Environment cloudbreakVersion(String cloudbreakVersion) {
+  public Environment cloudbreakVersion(@javax.annotation.Nullable String cloudbreakVersion) {
     
     this.cloudbreakVersion = cloudbreakVersion;
     return this;
   }
 
-   /**
+  /**
    * The Cloudbreak version used to create the environment.
    * @return cloudbreakVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUDBREAK_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -962,21 +974,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CLOUDBREAK_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudbreakVersion(String cloudbreakVersion) {
+  public void setCloudbreakVersion(@javax.annotation.Nullable String cloudbreakVersion) {
     this.cloudbreakVersion = cloudbreakVersion;
   }
 
-
-  public Environment vmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+  public Environment vmEncryptionDetails(@javax.annotation.Nullable VmEncryptionDetails vmEncryptionDetails) {
     
     this.vmEncryptionDetails = vmEncryptionDetails;
     return this;
   }
 
-   /**
+  /**
    * Get vmEncryptionDetails
    * @return vmEncryptionDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -988,21 +999,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+  public void setVmEncryptionDetails(@javax.annotation.Nullable VmEncryptionDetails vmEncryptionDetails) {
     this.vmEncryptionDetails = vmEncryptionDetails;
   }
 
-
-  public Environment dataServices(DataServices dataServices) {
+  public Environment dataServices(@javax.annotation.Nullable DataServices dataServices) {
     
     this.dataServices = dataServices;
     return this;
   }
 
-   /**
+  /**
    * Get dataServices
    * @return dataServices
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1014,21 +1024,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDataServices(DataServices dataServices) {
+  public void setDataServices(@javax.annotation.Nullable DataServices dataServices) {
     this.dataServices = dataServices;
   }
 
-
-  public Environment customDockerRegistry(CustomDockerRegistryResponse customDockerRegistry) {
+  public Environment customDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryResponse customDockerRegistry) {
     
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
 
-   /**
+  /**
    * Get customDockerRegistry
    * @return customDockerRegistry
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1040,21 +1049,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCustomDockerRegistry(CustomDockerRegistryResponse customDockerRegistry) {
+  public void setCustomDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryResponse customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
   }
 
-
-  public Environment pvcEnvironmentDetails(PvcEnvironmentDetails pvcEnvironmentDetails) {
+  public Environment pvcEnvironmentDetails(@javax.annotation.Nullable PvcEnvironmentDetails pvcEnvironmentDetails) {
     
     this.pvcEnvironmentDetails = pvcEnvironmentDetails;
     return this;
   }
 
-   /**
+  /**
    * Get pvcEnvironmentDetails
    * @return pvcEnvironmentDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PVC_ENVIRONMENT_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1066,21 +1074,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_PVC_ENVIRONMENT_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPvcEnvironmentDetails(PvcEnvironmentDetails pvcEnvironmentDetails) {
+  public void setPvcEnvironmentDetails(@javax.annotation.Nullable PvcEnvironmentDetails pvcEnvironmentDetails) {
     this.pvcEnvironmentDetails = pvcEnvironmentDetails;
   }
 
-
-  public Environment cdpRuntimeVersion(String cdpRuntimeVersion) {
+  public Environment cdpRuntimeVersion(@javax.annotation.Nullable String cdpRuntimeVersion) {
     
     this.cdpRuntimeVersion = cdpRuntimeVersion;
     return this;
   }
 
-   /**
+  /**
    * The version of CDP runtime.
    * @return cdpRuntimeVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDP_RUNTIME_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1092,21 +1099,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CDP_RUNTIME_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdpRuntimeVersion(String cdpRuntimeVersion) {
+  public void setCdpRuntimeVersion(@javax.annotation.Nullable String cdpRuntimeVersion) {
     this.cdpRuntimeVersion = cdpRuntimeVersion;
   }
 
-
-  public Environment clouderaManagerVersion(String clouderaManagerVersion) {
+  public Environment clouderaManagerVersion(@javax.annotation.Nullable String clouderaManagerVersion) {
     
     this.clouderaManagerVersion = clouderaManagerVersion;
     return this;
   }
 
-   /**
+  /**
    * The version of Cloudera Manager that the environment is registered with.
    * @return clouderaManagerVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUDERA_MANAGER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1118,21 +1124,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CLOUDERA_MANAGER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClouderaManagerVersion(String clouderaManagerVersion) {
+  public void setClouderaManagerVersion(@javax.annotation.Nullable String clouderaManagerVersion) {
     this.clouderaManagerVersion = clouderaManagerVersion;
   }
 
-
-  public Environment cdpPvcVersion(String cdpPvcVersion) {
+  public Environment cdpPvcVersion(@javax.annotation.Nullable String cdpPvcVersion) {
     
     this.cdpPvcVersion = cdpPvcVersion;
     return this;
   }
 
-   /**
+  /**
    * The version of CDP PVC.
    * @return cdpPvcVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDP_PVC_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1144,21 +1149,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_CDP_PVC_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdpPvcVersion(String cdpPvcVersion) {
+  public void setCdpPvcVersion(@javax.annotation.Nullable String cdpPvcVersion) {
     this.cdpPvcVersion = cdpPvcVersion;
   }
 
-
-  public Environment awsComputeClusterConfiguration(AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
+  public Environment awsComputeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
     
     this.awsComputeClusterConfiguration = awsComputeClusterConfiguration;
     return this;
   }
 
-   /**
+  /**
    * Get awsComputeClusterConfiguration
    * @return awsComputeClusterConfiguration
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1170,21 +1174,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsComputeClusterConfiguration(AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
+  public void setAwsComputeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
     this.awsComputeClusterConfiguration = awsComputeClusterConfiguration;
   }
 
-
-  public Environment azureComputeClusterConfiguration(AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
+  public Environment azureComputeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
     
     this.azureComputeClusterConfiguration = azureComputeClusterConfiguration;
     return this;
   }
 
-   /**
+  /**
    * Get azureComputeClusterConfiguration
    * @return azureComputeClusterConfiguration
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1196,21 +1199,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureComputeClusterConfiguration(AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
+  public void setAzureComputeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
     this.azureComputeClusterConfiguration = azureComputeClusterConfiguration;
   }
 
-
-  public Environment computeClusterEnabled(Boolean computeClusterEnabled) {
+  public Environment computeClusterEnabled(@javax.annotation.Nullable Boolean computeClusterEnabled) {
     
     this.computeClusterEnabled = computeClusterEnabled;
     return this;
   }
 
-   /**
+  /**
    * Compute clusters enabled
    * @return computeClusterEnabled
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1222,21 +1224,20 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterEnabled(Boolean computeClusterEnabled) {
+  public void setComputeClusterEnabled(@javax.annotation.Nullable Boolean computeClusterEnabled) {
     this.computeClusterEnabled = computeClusterEnabled;
   }
 
-
-  public Environment security(SecurityResponse security) {
+  public Environment security(@javax.annotation.Nullable SecurityResponse security) {
     
     this.security = security;
     return this;
   }
 
-   /**
+  /**
    * Get security
    * @return security
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -1248,9 +1249,10 @@ public class Environment {
 
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurity(SecurityResponse security) {
+  public void setSecurity(@javax.annotation.Nullable SecurityResponse security) {
     this.security = security;
   }
+
 
   @Override
   public boolean equals(Object o) {

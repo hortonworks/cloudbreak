@@ -32,30 +32,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeWarehouseResponse.JSON_PROPERTY_ENVIRONMENT_ID,
   DescribeWarehouseResponse.JSON_PROPERTY_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeWarehouseResponse {
   public static final String JSON_PROPERTY_WAREHOUSE_ID = "warehouseId";
+  @javax.annotation.Nullable
   private String warehouseId;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_ID = "environmentId";
+  @javax.annotation.Nullable
   private String environmentId;
 
   public static final String JSON_PROPERTY_DETAILS = "details";
+  @javax.annotation.Nullable
   private Warehouse details;
 
   public DescribeWarehouseResponse() {
   }
 
-  public DescribeWarehouseResponse warehouseId(String warehouseId) {
+  public DescribeWarehouseResponse warehouseId(@javax.annotation.Nullable String warehouseId) {
     
     this.warehouseId = warehouseId;
     return this;
   }
 
-   /**
+  /**
    * The id of the warehouse.
    * @return warehouseId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WAREHOUSE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -67,21 +70,20 @@ public class DescribeWarehouseResponse {
 
   @JsonProperty(JSON_PROPERTY_WAREHOUSE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWarehouseId(String warehouseId) {
+  public void setWarehouseId(@javax.annotation.Nullable String warehouseId) {
     this.warehouseId = warehouseId;
   }
 
-
-  public DescribeWarehouseResponse environmentId(String environmentId) {
+  public DescribeWarehouseResponse environmentId(@javax.annotation.Nullable String environmentId) {
     
     this.environmentId = environmentId;
     return this;
   }
 
-   /**
+  /**
    * The of the environment the warehouse is in.
    * @return environmentId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,21 +95,20 @@ public class DescribeWarehouseResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentId(String environmentId) {
+  public void setEnvironmentId(@javax.annotation.Nullable String environmentId) {
     this.environmentId = environmentId;
   }
 
-
-  public DescribeWarehouseResponse details(Warehouse details) {
+  public DescribeWarehouseResponse details(@javax.annotation.Nullable Warehouse details) {
     
     this.details = details;
     return this;
   }
 
-   /**
+  /**
    * Get details
    * @return details
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -119,9 +120,10 @@ public class DescribeWarehouseResponse {
 
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDetails(Warehouse details) {
+  public void setDetails(@javax.annotation.Nullable Warehouse details) {
     this.details = details;
   }
+
 
   @Override
   public boolean equals(Object o) {

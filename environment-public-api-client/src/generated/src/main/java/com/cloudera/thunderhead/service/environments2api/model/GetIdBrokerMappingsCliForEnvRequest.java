@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetIdBrokerMappingsCliForEnvRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   GetIdBrokerMappingsCliForEnvRequest.JSON_PROPERTY_COMMAND_REQUEST_INPUT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetIdBrokerMappingsCliForEnvRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_COMMAND_REQUEST_INPUT = "commandRequestInput";
+  @javax.annotation.Nullable
   private String commandRequestInput;
 
   public GetIdBrokerMappingsCliForEnvRequest() {
   }
 
-  public GetIdBrokerMappingsCliForEnvRequest environmentName(String environmentName) {
+  public GetIdBrokerMappingsCliForEnvRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment which has the desired IDBroker mapping - to recreate/-use it somewhere else -.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class GetIdBrokerMappingsCliForEnvRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public GetIdBrokerMappingsCliForEnvRequest commandRequestInput(String commandRequestInput) {
+  public GetIdBrokerMappingsCliForEnvRequest commandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     
     this.commandRequestInput = commandRequestInput;
     return this;
   }
 
-   /**
+  /**
    * The base64-encoded IDBroker mapping request for a new environment which does not exist yet. Can be null in which case the environment is treated as existing.
    * @return commandRequestInput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class GetIdBrokerMappingsCliForEnvRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandRequestInput(String commandRequestInput) {
+  public void setCommandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     this.commandRequestInput = commandRequestInput;
   }
+
 
   @Override
   public boolean equals(Object o) {

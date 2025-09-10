@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RotateFreeipaSecretsRequest.JSON_PROPERTY_ENVIRONMENT,
   RotateFreeipaSecretsRequest.JSON_PROPERTY_SECRET_TYPES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class RotateFreeipaSecretsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_SECRET_TYPES = "secretTypes";
+  @javax.annotation.Nonnull
   private List<String> secretTypes = new ArrayList<>();
 
   public RotateFreeipaSecretsRequest() {
   }
 
-  public RotateFreeipaSecretsRequest environment(String environment) {
+  public RotateFreeipaSecretsRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The environment CRN where FreeIPA is located and we wish to rotate secrets.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class RotateFreeipaSecretsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public RotateFreeipaSecretsRequest secretTypes(List<String> secretTypes) {
+  public RotateFreeipaSecretsRequest secretTypes(@javax.annotation.Nonnull List<String> secretTypes) {
     
     this.secretTypes = secretTypes;
     return this;
@@ -84,10 +85,10 @@ public class RotateFreeipaSecretsRequest {
     return this;
   }
 
-   /**
+  /**
    * The list of secrets that need replacement.
    * @return secretTypes
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -99,9 +100,10 @@ public class RotateFreeipaSecretsRequest {
 
   @JsonProperty(JSON_PROPERTY_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecretTypes(List<String> secretTypes) {
+  public void setSecretTypes(@javax.annotation.Nonnull List<String> secretTypes) {
     this.secretTypes = secretTypes;
   }
+
 
   @Override
   public boolean equals(Object o) {

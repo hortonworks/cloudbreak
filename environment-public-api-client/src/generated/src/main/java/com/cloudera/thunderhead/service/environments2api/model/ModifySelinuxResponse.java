@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ModifySelinuxResponse.JSON_PROPERTY_FLOW_ID,
   ModifySelinuxResponse.JSON_PROPERTY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ModifySelinuxResponse {
   public static final String JSON_PROPERTY_FLOW_ID = "flowId";
+  @javax.annotation.Nonnull
   private String flowId;
 
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nonnull
   private String type;
 
   public ModifySelinuxResponse() {
   }
 
-  public ModifySelinuxResponse flowId(String flowId) {
+  public ModifySelinuxResponse flowId(@javax.annotation.Nonnull String flowId) {
     
     this.flowId = flowId;
     return this;
   }
 
-   /**
+  /**
    * Flow ID of the modify SELinux flow.
    * @return flowId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class ModifySelinuxResponse {
 
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFlowId(String flowId) {
+  public void setFlowId(@javax.annotation.Nonnull String flowId) {
     this.flowId = flowId;
   }
 
-
-  public ModifySelinuxResponse type(String type) {
+  public ModifySelinuxResponse type(@javax.annotation.Nonnull String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * Flow Type of the modify SELinux flow.
    * @return type
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class ModifySelinuxResponse {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nonnull String type) {
     this.type = type;
   }
+
 
   @Override
   public boolean equals(Object o) {

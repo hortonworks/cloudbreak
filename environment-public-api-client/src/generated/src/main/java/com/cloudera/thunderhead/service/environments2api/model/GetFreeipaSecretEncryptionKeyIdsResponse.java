@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetFreeipaSecretEncryptionKeyIdsResponse.JSON_PROPERTY_ENCRYPTION_KEY_LUKS,
   GetFreeipaSecretEncryptionKeyIdsResponse.JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetFreeipaSecretEncryptionKeyIdsResponse {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_LUKS = "encryptionKeyLuks";
+  @javax.annotation.Nullable
   private String encryptionKeyLuks;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER = "encryptionKeyCloudSecretManager";
+  @javax.annotation.Nullable
   private String encryptionKeyCloudSecretManager;
 
   public GetFreeipaSecretEncryptionKeyIdsResponse() {
   }
 
-  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyLuks(String encryptionKeyLuks) {
+  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyLuks(@javax.annotation.Nullable String encryptionKeyLuks) {
     
     this.encryptionKeyLuks = encryptionKeyLuks;
     return this;
   }
 
-   /**
+  /**
    * The LUKS (Linux Unified Key Setup) encryption key of the cluster.
    * @return encryptionKeyLuks
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_LUKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_LUKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyLuks(String encryptionKeyLuks) {
+  public void setEncryptionKeyLuks(@javax.annotation.Nullable String encryptionKeyLuks) {
     this.encryptionKeyLuks = encryptionKeyLuks;
   }
 
-
-  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyCloudSecretManager(String encryptionKeyCloudSecretManager) {
+  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyCloudSecretManager(@javax.annotation.Nullable String encryptionKeyCloudSecretManager) {
     
     this.encryptionKeyCloudSecretManager = encryptionKeyCloudSecretManager;
     return this;
   }
 
-   /**
+  /**
    * The Cloud Secret Manager encryption key of the cluster.
    * @return encryptionKeyCloudSecretManager
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyCloudSecretManager(String encryptionKeyCloudSecretManager) {
+  public void setEncryptionKeyCloudSecretManager(@javax.annotation.Nullable String encryptionKeyCloudSecretManager) {
     this.encryptionKeyCloudSecretManager = encryptionKeyCloudSecretManager;
   }
+
 
   @Override
   public boolean equals(Object o) {

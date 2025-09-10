@@ -35,33 +35,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureComputeClusterConfiguration.JSON_PROPERTY_OUTBOUND_TYPE,
   AzureComputeClusterConfiguration.JSON_PROPERTY_WORKER_NODE_SUBNETS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureComputeClusterConfiguration {
   public static final String JSON_PROPERTY_PRIVATE_CLUSTER = "privateCluster";
+  @javax.annotation.Nullable
   private Boolean privateCluster;
 
   public static final String JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES = "kubeApiAuthorizedIpRanges";
+  @javax.annotation.Nullable
   private List<String> kubeApiAuthorizedIpRanges = new ArrayList<>();
 
   public static final String JSON_PROPERTY_OUTBOUND_TYPE = "outboundType";
+  @javax.annotation.Nullable
   private String outboundType;
 
   public static final String JSON_PROPERTY_WORKER_NODE_SUBNETS = "workerNodeSubnets";
+  @javax.annotation.Nullable
   private List<String> workerNodeSubnets = new ArrayList<>();
 
   public AzureComputeClusterConfiguration() {
   }
 
-  public AzureComputeClusterConfiguration privateCluster(Boolean privateCluster) {
+  public AzureComputeClusterConfiguration privateCluster(@javax.annotation.Nullable Boolean privateCluster) {
     
     this.privateCluster = privateCluster;
     return this;
   }
 
-   /**
+  /**
    * If true, creates private cluster.
    * @return privateCluster
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -73,12 +77,11 @@ public class AzureComputeClusterConfiguration {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateCluster(Boolean privateCluster) {
+  public void setPrivateCluster(@javax.annotation.Nullable Boolean privateCluster) {
     this.privateCluster = privateCluster;
   }
 
-
-  public AzureComputeClusterConfiguration kubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
+  public AzureComputeClusterConfiguration kubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     return this;
@@ -92,10 +95,10 @@ public class AzureComputeClusterConfiguration {
     return this;
   }
 
-   /**
+  /**
    * Kubernetes API authorized IP ranges in CIDR notation.
    * @return kubeApiAuthorizedIpRanges
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -107,21 +110,20 @@ public class AzureComputeClusterConfiguration {
 
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
+  public void setKubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
   }
 
-
-  public AzureComputeClusterConfiguration outboundType(String outboundType) {
+  public AzureComputeClusterConfiguration outboundType(@javax.annotation.Nullable String outboundType) {
     
     this.outboundType = outboundType;
     return this;
   }
 
-   /**
+  /**
    * Cluster egress with defined outbound type in Azure Kubernetes Service.
    * @return outboundType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTBOUND_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -133,12 +135,11 @@ public class AzureComputeClusterConfiguration {
 
   @JsonProperty(JSON_PROPERTY_OUTBOUND_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutboundType(String outboundType) {
+  public void setOutboundType(@javax.annotation.Nullable String outboundType) {
     this.outboundType = outboundType;
   }
 
-
-  public AzureComputeClusterConfiguration workerNodeSubnets(List<String> workerNodeSubnets) {
+  public AzureComputeClusterConfiguration workerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
     
     this.workerNodeSubnets = workerNodeSubnets;
     return this;
@@ -152,10 +153,10 @@ public class AzureComputeClusterConfiguration {
     return this;
   }
 
-   /**
+  /**
    * Subnets for Kubernetes Worker Nodes
    * @return workerNodeSubnets
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -167,9 +168,10 @@ public class AzureComputeClusterConfiguration {
 
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkerNodeSubnets(List<String> workerNodeSubnets) {
+  public void setWorkerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
     this.workerNodeSubnets = workerNodeSubnets;
   }
+
 
   @Override
   public boolean equals(Object o) {

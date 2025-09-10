@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   AwsDiskEncryptionParameters.JSON_PROPERTY_ENCRYPTION_KEY_ARN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AwsDiskEncryptionParameters {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
+  @javax.annotation.Nullable
   private String encryptionKeyArn;
 
   public AwsDiskEncryptionParameters() {
   }
 
-  public AwsDiskEncryptionParameters encryptionKeyArn(String encryptionKeyArn) {
+  public AwsDiskEncryptionParameters encryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
     
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
 
-   /**
+  /**
    * ARN of the CMK which is used to encrypt the AWS EBS volumes.
    * @return encryptionKeyArn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class AwsDiskEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyArn(String encryptionKeyArn) {
+  public void setEncryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
   }
+
 
   @Override
   public boolean equals(Object o) {

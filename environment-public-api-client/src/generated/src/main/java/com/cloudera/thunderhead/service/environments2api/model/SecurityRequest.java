@@ -29,15 +29,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   SecurityRequest.JSON_PROPERTY_SE_LINUX
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SecurityRequest {
   /**
    * Override default SELinux configuration which is PERMISSIVE by default
    */
   public enum SeLinuxEnum {
-    PERMISSIVE("PERMISSIVE"),
+    PERMISSIVE(String.valueOf("PERMISSIVE")),
     
-    ENFORCING("ENFORCING");
+    ENFORCING(String.valueOf("ENFORCING"));
 
     private String value;
 
@@ -67,21 +67,22 @@ public class SecurityRequest {
   }
 
   public static final String JSON_PROPERTY_SE_LINUX = "seLinux";
+  @javax.annotation.Nullable
   private SeLinuxEnum seLinux;
 
   public SecurityRequest() {
   }
 
-  public SecurityRequest seLinux(SeLinuxEnum seLinux) {
+  public SecurityRequest seLinux(@javax.annotation.Nullable SeLinuxEnum seLinux) {
     
     this.seLinux = seLinux;
     return this;
   }
 
-   /**
+  /**
    * Override default SELinux configuration which is PERMISSIVE by default
    * @return seLinux
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SE_LINUX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,9 +94,10 @@ public class SecurityRequest {
 
   @JsonProperty(JSON_PROPERTY_SE_LINUX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSeLinux(SeLinuxEnum seLinux) {
+  public void setSeLinux(@javax.annotation.Nullable SeLinuxEnum seLinux) {
     this.seLinux = seLinux;
   }
+
 
   @Override
   public boolean equals(Object o) {

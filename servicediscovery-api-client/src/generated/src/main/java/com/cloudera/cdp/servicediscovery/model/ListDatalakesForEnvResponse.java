@@ -34,27 +34,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ListDatalakesForEnvResponse.JSON_PROPERTY_ENVIRONMENT_CRN,
   ListDatalakesForEnvResponse.JSON_PROPERTY_DATALAKES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListDatalakesForEnvResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_DATALAKES = "datalakes";
+  @javax.annotation.Nullable
   private List<DatalakeInfo> datalakes = new ArrayList<>();
 
   public ListDatalakesForEnvResponse() {
   }
 
-  public ListDatalakesForEnvResponse environmentCrn(String environmentCrn) {
+  public ListDatalakesForEnvResponse environmentCrn(@javax.annotation.Nullable String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The environment CRN
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,12 +68,11 @@ public class ListDatalakesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public ListDatalakesForEnvResponse datalakes(List<DatalakeInfo> datalakes) {
+  public ListDatalakesForEnvResponse datalakes(@javax.annotation.Nullable List<DatalakeInfo> datalakes) {
     
     this.datalakes = datalakes;
     return this;
@@ -85,10 +86,10 @@ public class ListDatalakesForEnvResponse {
     return this;
   }
 
-   /**
+  /**
    * The list of Datalakes in the environment
    * @return datalakes
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,9 +101,10 @@ public class ListDatalakesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_DATALAKES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalakes(List<DatalakeInfo> datalakes) {
+  public void setDatalakes(@javax.annotation.Nullable List<DatalakeInfo> datalakes) {
     this.datalakes = datalakes;
   }
+
 
   @Override
   public boolean equals(Object o) {

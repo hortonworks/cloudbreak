@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DataServices.JSON_PROPERTY_AZURE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DataServices {
   public static final String JSON_PROPERTY_AZURE = "azure";
+  @javax.annotation.Nullable
   private AzureDataServicesParameters azure;
 
   public DataServices() {
   }
 
-  public DataServices azure(AzureDataServicesParameters azure) {
+  public DataServices azure(@javax.annotation.Nullable AzureDataServicesParameters azure) {
     
     this.azure = azure;
     return this;
   }
 
-   /**
+  /**
    * Get azure
    * @return azure
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -59,9 +60,10 @@ public class DataServices {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(AzureDataServicesParameters azure) {
+  public void setAzure(@javax.annotation.Nullable AzureDataServicesParameters azure) {
     this.azure = azure;
   }
+
 
   @Override
   public boolean equals(Object o) {

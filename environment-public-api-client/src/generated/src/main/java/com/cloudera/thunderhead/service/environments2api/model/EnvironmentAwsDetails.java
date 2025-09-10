@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvironmentAwsDetails.JSON_PROPERTY_S3_GUARD_TABLE_NAME
 })
 @JsonTypeName("Environment_awsDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvironmentAwsDetails {
   public static final String JSON_PROPERTY_S3_GUARD_TABLE_NAME = "s3GuardTableName";
+  @javax.annotation.Nullable
   private String s3GuardTableName;
 
   public EnvironmentAwsDetails() {
   }
 
-  public EnvironmentAwsDetails s3GuardTableName(String s3GuardTableName) {
+  public EnvironmentAwsDetails s3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
     
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
 
-   /**
+  /**
    * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -59,9 +60,10 @@ public class EnvironmentAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setS3GuardTableName(String s3GuardTableName) {
+  public void setS3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
     this.s3GuardTableName = s3GuardTableName;
   }
+
 
   @Override
   public boolean equals(Object o) {

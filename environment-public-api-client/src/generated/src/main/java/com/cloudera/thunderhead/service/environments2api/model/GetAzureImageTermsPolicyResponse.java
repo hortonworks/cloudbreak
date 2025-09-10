@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetAzureImageTermsPolicyResponse.JSON_PROPERTY_ACCEPTED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetAzureImageTermsPolicyResponse {
   public static final String JSON_PROPERTY_ACCEPTED = "accepted";
+  @javax.annotation.Nonnull
   private Boolean accepted;
 
   public GetAzureImageTermsPolicyResponse() {
   }
 
-  public GetAzureImageTermsPolicyResponse accepted(Boolean accepted) {
+  public GetAzureImageTermsPolicyResponse accepted(@javax.annotation.Nonnull Boolean accepted) {
     
     this.accepted = accepted;
     return this;
   }
 
-   /**
+  /**
    * Flag denoting whether automatic Azure Marketplace image terms acceptance is enabled or disabled.
    * @return accepted
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ACCEPTED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class GetAzureImageTermsPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCEPTED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAccepted(Boolean accepted) {
+  public void setAccepted(@javax.annotation.Nonnull Boolean accepted) {
     this.accepted = accepted;
   }
+
 
   @Override
   public boolean equals(Object o) {

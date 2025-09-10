@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetTruststorePasswordRequest.JSON_PROPERTY_DATALAKE_CRN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetTruststorePasswordRequest {
   public static final String JSON_PROPERTY_DATALAKE_CRN = "datalakeCrn";
+  @javax.annotation.Nonnull
   private String datalakeCrn;
 
   public GetTruststorePasswordRequest() {
   }
 
-  public GetTruststorePasswordRequest datalakeCrn(String datalakeCrn) {
+  public GetTruststorePasswordRequest datalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
     
     this.datalakeCrn = datalakeCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Datalake
    * @return datalakeCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class GetTruststorePasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatalakeCrn(String datalakeCrn) {
+  public void setDatalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
   }
+
 
   @Override
   public boolean equals(Object o) {

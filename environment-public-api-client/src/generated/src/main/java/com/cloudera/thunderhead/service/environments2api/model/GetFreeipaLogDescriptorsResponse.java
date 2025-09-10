@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetFreeipaLogDescriptorsResponse.JSON_PROPERTY_LOGS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetFreeipaLogDescriptorsResponse {
   public static final String JSON_PROPERTY_LOGS = "logs";
+  @javax.annotation.Nullable
   private List<FreeipaVmLogResponse> logs = new ArrayList<>();
 
   public GetFreeipaLogDescriptorsResponse() {
   }
 
-  public GetFreeipaLogDescriptorsResponse logs(List<FreeipaVmLogResponse> logs) {
+  public GetFreeipaLogDescriptorsResponse logs(@javax.annotation.Nullable List<FreeipaVmLogResponse> logs) {
     
     this.logs = logs;
     return this;
@@ -55,10 +56,10 @@ public class GetFreeipaLogDescriptorsResponse {
     return this;
   }
 
-   /**
+  /**
    * Array of log descriptors. (useful for diagnostics collection filtering)
    * @return logs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class GetFreeipaLogDescriptorsResponse {
 
   @JsonProperty(JSON_PROPERTY_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLogs(List<FreeipaVmLogResponse> logs) {
+  public void setLogs(@javax.annotation.Nullable List<FreeipaVmLogResponse> logs) {
     this.logs = logs;
   }
+
 
   @Override
   public boolean equals(Object o) {

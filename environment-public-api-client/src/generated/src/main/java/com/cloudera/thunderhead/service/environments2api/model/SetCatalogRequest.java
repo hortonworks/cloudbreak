@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetCatalogRequest.JSON_PROPERTY_ENVIRONMENT,
   SetCatalogRequest.JSON_PROPERTY_CATALOG
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetCatalogRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_CATALOG = "catalog";
+  @javax.annotation.Nonnull
   private String catalog;
 
   public SetCatalogRequest() {
   }
 
-  public SetCatalogRequest environment(String environment) {
+  public SetCatalogRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the affected environment that holds the FreeIPA installation.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class SetCatalogRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public SetCatalogRequest catalog(String catalog) {
+  public SetCatalogRequest catalog(@javax.annotation.Nonnull String catalog) {
     
     this.catalog = catalog;
     return this;
   }
 
-   /**
+  /**
    * URL of the FreeIPA catalog to be used.
    * @return catalog
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class SetCatalogRequest {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCatalog(String catalog) {
+  public void setCatalog(@javax.annotation.Nonnull String catalog) {
     this.catalog = catalog;
   }
+
 
   @Override
   public boolean equals(Object o) {

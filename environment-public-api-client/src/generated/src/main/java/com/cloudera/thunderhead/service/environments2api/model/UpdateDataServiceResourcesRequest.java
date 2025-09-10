@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateDataServiceResourcesRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateDataServiceResourcesRequest.JSON_PROPERTY_DATA_SERVICES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateDataServiceResourcesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_DATA_SERVICES = "dataServices";
+  @javax.annotation.Nonnull
   private DataServicesRequest dataServices;
 
   public UpdateDataServiceResourcesRequest() {
   }
 
-  public UpdateDataServiceResourcesRequest environment(String environment) {
+  public UpdateDataServiceResourcesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -63,21 +65,20 @@ public class UpdateDataServiceResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateDataServiceResourcesRequest dataServices(DataServicesRequest dataServices) {
+  public UpdateDataServiceResourcesRequest dataServices(@javax.annotation.Nonnull DataServicesRequest dataServices) {
     
     this.dataServices = dataServices;
     return this;
   }
 
-   /**
+  /**
    * Get dataServices
    * @return dataServices
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -89,9 +90,10 @@ public class UpdateDataServiceResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_DATA_SERVICES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDataServices(DataServicesRequest dataServices) {
+  public void setDataServices(@javax.annotation.Nonnull DataServicesRequest dataServices) {
     this.dataServices = dataServices;
   }
+
 
   @Override
   public boolean equals(Object o) {

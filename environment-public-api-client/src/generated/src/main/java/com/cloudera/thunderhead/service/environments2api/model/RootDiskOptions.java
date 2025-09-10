@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   RootDiskOptions.JSON_PROPERTY_MODIFY_DISKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class RootDiskOptions {
   public static final String JSON_PROPERTY_MODIFY_DISKS = "modifyDisks";
+  @javax.annotation.Nullable
   private ModifyDisks modifyDisks;
 
   public RootDiskOptions() {
   }
 
-  public RootDiskOptions modifyDisks(ModifyDisks modifyDisks) {
+  public RootDiskOptions modifyDisks(@javax.annotation.Nullable ModifyDisks modifyDisks) {
     
     this.modifyDisks = modifyDisks;
     return this;
   }
 
-   /**
+  /**
    * Get modifyDisks
    * @return modifyDisks
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -59,9 +60,10 @@ public class RootDiskOptions {
 
   @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setModifyDisks(ModifyDisks modifyDisks) {
+  public void setModifyDisks(@javax.annotation.Nullable ModifyDisks modifyDisks) {
     this.modifyDisks = modifyDisks;
   }
+
 
   @Override
   public boolean equals(Object o) {

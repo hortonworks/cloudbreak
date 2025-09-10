@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ListVirtualWarehousesForEnvResponse.JSON_PROPERTY_LAST_UPDATED,
   ListVirtualWarehousesForEnvResponse.JSON_PROPERTY_WAREHOUSES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListVirtualWarehousesForEnvResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public static final String JSON_PROPERTY_LAST_UPDATED = "lastUpdated";
+  @javax.annotation.Nullable
   private Long lastUpdated;
 
   public static final String JSON_PROPERTY_WAREHOUSES = "warehouses";
+  @javax.annotation.Nullable
   private List<VirtualWarehouse> warehouses = new ArrayList<>();
 
   public ListVirtualWarehousesForEnvResponse() {
   }
 
-  public ListVirtualWarehousesForEnvResponse environment(String environment) {
+  public ListVirtualWarehousesForEnvResponse environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,21 +73,20 @@ public class ListVirtualWarehousesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
 
-
-  public ListVirtualWarehousesForEnvResponse lastUpdated(Long lastUpdated) {
+  public ListVirtualWarehousesForEnvResponse lastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     
     this.lastUpdated = lastUpdated;
     return this;
   }
 
-   /**
+  /**
    * The RFC3339 timestamp of the last change to the Virtual Warehouse info. (millis)
    * @return lastUpdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,12 +98,11 @@ public class ListVirtualWarehousesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastUpdated(Long lastUpdated) {
+  public void setLastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
-
-  public ListVirtualWarehousesForEnvResponse warehouses(List<VirtualWarehouse> warehouses) {
+  public ListVirtualWarehousesForEnvResponse warehouses(@javax.annotation.Nullable List<VirtualWarehouse> warehouses) {
     
     this.warehouses = warehouses;
     return this;
@@ -115,10 +116,10 @@ public class ListVirtualWarehousesForEnvResponse {
     return this;
   }
 
-   /**
+  /**
    * The virtual warehouses for the environment.
    * @return warehouses
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WAREHOUSES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class ListVirtualWarehousesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_WAREHOUSES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWarehouses(List<VirtualWarehouse> warehouses) {
+  public void setWarehouses(@javax.annotation.Nullable List<VirtualWarehouse> warehouses) {
     this.warehouses = warehouses;
   }
+
 
   @Override
   public boolean equals(Object o) {

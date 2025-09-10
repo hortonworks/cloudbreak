@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   LogStorageAzureDetails.JSON_PROPERTY_MANAGED_IDENTITY
 })
 @JsonTypeName("LogStorage_azureDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class LogStorageAzureDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
+  @javax.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
+  @javax.annotation.Nullable
   private String managedIdentity;
 
   public LogStorageAzureDetails() {
   }
 
-  public LogStorageAzureDetails storageLocationBase(String storageLocationBase) {
+  public LogStorageAzureDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     
     this.storageLocationBase = storageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net.
    * @return storageLocationBase
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -63,21 +65,20 @@ public class LogStorageAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(String storageLocationBase) {
+  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-
-  public LogStorageAzureDetails managedIdentity(String managedIdentity) {
+  public LogStorageAzureDetails managedIdentity(@javax.annotation.Nullable String managedIdentity) {
     
     this.managedIdentity = managedIdentity;
     return this;
   }
 
-   /**
+  /**
    * The managed identity associated with the logger. This identity should have Storage Blob Data Contributor role on the given storage account.
    * @return managedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class LogStorageAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setManagedIdentity(String managedIdentity) {
+  public void setManagedIdentity(@javax.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
+
 
   @Override
   public boolean equals(Object o) {

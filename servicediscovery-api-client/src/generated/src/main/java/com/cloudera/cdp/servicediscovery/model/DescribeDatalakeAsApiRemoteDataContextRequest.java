@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DescribeDatalakeAsApiRemoteDataContextRequest.JSON_PROPERTY_DATALAKE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeDatalakeAsApiRemoteDataContextRequest {
   public static final String JSON_PROPERTY_DATALAKE = "datalake";
+  @javax.annotation.Nonnull
   private String datalake;
 
   public DescribeDatalakeAsApiRemoteDataContextRequest() {
   }
 
-  public DescribeDatalakeAsApiRemoteDataContextRequest datalake(String datalake) {
+  public DescribeDatalakeAsApiRemoteDataContextRequest datalake(@javax.annotation.Nonnull String datalake) {
     
     this.datalake = datalake;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the datalake.
    * @return datalake
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATALAKE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class DescribeDatalakeAsApiRemoteDataContextRequest {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatalake(String datalake) {
+  public void setDatalake(@javax.annotation.Nonnull String datalake) {
     this.datalake = datalake;
   }
+
 
   @Override
   public boolean equals(Object o) {

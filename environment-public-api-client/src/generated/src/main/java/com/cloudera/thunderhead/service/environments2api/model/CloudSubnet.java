@@ -38,39 +38,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CloudSubnet.JSON_PROPERTY_SECONDARY_CIDRS,
   CloudSubnet.JSON_PROPERTY_SECONDARY_CIDRS_WITH_NAMES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CloudSubnet {
   public static final String JSON_PROPERTY_SUBNET_ID = "subnetId";
+  @javax.annotation.Nullable
   private String subnetId;
 
   public static final String JSON_PROPERTY_SUBNET_NAME = "subnetName";
+  @javax.annotation.Nullable
   private String subnetName;
 
   public static final String JSON_PROPERTY_AVAILABILITY_ZONE = "availabilityZone";
+  @javax.annotation.Nullable
   private String availabilityZone;
 
   public static final String JSON_PROPERTY_CIDR = "cidr";
+  @javax.annotation.Nullable
   private String cidr;
 
   public static final String JSON_PROPERTY_SECONDARY_CIDRS = "secondaryCidrs";
+  @javax.annotation.Nullable
   private List<String> secondaryCidrs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_SECONDARY_CIDRS_WITH_NAMES = "secondaryCidrsWithNames";
+  @javax.annotation.Nullable
   private List<SecondaryCidrWithName> secondaryCidrsWithNames = new ArrayList<>();
 
   public CloudSubnet() {
   }
 
-  public CloudSubnet subnetId(String subnetId) {
+  public CloudSubnet subnetId(@javax.annotation.Nullable String subnetId) {
     
     this.subnetId = subnetId;
     return this;
   }
 
-   /**
+  /**
    * The id of the subnet.
    * @return subnetId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -82,21 +88,20 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetId(String subnetId) {
+  public void setSubnetId(@javax.annotation.Nullable String subnetId) {
     this.subnetId = subnetId;
   }
 
-
-  public CloudSubnet subnetName(String subnetName) {
+  public CloudSubnet subnetName(@javax.annotation.Nullable String subnetName) {
     
     this.subnetName = subnetName;
     return this;
   }
 
-   /**
+  /**
    * The name of the subnet.
    * @return subnetName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -108,21 +113,20 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetName(String subnetName) {
+  public void setSubnetName(@javax.annotation.Nullable String subnetName) {
     this.subnetName = subnetName;
   }
 
-
-  public CloudSubnet availabilityZone(String availabilityZone) {
+  public CloudSubnet availabilityZone(@javax.annotation.Nullable String availabilityZone) {
     
     this.availabilityZone = availabilityZone;
     return this;
   }
 
-   /**
+  /**
    * The availability zone of the subnet.
    * @return availabilityZone
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -134,21 +138,20 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAvailabilityZone(String availabilityZone) {
+  public void setAvailabilityZone(@javax.annotation.Nullable String availabilityZone) {
     this.availabilityZone = availabilityZone;
   }
 
-
-  public CloudSubnet cidr(String cidr) {
+  public CloudSubnet cidr(@javax.annotation.Nullable String cidr) {
     
     this.cidr = cidr;
     return this;
   }
 
-   /**
+  /**
    * The CIDR IP range of the subnet.
    * @return cidr
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -160,12 +163,11 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCidr(String cidr) {
+  public void setCidr(@javax.annotation.Nullable String cidr) {
     this.cidr = cidr;
   }
 
-
-  public CloudSubnet secondaryCidrs(List<String> secondaryCidrs) {
+  public CloudSubnet secondaryCidrs(@javax.annotation.Nullable List<String> secondaryCidrs) {
     
     this.secondaryCidrs = secondaryCidrs;
     return this;
@@ -179,10 +181,10 @@ public class CloudSubnet {
     return this;
   }
 
-   /**
+  /**
    * The Secondary CIDR IP ranges of the subnet (currently only available on Google Cloud).
    * @return secondaryCidrs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -194,12 +196,11 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecondaryCidrs(List<String> secondaryCidrs) {
+  public void setSecondaryCidrs(@javax.annotation.Nullable List<String> secondaryCidrs) {
     this.secondaryCidrs = secondaryCidrs;
   }
 
-
-  public CloudSubnet secondaryCidrsWithNames(List<SecondaryCidrWithName> secondaryCidrsWithNames) {
+  public CloudSubnet secondaryCidrsWithNames(@javax.annotation.Nullable List<SecondaryCidrWithName> secondaryCidrsWithNames) {
     
     this.secondaryCidrsWithNames = secondaryCidrsWithNames;
     return this;
@@ -213,10 +214,10 @@ public class CloudSubnet {
     return this;
   }
 
-   /**
+  /**
    * The Secondary CIDR IP ranges and names of the subnet (currently only available on Google Cloud).
    * @return secondaryCidrsWithNames
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS_WITH_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -228,9 +229,10 @@ public class CloudSubnet {
 
   @JsonProperty(JSON_PROPERTY_SECONDARY_CIDRS_WITH_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecondaryCidrsWithNames(List<SecondaryCidrWithName> secondaryCidrsWithNames) {
+  public void setSecondaryCidrsWithNames(@javax.annotation.Nullable List<SecondaryCidrWithName> secondaryCidrsWithNames) {
     this.secondaryCidrsWithNames = secondaryCidrsWithNames;
   }
+
 
   @Override
   public boolean equals(Object o) {

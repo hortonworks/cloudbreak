@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeWarehouseRequest.JSON_PROPERTY_ENVIRONMENT,
   DescribeWarehouseRequest.JSON_PROPERTY_WAREHOUSE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeWarehouseRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public static final String JSON_PROPERTY_WAREHOUSE = "warehouse";
+  @javax.annotation.Nullable
   private String warehouse;
 
   public DescribeWarehouseRequest() {
   }
 
-  public DescribeWarehouseRequest environment(String environment) {
+  public DescribeWarehouseRequest environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The id of the environment the warehouse is part of.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class DescribeWarehouseRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
 
-
-  public DescribeWarehouseRequest warehouse(String warehouse) {
+  public DescribeWarehouseRequest warehouse(@javax.annotation.Nullable String warehouse) {
     
     this.warehouse = warehouse;
     return this;
   }
 
-   /**
+  /**
    * The id of the warehouse to get details for.
    * @return warehouse
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WAREHOUSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class DescribeWarehouseRequest {
 
   @JsonProperty(JSON_PROPERTY_WAREHOUSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWarehouse(String warehouse) {
+  public void setWarehouse(@javax.annotation.Nullable String warehouse) {
     this.warehouse = warehouse;
   }
+
 
   @Override
   public boolean equals(Object o) {

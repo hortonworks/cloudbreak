@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CmlSummary.JSON_PROPERTY_CML_WORKSPACES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CmlSummary {
   public static final String JSON_PROPERTY_CML_WORKSPACES = "cmlWorkspaces";
+  @javax.annotation.Nullable
   private List<CmlWorkspace> cmlWorkspaces;
 
   public CmlSummary() {
   }
 
-  public CmlSummary cmlWorkspaces(List<CmlWorkspace> cmlWorkspaces) {
+  public CmlSummary cmlWorkspaces(@javax.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
     
     this.cmlWorkspaces = cmlWorkspaces;
     return this;
@@ -55,10 +56,10 @@ public class CmlSummary {
     return this;
   }
 
-   /**
+  /**
    * List of CML workspaces based on the environment.
    * @return cmlWorkspaces
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CML_WORKSPACES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class CmlSummary {
 
   @JsonProperty(JSON_PROPERTY_CML_WORKSPACES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmlWorkspaces(List<CmlWorkspace> cmlWorkspaces) {
+  public void setCmlWorkspaces(@javax.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
     this.cmlWorkspaces = cmlWorkspaces;
   }
+
 
   @Override
   public boolean equals(Object o) {

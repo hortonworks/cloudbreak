@@ -31,13 +31,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DownscaleFreeipaResponse.JSON_PROPERTY_TARGET_AVAILABILITY_TYPE,
   DownscaleFreeipaResponse.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DownscaleFreeipaResponse {
   /**
    * The target FreeIPA availability type.
    */
   public enum OriginalAvailabilityTypeEnum {
-    HA("HA");
+    HA(String.valueOf("HA"));
 
     private String value;
 
@@ -67,15 +67,16 @@ public class DownscaleFreeipaResponse {
   }
 
   public static final String JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE = "originalAvailabilityType";
+  @javax.annotation.Nullable
   private OriginalAvailabilityTypeEnum originalAvailabilityType;
 
   /**
    * The target FreeIPA availability type.
    */
   public enum TargetAvailabilityTypeEnum {
-    HA("HA"),
+    HA(String.valueOf("HA")),
     
-    TWO_NODE_BASED("TWO_NODE_BASED");
+    TWO_NODE_BASED(String.valueOf("TWO_NODE_BASED"));
 
     private String value;
 
@@ -105,24 +106,26 @@ public class DownscaleFreeipaResponse {
   }
 
   public static final String JSON_PROPERTY_TARGET_AVAILABILITY_TYPE = "targetAvailabilityType";
+  @javax.annotation.Nullable
   private TargetAvailabilityTypeEnum targetAvailabilityType;
 
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public DownscaleFreeipaResponse() {
   }
 
-  public DownscaleFreeipaResponse originalAvailabilityType(OriginalAvailabilityTypeEnum originalAvailabilityType) {
+  public DownscaleFreeipaResponse originalAvailabilityType(@javax.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
     
     this.originalAvailabilityType = originalAvailabilityType;
     return this;
   }
 
-   /**
+  /**
    * The target FreeIPA availability type.
    * @return originalAvailabilityType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -134,21 +137,20 @@ public class DownscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOriginalAvailabilityType(OriginalAvailabilityTypeEnum originalAvailabilityType) {
+  public void setOriginalAvailabilityType(@javax.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
     this.originalAvailabilityType = originalAvailabilityType;
   }
 
-
-  public DownscaleFreeipaResponse targetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public DownscaleFreeipaResponse targetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
 
-   /**
+  /**
    * The target FreeIPA availability type.
    * @return targetAvailabilityType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -160,21 +162,20 @@ public class DownscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTargetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public void setTargetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
   }
 
-
-  public DownscaleFreeipaResponse operationId(String operationId) {
+  public DownscaleFreeipaResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * UUID of the request for this operation. This ID can be used to get the status of the operation.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -186,9 +187,10 @@ public class DownscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

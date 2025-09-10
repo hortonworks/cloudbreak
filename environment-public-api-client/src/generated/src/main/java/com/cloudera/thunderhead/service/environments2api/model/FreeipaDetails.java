@@ -47,51 +47,61 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeipaDetails.JSON_PROPERTY_LOAD_BALANCER,
   FreeipaDetails.JSON_PROPERTY_IMAGE_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeipaDetails {
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_DOMAIN = "domain";
+  @javax.annotation.Nullable
   private String domain;
 
   public static final String JSON_PROPERTY_HOSTNAME = "hostname";
+  @javax.annotation.Nullable
   private String hostname;
 
   public static final String JSON_PROPERTY_SERVER_I_P = "serverIP";
+  @javax.annotation.Nullable
   private Set<String> serverIP = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
+  @javax.annotation.Nullable
   private List<String> recipes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
+  @javax.annotation.Nullable
   private Set<FreeIpaInstance> instances = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP = "instanceCountByGroup";
+  @javax.annotation.Nullable
   private Integer instanceCountByGroup;
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
+  @javax.annotation.Nullable
   private Boolean multiAz;
 
   public static final String JSON_PROPERTY_LOAD_BALANCER = "loadBalancer";
+  @javax.annotation.Nullable
   private FreeIpaLoadBalancer loadBalancer;
 
   public static final String JSON_PROPERTY_IMAGE_DETAILS = "imageDetails";
+  @javax.annotation.Nullable
   private ImageInfo imageDetails;
 
   public FreeipaDetails() {
   }
 
-  public FreeipaDetails crn(String crn) {
+  public FreeipaDetails crn(@javax.annotation.Nullable String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * CRN of the FreeIPA cluster.
    * @return crn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -103,21 +113,20 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-
-  public FreeipaDetails domain(String domain) {
+  public FreeipaDetails domain(@javax.annotation.Nullable String domain) {
     
     this.domain = domain;
     return this;
   }
 
-   /**
+  /**
    * The domain name of the FreeIPA cluster.
    * @return domain
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DOMAIN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -129,21 +138,20 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_DOMAIN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDomain(String domain) {
+  public void setDomain(@javax.annotation.Nullable String domain) {
     this.domain = domain;
   }
 
-
-  public FreeipaDetails hostname(String hostname) {
+  public FreeipaDetails hostname(@javax.annotation.Nullable String hostname) {
     
     this.hostname = hostname;
     return this;
   }
 
-   /**
+  /**
    * The hostname of the FreeIPA cluster.
    * @return hostname
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -155,12 +163,11 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHostname(String hostname) {
+  public void setHostname(@javax.annotation.Nullable String hostname) {
     this.hostname = hostname;
   }
 
-
-  public FreeipaDetails serverIP(Set<String> serverIP) {
+  public FreeipaDetails serverIP(@javax.annotation.Nullable Set<String> serverIP) {
     
     this.serverIP = serverIP;
     return this;
@@ -174,10 +181,10 @@ public class FreeipaDetails {
     return this;
   }
 
-   /**
+  /**
    * The IP addresses of the FreeIPA cluster.
    * @return serverIP
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVER_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,12 +197,11 @@ public class FreeipaDetails {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SERVER_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServerIP(Set<String> serverIP) {
+  public void setServerIP(@javax.annotation.Nullable Set<String> serverIP) {
     this.serverIP = serverIP;
   }
 
-
-  public FreeipaDetails recipes(List<String> recipes) {
+  public FreeipaDetails recipes(@javax.annotation.Nullable List<String> recipes) {
     
     this.recipes = recipes;
     return this;
@@ -209,10 +215,10 @@ public class FreeipaDetails {
     return this;
   }
 
-   /**
+  /**
    * The recipes for the FreeIPA cluster.
    * @return recipes
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -224,12 +230,11 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRecipes(List<String> recipes) {
+  public void setRecipes(@javax.annotation.Nullable List<String> recipes) {
     this.recipes = recipes;
   }
 
-
-  public FreeipaDetails instances(Set<FreeIpaInstance> instances) {
+  public FreeipaDetails instances(@javax.annotation.Nullable Set<FreeIpaInstance> instances) {
     
     this.instances = instances;
     return this;
@@ -243,10 +248,10 @@ public class FreeipaDetails {
     return this;
   }
 
-   /**
+  /**
    * The instances of the FreeIPA cluster.
    * @return instances
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -259,21 +264,20 @@ public class FreeipaDetails {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstances(Set<FreeIpaInstance> instances) {
+  public void setInstances(@javax.annotation.Nullable Set<FreeIpaInstance> instances) {
     this.instances = instances;
   }
 
-
-  public FreeipaDetails instanceCountByGroup(Integer instanceCountByGroup) {
+  public FreeipaDetails instanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
 
-   /**
+  /**
    * The number of FreeIPA instances to create per group when creating FreeIPA in environment.
    * @return instanceCountByGroup
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -285,21 +289,20 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceCountByGroup(Integer instanceCountByGroup) {
+  public void setInstanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     this.instanceCountByGroup = instanceCountByGroup;
   }
 
-
-  public FreeipaDetails multiAz(Boolean multiAz) {
+  public FreeipaDetails multiAz(@javax.annotation.Nullable Boolean multiAz) {
     
     this.multiAz = multiAz;
     return this;
   }
 
-   /**
+  /**
    * Whether the given FreeIPA is deployed in a multi-availability zone way or not.
    * @return multiAz
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -311,21 +314,20 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMultiAz(Boolean multiAz) {
+  public void setMultiAz(@javax.annotation.Nullable Boolean multiAz) {
     this.multiAz = multiAz;
   }
 
-
-  public FreeipaDetails loadBalancer(FreeIpaLoadBalancer loadBalancer) {
+  public FreeipaDetails loadBalancer(@javax.annotation.Nullable FreeIpaLoadBalancer loadBalancer) {
     
     this.loadBalancer = loadBalancer;
     return this;
   }
 
-   /**
+  /**
    * Get loadBalancer
    * @return loadBalancer
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -337,21 +339,20 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLoadBalancer(FreeIpaLoadBalancer loadBalancer) {
+  public void setLoadBalancer(@javax.annotation.Nullable FreeIpaLoadBalancer loadBalancer) {
     this.loadBalancer = loadBalancer;
   }
 
-
-  public FreeipaDetails imageDetails(ImageInfo imageDetails) {
+  public FreeipaDetails imageDetails(@javax.annotation.Nullable ImageInfo imageDetails) {
     
     this.imageDetails = imageDetails;
     return this;
   }
 
-   /**
+  /**
    * Get imageDetails
    * @return imageDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -363,9 +364,10 @@ public class FreeipaDetails {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageDetails(ImageInfo imageDetails) {
+  public void setImageDetails(@javax.annotation.Nullable ImageInfo imageDetails) {
     this.imageDetails = imageDetails;
   }
+
 
   @Override
   public boolean equals(Object o) {

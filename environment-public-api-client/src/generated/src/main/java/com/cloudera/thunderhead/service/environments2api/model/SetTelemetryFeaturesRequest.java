@@ -32,33 +32,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetTelemetryFeaturesRequest.JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS,
   SetTelemetryFeaturesRequest.JSON_PROPERTY_CLOUD_STORAGE_LOGGING
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetTelemetryFeaturesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
+  @javax.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
+  @javax.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public SetTelemetryFeaturesRequest() {
   }
 
-  public SetTelemetryFeaturesRequest environmentName(String environmentName) {
+  public SetTelemetryFeaturesRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +74,20 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public SetTelemetryFeaturesRequest workloadAnalytics(Boolean workloadAnalytics) {
+  public SetTelemetryFeaturesRequest workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * Flag to enable environment level workload analytics.
    * @return workloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,21 +99,20 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-
-  public SetTelemetryFeaturesRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public SetTelemetryFeaturesRequest reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
 
-   /**
+  /**
    * [Deprecated] Flag to enable environment level deployment log collection.
    * @return reportDeploymentLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -122,21 +124,20 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-
-  public SetTelemetryFeaturesRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+  public SetTelemetryFeaturesRequest cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
 
-   /**
+  /**
    * Flag to enable environment level cloud storage logging (enabled by default).
    * @return cloudStorageLogging
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,9 +149,10 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
+
 
   @Override
   public boolean equals(Object o) {

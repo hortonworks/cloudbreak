@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Error.JSON_PROPERTY_CODE,
   Error.JSON_PROPERTY_MESSAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Error {
   public static final String JSON_PROPERTY_CODE = "code";
+  @javax.annotation.Nullable
   private String code;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nullable
   private String message;
 
   public Error() {
   }
 
-  public Error code(String code) {
+  public Error code(@javax.annotation.Nullable String code) {
     
     this.code = code;
     return this;
   }
 
-   /**
+  /**
    * The error code.
    * @return code
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CODE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class Error {
 
   @JsonProperty(JSON_PROPERTY_CODE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCode(String code) {
+  public void setCode(@javax.annotation.Nullable String code) {
     this.code = code;
   }
 
-
-  public Error message(String message) {
+  public Error message(@javax.annotation.Nullable String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * The error message.
    * @return message
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class Error {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nullable String message) {
     this.message = message;
   }
+
 
   @Override
   public boolean equals(Object o) {

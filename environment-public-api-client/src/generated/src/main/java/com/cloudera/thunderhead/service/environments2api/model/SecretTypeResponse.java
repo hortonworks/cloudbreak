@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SecretTypeResponse.JSON_PROPERTY_SECRET_TYPE,
   SecretTypeResponse.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SecretTypeResponse {
   public static final String JSON_PROPERTY_SECRET_TYPE = "secretType";
+  @javax.annotation.Nullable
   private String secretType;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public SecretTypeResponse() {
   }
 
-  public SecretTypeResponse secretType(String secretType) {
+  public SecretTypeResponse secretType(@javax.annotation.Nullable String secretType) {
     
     this.secretType = secretType;
     return this;
   }
 
-   /**
+  /**
    * The type of secret that can be used with the rotate-freeipa-secrets command.
    * @return secretType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECRET_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class SecretTypeResponse {
 
   @JsonProperty(JSON_PROPERTY_SECRET_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecretType(String secretType) {
+  public void setSecretType(@javax.annotation.Nullable String secretType) {
     this.secretType = secretType;
   }
 
-
-  public SecretTypeResponse description(String description) {
+  public SecretTypeResponse description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * The description of the secret type.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class SecretTypeResponse {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
+
 
   @Override
   public boolean equals(Object o) {

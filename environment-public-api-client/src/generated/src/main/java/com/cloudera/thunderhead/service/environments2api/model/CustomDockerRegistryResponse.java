@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CustomDockerRegistryResponse.JSON_PROPERTY_CRN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CustomDockerRegistryResponse {
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nonnull
   private String crn;
 
   public CustomDockerRegistryResponse() {
   }
 
-  public CustomDockerRegistryResponse crn(String crn) {
+  public CustomDockerRegistryResponse crn(@javax.annotation.Nonnull String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the configured custom docker registry for data services on the environment.
    * @return crn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class CustomDockerRegistryResponse {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nonnull String crn) {
     this.crn = crn;
   }
+
 
   @Override
   public boolean equals(Object o) {

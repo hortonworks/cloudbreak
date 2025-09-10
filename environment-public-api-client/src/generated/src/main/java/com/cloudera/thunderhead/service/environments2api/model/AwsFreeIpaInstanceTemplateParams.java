@@ -30,29 +30,31 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AwsFreeIpaInstanceTemplateParams.JSON_PROPERTY_SPOT_PERCENTAGE,
   AwsFreeIpaInstanceTemplateParams.JSON_PROPERTY_SPOT_MAX_PRICE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AwsFreeIpaInstanceTemplateParams {
   public static final String JSON_PROPERTY_SPOT_PERCENTAGE = "spotPercentage";
+  @javax.annotation.Nullable
   private Integer spotPercentage;
 
   public static final String JSON_PROPERTY_SPOT_MAX_PRICE = "spotMaxPrice";
+  @javax.annotation.Nullable
   private Double spotMaxPrice;
 
   public AwsFreeIpaInstanceTemplateParams() {
   }
 
-  public AwsFreeIpaInstanceTemplateParams spotPercentage(Integer spotPercentage) {
+  public AwsFreeIpaInstanceTemplateParams spotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
     
     this.spotPercentage = spotPercentage;
     return this;
   }
 
-   /**
+  /**
    * Percentage of spot instances.
    * minimum: 0
    * maximum: 100
    * @return spotPercentage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -64,23 +66,22 @@ public class AwsFreeIpaInstanceTemplateParams {
 
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotPercentage(Integer spotPercentage) {
+  public void setSpotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
     this.spotPercentage = spotPercentage;
   }
 
-
-  public AwsFreeIpaInstanceTemplateParams spotMaxPrice(Double spotMaxPrice) {
+  public AwsFreeIpaInstanceTemplateParams spotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
     
     this.spotMaxPrice = spotMaxPrice;
     return this;
   }
 
-   /**
+  /**
    * Maximum hourly price of spot instances.
    * minimum: 0.001
    * maximum: 255
    * @return spotMaxPrice
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,9 +93,10 @@ public class AwsFreeIpaInstanceTemplateParams {
 
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotMaxPrice(Double spotMaxPrice) {
+  public void setSpotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
     this.spotMaxPrice = spotMaxPrice;
   }
+
 
   @Override
   public boolean equals(Object o) {

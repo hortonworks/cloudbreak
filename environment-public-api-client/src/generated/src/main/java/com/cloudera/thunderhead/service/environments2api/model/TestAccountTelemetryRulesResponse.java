@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   TestAccountTelemetryRulesResponse.JSON_PROPERTY_OUTPUT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class TestAccountTelemetryRulesResponse {
   public static final String JSON_PROPERTY_OUTPUT = "output";
+  @javax.annotation.Nullable
   private String output;
 
   public TestAccountTelemetryRulesResponse() {
   }
 
-  public TestAccountTelemetryRulesResponse output(String output) {
+  public TestAccountTelemetryRulesResponse output(@javax.annotation.Nullable String output) {
     
     this.output = output;
     return this;
   }
 
-   /**
+  /**
    * Output text after applying the anonymization rules on the test input.
    * @return output
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class TestAccountTelemetryRulesResponse {
 
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutput(String output) {
+  public void setOutput(@javax.annotation.Nullable String output) {
     this.output = output;
   }
+
 
   @Override
   public boolean equals(Object o) {

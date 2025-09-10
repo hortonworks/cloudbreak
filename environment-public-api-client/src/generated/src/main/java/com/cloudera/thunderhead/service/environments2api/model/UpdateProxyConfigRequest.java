@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateProxyConfigRequest.JSON_PROPERTY_PROXY_CONFIG_NAME,
   UpdateProxyConfigRequest.JSON_PROPERTY_REMOVE_PROXY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateProxyConfigRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
+  @javax.annotation.Nullable
   private String proxyConfigName;
 
   public static final String JSON_PROPERTY_REMOVE_PROXY = "removeProxy";
+  @javax.annotation.Nullable
   private Boolean removeProxy;
 
   public UpdateProxyConfigRequest() {
   }
 
-  public UpdateProxyConfigRequest environment(String environment) {
+  public UpdateProxyConfigRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class UpdateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateProxyConfigRequest proxyConfigName(String proxyConfigName) {
+  public UpdateProxyConfigRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     
     this.proxyConfigName = proxyConfigName;
     return this;
   }
 
-   /**
+  /**
    * The name of the new proxy config for the environment. Either this or the remove proxy flag has to be given.
    * @return proxyConfigName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class UpdateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(String proxyConfigName) {
+  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
-
-  public UpdateProxyConfigRequest removeProxy(Boolean removeProxy) {
+  public UpdateProxyConfigRequest removeProxy(@javax.annotation.Nullable Boolean removeProxy) {
     
     this.removeProxy = removeProxy;
     return this;
   }
 
-   /**
+  /**
    * Flag to indicate that the current proxy config should be removed for the environment. Either this or a proxy config name has to be given.
    * @return removeProxy
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REMOVE_PROXY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class UpdateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_REMOVE_PROXY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRemoveProxy(Boolean removeProxy) {
+  public void setRemoveProxy(@javax.annotation.Nullable Boolean removeProxy) {
     this.removeProxy = removeProxy;
   }
+
 
   @Override
   public boolean equals(Object o) {

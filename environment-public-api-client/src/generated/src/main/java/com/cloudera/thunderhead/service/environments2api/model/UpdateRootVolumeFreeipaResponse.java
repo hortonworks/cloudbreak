@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   UpdateRootVolumeFreeipaResponse.JSON_PROPERTY_RESULT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateRootVolumeFreeipaResponse {
   public static final String JSON_PROPERTY_RESULT = "result";
+  @javax.annotation.Nullable
   private String result;
 
   public UpdateRootVolumeFreeipaResponse() {
   }
 
-  public UpdateRootVolumeFreeipaResponse result(String result) {
+  public UpdateRootVolumeFreeipaResponse result(@javax.annotation.Nullable String result) {
     
     this.result = result;
     return this;
   }
 
-   /**
+  /**
    * The result of the operation.
    * @return result
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class UpdateRootVolumeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResult(String result) {
+  public void setResult(@javax.annotation.Nullable String result) {
     this.result = result;
   }
+
 
   @Override
   public boolean equals(Object o) {

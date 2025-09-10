@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetPasswordRequest.JSON_PROPERTY_PASSWORD,
   SetPasswordRequest.JSON_PROPERTY_ENVIRONMENT_C_R_NS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetPasswordRequest {
   public static final String JSON_PROPERTY_PASSWORD = "password";
+  @javax.annotation.Nonnull
   private String password;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_C_R_NS = "environmentCRNs";
+  @javax.annotation.Nullable
   private List<String> environmentCRNs = new ArrayList<>();
 
   public SetPasswordRequest() {
   }
 
-  public SetPasswordRequest password(String password) {
+  public SetPasswordRequest password(@javax.annotation.Nonnull String password) {
     
     this.password = password;
     return this;
   }
 
-   /**
+  /**
    * password field.
    * @return password
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class SetPasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(String password) {
+  public void setPassword(@javax.annotation.Nonnull String password) {
     this.password = password;
   }
 
-
-  public SetPasswordRequest environmentCRNs(List<String> environmentCRNs) {
+  public SetPasswordRequest environmentCRNs(@javax.annotation.Nullable List<String> environmentCRNs) {
     
     this.environmentCRNs = environmentCRNs;
     return this;
@@ -84,10 +85,10 @@ public class SetPasswordRequest {
     return this;
   }
 
-   /**
+  /**
    * Optional list of environment CRNs. Only the passed environments user&#39;s password will be affected. If this field is not present, all environments will be affected.
    * @return environmentCRNs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_C_R_NS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,9 +100,10 @@ public class SetPasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_C_R_NS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCRNs(List<String> environmentCRNs) {
+  public void setEnvironmentCRNs(@javax.annotation.Nullable List<String> environmentCRNs) {
     this.environmentCRNs = environmentCRNs;
   }
+
 
   @Override
   public boolean equals(Object o) {

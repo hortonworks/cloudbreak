@@ -37,30 +37,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Service.JSON_PROPERTY_ENDPOINTS,
   Service.JSON_PROPERTY_CONFIG
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Service {
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_ENDPOINTS = "endpoints";
+  @javax.annotation.Nullable
   private List<ServiceEndPoint> endpoints = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CONFIG = "config";
+  @javax.annotation.Nullable
   private Map<String, String> config = new HashMap<>();
 
   public Service() {
   }
 
-  public Service type(String type) {
+  public Service type(@javax.annotation.Nullable String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * The type the service represents
    * @return type
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -72,12 +75,11 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nullable String type) {
     this.type = type;
   }
 
-
-  public Service endpoints(List<ServiceEndPoint> endpoints) {
+  public Service endpoints(@javax.annotation.Nullable List<ServiceEndPoint> endpoints) {
     
     this.endpoints = endpoints;
     return this;
@@ -91,10 +93,10 @@ public class Service {
     return this;
   }
 
-   /**
+  /**
    * The endpoints that the service presents
    * @return endpoints
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -106,12 +108,11 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpoints(List<ServiceEndPoint> endpoints) {
+  public void setEndpoints(@javax.annotation.Nullable List<ServiceEndPoint> endpoints) {
     this.endpoints = endpoints;
   }
 
-
-  public Service config(Map<String, String> config) {
+  public Service config(@javax.annotation.Nullable Map<String, String> config) {
     
     this.config = config;
     return this;
@@ -125,10 +126,10 @@ public class Service {
     return this;
   }
 
-   /**
+  /**
    * Configuration key values for a service
    * @return config
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -140,9 +141,10 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfig(Map<String, String> config) {
+  public void setConfig(@javax.annotation.Nullable Map<String, String> config) {
     this.config = config;
   }
+
 
   @Override
   public boolean equals(Object o) {

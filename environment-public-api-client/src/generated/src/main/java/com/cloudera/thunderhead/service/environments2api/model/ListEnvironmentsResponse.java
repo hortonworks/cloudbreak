@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListEnvironmentsResponse.JSON_PROPERTY_ENVIRONMENTS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListEnvironmentsResponse {
   public static final String JSON_PROPERTY_ENVIRONMENTS = "environments";
+  @javax.annotation.Nonnull
   private List<EnvironmentSummary> environments = new ArrayList<>();
 
   public ListEnvironmentsResponse() {
   }
 
-  public ListEnvironmentsResponse environments(List<EnvironmentSummary> environments) {
+  public ListEnvironmentsResponse environments(@javax.annotation.Nonnull List<EnvironmentSummary> environments) {
     
     this.environments = environments;
     return this;
@@ -55,10 +56,10 @@ public class ListEnvironmentsResponse {
     return this;
   }
 
-   /**
+  /**
    * The environment.
    * @return environments
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,9 +71,10 @@ public class ListEnvironmentsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironments(List<EnvironmentSummary> environments) {
+  public void setEnvironments(@javax.annotation.Nonnull List<EnvironmentSummary> environments) {
     this.environments = environments;
   }
+
 
   @Override
   public boolean equals(Object o) {

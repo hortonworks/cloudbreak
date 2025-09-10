@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeipaVmLogRequest.JSON_PROPERTY_PATH,
   FreeipaVmLogRequest.JSON_PROPERTY_LABEL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeipaVmLogRequest {
   public static final String JSON_PROPERTY_PATH = "path";
+  @javax.annotation.Nonnull
   private String path;
 
   public static final String JSON_PROPERTY_LABEL = "label";
+  @javax.annotation.Nonnull
   private String label;
 
   public FreeipaVmLogRequest() {
   }
 
-  public FreeipaVmLogRequest path(String path) {
+  public FreeipaVmLogRequest path(@javax.annotation.Nonnull String path) {
     
     this.path = path;
     return this;
   }
 
-   /**
+  /**
    * Path of the log file(s) that needs to be collected. (Can be glob wildcard)
    * @return path
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class FreeipaVmLogRequest {
 
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPath(String path) {
+  public void setPath(@javax.annotation.Nonnull String path) {
     this.path = path;
   }
 
-
-  public FreeipaVmLogRequest label(String label) {
+  public FreeipaVmLogRequest label(@javax.annotation.Nonnull String label) {
     
     this.label = label;
     return this;
   }
 
-   /**
+  /**
    * Label that will be used to identify a log descriptor. (will be used as a folder inside logs folder)
    * @return label
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class FreeipaVmLogRequest {
 
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setLabel(String label) {
+  public void setLabel(@javax.annotation.Nonnull String label) {
     this.label = label;
   }
+
 
   @Override
   public boolean equals(Object o) {

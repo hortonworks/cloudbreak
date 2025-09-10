@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CdeSummary.JSON_PROPERTY_CDE_SERVICES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdeSummary {
   public static final String JSON_PROPERTY_CDE_SERVICES = "cdeServices";
+  @javax.annotation.Nullable
   private List<CdeService> cdeServices;
 
   public CdeSummary() {
   }
 
-  public CdeSummary cdeServices(List<CdeService> cdeServices) {
+  public CdeSummary cdeServices(@javax.annotation.Nullable List<CdeService> cdeServices) {
     
     this.cdeServices = cdeServices;
     return this;
@@ -55,10 +56,10 @@ public class CdeSummary {
     return this;
   }
 
-   /**
+  /**
    * The list of CDE services associated with the environment.
    * @return cdeServices
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDE_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class CdeSummary {
 
   @JsonProperty(JSON_PROPERTY_CDE_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdeServices(List<CdeService> cdeServices) {
+  public void setCdeServices(@javax.annotation.Nullable List<CdeService> cdeServices) {
     this.cdeServices = cdeServices;
   }
+
 
   @Override
   public boolean equals(Object o) {

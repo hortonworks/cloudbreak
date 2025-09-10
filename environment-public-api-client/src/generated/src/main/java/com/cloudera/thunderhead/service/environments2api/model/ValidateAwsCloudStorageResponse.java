@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ValidateAwsCloudStorageResponse.JSON_PROPERTY_STATUS,
   ValidateAwsCloudStorageResponse.JSON_PROPERTY_ERROR
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ValidateAwsCloudStorageResponse {
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_ERROR = "error";
+  @javax.annotation.Nullable
   private String error;
 
   public ValidateAwsCloudStorageResponse() {
   }
 
-  public ValidateAwsCloudStorageResponse status(String status) {
+  public ValidateAwsCloudStorageResponse status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Validation result. Allowed values are \&quot;OK\&quot;, \&quot;ACCESS_DENIED\&quot;, \&quot;ERROR\&quot;, \&quot;RESOURCE_NOT_FOUND\&quot;.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class ValidateAwsCloudStorageResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public ValidateAwsCloudStorageResponse error(String error) {
+  public ValidateAwsCloudStorageResponse error(@javax.annotation.Nullable String error) {
     
     this.error = error;
     return this;
   }
 
-   /**
+  /**
    * Error message if validation failed.
    * @return error
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class ValidateAwsCloudStorageResponse {
 
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(String error) {
+  public void setError(@javax.annotation.Nullable String error) {
     this.error = error;
   }
+
 
   @Override
   public boolean equals(Object o) {

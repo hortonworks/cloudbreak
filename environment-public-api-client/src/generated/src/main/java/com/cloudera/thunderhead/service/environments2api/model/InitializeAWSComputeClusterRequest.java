@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   InitializeAWSComputeClusterRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   InitializeAWSComputeClusterRequest.JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class InitializeAWSComputeClusterRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
+  @javax.annotation.Nullable
   private AWSComputeClusterConfigurationRequest computeClusterConfiguration;
 
   public InitializeAWSComputeClusterRequest() {
   }
 
-  public InitializeAWSComputeClusterRequest environmentName(String environmentName) {
+  public InitializeAWSComputeClusterRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -63,21 +65,20 @@ public class InitializeAWSComputeClusterRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public InitializeAWSComputeClusterRequest computeClusterConfiguration(AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public InitializeAWSComputeClusterRequest computeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
 
-   /**
+  /**
    * Get computeClusterConfiguration
    * @return computeClusterConfiguration
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class InitializeAWSComputeClusterRequest {
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterConfiguration(AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public void setComputeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
   }
+
 
   @Override
   public boolean equals(Object o) {

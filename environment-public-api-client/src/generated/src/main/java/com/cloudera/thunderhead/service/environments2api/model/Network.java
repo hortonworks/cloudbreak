@@ -51,21 +51,23 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Network.JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION,
   Network.JSON_PROPERTY_ENABLE_LOAD_BALANCERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Network {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
+  @javax.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
+  @javax.annotation.Nonnull
   private Set<String> subnetIds = new LinkedHashSet<>();
 
   /**
    * The scheme for the endpoint gateway. PUBLIC indicates an external endpoint that can be accessed over the Internet.
    */
   public enum EndpointAccessGatewaySchemeEnum {
-    PUBLIC("PUBLIC"),
+    PUBLIC(String.valueOf("PUBLIC")),
     
-    PRIVATE("PRIVATE");
+    PRIVATE(String.valueOf("PRIVATE"));
 
     private String value;
 
@@ -95,51 +97,62 @@ public class Network {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
+  @javax.annotation.Nullable
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
+  @javax.annotation.Nullable
   private Set<String> endpointAccessGatewaySubnetIds = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_AWS = "aws";
+  @javax.annotation.Nullable
   private NetworkAwsParams aws;
 
   public static final String JSON_PROPERTY_AZURE = "azure";
+  @javax.annotation.Nullable
   private NetworkAzureParams azure;
 
   public static final String JSON_PROPERTY_GCP = "gcp";
+  @javax.annotation.Nullable
   private NetworkGcpParams gcp;
 
   public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
+  @javax.annotation.Nullable
   private String networkCidr;
 
   public static final String JSON_PROPERTY_DWX_SUBNETS = "dwxSubnets";
+  @javax.annotation.Nullable
   private Map<String, CloudSubnet> dwxSubnets = new HashMap<>();
 
   public static final String JSON_PROPERTY_LIFTIE_SUBNETS = "liftieSubnets";
+  @javax.annotation.Nullable
   private Map<String, CloudSubnet> liftieSubnets = new HashMap<>();
 
   public static final String JSON_PROPERTY_SUBNET_METADATA = "subnetMetadata";
+  @javax.annotation.Nullable
   private Map<String, CloudSubnet> subnetMetadata = new HashMap<>();
 
   public static final String JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION = "serviceEndpointsCreation";
+  @javax.annotation.Nullable
   private ServiceEndpointsCreation serviceEndpointsCreation;
 
   public static final String JSON_PROPERTY_ENABLE_LOAD_BALANCERS = "enableLoadBalancers";
+  @javax.annotation.Nullable
   private Boolean enableLoadBalancers;
 
   public Network() {
   }
 
-  public Network networkName(String networkName) {
+  public Network networkName(@javax.annotation.Nonnull String networkName) {
     
     this.networkName = networkName;
     return this;
   }
 
-   /**
+  /**
    * Name or id of the network
    * @return networkName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -151,12 +164,11 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(String networkName) {
+  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-
-  public Network subnetIds(Set<String> subnetIds) {
+  public Network subnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
     
     this.subnetIds = subnetIds;
     return this;
@@ -170,10 +182,10 @@ public class Network {
     return this;
   }
 
-   /**
+  /**
    * Subnet names or ids of the network.
    * @return subnetIds
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -186,21 +198,20 @@ public class Network {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubnetIds(Set<String> subnetIds) {
+  public void setSubnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
     this.subnetIds = subnetIds;
   }
 
-
-  public Network endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public Network endpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
 
-   /**
+  /**
    * The scheme for the endpoint gateway. PUBLIC indicates an external endpoint that can be accessed over the Internet.
    * @return endpointAccessGatewayScheme
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -212,12 +223,11 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-
-  public Network endpointAccessGatewaySubnetIds(Set<String> endpointAccessGatewaySubnetIds) {
+  public Network endpointAccessGatewaySubnetIds(@javax.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
     
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
@@ -231,10 +241,10 @@ public class Network {
     return this;
   }
 
-   /**
+  /**
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -247,21 +257,20 @@ public class Network {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(Set<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
-
-  public Network aws(NetworkAwsParams aws) {
+  public Network aws(@javax.annotation.Nullable NetworkAwsParams aws) {
     
     this.aws = aws;
     return this;
   }
 
-   /**
+  /**
    * Get aws
    * @return aws
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -273,21 +282,20 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(NetworkAwsParams aws) {
+  public void setAws(@javax.annotation.Nullable NetworkAwsParams aws) {
     this.aws = aws;
   }
 
-
-  public Network azure(NetworkAzureParams azure) {
+  public Network azure(@javax.annotation.Nullable NetworkAzureParams azure) {
     
     this.azure = azure;
     return this;
   }
 
-   /**
+  /**
    * Get azure
    * @return azure
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -299,21 +307,20 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(NetworkAzureParams azure) {
+  public void setAzure(@javax.annotation.Nullable NetworkAzureParams azure) {
     this.azure = azure;
   }
 
-
-  public Network gcp(NetworkGcpParams gcp) {
+  public Network gcp(@javax.annotation.Nullable NetworkGcpParams gcp) {
     
     this.gcp = gcp;
     return this;
   }
 
-   /**
+  /**
    * Get gcp
    * @return gcp
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -325,21 +332,20 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(NetworkGcpParams gcp) {
+  public void setGcp(@javax.annotation.Nullable NetworkGcpParams gcp) {
     this.gcp = gcp;
   }
 
-
-  public Network networkCidr(String networkCidr) {
+  public Network networkCidr(@javax.annotation.Nullable String networkCidr) {
     
     this.networkCidr = networkCidr;
     return this;
   }
 
-   /**
+  /**
    * The range of private IPv4 addresses that resources will use under this network.
    * @return networkCidr
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -351,12 +357,11 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkCidr(String networkCidr) {
+  public void setNetworkCidr(@javax.annotation.Nullable String networkCidr) {
     this.networkCidr = networkCidr;
   }
 
-
-  public Network dwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+  public Network dwxSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
     
     this.dwxSubnets = dwxSubnets;
     return this;
@@ -370,10 +375,10 @@ public class Network {
     return this;
   }
 
-   /**
+  /**
    * DWX subnet parameters.
    * @return dwxSubnets
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DWX_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -385,12 +390,11 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_DWX_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+  public void setDwxSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
     this.dwxSubnets = dwxSubnets;
   }
 
-
-  public Network liftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+  public Network liftieSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
     
     this.liftieSubnets = liftieSubnets;
     return this;
@@ -404,10 +408,10 @@ public class Network {
     return this;
   }
 
-   /**
+  /**
    * Subnet parameters for experiences that managed by Liftie.
    * @return liftieSubnets
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LIFTIE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -419,12 +423,11 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_LIFTIE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+  public void setLiftieSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
     this.liftieSubnets = liftieSubnets;
   }
 
-
-  public Network subnetMetadata(Map<String, CloudSubnet> subnetMetadata) {
+  public Network subnetMetadata(@javax.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
     
     this.subnetMetadata = subnetMetadata;
     return this;
@@ -438,10 +441,10 @@ public class Network {
     return this;
   }
 
-   /**
+  /**
    * Additional subnet metadata of the network.
    * @return subnetMetadata
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -453,21 +456,20 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetMetadata(Map<String, CloudSubnet> subnetMetadata) {
+  public void setSubnetMetadata(@javax.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
     this.subnetMetadata = subnetMetadata;
   }
 
-
-  public Network serviceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
+  public Network serviceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     
     this.serviceEndpointsCreation = serviceEndpointsCreation;
     return this;
   }
 
-   /**
+  /**
    * Get serviceEndpointsCreation
    * @return serviceEndpointsCreation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -479,21 +481,20 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
+  public void setServiceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
   }
 
-
-  public Network enableLoadBalancers(Boolean enableLoadBalancers) {
+  public Network enableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
     
     this.enableLoadBalancers = enableLoadBalancers;
     return this;
   }
 
-   /**
+  /**
    * The load balancer creation mode for all Data Lakes and Data Hubs in the environment. This will override the load balancer creation mode at the cluster level.
    * @return enableLoadBalancers
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -505,9 +506,10 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableLoadBalancers(Boolean enableLoadBalancers) {
+  public void setEnableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
     this.enableLoadBalancers = enableLoadBalancers;
   }
+
 
   @Override
   public boolean equals(Object o) {

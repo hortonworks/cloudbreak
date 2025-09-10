@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeipaVmLogResponse.JSON_PROPERTY_PATH,
   FreeipaVmLogResponse.JSON_PROPERTY_LABEL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeipaVmLogResponse {
   public static final String JSON_PROPERTY_PATH = "path";
+  @javax.annotation.Nullable
   private String path;
 
   public static final String JSON_PROPERTY_LABEL = "label";
+  @javax.annotation.Nullable
   private String label;
 
   public FreeipaVmLogResponse() {
   }
 
-  public FreeipaVmLogResponse path(String path) {
+  public FreeipaVmLogResponse path(@javax.annotation.Nullable String path) {
     
     this.path = path;
     return this;
   }
 
-   /**
+  /**
    * Path of the log file(s) that needs to be collected. (Can be glob wildcard)
    * @return path
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class FreeipaVmLogResponse {
 
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPath(String path) {
+  public void setPath(@javax.annotation.Nullable String path) {
     this.path = path;
   }
 
-
-  public FreeipaVmLogResponse label(String label) {
+  public FreeipaVmLogResponse label(@javax.annotation.Nullable String label) {
     
     this.label = label;
     return this;
   }
 
-   /**
+  /**
    * Label that will be used to identify a log descriptor. (will be used as a folder inside logs folder)
    * @return label
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class FreeipaVmLogResponse {
 
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLabel(String label) {
+  public void setLabel(@javax.annotation.Nullable String label) {
     this.label = label;
   }
+
 
   @Override
   public boolean equals(Object o) {

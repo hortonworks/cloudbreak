@@ -35,33 +35,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Warehouse.JSON_PROPERTY_SERVICES,
   Warehouse.JSON_PROPERTY_DEFAULT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Warehouse {
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
+  @javax.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_SERVICES = "services";
+  @javax.annotation.Nullable
   private Map<String, WarehouseService> services = new HashMap<>();
 
   public static final String JSON_PROPERTY_DEFAULT = "default";
+  @javax.annotation.Nullable
   private Boolean _default;
 
   public Warehouse() {
   }
 
-  public Warehouse id(String id) {
+  public Warehouse id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * id
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -73,21 +77,20 @@ public class Warehouse {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public Warehouse displayName(String displayName) {
+  public Warehouse displayName(@javax.annotation.Nullable String displayName) {
     
     this.displayName = displayName;
     return this;
   }
 
-   /**
+  /**
    * displayName
    * @return displayName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,12 +102,11 @@ public class Warehouse {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(String displayName) {
+  public void setDisplayName(@javax.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-
-  public Warehouse services(Map<String, WarehouseService> services) {
+  public Warehouse services(@javax.annotation.Nullable Map<String, WarehouseService> services) {
     
     this.services = services;
     return this;
@@ -118,10 +120,10 @@ public class Warehouse {
     return this;
   }
 
-   /**
+  /**
    * The services that make up the warehouse
    * @return services
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -133,21 +135,20 @@ public class Warehouse {
 
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServices(Map<String, WarehouseService> services) {
+  public void setServices(@javax.annotation.Nullable Map<String, WarehouseService> services) {
     this.services = services;
   }
 
-
-  public Warehouse _default(Boolean _default) {
+  public Warehouse _default(@javax.annotation.Nullable Boolean _default) {
     
     this._default = _default;
     return this;
   }
 
-   /**
+  /**
    * Is this the default warehouse.
    * @return _default
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -159,9 +160,10 @@ public class Warehouse {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefault(Boolean _default) {
+  public void setDefault(@javax.annotation.Nullable Boolean _default) {
     this._default = _default;
   }
+
 
   @Override
   public boolean equals(Object o) {

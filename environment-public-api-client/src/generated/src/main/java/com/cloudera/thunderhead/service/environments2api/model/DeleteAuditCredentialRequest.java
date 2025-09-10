@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DeleteAuditCredentialRequest.JSON_PROPERTY_CREDENTIAL_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DeleteAuditCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public DeleteAuditCredentialRequest() {
   }
 
-  public DeleteAuditCredentialRequest credentialName(String credentialName) {
+  public DeleteAuditCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the credential.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class DeleteAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   StartEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   StartEnvironmentRequest.JSON_PROPERTY_WITH_DATAHUB_START
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class StartEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_WITH_DATAHUB_START = "withDatahubStart";
+  @javax.annotation.Nullable
   private Boolean withDatahubStart;
 
   public StartEnvironmentRequest() {
   }
 
-  public StartEnvironmentRequest environmentName(String environmentName) {
+  public StartEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class StartEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public StartEnvironmentRequest withDatahubStart(Boolean withDatahubStart) {
+  public StartEnvironmentRequest withDatahubStart(@javax.annotation.Nullable Boolean withDatahubStart) {
     
     this.withDatahubStart = withDatahubStart;
     return this;
   }
 
-   /**
+  /**
    * Whether the Data Hub clusters should start or not at the environment (re-)start
    * @return withDatahubStart
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WITH_DATAHUB_START)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class StartEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_WITH_DATAHUB_START)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWithDatahubStart(Boolean withDatahubStart) {
+  public void setWithDatahubStart(@javax.annotation.Nullable Boolean withDatahubStart) {
     this.withDatahubStart = withDatahubStart;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -36,36 +36,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SecurityAccessRequest.JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX,
   SecurityAccessRequest.JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SecurityAccessRequest {
   public static final String JSON_PROPERTY_CIDR = "cidr";
+  @javax.annotation.Nullable
   private String cidr;
 
   public static final String JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX = "securityGroupIdForKnox";
+  @javax.annotation.Nullable
   private String securityGroupIdForKnox;
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
+  @javax.annotation.Nullable
   private String defaultSecurityGroupId;
 
   public static final String JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX = "securityGroupIDsForKnox";
+  @javax.annotation.Nullable
   private Set<String> securityGroupIDsForKnox = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS = "defaultSecurityGroupIDs";
+  @javax.annotation.Nullable
   private Set<String> defaultSecurityGroupIDs = new LinkedHashSet<>();
 
   public SecurityAccessRequest() {
   }
 
-  public SecurityAccessRequest cidr(String cidr) {
+  public SecurityAccessRequest cidr(@javax.annotation.Nullable String cidr) {
     
     this.cidr = cidr;
     return this;
   }
 
-   /**
+  /**
    * CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.
    * @return cidr
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -77,21 +82,20 @@ public class SecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCidr(String cidr) {
+  public void setCidr(@javax.annotation.Nullable String cidr) {
     this.cidr = cidr;
   }
 
-
-  public SecurityAccessRequest securityGroupIdForKnox(String securityGroupIdForKnox) {
+  public SecurityAccessRequest securityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
     
     this.securityGroupIdForKnox = securityGroupIdForKnox;
     return this;
   }
 
-   /**
+  /**
    * Security group where Knox-enabled hosts are placed. Mutually exclusive with cidr.
    * @return securityGroupIdForKnox
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -103,21 +107,20 @@ public class SecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityGroupIdForKnox(String securityGroupIdForKnox) {
+  public void setSecurityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
     this.securityGroupIdForKnox = securityGroupIdForKnox;
   }
 
-
-  public SecurityAccessRequest defaultSecurityGroupId(String defaultSecurityGroupId) {
+  public SecurityAccessRequest defaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
     
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
 
-   /**
+  /**
    * Security group where all other hosts are placed. Mutually exclusive with cidr.
    * @return defaultSecurityGroupId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -129,12 +132,11 @@ public class SecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultSecurityGroupId(String defaultSecurityGroupId) {
+  public void setDefaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
 
-
-  public SecurityAccessRequest securityGroupIDsForKnox(Set<String> securityGroupIDsForKnox) {
+  public SecurityAccessRequest securityGroupIDsForKnox(@javax.annotation.Nullable Set<String> securityGroupIDsForKnox) {
     
     this.securityGroupIDsForKnox = securityGroupIDsForKnox;
     return this;
@@ -148,10 +150,10 @@ public class SecurityAccessRequest {
     return this;
   }
 
-   /**
+  /**
    * Security group IDs where Knox-enabled hosts are placed. Mutually exclusive with CIDR.
    * @return securityGroupIDsForKnox
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -164,12 +166,11 @@ public class SecurityAccessRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityGroupIDsForKnox(Set<String> securityGroupIDsForKnox) {
+  public void setSecurityGroupIDsForKnox(@javax.annotation.Nullable Set<String> securityGroupIDsForKnox) {
     this.securityGroupIDsForKnox = securityGroupIDsForKnox;
   }
 
-
-  public SecurityAccessRequest defaultSecurityGroupIDs(Set<String> defaultSecurityGroupIDs) {
+  public SecurityAccessRequest defaultSecurityGroupIDs(@javax.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
     
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
     return this;
@@ -183,10 +184,10 @@ public class SecurityAccessRequest {
     return this;
   }
 
-   /**
+  /**
    * Security group IDs where all other hosts are placed. Mutually exclusive with CIDR.
    * @return defaultSecurityGroupIDs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -199,9 +200,10 @@ public class SecurityAccessRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultSecurityGroupIDs(Set<String> defaultSecurityGroupIDs) {
+  public void setDefaultSecurityGroupIDs(@javax.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
   }
+
 
   @Override
   public boolean equals(Object o) {

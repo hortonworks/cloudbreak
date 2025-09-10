@@ -32,30 +32,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetCliForEnvironmentRequest.JSON_PROPERTY_COMMAND_REQUEST_INPUT,
   GetCliForEnvironmentRequest.JSON_PROPERTY_COMMAND_RESPONSE_INPUT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetCliForEnvironmentRequest {
   public static final String JSON_PROPERTY_COMMAND_CLOUD_PROVIDER = "commandCloudProvider";
+  @javax.annotation.Nullable
   private CloudProviderType commandCloudProvider;
 
   public static final String JSON_PROPERTY_COMMAND_REQUEST_INPUT = "commandRequestInput";
+  @javax.annotation.Nullable
   private String commandRequestInput;
 
   public static final String JSON_PROPERTY_COMMAND_RESPONSE_INPUT = "commandResponseInput";
+  @javax.annotation.Nullable
   private String commandResponseInput;
 
   public GetCliForEnvironmentRequest() {
   }
 
-  public GetCliForEnvironmentRequest commandCloudProvider(CloudProviderType commandCloudProvider) {
+  public GetCliForEnvironmentRequest commandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
     
     this.commandCloudProvider = commandCloudProvider;
     return this;
   }
 
-   /**
+  /**
    * Get commandCloudProvider
    * @return commandCloudProvider
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -67,21 +70,20 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandCloudProvider(CloudProviderType commandCloudProvider) {
+  public void setCommandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
     this.commandCloudProvider = commandCloudProvider;
   }
 
-
-  public GetCliForEnvironmentRequest commandRequestInput(String commandRequestInput) {
+  public GetCliForEnvironmentRequest commandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     
     this.commandRequestInput = commandRequestInput;
     return this;
   }
 
-   /**
+  /**
    * cloudbreak environment request object of the private API, encoded in base64
    * @return commandRequestInput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,21 +95,20 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandRequestInput(String commandRequestInput) {
+  public void setCommandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
     this.commandRequestInput = commandRequestInput;
   }
 
-
-  public GetCliForEnvironmentRequest commandResponseInput(String commandResponseInput) {
+  public GetCliForEnvironmentRequest commandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
     
     this.commandResponseInput = commandResponseInput;
     return this;
   }
 
-   /**
+  /**
    * cloudbreak environment response object of the private API, encoded in base64
    * @return commandResponseInput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -119,9 +120,10 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandResponseInput(String commandResponseInput) {
+  public void setCommandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
     this.commandResponseInput = commandResponseInput;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -34,30 +34,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeEnvironmentServicesResponse.JSON_PROPERTY_LASTUPDATED,
   DescribeEnvironmentServicesResponse.JSON_PROPERTY_APPLICATIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeEnvironmentServicesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_LASTUPDATED = "lastupdated";
+  @javax.annotation.Nullable
   private Long lastupdated;
 
   public static final String JSON_PROPERTY_APPLICATIONS = "applications";
+  @javax.annotation.Nullable
   private Map<String, Application> applications = new HashMap<>();
 
   public DescribeEnvironmentServicesResponse() {
   }
 
-  public DescribeEnvironmentServicesResponse environmentCrn(String environmentCrn) {
+  public DescribeEnvironmentServicesResponse environmentCrn(@javax.annotation.Nullable String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The environment CRN for the services described
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -69,21 +72,20 @@ public class DescribeEnvironmentServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public DescribeEnvironmentServicesResponse lastupdated(Long lastupdated) {
+  public DescribeEnvironmentServicesResponse lastupdated(@javax.annotation.Nullable Long lastupdated) {
     
     this.lastupdated = lastupdated;
     return this;
   }
 
-   /**
+  /**
    * The number of milliseconds since the last update
    * @return lastupdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LASTUPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -95,12 +97,11 @@ public class DescribeEnvironmentServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_LASTUPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastupdated(Long lastupdated) {
+  public void setLastupdated(@javax.annotation.Nullable Long lastupdated) {
     this.lastupdated = lastupdated;
   }
 
-
-  public DescribeEnvironmentServicesResponse applications(Map<String, Application> applications) {
+  public DescribeEnvironmentServicesResponse applications(@javax.annotation.Nullable Map<String, Application> applications) {
     
     this.applications = applications;
     return this;
@@ -114,10 +115,10 @@ public class DescribeEnvironmentServicesResponse {
     return this;
   }
 
-   /**
+  /**
    * A map of applications that provide services for the Environment
    * @return applications
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -129,9 +130,10 @@ public class DescribeEnvironmentServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setApplications(Map<String, Application> applications) {
+  public void setApplications(@javax.annotation.Nullable Map<String, Application> applications) {
     this.applications = applications;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -36,22 +36,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CheckEnvironmentConnectivityRequest.JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE,
   CheckEnvironmentConnectivityRequest.JSON_PROPERTY_CLUSTER_NAMES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckEnvironmentConnectivityRequest {
   public static final String JSON_PROPERTY_ADDRESS = "address";
+  @javax.annotation.Nonnull
   private String address;
 
   public static final String JSON_PROPERTY_USER = "user";
+  @javax.annotation.Nonnull
   private String user;
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN = "authenticationToken";
+  @javax.annotation.Nonnull
   private String authenticationToken;
 
   /**
    * How to interpret the authenticationToken field. Defaults to CLEARTEXT_PASSWORD.
    */
   public enum AuthenticationTokenTypeEnum {
-    CLEARTEXT_PASSWORD("CLEARTEXT_PASSWORD");
+    CLEARTEXT_PASSWORD(String.valueOf("CLEARTEXT_PASSWORD"));
 
     private String value;
 
@@ -81,24 +84,26 @@ public class CheckEnvironmentConnectivityRequest {
   }
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE = "authenticationTokenType";
+  @javax.annotation.Nullable
   private AuthenticationTokenTypeEnum authenticationTokenType;
 
   public static final String JSON_PROPERTY_CLUSTER_NAMES = "clusterNames";
+  @javax.annotation.Nullable
   private List<String> clusterNames = new ArrayList<>();
 
   public CheckEnvironmentConnectivityRequest() {
   }
 
-  public CheckEnvironmentConnectivityRequest address(String address) {
+  public CheckEnvironmentConnectivityRequest address(@javax.annotation.Nonnull String address) {
     
     this.address = address;
     return this;
   }
 
-   /**
+  /**
    * The address of the Cloudera Manager managing the Datalake cluster.
    * @return address
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -110,21 +115,20 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAddress(String address) {
+  public void setAddress(@javax.annotation.Nonnull String address) {
     this.address = address;
   }
 
-
-  public CheckEnvironmentConnectivityRequest user(String user) {
+  public CheckEnvironmentConnectivityRequest user(@javax.annotation.Nonnull String user) {
     
     this.user = user;
     return this;
   }
 
-   /**
+  /**
    * User name for accessing the Cloudera Manager.
    * @return user
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -136,21 +140,20 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUser(String user) {
+  public void setUser(@javax.annotation.Nonnull String user) {
     this.user = user;
   }
 
-
-  public CheckEnvironmentConnectivityRequest authenticationToken(String authenticationToken) {
+  public CheckEnvironmentConnectivityRequest authenticationToken(@javax.annotation.Nonnull String authenticationToken) {
     
     this.authenticationToken = authenticationToken;
     return this;
   }
 
-   /**
+  /**
    * A string (text or json) used to authenticate to the Cloudera Manager.
    * @return authenticationToken
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -162,21 +165,20 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthenticationToken(String authenticationToken) {
+  public void setAuthenticationToken(@javax.annotation.Nonnull String authenticationToken) {
     this.authenticationToken = authenticationToken;
   }
 
-
-  public CheckEnvironmentConnectivityRequest authenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+  public CheckEnvironmentConnectivityRequest authenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     
     this.authenticationTokenType = authenticationTokenType;
     return this;
   }
 
-   /**
+  /**
    * How to interpret the authenticationToken field. Defaults to CLEARTEXT_PASSWORD.
    * @return authenticationTokenType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -188,12 +190,11 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+  public void setAuthenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     this.authenticationTokenType = authenticationTokenType;
   }
 
-
-  public CheckEnvironmentConnectivityRequest clusterNames(List<String> clusterNames) {
+  public CheckEnvironmentConnectivityRequest clusterNames(@javax.annotation.Nullable List<String> clusterNames) {
     
     this.clusterNames = clusterNames;
     return this;
@@ -207,10 +208,10 @@ public class CheckEnvironmentConnectivityRequest {
     return this;
   }
 
-   /**
+  /**
    * The name of the cluster(s) to use as a Datalake for the environment.
    * @return clusterNames
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -222,9 +223,10 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterNames(List<String> clusterNames) {
+  public void setClusterNames(@javax.annotation.Nullable List<String> clusterNames) {
     this.clusterNames = clusterNames;
   }
+
 
   @Override
   public boolean equals(Object o) {

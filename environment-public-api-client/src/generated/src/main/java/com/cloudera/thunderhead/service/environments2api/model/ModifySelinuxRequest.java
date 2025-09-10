@@ -30,18 +30,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ModifySelinuxRequest.JSON_PROPERTY_ENVIRONMENT,
   ModifySelinuxRequest.JSON_PROPERTY_SELINUX
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ModifySelinuxRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   /**
    * SELinux Mode.
    */
   public enum SelinuxEnum {
-    ENFORCING("ENFORCING"),
+    ENFORCING(String.valueOf("ENFORCING")),
     
-    PERMISSIVE("PERMISSIVE");
+    PERMISSIVE(String.valueOf("PERMISSIVE"));
 
     private String value;
 
@@ -71,21 +72,22 @@ public class ModifySelinuxRequest {
   }
 
   public static final String JSON_PROPERTY_SELINUX = "selinux";
+  @javax.annotation.Nonnull
   private SelinuxEnum selinux;
 
   public ModifySelinuxRequest() {
   }
 
-  public ModifySelinuxRequest environment(String environment) {
+  public ModifySelinuxRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The Environment CRN.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +99,20 @@ public class ModifySelinuxRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public ModifySelinuxRequest selinux(SelinuxEnum selinux) {
+  public ModifySelinuxRequest selinux(@javax.annotation.Nonnull SelinuxEnum selinux) {
     
     this.selinux = selinux;
     return this;
   }
 
-   /**
+  /**
    * SELinux Mode.
    * @return selinux
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SELINUX)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -123,9 +124,10 @@ public class ModifySelinuxRequest {
 
   @JsonProperty(JSON_PROPERTY_SELINUX)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSelinux(SelinuxEnum selinux) {
+  public void setSelinux(@javax.annotation.Nonnull SelinuxEnum selinux) {
     this.selinux = selinux;
   }
+
 
   @Override
   public boolean equals(Object o) {

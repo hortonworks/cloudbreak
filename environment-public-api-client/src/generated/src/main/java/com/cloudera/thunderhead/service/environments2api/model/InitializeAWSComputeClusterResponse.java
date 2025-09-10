@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   InitializeAWSComputeClusterResponse.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class InitializeAWSComputeClusterResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public InitializeAWSComputeClusterResponse() {
   }
 
-  public InitializeAWSComputeClusterResponse operationId(String operationId) {
+  public InitializeAWSComputeClusterResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * The id of the related operation.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class InitializeAWSComputeClusterResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

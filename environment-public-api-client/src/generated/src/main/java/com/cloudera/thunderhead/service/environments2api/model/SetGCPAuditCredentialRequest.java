@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   SetGCPAuditCredentialRequest.JSON_PROPERTY_CREDENTIAL_KEY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetGCPAuditCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_KEY = "credentialKey";
+  @javax.annotation.Nonnull
   private String credentialKey;
 
   public SetGCPAuditCredentialRequest() {
   }
 
-  public SetGCPAuditCredentialRequest credentialKey(String credentialKey) {
+  public SetGCPAuditCredentialRequest credentialKey(@javax.annotation.Nonnull String credentialKey) {
     
     this.credentialKey = credentialKey;
     return this;
   }
 
-   /**
+  /**
    * The JSON key for the service account. Please use the local path when using the CLI (e.g. file:///absolute/path/to/cred.json) to avoid exposing the keys in the command line history.
    * @return credentialKey
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class SetGCPAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialKey(String credentialKey) {
+  public void setCredentialKey(@javax.annotation.Nonnull String credentialKey) {
     this.credentialKey = credentialKey;
   }
+
 
   @Override
   public boolean equals(Object o) {

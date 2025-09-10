@@ -34,27 +34,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   WarehouseService.JSON_PROPERTY_TYPE,
   WarehouseService.JSON_PROPERTY_ENDPOINTS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class WarehouseService {
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_ENDPOINTS = "endpoints";
+  @javax.annotation.Nullable
   private List<Endpoint> endpoints = new ArrayList<>();
 
   public WarehouseService() {
   }
 
-  public WarehouseService type(String type) {
+  public WarehouseService type(@javax.annotation.Nullable String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * The service type
    * @return type
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,12 +68,11 @@ public class WarehouseService {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nullable String type) {
     this.type = type;
   }
 
-
-  public WarehouseService endpoints(List<Endpoint> endpoints) {
+  public WarehouseService endpoints(@javax.annotation.Nullable List<Endpoint> endpoints) {
     
     this.endpoints = endpoints;
     return this;
@@ -85,10 +86,10 @@ public class WarehouseService {
     return this;
   }
 
-   /**
+  /**
    * The endpoints for service
    * @return endpoints
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,9 +101,10 @@ public class WarehouseService {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpoints(List<Endpoint> endpoints) {
+  public void setEndpoints(@javax.annotation.Nullable List<Endpoint> endpoints) {
     this.endpoints = endpoints;
   }
+
 
   @Override
   public boolean equals(Object o) {

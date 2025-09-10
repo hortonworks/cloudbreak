@@ -32,30 +32,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetAzureAuditCredentialRequest.JSON_PROPERTY_TENANT_ID,
   SetAzureAuditCredentialRequest.JSON_PROPERTY_APP_BASED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetAzureAuditCredentialRequest {
   public static final String JSON_PROPERTY_SUBSCRIPTION_ID = "subscriptionId";
+  @javax.annotation.Nonnull
   private String subscriptionId;
 
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
+  @javax.annotation.Nonnull
   private String tenantId;
 
   public static final String JSON_PROPERTY_APP_BASED = "appBased";
+  @javax.annotation.Nonnull
   private SetAzureAuditCredentialRequestAppBased appBased;
 
   public SetAzureAuditCredentialRequest() {
   }
 
-  public SetAzureAuditCredentialRequest subscriptionId(String subscriptionId) {
+  public SetAzureAuditCredentialRequest subscriptionId(@javax.annotation.Nonnull String subscriptionId) {
     
     this.subscriptionId = subscriptionId;
     return this;
   }
 
-   /**
+  /**
    * The Azure subscription ID.
    * @return subscriptionId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -67,21 +70,20 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubscriptionId(String subscriptionId) {
+  public void setSubscriptionId(@javax.annotation.Nonnull String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
-
-  public SetAzureAuditCredentialRequest tenantId(String tenantId) {
+  public SetAzureAuditCredentialRequest tenantId(@javax.annotation.Nonnull String tenantId) {
     
     this.tenantId = tenantId;
     return this;
   }
 
-   /**
+  /**
    * The Azure AD tenant ID for the Azure subscription.
    * @return tenantId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -93,21 +95,20 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTenantId(String tenantId) {
+  public void setTenantId(@javax.annotation.Nonnull String tenantId) {
     this.tenantId = tenantId;
   }
 
-
-  public SetAzureAuditCredentialRequest appBased(SetAzureAuditCredentialRequestAppBased appBased) {
+  public SetAzureAuditCredentialRequest appBased(@javax.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
     
     this.appBased = appBased;
     return this;
   }
 
-   /**
+  /**
    * Get appBased
    * @return appBased
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -119,9 +120,10 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppBased(SetAzureAuditCredentialRequestAppBased appBased) {
+  public void setAppBased(@javax.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
     this.appBased = appBased;
   }
+
 
   @Override
   public boolean equals(Object o) {

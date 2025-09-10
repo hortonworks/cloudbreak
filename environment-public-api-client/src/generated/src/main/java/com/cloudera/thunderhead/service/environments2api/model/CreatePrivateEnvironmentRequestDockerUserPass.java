@@ -33,33 +33,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreatePrivateEnvironmentRequestDockerUserPass.JSON_PROPERTY_SERVER
 })
 @JsonTypeName("CreatePrivateEnvironmentRequest_dockerUserPass")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreatePrivateEnvironmentRequestDockerUserPass {
   public static final String JSON_PROPERTY_USERNAME = "username";
+  @javax.annotation.Nonnull
   private String username;
 
   public static final String JSON_PROPERTY_PASSWORD = "password";
+  @javax.annotation.Nonnull
   private String password;
 
   public static final String JSON_PROPERTY_EMAIL = "email";
+  @javax.annotation.Nullable
   private String email;
 
   public static final String JSON_PROPERTY_SERVER = "server";
+  @javax.annotation.Nonnull
   private String server;
 
   public CreatePrivateEnvironmentRequestDockerUserPass() {
   }
 
-  public CreatePrivateEnvironmentRequestDockerUserPass username(String username) {
+  public CreatePrivateEnvironmentRequestDockerUserPass username(@javax.annotation.Nonnull String username) {
     
     this.username = username;
     return this;
   }
 
-   /**
+  /**
    * Docker username.
    * @return username
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -71,21 +75,20 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsername(String username) {
+  public void setUsername(@javax.annotation.Nonnull String username) {
     this.username = username;
   }
 
-
-  public CreatePrivateEnvironmentRequestDockerUserPass password(String password) {
+  public CreatePrivateEnvironmentRequestDockerUserPass password(@javax.annotation.Nonnull String password) {
     
     this.password = password;
     return this;
   }
 
-   /**
+  /**
    * Docker password.
    * @return password
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +100,20 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(String password) {
+  public void setPassword(@javax.annotation.Nonnull String password) {
     this.password = password;
   }
 
-
-  public CreatePrivateEnvironmentRequestDockerUserPass email(String email) {
+  public CreatePrivateEnvironmentRequestDockerUserPass email(@javax.annotation.Nullable String email) {
     
     this.email = email;
     return this;
   }
 
-   /**
+  /**
    * Docker email.
    * @return email
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -123,21 +125,20 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEmail(String email) {
+  public void setEmail(@javax.annotation.Nullable String email) {
     this.email = email;
   }
 
-
-  public CreatePrivateEnvironmentRequestDockerUserPass server(String server) {
+  public CreatePrivateEnvironmentRequestDockerUserPass server(@javax.annotation.Nonnull String server) {
     
     this.server = server;
     return this;
   }
 
-   /**
+  /**
    * Docker Registry FQDN.
    * @return server
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -149,9 +150,10 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_SERVER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setServer(String server) {
+  public void setServer(@javax.annotation.Nonnull String server) {
     this.server = server;
   }
+
 
   @Override
   public boolean equals(Object o) {

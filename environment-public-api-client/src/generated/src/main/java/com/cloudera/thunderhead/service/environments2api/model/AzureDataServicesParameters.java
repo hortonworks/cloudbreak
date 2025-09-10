@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   AzureDataServicesParameters.JSON_PROPERTY_SHARED_MANAGED_IDENTITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureDataServicesParameters {
   public static final String JSON_PROPERTY_SHARED_MANAGED_IDENTITY = "sharedManagedIdentity";
+  @javax.annotation.Nonnull
   private String sharedManagedIdentity;
 
   public AzureDataServicesParameters() {
   }
 
-  public AzureDataServicesParameters sharedManagedIdentity(String sharedManagedIdentity) {
+  public AzureDataServicesParameters sharedManagedIdentity(@javax.annotation.Nonnull String sharedManagedIdentity) {
     
     this.sharedManagedIdentity = sharedManagedIdentity;
     return this;
   }
 
-   /**
+  /**
    * User-assigned managed identity used by the AKS control plane.
    * @return sharedManagedIdentity
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SHARED_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class AzureDataServicesParameters {
 
   @JsonProperty(JSON_PROPERTY_SHARED_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSharedManagedIdentity(String sharedManagedIdentity) {
+  public void setSharedManagedIdentity(@javax.annotation.Nonnull String sharedManagedIdentity) {
     this.sharedManagedIdentity = sharedManagedIdentity;
   }
+
 
   @Override
   public boolean equals(Object o) {

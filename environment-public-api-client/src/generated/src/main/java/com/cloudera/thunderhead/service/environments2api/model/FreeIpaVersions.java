@@ -34,21 +34,24 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeIpaVersions.JSON_PROPERTY_DEFAULTS,
   FreeIpaVersions.JSON_PROPERTY_VERSIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeIpaVersions {
   public static final String JSON_PROPERTY_IMAGES = "images";
+  @javax.annotation.Nullable
   private List<String> images = new ArrayList<>();
 
   public static final String JSON_PROPERTY_DEFAULTS = "defaults";
+  @javax.annotation.Nullable
   private List<String> defaults = new ArrayList<>();
 
   public static final String JSON_PROPERTY_VERSIONS = "versions";
+  @javax.annotation.Nullable
   private List<String> versions = new ArrayList<>();
 
   public FreeIpaVersions() {
   }
 
-  public FreeIpaVersions images(List<String> images) {
+  public FreeIpaVersions images(@javax.annotation.Nullable List<String> images) {
     
     this.images = images;
     return this;
@@ -62,10 +65,10 @@ public class FreeIpaVersions {
     return this;
   }
 
-   /**
+  /**
    * List of image UUIDs.
    * @return images
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -77,12 +80,11 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(List<String> images) {
+  public void setImages(@javax.annotation.Nullable List<String> images) {
     this.images = images;
   }
 
-
-  public FreeIpaVersions defaults(List<String> defaults) {
+  public FreeIpaVersions defaults(@javax.annotation.Nullable List<String> defaults) {
     
     this.defaults = defaults;
     return this;
@@ -96,10 +98,10 @@ public class FreeIpaVersions {
     return this;
   }
 
-   /**
+  /**
    * List of default image UUIDs.
    * @return defaults
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -111,12 +113,11 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaults(List<String> defaults) {
+  public void setDefaults(@javax.annotation.Nullable List<String> defaults) {
     this.defaults = defaults;
   }
 
-
-  public FreeIpaVersions versions(List<String> versions) {
+  public FreeIpaVersions versions(@javax.annotation.Nullable List<String> versions) {
     
     this.versions = versions;
     return this;
@@ -130,10 +131,10 @@ public class FreeIpaVersions {
     return this;
   }
 
-   /**
+  /**
    * List of versions.
    * @return versions
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -145,9 +146,10 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersions(List<String> versions) {
+  public void setVersions(@javax.annotation.Nullable List<String> versions) {
     this.versions = versions;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -33,18 +33,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetEnvironmentSettingRequest.JSON_PROPERTY_ATTRS,
   GetEnvironmentSettingRequest.JSON_PROPERTY_ENVIRONMENT_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetEnvironmentSettingRequest {
   public static final String JSON_PROPERTY_ATTRS = "attrs";
+  @javax.annotation.Nonnull
   private List<String> attrs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nullable
   private String environmentName;
 
   public GetEnvironmentSettingRequest() {
   }
 
-  public GetEnvironmentSettingRequest attrs(List<String> attrs) {
+  public GetEnvironmentSettingRequest attrs(@javax.annotation.Nonnull List<String> attrs) {
     
     this.attrs = attrs;
     return this;
@@ -58,10 +60,10 @@ public class GetEnvironmentSettingRequest {
     return this;
   }
 
-   /**
+  /**
    * List of attributes to query settings for. Non-existant settings will be ignored.
    * @return attrs
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ATTRS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -73,21 +75,20 @@ public class GetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_ATTRS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAttrs(List<String> attrs) {
+  public void setAttrs(@javax.annotation.Nonnull List<String> attrs) {
     this.attrs = attrs;
   }
 
-
-  public GetEnvironmentSettingRequest environmentName(String environmentName) {
+  public GetEnvironmentSettingRequest environmentName(@javax.annotation.Nullable String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment. Empty to get system wide settings.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,9 +100,10 @@ public class GetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
+
 
   @Override
   public boolean equals(Object o) {

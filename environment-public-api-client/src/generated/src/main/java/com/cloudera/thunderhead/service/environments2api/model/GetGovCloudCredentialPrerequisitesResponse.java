@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetGovCloudCredentialPrerequisitesResponse.JSON_PROPERTY_ACCOUNT_ID,
   GetGovCloudCredentialPrerequisitesResponse.JSON_PROPERTY_AWS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetGovCloudCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_ACCOUNT_ID = "accountId";
+  @javax.annotation.Nullable
   private String accountId;
 
   public static final String JSON_PROPERTY_AWS = "aws";
+  @javax.annotation.Nullable
   private AwsCredentialPrerequisitesResponse aws;
 
   public GetGovCloudCredentialPrerequisitesResponse() {
   }
 
-  public GetGovCloudCredentialPrerequisitesResponse accountId(String accountId) {
+  public GetGovCloudCredentialPrerequisitesResponse accountId(@javax.annotation.Nullable String accountId) {
     
     this.accountId = accountId;
     return this;
   }
 
-   /**
+  /**
    * The provider specific identifier of the account/subscription/project.
    * @return accountId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -63,21 +65,20 @@ public class GetGovCloudCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountId(String accountId) {
+  public void setAccountId(@javax.annotation.Nullable String accountId) {
     this.accountId = accountId;
   }
 
-
-  public GetGovCloudCredentialPrerequisitesResponse aws(AwsCredentialPrerequisitesResponse aws) {
+  public GetGovCloudCredentialPrerequisitesResponse aws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     
     this.aws = aws;
     return this;
   }
 
-   /**
+  /**
    * Get aws
    * @return aws
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class GetGovCloudCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(AwsCredentialPrerequisitesResponse aws) {
+  public void setAws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
   }
+
 
   @Override
   public boolean equals(Object o) {

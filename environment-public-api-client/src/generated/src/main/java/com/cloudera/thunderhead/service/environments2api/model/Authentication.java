@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Authentication.JSON_PROPERTY_PUBLIC_KEY_ID,
   Authentication.JSON_PROPERTY_LOGIN_USER_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Authentication {
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
+  @javax.annotation.Nullable
   private String publicKey;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY_ID = "publicKeyId";
+  @javax.annotation.Nullable
   private String publicKeyId;
 
   public static final String JSON_PROPERTY_LOGIN_USER_NAME = "loginUserName";
+  @javax.annotation.Nullable
   private String loginUserName;
 
   public Authentication() {
   }
 
-  public Authentication publicKey(String publicKey) {
+  public Authentication publicKey(@javax.annotation.Nullable String publicKey) {
     
     this.publicKey = publicKey;
     return this;
   }
 
-   /**
+  /**
    * SSH Public key string.
    * @return publicKey
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKey(String publicKey) {
+  public void setPublicKey(@javax.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
   }
 
-
-  public Authentication publicKeyId(String publicKeyId) {
+  public Authentication publicKeyId(@javax.annotation.Nullable String publicKeyId) {
     
     this.publicKeyId = publicKeyId;
     return this;
   }
 
-   /**
+  /**
    * Public SSH key ID already registered in the cloud provider.
    * @return publicKeyId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKeyId(String publicKeyId) {
+  public void setPublicKeyId(@javax.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
   }
 
-
-  public Authentication loginUserName(String loginUserName) {
+  public Authentication loginUserName(@javax.annotation.Nullable String loginUserName) {
     
     this.loginUserName = loginUserName;
     return this;
   }
 
-   /**
+  /**
    * The SSH user name created on the nodes for SSH access.
    * @return loginUserName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOGIN_USER_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_LOGIN_USER_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLoginUserName(String loginUserName) {
+  public void setLoginUserName(@javax.annotation.Nullable String loginUserName) {
     this.loginUserName = loginUserName;
   }
+
 
   @Override
   public boolean equals(Object o) {

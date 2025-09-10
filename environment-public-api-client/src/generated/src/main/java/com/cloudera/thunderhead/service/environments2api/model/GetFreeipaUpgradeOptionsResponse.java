@@ -34,18 +34,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetFreeipaUpgradeOptionsResponse.JSON_PROPERTY_IMAGES,
   GetFreeipaUpgradeOptionsResponse.JSON_PROPERTY_CURRENT_IMAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetFreeipaUpgradeOptionsResponse {
   public static final String JSON_PROPERTY_IMAGES = "images";
+  @javax.annotation.Nullable
   private List<ImageInfoResponse> images = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CURRENT_IMAGE = "currentImage";
+  @javax.annotation.Nullable
   private ImageInfoResponse currentImage;
 
   public GetFreeipaUpgradeOptionsResponse() {
   }
 
-  public GetFreeipaUpgradeOptionsResponse images(List<ImageInfoResponse> images) {
+  public GetFreeipaUpgradeOptionsResponse images(@javax.annotation.Nullable List<ImageInfoResponse> images) {
     
     this.images = images;
     return this;
@@ -59,10 +61,10 @@ public class GetFreeipaUpgradeOptionsResponse {
     return this;
   }
 
-   /**
+  /**
    * The list of the upgrade candidates.
    * @return images
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -74,21 +76,20 @@ public class GetFreeipaUpgradeOptionsResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(List<ImageInfoResponse> images) {
+  public void setImages(@javax.annotation.Nullable List<ImageInfoResponse> images) {
     this.images = images;
   }
 
-
-  public GetFreeipaUpgradeOptionsResponse currentImage(ImageInfoResponse currentImage) {
+  public GetFreeipaUpgradeOptionsResponse currentImage(@javax.annotation.Nullable ImageInfoResponse currentImage) {
     
     this.currentImage = currentImage;
     return this;
   }
 
-   /**
+  /**
    * Get currentImage
    * @return currentImage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CURRENT_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,9 +101,10 @@ public class GetFreeipaUpgradeOptionsResponse {
 
   @JsonProperty(JSON_PROPERTY_CURRENT_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCurrentImage(ImageInfoResponse currentImage) {
+  public void setCurrentImage(@javax.annotation.Nullable ImageInfoResponse currentImage) {
     this.currentImage = currentImage;
   }
+
 
   @Override
   public boolean equals(Object o) {

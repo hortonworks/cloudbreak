@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdBrokerMappingRequest.JSON_PROPERTY_ACCESSOR_CRN,
   IdBrokerMappingRequest.JSON_PROPERTY_ROLE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class IdBrokerMappingRequest {
   public static final String JSON_PROPERTY_ACCESSOR_CRN = "accessorCrn";
+  @javax.annotation.Nonnull
   private String accessorCrn;
 
   public static final String JSON_PROPERTY_ROLE = "role";
+  @javax.annotation.Nonnull
   private String role;
 
   public IdBrokerMappingRequest() {
   }
 
-  public IdBrokerMappingRequest accessorCrn(String accessorCrn) {
+  public IdBrokerMappingRequest accessorCrn(@javax.annotation.Nonnull String accessorCrn) {
     
     this.accessorCrn = accessorCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the actor or group.
    * @return accessorCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ACCESSOR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class IdBrokerMappingRequest {
 
   @JsonProperty(JSON_PROPERTY_ACCESSOR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAccessorCrn(String accessorCrn) {
+  public void setAccessorCrn(@javax.annotation.Nonnull String accessorCrn) {
     this.accessorCrn = accessorCrn;
   }
 
-
-  public IdBrokerMappingRequest role(String role) {
+  public IdBrokerMappingRequest role(@javax.annotation.Nonnull String role) {
     
     this.role = role;
     return this;
   }
 
-   /**
+  /**
    * The cloud provider role (e.g., ARN in AWS, Resource ID in Azure) to which the actor or group is mapped.
    * @return role
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class IdBrokerMappingRequest {
 
   @JsonProperty(JSON_PROPERTY_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRole(String role) {
+  public void setRole(@javax.annotation.Nonnull String role) {
     this.role = role;
   }
+
 
   @Override
   public boolean equals(Object o) {

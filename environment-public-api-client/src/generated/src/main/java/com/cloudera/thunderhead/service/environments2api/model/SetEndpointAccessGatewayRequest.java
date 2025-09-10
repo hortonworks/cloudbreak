@@ -34,18 +34,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetEndpointAccessGatewayRequest.JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME,
   SetEndpointAccessGatewayRequest.JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetEndpointAccessGatewayRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over internet. Defaults to PRIVATE which restricts the traffic to be internal to the VPC / Vnet.
    */
   public enum EndpointAccessGatewaySchemeEnum {
-    PUBLIC("PUBLIC"),
+    PUBLIC(String.valueOf("PUBLIC")),
     
-    PRIVATE("PRIVATE");
+    PRIVATE(String.valueOf("PRIVATE"));
 
     private String value;
 
@@ -75,24 +76,26 @@ public class SetEndpointAccessGatewayRequest {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
+  @javax.annotation.Nonnull
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
+  @javax.annotation.Nullable
   private List<String> endpointAccessGatewaySubnetIds = new ArrayList<>();
 
   public SetEndpointAccessGatewayRequest() {
   }
 
-  public SetEndpointAccessGatewayRequest environment(String environment) {
+  public SetEndpointAccessGatewayRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment. Empty to get system wide settings.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -104,21 +107,20 @@ public class SetEndpointAccessGatewayRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public SetEndpointAccessGatewayRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public SetEndpointAccessGatewayRequest endpointAccessGatewayScheme(@javax.annotation.Nonnull EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
 
-   /**
+  /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over internet. Defaults to PRIVATE which restricts the traffic to be internal to the VPC / Vnet.
    * @return endpointAccessGatewayScheme
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -130,12 +132,11 @@ public class SetEndpointAccessGatewayRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEndpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@javax.annotation.Nonnull EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-
-  public SetEndpointAccessGatewayRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public SetEndpointAccessGatewayRequest endpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
@@ -149,10 +150,10 @@ public class SetEndpointAccessGatewayRequest {
     return this;
   }
 
-   /**
+  /**
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -164,9 +165,10 @@ public class SetEndpointAccessGatewayRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
+
 
   @Override
   public boolean equals(Object o) {

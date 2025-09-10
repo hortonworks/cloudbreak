@@ -37,42 +37,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Endpoint.JSON_PROPERTY_HAS_ERROR,
   Endpoint.JSON_PROPERTY_STATUS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Endpoint {
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
+  @javax.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_DEFAULT = "default";
+  @javax.annotation.Nullable
   private Boolean _default;
 
   public static final String JSON_PROPERTY_URI = "uri";
+  @javax.annotation.Nullable
   private String uri;
 
   public static final String JSON_PROPERTY_CONFIG = "config";
+  @javax.annotation.Nullable
   private Map<String, String> config = new HashMap<>();
 
   public static final String JSON_PROPERTY_HAS_ERROR = "hasError";
+  @javax.annotation.Nullable
   private Boolean hasError;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public Endpoint() {
   }
 
-  public Endpoint id(String id) {
+  public Endpoint id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * The endpoint Identifier
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -84,21 +91,20 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public Endpoint displayName(String displayName) {
+  public Endpoint displayName(@javax.annotation.Nullable String displayName) {
     
     this.displayName = displayName;
     return this;
   }
 
-   /**
+  /**
    * Display name for the endpoint
    * @return displayName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -110,21 +116,20 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(String displayName) {
+  public void setDisplayName(@javax.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-
-  public Endpoint _default(Boolean _default) {
+  public Endpoint _default(@javax.annotation.Nullable Boolean _default) {
     
     this._default = _default;
     return this;
   }
 
-   /**
+  /**
    * Is the default endpoint
    * @return _default
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -136,21 +141,20 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefault(Boolean _default) {
+  public void setDefault(@javax.annotation.Nullable Boolean _default) {
     this._default = _default;
   }
 
-
-  public Endpoint uri(String uri) {
+  public Endpoint uri(@javax.annotation.Nullable String uri) {
     
     this.uri = uri;
     return this;
   }
 
-   /**
+  /**
    * The URI of the endpoint
    * @return uri
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -162,12 +166,11 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUri(String uri) {
+  public void setUri(@javax.annotation.Nullable String uri) {
     this.uri = uri;
   }
 
-
-  public Endpoint config(Map<String, String> config) {
+  public Endpoint config(@javax.annotation.Nullable Map<String, String> config) {
     
     this.config = config;
     return this;
@@ -181,10 +184,10 @@ public class Endpoint {
     return this;
   }
 
-   /**
+  /**
    * The config options for the endpoint
    * @return config
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -196,21 +199,20 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfig(Map<String, String> config) {
+  public void setConfig(@javax.annotation.Nullable Map<String, String> config) {
     this.config = config;
   }
 
-
-  public Endpoint hasError(Boolean hasError) {
+  public Endpoint hasError(@javax.annotation.Nullable Boolean hasError) {
     
     this.hasError = hasError;
     return this;
   }
 
-   /**
+  /**
    * Does this endpoint have an error
    * @return hasError
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HAS_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -222,21 +224,20 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_HAS_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHasError(Boolean hasError) {
+  public void setHasError(@javax.annotation.Nullable Boolean hasError) {
     this.hasError = hasError;
   }
 
-
-  public Endpoint status(String status) {
+  public Endpoint status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of this endpoint
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -248,9 +249,10 @@ public class Endpoint {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
+
 
   @Override
   public boolean equals(Object o) {

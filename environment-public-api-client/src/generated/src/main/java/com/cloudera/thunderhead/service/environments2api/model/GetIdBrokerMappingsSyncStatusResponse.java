@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetIdBrokerMappingsSyncStatusResponse.JSON_PROPERTY_GLOBAL_STATUS,
   GetIdBrokerMappingsSyncStatusResponse.JSON_PROPERTY_STATUSES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetIdBrokerMappingsSyncStatusResponse {
   public static final String JSON_PROPERTY_SYNC_NEEDED = "syncNeeded";
+  @javax.annotation.Nonnull
   private Boolean syncNeeded;
 
   public static final String JSON_PROPERTY_GLOBAL_STATUS = "globalStatus";
+  @javax.annotation.Nonnull
   private SyncStatus globalStatus;
 
   public static final String JSON_PROPERTY_STATUSES = "statuses";
+  @javax.annotation.Nonnull
   private Map<String, IdBrokerSyncStatus> statuses = new HashMap<>();
 
   public GetIdBrokerMappingsSyncStatusResponse() {
   }
 
-  public GetIdBrokerMappingsSyncStatusResponse syncNeeded(Boolean syncNeeded) {
+  public GetIdBrokerMappingsSyncStatusResponse syncNeeded(@javax.annotation.Nonnull Boolean syncNeeded) {
     
     this.syncNeeded = syncNeeded;
     return this;
   }
 
-   /**
+  /**
    * Whether a sync is needed to bring in-cluster mappings up-to-date.
    * @return syncNeeded
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SYNC_NEEDED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +73,20 @@ public class GetIdBrokerMappingsSyncStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_SYNC_NEEDED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSyncNeeded(Boolean syncNeeded) {
+  public void setSyncNeeded(@javax.annotation.Nonnull Boolean syncNeeded) {
     this.syncNeeded = syncNeeded;
   }
 
-
-  public GetIdBrokerMappingsSyncStatusResponse globalStatus(SyncStatus globalStatus) {
+  public GetIdBrokerMappingsSyncStatusResponse globalStatus(@javax.annotation.Nonnull SyncStatus globalStatus) {
     
     this.globalStatus = globalStatus;
     return this;
   }
 
-   /**
+  /**
    * Get globalStatus
    * @return globalStatus
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_GLOBAL_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -96,12 +98,11 @@ public class GetIdBrokerMappingsSyncStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_GLOBAL_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setGlobalStatus(SyncStatus globalStatus) {
+  public void setGlobalStatus(@javax.annotation.Nonnull SyncStatus globalStatus) {
     this.globalStatus = globalStatus;
   }
 
-
-  public GetIdBrokerMappingsSyncStatusResponse statuses(Map<String, IdBrokerSyncStatus> statuses) {
+  public GetIdBrokerMappingsSyncStatusResponse statuses(@javax.annotation.Nonnull Map<String, IdBrokerSyncStatus> statuses) {
     
     this.statuses = statuses;
     return this;
@@ -112,10 +113,10 @@ public class GetIdBrokerMappingsSyncStatusResponse {
     return this;
   }
 
-   /**
+  /**
    * Map of datalake cluster CRN to mappings sync status for each datalake cluster in the environment.
    * @return statuses
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUSES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -127,9 +128,10 @@ public class GetIdBrokerMappingsSyncStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUSES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatuses(Map<String, IdBrokerSyncStatus> statuses) {
+  public void setStatuses(@javax.annotation.Nonnull Map<String, IdBrokerSyncStatus> statuses) {
     this.statuses = statuses;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAzureEnvironmentRequestNewNetworkParams.JSON_PROPERTY_NETWORK_CIDR
 })
 @JsonTypeName("CreateAzureEnvironmentRequest_newNetworkParams")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateAzureEnvironmentRequestNewNetworkParams {
   public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
+  @javax.annotation.Nonnull
   private String networkCidr;
 
   public CreateAzureEnvironmentRequestNewNetworkParams() {
   }
 
-  public CreateAzureEnvironmentRequestNewNetworkParams networkCidr(String networkCidr) {
+  public CreateAzureEnvironmentRequestNewNetworkParams networkCidr(@javax.annotation.Nonnull String networkCidr) {
     
     this.networkCidr = networkCidr;
     return this;
   }
 
-   /**
+  /**
    * The range of private IPv4 addresses that resources will use under the created VNet.
    * @return networkCidr
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -59,9 +60,10 @@ public class CreateAzureEnvironmentRequestNewNetworkParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkCidr(String networkCidr) {
+  public void setNetworkCidr(@javax.annotation.Nonnull String networkCidr) {
     this.networkCidr = networkCidr;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -39,36 +39,43 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AWSFreeIpaCreationRequest.JSON_PROPERTY_SPOT_MAX_PRICE,
   AWSFreeIpaCreationRequest.JSON_PROPERTY_ARCHITECTURE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AWSFreeIpaCreationRequest {
   public static final String JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP = "instanceCountByGroup";
+  @javax.annotation.Nullable
   private Integer instanceCountByGroup;
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
+  @javax.annotation.Nullable
   private List<String> recipes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
+  @javax.annotation.Nullable
   private String instanceType;
 
   public static final String JSON_PROPERTY_USE_CLOUD_FORMATION = "useCloudFormation";
+  @javax.annotation.Nullable
   private Boolean useCloudFormation;
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
+  @javax.annotation.Nullable
   private Boolean multiAz;
 
   public static final String JSON_PROPERTY_SPOT_PERCENTAGE = "spotPercentage";
+  @javax.annotation.Nullable
   private Integer spotPercentage;
 
   public static final String JSON_PROPERTY_SPOT_MAX_PRICE = "spotMaxPrice";
+  @javax.annotation.Nullable
   private Double spotMaxPrice;
 
   /**
    * Specifies the CPU architecture of freeipa instance type. Values are ARM64, X86_64.
    */
   public enum ArchitectureEnum {
-    ARM64("ARM64"),
+    ARM64(String.valueOf("ARM64")),
     
-    X86_64("X86_64");
+    X86_64(String.valueOf("X86_64"));
 
     private String value;
 
@@ -98,21 +105,22 @@ public class AWSFreeIpaCreationRequest {
   }
 
   public static final String JSON_PROPERTY_ARCHITECTURE = "architecture";
+  @javax.annotation.Nullable
   private ArchitectureEnum architecture;
 
   public AWSFreeIpaCreationRequest() {
   }
 
-  public AWSFreeIpaCreationRequest instanceCountByGroup(Integer instanceCountByGroup) {
+  public AWSFreeIpaCreationRequest instanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
 
-   /**
+  /**
    * The number of FreeIPA instances to create per group when creating FreeIPA in the environment
    * @return instanceCountByGroup
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -124,12 +132,11 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceCountByGroup(Integer instanceCountByGroup) {
+  public void setInstanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     this.instanceCountByGroup = instanceCountByGroup;
   }
 
-
-  public AWSFreeIpaCreationRequest recipes(List<String> recipes) {
+  public AWSFreeIpaCreationRequest recipes(@javax.annotation.Nullable List<String> recipes) {
     
     this.recipes = recipes;
     return this;
@@ -143,10 +150,10 @@ public class AWSFreeIpaCreationRequest {
     return this;
   }
 
-   /**
+  /**
    * The recipes for the FreeIPA cluster.
    * @return recipes
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -158,21 +165,20 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRecipes(List<String> recipes) {
+  public void setRecipes(@javax.annotation.Nullable List<String> recipes) {
     this.recipes = recipes;
   }
 
-
-  public AWSFreeIpaCreationRequest instanceType(String instanceType) {
+  public AWSFreeIpaCreationRequest instanceType(@javax.annotation.Nullable String instanceType) {
     
     this.instanceType = instanceType;
     return this;
   }
 
-   /**
+  /**
    * Custom instance type of FreeIPA instances.
    * @return instanceType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -184,21 +190,20 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceType(String instanceType) {
+  public void setInstanceType(@javax.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
   }
 
-
-  public AWSFreeIpaCreationRequest useCloudFormation(Boolean useCloudFormation) {
+  public AWSFreeIpaCreationRequest useCloudFormation(@javax.annotation.Nullable Boolean useCloudFormation) {
     
     this.useCloudFormation = useCloudFormation;
     return this;
   }
 
-   /**
+  /**
    * Flag which when enabled uses AWS as cloud platform variant and uses cloud formation.
    * @return useCloudFormation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USE_CLOUD_FORMATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -210,21 +215,20 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_USE_CLOUD_FORMATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUseCloudFormation(Boolean useCloudFormation) {
+  public void setUseCloudFormation(@javax.annotation.Nullable Boolean useCloudFormation) {
     this.useCloudFormation = useCloudFormation;
   }
 
-
-  public AWSFreeIpaCreationRequest multiAz(Boolean multiAz) {
+  public AWSFreeIpaCreationRequest multiAz(@javax.annotation.Nullable Boolean multiAz) {
     
     this.multiAz = multiAz;
     return this;
   }
 
-   /**
+  /**
    * Flag which marks that the FreeIPA will be deployed in a multi-availability zone way or not.
    * @return multiAz
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -236,23 +240,22 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMultiAz(Boolean multiAz) {
+  public void setMultiAz(@javax.annotation.Nullable Boolean multiAz) {
     this.multiAz = multiAz;
   }
 
-
-  public AWSFreeIpaCreationRequest spotPercentage(Integer spotPercentage) {
+  public AWSFreeIpaCreationRequest spotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
     
     this.spotPercentage = spotPercentage;
     return this;
   }
 
-   /**
+  /**
    * Percentage of spot instances.
    * minimum: 0
    * maximum: 100
    * @return spotPercentage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -264,23 +267,22 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotPercentage(Integer spotPercentage) {
+  public void setSpotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
     this.spotPercentage = spotPercentage;
   }
 
-
-  public AWSFreeIpaCreationRequest spotMaxPrice(Double spotMaxPrice) {
+  public AWSFreeIpaCreationRequest spotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
     
     this.spotMaxPrice = spotMaxPrice;
     return this;
   }
 
-   /**
+  /**
    * Max hourly price of spot instances.
    * minimum: 0.001
    * maximum: 255
    * @return spotMaxPrice
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -292,21 +294,20 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotMaxPrice(Double spotMaxPrice) {
+  public void setSpotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
     this.spotMaxPrice = spotMaxPrice;
   }
 
-
-  public AWSFreeIpaCreationRequest architecture(ArchitectureEnum architecture) {
+  public AWSFreeIpaCreationRequest architecture(@javax.annotation.Nullable ArchitectureEnum architecture) {
     
     this.architecture = architecture;
     return this;
   }
 
-   /**
+  /**
    * Specifies the CPU architecture of freeipa instance type. Values are ARM64, X86_64.
    * @return architecture
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ARCHITECTURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -318,9 +319,10 @@ public class AWSFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_ARCHITECTURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setArchitecture(ArchitectureEnum architecture) {
+  public void setArchitecture(@javax.annotation.Nullable ArchitectureEnum architecture) {
     this.architecture = architecture;
   }
+
 
   @Override
   public boolean equals(Object o) {

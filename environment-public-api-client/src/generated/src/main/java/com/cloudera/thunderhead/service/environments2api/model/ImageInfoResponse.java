@@ -34,39 +34,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ImageInfoResponse.JSON_PROPERTY_DATE,
   ImageInfoResponse.JSON_PROPERTY_CATALOG_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ImageInfoResponse {
   public static final String JSON_PROPERTY_CATALOG = "catalog";
+  @javax.annotation.Nullable
   private String catalog;
 
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_OS = "os";
+  @javax.annotation.Nullable
   private String os;
 
   public static final String JSON_PROPERTY_IMAGE_NAME = "imageName";
+  @javax.annotation.Nullable
   private String imageName;
 
   public static final String JSON_PROPERTY_DATE = "date";
+  @javax.annotation.Nullable
   private String date;
 
   public static final String JSON_PROPERTY_CATALOG_NAME = "catalogName";
+  @javax.annotation.Nullable
   private String catalogName;
 
   public ImageInfoResponse() {
   }
 
-  public ImageInfoResponse catalog(String catalog) {
+  public ImageInfoResponse catalog(@javax.annotation.Nullable String catalog) {
     
     this.catalog = catalog;
     return this;
   }
 
-   /**
+  /**
    * Image catalog URL.
    * @return catalog
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -78,21 +84,20 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalog(String catalog) {
+  public void setCatalog(@javax.annotation.Nullable String catalog) {
     this.catalog = catalog;
   }
 
-
-  public ImageInfoResponse id(String id) {
+  public ImageInfoResponse id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * Virtual machine image ID from ImageCatalog, machines of the cluster will be started from this image.
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -104,21 +109,20 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public ImageInfoResponse os(String os) {
+  public ImageInfoResponse os(@javax.annotation.Nullable String os) {
     
     this.os = os;
     return this;
   }
 
-   /**
+  /**
    * OS type of the image, this property is only considered when no specific image ID is provided.
    * @return os
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +134,20 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(String os) {
+  public void setOs(@javax.annotation.Nullable String os) {
     this.os = os;
   }
 
-
-  public ImageInfoResponse imageName(String imageName) {
+  public ImageInfoResponse imageName(@javax.annotation.Nullable String imageName) {
     
     this.imageName = imageName;
     return this;
   }
 
-   /**
+  /**
    * Image name
    * @return imageName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,21 +159,20 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageName(String imageName) {
+  public void setImageName(@javax.annotation.Nullable String imageName) {
     this.imageName = imageName;
   }
 
-
-  public ImageInfoResponse date(String date) {
+  public ImageInfoResponse date(@javax.annotation.Nullable String date) {
     
     this.date = date;
     return this;
   }
 
-   /**
+  /**
    * Creation date of the image from catalog.
    * @return date
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -182,21 +184,20 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDate(String date) {
+  public void setDate(@javax.annotation.Nullable String date) {
     this.date = date;
   }
 
-
-  public ImageInfoResponse catalogName(String catalogName) {
+  public ImageInfoResponse catalogName(@javax.annotation.Nullable String catalogName) {
     
     this.catalogName = catalogName;
     return this;
   }
 
-   /**
+  /**
    * Image catalog name.
    * @return catalogName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -208,9 +209,10 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalogName(String catalogName) {
+  public void setCatalogName(@javax.annotation.Nullable String catalogName) {
     this.catalogName = catalogName;
   }
+
 
   @Override
   public boolean equals(Object o) {

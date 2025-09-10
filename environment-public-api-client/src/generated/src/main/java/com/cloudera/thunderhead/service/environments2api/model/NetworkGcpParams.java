@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   NetworkGcpParams.JSON_PROPERTY_USE_PUBLIC_IP,
   NetworkGcpParams.JSON_PROPERTY_SHARED_PROJECT_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class NetworkGcpParams {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
+  @javax.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
+  @javax.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
+  @javax.annotation.Nullable
   private String sharedProjectId;
 
   public NetworkGcpParams() {
   }
 
-  public NetworkGcpParams networkName(String networkName) {
+  public NetworkGcpParams networkName(@javax.annotation.Nonnull String networkName) {
     
     this.networkName = networkName;
     return this;
   }
 
-   /**
+  /**
    * The name of the GCP VPC.
    * @return networkName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(String networkName) {
+  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-
-  public NetworkGcpParams usePublicIp(Boolean usePublicIp) {
+  public NetworkGcpParams usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     
     this.usePublicIp = usePublicIp;
     return this;
   }
 
-   /**
+  /**
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(Boolean usePublicIp) {
+  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-
-  public NetworkGcpParams sharedProjectId(String sharedProjectId) {
+  public NetworkGcpParams sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     
     this.sharedProjectId = sharedProjectId;
     return this;
   }
 
-   /**
+  /**
    * The ID of the Google project associated with the VPC.
    * @return sharedProjectId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(String sharedProjectId) {
+  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
+
 
   @Override
   public boolean equals(Object o) {

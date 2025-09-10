@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ListOpdbsForEnvResponse.JSON_PROPERTY_LAST_UPDATED,
   ListOpdbsForEnvResponse.JSON_PROPERTY_OP_D_BS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListOpdbsForEnvResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public static final String JSON_PROPERTY_LAST_UPDATED = "lastUpdated";
+  @javax.annotation.Nullable
   private Long lastUpdated;
 
   public static final String JSON_PROPERTY_OP_D_BS = "opDBs";
+  @javax.annotation.Nullable
   private List<OpDB> opDBs = new ArrayList<>();
 
   public ListOpdbsForEnvResponse() {
   }
 
-  public ListOpdbsForEnvResponse environment(String environment) {
+  public ListOpdbsForEnvResponse environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,21 +73,20 @@ public class ListOpdbsForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
 
-
-  public ListOpdbsForEnvResponse lastUpdated(Long lastUpdated) {
+  public ListOpdbsForEnvResponse lastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     
     this.lastUpdated = lastUpdated;
     return this;
   }
 
-   /**
+  /**
    * The RFC3339 timestamp of the last change to the OpDB config.
    * @return lastUpdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,12 +98,11 @@ public class ListOpdbsForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastUpdated(Long lastUpdated) {
+  public void setLastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
-
-  public ListOpdbsForEnvResponse opDBs(List<OpDB> opDBs) {
+  public ListOpdbsForEnvResponse opDBs(@javax.annotation.Nullable List<OpDB> opDBs) {
     
     this.opDBs = opDBs;
     return this;
@@ -115,10 +116,10 @@ public class ListOpdbsForEnvResponse {
     return this;
   }
 
-   /**
+  /**
    * The list of OpDBs in the environment.
    * @return opDBs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OP_D_BS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class ListOpdbsForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_OP_D_BS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOpDBs(List<OpDB> opDBs) {
+  public void setOpDBs(@javax.annotation.Nullable List<OpDB> opDBs) {
     this.opDBs = opDBs;
   }
+
 
   @Override
   public boolean equals(Object o) {

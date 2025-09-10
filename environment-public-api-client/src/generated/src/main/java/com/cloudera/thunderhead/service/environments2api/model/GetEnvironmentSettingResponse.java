@@ -31,15 +31,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetEnvironmentSettingResponse.JSON_PROPERTY_SETTINGS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetEnvironmentSettingResponse {
   public static final String JSON_PROPERTY_SETTINGS = "settings";
+  @javax.annotation.Nullable
   private Map<String, String> settings = new HashMap<>();
 
   public GetEnvironmentSettingResponse() {
   }
 
-  public GetEnvironmentSettingResponse settings(Map<String, String> settings) {
+  public GetEnvironmentSettingResponse settings(@javax.annotation.Nullable Map<String, String> settings) {
     
     this.settings = settings;
     return this;
@@ -53,10 +54,10 @@ public class GetEnvironmentSettingResponse {
     return this;
   }
 
-   /**
+  /**
    * Dictionary of settings found.
    * @return settings
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -68,9 +69,10 @@ public class GetEnvironmentSettingResponse {
 
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSettings(Map<String, String> settings) {
+  public void setSettings(@javax.annotation.Nullable Map<String, String> settings) {
     this.settings = settings;
   }
+
 
   @Override
   public boolean equals(Object o) {

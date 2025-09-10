@@ -32,33 +32,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OpDB.JSON_PROPERTY_STATUS,
   OpDB.JSON_PROPERTY_HUE_ENDPOINT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class OpDB {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_HUE_ENDPOINT = "hueEndpoint";
+  @javax.annotation.Nullable
   private String hueEndpoint;
 
   public OpDB() {
   }
 
-  public OpDB name(String name) {
+  public OpDB name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * The database name
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,21 +74,20 @@ public class OpDB {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public OpDB crn(String crn) {
+  public OpDB crn(@javax.annotation.Nullable String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * The database crn
    * @return crn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,21 +99,20 @@ public class OpDB {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-
-  public OpDB status(String status) {
+  public OpDB status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * The database status
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -122,21 +124,20 @@ public class OpDB {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public OpDB hueEndpoint(String hueEndpoint) {
+  public OpDB hueEndpoint(@javax.annotation.Nullable String hueEndpoint) {
     
     this.hueEndpoint = hueEndpoint;
     return this;
   }
 
-   /**
+  /**
    * The HUE endpoint
    * @return hueEndpoint
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HUE_ENDPOINT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,9 +149,10 @@ public class OpDB {
 
   @JsonProperty(JSON_PROPERTY_HUE_ENDPOINT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHueEndpoint(String hueEndpoint) {
+  public void setHueEndpoint(@javax.annotation.Nullable String hueEndpoint) {
     this.hueEndpoint = hueEndpoint;
   }
+
 
   @Override
   public boolean equals(Object o) {

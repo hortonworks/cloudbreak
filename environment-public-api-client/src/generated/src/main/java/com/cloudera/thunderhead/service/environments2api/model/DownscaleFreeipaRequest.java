@@ -35,18 +35,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DownscaleFreeipaRequest.JSON_PROPERTY_INSTANCES,
   DownscaleFreeipaRequest.JSON_PROPERTY_FORCE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DownscaleFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   /**
    * The target FreeIPA availability type.
    */
   public enum TargetAvailabilityTypeEnum {
-    HA("HA"),
+    HA(String.valueOf("HA")),
     
-    TWO_NODE_BASED("TWO_NODE_BASED");
+    TWO_NODE_BASED(String.valueOf("TWO_NODE_BASED"));
 
     private String value;
 
@@ -76,27 +77,30 @@ public class DownscaleFreeipaRequest {
   }
 
   public static final String JSON_PROPERTY_TARGET_AVAILABILITY_TYPE = "targetAvailabilityType";
+  @javax.annotation.Nullable
   private TargetAvailabilityTypeEnum targetAvailabilityType;
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
+  @javax.annotation.Nullable
   private List<String> instances = new ArrayList<>();
 
   public static final String JSON_PROPERTY_FORCE = "force";
+  @javax.annotation.Nullable
   private Boolean force = false;
 
   public DownscaleFreeipaRequest() {
   }
 
-  public DownscaleFreeipaRequest environmentName(String environmentName) {
+  public DownscaleFreeipaRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -108,21 +112,20 @@ public class DownscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public DownscaleFreeipaRequest targetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public DownscaleFreeipaRequest targetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
 
-   /**
+  /**
    * The target FreeIPA availability type.
    * @return targetAvailabilityType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -134,12 +137,11 @@ public class DownscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTargetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public void setTargetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
   }
 
-
-  public DownscaleFreeipaRequest instances(List<String> instances) {
+  public DownscaleFreeipaRequest instances(@javax.annotation.Nullable List<String> instances) {
     
     this.instances = instances;
     return this;
@@ -153,10 +155,10 @@ public class DownscaleFreeipaRequest {
     return this;
   }
 
-   /**
+  /**
    * The instance Ids to downscale.
    * @return instances
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -168,21 +170,20 @@ public class DownscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstances(List<String> instances) {
+  public void setInstances(@javax.annotation.Nullable List<String> instances) {
     this.instances = instances;
   }
 
-
-  public DownscaleFreeipaRequest force(Boolean force) {
+  public DownscaleFreeipaRequest force(@javax.annotation.Nullable Boolean force) {
     
     this.force = force;
     return this;
   }
 
-   /**
+  /**
    * Force the downscale regardless of the status of the FreeIPA nodes and skip some validations.
    * @return force
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -194,9 +195,10 @@ public class DownscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_FORCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setForce(Boolean force) {
+  public void setForce(@javax.annotation.Nullable Boolean force) {
     this.force = force;
   }
+
 
   @Override
   public boolean equals(Object o) {

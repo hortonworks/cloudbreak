@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   UpdateFreeipaToAwsImdsV2Request.JSON_PROPERTY_ENVIRONMENT_CRN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateFreeipaToAwsImdsV2Request {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nonnull
   private String environmentCrn;
 
   public UpdateFreeipaToAwsImdsV2Request() {
   }
 
-  public UpdateFreeipaToAwsImdsV2Request environmentCrn(String environmentCrn) {
+  public UpdateFreeipaToAwsImdsV2Request environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class UpdateFreeipaToAwsImdsV2Request {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
+
 
   @Override
   public boolean equals(Object o) {

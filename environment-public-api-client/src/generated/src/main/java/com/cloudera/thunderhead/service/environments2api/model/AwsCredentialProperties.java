@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AwsCredentialProperties.JSON_PROPERTY_GOV_CLOUD,
   AwsCredentialProperties.JSON_PROPERTY_DEFAULT_REGION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AwsCredentialProperties {
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
+  @javax.annotation.Nullable
   private String roleArn;
 
   public static final String JSON_PROPERTY_GOV_CLOUD = "govCloud";
+  @javax.annotation.Nullable
   private Boolean govCloud;
 
   public static final String JSON_PROPERTY_DEFAULT_REGION = "defaultRegion";
+  @javax.annotation.Nullable
   private String defaultRegion;
 
   public AwsCredentialProperties() {
   }
 
-  public AwsCredentialProperties roleArn(String roleArn) {
+  public AwsCredentialProperties roleArn(@javax.annotation.Nullable String roleArn) {
     
     this.roleArn = roleArn;
     return this;
   }
 
-   /**
+  /**
    * The AWS role arn for the given credential.
    * @return roleArn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRoleArn(String roleArn) {
+  public void setRoleArn(@javax.annotation.Nullable String roleArn) {
     this.roleArn = roleArn;
   }
 
-
-  public AwsCredentialProperties govCloud(Boolean govCloud) {
+  public AwsCredentialProperties govCloud(@javax.annotation.Nullable Boolean govCloud) {
     
     this.govCloud = govCloud;
     return this;
   }
 
-   /**
+  /**
    * Flag that indicates that the given AWS credential is GovCloud specific.
    * @return govCloud
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GOV_CLOUD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_GOV_CLOUD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGovCloud(Boolean govCloud) {
+  public void setGovCloud(@javax.annotation.Nullable Boolean govCloud) {
     this.govCloud = govCloud;
   }
 
-
-  public AwsCredentialProperties defaultRegion(String defaultRegion) {
+  public AwsCredentialProperties defaultRegion(@javax.annotation.Nullable String defaultRegion) {
     
     this.defaultRegion = defaultRegion;
     return this;
   }
 
-   /**
+  /**
    * The default region for the Credential to be used during API interactions.
    * @return defaultRegion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultRegion(String defaultRegion) {
+  public void setDefaultRegion(@javax.annotation.Nullable String defaultRegion) {
     this.defaultRegion = defaultRegion;
   }
+
 
   @Override
   public boolean equals(Object o) {

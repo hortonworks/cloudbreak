@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AwsLogStorageRequest.JSON_PROPERTY_INSTANCE_PROFILE,
   AwsLogStorageRequest.JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AwsLogStorageRequest {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
+  @javax.annotation.Nonnull
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_INSTANCE_PROFILE = "instanceProfile";
+  @javax.annotation.Nonnull
   private String instanceProfile;
 
   public static final String JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE = "backupStorageLocationBase";
+  @javax.annotation.Nullable
   private String backupStorageLocationBase;
 
   public AwsLogStorageRequest() {
   }
 
-  public AwsLogStorageRequest storageLocationBase(String storageLocationBase) {
+  public AwsLogStorageRequest storageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
     
     this.storageLocationBase = storageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The base location to store logs in S3. This should be an s3a:// url.
    * @return storageLocationBase
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class AwsLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocationBase(String storageLocationBase) {
+  public void setStorageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-
-  public AwsLogStorageRequest instanceProfile(String instanceProfile) {
+  public AwsLogStorageRequest instanceProfile(@javax.annotation.Nonnull String instanceProfile) {
     
     this.instanceProfile = instanceProfile;
     return this;
   }
 
-   /**
+  /**
    * The AWS instance profile that which contains the necessary permissions to access the S3 storage location.
    * @return instanceProfile
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class AwsLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInstanceProfile(String instanceProfile) {
+  public void setInstanceProfile(@javax.annotation.Nonnull String instanceProfile) {
     this.instanceProfile = instanceProfile;
   }
 
-
-  public AwsLogStorageRequest backupStorageLocationBase(String backupStorageLocationBase) {
+  public AwsLogStorageRequest backupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
     
     this.backupStorageLocationBase = backupStorageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The base location to store backup in S3. This should be an s3a:// url.
    * @return backupStorageLocationBase
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class AwsLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBackupStorageLocationBase(String backupStorageLocationBase) {
+  public void setBackupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
   }
+
 
   @Override
   public boolean equals(Object o) {

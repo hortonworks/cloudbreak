@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ValidateAwsCloudStorageRequest.JSON_PROPERTY_STORAGE_LOCATION,
   ValidateAwsCloudStorageRequest.JSON_PROPERTY_INSTANCE_PROFILE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ValidateAwsCloudStorageRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_CRN = "credentialCrn";
+  @javax.annotation.Nonnull
   private String credentialCrn;
 
   public static final String JSON_PROPERTY_STORAGE_LOCATION = "storageLocation";
+  @javax.annotation.Nonnull
   private String storageLocation;
 
   public static final String JSON_PROPERTY_INSTANCE_PROFILE = "instanceProfile";
+  @javax.annotation.Nonnull
   private String instanceProfile;
 
   public ValidateAwsCloudStorageRequest() {
   }
 
-  public ValidateAwsCloudStorageRequest credentialCrn(String credentialCrn) {
+  public ValidateAwsCloudStorageRequest credentialCrn(@javax.annotation.Nonnull String credentialCrn) {
     
     this.credentialCrn = credentialCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the credential.
    * @return credentialCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class ValidateAwsCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialCrn(String credentialCrn) {
+  public void setCredentialCrn(@javax.annotation.Nonnull String credentialCrn) {
     this.credentialCrn = credentialCrn;
   }
 
-
-  public ValidateAwsCloudStorageRequest storageLocation(String storageLocation) {
+  public ValidateAwsCloudStorageRequest storageLocation(@javax.annotation.Nonnull String storageLocation) {
     
     this.storageLocation = storageLocation;
     return this;
   }
 
-   /**
+  /**
    * AWS S3 storage bucket location for logging.
    * @return storageLocation
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class ValidateAwsCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocation(String storageLocation) {
+  public void setStorageLocation(@javax.annotation.Nonnull String storageLocation) {
     this.storageLocation = storageLocation;
   }
 
-
-  public ValidateAwsCloudStorageRequest instanceProfile(String instanceProfile) {
+  public ValidateAwsCloudStorageRequest instanceProfile(@javax.annotation.Nonnull String instanceProfile) {
     
     this.instanceProfile = instanceProfile;
     return this;
   }
 
-   /**
+  /**
    * AWS instance profile.
    * @return instanceProfile
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -118,9 +119,10 @@ public class ValidateAwsCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInstanceProfile(String instanceProfile) {
+  public void setInstanceProfile(@javax.annotation.Nonnull String instanceProfile) {
     this.instanceProfile = instanceProfile;
   }
+
 
   @Override
   public boolean equals(Object o) {

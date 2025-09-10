@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpgradeFreeipaRequest.JSON_PROPERTY_IMAGE_ID,
   UpgradeFreeipaRequest.JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpgradeFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_IMAGE_ID = "imageId";
+  @javax.annotation.Nullable
   private String imageId;
 
   public static final String JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE = "allowMajorOsUpgrade";
+  @javax.annotation.Nullable
   private Boolean allowMajorOsUpgrade;
 
   public UpgradeFreeipaRequest() {
   }
 
-  public UpgradeFreeipaRequest environmentName(String environmentName) {
+  public UpgradeFreeipaRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class UpgradeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public UpgradeFreeipaRequest imageId(String imageId) {
+  public UpgradeFreeipaRequest imageId(@javax.annotation.Nullable String imageId) {
     
     this.imageId = imageId;
     return this;
   }
 
-   /**
+  /**
    * Target image ID for upgrade.
    * @return imageId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class UpgradeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageId(String imageId) {
+  public void setImageId(@javax.annotation.Nullable String imageId) {
     this.imageId = imageId;
   }
 
-
-  public UpgradeFreeipaRequest allowMajorOsUpgrade(Boolean allowMajorOsUpgrade) {
+  public UpgradeFreeipaRequest allowMajorOsUpgrade(@javax.annotation.Nullable Boolean allowMajorOsUpgrade) {
     
     this.allowMajorOsUpgrade = allowMajorOsUpgrade;
     return this;
   }
 
-   /**
+  /**
    * Allows the upgrade to a subsequent major OS version in the series.
    * @return allowMajorOsUpgrade
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class UpgradeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAllowMajorOsUpgrade(Boolean allowMajorOsUpgrade) {
+  public void setAllowMajorOsUpgrade(@javax.annotation.Nullable Boolean allowMajorOsUpgrade) {
     this.allowMajorOsUpgrade = allowMajorOsUpgrade;
   }
+
 
   @Override
   public boolean equals(Object o) {

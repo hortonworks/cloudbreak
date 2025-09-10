@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ApiEndPointHost.JSON_PROPERTY_END_POINT_CONFIGS,
   ApiEndPointHost.JSON_PROPERTY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ApiEndPointHost {
   public static final String JSON_PROPERTY_URI = "uri";
+  @javax.annotation.Nullable
   private String uri;
 
   public static final String JSON_PROPERTY_END_POINT_CONFIGS = "endPointConfigs";
+  @javax.annotation.Nullable
   private List<ApiMapEntry> endPointConfigs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nullable
   private String type;
 
   public ApiEndPointHost() {
   }
 
-  public ApiEndPointHost uri(String uri) {
+  public ApiEndPointHost uri(@javax.annotation.Nullable String uri) {
     
     this.uri = uri;
     return this;
   }
 
-   /**
+  /**
    * Uri for the endPoint.
    * @return uri
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,12 +73,11 @@ public class ApiEndPointHost {
 
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUri(String uri) {
+  public void setUri(@javax.annotation.Nullable String uri) {
     this.uri = uri;
   }
 
-
-  public ApiEndPointHost endPointConfigs(List<ApiMapEntry> endPointConfigs) {
+  public ApiEndPointHost endPointConfigs(@javax.annotation.Nullable List<ApiMapEntry> endPointConfigs) {
     
     this.endPointConfigs = endPointConfigs;
     return this;
@@ -89,10 +91,10 @@ public class ApiEndPointHost {
     return this;
   }
 
-   /**
+  /**
    * EndPointHost specific configs.
    * @return endPointConfigs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_POINT_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -104,21 +106,20 @@ public class ApiEndPointHost {
 
   @JsonProperty(JSON_PROPERTY_END_POINT_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndPointConfigs(List<ApiMapEntry> endPointConfigs) {
+  public void setEndPointConfigs(@javax.annotation.Nullable List<ApiMapEntry> endPointConfigs) {
     this.endPointConfigs = endPointConfigs;
   }
 
-
-  public ApiEndPointHost type(String type) {
+  public ApiEndPointHost type(@javax.annotation.Nullable String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * EndPointHost type.
    * @return type
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class ApiEndPointHost {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nullable String type) {
     this.type = type;
   }
+
 
   @Override
   public boolean equals(Object o) {

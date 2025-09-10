@@ -32,24 +32,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetAutomatedSyncEnvironmentStatusResponse.JSON_PROPERTY_SYNC_PENDING_STATE,
   GetAutomatedSyncEnvironmentStatusResponse.JSON_PROPERTY_LAST_SYNC_STATUS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetAutomatedSyncEnvironmentStatusResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nullable
   private String environmentCrn;
 
   /**
    * The state to indicate whether the environment is synced or has a sync pending.
    */
   public enum SyncPendingStateEnum {
-    UNKNOWN("UNKNOWN"),
+    UNKNOWN(String.valueOf("UNKNOWN")),
     
-    SYNC_PENDING("SYNC_PENDING"),
+    SYNC_PENDING(String.valueOf("SYNC_PENDING")),
     
-    SYNCED("SYNCED"),
+    SYNCED(String.valueOf("SYNCED")),
     
-    SYNC_HALTED("SYNC_HALTED"),
+    SYNC_HALTED(String.valueOf("SYNC_HALTED")),
     
-    QUARANTINED("QUARANTINED");
+    QUARANTINED(String.valueOf("QUARANTINED"));
 
     private String value;
 
@@ -79,24 +80,26 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
   }
 
   public static final String JSON_PROPERTY_SYNC_PENDING_STATE = "syncPendingState";
+  @javax.annotation.Nullable
   private SyncPendingStateEnum syncPendingState;
 
   public static final String JSON_PROPERTY_LAST_SYNC_STATUS = "lastSyncStatus";
+  @javax.annotation.Nullable
   private LastAutomatedSyncDetails lastSyncStatus;
 
   public GetAutomatedSyncEnvironmentStatusResponse() {
   }
 
-  public GetAutomatedSyncEnvironmentStatusResponse environmentCrn(String environmentCrn) {
+  public GetAutomatedSyncEnvironmentStatusResponse environmentCrn(@javax.annotation.Nullable String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -108,21 +111,20 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public GetAutomatedSyncEnvironmentStatusResponse syncPendingState(SyncPendingStateEnum syncPendingState) {
+  public GetAutomatedSyncEnvironmentStatusResponse syncPendingState(@javax.annotation.Nullable SyncPendingStateEnum syncPendingState) {
     
     this.syncPendingState = syncPendingState;
     return this;
   }
 
-   /**
+  /**
    * The state to indicate whether the environment is synced or has a sync pending.
    * @return syncPendingState
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SYNC_PENDING_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -134,21 +136,20 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_SYNC_PENDING_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSyncPendingState(SyncPendingStateEnum syncPendingState) {
+  public void setSyncPendingState(@javax.annotation.Nullable SyncPendingStateEnum syncPendingState) {
     this.syncPendingState = syncPendingState;
   }
 
-
-  public GetAutomatedSyncEnvironmentStatusResponse lastSyncStatus(LastAutomatedSyncDetails lastSyncStatus) {
+  public GetAutomatedSyncEnvironmentStatusResponse lastSyncStatus(@javax.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
     
     this.lastSyncStatus = lastSyncStatus;
     return this;
   }
 
-   /**
+  /**
    * Get lastSyncStatus
    * @return lastSyncStatus
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_SYNC_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -160,9 +161,10 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_SYNC_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastSyncStatus(LastAutomatedSyncDetails lastSyncStatus) {
+  public void setLastSyncStatus(@javax.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
     this.lastSyncStatus = lastSyncStatus;
   }
+
 
   @Override
   public boolean equals(Object o) {

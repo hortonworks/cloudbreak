@@ -29,15 +29,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetCredentialPrerequisitesRequest.JSON_PROPERTY_CLOUD_PLATFORM
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetCredentialPrerequisitesRequest {
   /**
    * The kind of cloud platform.
    */
   public enum CloudPlatformEnum {
-    AWS("AWS"),
+    AWS(String.valueOf("AWS")),
     
-    AZURE("AZURE");
+    AZURE(String.valueOf("AZURE"));
 
     private String value;
 
@@ -67,21 +67,22 @@ public class GetCredentialPrerequisitesRequest {
   }
 
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
+  @javax.annotation.Nonnull
   private CloudPlatformEnum cloudPlatform;
 
   public GetCredentialPrerequisitesRequest() {
   }
 
-  public GetCredentialPrerequisitesRequest cloudPlatform(CloudPlatformEnum cloudPlatform) {
+  public GetCredentialPrerequisitesRequest cloudPlatform(@javax.annotation.Nonnull CloudPlatformEnum cloudPlatform) {
     
     this.cloudPlatform = cloudPlatform;
     return this;
   }
 
-   /**
+  /**
    * The kind of cloud platform.
    * @return cloudPlatform
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -93,9 +94,10 @@ public class GetCredentialPrerequisitesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(CloudPlatformEnum cloudPlatform) {
+  public void setCloudPlatform(@javax.annotation.Nonnull CloudPlatformEnum cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
+
 
   @Override
   public boolean equals(Object o) {

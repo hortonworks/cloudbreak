@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvironmentGcpDetails.JSON_PROPERTY_SHARED_PROJECT_ID
 })
 @JsonTypeName("Environment_gcpDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvironmentGcpDetails {
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
+  @javax.annotation.Nullable
   private String sharedProjectId;
 
   public EnvironmentGcpDetails() {
   }
 
-  public EnvironmentGcpDetails sharedProjectId(String sharedProjectId) {
+  public EnvironmentGcpDetails sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     
     this.sharedProjectId = sharedProjectId;
     return this;
   }
 
-   /**
+  /**
    * ID of the Google project where the resources are created.
    * @return sharedProjectId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -59,9 +60,10 @@ public class EnvironmentGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(String sharedProjectId) {
+  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
+
 
   @Override
   public boolean equals(Object o) {

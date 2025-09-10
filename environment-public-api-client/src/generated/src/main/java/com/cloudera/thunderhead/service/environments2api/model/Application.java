@@ -34,30 +34,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Application.JSON_PROPERTY_SERVICES,
   Application.JSON_PROPERTY_CONFIG
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Application {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_SERVICES = "services";
+  @javax.annotation.Nullable
   private Map<String, Service> services = new HashMap<>();
 
   public static final String JSON_PROPERTY_CONFIG = "config";
+  @javax.annotation.Nullable
   private Map<String, String> config = new HashMap<>();
 
   public Application() {
   }
 
-  public Application name(String name) {
+  public Application name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * The name of the service
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -69,12 +72,11 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public Application services(Map<String, Service> services) {
+  public Application services(@javax.annotation.Nullable Map<String, Service> services) {
     
     this.services = services;
     return this;
@@ -88,10 +90,10 @@ public class Application {
     return this;
   }
 
-   /**
+  /**
    * The services provided by the application
    * @return services
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -103,12 +105,11 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServices(Map<String, Service> services) {
+  public void setServices(@javax.annotation.Nullable Map<String, Service> services) {
     this.services = services;
   }
 
-
-  public Application config(Map<String, String> config) {
+  public Application config(@javax.annotation.Nullable Map<String, String> config) {
     
     this.config = config;
     return this;
@@ -122,10 +123,10 @@ public class Application {
     return this;
   }
 
-   /**
+  /**
    * Configuration key values for an application
    * @return config
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -137,9 +138,10 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfig(Map<String, String> config) {
+  public void setConfig(@javax.annotation.Nullable Map<String, String> config) {
     this.config = config;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   TagRequest.JSON_PROPERTY_KEY,
   TagRequest.JSON_PROPERTY_VALUE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class TagRequest {
   public static final String JSON_PROPERTY_KEY = "key";
+  @javax.annotation.Nonnull
   private String key;
 
   public static final String JSON_PROPERTY_VALUE = "value";
+  @javax.annotation.Nonnull
   private String value;
 
   public TagRequest() {
   }
 
-  public TagRequest key(String key) {
+  public TagRequest key(@javax.annotation.Nonnull String key) {
     
     this.key = key;
     return this;
   }
 
-   /**
+  /**
    * The tag&#39;s name.
    * @return key
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class TagRequest {
 
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKey(String key) {
+  public void setKey(@javax.annotation.Nonnull String key) {
     this.key = key;
   }
 
-
-  public TagRequest value(String value) {
+  public TagRequest value(@javax.annotation.Nonnull String value) {
     
     this.value = value;
     return this;
   }
 
-   /**
+  /**
    * The associated value of the tag.
    * @return value
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class TagRequest {
 
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setValue(String value) {
+  public void setValue(@javax.annotation.Nonnull String value) {
     this.value = value;
   }
+
 
   @Override
   public boolean equals(Object o) {

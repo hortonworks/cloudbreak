@@ -32,27 +32,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvironmentAzureDetails.JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS
 })
 @JsonTypeName("Environment_azureDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvironmentAzureDetails {
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
+  @javax.annotation.Nullable
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS = "resourceEncryptionParameters";
+  @javax.annotation.Nullable
   private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
   public EnvironmentAzureDetails() {
   }
 
-  public EnvironmentAzureDetails resourceGroupName(String resourceGroupName) {
+  public EnvironmentAzureDetails resourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
     
     this.resourceGroupName = resourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * Name of an existing Azure resource group to be used for the environment. If it is not specified then new resource groups will be generated.
    * @return resourceGroupName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -64,21 +66,20 @@ public class EnvironmentAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceGroupName(String resourceGroupName) {
+  public void setResourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-
-  public EnvironmentAzureDetails resourceEncryptionParameters(AzureResourceEncryptionParameters resourceEncryptionParameters) {
+  public EnvironmentAzureDetails resourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     
     this.resourceEncryptionParameters = resourceEncryptionParameters;
     return this;
   }
 
-   /**
+  /**
    * Get resourceEncryptionParameters
    * @return resourceEncryptionParameters
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -90,9 +91,10 @@ public class EnvironmentAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceEncryptionParameters(AzureResourceEncryptionParameters resourceEncryptionParameters) {
+  public void setResourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     this.resourceEncryptionParameters = resourceEncryptionParameters;
   }
+
 
   @Override
   public boolean equals(Object o) {

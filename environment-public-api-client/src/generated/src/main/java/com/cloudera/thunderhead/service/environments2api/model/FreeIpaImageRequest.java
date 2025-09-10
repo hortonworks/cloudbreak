@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeIpaImageRequest.JSON_PROPERTY_ID,
   FreeIpaImageRequest.JSON_PROPERTY_OS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeIpaImageRequest {
   public static final String JSON_PROPERTY_CATALOG = "catalog";
+  @javax.annotation.Nullable
   private String catalog;
 
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_OS = "os";
+  @javax.annotation.Nullable
   private String os;
 
   public FreeIpaImageRequest() {
   }
 
-  public FreeIpaImageRequest catalog(String catalog) {
+  public FreeIpaImageRequest catalog(@javax.annotation.Nullable String catalog) {
     
     this.catalog = catalog;
     return this;
   }
 
-   /**
+  /**
    * Image catalog to use for FreeIPA image selection.
    * @return catalog
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalog(String catalog) {
+  public void setCatalog(@javax.annotation.Nullable String catalog) {
     this.catalog = catalog;
   }
 
-
-  public FreeIpaImageRequest id(String id) {
+  public FreeIpaImageRequest id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * Image ID to use for creating FreeIPA instances.
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public FreeIpaImageRequest os(String os) {
+  public FreeIpaImageRequest os(@javax.annotation.Nullable String os) {
     
     this.os = os;
     return this;
   }
 
-   /**
+  /**
    * The OS to use for creating FreeIPA instances.
    * @return os
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(String os) {
+  public void setOs(@javax.annotation.Nullable String os) {
     this.os = os;
   }
+
 
   @Override
   public boolean equals(Object o) {

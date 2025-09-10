@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListConnectedDataServicesResponse.JSON_PROPERTY_RESULT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListConnectedDataServicesResponse {
   public static final String JSON_PROPERTY_RESULT = "result";
+  @javax.annotation.Nonnull
   private List<ConnectedDataService> result = new ArrayList<>();
 
   public ListConnectedDataServicesResponse() {
   }
 
-  public ListConnectedDataServicesResponse result(List<ConnectedDataService> result) {
+  public ListConnectedDataServicesResponse result(@javax.annotation.Nonnull List<ConnectedDataService> result) {
     
     this.result = result;
     return this;
@@ -55,10 +56,10 @@ public class ListConnectedDataServicesResponse {
     return this;
   }
 
-   /**
+  /**
    * List of connected Data Service for the given environment.
    * @return result
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,9 +71,10 @@ public class ListConnectedDataServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResult(List<ConnectedDataService> result) {
+  public void setResult(@javax.annotation.Nonnull List<ConnectedDataService> result) {
     this.result = result;
   }
+
 
   @Override
   public boolean equals(Object o) {

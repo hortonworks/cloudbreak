@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeOpdbServicesRequest.JSON_PROPERTY_ENVIRONMENT,
   DescribeOpdbServicesRequest.JSON_PROPERTY_DATABASE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeOpdbServicesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_DATABASE = "database";
+  @javax.annotation.Nonnull
   private String database;
 
   public DescribeOpdbServicesRequest() {
   }
 
-  public DescribeOpdbServicesRequest environment(String environment) {
+  public DescribeOpdbServicesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class DescribeOpdbServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public DescribeOpdbServicesRequest database(String database) {
+  public DescribeOpdbServicesRequest database(@javax.annotation.Nonnull String database) {
     
     this.database = database;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the Operational Database (OpDB).
    * @return database
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATABASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class DescribeOpdbServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_DATABASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatabase(String database) {
+  public void setDatabase(@javax.annotation.Nonnull String database) {
     this.database = database;
   }
+
 
   @Override
   public boolean equals(Object o) {

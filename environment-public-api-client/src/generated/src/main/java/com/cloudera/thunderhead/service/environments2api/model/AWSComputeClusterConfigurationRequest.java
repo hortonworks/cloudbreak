@@ -34,30 +34,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AWSComputeClusterConfigurationRequest.JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES,
   AWSComputeClusterConfigurationRequest.JSON_PROPERTY_WORKER_NODE_SUBNETS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AWSComputeClusterConfigurationRequest {
   public static final String JSON_PROPERTY_PRIVATE_CLUSTER = "privateCluster";
+  @javax.annotation.Nullable
   private Boolean privateCluster;
 
   public static final String JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES = "kubeApiAuthorizedIpRanges";
+  @javax.annotation.Nullable
   private List<String> kubeApiAuthorizedIpRanges = new ArrayList<>();
 
   public static final String JSON_PROPERTY_WORKER_NODE_SUBNETS = "workerNodeSubnets";
+  @javax.annotation.Nullable
   private List<String> workerNodeSubnets = new ArrayList<>();
 
   public AWSComputeClusterConfigurationRequest() {
   }
 
-  public AWSComputeClusterConfigurationRequest privateCluster(Boolean privateCluster) {
+  public AWSComputeClusterConfigurationRequest privateCluster(@javax.annotation.Nullable Boolean privateCluster) {
     
     this.privateCluster = privateCluster;
     return this;
   }
 
-   /**
+  /**
    * If true, creates private cluster.
    * @return privateCluster
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -69,12 +72,11 @@ public class AWSComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateCluster(Boolean privateCluster) {
+  public void setPrivateCluster(@javax.annotation.Nullable Boolean privateCluster) {
     this.privateCluster = privateCluster;
   }
 
-
-  public AWSComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
+  public AWSComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     return this;
@@ -88,10 +90,10 @@ public class AWSComputeClusterConfigurationRequest {
     return this;
   }
 
-   /**
+  /**
    * Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster.
    * @return kubeApiAuthorizedIpRanges
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -103,12 +105,11 @@ public class AWSComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
+  public void setKubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
   }
 
-
-  public AWSComputeClusterConfigurationRequest workerNodeSubnets(List<String> workerNodeSubnets) {
+  public AWSComputeClusterConfigurationRequest workerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
     
     this.workerNodeSubnets = workerNodeSubnets;
     return this;
@@ -122,10 +123,10 @@ public class AWSComputeClusterConfigurationRequest {
     return this;
   }
 
-   /**
+  /**
    * Specify subnets for Kubernetes Worker Nodes
    * @return workerNodeSubnets
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -137,9 +138,10 @@ public class AWSComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkerNodeSubnets(List<String> workerNodeSubnets) {
+  public void setWorkerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
     this.workerNodeSubnets = workerNodeSubnets;
   }
+
 
   @Override
   public boolean equals(Object o) {

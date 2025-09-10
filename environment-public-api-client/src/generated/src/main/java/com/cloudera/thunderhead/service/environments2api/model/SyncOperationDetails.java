@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SyncOperationDetails.JSON_PROPERTY_MESSAGE,
   SyncOperationDetails.JSON_PROPERTY_ADDITIONAL_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SyncOperationDetails {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nonnull
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nullable
   private String message;
 
   public static final String JSON_PROPERTY_ADDITIONAL_DETAILS = "additionalDetails";
+  @javax.annotation.Nullable
   private List<SyncOperationAdditionalDetail> additionalDetails = new ArrayList<>();
 
   public SyncOperationDetails() {
   }
 
-  public SyncOperationDetails environmentCrn(String environmentCrn) {
+  public SyncOperationDetails environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * environment crn.
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +73,20 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public SyncOperationDetails message(String message) {
+  public SyncOperationDetails message(@javax.annotation.Nullable String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * The detail of the success or failure.
    * @return message
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,12 +98,11 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nullable String message) {
     this.message = message;
   }
 
-
-  public SyncOperationDetails additionalDetails(List<SyncOperationAdditionalDetail> additionalDetails) {
+  public SyncOperationDetails additionalDetails(@javax.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
     
     this.additionalDetails = additionalDetails;
     return this;
@@ -115,10 +116,10 @@ public class SyncOperationDetails {
     return this;
   }
 
-   /**
+  /**
    * List of additional details for a sync operation.
    * @return additionalDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalDetails(List<SyncOperationAdditionalDetail> additionalDetails) {
+  public void setAdditionalDetails(@javax.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
     this.additionalDetails = additionalDetails;
   }
+
 
   @Override
   public boolean equals(Object o) {

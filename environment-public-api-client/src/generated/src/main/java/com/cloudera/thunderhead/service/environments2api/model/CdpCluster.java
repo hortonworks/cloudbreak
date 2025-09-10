@@ -39,39 +39,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdpCluster.JSON_PROPERTY_EXPOSED_SERVICES,
   CdpCluster.JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdpCluster {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
+  @javax.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_CM_URL = "cmUrl";
+  @javax.annotation.Nullable
   private String cmUrl;
 
   public static final String JSON_PROPERTY_VERSION = "version";
+  @javax.annotation.Nullable
   private String version;
 
   public static final String JSON_PROPERTY_EXPOSED_SERVICES = "exposedServices";
+  @javax.annotation.Nullable
   private List<ExposedService> exposedServices = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES = "clusterValidationMessages";
+  @javax.annotation.Nullable
   private List<EnvValidation> clusterValidationMessages = new ArrayList<>();
 
   public CdpCluster() {
   }
 
-  public CdpCluster name(String name) {
+  public CdpCluster name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * Name of cluster.
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -83,21 +89,20 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public CdpCluster displayName(String displayName) {
+  public CdpCluster displayName(@javax.annotation.Nullable String displayName) {
     
     this.displayName = displayName;
     return this;
   }
 
-   /**
+  /**
    * Display name of cluster.
    * @return displayName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -109,21 +114,20 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(String displayName) {
+  public void setDisplayName(@javax.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-
-  public CdpCluster cmUrl(String cmUrl) {
+  public CdpCluster cmUrl(@javax.annotation.Nullable String cmUrl) {
     
     this.cmUrl = cmUrl;
     return this;
   }
 
-   /**
+  /**
    * The Url to Cloudera Manager.
    * @return cmUrl
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -135,21 +139,20 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_CM_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmUrl(String cmUrl) {
+  public void setCmUrl(@javax.annotation.Nullable String cmUrl) {
     this.cmUrl = cmUrl;
   }
 
-
-  public CdpCluster version(String version) {
+  public CdpCluster version(@javax.annotation.Nullable String version) {
     
     this.version = version;
     return this;
   }
 
-   /**
+  /**
    * Version of Cloudera Manager.
    * @return version
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -161,12 +164,11 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersion(String version) {
+  public void setVersion(@javax.annotation.Nullable String version) {
     this.version = version;
   }
 
-
-  public CdpCluster exposedServices(List<ExposedService> exposedServices) {
+  public CdpCluster exposedServices(@javax.annotation.Nullable List<ExposedService> exposedServices) {
     
     this.exposedServices = exposedServices;
     return this;
@@ -180,10 +182,10 @@ public class CdpCluster {
     return this;
   }
 
-   /**
+  /**
    * List of exposed CDP DC services
    * @return exposedServices
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXPOSED_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -195,12 +197,11 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_EXPOSED_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExposedServices(List<ExposedService> exposedServices) {
+  public void setExposedServices(@javax.annotation.Nullable List<ExposedService> exposedServices) {
     this.exposedServices = exposedServices;
   }
 
-
-  public CdpCluster clusterValidationMessages(List<EnvValidation> clusterValidationMessages) {
+  public CdpCluster clusterValidationMessages(@javax.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
     
     this.clusterValidationMessages = clusterValidationMessages;
     return this;
@@ -214,10 +215,10 @@ public class CdpCluster {
     return this;
   }
 
-   /**
+  /**
    * List of cluster validation message.
    * @return clusterValidationMessages
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -229,9 +230,10 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterValidationMessages(List<EnvValidation> clusterValidationMessages) {
+  public void setClusterValidationMessages(@javax.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
     this.clusterValidationMessages = clusterValidationMessages;
   }
+
 
   @Override
   public boolean equals(Object o) {

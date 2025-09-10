@@ -39,45 +39,53 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExistingAzureNetworkRequest.JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID,
   ExistingAzureNetworkRequest.JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ExistingAzureNetworkRequest {
   public static final String JSON_PROPERTY_NETWORK_ID = "networkId";
+  @javax.annotation.Nonnull
   private String networkId;
 
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
+  @javax.annotation.Nonnull
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
+  @javax.annotation.Nonnull
   private Set<String> subnetIds = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
+  @javax.annotation.Nullable
   private String networkName;
 
   public static final String JSON_PROPERTY_SUBNET_NAMES = "subnetNames";
+  @javax.annotation.Nullable
   private Set<String> subnetNames = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDnsZoneId";
+  @javax.annotation.Nullable
   private String databasePrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
+  @javax.annotation.Nullable
   private String aksPrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS = "usePublicDnsForPrivateAks";
+  @javax.annotation.Nullable
   private Boolean usePublicDnsForPrivateAks;
 
   public ExistingAzureNetworkRequest() {
   }
 
-  public ExistingAzureNetworkRequest networkId(String networkId) {
+  public ExistingAzureNetworkRequest networkId(@javax.annotation.Nonnull String networkId) {
     
     this.networkId = networkId;
     return this;
   }
 
-   /**
+  /**
    * The id of the Azure VNet.
    * @return networkId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -89,21 +97,20 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkId(String networkId) {
+  public void setNetworkId(@javax.annotation.Nonnull String networkId) {
     this.networkId = networkId;
   }
 
-
-  public ExistingAzureNetworkRequest resourceGroupName(String resourceGroupName) {
+  public ExistingAzureNetworkRequest resourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
     
     this.resourceGroupName = resourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * The name of the resource group associated with the VNet.
    * @return resourceGroupName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -115,12 +122,11 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResourceGroupName(String resourceGroupName) {
+  public void setResourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-
-  public ExistingAzureNetworkRequest subnetIds(Set<String> subnetIds) {
+  public ExistingAzureNetworkRequest subnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
     
     this.subnetIds = subnetIds;
     return this;
@@ -134,10 +140,10 @@ public class ExistingAzureNetworkRequest {
     return this;
   }
 
-   /**
+  /**
    * One or more subnet ids within the VNet.
    * @return subnetIds
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -150,21 +156,20 @@ public class ExistingAzureNetworkRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubnetIds(Set<String> subnetIds) {
+  public void setSubnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
     this.subnetIds = subnetIds;
   }
 
-
-  public ExistingAzureNetworkRequest networkName(String networkName) {
+  public ExistingAzureNetworkRequest networkName(@javax.annotation.Nullable String networkName) {
     
     this.networkName = networkName;
     return this;
   }
 
-   /**
+  /**
    * The name of the Azure VNet.
    * @return networkName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -176,12 +181,11 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkName(String networkName) {
+  public void setNetworkName(@javax.annotation.Nullable String networkName) {
     this.networkName = networkName;
   }
 
-
-  public ExistingAzureNetworkRequest subnetNames(Set<String> subnetNames) {
+  public ExistingAzureNetworkRequest subnetNames(@javax.annotation.Nullable Set<String> subnetNames) {
     
     this.subnetNames = subnetNames;
     return this;
@@ -195,10 +199,10 @@ public class ExistingAzureNetworkRequest {
     return this;
   }
 
-   /**
+  /**
    * One or more subnet names within the VNet.
    * @return subnetNames
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -211,21 +215,20 @@ public class ExistingAzureNetworkRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetNames(Set<String> subnetNames) {
+  public void setSubnetNames(@javax.annotation.Nullable Set<String> subnetNames) {
     this.subnetNames = subnetNames;
   }
 
-
-  public ExistingAzureNetworkRequest databasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public ExistingAzureNetworkRequest databasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
 
-   /**
+  /**
    * The full Azure resource ID of the existing Private DNS Zone used for Flexible Server and Single Server Databases.
    * @return databasePrivateDnsZoneId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -237,21 +240,20 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public void setDatabasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
   }
 
-
-  public ExistingAzureNetworkRequest aksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+  public ExistingAzureNetworkRequest aksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
     
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     return this;
   }
 
-   /**
+  /**
    * The full Azure resource ID of an existing Private DNS zone used for the AKS.
    * @return aksPrivateDnsZoneId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -263,21 +265,20 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+  public void setAksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
   }
 
-
-  public ExistingAzureNetworkRequest usePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+  public ExistingAzureNetworkRequest usePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
     return this;
   }
 
-   /**
+  /**
    * Use public DNS for all DNS records in a private cluster.
    * @return usePublicDnsForPrivateAks
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -289,9 +290,10 @@ public class ExistingAzureNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUsePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+  public void setUsePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
   }
+
 
   @Override
   public boolean equals(Object o) {

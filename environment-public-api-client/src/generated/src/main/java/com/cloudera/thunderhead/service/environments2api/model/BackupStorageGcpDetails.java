@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   BackupStorageGcpDetails.JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL
 })
 @JsonTypeName("BackupStorage_gcpDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class BackupStorageGcpDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
+  @javax.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
+  @javax.annotation.Nullable
   private String serviceAccountEmail;
 
   public BackupStorageGcpDetails() {
   }
 
-  public BackupStorageGcpDetails storageLocationBase(String storageLocationBase) {
+  public BackupStorageGcpDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     
     this.storageLocationBase = storageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The storage location to use. This should be a gs:// url.
    * @return storageLocationBase
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -63,21 +65,20 @@ public class BackupStorageGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(String storageLocationBase) {
+  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-
-  public BackupStorageGcpDetails serviceAccountEmail(String serviceAccountEmail) {
+  public BackupStorageGcpDetails serviceAccountEmail(@javax.annotation.Nullable String serviceAccountEmail) {
     
     this.serviceAccountEmail = serviceAccountEmail;
     return this;
   }
 
-   /**
+  /**
    * Email ID of the service account associated with the backup instances.
    * @return serviceAccountEmail
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class BackupStorageGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceAccountEmail(String serviceAccountEmail) {
+  public void setServiceAccountEmail(@javax.annotation.Nullable String serviceAccountEmail) {
     this.serviceAccountEmail = serviceAccountEmail;
   }
+
 
   @Override
   public boolean equals(Object o) {

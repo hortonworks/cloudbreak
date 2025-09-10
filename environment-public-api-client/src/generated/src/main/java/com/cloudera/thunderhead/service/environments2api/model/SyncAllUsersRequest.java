@@ -33,18 +33,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SyncAllUsersRequest.JSON_PROPERTY_ENVIRONMENT_NAMES,
   SyncAllUsersRequest.JSON_PROPERTY_ACTOR_CRNS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SyncAllUsersRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAMES = "environmentNames";
+  @javax.annotation.Nullable
   private List<String> environmentNames = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ACTOR_CRNS = "actorCrns";
+  @javax.annotation.Nullable
   private List<String> actorCrns = new ArrayList<>();
 
   public SyncAllUsersRequest() {
   }
 
-  public SyncAllUsersRequest environmentNames(List<String> environmentNames) {
+  public SyncAllUsersRequest environmentNames(@javax.annotation.Nullable List<String> environmentNames) {
     
     this.environmentNames = environmentNames;
     return this;
@@ -58,10 +60,10 @@ public class SyncAllUsersRequest {
     return this;
   }
 
-   /**
+  /**
    * List of environments to be synced. If not present, all environments will be synced.
    * @return environmentNames
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -73,12 +75,11 @@ public class SyncAllUsersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentNames(List<String> environmentNames) {
+  public void setEnvironmentNames(@javax.annotation.Nullable List<String> environmentNames) {
     this.environmentNames = environmentNames;
   }
 
-
-  public SyncAllUsersRequest actorCrns(List<String> actorCrns) {
+  public SyncAllUsersRequest actorCrns(@javax.annotation.Nullable List<String> actorCrns) {
     
     this.actorCrns = actorCrns;
     return this;
@@ -92,10 +93,10 @@ public class SyncAllUsersRequest {
     return this;
   }
 
-   /**
+  /**
    * List of actor crns to be synced. If not present, all actors with environment access will be synced.
    * @return actorCrns
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACTOR_CRNS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -107,9 +108,10 @@ public class SyncAllUsersRequest {
 
   @JsonProperty(JSON_PROPERTY_ACTOR_CRNS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setActorCrns(List<String> actorCrns) {
+  public void setActorCrns(@javax.annotation.Nullable List<String> actorCrns) {
     this.actorCrns = actorCrns;
   }
+
 
   @Override
   public boolean equals(Object o) {

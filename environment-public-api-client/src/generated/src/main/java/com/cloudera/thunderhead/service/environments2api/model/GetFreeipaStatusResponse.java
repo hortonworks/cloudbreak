@@ -35,65 +35,67 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetFreeipaStatusResponse.JSON_PROPERTY_STATUS,
   GetFreeipaStatusResponse.JSON_PROPERTY_INSTANCES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetFreeipaStatusResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nonnull
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   /**
    * The overall status of the FreeIPA cluster
    */
   public enum StatusEnum {
-    REQUESTED("REQUESTED"),
+    REQUESTED(String.valueOf("REQUESTED")),
     
-    CREATE_IN_PROGRESS("CREATE_IN_PROGRESS"),
+    CREATE_IN_PROGRESS(String.valueOf("CREATE_IN_PROGRESS")),
     
-    AVAILABLE("AVAILABLE"),
+    AVAILABLE(String.valueOf("AVAILABLE")),
     
-    STACK_AVAILABLE("STACK_AVAILABLE"),
+    STACK_AVAILABLE(String.valueOf("STACK_AVAILABLE")),
     
-    UPDATE_IN_PROGRESS("UPDATE_IN_PROGRESS"),
+    UPDATE_IN_PROGRESS(String.valueOf("UPDATE_IN_PROGRESS")),
     
-    UPDATE_REQUESTED("UPDATE_REQUESTED"),
+    UPDATE_REQUESTED(String.valueOf("UPDATE_REQUESTED")),
     
-    UPDATE_FAILED("UPDATE_FAILED"),
+    UPDATE_FAILED(String.valueOf("UPDATE_FAILED")),
     
-    CREATE_FAILED("CREATE_FAILED"),
+    CREATE_FAILED(String.valueOf("CREATE_FAILED")),
     
-    DELETE_IN_PROGRESS("DELETE_IN_PROGRESS"),
+    DELETE_IN_PROGRESS(String.valueOf("DELETE_IN_PROGRESS")),
     
-    DELETE_FAILED("DELETE_FAILED"),
+    DELETE_FAILED(String.valueOf("DELETE_FAILED")),
     
-    DELETE_COMPLETED("DELETE_COMPLETED"),
+    DELETE_COMPLETED(String.valueOf("DELETE_COMPLETED")),
     
-    STOPPED("STOPPED"),
+    STOPPED(String.valueOf("STOPPED")),
     
-    STOP_REQUESTED("STOP_REQUESTED"),
+    STOP_REQUESTED(String.valueOf("STOP_REQUESTED")),
     
-    START_REQUESTED("START_REQUESTED"),
+    START_REQUESTED(String.valueOf("START_REQUESTED")),
     
-    STOP_IN_PROGRESS("STOP_IN_PROGRESS"),
+    STOP_IN_PROGRESS(String.valueOf("STOP_IN_PROGRESS")),
     
-    START_IN_PROGRESS("START_IN_PROGRESS"),
+    START_IN_PROGRESS(String.valueOf("START_IN_PROGRESS")),
     
-    START_FAILED("START_FAILED"),
+    START_FAILED(String.valueOf("START_FAILED")),
     
-    STOP_FAILED("STOP_FAILED"),
+    STOP_FAILED(String.valueOf("STOP_FAILED")),
     
-    WAIT_FOR_SYNC("WAIT_FOR_SYNC"),
+    WAIT_FOR_SYNC(String.valueOf("WAIT_FOR_SYNC")),
     
-    MAINTENANCE_MODE_ENABLED("MAINTENANCE_MODE_ENABLED"),
+    MAINTENANCE_MODE_ENABLED(String.valueOf("MAINTENANCE_MODE_ENABLED")),
     
-    UNREACHABLE("UNREACHABLE"),
+    UNREACHABLE(String.valueOf("UNREACHABLE")),
     
-    UNHEALTHY("UNHEALTHY"),
+    UNHEALTHY(String.valueOf("UNHEALTHY")),
     
-    DELETED_ON_PROVIDER_SIDE("DELETED_ON_PROVIDER_SIDE"),
+    DELETED_ON_PROVIDER_SIDE(String.valueOf("DELETED_ON_PROVIDER_SIDE")),
     
-    UNKNOWN("UNKNOWN");
+    UNKNOWN(String.valueOf("UNKNOWN"));
 
     private String value;
 
@@ -123,24 +125,26 @@ public class GetFreeipaStatusResponse {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
+  @javax.annotation.Nonnull
   private Map<String, FreeIPANodeStatus> instances = new HashMap<>();
 
   public GetFreeipaStatusResponse() {
   }
 
-  public GetFreeipaStatusResponse environmentCrn(String environmentCrn) {
+  public GetFreeipaStatusResponse environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -152,21 +156,20 @@ public class GetFreeipaStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public GetFreeipaStatusResponse environmentName(String environmentName) {
+  public GetFreeipaStatusResponse environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the Environment
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -178,21 +181,20 @@ public class GetFreeipaStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public GetFreeipaStatusResponse status(StatusEnum status) {
+  public GetFreeipaStatusResponse status(@javax.annotation.Nonnull StatusEnum status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * The overall status of the FreeIPA cluster
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -204,12 +206,11 @@ public class GetFreeipaStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(StatusEnum status) {
+  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-
-  public GetFreeipaStatusResponse instances(Map<String, FreeIPANodeStatus> instances) {
+  public GetFreeipaStatusResponse instances(@javax.annotation.Nonnull Map<String, FreeIPANodeStatus> instances) {
     
     this.instances = instances;
     return this;
@@ -220,10 +221,10 @@ public class GetFreeipaStatusResponse {
     return this;
   }
 
-   /**
+  /**
    * Status of individual nodes in the FreeIPA cluster
    * @return instances
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -235,9 +236,10 @@ public class GetFreeipaStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInstances(Map<String, FreeIPANodeStatus> instances) {
+  public void setInstances(@javax.annotation.Nonnull Map<String, FreeIPANodeStatus> instances) {
     this.instances = instances;
   }
+
 
   @Override
   public boolean equals(Object o) {

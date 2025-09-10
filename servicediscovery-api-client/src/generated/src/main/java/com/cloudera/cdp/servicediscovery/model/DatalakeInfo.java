@@ -35,39 +35,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DatalakeInfo.JSON_PROPERTY_RUNTIME,
   DatalakeInfo.JSON_PROPERTY_DEPLOYMENT_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DatalakeInfo {
   public static final String JSON_PROPERTY_DATALAKE_CRN = "datalakeCrn";
+  @javax.annotation.Nullable
   private String datalakeCrn;
 
   public static final String JSON_PROPERTY_DATALAKE_NAME = "datalakeName";
+  @javax.annotation.Nullable
   private String datalakeName;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_ENVRIONMENT_NAME = "envrionmentName";
+  @javax.annotation.Nullable
   private String envrionmentName;
 
   public static final String JSON_PROPERTY_RUNTIME = "runtime";
+  @javax.annotation.Nullable
   private String runtime;
 
   public static final String JSON_PROPERTY_DEPLOYMENT_TYPE = "deploymentType";
+  @javax.annotation.Nullable
   private DeploymentType deploymentType;
 
   public DatalakeInfo() {
   }
 
-  public DatalakeInfo datalakeCrn(String datalakeCrn) {
+  public DatalakeInfo datalakeCrn(@javax.annotation.Nullable String datalakeCrn) {
     
     this.datalakeCrn = datalakeCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Datalake
    * @return datalakeCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -79,21 +85,20 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalakeCrn(String datalakeCrn) {
+  public void setDatalakeCrn(@javax.annotation.Nullable String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
   }
 
-
-  public DatalakeInfo datalakeName(String datalakeName) {
+  public DatalakeInfo datalakeName(@javax.annotation.Nullable String datalakeName) {
     
     this.datalakeName = datalakeName;
     return this;
   }
 
-   /**
+  /**
    * The human readable name of the Datalake
    * @return datalakeName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -105,21 +110,20 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalakeName(String datalakeName) {
+  public void setDatalakeName(@javax.annotation.Nullable String datalakeName) {
     this.datalakeName = datalakeName;
   }
 
-
-  public DatalakeInfo environmentCrn(String environmentCrn) {
+  public DatalakeInfo environmentCrn(@javax.annotation.Nullable String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment the Datalake resides in
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -131,21 +135,20 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public DatalakeInfo envrionmentName(String envrionmentName) {
+  public DatalakeInfo envrionmentName(@javax.annotation.Nullable String envrionmentName) {
     
     this.envrionmentName = envrionmentName;
     return this;
   }
 
-   /**
+  /**
    * The human readable name of the environment the Datalake resides in
    * @return envrionmentName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVRIONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -157,21 +160,20 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_ENVRIONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvrionmentName(String envrionmentName) {
+  public void setEnvrionmentName(@javax.annotation.Nullable String envrionmentName) {
     this.envrionmentName = envrionmentName;
   }
 
-
-  public DatalakeInfo runtime(String runtime) {
+  public DatalakeInfo runtime(@javax.annotation.Nullable String runtime) {
     
     this.runtime = runtime;
     return this;
   }
 
-   /**
+  /**
    * An advertised Datalake runtime version
    * @return runtime
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RUNTIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -183,21 +185,20 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_RUNTIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRuntime(String runtime) {
+  public void setRuntime(@javax.annotation.Nullable String runtime) {
     this.runtime = runtime;
   }
 
-
-  public DatalakeInfo deploymentType(DeploymentType deploymentType) {
+  public DatalakeInfo deploymentType(@javax.annotation.Nullable DeploymentType deploymentType) {
     
     this.deploymentType = deploymentType;
     return this;
   }
 
-   /**
+  /**
    * Get deploymentType
    * @return deploymentType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -209,9 +210,10 @@ public class DatalakeInfo {
 
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDeploymentType(DeploymentType deploymentType) {
+  public void setDeploymentType(@javax.annotation.Nullable DeploymentType deploymentType) {
     this.deploymentType = deploymentType;
   }
+
 
   @Override
   public boolean equals(Object o) {

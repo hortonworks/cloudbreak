@@ -34,27 +34,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetOperationResponse.JSON_PROPERTY_STARTED,
   GetOperationResponse.JSON_PROPERTY_ENDED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetOperationResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public static final String JSON_PROPERTY_OPERATION_NAME = "operationName";
+  @javax.annotation.Nullable
   private String operationName;
 
   /**
    * Status of the operation.
    */
   public enum OperationStatusEnum {
-    UNKNOWN("UNKNOWN"),
+    UNKNOWN(String.valueOf("UNKNOWN")),
     
-    RUNNING("RUNNING"),
+    RUNNING(String.valueOf("RUNNING")),
     
-    FAILED("FAILED"),
+    FAILED(String.valueOf("FAILED")),
     
-    FINISHED("FINISHED"),
+    FINISHED(String.valueOf("FINISHED")),
     
-    CANCELLED("CANCELLED");
+    CANCELLED(String.valueOf("CANCELLED"));
 
     private String value;
 
@@ -84,27 +86,30 @@ public class GetOperationResponse {
   }
 
   public static final String JSON_PROPERTY_OPERATION_STATUS = "operationStatus";
+  @javax.annotation.Nullable
   private OperationStatusEnum operationStatus;
 
   public static final String JSON_PROPERTY_STARTED = "started";
+  @javax.annotation.Nullable
   private OffsetDateTime started;
 
   public static final String JSON_PROPERTY_ENDED = "ended";
+  @javax.annotation.Nullable
   private OffsetDateTime ended;
 
   public GetOperationResponse() {
   }
 
-  public GetOperationResponse operationId(String operationId) {
+  public GetOperationResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * Identifier of the operation.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -116,21 +121,20 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
-
-  public GetOperationResponse operationName(String operationName) {
+  public GetOperationResponse operationName(@javax.annotation.Nullable String operationName) {
     
     this.operationName = operationName;
     return this;
   }
 
-   /**
+  /**
    * Name of the operation.
    * @return operationName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -142,21 +146,20 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationName(String operationName) {
+  public void setOperationName(@javax.annotation.Nullable String operationName) {
     this.operationName = operationName;
   }
 
-
-  public GetOperationResponse operationStatus(OperationStatusEnum operationStatus) {
+  public GetOperationResponse operationStatus(@javax.annotation.Nullable OperationStatusEnum operationStatus) {
     
     this.operationStatus = operationStatus;
     return this;
   }
 
-   /**
+  /**
    * Status of the operation.
    * @return operationStatus
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -168,21 +171,20 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationStatus(OperationStatusEnum operationStatus) {
+  public void setOperationStatus(@javax.annotation.Nullable OperationStatusEnum operationStatus) {
     this.operationStatus = operationStatus;
   }
 
-
-  public GetOperationResponse started(OffsetDateTime started) {
+  public GetOperationResponse started(@javax.annotation.Nullable OffsetDateTime started) {
     
     this.started = started;
     return this;
   }
 
-   /**
+  /**
    * Start time of the operation.
    * @return started
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -194,21 +196,20 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStarted(OffsetDateTime started) {
+  public void setStarted(@javax.annotation.Nullable OffsetDateTime started) {
     this.started = started;
   }
 
-
-  public GetOperationResponse ended(OffsetDateTime ended) {
+  public GetOperationResponse ended(@javax.annotation.Nullable OffsetDateTime ended) {
     
     this.ended = ended;
     return this;
   }
 
-   /**
+  /**
    * End time of the operation.
    * @return ended
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -220,9 +221,10 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_ENDED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnded(OffsetDateTime ended) {
+  public void setEnded(@javax.annotation.Nullable OffsetDateTime ended) {
     this.ended = ended;
   }
+
 
   @Override
   public boolean equals(Object o) {

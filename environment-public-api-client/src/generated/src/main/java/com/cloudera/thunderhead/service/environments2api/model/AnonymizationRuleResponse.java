@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AnonymizationRuleResponse.JSON_PROPERTY_VALUE,
   AnonymizationRuleResponse.JSON_PROPERTY_REPLACEMENT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AnonymizationRuleResponse {
   public static final String JSON_PROPERTY_VALUE = "value";
+  @javax.annotation.Nullable
   private String value;
 
   public static final String JSON_PROPERTY_REPLACEMENT = "replacement";
+  @javax.annotation.Nullable
   private String replacement;
 
   public AnonymizationRuleResponse() {
   }
 
-  public AnonymizationRuleResponse value(String value) {
+  public AnonymizationRuleResponse value(@javax.annotation.Nullable String value) {
     
     this.value = value;
     return this;
   }
 
-   /**
+  /**
    * Pattern of the rule that should be redacted.
    * @return value
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class AnonymizationRuleResponse {
 
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setValue(String value) {
+  public void setValue(@javax.annotation.Nullable String value) {
     this.value = value;
   }
 
-
-  public AnonymizationRuleResponse replacement(String replacement) {
+  public AnonymizationRuleResponse replacement(@javax.annotation.Nullable String replacement) {
     
     this.replacement = replacement;
     return this;
   }
 
-   /**
+  /**
    * If rule pattern (value) matches, that will be replaced for this string (default [REDACTED])
    * @return replacement
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPLACEMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class AnonymizationRuleResponse {
 
   @JsonProperty(JSON_PROPERTY_REPLACEMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReplacement(String replacement) {
+  public void setReplacement(@javax.annotation.Nullable String replacement) {
     this.replacement = replacement;
   }
+
 
   @Override
   public boolean equals(Object o) {

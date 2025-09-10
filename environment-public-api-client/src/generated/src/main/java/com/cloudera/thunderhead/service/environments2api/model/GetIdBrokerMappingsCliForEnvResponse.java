@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetIdBrokerMappingsCliForEnvResponse.JSON_PROPERTY_COMMAND
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetIdBrokerMappingsCliForEnvResponse {
   public static final String JSON_PROPERTY_COMMAND = "command";
+  @javax.annotation.Nullable
   private String command;
 
   public GetIdBrokerMappingsCliForEnvResponse() {
   }
 
-  public GetIdBrokerMappingsCliForEnvResponse command(String command) {
+  public GetIdBrokerMappingsCliForEnvResponse command(@javax.annotation.Nullable String command) {
     
     this.command = command;
     return this;
   }
 
-   /**
+  /**
    * cdp cli command string
    * @return command
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class GetIdBrokerMappingsCliForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommand(String command) {
+  public void setCommand(@javax.annotation.Nullable String command) {
     this.command = command;
   }
+
 
   @Override
   public boolean equals(Object o) {

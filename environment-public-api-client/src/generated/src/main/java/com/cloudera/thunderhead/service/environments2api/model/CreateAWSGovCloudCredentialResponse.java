@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CreateAWSGovCloudCredentialResponse.JSON_PROPERTY_CREDENTIAL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateAWSGovCloudCredentialResponse {
   public static final String JSON_PROPERTY_CREDENTIAL = "credential";
+  @javax.annotation.Nonnull
   private Credential credential;
 
   public CreateAWSGovCloudCredentialResponse() {
   }
 
-  public CreateAWSGovCloudCredentialResponse credential(Credential credential) {
+  public CreateAWSGovCloudCredentialResponse credential(@javax.annotation.Nonnull Credential credential) {
     
     this.credential = credential;
     return this;
   }
 
-   /**
+  /**
    * Get credential
    * @return credential
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -59,9 +60,10 @@ public class CreateAWSGovCloudCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredential(Credential credential) {
+  public void setCredential(@javax.annotation.Nonnull Credential credential) {
     this.credential = credential;
   }
+
 
   @Override
   public boolean equals(Object o) {

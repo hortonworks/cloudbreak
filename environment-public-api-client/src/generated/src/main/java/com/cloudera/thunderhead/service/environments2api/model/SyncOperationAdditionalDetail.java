@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SyncOperationAdditionalDetail.JSON_PROPERTY_MESSAGE,
   SyncOperationAdditionalDetail.JSON_PROPERTY_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SyncOperationAdditionalDetail {
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nonnull
   private String message;
 
   public static final String JSON_PROPERTY_DETAILS = "details";
+  @javax.annotation.Nonnull
   private List<String> details = new ArrayList<>();
 
   public SyncOperationAdditionalDetail() {
   }
 
-  public SyncOperationAdditionalDetail message(String message) {
+  public SyncOperationAdditionalDetail message(@javax.annotation.Nonnull String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * The message string for an additional detail.
    * @return message
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class SyncOperationAdditionalDetail {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nonnull String message) {
     this.message = message;
   }
 
-
-  public SyncOperationAdditionalDetail details(List<String> details) {
+  public SyncOperationAdditionalDetail details(@javax.annotation.Nonnull List<String> details) {
     
     this.details = details;
     return this;
@@ -84,10 +85,10 @@ public class SyncOperationAdditionalDetail {
     return this;
   }
 
-   /**
+  /**
    * The array of details strings.
    * @return details
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -99,9 +100,10 @@ public class SyncOperationAdditionalDetail {
 
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDetails(List<String> details) {
+  public void setDetails(@javax.annotation.Nonnull List<String> details) {
     this.details = details;
   }
+
 
   @Override
   public boolean equals(Object o) {

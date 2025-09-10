@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAWSGovCloudCredentialRequest.JSON_PROPERTY_ROLE_ARN,
   CreateAWSGovCloudCredentialRequest.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateAWSGovCloudCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
+  @javax.annotation.Nonnull
   private String roleArn;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public CreateAWSGovCloudCredentialRequest() {
   }
 
-  public CreateAWSGovCloudCredentialRequest credentialName(String credentialName) {
+  public CreateAWSGovCloudCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * The name of the credential.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class CreateAWSGovCloudCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public CreateAWSGovCloudCredentialRequest roleArn(String roleArn) {
+  public CreateAWSGovCloudCredentialRequest roleArn(@javax.annotation.Nonnull String roleArn) {
     
     this.roleArn = roleArn;
     return this;
   }
 
-   /**
+  /**
    * The ARN of the delegated access role.
    * @return roleArn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class CreateAWSGovCloudCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleArn(String roleArn) {
+  public void setRoleArn(@javax.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
   }
 
-
-  public CreateAWSGovCloudCredentialRequest description(String description) {
+  public CreateAWSGovCloudCredentialRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * A description for the credential.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class CreateAWSGovCloudCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
+
 
   @Override
   public boolean equals(Object o) {

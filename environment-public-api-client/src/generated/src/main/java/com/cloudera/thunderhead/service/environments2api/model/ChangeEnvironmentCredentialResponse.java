@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ChangeEnvironmentCredentialResponse.JSON_PROPERTY_ENVIRONMENT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ChangeEnvironmentCredentialResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private EnvironmentSummary environment;
 
   public ChangeEnvironmentCredentialResponse() {
   }
 
-  public ChangeEnvironmentCredentialResponse environment(EnvironmentSummary environment) {
+  public ChangeEnvironmentCredentialResponse environment(@javax.annotation.Nonnull EnvironmentSummary environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * Get environment
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -59,9 +60,10 @@ public class ChangeEnvironmentCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(EnvironmentSummary environment) {
+  public void setEnvironment(@javax.annotation.Nonnull EnvironmentSummary environment) {
     this.environment = environment;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SecurityAccess.JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX,
   SecurityAccess.JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SecurityAccess {
   public static final String JSON_PROPERTY_CIDR = "cidr";
+  @javax.annotation.Nullable
   private String cidr;
 
   public static final String JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX = "securityGroupIdForKnox";
+  @javax.annotation.Nullable
   private String securityGroupIdForKnox;
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
+  @javax.annotation.Nullable
   private String defaultSecurityGroupId;
 
   public SecurityAccess() {
   }
 
-  public SecurityAccess cidr(String cidr) {
+  public SecurityAccess cidr(@javax.annotation.Nullable String cidr) {
     
     this.cidr = cidr;
     return this;
   }
 
-   /**
+  /**
    * CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.
    * @return cidr
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class SecurityAccess {
 
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCidr(String cidr) {
+  public void setCidr(@javax.annotation.Nullable String cidr) {
     this.cidr = cidr;
   }
 
-
-  public SecurityAccess securityGroupIdForKnox(String securityGroupIdForKnox) {
+  public SecurityAccess securityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
     
     this.securityGroupIdForKnox = securityGroupIdForKnox;
     return this;
   }
 
-   /**
+  /**
    * Security group where Knox-enabled hosts are placed.
    * @return securityGroupIdForKnox
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class SecurityAccess {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityGroupIdForKnox(String securityGroupIdForKnox) {
+  public void setSecurityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
     this.securityGroupIdForKnox = securityGroupIdForKnox;
   }
 
-
-  public SecurityAccess defaultSecurityGroupId(String defaultSecurityGroupId) {
+  public SecurityAccess defaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
     
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
 
-   /**
+  /**
    * Security group where all other hosts are placed.
    * @return defaultSecurityGroupId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class SecurityAccess {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultSecurityGroupId(String defaultSecurityGroupId) {
+  public void setDefaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
+
 
   @Override
   public boolean equals(Object o) {

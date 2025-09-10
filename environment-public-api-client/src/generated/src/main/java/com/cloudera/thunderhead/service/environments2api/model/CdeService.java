@@ -37,36 +37,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdeService.JSON_PROPERTY_STATUS,
   CdeService.JSON_PROPERTY_CDE_VCS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdeService {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
+  @javax.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nullable
   private String environmentName;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_CDE_VCS = "cdeVcs";
+  @javax.annotation.Nullable
   private List<CdeVc> cdeVcs;
 
   public CdeService() {
   }
 
-  public CdeService name(String name) {
+  public CdeService name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * Name of the CDE service
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -78,21 +83,20 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public CdeService clusterId(String clusterId) {
+  public CdeService clusterId(@javax.annotation.Nullable String clusterId) {
     
     this.clusterId = clusterId;
     return this;
   }
 
-   /**
+  /**
    * Cluster Id of the CDE Service.
    * @return clusterId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -104,21 +108,20 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(String clusterId) {
+  public void setClusterId(@javax.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-
-  public CdeService environmentName(String environmentName) {
+  public CdeService environmentName(@javax.annotation.Nullable String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the service&#39;s environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +133,20 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public CdeService status(String status) {
+  public CdeService status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of the CDE service.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,12 +158,11 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public CdeService cdeVcs(List<CdeVc> cdeVcs) {
+  public CdeService cdeVcs(@javax.annotation.Nullable List<CdeVc> cdeVcs) {
     
     this.cdeVcs = cdeVcs;
     return this;
@@ -175,10 +176,10 @@ public class CdeService {
     return this;
   }
 
-   /**
+  /**
    * List of virtual clusters associated with the CDE service.
    * @return cdeVcs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDE_VCS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,9 +191,10 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_CDE_VCS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdeVcs(List<CdeVc> cdeVcs) {
+  public void setCdeVcs(@javax.annotation.Nullable List<CdeVc> cdeVcs) {
     this.cdeVcs = cdeVcs;
   }
+
 
   @Override
   public boolean equals(Object o) {

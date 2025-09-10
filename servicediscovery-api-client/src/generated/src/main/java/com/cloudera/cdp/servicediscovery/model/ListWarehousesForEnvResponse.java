@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ListWarehousesForEnvResponse.JSON_PROPERTY_ENVIRONMENT_ID,
   ListWarehousesForEnvResponse.JSON_PROPERTY_WAREHOUSES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListWarehousesForEnvResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_ID = "environmentId";
+  @javax.annotation.Nullable
   private String environmentId;
 
   public static final String JSON_PROPERTY_WAREHOUSES = "warehouses";
+  @javax.annotation.Nullable
   private Map<String, Warehouse> warehouses = new HashMap<>();
 
   public ListWarehousesForEnvResponse() {
   }
 
-  public ListWarehousesForEnvResponse environmentId(String environmentId) {
+  public ListWarehousesForEnvResponse environmentId(@javax.annotation.Nullable String environmentId) {
     
     this.environmentId = environmentId;
     return this;
   }
 
-   /**
+  /**
    * The environment Id the warehouses are in.
    * @return environmentId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -65,12 +67,11 @@ public class ListWarehousesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentId(String environmentId) {
+  public void setEnvironmentId(@javax.annotation.Nullable String environmentId) {
     this.environmentId = environmentId;
   }
 
-
-  public ListWarehousesForEnvResponse warehouses(Map<String, Warehouse> warehouses) {
+  public ListWarehousesForEnvResponse warehouses(@javax.annotation.Nullable Map<String, Warehouse> warehouses) {
     
     this.warehouses = warehouses;
     return this;
@@ -84,10 +85,10 @@ public class ListWarehousesForEnvResponse {
     return this;
   }
 
-   /**
+  /**
    * The map of warehouses for the environment.
    * @return warehouses
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WAREHOUSES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,9 +100,10 @@ public class ListWarehousesForEnvResponse {
 
   @JsonProperty(JSON_PROPERTY_WAREHOUSES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWarehouses(Map<String, Warehouse> warehouses) {
+  public void setWarehouses(@javax.annotation.Nullable Map<String, Warehouse> warehouses) {
     this.warehouses = warehouses;
   }
+
 
   @Override
   public boolean equals(Object o) {

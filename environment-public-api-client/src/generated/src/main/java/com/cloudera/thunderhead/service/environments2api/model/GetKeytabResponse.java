@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetKeytabResponse.JSON_PROPERTY_CONTENTS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetKeytabResponse {
   public static final String JSON_PROPERTY_CONTENTS = "contents";
+  @javax.annotation.Nullable
   private String contents;
 
   public GetKeytabResponse() {
   }
 
-  public GetKeytabResponse contents(String contents) {
+  public GetKeytabResponse contents(@javax.annotation.Nullable String contents) {
     
     this.contents = contents;
     return this;
   }
 
-   /**
+  /**
    * The contents of the keytab encoded as a base64 string.
    * @return contents
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONTENTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class GetKeytabResponse {
 
   @JsonProperty(JSON_PROPERTY_CONTENTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setContents(String contents) {
+  public void setContents(@javax.annotation.Nullable String contents) {
     this.contents = contents;
   }
+
 
   @Override
   public boolean equals(Object o) {

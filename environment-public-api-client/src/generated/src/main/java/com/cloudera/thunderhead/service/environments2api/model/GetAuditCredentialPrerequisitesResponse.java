@@ -36,36 +36,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetAuditCredentialPrerequisitesResponse.JSON_PROPERTY_AZURE,
   GetAuditCredentialPrerequisitesResponse.JSON_PROPERTY_GCP
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetAuditCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
+  @javax.annotation.Nonnull
   private String cloudPlatform;
 
   public static final String JSON_PROPERTY_ACCOUNT_ID = "accountId";
+  @javax.annotation.Nullable
   private String accountId;
 
   public static final String JSON_PROPERTY_AWS = "aws";
+  @javax.annotation.Nullable
   private AwsCredentialPrerequisitesResponse aws;
 
   public static final String JSON_PROPERTY_AZURE = "azure";
+  @javax.annotation.Nullable
   private AzureCredentialPrerequisitesResponse azure;
 
   public static final String JSON_PROPERTY_GCP = "gcp";
+  @javax.annotation.Nullable
   private GcpCredentialPrerequisitesResponse gcp;
 
   public GetAuditCredentialPrerequisitesResponse() {
   }
 
-  public GetAuditCredentialPrerequisitesResponse cloudPlatform(String cloudPlatform) {
+  public GetAuditCredentialPrerequisitesResponse cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     
     this.cloudPlatform = cloudPlatform;
     return this;
   }
 
-   /**
+  /**
    * The name of the given cloud platform
    * @return cloudPlatform
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -77,21 +82,20 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(String cloudPlatform) {
+  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
 
-
-  public GetAuditCredentialPrerequisitesResponse accountId(String accountId) {
+  public GetAuditCredentialPrerequisitesResponse accountId(@javax.annotation.Nullable String accountId) {
     
     this.accountId = accountId;
     return this;
   }
 
-   /**
+  /**
    * The provider specific identifier of the account/subscription/project that is used by Cloudbreak.
    * @return accountId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -103,21 +107,20 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountId(String accountId) {
+  public void setAccountId(@javax.annotation.Nullable String accountId) {
     this.accountId = accountId;
   }
 
-
-  public GetAuditCredentialPrerequisitesResponse aws(AwsCredentialPrerequisitesResponse aws) {
+  public GetAuditCredentialPrerequisitesResponse aws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     
     this.aws = aws;
     return this;
   }
 
-   /**
+  /**
    * Get aws
    * @return aws
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -129,21 +132,20 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(AwsCredentialPrerequisitesResponse aws) {
+  public void setAws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
   }
 
-
-  public GetAuditCredentialPrerequisitesResponse azure(AzureCredentialPrerequisitesResponse azure) {
+  public GetAuditCredentialPrerequisitesResponse azure(@javax.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
     
     this.azure = azure;
     return this;
   }
 
-   /**
+  /**
    * Get azure
    * @return azure
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -155,21 +157,20 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(AzureCredentialPrerequisitesResponse azure) {
+  public void setAzure(@javax.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
     this.azure = azure;
   }
 
-
-  public GetAuditCredentialPrerequisitesResponse gcp(GcpCredentialPrerequisitesResponse gcp) {
+  public GetAuditCredentialPrerequisitesResponse gcp(@javax.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
     
     this.gcp = gcp;
     return this;
   }
 
-   /**
+  /**
    * Get gcp
    * @return gcp
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -181,9 +182,10 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(GcpCredentialPrerequisitesResponse gcp) {
+  public void setGcp(@javax.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
     this.gcp = gcp;
   }
+
 
   @Override
   public boolean equals(Object o) {

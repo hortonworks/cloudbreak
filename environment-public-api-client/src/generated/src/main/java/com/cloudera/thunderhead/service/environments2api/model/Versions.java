@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   Versions.JSON_PROPERTY_FREEIPA
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Versions {
   public static final String JSON_PROPERTY_FREEIPA = "freeipa";
+  @javax.annotation.Nullable
   private List<FreeIpaVersions> freeipa = new ArrayList<>();
 
   public Versions() {
   }
 
-  public Versions freeipa(List<FreeIpaVersions> freeipa) {
+  public Versions freeipa(@javax.annotation.Nullable List<FreeIpaVersions> freeipa) {
     
     this.freeipa = freeipa;
     return this;
@@ -55,10 +56,10 @@ public class Versions {
     return this;
   }
 
-   /**
+  /**
    * List of the FreeIPA-related versions.
    * @return freeipa
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class Versions {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeipa(List<FreeIpaVersions> freeipa) {
+  public void setFreeipa(@javax.annotation.Nullable List<FreeIpaVersions> freeipa) {
     this.freeipa = freeipa;
   }
+
 
   @Override
   public boolean equals(Object o) {

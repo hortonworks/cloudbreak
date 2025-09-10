@@ -37,36 +37,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdwDbc.JSON_PROPERTY_STATUS,
   CdwDbc.JSON_PROPERTY_CDW_VWS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdwDbc {
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_CDW_VWS = "cdwVws";
+  @javax.annotation.Nullable
   private List<CdwVw> cdwVws;
 
   public CdwDbc() {
   }
 
-  public CdwDbc crn(String crn) {
+  public CdwDbc crn(@javax.annotation.Nullable String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Database Catalog.
    * @return crn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -78,21 +83,20 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-
-  public CdwDbc id(String id) {
+  public CdwDbc id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * The ID of the Database Catalog.
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -104,21 +108,20 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public CdwDbc name(String name) {
+  public CdwDbc name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * The name of the Database Catalog.
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +133,20 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public CdwDbc status(String status) {
+  public CdwDbc status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * The status of the Database Catalog.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,12 +158,11 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public CdwDbc cdwVws(List<CdwVw> cdwVws) {
+  public CdwDbc cdwVws(@javax.annotation.Nullable List<CdwVw> cdwVws) {
     
     this.cdwVws = cdwVws;
     return this;
@@ -175,10 +176,10 @@ public class CdwDbc {
     return this;
   }
 
-   /**
+  /**
    * List of virtual warehouse based on the Database Catalog.
    * @return cdwVws
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_VWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,9 +191,10 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_CDW_VWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwVws(List<CdwVw> cdwVws) {
+  public void setCdwVws(@javax.annotation.Nullable List<CdwVw> cdwVws) {
     this.cdwVws = cdwVws;
   }
+
 
   @Override
   public boolean equals(Object o) {

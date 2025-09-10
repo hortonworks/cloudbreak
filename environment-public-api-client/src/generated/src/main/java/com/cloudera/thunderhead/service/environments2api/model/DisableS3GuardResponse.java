@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DisableS3GuardResponse.JSON_PROPERTY_S3_GUARD_RESPONSE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DisableS3GuardResponse {
   public static final String JSON_PROPERTY_S3_GUARD_RESPONSE = "s3GuardResponse";
+  @javax.annotation.Nullable
   private String s3GuardResponse;
 
   public DisableS3GuardResponse() {
   }
 
-  public DisableS3GuardResponse s3GuardResponse(String s3GuardResponse) {
+  public DisableS3GuardResponse s3GuardResponse(@javax.annotation.Nullable String s3GuardResponse) {
     
     this.s3GuardResponse = s3GuardResponse;
     return this;
   }
 
-   /**
+  /**
    * Response status for disabling S3Guard in an environment.
    * @return s3GuardResponse
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_S3_GUARD_RESPONSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class DisableS3GuardResponse {
 
   @JsonProperty(JSON_PROPERTY_S3_GUARD_RESPONSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setS3GuardResponse(String s3GuardResponse) {
+  public void setS3GuardResponse(@javax.annotation.Nullable String s3GuardResponse) {
     this.s3GuardResponse = s3GuardResponse;
   }
+
 
   @Override
   public boolean equals(Object o) {

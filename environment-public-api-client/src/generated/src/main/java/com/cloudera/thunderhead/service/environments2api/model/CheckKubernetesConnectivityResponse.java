@@ -30,15 +30,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CheckKubernetesConnectivityResponse.JSON_PROPERTY_STATUS,
   CheckKubernetesConnectivityResponse.JSON_PROPERTY_MESSAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckKubernetesConnectivityResponse {
   /**
    * Status of Kubernetes cluster. Also indicates connectivity.
    */
   public enum StatusEnum {
-    SUCCESS("SUCCESS"),
+    SUCCESS(String.valueOf("SUCCESS")),
     
-    FAILURE("FAILURE");
+    FAILURE(String.valueOf("FAILURE"));
 
     private String value;
 
@@ -68,24 +68,26 @@ public class CheckKubernetesConnectivityResponse {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nullable
   private String message;
 
   public CheckKubernetesConnectivityResponse() {
   }
 
-  public CheckKubernetesConnectivityResponse status(StatusEnum status) {
+  public CheckKubernetesConnectivityResponse status(@javax.annotation.Nonnull StatusEnum status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of Kubernetes cluster. Also indicates connectivity.
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +99,20 @@ public class CheckKubernetesConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(StatusEnum status) {
+  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-
-  public CheckKubernetesConnectivityResponse message(String message) {
+  public CheckKubernetesConnectivityResponse message(@javax.annotation.Nullable String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * Message explaining the status. Used for Errors.
    * @return message
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -123,9 +124,10 @@ public class CheckKubernetesConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nullable String message) {
     this.message = message;
   }
+
 
   @Override
   public boolean equals(Object o) {

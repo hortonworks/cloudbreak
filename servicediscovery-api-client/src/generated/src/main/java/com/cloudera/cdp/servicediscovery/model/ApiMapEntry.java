@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ApiMapEntry.JSON_PROPERTY_KEY,
   ApiMapEntry.JSON_PROPERTY_VALUE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ApiMapEntry {
   public static final String JSON_PROPERTY_KEY = "key";
+  @javax.annotation.Nullable
   private String key;
 
   public static final String JSON_PROPERTY_VALUE = "value";
+  @javax.annotation.Nullable
   private String value;
 
   public ApiMapEntry() {
   }
 
-  public ApiMapEntry key(String key) {
+  public ApiMapEntry key(@javax.annotation.Nullable String key) {
     
     this.key = key;
     return this;
   }
 
-   /**
+  /**
    * key
    * @return key
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class ApiMapEntry {
 
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKey(String key) {
+  public void setKey(@javax.annotation.Nullable String key) {
     this.key = key;
   }
 
-
-  public ApiMapEntry value(String value) {
+  public ApiMapEntry value(@javax.annotation.Nullable String value) {
     
     this.value = value;
     return this;
   }
 
-   /**
+  /**
    * value
    * @return value
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class ApiMapEntry {
 
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setValue(String value) {
+  public void setValue(@javax.annotation.Nullable String value) {
     this.value = value;
   }
+
 
   @Override
   public boolean equals(Object o) {

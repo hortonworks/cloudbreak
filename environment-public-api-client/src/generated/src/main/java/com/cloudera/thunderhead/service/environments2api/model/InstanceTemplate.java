@@ -36,21 +36,24 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   InstanceTemplate.JSON_PROPERTY_AWS_PROPERTIES,
   InstanceTemplate.JSON_PROPERTY_INSTANCE_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class InstanceTemplate {
   public static final String JSON_PROPERTY_ATTACHED_VOLUMES = "attachedVolumes";
+  @javax.annotation.Nullable
   private List<AttachedVolume> attachedVolumes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_AWS_PROPERTIES = "awsProperties";
+  @javax.annotation.Nullable
   private AwsFreeIpaInstanceTemplateParams awsProperties;
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
+  @javax.annotation.Nullable
   private String instanceType;
 
   public InstanceTemplate() {
   }
 
-  public InstanceTemplate attachedVolumes(List<AttachedVolume> attachedVolumes) {
+  public InstanceTemplate attachedVolumes(@javax.annotation.Nullable List<AttachedVolume> attachedVolumes) {
     
     this.attachedVolumes = attachedVolumes;
     return this;
@@ -64,10 +67,10 @@ public class InstanceTemplate {
     return this;
   }
 
-   /**
+  /**
    * The attached volume configuration(s).
    * @return attachedVolumes
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ATTACHED_VOLUMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -79,21 +82,20 @@ public class InstanceTemplate {
 
   @JsonProperty(JSON_PROPERTY_ATTACHED_VOLUMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAttachedVolumes(List<AttachedVolume> attachedVolumes) {
+  public void setAttachedVolumes(@javax.annotation.Nullable List<AttachedVolume> attachedVolumes) {
     this.attachedVolumes = attachedVolumes;
   }
 
-
-  public InstanceTemplate awsProperties(AwsFreeIpaInstanceTemplateParams awsProperties) {
+  public InstanceTemplate awsProperties(@javax.annotation.Nullable AwsFreeIpaInstanceTemplateParams awsProperties) {
     
     this.awsProperties = awsProperties;
     return this;
   }
 
-   /**
+  /**
    * Get awsProperties
    * @return awsProperties
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -105,21 +107,20 @@ public class InstanceTemplate {
 
   @JsonProperty(JSON_PROPERTY_AWS_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsProperties(AwsFreeIpaInstanceTemplateParams awsProperties) {
+  public void setAwsProperties(@javax.annotation.Nullable AwsFreeIpaInstanceTemplateParams awsProperties) {
     this.awsProperties = awsProperties;
   }
 
-
-  public InstanceTemplate instanceType(String instanceType) {
+  public InstanceTemplate instanceType(@javax.annotation.Nullable String instanceType) {
     
     this.instanceType = instanceType;
     return this;
   }
 
-   /**
+  /**
    * The type of the instance.
    * @return instanceType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -131,9 +132,10 @@ public class InstanceTemplate {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceType(String instanceType) {
+  public void setInstanceType(@javax.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
   }
+
 
   @Override
   public boolean equals(Object o) {

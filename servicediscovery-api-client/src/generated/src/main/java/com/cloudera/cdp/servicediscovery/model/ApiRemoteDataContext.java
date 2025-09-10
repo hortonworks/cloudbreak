@@ -37,33 +37,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ApiRemoteDataContext.JSON_PROPERTY_CONFIGS,
   ApiRemoteDataContext.JSON_PROPERTY_CLUSTER_VERSION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ApiRemoteDataContext {
   public static final String JSON_PROPERTY_END_POINT_ID = "endPointId";
+  @javax.annotation.Nullable
   private String endPointId;
 
   public static final String JSON_PROPERTY_END_POINTS = "endPoints";
+  @javax.annotation.Nullable
   private List<ApiEndPoint> endPoints = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CONFIGS = "configs";
+  @javax.annotation.Nullable
   private List<ApiMapEntry> configs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CLUSTER_VERSION = "clusterVersion";
+  @javax.annotation.Nullable
   private String clusterVersion;
 
   public ApiRemoteDataContext() {
   }
 
-  public ApiRemoteDataContext endPointId(String endPointId) {
+  public ApiRemoteDataContext endPointId(@javax.annotation.Nullable String endPointId) {
     
     this.endPointId = endPointId;
     return this;
   }
 
-   /**
+  /**
    * A string to uniquely identify the SDX cluster.
    * @return endPointId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_POINT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -75,12 +79,11 @@ public class ApiRemoteDataContext {
 
   @JsonProperty(JSON_PROPERTY_END_POINT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndPointId(String endPointId) {
+  public void setEndPointId(@javax.annotation.Nullable String endPointId) {
     this.endPointId = endPointId;
   }
 
-
-  public ApiRemoteDataContext endPoints(List<ApiEndPoint> endPoints) {
+  public ApiRemoteDataContext endPoints(@javax.annotation.Nullable List<ApiEndPoint> endPoints) {
     
     this.endPoints = endPoints;
     return this;
@@ -94,10 +97,10 @@ public class ApiRemoteDataContext {
     return this;
   }
 
-   /**
+  /**
    * List of endPoints exported by this SDX cluster.
    * @return endPoints
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_POINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -109,12 +112,11 @@ public class ApiRemoteDataContext {
 
   @JsonProperty(JSON_PROPERTY_END_POINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndPoints(List<ApiEndPoint> endPoints) {
+  public void setEndPoints(@javax.annotation.Nullable List<ApiEndPoint> endPoints) {
     this.endPoints = endPoints;
   }
 
-
-  public ApiRemoteDataContext configs(List<ApiMapEntry> configs) {
+  public ApiRemoteDataContext configs(@javax.annotation.Nullable List<ApiMapEntry> configs) {
     
     this.configs = configs;
     return this;
@@ -128,10 +130,10 @@ public class ApiRemoteDataContext {
     return this;
   }
 
-   /**
+  /**
    * SDX cluster specifc options.
    * @return configs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -143,21 +145,20 @@ public class ApiRemoteDataContext {
 
   @JsonProperty(JSON_PROPERTY_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfigs(List<ApiMapEntry> configs) {
+  public void setConfigs(@javax.annotation.Nullable List<ApiMapEntry> configs) {
     this.configs = configs;
   }
 
-
-  public ApiRemoteDataContext clusterVersion(String clusterVersion) {
+  public ApiRemoteDataContext clusterVersion(@javax.annotation.Nullable String clusterVersion) {
     
     this.clusterVersion = clusterVersion;
     return this;
   }
 
-   /**
+  /**
    * Cluster version
    * @return clusterVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -169,9 +170,10 @@ public class ApiRemoteDataContext {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterVersion(String clusterVersion) {
+  public void setClusterVersion(@javax.annotation.Nullable String clusterVersion) {
     this.clusterVersion = clusterVersion;
   }
+
 
   @Override
   public boolean equals(Object o) {

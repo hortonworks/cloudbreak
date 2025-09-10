@@ -32,27 +32,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExtractCatalogResponse.JSON_PROPERTY_IMAGES,
   ExtractCatalogResponse.JSON_PROPERTY_VERSIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ExtractCatalogResponse {
   public static final String JSON_PROPERTY_IMAGES = "images";
+  @javax.annotation.Nullable
   private Images images;
 
   public static final String JSON_PROPERTY_VERSIONS = "versions";
+  @javax.annotation.Nullable
   private Versions versions;
 
   public ExtractCatalogResponse() {
   }
 
-  public ExtractCatalogResponse images(Images images) {
+  public ExtractCatalogResponse images(@javax.annotation.Nullable Images images) {
     
     this.images = images;
     return this;
   }
 
-   /**
+  /**
    * Get images
    * @return images
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -64,21 +66,20 @@ public class ExtractCatalogResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(Images images) {
+  public void setImages(@javax.annotation.Nullable Images images) {
     this.images = images;
   }
 
-
-  public ExtractCatalogResponse versions(Versions versions) {
+  public ExtractCatalogResponse versions(@javax.annotation.Nullable Versions versions) {
     
     this.versions = versions;
     return this;
   }
 
-   /**
+  /**
    * Get versions
    * @return versions
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -90,9 +91,10 @@ public class ExtractCatalogResponse {
 
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersions(Versions versions) {
+  public void setVersions(@javax.annotation.Nullable Versions versions) {
     this.versions = versions;
   }
+
 
   @Override
   public boolean equals(Object o) {

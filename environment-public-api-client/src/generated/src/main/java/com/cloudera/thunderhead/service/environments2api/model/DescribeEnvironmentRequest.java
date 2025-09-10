@@ -30,18 +30,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   DescribeEnvironmentRequest.JSON_PROPERTY_OUTPUT_VIEW
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   /**
    * The level of output to be returned. &#39;FULL&#39; is only applicable in Private Cloud and does not affect Public Cloud. If left empty, it defaults to &#39;SUMMARY&#39;.
    */
   public enum OutputViewEnum {
-    SUMMARY("SUMMARY"),
+    SUMMARY(String.valueOf("SUMMARY")),
     
-    FULL("FULL");
+    FULL(String.valueOf("FULL"));
 
     private String value;
 
@@ -71,21 +72,22 @@ public class DescribeEnvironmentRequest {
   }
 
   public static final String JSON_PROPERTY_OUTPUT_VIEW = "outputView";
+  @javax.annotation.Nullable
   private OutputViewEnum outputView;
 
   public DescribeEnvironmentRequest() {
   }
 
-  public DescribeEnvironmentRequest environmentName(String environmentName) {
+  public DescribeEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The names or CRN of the environment. In case of hybrid environments this can be only CRN.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +99,20 @@ public class DescribeEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public DescribeEnvironmentRequest outputView(OutputViewEnum outputView) {
+  public DescribeEnvironmentRequest outputView(@javax.annotation.Nullable OutputViewEnum outputView) {
     
     this.outputView = outputView;
     return this;
   }
 
-   /**
+  /**
    * The level of output to be returned. &#39;FULL&#39; is only applicable in Private Cloud and does not affect Public Cloud. If left empty, it defaults to &#39;SUMMARY&#39;.
    * @return outputView
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTPUT_VIEW)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -123,9 +124,10 @@ public class DescribeEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_OUTPUT_VIEW)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutputView(OutputViewEnum outputView) {
+  public void setOutputView(@javax.annotation.Nullable OutputViewEnum outputView) {
     this.outputView = outputView;
   }
+
 
   @Override
   public boolean equals(Object o) {

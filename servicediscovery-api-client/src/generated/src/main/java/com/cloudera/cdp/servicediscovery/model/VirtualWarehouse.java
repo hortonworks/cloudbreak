@@ -39,45 +39,53 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   VirtualWarehouse.JSON_PROPERTY_STATUS,
   VirtualWarehouse.JSON_PROPERTY_SERVICES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class VirtualWarehouse {
   public static final String JSON_PROPERTY_CRN = "crn";
+  @javax.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_ID = "id";
+  @javax.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
+  @javax.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_DBC_ID = "dbcId";
+  @javax.annotation.Nullable
   private String dbcId;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_SERVICES = "services";
+  @javax.annotation.Nullable
   private Map<String, WarehouseService> services = new HashMap<>();
 
   public VirtualWarehouse() {
   }
 
-  public VirtualWarehouse crn(String crn) {
+  public VirtualWarehouse crn(@javax.annotation.Nullable String crn) {
     
     this.crn = crn;
     return this;
   }
 
-   /**
+  /**
    * crn
    * @return crn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,21 +97,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(String crn) {
+  public void setCrn(@javax.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-
-  public VirtualWarehouse id(String id) {
+  public VirtualWarehouse id(@javax.annotation.Nullable String id) {
     
     this.id = id;
     return this;
   }
 
-   /**
+  /**
    * id
    * @return id
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -115,21 +122,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(String id) {
+  public void setId(@javax.annotation.Nullable String id) {
     this.id = id;
   }
 
-
-  public VirtualWarehouse name(String name) {
+  public VirtualWarehouse name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * name
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -141,21 +147,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public VirtualWarehouse type(String type) {
+  public VirtualWarehouse type(@javax.annotation.Nullable String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * type
    * @return type
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -167,21 +172,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nullable String type) {
     this.type = type;
   }
 
-
-  public VirtualWarehouse clusterId(String clusterId) {
+  public VirtualWarehouse clusterId(@javax.annotation.Nullable String clusterId) {
     
     this.clusterId = clusterId;
     return this;
   }
 
-   /**
+  /**
    * clusterId
    * @return clusterId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -193,21 +197,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(String clusterId) {
+  public void setClusterId(@javax.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-
-  public VirtualWarehouse dbcId(String dbcId) {
+  public VirtualWarehouse dbcId(@javax.annotation.Nullable String dbcId) {
     
     this.dbcId = dbcId;
     return this;
   }
 
-   /**
+  /**
    * dbcId
    * @return dbcId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DBC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -219,21 +222,20 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_DBC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDbcId(String dbcId) {
+  public void setDbcId(@javax.annotation.Nullable String dbcId) {
     this.dbcId = dbcId;
   }
 
-
-  public VirtualWarehouse status(String status) {
+  public VirtualWarehouse status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * status
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -245,12 +247,11 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public VirtualWarehouse services(Map<String, WarehouseService> services) {
+  public VirtualWarehouse services(@javax.annotation.Nullable Map<String, WarehouseService> services) {
     
     this.services = services;
     return this;
@@ -264,10 +265,10 @@ public class VirtualWarehouse {
     return this;
   }
 
-   /**
+  /**
    * The services that make up the warehouse
    * @return services
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -279,9 +280,10 @@ public class VirtualWarehouse {
 
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServices(Map<String, WarehouseService> services) {
+  public void setServices(@javax.annotation.Nullable Map<String, WarehouseService> services) {
     this.services = services;
   }
+
 
   @Override
   public boolean equals(Object o) {

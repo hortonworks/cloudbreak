@@ -35,42 +35,43 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeIPANodeStatus.JSON_PROPERTY_ISSUES,
   FreeIPANodeStatus.JSON_PROPERTY_INSTANCE_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeIPANodeStatus {
   public static final String JSON_PROPERTY_HOSTNAME = "hostname";
+  @javax.annotation.Nonnull
   private String hostname;
 
   /**
    * The status of the individual node
    */
   public enum StatusEnum {
-    REQUESTED("REQUESTED"),
+    REQUESTED(String.valueOf("REQUESTED")),
     
-    CREATED("CREATED"),
+    CREATED(String.valueOf("CREATED")),
     
-    UNREGISTERED("UNREGISTERED"),
+    UNREGISTERED(String.valueOf("UNREGISTERED")),
     
-    REGISTERED("REGISTERED"),
+    REGISTERED(String.valueOf("REGISTERED")),
     
-    DECOMMISSIONED("DECOMMISSIONED"),
+    DECOMMISSIONED(String.valueOf("DECOMMISSIONED")),
     
-    TERMINATED("TERMINATED"),
+    TERMINATED(String.valueOf("TERMINATED")),
     
-    DELETED_ON_PROVIDER_SIDE("DELETED_ON_PROVIDER_SIDE"),
+    DELETED_ON_PROVIDER_SIDE(String.valueOf("DELETED_ON_PROVIDER_SIDE")),
     
-    DELETED_BY_PROVIDER("DELETED_BY_PROVIDER"),
+    DELETED_BY_PROVIDER(String.valueOf("DELETED_BY_PROVIDER")),
     
-    FAILED("FAILED"),
+    FAILED(String.valueOf("FAILED")),
     
-    STOPPED("STOPPED"),
+    STOPPED(String.valueOf("STOPPED")),
     
-    REBOOTING("REBOOTING"),
+    REBOOTING(String.valueOf("REBOOTING")),
     
-    UNREACHABLE("UNREACHABLE"),
+    UNREACHABLE(String.valueOf("UNREACHABLE")),
     
-    UNHEALTHY("UNHEALTHY"),
+    UNHEALTHY(String.valueOf("UNHEALTHY")),
     
-    DELETE_REQUESTED("DELETE_REQUESTED");
+    DELETE_REQUESTED(String.valueOf("DELETE_REQUESTED"));
 
     private String value;
 
@@ -100,27 +101,30 @@ public class FreeIPANodeStatus {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_ISSUES = "issues";
+  @javax.annotation.Nullable
   private List<String> issues = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
+  @javax.annotation.Nullable
   private String instanceId;
 
   public FreeIPANodeStatus() {
   }
 
-  public FreeIPANodeStatus hostname(String hostname) {
+  public FreeIPANodeStatus hostname(@javax.annotation.Nonnull String hostname) {
     
     this.hostname = hostname;
     return this;
   }
 
-   /**
+  /**
    * The hostname of the ipa instance.
    * @return hostname
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -132,21 +136,20 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setHostname(String hostname) {
+  public void setHostname(@javax.annotation.Nonnull String hostname) {
     this.hostname = hostname;
   }
 
-
-  public FreeIPANodeStatus status(StatusEnum status) {
+  public FreeIPANodeStatus status(@javax.annotation.Nonnull StatusEnum status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * The status of the individual node
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -158,12 +161,11 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(StatusEnum status) {
+  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-
-  public FreeIPANodeStatus issues(List<String> issues) {
+  public FreeIPANodeStatus issues(@javax.annotation.Nullable List<String> issues) {
     
     this.issues = issues;
     return this;
@@ -177,10 +179,10 @@ public class FreeIPANodeStatus {
     return this;
   }
 
-   /**
+  /**
    * A list of issues the node is having
    * @return issues
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ISSUES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -192,21 +194,20 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_ISSUES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIssues(List<String> issues) {
+  public void setIssues(@javax.annotation.Nullable List<String> issues) {
     this.issues = issues;
   }
 
-
-  public FreeIPANodeStatus instanceId(String instanceId) {
+  public FreeIPANodeStatus instanceId(@javax.annotation.Nullable String instanceId) {
     
     this.instanceId = instanceId;
     return this;
   }
 
-   /**
+  /**
    * The instance ID for the instance.
    * @return instanceId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -218,9 +219,10 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceId(String instanceId) {
+  public void setInstanceId(@javax.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
   }
+
 
   @Override
   public boolean equals(Object o) {

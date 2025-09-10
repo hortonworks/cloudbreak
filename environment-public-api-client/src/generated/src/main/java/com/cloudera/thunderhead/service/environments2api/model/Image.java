@@ -40,48 +40,57 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Image.JSON_PROPERTY_IMAGES,
   Image.JSON_PROPERTY_PACKAGE_VERSIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Image {
   public static final String JSON_PROPERTY_CREATED = "created";
+  @javax.annotation.Nullable
   private Long created;
 
   public static final String JSON_PROPERTY_DATE = "date";
+  @javax.annotation.Nullable
   private String date;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ADVERTISED = "advertised";
+  @javax.annotation.Nullable
   private Boolean advertised;
 
   public static final String JSON_PROPERTY_OS = "os";
+  @javax.annotation.Nullable
   private String os;
 
   public static final String JSON_PROPERTY_OS_TYPE = "osType";
+  @javax.annotation.Nullable
   private String osType;
 
   public static final String JSON_PROPERTY_UUID = "uuid";
+  @javax.annotation.Nullable
   private String uuid;
 
   public static final String JSON_PROPERTY_IMAGES = "images";
+  @javax.annotation.Nullable
   private ImageReferenceSet images;
 
   public static final String JSON_PROPERTY_PACKAGE_VERSIONS = "packageVersions";
+  @javax.annotation.Nullable
   private Map<String, String> packageVersions = new HashMap<>();
 
   public Image() {
   }
 
-  public Image created(Long created) {
+  public Image created(@javax.annotation.Nullable Long created) {
     
     this.created = created;
     return this;
   }
 
-   /**
+  /**
    * Image creation timestamp.
    * @return created
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -93,21 +102,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreated(Long created) {
+  public void setCreated(@javax.annotation.Nullable Long created) {
     this.created = created;
   }
 
-
-  public Image date(String date) {
+  public Image date(@javax.annotation.Nullable String date) {
     
     this.date = date;
     return this;
   }
 
-   /**
+  /**
    * The date when the image was created.
    * @return date
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -119,21 +127,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDate(String date) {
+  public void setDate(@javax.annotation.Nullable String date) {
     this.date = date;
   }
 
-
-  public Image description(String description) {
+  public Image description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * Description of the image.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -145,21 +152,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public Image advertised(Boolean advertised) {
+  public Image advertised(@javax.annotation.Nullable Boolean advertised) {
     
     this.advertised = advertised;
     return this;
   }
 
-   /**
+  /**
    * Indicates the visibility of the imgae in the catalog.
    * @return advertised
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADVERTISED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -171,21 +177,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_ADVERTISED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdvertised(Boolean advertised) {
+  public void setAdvertised(@javax.annotation.Nullable Boolean advertised) {
     this.advertised = advertised;
   }
 
-
-  public Image os(String os) {
+  public Image os(@javax.annotation.Nullable String os) {
     
     this.os = os;
     return this;
   }
 
-   /**
+  /**
    * Installed OS of the image.
    * @return os
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -197,21 +202,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(String os) {
+  public void setOs(@javax.annotation.Nullable String os) {
     this.os = os;
   }
 
-
-  public Image osType(String osType) {
+  public Image osType(@javax.annotation.Nullable String osType) {
     
     this.osType = osType;
     return this;
   }
 
-   /**
+  /**
    * The distribution family of OS installed on the image.
    * @return osType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -223,21 +227,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_OS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOsType(String osType) {
+  public void setOsType(@javax.annotation.Nullable String osType) {
     this.osType = osType;
   }
 
-
-  public Image uuid(String uuid) {
+  public Image uuid(@javax.annotation.Nullable String uuid) {
     
     this.uuid = uuid;
     return this;
   }
 
-   /**
+  /**
    * The UUID of the image.
    * @return uuid
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_UUID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -249,21 +252,20 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_UUID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUuid(String uuid) {
+  public void setUuid(@javax.annotation.Nullable String uuid) {
     this.uuid = uuid;
   }
 
-
-  public Image images(ImageReferenceSet images) {
+  public Image images(@javax.annotation.Nullable ImageReferenceSet images) {
     
     this.images = images;
     return this;
   }
 
-   /**
+  /**
    * Get images
    * @return images
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -275,12 +277,11 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(ImageReferenceSet images) {
+  public void setImages(@javax.annotation.Nullable ImageReferenceSet images) {
     this.images = images;
   }
 
-
-  public Image packageVersions(Map<String, String> packageVersions) {
+  public Image packageVersions(@javax.annotation.Nullable Map<String, String> packageVersions) {
     
     this.packageVersions = packageVersions;
     return this;
@@ -294,10 +295,10 @@ public class Image {
     return this;
   }
 
-   /**
+  /**
    * Package versions.
    * @return packageVersions
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PACKAGE_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -309,9 +310,10 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_PACKAGE_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPackageVersions(Map<String, String> packageVersions) {
+  public void setPackageVersions(@javax.annotation.Nullable Map<String, String> packageVersions) {
     this.packageVersions = packageVersions;
   }
+
 
   @Override
   public boolean equals(Object o) {

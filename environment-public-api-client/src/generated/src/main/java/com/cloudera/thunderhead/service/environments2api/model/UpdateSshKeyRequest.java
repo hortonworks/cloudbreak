@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateSshKeyRequest.JSON_PROPERTY_NEW_PUBLIC_KEY,
   UpdateSshKeyRequest.JSON_PROPERTY_EXISTING_PUBLIC_KEY_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateSshKeyRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_NEW_PUBLIC_KEY = "newPublicKey";
+  @javax.annotation.Nullable
   private String newPublicKey;
 
   public static final String JSON_PROPERTY_EXISTING_PUBLIC_KEY_ID = "existingPublicKeyId";
+  @javax.annotation.Nullable
   private String existingPublicKeyId;
 
   public UpdateSshKeyRequest() {
   }
 
-  public UpdateSshKeyRequest environment(String environment) {
+  public UpdateSshKeyRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or the CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class UpdateSshKeyRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateSshKeyRequest newPublicKey(String newPublicKey) {
+  public UpdateSshKeyRequest newPublicKey(@javax.annotation.Nullable String newPublicKey) {
     
     this.newPublicKey = newPublicKey;
     return this;
   }
 
-   /**
+  /**
    * A new SSH public key that is stored locally. Either this or an existing public key ID has to be given.
    * @return newPublicKey
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NEW_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class UpdateSshKeyRequest {
 
   @JsonProperty(JSON_PROPERTY_NEW_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNewPublicKey(String newPublicKey) {
+  public void setNewPublicKey(@javax.annotation.Nullable String newPublicKey) {
     this.newPublicKey = newPublicKey;
   }
 
-
-  public UpdateSshKeyRequest existingPublicKeyId(String existingPublicKeyId) {
+  public UpdateSshKeyRequest existingPublicKeyId(@javax.annotation.Nullable String existingPublicKeyId) {
     
     this.existingPublicKeyId = existingPublicKeyId;
     return this;
   }
 
-   /**
+  /**
    * The ID of the existing SSH public key that is stored on the cloud provider side. Either this or a new public key has to be given.
    * @return existingPublicKeyId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXISTING_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class UpdateSshKeyRequest {
 
   @JsonProperty(JSON_PROPERTY_EXISTING_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExistingPublicKeyId(String existingPublicKeyId) {
+  public void setExistingPublicKeyId(@javax.annotation.Nullable String existingPublicKeyId) {
     this.existingPublicKeyId = existingPublicKeyId;
   }
+
 
   @Override
   public boolean equals(Object o) {

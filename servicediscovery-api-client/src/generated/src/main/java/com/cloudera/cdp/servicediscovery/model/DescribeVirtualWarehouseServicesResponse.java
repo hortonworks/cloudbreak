@@ -34,36 +34,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeVirtualWarehouseServicesResponse.JSON_PROPERTY_LAST_UPDATED,
   DescribeVirtualWarehouseServicesResponse.JSON_PROPERTY_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeVirtualWarehouseServicesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
+  @javax.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_VW_ID = "vwId";
+  @javax.annotation.Nullable
   private String vwId;
 
   public static final String JSON_PROPERTY_LAST_UPDATED = "lastUpdated";
+  @javax.annotation.Nullable
   private Long lastUpdated;
 
   public static final String JSON_PROPERTY_DETAILS = "details";
+  @javax.annotation.Nullable
   private VirtualWarehouse details;
 
   public DescribeVirtualWarehouseServicesResponse() {
   }
 
-  public DescribeVirtualWarehouseServicesResponse environment(String environment) {
+  public DescribeVirtualWarehouseServicesResponse environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -75,21 +80,20 @@ public class DescribeVirtualWarehouseServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
 
-
-  public DescribeVirtualWarehouseServicesResponse clusterId(String clusterId) {
+  public DescribeVirtualWarehouseServicesResponse clusterId(@javax.annotation.Nullable String clusterId) {
     
     this.clusterId = clusterId;
     return this;
   }
 
-   /**
+  /**
    * The id of the CDW cluster.
    * @return clusterId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -101,21 +105,20 @@ public class DescribeVirtualWarehouseServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(String clusterId) {
+  public void setClusterId(@javax.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-
-  public DescribeVirtualWarehouseServicesResponse vwId(String vwId) {
+  public DescribeVirtualWarehouseServicesResponse vwId(@javax.annotation.Nullable String vwId) {
     
     this.vwId = vwId;
     return this;
   }
 
-   /**
+  /**
    * The id of the virtual warehouse.
    * @return vwId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VW_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -127,21 +130,20 @@ public class DescribeVirtualWarehouseServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_VW_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVwId(String vwId) {
+  public void setVwId(@javax.annotation.Nullable String vwId) {
     this.vwId = vwId;
   }
 
-
-  public DescribeVirtualWarehouseServicesResponse lastUpdated(Long lastUpdated) {
+  public DescribeVirtualWarehouseServicesResponse lastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     
     this.lastUpdated = lastUpdated;
     return this;
   }
 
-   /**
+  /**
    * The RFC3339 timestamp of the last change to the Virtual Warehouse config. (millis)
    * @return lastUpdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -153,21 +155,20 @@ public class DescribeVirtualWarehouseServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastUpdated(Long lastUpdated) {
+  public void setLastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
-
-  public DescribeVirtualWarehouseServicesResponse details(VirtualWarehouse details) {
+  public DescribeVirtualWarehouseServicesResponse details(@javax.annotation.Nullable VirtualWarehouse details) {
     
     this.details = details;
     return this;
   }
 
-   /**
+  /**
    * Get details
    * @return details
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -179,9 +180,10 @@ public class DescribeVirtualWarehouseServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDetails(VirtualWarehouse details) {
+  public void setDetails(@javax.annotation.Nullable VirtualWarehouse details) {
     this.details = details;
   }
+
 
   @Override
   public boolean equals(Object o) {

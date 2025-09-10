@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeVirtualWarehouseServicesRequest.JSON_PROPERTY_CLUSTER_ID,
   DescribeVirtualWarehouseServicesRequest.JSON_PROPERTY_VW_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeVirtualWarehouseServicesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
+  @javax.annotation.Nonnull
   private String clusterId;
 
   public static final String JSON_PROPERTY_VW_ID = "vwId";
+  @javax.annotation.Nonnull
   private String vwId;
 
   public DescribeVirtualWarehouseServicesRequest() {
   }
 
-  public DescribeVirtualWarehouseServicesRequest environment(String environment) {
+  public DescribeVirtualWarehouseServicesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class DescribeVirtualWarehouseServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public DescribeVirtualWarehouseServicesRequest clusterId(String clusterId) {
+  public DescribeVirtualWarehouseServicesRequest clusterId(@javax.annotation.Nonnull String clusterId) {
     
     this.clusterId = clusterId;
     return this;
   }
 
-   /**
+  /**
    * The id of the CDW cluster.
    * @return clusterId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -92,21 +94,20 @@ public class DescribeVirtualWarehouseServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusterId(String clusterId) {
+  public void setClusterId(@javax.annotation.Nonnull String clusterId) {
     this.clusterId = clusterId;
   }
 
-
-  public DescribeVirtualWarehouseServicesRequest vwId(String vwId) {
+  public DescribeVirtualWarehouseServicesRequest vwId(@javax.annotation.Nonnull String vwId) {
     
     this.vwId = vwId;
     return this;
   }
 
-   /**
+  /**
    * The id of the virtual warehouse.
    * @return vwId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -118,9 +119,10 @@ public class DescribeVirtualWarehouseServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_VW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVwId(String vwId) {
+  public void setVwId(@javax.annotation.Nonnull String vwId) {
     this.vwId = vwId;
   }
+
 
   @Override
   public boolean equals(Object o) {

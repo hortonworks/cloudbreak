@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   Images.JSON_PROPERTY_FREE_IPA_IMAGES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Images {
   public static final String JSON_PROPERTY_FREE_IPA_IMAGES = "freeIpaImages";
+  @javax.annotation.Nullable
   private List<Image> freeIpaImages = new ArrayList<>();
 
   public Images() {
   }
 
-  public Images freeIpaImages(List<Image> freeIpaImages) {
+  public Images freeIpaImages(@javax.annotation.Nullable List<Image> freeIpaImages) {
     
     this.freeIpaImages = freeIpaImages;
     return this;
@@ -55,10 +56,10 @@ public class Images {
     return this;
   }
 
-   /**
+  /**
    * List of the FreeIPA-related images.
    * @return freeIpaImages
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREE_IPA_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class Images {
 
   @JsonProperty(JSON_PROPERTY_FREE_IPA_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeIpaImages(List<Image> freeIpaImages) {
+  public void setFreeIpaImages(@javax.annotation.Nullable List<Image> freeIpaImages) {
     this.freeIpaImages = freeIpaImages;
   }
+
 
   @Override
   public boolean equals(Object o) {

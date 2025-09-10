@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateAwsDiskEncryptionParametersRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateAwsDiskEncryptionParametersRequest.JSON_PROPERTY_ENCRYPTION_KEY_ARN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateAwsDiskEncryptionParametersRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
+  @javax.annotation.Nonnull
   private String encryptionKeyArn;
 
   public UpdateAwsDiskEncryptionParametersRequest() {
   }
 
-  public UpdateAwsDiskEncryptionParametersRequest environment(String environment) {
+  public UpdateAwsDiskEncryptionParametersRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class UpdateAwsDiskEncryptionParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateAwsDiskEncryptionParametersRequest encryptionKeyArn(String encryptionKeyArn) {
+  public UpdateAwsDiskEncryptionParametersRequest encryptionKeyArn(@javax.annotation.Nonnull String encryptionKeyArn) {
     
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
 
-   /**
+  /**
    * The ARN of an encryption key, which will be used to encrypt the AWS EBS volumes, if the entitlement has been granted.
    * @return encryptionKeyArn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class UpdateAwsDiskEncryptionParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEncryptionKeyArn(String encryptionKeyArn) {
+  public void setEncryptionKeyArn(@javax.annotation.Nonnull String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
   }
+
 
   @Override
   public boolean equals(Object o) {

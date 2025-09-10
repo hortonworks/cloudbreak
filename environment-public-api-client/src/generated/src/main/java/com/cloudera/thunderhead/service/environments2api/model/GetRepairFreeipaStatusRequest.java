@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetRepairFreeipaStatusRequest.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetRepairFreeipaStatusRequest {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nonnull
   private String operationId;
 
   public GetRepairFreeipaStatusRequest() {
   }
 
-  public GetRepairFreeipaStatusRequest operationId(String operationId) {
+  public GetRepairFreeipaStatusRequest operationId(@javax.annotation.Nonnull String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * operationId for the previously requested repair operation.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class GetRepairFreeipaStatusRequest {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nonnull String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

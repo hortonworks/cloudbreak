@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   DescribeDatalakeServicesRequest.JSON_PROPERTY_CLUSTERID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeDatalakeServicesRequest {
   public static final String JSON_PROPERTY_CLUSTERID = "clusterid";
+  @javax.annotation.Nonnull
   private String clusterid;
 
   public DescribeDatalakeServicesRequest() {
   }
 
-  public DescribeDatalakeServicesRequest clusterid(String clusterid) {
+  public DescribeDatalakeServicesRequest clusterid(@javax.annotation.Nonnull String clusterid) {
     
     this.clusterid = clusterid;
     return this;
   }
 
-   /**
+  /**
    * The cluster CRN for the request
    * @return clusterid
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTERID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class DescribeDatalakeServicesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusterid(String clusterid) {
+  public void setClusterid(@javax.annotation.Nonnull String clusterid) {
     this.clusterid = clusterid;
   }
+
 
   @Override
   public boolean equals(Object o) {

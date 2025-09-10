@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   StartFreeIpaVerticalScalingResponse.JSON_PROPERTY_RESULT,
   StartFreeIpaVerticalScalingResponse.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class StartFreeIpaVerticalScalingResponse {
   public static final String JSON_PROPERTY_RESULT = "result";
+  @javax.annotation.Nullable
   private String result;
 
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public StartFreeIpaVerticalScalingResponse() {
   }
 
-  public StartFreeIpaVerticalScalingResponse result(String result) {
+  public StartFreeIpaVerticalScalingResponse result(@javax.annotation.Nullable String result) {
     
     this.result = result;
     return this;
   }
 
-   /**
+  /**
    * The result of the operation.
    * @return result
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class StartFreeIpaVerticalScalingResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResult(String result) {
+  public void setResult(@javax.annotation.Nullable String result) {
     this.result = result;
   }
 
-
-  public StartFreeIpaVerticalScalingResponse operationId(String operationId) {
+  public StartFreeIpaVerticalScalingResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class StartFreeIpaVerticalScalingResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

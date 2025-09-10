@@ -35,33 +35,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_TYPE,
   AzureFreeIpaCreationRequest.JSON_PROPERTY_MULTI_AZ
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureFreeIpaCreationRequest {
   public static final String JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP = "instanceCountByGroup";
+  @javax.annotation.Nullable
   private Integer instanceCountByGroup;
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
+  @javax.annotation.Nullable
   private List<String> recipes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
+  @javax.annotation.Nullable
   private String instanceType;
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
+  @javax.annotation.Nullable
   private Boolean multiAz = false;
 
   public AzureFreeIpaCreationRequest() {
   }
 
-  public AzureFreeIpaCreationRequest instanceCountByGroup(Integer instanceCountByGroup) {
+  public AzureFreeIpaCreationRequest instanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
 
-   /**
+  /**
    * The number of FreeIPA instances to create per group when creating FreeIPA in the environment
    * @return instanceCountByGroup
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -73,12 +77,11 @@ public class AzureFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceCountByGroup(Integer instanceCountByGroup) {
+  public void setInstanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
     this.instanceCountByGroup = instanceCountByGroup;
   }
 
-
-  public AzureFreeIpaCreationRequest recipes(List<String> recipes) {
+  public AzureFreeIpaCreationRequest recipes(@javax.annotation.Nullable List<String> recipes) {
     
     this.recipes = recipes;
     return this;
@@ -92,10 +95,10 @@ public class AzureFreeIpaCreationRequest {
     return this;
   }
 
-   /**
+  /**
    * The recipes for the FreeIPA cluster.
    * @return recipes
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -107,21 +110,20 @@ public class AzureFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRecipes(List<String> recipes) {
+  public void setRecipes(@javax.annotation.Nullable List<String> recipes) {
     this.recipes = recipes;
   }
 
-
-  public AzureFreeIpaCreationRequest instanceType(String instanceType) {
+  public AzureFreeIpaCreationRequest instanceType(@javax.annotation.Nullable String instanceType) {
     
     this.instanceType = instanceType;
     return this;
   }
 
-   /**
+  /**
    * Custom instance type of FreeIPA instances.
    * @return instanceType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -133,21 +135,20 @@ public class AzureFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceType(String instanceType) {
+  public void setInstanceType(@javax.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
   }
 
-
-  public AzureFreeIpaCreationRequest multiAz(Boolean multiAz) {
+  public AzureFreeIpaCreationRequest multiAz(@javax.annotation.Nullable Boolean multiAz) {
     
     this.multiAz = multiAz;
     return this;
   }
 
-   /**
+  /**
    * Flag that enables deployment of the FreeIPA in a multi-availability zone.
    * @return multiAz
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -159,9 +160,10 @@ public class AzureFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMultiAz(Boolean multiAz) {
+  public void setMultiAz(@javax.annotation.Nullable Boolean multiAz) {
     this.multiAz = multiAz;
   }
+
 
   @Override
   public boolean equals(Object o) {

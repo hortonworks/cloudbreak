@@ -48,34 +48,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_DESCRIPTION,
   CreatePrivateEnvironmentRequest.JSON_PROPERTY_STORAGE_CLASS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreatePrivateEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_ADDRESS = "address";
+  @javax.annotation.Nonnull
   private String address;
 
   public static final String JSON_PROPERTY_USER = "user";
+  @javax.annotation.Nonnull
   private String user;
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN = "authenticationToken";
+  @javax.annotation.Nonnull
   private String authenticationToken;
 
   public static final String JSON_PROPERTY_CLUSTER_NAMES = "clusterNames";
+  @javax.annotation.Nonnull
   private List<String> clusterNames = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ENVIRONMENT_QUOTA = "environmentQuota";
+  @javax.annotation.Nullable
   private EnvironmentQuota environmentQuota;
 
   public static final String JSON_PROPERTY_KUBE_CONFIG = "kubeConfig";
+  @javax.annotation.Nullable
   private String kubeConfig;
 
   /**
    * How to interpret the authenticationToken field. Defaults to CLEARTEXT_PASSWORD.
    */
   public enum AuthenticationTokenTypeEnum {
-    CLEARTEXT_PASSWORD("CLEARTEXT_PASSWORD");
+    CLEARTEXT_PASSWORD(String.valueOf("CLEARTEXT_PASSWORD"));
 
     private String value;
 
@@ -105,42 +112,50 @@ public class CreatePrivateEnvironmentRequest {
   }
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE = "authenticationTokenType";
+  @javax.annotation.Nullable
   private AuthenticationTokenTypeEnum authenticationTokenType;
 
   public static final String JSON_PROPERTY_NAMESPACE_PREFIX = "namespacePrefix";
+  @javax.annotation.Nullable
   private String namespacePrefix = "cdp";
 
   public static final String JSON_PROPERTY_DOMAIN = "domain";
+  @javax.annotation.Nullable
   private String domain;
 
   public static final String JSON_PROPERTY_PLATFORM = "platform";
+  @javax.annotation.Nullable
   private String platform = "OPENSHIFT";
 
   public static final String JSON_PROPERTY_DOCKER_CONFIG_JSON = "dockerConfigJson";
+  @javax.annotation.Nullable
   private String dockerConfigJson;
 
   public static final String JSON_PROPERTY_DOCKER_USER_PASS = "dockerUserPass";
+  @javax.annotation.Nullable
   private CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_STORAGE_CLASS = "storageClass";
+  @javax.annotation.Nullable
   private String storageClass;
 
   public CreatePrivateEnvironmentRequest() {
   }
 
-  public CreatePrivateEnvironmentRequest environmentName(String environmentName) {
+  public CreatePrivateEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment. Must contain only lowercase letters, numbers and hyphens.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -152,21 +167,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public CreatePrivateEnvironmentRequest address(String address) {
+  public CreatePrivateEnvironmentRequest address(@javax.annotation.Nonnull String address) {
     
     this.address = address;
     return this;
   }
 
-   /**
+  /**
    * The address of the Cloudera Manager managing the Datalake cluster.
    * @return address
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -178,21 +192,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAddress(String address) {
+  public void setAddress(@javax.annotation.Nonnull String address) {
     this.address = address;
   }
 
-
-  public CreatePrivateEnvironmentRequest user(String user) {
+  public CreatePrivateEnvironmentRequest user(@javax.annotation.Nonnull String user) {
     
     this.user = user;
     return this;
   }
 
-   /**
+  /**
    * User name for accessing the Cloudera Manager.
    * @return user
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -204,21 +217,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUser(String user) {
+  public void setUser(@javax.annotation.Nonnull String user) {
     this.user = user;
   }
 
-
-  public CreatePrivateEnvironmentRequest authenticationToken(String authenticationToken) {
+  public CreatePrivateEnvironmentRequest authenticationToken(@javax.annotation.Nonnull String authenticationToken) {
     
     this.authenticationToken = authenticationToken;
     return this;
   }
 
-   /**
+  /**
    * A string (text or json) used to authenticate to the Cloudera Manager.
    * @return authenticationToken
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -230,12 +242,11 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthenticationToken(String authenticationToken) {
+  public void setAuthenticationToken(@javax.annotation.Nonnull String authenticationToken) {
     this.authenticationToken = authenticationToken;
   }
 
-
-  public CreatePrivateEnvironmentRequest clusterNames(List<String> clusterNames) {
+  public CreatePrivateEnvironmentRequest clusterNames(@javax.annotation.Nonnull List<String> clusterNames) {
     
     this.clusterNames = clusterNames;
     return this;
@@ -249,10 +260,10 @@ public class CreatePrivateEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The name of the cluster(s) to use as a Datalake for the environment.
    * @return clusterNames
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -264,21 +275,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusterNames(List<String> clusterNames) {
+  public void setClusterNames(@javax.annotation.Nonnull List<String> clusterNames) {
     this.clusterNames = clusterNames;
   }
 
-
-  public CreatePrivateEnvironmentRequest environmentQuota(EnvironmentQuota environmentQuota) {
+  public CreatePrivateEnvironmentRequest environmentQuota(@javax.annotation.Nullable EnvironmentQuota environmentQuota) {
     
     this.environmentQuota = environmentQuota;
     return this;
   }
 
-   /**
+  /**
    * Get environmentQuota
    * @return environmentQuota
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -290,21 +300,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentQuota(EnvironmentQuota environmentQuota) {
+  public void setEnvironmentQuota(@javax.annotation.Nullable EnvironmentQuota environmentQuota) {
     this.environmentQuota = environmentQuota;
   }
 
-
-  public CreatePrivateEnvironmentRequest kubeConfig(String kubeConfig) {
+  public CreatePrivateEnvironmentRequest kubeConfig(@javax.annotation.Nullable String kubeConfig) {
     
     this.kubeConfig = kubeConfig;
     return this;
   }
 
-   /**
+  /**
    * Name of credentials holding kubeconfig for access to the kubernetes cluster paired with this Environment.
    * @return kubeConfig
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -316,21 +325,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKubeConfig(String kubeConfig) {
+  public void setKubeConfig(@javax.annotation.Nullable String kubeConfig) {
     this.kubeConfig = kubeConfig;
   }
 
-
-  public CreatePrivateEnvironmentRequest authenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+  public CreatePrivateEnvironmentRequest authenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     
     this.authenticationTokenType = authenticationTokenType;
     return this;
   }
 
-   /**
+  /**
    * How to interpret the authenticationToken field. Defaults to CLEARTEXT_PASSWORD.
    * @return authenticationTokenType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -342,21 +350,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+  public void setAuthenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     this.authenticationTokenType = authenticationTokenType;
   }
 
-
-  public CreatePrivateEnvironmentRequest namespacePrefix(String namespacePrefix) {
+  public CreatePrivateEnvironmentRequest namespacePrefix(@javax.annotation.Nullable String namespacePrefix) {
     
     this.namespacePrefix = namespacePrefix;
     return this;
   }
 
-   /**
+  /**
    * Prefix for all namespaces created by Cloudera Data Platform within this cluster.
    * @return namespacePrefix
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAMESPACE_PREFIX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -368,21 +375,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_NAMESPACE_PREFIX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNamespacePrefix(String namespacePrefix) {
+  public void setNamespacePrefix(@javax.annotation.Nullable String namespacePrefix) {
     this.namespacePrefix = namespacePrefix;
   }
 
-
-  public CreatePrivateEnvironmentRequest domain(String domain) {
+  public CreatePrivateEnvironmentRequest domain(@javax.annotation.Nullable String domain) {
     
     this.domain = domain;
     return this;
   }
 
-   /**
+  /**
    * default domain suffix to work workload applications to use.
    * @return domain
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DOMAIN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -394,21 +400,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DOMAIN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDomain(String domain) {
+  public void setDomain(@javax.annotation.Nullable String domain) {
     this.domain = domain;
   }
 
-
-  public CreatePrivateEnvironmentRequest platform(String platform) {
+  public CreatePrivateEnvironmentRequest platform(@javax.annotation.Nullable String platform) {
     
     this.platform = platform;
     return this;
   }
 
-   /**
+  /**
    * the K8s cluster type used for the environment.
    * @return platform
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -420,21 +425,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPlatform(String platform) {
+  public void setPlatform(@javax.annotation.Nullable String platform) {
     this.platform = platform;
   }
 
-
-  public CreatePrivateEnvironmentRequest dockerConfigJson(String dockerConfigJson) {
+  public CreatePrivateEnvironmentRequest dockerConfigJson(@javax.annotation.Nullable String dockerConfigJson) {
     
     this.dockerConfigJson = dockerConfigJson;
     return this;
   }
 
-   /**
+  /**
    * docker pull secrets for the K8s cluster. This is expected to be a docker config json.
    * @return dockerConfigJson
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DOCKER_CONFIG_JSON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -446,21 +450,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DOCKER_CONFIG_JSON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDockerConfigJson(String dockerConfigJson) {
+  public void setDockerConfigJson(@javax.annotation.Nullable String dockerConfigJson) {
     this.dockerConfigJson = dockerConfigJson;
   }
 
-
-  public CreatePrivateEnvironmentRequest dockerUserPass(CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass) {
+  public CreatePrivateEnvironmentRequest dockerUserPass(@javax.annotation.Nullable CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass) {
     
     this.dockerUserPass = dockerUserPass;
     return this;
   }
 
-   /**
+  /**
    * Get dockerUserPass
    * @return dockerUserPass
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DOCKER_USER_PASS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -472,21 +475,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DOCKER_USER_PASS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDockerUserPass(CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass) {
+  public void setDockerUserPass(@javax.annotation.Nullable CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass) {
     this.dockerUserPass = dockerUserPass;
   }
 
-
-  public CreatePrivateEnvironmentRequest description(String description) {
+  public CreatePrivateEnvironmentRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * An description of the environment.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -498,21 +500,20 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public CreatePrivateEnvironmentRequest storageClass(String storageClass) {
+  public CreatePrivateEnvironmentRequest storageClass(@javax.annotation.Nullable String storageClass) {
     
     this.storageClass = storageClass;
     return this;
   }
 
-   /**
+  /**
    * An existing storage class on this kubernetes cluster. If not specified, the default storage class will be used.
    * @return storageClass
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_CLASS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -524,9 +525,10 @@ public class CreatePrivateEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_CLASS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageClass(String storageClass) {
+  public void setStorageClass(@javax.annotation.Nullable String storageClass) {
     this.storageClass = storageClass;
   }
+
 
   @Override
   public boolean equals(Object o) {

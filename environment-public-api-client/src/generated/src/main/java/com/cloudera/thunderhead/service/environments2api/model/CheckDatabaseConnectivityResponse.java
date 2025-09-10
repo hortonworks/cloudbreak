@@ -30,15 +30,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CheckDatabaseConnectivityResponse.JSON_PROPERTY_RESULT,
   CheckDatabaseConnectivityResponse.JSON_PROPERTY_MESSAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckDatabaseConnectivityResponse {
   /**
    * Result of the connectivity check.
    */
   public enum ResultEnum {
-    SUCCESS("SUCCESS"),
+    SUCCESS(String.valueOf("SUCCESS")),
     
-    FAILURE("FAILURE");
+    FAILURE(String.valueOf("FAILURE"));
 
     private String value;
 
@@ -68,24 +68,26 @@ public class CheckDatabaseConnectivityResponse {
   }
 
   public static final String JSON_PROPERTY_RESULT = "result";
+  @javax.annotation.Nonnull
   private ResultEnum result;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
+  @javax.annotation.Nullable
   private String message;
 
   public CheckDatabaseConnectivityResponse() {
   }
 
-  public CheckDatabaseConnectivityResponse result(ResultEnum result) {
+  public CheckDatabaseConnectivityResponse result(@javax.annotation.Nonnull ResultEnum result) {
     
     this.result = result;
     return this;
   }
 
-   /**
+  /**
    * Result of the connectivity check.
    * @return result
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -97,21 +99,20 @@ public class CheckDatabaseConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResult(ResultEnum result) {
+  public void setResult(@javax.annotation.Nonnull ResultEnum result) {
     this.result = result;
   }
 
-
-  public CheckDatabaseConnectivityResponse message(String message) {
+  public CheckDatabaseConnectivityResponse message(@javax.annotation.Nullable String message) {
     
     this.message = message;
     return this;
   }
 
-   /**
+  /**
    * Message explaining the result.
    * @return message
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -123,9 +124,10 @@ public class CheckDatabaseConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(String message) {
+  public void setMessage(@javax.annotation.Nullable String message) {
     this.message = message;
   }
+
 
   @Override
   public boolean equals(Object o) {

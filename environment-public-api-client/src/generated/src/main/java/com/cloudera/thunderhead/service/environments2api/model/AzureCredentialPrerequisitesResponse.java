@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureCredentialPrerequisitesResponse.JSON_PROPERTY_ROLE_DEFINITION_JSON,
   AzureCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_APP_CREATION_COMMAND = "appCreationCommand";
+  @javax.annotation.Nonnull
   private String appCreationCommand;
 
   public static final String JSON_PROPERTY_ROLE_DEFINITION_JSON = "roleDefinitionJson";
+  @javax.annotation.Nonnull
   private String roleDefinitionJson;
 
   public static final String JSON_PROPERTY_POLICIES = "policies";
+  @javax.annotation.Nullable
   private List<CredentialGranularPolicyResponse> policies = new ArrayList<>();
 
   public AzureCredentialPrerequisitesResponse() {
   }
 
-  public AzureCredentialPrerequisitesResponse appCreationCommand(String appCreationCommand) {
+  public AzureCredentialPrerequisitesResponse appCreationCommand(@javax.annotation.Nonnull String appCreationCommand) {
     
     this.appCreationCommand = appCreationCommand;
     return this;
   }
 
-   /**
+  /**
    * Azure CLI command to create Azure AD Application encoded in base64.
    * @return appCreationCommand
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +73,20 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_APP_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppCreationCommand(String appCreationCommand) {
+  public void setAppCreationCommand(@javax.annotation.Nonnull String appCreationCommand) {
     this.appCreationCommand = appCreationCommand;
   }
 
-
-  public AzureCredentialPrerequisitesResponse roleDefinitionJson(String roleDefinitionJson) {
+  public AzureCredentialPrerequisitesResponse roleDefinitionJson(@javax.annotation.Nonnull String roleDefinitionJson) {
     
     this.roleDefinitionJson = roleDefinitionJson;
     return this;
   }
 
-   /**
+  /**
    * The related role definition json encoded in base64
    * @return roleDefinitionJson
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_DEFINITION_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -96,12 +98,11 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ROLE_DEFINITION_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleDefinitionJson(String roleDefinitionJson) {
+  public void setRoleDefinitionJson(@javax.annotation.Nonnull String roleDefinitionJson) {
     this.roleDefinitionJson = roleDefinitionJson;
   }
 
-
-  public AzureCredentialPrerequisitesResponse policies(List<CredentialGranularPolicyResponse> policies) {
+  public AzureCredentialPrerequisitesResponse policies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     
     this.policies = policies;
     return this;
@@ -115,10 +116,10 @@ public class AzureCredentialPrerequisitesResponse {
     return this;
   }
 
-   /**
+  /**
    * The fine-grained policies related to each service.
    * @return policies
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPolicies(List<CredentialGranularPolicyResponse> policies) {
+  public void setPolicies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
   }
+
 
   @Override
   public boolean equals(Object o) {

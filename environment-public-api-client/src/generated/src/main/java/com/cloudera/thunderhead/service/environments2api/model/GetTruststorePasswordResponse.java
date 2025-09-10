@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetTruststorePasswordResponse.JSON_PROPERTY_PASSWORD
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetTruststorePasswordResponse {
   public static final String JSON_PROPERTY_PASSWORD = "password";
+  @javax.annotation.Nullable
   private String password;
 
   public GetTruststorePasswordResponse() {
   }
 
-  public GetTruststorePasswordResponse password(String password) {
+  public GetTruststorePasswordResponse password(@javax.annotation.Nullable String password) {
     
     this.password = password;
     return this;
   }
 
-   /**
+  /**
    * truststore password.
    * @return password
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class GetTruststorePasswordResponse {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPassword(String password) {
+  public void setPassword(@javax.annotation.Nullable String password) {
     this.password = password;
   }
+
 
   @Override
   public boolean equals(Object o) {

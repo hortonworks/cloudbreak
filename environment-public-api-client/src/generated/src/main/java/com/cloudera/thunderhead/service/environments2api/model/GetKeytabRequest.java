@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetKeytabRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   GetKeytabRequest.JSON_PROPERTY_ACTOR_CRN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetKeytabRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_ACTOR_CRN = "actorCrn";
+  @javax.annotation.Nullable
   private String actorCrn;
 
   public GetKeytabRequest() {
   }
 
-  public GetKeytabRequest environmentName(String environmentName) {
+  public GetKeytabRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class GetKeytabRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public GetKeytabRequest actorCrn(String actorCrn) {
+  public GetKeytabRequest actorCrn(@javax.annotation.Nullable String actorCrn) {
     
     this.actorCrn = actorCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the user or machine user to retrieve the keytab for. If it is not included, it defaults to the user making the request.
    * @return actorCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACTOR_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class GetKeytabRequest {
 
   @JsonProperty(JSON_PROPERTY_ACTOR_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setActorCrn(String actorCrn) {
+  public void setActorCrn(@javax.annotation.Nullable String actorCrn) {
     this.actorCrn = actorCrn;
   }
+
 
   @Override
   public boolean equals(Object o) {

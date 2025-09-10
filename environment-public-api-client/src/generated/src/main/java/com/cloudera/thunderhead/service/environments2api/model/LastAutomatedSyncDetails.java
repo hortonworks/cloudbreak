@@ -35,20 +35,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   LastAutomatedSyncDetails.JSON_PROPERTY_STATUS,
   LastAutomatedSyncDetails.JSON_PROPERTY_STATUS_MESSAGES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class LastAutomatedSyncDetails {
   public static final String JSON_PROPERTY_TIMESTAMP = "timestamp";
+  @javax.annotation.Nonnull
   private OffsetDateTime timestamp;
 
   /**
    * The status of the sync.
    */
   public enum StatusEnum {
-    UNKNOWN("UNKNOWN"),
+    UNKNOWN(String.valueOf("UNKNOWN")),
     
-    SUCCESS("SUCCESS"),
+    SUCCESS(String.valueOf("SUCCESS")),
     
-    FAILED("FAILED");
+    FAILED(String.valueOf("FAILED"));
 
     private String value;
 
@@ -78,24 +79,26 @@ public class LastAutomatedSyncDetails {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_STATUS_MESSAGES = "statusMessages";
+  @javax.annotation.Nullable
   private List<String> statusMessages = new ArrayList<>();
 
   public LastAutomatedSyncDetails() {
   }
 
-  public LastAutomatedSyncDetails timestamp(OffsetDateTime timestamp) {
+  public LastAutomatedSyncDetails timestamp(@javax.annotation.Nonnull OffsetDateTime timestamp) {
     
     this.timestamp = timestamp;
     return this;
   }
 
-   /**
+  /**
    * The time when the sync was processed.
    * @return timestamp
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TIMESTAMP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -107,21 +110,20 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_TIMESTAMP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTimestamp(OffsetDateTime timestamp) {
+  public void setTimestamp(@javax.annotation.Nonnull OffsetDateTime timestamp) {
     this.timestamp = timestamp;
   }
 
-
-  public LastAutomatedSyncDetails status(StatusEnum status) {
+  public LastAutomatedSyncDetails status(@javax.annotation.Nonnull StatusEnum status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * The status of the sync.
    * @return status
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -133,12 +135,11 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(StatusEnum status) {
+  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-
-  public LastAutomatedSyncDetails statusMessages(List<String> statusMessages) {
+  public LastAutomatedSyncDetails statusMessages(@javax.annotation.Nullable List<String> statusMessages) {
     
     this.statusMessages = statusMessages;
     return this;
@@ -152,10 +153,10 @@ public class LastAutomatedSyncDetails {
     return this;
   }
 
-   /**
+  /**
    * Additional detail related to the status.
    * @return statusMessages
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -167,9 +168,10 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatusMessages(List<String> statusMessages) {
+  public void setStatusMessages(@javax.annotation.Nullable List<String> statusMessages) {
     this.statusMessages = statusMessages;
   }
+
 
   @Override
   public boolean equals(Object o) {

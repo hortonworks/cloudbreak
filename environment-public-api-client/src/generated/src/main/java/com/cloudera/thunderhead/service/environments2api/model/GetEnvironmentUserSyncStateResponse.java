@@ -30,19 +30,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetEnvironmentUserSyncStateResponse.JSON_PROPERTY_STATE,
   GetEnvironmentUserSyncStateResponse.JSON_PROPERTY_USER_SYNC_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetEnvironmentUserSyncStateResponse {
   /**
    * The user sync state of the environment.
    */
   public enum StateEnum {
-    UP_TO_DATE("UP_TO_DATE"),
+    UP_TO_DATE(String.valueOf("UP_TO_DATE")),
     
-    STALE("STALE"),
+    STALE(String.valueOf("STALE")),
     
-    SYNC_IN_PROGRESS("SYNC_IN_PROGRESS"),
+    SYNC_IN_PROGRESS(String.valueOf("SYNC_IN_PROGRESS")),
     
-    SYNC_FAILED("SYNC_FAILED");
+    SYNC_FAILED(String.valueOf("SYNC_FAILED"));
 
     private String value;
 
@@ -72,24 +72,26 @@ public class GetEnvironmentUserSyncStateResponse {
   }
 
   public static final String JSON_PROPERTY_STATE = "state";
+  @javax.annotation.Nonnull
   private StateEnum state;
 
   public static final String JSON_PROPERTY_USER_SYNC_OPERATION_ID = "userSyncOperationId";
+  @javax.annotation.Nullable
   private String userSyncOperationId;
 
   public GetEnvironmentUserSyncStateResponse() {
   }
 
-  public GetEnvironmentUserSyncStateResponse state(StateEnum state) {
+  public GetEnvironmentUserSyncStateResponse state(@javax.annotation.Nonnull StateEnum state) {
     
     this.state = state;
     return this;
   }
 
-   /**
+  /**
    * The user sync state of the environment.
    * @return state
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -101,21 +103,20 @@ public class GetEnvironmentUserSyncStateResponse {
 
   @JsonProperty(JSON_PROPERTY_STATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setState(StateEnum state) {
+  public void setState(@javax.annotation.Nonnull StateEnum state) {
     this.state = state;
   }
 
-
-  public GetEnvironmentUserSyncStateResponse userSyncOperationId(String userSyncOperationId) {
+  public GetEnvironmentUserSyncStateResponse userSyncOperationId(@javax.annotation.Nullable String userSyncOperationId) {
     
     this.userSyncOperationId = userSyncOperationId;
     return this;
   }
 
-   /**
+  /**
    * Operation Id for the latest user sync operation, if any, run for this environment.
    * @return userSyncOperationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER_SYNC_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -127,9 +128,10 @@ public class GetEnvironmentUserSyncStateResponse {
 
   @JsonProperty(JSON_PROPERTY_USER_SYNC_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserSyncOperationId(String userSyncOperationId) {
+  public void setUserSyncOperationId(@javax.annotation.Nullable String userSyncOperationId) {
     this.userSyncOperationId = userSyncOperationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

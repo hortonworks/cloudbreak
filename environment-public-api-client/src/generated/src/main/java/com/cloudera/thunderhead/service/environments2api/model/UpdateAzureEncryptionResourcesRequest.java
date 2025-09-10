@@ -32,33 +32,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME,
   UpdateAzureEncryptionResourcesRequest.JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateAzureEncryptionResourcesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_URL = "encryptionKeyUrl";
+  @javax.annotation.Nonnull
   private String encryptionKeyUrl;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "encryptionKeyResourceGroupName";
+  @javax.annotation.Nullable
   private String encryptionKeyResourceGroupName;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
+  @javax.annotation.Nullable
   private String encryptionUserManagedIdentity;
 
   public UpdateAzureEncryptionResourcesRequest() {
   }
 
-  public UpdateAzureEncryptionResourcesRequest environment(String environment) {
+  public UpdateAzureEncryptionResourcesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +74,20 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateAzureEncryptionResourcesRequest encryptionKeyUrl(String encryptionKeyUrl) {
+  public UpdateAzureEncryptionResourcesRequest encryptionKeyUrl(@javax.annotation.Nonnull String encryptionKeyUrl) {
     
     this.encryptionKeyUrl = encryptionKeyUrl;
     return this;
   }
 
-   /**
+  /**
    * The URL of an encryption key, which will be used to encrypt the Azure Managed Disks, if the entitlement has been granted.
    * @return encryptionKeyUrl
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -96,21 +99,20 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+  public void setEncryptionKeyUrl(@javax.annotation.Nonnull String encryptionKeyUrl) {
     this.encryptionKeyUrl = encryptionKeyUrl;
   }
 
-
-  public UpdateAzureEncryptionResourcesRequest encryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public UpdateAzureEncryptionResourcesRequest encryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * Name of the existing Azure resource group hosting the Azure Key Vault containing customer managed key which will be used to encrypt the Azure Managed Disks. It is required only when the entitlement is granted and the resource group of the key vault is different from the resource group in which the environment is to be created. Omitting it implies that, the key vault containing the encryption key is present in the same resource group where the environment would be created.
    * @return encryptionKeyResourceGroupName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -122,21 +124,20 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public void setEncryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
   }
 
-
-  public UpdateAzureEncryptionResourcesRequest encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public UpdateAzureEncryptionResourcesRequest encryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
     return this;
   }
 
-   /**
+  /**
    * User managed identity for encryption.
    * @return encryptionUserManagedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,9 +149,10 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public void setEncryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
   }
+
 
   @Override
   public boolean equals(Object o) {

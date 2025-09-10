@@ -35,33 +35,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   BackupStorage.JSON_PROPERTY_AZURE_DETAILS,
   BackupStorage.JSON_PROPERTY_GCP_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class BackupStorage {
   public static final String JSON_PROPERTY_ENABLED = "enabled";
+  @javax.annotation.Nullable
   private Boolean enabled;
 
   public static final String JSON_PROPERTY_AWS_DETAILS = "awsDetails";
+  @javax.annotation.Nullable
   private BackupStorageAwsDetails awsDetails;
 
   public static final String JSON_PROPERTY_AZURE_DETAILS = "azureDetails";
+  @javax.annotation.Nullable
   private BackupStorageAzureDetails azureDetails;
 
   public static final String JSON_PROPERTY_GCP_DETAILS = "gcpDetails";
+  @javax.annotation.Nullable
   private BackupStorageGcpDetails gcpDetails;
 
   public BackupStorage() {
   }
 
-  public BackupStorage enabled(Boolean enabled) {
+  public BackupStorage enabled(@javax.annotation.Nullable Boolean enabled) {
     
     this.enabled = enabled;
     return this;
   }
 
-   /**
+  /**
    * Whether external backup storage is enabled. The default value is disabled.
    * @return enabled
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -73,21 +77,20 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnabled(Boolean enabled) {
+  public void setEnabled(@javax.annotation.Nullable Boolean enabled) {
     this.enabled = enabled;
   }
 
-
-  public BackupStorage awsDetails(BackupStorageAwsDetails awsDetails) {
+  public BackupStorage awsDetails(@javax.annotation.Nullable BackupStorageAwsDetails awsDetails) {
     
     this.awsDetails = awsDetails;
     return this;
   }
 
-   /**
+  /**
    * Get awsDetails
    * @return awsDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,21 +102,20 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDetails(BackupStorageAwsDetails awsDetails) {
+  public void setAwsDetails(@javax.annotation.Nullable BackupStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
   }
 
-
-  public BackupStorage azureDetails(BackupStorageAzureDetails azureDetails) {
+  public BackupStorage azureDetails(@javax.annotation.Nullable BackupStorageAzureDetails azureDetails) {
     
     this.azureDetails = azureDetails;
     return this;
   }
 
-   /**
+  /**
    * Get azureDetails
    * @return azureDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -125,21 +127,20 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDetails(BackupStorageAzureDetails azureDetails) {
+  public void setAzureDetails(@javax.annotation.Nullable BackupStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
   }
 
-
-  public BackupStorage gcpDetails(BackupStorageGcpDetails gcpDetails) {
+  public BackupStorage gcpDetails(@javax.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
     
     this.gcpDetails = gcpDetails;
     return this;
   }
 
-   /**
+  /**
    * Get gcpDetails
    * @return gcpDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -151,9 +152,10 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpDetails(BackupStorageGcpDetails gcpDetails) {
+  public void setGcpDetails(@javax.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
   }
+
 
   @Override
   public boolean equals(Object o) {

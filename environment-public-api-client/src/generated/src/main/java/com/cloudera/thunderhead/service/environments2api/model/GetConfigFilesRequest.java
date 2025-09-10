@@ -35,40 +35,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetConfigFilesRequest.JSON_PROPERTY_SERVICE_OVERRIDE_LIST,
   GetConfigFilesRequest.JSON_PROPERTY_ADDITIONAL_SERVICES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetConfigFilesRequest {
   public static final String JSON_PROPERTY_DATALAKE_CRN = "datalakeCrn";
+  @javax.annotation.Nonnull
   private String datalakeCrn;
 
   /**
    * config file set to retrieve.
    */
   public enum ConfigSetEnum {
-    CLIENT("CLIENT"),
+    CLIENT(String.valueOf("CLIENT")),
     
-    KRB("KRB"),
+    KRB(String.valueOf("KRB")),
     
-    TRUSTSTORE_PEM("TRUSTSTORE_PEM"),
+    TRUSTSTORE_PEM(String.valueOf("TRUSTSTORE_PEM")),
     
-    TRUSTSTORE_JKS("TRUSTSTORE_JKS"),
+    TRUSTSTORE_JKS(String.valueOf("TRUSTSTORE_JKS")),
     
-    VAULT_TRUSTSTORE_PEM("VAULT_TRUSTSTORE_PEM"),
+    VAULT_TRUSTSTORE_PEM(String.valueOf("VAULT_TRUSTSTORE_PEM")),
     
-    VAULT_TRUSTSTORE_JKS("VAULT_TRUSTSTORE_JKS"),
+    VAULT_TRUSTSTORE_JKS(String.valueOf("VAULT_TRUSTSTORE_JKS")),
     
-    DATABASE_TRUSTSTORE_PEM("DATABASE_TRUSTSTORE_PEM"),
+    DATABASE_TRUSTSTORE_PEM(String.valueOf("DATABASE_TRUSTSTORE_PEM")),
     
-    DOCKER_TRUSTSTORE_PEM("DOCKER_TRUSTSTORE_PEM"),
+    DOCKER_TRUSTSTORE_PEM(String.valueOf("DOCKER_TRUSTSTORE_PEM")),
     
-    DWX_DB_HOST("DWX_DB_HOST"),
+    DWX_DB_HOST(String.valueOf("DWX_DB_HOST")),
     
-    DWX_DB_PORT("DWX_DB_PORT"),
+    DWX_DB_PORT(String.valueOf("DWX_DB_PORT")),
     
-    DWX_DB_NAME("DWX_DB_NAME"),
+    DWX_DB_NAME(String.valueOf("DWX_DB_NAME")),
     
-    DWX_DB_USERNAME("DWX_DB_USERNAME"),
+    DWX_DB_USERNAME(String.valueOf("DWX_DB_USERNAME")),
     
-    DWX_DB_PASSWORD("DWX_DB_PASSWORD");
+    DWX_DB_PASSWORD(String.valueOf("DWX_DB_PASSWORD"));
 
     private String value;
 
@@ -98,27 +99,30 @@ public class GetConfigFilesRequest {
   }
 
   public static final String JSON_PROPERTY_CONFIG_SET = "configSet";
+  @javax.annotation.Nullable
   private ConfigSetEnum configSet;
 
   public static final String JSON_PROPERTY_SERVICE_OVERRIDE_LIST = "serviceOverrideList";
+  @javax.annotation.Nullable
   private List<String> serviceOverrideList = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ADDITIONAL_SERVICES = "additionalServices";
+  @javax.annotation.Nullable
   private String additionalServices;
 
   public GetConfigFilesRequest() {
   }
 
-  public GetConfigFilesRequest datalakeCrn(String datalakeCrn) {
+  public GetConfigFilesRequest datalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
     
     this.datalakeCrn = datalakeCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Datalake
    * @return datalakeCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -130,21 +134,20 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatalakeCrn(String datalakeCrn) {
+  public void setDatalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
   }
 
-
-  public GetConfigFilesRequest configSet(ConfigSetEnum configSet) {
+  public GetConfigFilesRequest configSet(@javax.annotation.Nullable ConfigSetEnum configSet) {
     
     this.configSet = configSet;
     return this;
   }
 
-   /**
+  /**
    * config file set to retrieve.
    * @return configSet
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG_SET)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,12 +159,11 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_CONFIG_SET)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfigSet(ConfigSetEnum configSet) {
+  public void setConfigSet(@javax.annotation.Nullable ConfigSetEnum configSet) {
     this.configSet = configSet;
   }
 
-
-  public GetConfigFilesRequest serviceOverrideList(List<String> serviceOverrideList) {
+  public GetConfigFilesRequest serviceOverrideList(@javax.annotation.Nullable List<String> serviceOverrideList) {
     
     this.serviceOverrideList = serviceOverrideList;
     return this;
@@ -175,10 +177,10 @@ public class GetConfigFilesRequest {
     return this;
   }
 
-   /**
+  /**
    * The Datalakservices to collect client configs.
    * @return serviceOverrideList
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_OVERRIDE_LIST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,21 +192,20 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_OVERRIDE_LIST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceOverrideList(List<String> serviceOverrideList) {
+  public void setServiceOverrideList(@javax.annotation.Nullable List<String> serviceOverrideList) {
     this.serviceOverrideList = serviceOverrideList;
   }
 
-
-  public GetConfigFilesRequest additionalServices(String additionalServices) {
+  public GetConfigFilesRequest additionalServices(@javax.annotation.Nullable String additionalServices) {
     
     this.additionalServices = additionalServices;
     return this;
   }
 
-   /**
+  /**
    * A list of service types and role types to get their process configs. The input format must be \&quot;serviceType1,roleType1;serviceType2,roleType2\&quot;. Each service type and its role type maps to a process. Different service type and role type groups are separated by \&quot;;\&quot; and each service type and its associated role type is separated by \&quot;,\&quot;. The input is case sensitive. If the format is wrong or service is not found, exceptions will be thrown. If no roles are found for the service, no config files for that role and service will be returned. e.g. \&quot;HIVE,HIVESERVER2;HUE,HUE_SERVER\&quot;.
    * @return additionalServices
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -216,9 +217,10 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalServices(String additionalServices) {
+  public void setAdditionalServices(@javax.annotation.Nullable String additionalServices) {
     this.additionalServices = additionalServices;
   }
+
 
   @Override
   public boolean equals(Object o) {

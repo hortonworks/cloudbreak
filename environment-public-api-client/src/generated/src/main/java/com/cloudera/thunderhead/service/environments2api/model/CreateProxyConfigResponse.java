@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CreateProxyConfigResponse.JSON_PROPERTY_PROXY_CONFIG
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateProxyConfigResponse {
   public static final String JSON_PROPERTY_PROXY_CONFIG = "proxyConfig";
+  @javax.annotation.Nonnull
   private ProxyConfig proxyConfig;
 
   public CreateProxyConfigResponse() {
   }
 
-  public CreateProxyConfigResponse proxyConfig(ProxyConfig proxyConfig) {
+  public CreateProxyConfigResponse proxyConfig(@javax.annotation.Nonnull ProxyConfig proxyConfig) {
     
     this.proxyConfig = proxyConfig;
     return this;
   }
 
-   /**
+  /**
    * Get proxyConfig
    * @return proxyConfig
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -59,9 +60,10 @@ public class CreateProxyConfigResponse {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProxyConfig(ProxyConfig proxyConfig) {
+  public void setProxyConfig(@javax.annotation.Nonnull ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
   }
+
 
   @Override
   public boolean equals(Object o) {

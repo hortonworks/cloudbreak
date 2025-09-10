@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetCliForEnvironmentResponse.JSON_PROPERTY_COMMAND
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetCliForEnvironmentResponse {
   public static final String JSON_PROPERTY_COMMAND = "command";
+  @javax.annotation.Nullable
   private String command;
 
   public GetCliForEnvironmentResponse() {
   }
 
-  public GetCliForEnvironmentResponse command(String command) {
+  public GetCliForEnvironmentResponse command(@javax.annotation.Nullable String command) {
     
     this.command = command;
     return this;
   }
 
-   /**
+  /**
    * cdp cli command string for creating the environment
    * @return command
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class GetCliForEnvironmentResponse {
 
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommand(String command) {
+  public void setCommand(@javax.annotation.Nullable String command) {
     this.command = command;
   }
+
 
   @Override
   public boolean equals(Object o) {

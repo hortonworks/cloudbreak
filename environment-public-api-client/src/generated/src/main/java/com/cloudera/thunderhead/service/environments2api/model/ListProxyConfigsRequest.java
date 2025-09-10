@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListProxyConfigsRequest.JSON_PROPERTY_PROXY_CONFIG_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListProxyConfigsRequest {
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
+  @javax.annotation.Nullable
   private String proxyConfigName;
 
   public ListProxyConfigsRequest() {
   }
 
-  public ListProxyConfigsRequest proxyConfigName(String proxyConfigName) {
+  public ListProxyConfigsRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     
     this.proxyConfigName = proxyConfigName;
     return this;
   }
 
-   /**
+  /**
    * An optional proxy config name to search by.
    * @return proxyConfigName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -58,9 +59,10 @@ public class ListProxyConfigsRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(String proxyConfigName) {
+  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
+
 
   @Override
   public boolean equals(Object o) {

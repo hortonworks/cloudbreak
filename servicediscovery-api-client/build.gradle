@@ -37,6 +37,7 @@ openApiGenerate {
   inputSpec = "$projectDir/src/main/yaml/servicediscovery.yaml"
   outputDir = "$projectDir/src/generated"
   modelPackage = "com.cloudera.cdp.servicediscovery.model"
+  templateDir = "$projectDir/openapi-templates".toString()
   configOptions.set([
           openApiNullable: "false",
           dateLibrary: "java8"

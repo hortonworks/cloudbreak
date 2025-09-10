@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ModifyDisks.JSON_PROPERTY_SIZE,
   ModifyDisks.JSON_PROPERTY_VOLUME_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ModifyDisks {
   public static final String JSON_PROPERTY_SIZE = "size";
+  @javax.annotation.Nonnull
   private Integer size;
 
   public static final String JSON_PROPERTY_VOLUME_TYPE = "volumeType";
+  @javax.annotation.Nonnull
   private String volumeType;
 
   public ModifyDisks() {
   }
 
-  public ModifyDisks size(Integer size) {
+  public ModifyDisks size(@javax.annotation.Nonnull Integer size) {
     
     this.size = size;
     return this;
   }
 
-   /**
+  /**
    * Size of disks to modify to on all the instances in GB.
    * @return size
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class ModifyDisks {
 
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSize(Integer size) {
+  public void setSize(@javax.annotation.Nonnull Integer size) {
     this.size = size;
   }
 
-
-  public ModifyDisks volumeType(String volumeType) {
+  public ModifyDisks volumeType(@javax.annotation.Nonnull String volumeType) {
     
     this.volumeType = volumeType;
     return this;
   }
 
-   /**
+  /**
    * Type of disks to modify to on all the instances.
    * @return volumeType
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class ModifyDisks {
 
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVolumeType(String volumeType) {
+  public void setVolumeType(@javax.annotation.Nonnull String volumeType) {
     this.volumeType = volumeType;
   }
+
 
   @Override
   public boolean equals(Object o) {

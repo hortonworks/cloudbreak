@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CreateYARNEnvironmentRequest.JSON_PROPERTY_INPUT_JSON
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateYARNEnvironmentRequest {
   public static final String JSON_PROPERTY_INPUT_JSON = "inputJson";
+  @javax.annotation.Nonnull
   private String inputJson;
 
   public CreateYARNEnvironmentRequest() {
   }
 
-  public CreateYARNEnvironmentRequest inputJson(String inputJson) {
+  public CreateYARNEnvironmentRequest inputJson(@javax.annotation.Nonnull String inputJson) {
     
     this.inputJson = inputJson;
     return this;
   }
 
-   /**
+  /**
    * Provides the input values for YCLOUD environment creation in JSON format.
    * @return inputJson
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INPUT_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class CreateYARNEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_INPUT_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInputJson(String inputJson) {
+  public void setInputJson(@javax.annotation.Nonnull String inputJson) {
     this.inputJson = inputJson;
   }
+
 
   @Override
   public boolean equals(Object o) {

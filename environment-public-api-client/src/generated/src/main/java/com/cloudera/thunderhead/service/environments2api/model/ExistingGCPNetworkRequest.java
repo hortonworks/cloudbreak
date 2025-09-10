@@ -34,30 +34,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExistingGCPNetworkRequest.JSON_PROPERTY_SUBNET_NAMES,
   ExistingGCPNetworkRequest.JSON_PROPERTY_SHARED_PROJECT_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ExistingGCPNetworkRequest {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
+  @javax.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_SUBNET_NAMES = "subnetNames";
+  @javax.annotation.Nonnull
   private Set<String> subnetNames = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
+  @javax.annotation.Nullable
   private String sharedProjectId;
 
   public ExistingGCPNetworkRequest() {
   }
 
-  public ExistingGCPNetworkRequest networkName(String networkName) {
+  public ExistingGCPNetworkRequest networkName(@javax.annotation.Nonnull String networkName) {
     
     this.networkName = networkName;
     return this;
   }
 
-   /**
+  /**
    * The name of the GCP VPC.
    * @return networkName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -69,12 +72,11 @@ public class ExistingGCPNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(String networkName) {
+  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-
-  public ExistingGCPNetworkRequest subnetNames(Set<String> subnetNames) {
+  public ExistingGCPNetworkRequest subnetNames(@javax.annotation.Nonnull Set<String> subnetNames) {
     
     this.subnetNames = subnetNames;
     return this;
@@ -88,10 +90,10 @@ public class ExistingGCPNetworkRequest {
     return this;
   }
 
-   /**
+  /**
    * One or more subnet names within the VPC. Google VPC&#39;s are global, please give subnets from single geographic region only to reduce latency.
    * @return subnetNames
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -104,21 +106,20 @@ public class ExistingGCPNetworkRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubnetNames(Set<String> subnetNames) {
+  public void setSubnetNames(@javax.annotation.Nonnull Set<String> subnetNames) {
     this.subnetNames = subnetNames;
   }
 
-
-  public ExistingGCPNetworkRequest sharedProjectId(String sharedProjectId) {
+  public ExistingGCPNetworkRequest sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     
     this.sharedProjectId = sharedProjectId;
     return this;
   }
 
-   /**
+  /**
    * The ID of the Google project associated with the VPC.
    * @return sharedProjectId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class ExistingGCPNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(String sharedProjectId) {
+  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
+
 
   @Override
   public boolean equals(Object o) {

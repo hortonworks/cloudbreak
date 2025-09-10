@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListFreeipaDiagnosticsResponse.JSON_PROPERTY_COLLECTIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListFreeipaDiagnosticsResponse {
   public static final String JSON_PROPERTY_COLLECTIONS = "collections";
+  @javax.annotation.Nullable
   private List<FreeipaDiagnosticsCollectionResponse> collections = new ArrayList<>();
 
   public ListFreeipaDiagnosticsResponse() {
   }
 
-  public ListFreeipaDiagnosticsResponse collections(List<FreeipaDiagnosticsCollectionResponse> collections) {
+  public ListFreeipaDiagnosticsResponse collections(@javax.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
     
     this.collections = collections;
     return this;
@@ -55,10 +56,10 @@ public class ListFreeipaDiagnosticsResponse {
     return this;
   }
 
-   /**
+  /**
    * description.
    * @return collections
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COLLECTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,9 +71,10 @@ public class ListFreeipaDiagnosticsResponse {
 
   @JsonProperty(JSON_PROPERTY_COLLECTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCollections(List<FreeipaDiagnosticsCollectionResponse> collections) {
+  public void setCollections(@javax.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
     this.collections = collections;
   }
+
 
   @Override
   public boolean equals(Object o) {

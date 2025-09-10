@@ -35,36 +35,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureCredentialProperties.JSON_PROPERTY_AUTHENTICATION_TYPE,
   AzureCredentialProperties.JSON_PROPERTY_CERTIFICATE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureCredentialProperties {
   public static final String JSON_PROPERTY_SUBSCRIPTION_ID = "subscriptionId";
+  @javax.annotation.Nullable
   private String subscriptionId;
 
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
+  @javax.annotation.Nullable
   private String tenantId;
 
   public static final String JSON_PROPERTY_APP_ID = "appId";
+  @javax.annotation.Nullable
   private String appId;
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TYPE = "authenticationType";
+  @javax.annotation.Nullable
   private AzureAuthenticationTypeProperties authenticationType;
 
   public static final String JSON_PROPERTY_CERTIFICATE = "certificate";
+  @javax.annotation.Nullable
   private AzureCredentialCertificateProperties certificate;
 
   public AzureCredentialProperties() {
   }
 
-  public AzureCredentialProperties subscriptionId(String subscriptionId) {
+  public AzureCredentialProperties subscriptionId(@javax.annotation.Nullable String subscriptionId) {
     
     this.subscriptionId = subscriptionId;
     return this;
   }
 
-   /**
+  /**
    * The Azure subscription ID for the given credential.
    * @return subscriptionId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -76,21 +81,20 @@ public class AzureCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubscriptionId(String subscriptionId) {
+  public void setSubscriptionId(@javax.annotation.Nullable String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
-
-  public AzureCredentialProperties tenantId(String tenantId) {
+  public AzureCredentialProperties tenantId(@javax.annotation.Nullable String tenantId) {
     
     this.tenantId = tenantId;
     return this;
   }
 
-   /**
+  /**
    * The Azure tenant ID for the given credential.
    * @return tenantId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -102,21 +106,20 @@ public class AzureCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTenantId(String tenantId) {
+  public void setTenantId(@javax.annotation.Nullable String tenantId) {
     this.tenantId = tenantId;
   }
 
-
-  public AzureCredentialProperties appId(String appId) {
+  public AzureCredentialProperties appId(@javax.annotation.Nullable String appId) {
     
     this.appId = appId;
     return this;
   }
 
-   /**
+  /**
    * The ID of the created Azure app.
    * @return appId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_APP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -128,21 +131,20 @@ public class AzureCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_APP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAppId(String appId) {
+  public void setAppId(@javax.annotation.Nullable String appId) {
     this.appId = appId;
   }
 
-
-  public AzureCredentialProperties authenticationType(AzureAuthenticationTypeProperties authenticationType) {
+  public AzureCredentialProperties authenticationType(@javax.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
     
     this.authenticationType = authenticationType;
     return this;
   }
 
-   /**
+  /**
    * Get authenticationType
    * @return authenticationType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -154,21 +156,20 @@ public class AzureCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthenticationType(AzureAuthenticationTypeProperties authenticationType) {
+  public void setAuthenticationType(@javax.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
   }
 
-
-  public AzureCredentialProperties certificate(AzureCredentialCertificateProperties certificate) {
+  public AzureCredentialProperties certificate(@javax.annotation.Nullable AzureCredentialCertificateProperties certificate) {
     
     this.certificate = certificate;
     return this;
   }
 
-   /**
+  /**
    * Get certificate
    * @return certificate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CERTIFICATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -180,9 +181,10 @@ public class AzureCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_CERTIFICATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCertificate(AzureCredentialCertificateProperties certificate) {
+  public void setCertificate(@javax.annotation.Nullable AzureCredentialCertificateProperties certificate) {
     this.certificate = certificate;
   }
+
 
   @Override
   public boolean equals(Object o) {

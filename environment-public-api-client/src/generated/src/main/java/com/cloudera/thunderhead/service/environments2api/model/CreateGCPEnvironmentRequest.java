@@ -67,63 +67,79 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateGCPEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
   CreateGCPEnvironmentRequest.JSON_PROPERTY_SECURITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateGCPEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_REGION = "region";
+  @javax.annotation.Nonnull
   private String region;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
+  @javax.annotation.Nonnull
   private String publicKey;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
+  @javax.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_EXISTING_NETWORK_PARAMS = "existingNetworkParams";
+  @javax.annotation.Nonnull
   private ExistingGCPNetworkRequest existingNetworkParams;
 
   public static final String JSON_PROPERTY_SECURITY_ACCESS = "securityAccess";
+  @javax.annotation.Nullable
   private GcpSecurityAccessRequest securityAccess;
 
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
+  @javax.annotation.Nullable
   private GcpLogStorageRequest logStorage;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ENABLE_TUNNEL = "enableTunnel";
+  @javax.annotation.Nullable
   private Boolean enableTunnel = true;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
+  @javax.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
+  @javax.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
+  @javax.annotation.Nullable
   private TunnelType tunnelType;
 
   public static final String JSON_PROPERTY_CCM_V2_TLS_TYPE = "ccmV2TlsType";
+  @javax.annotation.Nullable
   private CcmV2TlsType ccmV2TlsType;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
+  @javax.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
+  @javax.annotation.Nullable
   private GCPFreeIpaCreationRequest freeIpa;
 
   /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over the Internet. Defaults to PRIVATE which restricts the traffic to be internal to the VPC.
    */
   public enum EndpointAccessGatewaySchemeEnum {
-    PUBLIC("PUBLIC"),
+    PUBLIC(String.valueOf("PUBLIC")),
     
-    PRIVATE("PRIVATE");
+    PRIVATE(String.valueOf("PRIVATE"));
 
     private String value;
 
@@ -153,48 +169,58 @@ public class CreateGCPEnvironmentRequest {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
+  @javax.annotation.Nullable
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
+  @javax.annotation.Nullable
   private List<String> endpointAccessGatewaySubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_IMAGE = "image";
+  @javax.annotation.Nullable
   private FreeIpaImageRequest image;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
+  @javax.annotation.Nullable
   private List<GcpTagRequest> tags = new ArrayList<>();
 
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
+  @javax.annotation.Nullable
   private String proxyConfigName;
 
   public static final String JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE = "idBrokerMappingSource";
+  @javax.annotation.Nullable
   private String idBrokerMappingSource;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY = "encryptionKey";
+  @javax.annotation.Nullable
   private String encryptionKey;
 
   public static final String JSON_PROPERTY_AVAILABILITY_ZONES = "availabilityZones";
+  @javax.annotation.Nullable
   private List<String> availabilityZones = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
+  @javax.annotation.Nullable
   private CustomDockerRegistryRequest customDockerRegistry;
 
   public static final String JSON_PROPERTY_SECURITY = "security";
+  @javax.annotation.Nullable
   private SecurityRequest security;
 
   public CreateGCPEnvironmentRequest() {
   }
 
-  public CreateGCPEnvironmentRequest environmentName(String environmentName) {
+  public CreateGCPEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment. Must contain only lowercase letters, numbers and hyphens.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -206,21 +232,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public CreateGCPEnvironmentRequest credentialName(String credentialName) {
+  public CreateGCPEnvironmentRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * Name of the credential to use for the environment.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -232,21 +257,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public CreateGCPEnvironmentRequest region(String region) {
+  public CreateGCPEnvironmentRequest region(@javax.annotation.Nonnull String region) {
     
     this.region = region;
     return this;
   }
 
-   /**
+  /**
    * The region of the environment.
    * @return region
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -258,21 +282,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRegion(String region) {
+  public void setRegion(@javax.annotation.Nonnull String region) {
     this.region = region;
   }
 
-
-  public CreateGCPEnvironmentRequest publicKey(String publicKey) {
+  public CreateGCPEnvironmentRequest publicKey(@javax.annotation.Nonnull String publicKey) {
     
     this.publicKey = publicKey;
     return this;
   }
 
-   /**
+  /**
    * Public SSH key string. The associated private key can be used to get root-level access to the Data Lake instance and Data Hub cluster instances.
    * @return publicKey
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -284,21 +307,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPublicKey(String publicKey) {
+  public void setPublicKey(@javax.annotation.Nonnull String publicKey) {
     this.publicKey = publicKey;
   }
 
-
-  public CreateGCPEnvironmentRequest usePublicIp(Boolean usePublicIp) {
+  public CreateGCPEnvironmentRequest usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     
     this.usePublicIp = usePublicIp;
     return this;
   }
 
-   /**
+  /**
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -310,21 +332,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(Boolean usePublicIp) {
+  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-
-  public CreateGCPEnvironmentRequest existingNetworkParams(ExistingGCPNetworkRequest existingNetworkParams) {
+  public CreateGCPEnvironmentRequest existingNetworkParams(@javax.annotation.Nonnull ExistingGCPNetworkRequest existingNetworkParams) {
     
     this.existingNetworkParams = existingNetworkParams;
     return this;
   }
 
-   /**
+  /**
    * Get existingNetworkParams
    * @return existingNetworkParams
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_EXISTING_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -336,21 +357,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_EXISTING_NETWORK_PARAMS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setExistingNetworkParams(ExistingGCPNetworkRequest existingNetworkParams) {
+  public void setExistingNetworkParams(@javax.annotation.Nonnull ExistingGCPNetworkRequest existingNetworkParams) {
     this.existingNetworkParams = existingNetworkParams;
   }
 
-
-  public CreateGCPEnvironmentRequest securityAccess(GcpSecurityAccessRequest securityAccess) {
+  public CreateGCPEnvironmentRequest securityAccess(@javax.annotation.Nullable GcpSecurityAccessRequest securityAccess) {
     
     this.securityAccess = securityAccess;
     return this;
   }
 
-   /**
+  /**
    * Get securityAccess
    * @return securityAccess
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -362,21 +382,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityAccess(GcpSecurityAccessRequest securityAccess) {
+  public void setSecurityAccess(@javax.annotation.Nullable GcpSecurityAccessRequest securityAccess) {
     this.securityAccess = securityAccess;
   }
 
-
-  public CreateGCPEnvironmentRequest logStorage(GcpLogStorageRequest logStorage) {
+  public CreateGCPEnvironmentRequest logStorage(@javax.annotation.Nullable GcpLogStorageRequest logStorage) {
     
     this.logStorage = logStorage;
     return this;
   }
 
-   /**
+  /**
    * Get logStorage
    * @return logStorage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -388,21 +407,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLogStorage(GcpLogStorageRequest logStorage) {
+  public void setLogStorage(@javax.annotation.Nullable GcpLogStorageRequest logStorage) {
     this.logStorage = logStorage;
   }
 
-
-  public CreateGCPEnvironmentRequest description(String description) {
+  public CreateGCPEnvironmentRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * A description of the environment.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -414,21 +432,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public CreateGCPEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+  public CreateGCPEnvironmentRequest enableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
     
     this.enableTunnel = enableTunnel;
     return this;
   }
 
-   /**
+  /**
    * Whether to enable SSH tunneling for the environment.
    * @return enableTunnel
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -440,21 +457,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableTunnel(Boolean enableTunnel) {
+  public void setEnableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
     this.enableTunnel = enableTunnel;
   }
 
-
-  public CreateGCPEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+  public CreateGCPEnvironmentRequest workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return workloadAnalytics
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -466,21 +482,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-
-  public CreateGCPEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public CreateGCPEnvironmentRequest reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
 
-   /**
+  /**
    * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -492,21 +507,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-
-  public CreateGCPEnvironmentRequest tunnelType(TunnelType tunnelType) {
+  public CreateGCPEnvironmentRequest tunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     
     this.tunnelType = tunnelType;
     return this;
   }
 
-   /**
+  /**
    * Get tunnelType
    * @return tunnelType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -518,21 +532,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTunnelType(TunnelType tunnelType) {
+  public void setTunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
     this.tunnelType = tunnelType;
   }
 
-
-  public CreateGCPEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+  public CreateGCPEnvironmentRequest ccmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
 
-   /**
+  /**
    * Get ccmV2TlsType
    * @return ccmV2TlsType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -544,21 +557,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+  public void setCcmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     this.ccmV2TlsType = ccmV2TlsType;
   }
 
-
-  public CreateGCPEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+  public CreateGCPEnvironmentRequest cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
 
-   /**
+  /**
    * When this is enabled, logs from the VMs will end up on the pre-defined cloud storage (enabled by default).
    * @return cloudStorageLogging
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -570,21 +582,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-
-  public CreateGCPEnvironmentRequest freeIpa(GCPFreeIpaCreationRequest freeIpa) {
+  public CreateGCPEnvironmentRequest freeIpa(@javax.annotation.Nullable GCPFreeIpaCreationRequest freeIpa) {
     
     this.freeIpa = freeIpa;
     return this;
   }
 
-   /**
+  /**
    * Get freeIpa
    * @return freeIpa
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -596,21 +607,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeIpa(GCPFreeIpaCreationRequest freeIpa) {
+  public void setFreeIpa(@javax.annotation.Nullable GCPFreeIpaCreationRequest freeIpa) {
     this.freeIpa = freeIpa;
   }
 
-
-  public CreateGCPEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public CreateGCPEnvironmentRequest endpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
 
-   /**
+  /**
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over the Internet. Defaults to PRIVATE which restricts the traffic to be internal to the VPC.
    * @return endpointAccessGatewayScheme
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -622,12 +632,11 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-
-  public CreateGCPEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public CreateGCPEnvironmentRequest endpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
@@ -641,10 +650,10 @@ public class CreateGCPEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -656,21 +665,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
-
-  public CreateGCPEnvironmentRequest image(FreeIpaImageRequest image) {
+  public CreateGCPEnvironmentRequest image(@javax.annotation.Nullable FreeIpaImageRequest image) {
     
     this.image = image;
     return this;
   }
 
-   /**
+  /**
    * Get image
    * @return image
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -682,12 +690,11 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImage(FreeIpaImageRequest image) {
+  public void setImage(@javax.annotation.Nullable FreeIpaImageRequest image) {
     this.image = image;
   }
 
-
-  public CreateGCPEnvironmentRequest tags(List<GcpTagRequest> tags) {
+  public CreateGCPEnvironmentRequest tags(@javax.annotation.Nullable List<GcpTagRequest> tags) {
     
     this.tags = tags;
     return this;
@@ -701,10 +708,10 @@ public class CreateGCPEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * Tags that can be attached to GCP resources. Please refer to Google documentation for the rules https://cloud.google.com/compute/docs/labeling-resources#label_format.
    * @return tags
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -716,21 +723,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTags(List<GcpTagRequest> tags) {
+  public void setTags(@javax.annotation.Nullable List<GcpTagRequest> tags) {
     this.tags = tags;
   }
 
-
-  public CreateGCPEnvironmentRequest proxyConfigName(String proxyConfigName) {
+  public CreateGCPEnvironmentRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     
     this.proxyConfigName = proxyConfigName;
     return this;
   }
 
-   /**
+  /**
    * Name of the proxy config to use for the environment.
    * @return proxyConfigName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -742,21 +748,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(String proxyConfigName) {
+  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
-
-  public CreateGCPEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+  public CreateGCPEnvironmentRequest idBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
     
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
 
-   /**
+  /**
    * This is an optional field. This is for QE testing purposes and internal use only. QE can pass this to set idbroker mapping source as \&quot;MOCK\&quot; until cloud storage is implemented for GCP. \&quot;IDBMMS\&quot; is the default value.
    * @return idBrokerMappingSource
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -768,21 +773,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIdBrokerMappingSource(String idBrokerMappingSource) {
+  public void setIdBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
     this.idBrokerMappingSource = idBrokerMappingSource;
   }
 
-
-  public CreateGCPEnvironmentRequest encryptionKey(String encryptionKey) {
+  public CreateGCPEnvironmentRequest encryptionKey(@javax.annotation.Nullable String encryptionKey) {
     
     this.encryptionKey = encryptionKey;
     return this;
   }
 
-   /**
+  /**
    * Key Resource ID of the customer managed encryption key to encrypt GCP resources.
    * @return encryptionKey
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -794,12 +798,11 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKey(String encryptionKey) {
+  public void setEncryptionKey(@javax.annotation.Nullable String encryptionKey) {
     this.encryptionKey = encryptionKey;
   }
 
-
-  public CreateGCPEnvironmentRequest availabilityZones(List<String> availabilityZones) {
+  public CreateGCPEnvironmentRequest availabilityZones(@javax.annotation.Nullable List<String> availabilityZones) {
     
     this.availabilityZones = availabilityZones;
     return this;
@@ -813,10 +816,10 @@ public class CreateGCPEnvironmentRequest {
     return this;
   }
 
-   /**
+  /**
    * The zones of the environment in the given region. Multi-zone selection is not supported in GCP yet. It accepts only one zone until support is added.
    * @return availabilityZones
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -828,21 +831,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAvailabilityZones(List<String> availabilityZones) {
+  public void setAvailabilityZones(@javax.annotation.Nullable List<String> availabilityZones) {
     this.availabilityZones = availabilityZones;
   }
 
-
-  public CreateGCPEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+  public CreateGCPEnvironmentRequest customDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
 
-   /**
+  /**
    * Get customDockerRegistry
    * @return customDockerRegistry
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -854,21 +856,20 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCustomDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+  public void setCustomDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
   }
 
-
-  public CreateGCPEnvironmentRequest security(SecurityRequest security) {
+  public CreateGCPEnvironmentRequest security(@javax.annotation.Nullable SecurityRequest security) {
     
     this.security = security;
     return this;
   }
 
-   /**
+  /**
    * Get security
    * @return security
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -880,9 +881,10 @@ public class CreateGCPEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurity(SecurityRequest security) {
+  public void setSecurity(@javax.annotation.Nullable SecurityRequest security) {
     this.security = security;
   }
+
 
   @Override
   public boolean equals(Object o) {

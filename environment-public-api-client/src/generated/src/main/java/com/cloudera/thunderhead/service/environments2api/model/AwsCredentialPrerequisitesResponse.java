@@ -35,30 +35,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AwsCredentialPrerequisitesResponse.JSON_PROPERTY_POLICY_JSON,
   AwsCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AwsCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_EXTERNAL_ID = "externalId";
+  @javax.annotation.Nonnull
   private String externalId;
 
   public static final String JSON_PROPERTY_POLICY_JSON = "policyJson";
+  @javax.annotation.Nonnull
   private String policyJson;
 
   public static final String JSON_PROPERTY_POLICIES = "policies";
+  @javax.annotation.Nullable
   private List<CredentialGranularPolicyResponse> policies = new ArrayList<>();
 
   public AwsCredentialPrerequisitesResponse() {
   }
 
-  public AwsCredentialPrerequisitesResponse externalId(String externalId) {
+  public AwsCredentialPrerequisitesResponse externalId(@javax.annotation.Nonnull String externalId) {
     
     this.externalId = externalId;
     return this;
   }
 
-   /**
+  /**
    * The cross-account external ID.
    * @return externalId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_EXTERNAL_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,21 +73,20 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_EXTERNAL_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setExternalId(String externalId) {
+  public void setExternalId(@javax.annotation.Nonnull String externalId) {
     this.externalId = externalId;
   }
 
-
-  public AwsCredentialPrerequisitesResponse policyJson(String policyJson) {
+  public AwsCredentialPrerequisitesResponse policyJson(@javax.annotation.Nonnull String policyJson) {
     
     this.policyJson = policyJson;
     return this;
   }
 
-   /**
+  /**
    * The related policy json encoded in base64
    * @return policyJson
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -96,12 +98,11 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPolicyJson(String policyJson) {
+  public void setPolicyJson(@javax.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
   }
 
-
-  public AwsCredentialPrerequisitesResponse policies(List<CredentialGranularPolicyResponse> policies) {
+  public AwsCredentialPrerequisitesResponse policies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     
     this.policies = policies;
     return this;
@@ -115,10 +116,10 @@ public class AwsCredentialPrerequisitesResponse {
     return this;
   }
 
-   /**
+  /**
    * The fine-grained policies related to each service.
    * @return policies
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,9 +131,10 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPolicies(List<CredentialGranularPolicyResponse> policies) {
+  public void setPolicies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
   }
+
 
   @Override
   public boolean equals(Object o) {

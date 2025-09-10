@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeDatalakeAsApiRemoteDataContextResponse.JSON_PROPERTY_DATALAKE,
   DescribeDatalakeAsApiRemoteDataContextResponse.JSON_PROPERTY_CONTEXT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeDatalakeAsApiRemoteDataContextResponse {
   public static final String JSON_PROPERTY_DATALAKE = "datalake";
+  @javax.annotation.Nullable
   private String datalake;
 
   public static final String JSON_PROPERTY_CONTEXT = "context";
+  @javax.annotation.Nullable
   private ApiRemoteDataContext context;
 
   public DescribeDatalakeAsApiRemoteDataContextResponse() {
   }
 
-  public DescribeDatalakeAsApiRemoteDataContextResponse datalake(String datalake) {
+  public DescribeDatalakeAsApiRemoteDataContextResponse datalake(@javax.annotation.Nullable String datalake) {
     
     this.datalake = datalake;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the datalake.
    * @return datalake
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -63,21 +65,20 @@ public class DescribeDatalakeAsApiRemoteDataContextResponse {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalake(String datalake) {
+  public void setDatalake(@javax.annotation.Nullable String datalake) {
     this.datalake = datalake;
   }
 
-
-  public DescribeDatalakeAsApiRemoteDataContextResponse context(ApiRemoteDataContext context) {
+  public DescribeDatalakeAsApiRemoteDataContextResponse context(@javax.annotation.Nullable ApiRemoteDataContext context) {
     
     this.context = context;
     return this;
   }
 
-   /**
+  /**
    * Get context
    * @return context
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONTEXT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class DescribeDatalakeAsApiRemoteDataContextResponse {
 
   @JsonProperty(JSON_PROPERTY_CONTEXT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setContext(ApiRemoteDataContext context) {
+  public void setContext(@javax.annotation.Nullable ApiRemoteDataContext context) {
     this.context = context;
   }
+
 
   @Override
   public boolean equals(Object o) {

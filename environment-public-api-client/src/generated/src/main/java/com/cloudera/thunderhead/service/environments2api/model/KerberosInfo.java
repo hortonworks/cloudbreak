@@ -33,36 +33,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   KerberosInfo.JSON_PROPERTY_KDC_HOST_IP,
   KerberosInfo.JSON_PROPERTY_KERBERIZED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class KerberosInfo {
   public static final String JSON_PROPERTY_KDC_TYPE = "kdcType";
+  @javax.annotation.Nullable
   private String kdcType;
 
   public static final String JSON_PROPERTY_KERBEROS_REALM = "kerberosRealm";
+  @javax.annotation.Nullable
   private String kerberosRealm;
 
   public static final String JSON_PROPERTY_KDC_HOST = "kdcHost";
+  @javax.annotation.Nullable
   private String kdcHost;
 
   public static final String JSON_PROPERTY_KDC_HOST_IP = "kdcHostIp";
+  @javax.annotation.Nullable
   private String kdcHostIp;
 
   public static final String JSON_PROPERTY_KERBERIZED = "kerberized";
+  @javax.annotation.Nullable
   private Boolean kerberized;
 
   public KerberosInfo() {
   }
 
-  public KerberosInfo kdcType(String kdcType) {
+  public KerberosInfo kdcType(@javax.annotation.Nullable String kdcType) {
     
     this.kdcType = kdcType;
     return this;
   }
 
-   /**
+  /**
    * Type of KDC.
    * @return kdcType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KDC_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -74,21 +79,20 @@ public class KerberosInfo {
 
   @JsonProperty(JSON_PROPERTY_KDC_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKdcType(String kdcType) {
+  public void setKdcType(@javax.annotation.Nullable String kdcType) {
     this.kdcType = kdcType;
   }
 
-
-  public KerberosInfo kerberosRealm(String kerberosRealm) {
+  public KerberosInfo kerberosRealm(@javax.annotation.Nullable String kerberosRealm) {
     
     this.kerberosRealm = kerberosRealm;
     return this;
   }
 
-   /**
+  /**
    * Kerberos realm.
    * @return kerberosRealm
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KERBEROS_REALM)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -100,21 +104,20 @@ public class KerberosInfo {
 
   @JsonProperty(JSON_PROPERTY_KERBEROS_REALM)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKerberosRealm(String kerberosRealm) {
+  public void setKerberosRealm(@javax.annotation.Nullable String kerberosRealm) {
     this.kerberosRealm = kerberosRealm;
   }
 
-
-  public KerberosInfo kdcHost(String kdcHost) {
+  public KerberosInfo kdcHost(@javax.annotation.Nullable String kdcHost) {
     
     this.kdcHost = kdcHost;
     return this;
   }
 
-   /**
+  /**
    * KDC host.
    * @return kdcHost
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KDC_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -126,21 +129,20 @@ public class KerberosInfo {
 
   @JsonProperty(JSON_PROPERTY_KDC_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKdcHost(String kdcHost) {
+  public void setKdcHost(@javax.annotation.Nullable String kdcHost) {
     this.kdcHost = kdcHost;
   }
 
-
-  public KerberosInfo kdcHostIp(String kdcHostIp) {
+  public KerberosInfo kdcHostIp(@javax.annotation.Nullable String kdcHostIp) {
     
     this.kdcHostIp = kdcHostIp;
     return this;
   }
 
-   /**
+  /**
    * KDC host IP address.
    * @return kdcHostIp
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KDC_HOST_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -152,21 +154,20 @@ public class KerberosInfo {
 
   @JsonProperty(JSON_PROPERTY_KDC_HOST_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKdcHostIp(String kdcHostIp) {
+  public void setKdcHostIp(@javax.annotation.Nullable String kdcHostIp) {
     this.kdcHostIp = kdcHostIp;
   }
 
-
-  public KerberosInfo kerberized(Boolean kerberized) {
+  public KerberosInfo kerberized(@javax.annotation.Nullable Boolean kerberized) {
     
     this.kerberized = kerberized;
     return this;
   }
 
-   /**
+  /**
    * Whether kerberized or not.
    * @return kerberized
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KERBERIZED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -178,9 +179,10 @@ public class KerberosInfo {
 
   @JsonProperty(JSON_PROPERTY_KERBERIZED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKerberized(Boolean kerberized) {
+  public void setKerberized(@javax.annotation.Nullable Boolean kerberized) {
     this.kerberized = kerberized;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -35,39 +35,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RebuildFreeipaResponse.JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION,
   RebuildFreeipaResponse.JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class RebuildFreeipaResponse {
   public static final String JSON_PROPERTY_OPERATION = "operation";
+  @javax.annotation.Nullable
   private OperationResponse operation;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_FREEIPA_CRN = "freeipaCrn";
+  @javax.annotation.Nullable
   private String freeipaCrn;
 
   public static final String JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN = "instanceToRestoreFqdn";
+  @javax.annotation.Nullable
   private String instanceToRestoreFqdn;
 
   public static final String JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION = "fullBackupStorageLocation";
+  @javax.annotation.Nullable
   private String fullBackupStorageLocation;
 
   public static final String JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION = "dataBackupStorageLocation";
+  @javax.annotation.Nullable
   private String dataBackupStorageLocation;
 
   public RebuildFreeipaResponse() {
   }
 
-  public RebuildFreeipaResponse operation(OperationResponse operation) {
+  public RebuildFreeipaResponse operation(@javax.annotation.Nullable OperationResponse operation) {
     
     this.operation = operation;
     return this;
   }
 
-   /**
+  /**
    * Get operation
    * @return operation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -79,21 +85,20 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperation(OperationResponse operation) {
+  public void setOperation(@javax.annotation.Nullable OperationResponse operation) {
     this.operation = operation;
   }
 
-
-  public RebuildFreeipaResponse environmentCrn(String environmentCrn) {
+  public RebuildFreeipaResponse environmentCrn(@javax.annotation.Nullable String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The environment CRN of the FreeIPA to rebuild
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -105,21 +110,20 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public RebuildFreeipaResponse freeipaCrn(String freeipaCrn) {
+  public RebuildFreeipaResponse freeipaCrn(@javax.annotation.Nullable String freeipaCrn) {
     
     this.freeipaCrn = freeipaCrn;
     return this;
   }
 
-   /**
+  /**
    * CRN of the FreeIPA to rebuild. Must be in the environment specified in &#39;environmentName&#39;.
    * @return freeipaCrn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREEIPA_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -131,21 +135,20 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeipaCrn(String freeipaCrn) {
+  public void setFreeipaCrn(@javax.annotation.Nullable String freeipaCrn) {
     this.freeipaCrn = freeipaCrn;
   }
 
-
-  public RebuildFreeipaResponse instanceToRestoreFqdn(String instanceToRestoreFqdn) {
+  public RebuildFreeipaResponse instanceToRestoreFqdn(@javax.annotation.Nullable String instanceToRestoreFqdn) {
     
     this.instanceToRestoreFqdn = instanceToRestoreFqdn;
     return this;
   }
 
-   /**
+  /**
    * The instance&#39;s Fully Qualified Domain Name (FQDN) that will be restored from the backups. This must match the FQDN of the instance from which the backup was taken.
    * @return instanceToRestoreFqdn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -157,21 +160,20 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceToRestoreFqdn(String instanceToRestoreFqdn) {
+  public void setInstanceToRestoreFqdn(@javax.annotation.Nullable String instanceToRestoreFqdn) {
     this.instanceToRestoreFqdn = instanceToRestoreFqdn;
   }
 
-
-  public RebuildFreeipaResponse fullBackupStorageLocation(String fullBackupStorageLocation) {
+  public RebuildFreeipaResponse fullBackupStorageLocation(@javax.annotation.Nullable String fullBackupStorageLocation) {
     
     this.fullBackupStorageLocation = fullBackupStorageLocation;
     return this;
   }
 
-   /**
+  /**
    * Full backup location on the cloud storage. This backup was created during the provisioning of the instance. By default, no additional full backups are created for a single instance.
    * @return fullBackupStorageLocation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -183,21 +185,20 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFullBackupStorageLocation(String fullBackupStorageLocation) {
+  public void setFullBackupStorageLocation(@javax.annotation.Nullable String fullBackupStorageLocation) {
     this.fullBackupStorageLocation = fullBackupStorageLocation;
   }
 
-
-  public RebuildFreeipaResponse dataBackupStorageLocation(String dataBackupStorageLocation) {
+  public RebuildFreeipaResponse dataBackupStorageLocation(@javax.annotation.Nullable String dataBackupStorageLocation) {
     
     this.dataBackupStorageLocation = dataBackupStorageLocation;
     return this;
   }
 
-   /**
+  /**
    * Data/hourly backup location on the cloud storage. These are created in every hour. Usually the lastest one is required, so there won&#39;t be any data loss.
    * @return dataBackupStorageLocation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -209,9 +210,10 @@ public class RebuildFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDataBackupStorageLocation(String dataBackupStorageLocation) {
+  public void setDataBackupStorageLocation(@javax.annotation.Nullable String dataBackupStorageLocation) {
     this.dataBackupStorageLocation = dataBackupStorageLocation;
   }
+
 
   @Override
   public boolean equals(Object o) {

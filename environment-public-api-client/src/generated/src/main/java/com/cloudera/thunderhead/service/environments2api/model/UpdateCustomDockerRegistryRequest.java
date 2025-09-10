@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateCustomDockerRegistryRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateCustomDockerRegistryRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateCustomDockerRegistryRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
+  @javax.annotation.Nonnull
   private String customDockerRegistry;
 
   public UpdateCustomDockerRegistryRequest() {
   }
 
-  public UpdateCustomDockerRegistryRequest environment(String environment) {
+  public UpdateCustomDockerRegistryRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class UpdateCustomDockerRegistryRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateCustomDockerRegistryRequest customDockerRegistry(String customDockerRegistry) {
+  public UpdateCustomDockerRegistryRequest customDockerRegistry(@javax.annotation.Nonnull String customDockerRegistry) {
     
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the desired custom docker registry for data services to be used.
    * @return customDockerRegistry
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class UpdateCustomDockerRegistryRequest {
 
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCustomDockerRegistry(String customDockerRegistry) {
+  public void setCustomDockerRegistry(@javax.annotation.Nonnull String customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -32,33 +32,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureResourceEncryptionParameters.JSON_PROPERTY_DISK_ENCRYPTION_SET_ID,
   AzureResourceEncryptionParameters.JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureResourceEncryptionParameters {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_URL = "encryptionKeyUrl";
+  @javax.annotation.Nullable
   private String encryptionKeyUrl;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "encryptionKeyResourceGroupName";
+  @javax.annotation.Nullable
   private String encryptionKeyResourceGroupName;
 
   public static final String JSON_PROPERTY_DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
+  @javax.annotation.Nullable
   private String diskEncryptionSetId;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
+  @javax.annotation.Nullable
   private String encryptionUserManagedIdentity;
 
   public AzureResourceEncryptionParameters() {
   }
 
-  public AzureResourceEncryptionParameters encryptionKeyUrl(String encryptionKeyUrl) {
+  public AzureResourceEncryptionParameters encryptionKeyUrl(@javax.annotation.Nullable String encryptionKeyUrl) {
     
     this.encryptionKeyUrl = encryptionKeyUrl;
     return this;
   }
 
-   /**
+  /**
    * URL of the key which is used to encrypt the Azure Managed Disks.
    * @return encryptionKeyUrl
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,21 +74,20 @@ public class AzureResourceEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+  public void setEncryptionKeyUrl(@javax.annotation.Nullable String encryptionKeyUrl) {
     this.encryptionKeyUrl = encryptionKeyUrl;
   }
 
-
-  public AzureResourceEncryptionParameters encryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public AzureResourceEncryptionParameters encryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * Name of the existing Azure resource group hosting the Azure Key Vault containing customer managed key which is used to encrypt the Azure Managed Disks.
    * @return encryptionKeyResourceGroupName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,21 +99,20 @@ public class AzureResourceEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+  public void setEncryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
   }
 
-
-  public AzureResourceEncryptionParameters diskEncryptionSetId(String diskEncryptionSetId) {
+  public AzureResourceEncryptionParameters diskEncryptionSetId(@javax.annotation.Nullable String diskEncryptionSetId) {
     
     this.diskEncryptionSetId = diskEncryptionSetId;
     return this;
   }
 
-   /**
+  /**
    * ID of the Disk Encryption Set created in Azure which is used to encrypt Managed Disks of FreeIPA, Data Lake, Data Hub and PostgreSQL.
    * @return diskEncryptionSetId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISK_ENCRYPTION_SET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -122,21 +124,20 @@ public class AzureResourceEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_DISK_ENCRYPTION_SET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDiskEncryptionSetId(String diskEncryptionSetId) {
+  public void setDiskEncryptionSetId(@javax.annotation.Nullable String diskEncryptionSetId) {
     this.diskEncryptionSetId = diskEncryptionSetId;
   }
 
-
-  public AzureResourceEncryptionParameters encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public AzureResourceEncryptionParameters encryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
     return this;
   }
 
-   /**
+  /**
    * User managed identity for encryption.
    * @return encryptionUserManagedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,9 +149,10 @@ public class AzureResourceEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+  public void setEncryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
   }
+
 
   @Override
   public boolean equals(Object o) {

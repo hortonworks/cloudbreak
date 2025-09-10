@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ListFreeipaSecretTypesResponse.JSON_PROPERTY_FREEIPA_SECRET_TYPES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ListFreeipaSecretTypesResponse {
   public static final String JSON_PROPERTY_FREEIPA_SECRET_TYPES = "freeipaSecretTypes";
+  @javax.annotation.Nonnull
   private List<SecretTypeResponse> freeipaSecretTypes = new ArrayList<>();
 
   public ListFreeipaSecretTypesResponse() {
   }
 
-  public ListFreeipaSecretTypesResponse freeipaSecretTypes(List<SecretTypeResponse> freeipaSecretTypes) {
+  public ListFreeipaSecretTypesResponse freeipaSecretTypes(@javax.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
     
     this.freeipaSecretTypes = freeipaSecretTypes;
     return this;
@@ -55,10 +56,10 @@ public class ListFreeipaSecretTypesResponse {
     return this;
   }
 
-   /**
+  /**
    * The list of secret types supported by FreeIpa.
    * @return freeipaSecretTypes
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FREEIPA_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,9 +71,10 @@ public class ListFreeipaSecretTypesResponse {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFreeipaSecretTypes(List<SecretTypeResponse> freeipaSecretTypes) {
+  public void setFreeipaSecretTypes(@javax.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
     this.freeipaSecretTypes = freeipaSecretTypes;
   }
+
 
   @Override
   public boolean equals(Object o) {

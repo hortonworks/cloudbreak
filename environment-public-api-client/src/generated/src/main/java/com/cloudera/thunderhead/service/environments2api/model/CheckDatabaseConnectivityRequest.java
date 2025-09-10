@@ -33,36 +33,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CheckDatabaseConnectivityRequest.JSON_PROPERTY_USERNAME,
   CheckDatabaseConnectivityRequest.JSON_PROPERTY_PASSWORD
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckDatabaseConnectivityRequest {
   public static final String JSON_PROPERTY_HOST = "host";
+  @javax.annotation.Nonnull
   private String host;
 
   public static final String JSON_PROPERTY_PORT = "port";
+  @javax.annotation.Nonnull
   private Integer port;
 
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_USERNAME = "username";
+  @javax.annotation.Nonnull
   private String username;
 
   public static final String JSON_PROPERTY_PASSWORD = "password";
+  @javax.annotation.Nonnull
   private String password;
 
   public CheckDatabaseConnectivityRequest() {
   }
 
-  public CheckDatabaseConnectivityRequest host(String host) {
+  public CheckDatabaseConnectivityRequest host(@javax.annotation.Nonnull String host) {
     
     this.host = host;
     return this;
   }
 
-   /**
+  /**
    * Host value.
    * @return host
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -74,21 +79,20 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setHost(String host) {
+  public void setHost(@javax.annotation.Nonnull String host) {
     this.host = host;
   }
 
-
-  public CheckDatabaseConnectivityRequest port(Integer port) {
+  public CheckDatabaseConnectivityRequest port(@javax.annotation.Nonnull Integer port) {
     
     this.port = port;
     return this;
   }
 
-   /**
+  /**
    * Port value.
    * @return port
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -100,21 +104,20 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPort(Integer port) {
+  public void setPort(@javax.annotation.Nonnull Integer port) {
     this.port = port;
   }
 
-
-  public CheckDatabaseConnectivityRequest name(String name) {
+  public CheckDatabaseConnectivityRequest name(@javax.annotation.Nonnull String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * Database name value.
    * @return name
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -126,21 +129,20 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
   }
 
-
-  public CheckDatabaseConnectivityRequest username(String username) {
+  public CheckDatabaseConnectivityRequest username(@javax.annotation.Nonnull String username) {
     
     this.username = username;
     return this;
   }
 
-   /**
+  /**
    * Username value.
    * @return username
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -152,21 +154,20 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsername(String username) {
+  public void setUsername(@javax.annotation.Nonnull String username) {
     this.username = username;
   }
 
-
-  public CheckDatabaseConnectivityRequest password(String password) {
+  public CheckDatabaseConnectivityRequest password(@javax.annotation.Nonnull String password) {
     
     this.password = password;
     return this;
   }
 
-   /**
+  /**
    * Password value.
    * @return password
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -178,9 +179,10 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(String password) {
+  public void setPassword(@javax.annotation.Nonnull String password) {
     this.password = password;
   }
+
 
   @Override
   public boolean equals(Object o) {

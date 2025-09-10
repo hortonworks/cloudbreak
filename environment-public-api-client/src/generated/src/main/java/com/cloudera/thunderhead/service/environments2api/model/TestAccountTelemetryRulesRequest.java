@@ -34,27 +34,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   TestAccountTelemetryRulesRequest.JSON_PROPERTY_TEST_INPUT,
   TestAccountTelemetryRulesRequest.JSON_PROPERTY_RULES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class TestAccountTelemetryRulesRequest {
   public static final String JSON_PROPERTY_TEST_INPUT = "testInput";
+  @javax.annotation.Nonnull
   private String testInput;
 
   public static final String JSON_PROPERTY_RULES = "rules";
+  @javax.annotation.Nonnull
   private List<AnonymizationRuleRequest> rules = new ArrayList<>();
 
   public TestAccountTelemetryRulesRequest() {
   }
 
-  public TestAccountTelemetryRulesRequest testInput(String testInput) {
+  public TestAccountTelemetryRulesRequest testInput(@javax.annotation.Nonnull String testInput) {
     
     this.testInput = testInput;
     return this;
   }
 
-   /**
+  /**
    * Text input that will be tested against the provided account telemetry anonymization rules.
    * @return testInput
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,12 +68,11 @@ public class TestAccountTelemetryRulesRequest {
 
   @JsonProperty(JSON_PROPERTY_TEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTestInput(String testInput) {
+  public void setTestInput(@javax.annotation.Nonnull String testInput) {
     this.testInput = testInput;
   }
 
-
-  public TestAccountTelemetryRulesRequest rules(List<AnonymizationRuleRequest> rules) {
+  public TestAccountTelemetryRulesRequest rules(@javax.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
     
     this.rules = rules;
     return this;
@@ -85,10 +86,10 @@ public class TestAccountTelemetryRulesRequest {
     return this;
   }
 
-   /**
+  /**
    * List of anonymization rules that are applied on logs that are shipped to Cloudera
    * @return rules
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -100,9 +101,10 @@ public class TestAccountTelemetryRulesRequest {
 
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRules(List<AnonymizationRuleRequest> rules) {
+  public void setRules(@javax.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
     this.rules = rules;
   }
+
 
   @Override
   public boolean equals(Object o) {

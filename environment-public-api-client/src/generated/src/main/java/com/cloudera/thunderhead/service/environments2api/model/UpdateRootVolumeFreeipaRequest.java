@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateRootVolumeFreeipaRequest.JSON_PROPERTY_ENVIRONMENT_CRN,
   UpdateRootVolumeFreeipaRequest.JSON_PROPERTY_ROOT_DISK_OPTIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateRootVolumeFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
+  @javax.annotation.Nonnull
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_ROOT_DISK_OPTIONS = "rootDiskOptions";
+  @javax.annotation.Nullable
   private RootDiskOptions rootDiskOptions;
 
   public UpdateRootVolumeFreeipaRequest() {
   }
 
-  public UpdateRootVolumeFreeipaRequest environmentCrn(String environmentCrn) {
+  public UpdateRootVolumeFreeipaRequest environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     
     this.environmentCrn = environmentCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environmentCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -63,21 +65,20 @@ public class UpdateRootVolumeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(String environmentCrn) {
+  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-
-  public UpdateRootVolumeFreeipaRequest rootDiskOptions(RootDiskOptions rootDiskOptions) {
+  public UpdateRootVolumeFreeipaRequest rootDiskOptions(@javax.annotation.Nullable RootDiskOptions rootDiskOptions) {
     
     this.rootDiskOptions = rootDiskOptions;
     return this;
   }
 
-   /**
+  /**
    * Get rootDiskOptions
    * @return rootDiskOptions
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ROOT_DISK_OPTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class UpdateRootVolumeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ROOT_DISK_OPTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRootDiskOptions(RootDiskOptions rootDiskOptions) {
+  public void setRootDiskOptions(@javax.annotation.Nullable RootDiskOptions rootDiskOptions) {
     this.rootDiskOptions = rootDiskOptions;
   }
+
 
   @Override
   public boolean equals(Object o) {

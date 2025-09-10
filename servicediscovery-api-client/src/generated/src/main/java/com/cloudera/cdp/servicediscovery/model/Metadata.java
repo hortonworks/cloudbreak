@@ -32,33 +32,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Metadata.JSON_PROPERTY_SERVICE_PACK,
   Metadata.JSON_PROPERTY_DEPLOYMENT_VERSION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class Metadata {
   public static final String JSON_PROPERTY_SHAPE = "shape";
+  @javax.annotation.Nullable
   private String shape;
 
   public static final String JSON_PROPERTY_BASE_VERSION = "baseVersion";
+  @javax.annotation.Nullable
   private String baseVersion;
 
   public static final String JSON_PROPERTY_SERVICE_PACK = "servicePack";
+  @javax.annotation.Nullable
   private String servicePack;
 
   public static final String JSON_PROPERTY_DEPLOYMENT_VERSION = "deploymentVersion";
+  @javax.annotation.Nullable
   private String deploymentVersion;
 
   public Metadata() {
   }
 
-  public Metadata shape(String shape) {
+  public Metadata shape(@javax.annotation.Nullable String shape) {
     
     this.shape = shape;
     return this;
   }
 
-   /**
+  /**
    * The shape of the datalake.
    * @return shape
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHAPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -70,21 +74,20 @@ public class Metadata {
 
   @JsonProperty(JSON_PROPERTY_SHAPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setShape(String shape) {
+  public void setShape(@javax.annotation.Nullable String shape) {
     this.shape = shape;
   }
 
-
-  public Metadata baseVersion(String baseVersion) {
+  public Metadata baseVersion(@javax.annotation.Nullable String baseVersion) {
     
     this.baseVersion = baseVersion;
     return this;
   }
 
-   /**
+  /**
    * The version of CDH deployed.
    * @return baseVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BASE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -96,21 +99,20 @@ public class Metadata {
 
   @JsonProperty(JSON_PROPERTY_BASE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBaseVersion(String baseVersion) {
+  public void setBaseVersion(@javax.annotation.Nullable String baseVersion) {
     this.baseVersion = baseVersion;
   }
 
-
-  public Metadata servicePack(String servicePack) {
+  public Metadata servicePack(@javax.annotation.Nullable String servicePack) {
     
     this.servicePack = servicePack;
     return this;
   }
 
-   /**
+  /**
    * The service pack of CDH deployed.
    * @return servicePack
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_PACK)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -122,21 +124,20 @@ public class Metadata {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_PACK)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServicePack(String servicePack) {
+  public void setServicePack(@javax.annotation.Nullable String servicePack) {
     this.servicePack = servicePack;
   }
 
-
-  public Metadata deploymentVersion(String deploymentVersion) {
+  public Metadata deploymentVersion(@javax.annotation.Nullable String deploymentVersion) {
     
     this.deploymentVersion = deploymentVersion;
     return this;
   }
 
-   /**
+  /**
    * The complete deployment version.
    * @return deploymentVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,9 +149,10 @@ public class Metadata {
 
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDeploymentVersion(String deploymentVersion) {
+  public void setDeploymentVersion(@javax.annotation.Nullable String deploymentVersion) {
     this.deploymentVersion = deploymentVersion;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -32,27 +32,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateAzureCredentialRequestAppBased.JSON_PROPERTY_APPLICATION_ID
 })
 @JsonTypeName("UpdateAzureCredentialRequest_appBased")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateAzureCredentialRequestAppBased {
   public static final String JSON_PROPERTY_AUTHENTICATION_TYPE = "authenticationType";
+  @javax.annotation.Nonnull
   private AzureAuthenticationTypeProperties authenticationType;
 
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
+  @javax.annotation.Nonnull
   private String applicationId;
 
   public UpdateAzureCredentialRequestAppBased() {
   }
 
-  public UpdateAzureCredentialRequestAppBased authenticationType(AzureAuthenticationTypeProperties authenticationType) {
+  public UpdateAzureCredentialRequestAppBased authenticationType(@javax.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
     
     this.authenticationType = authenticationType;
     return this;
   }
 
-   /**
+  /**
    * Get authenticationType
    * @return authenticationType
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -64,21 +66,20 @@ public class UpdateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthenticationType(AzureAuthenticationTypeProperties authenticationType) {
+  public void setAuthenticationType(@javax.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
   }
 
-
-  public UpdateAzureCredentialRequestAppBased applicationId(String applicationId) {
+  public UpdateAzureCredentialRequestAppBased applicationId(@javax.annotation.Nonnull String applicationId) {
     
     this.applicationId = applicationId;
     return this;
   }
 
-   /**
+  /**
    * The id of the application registered in Azure.
    * @return applicationId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -90,9 +91,10 @@ public class UpdateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setApplicationId(String applicationId) {
+  public void setApplicationId(@javax.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

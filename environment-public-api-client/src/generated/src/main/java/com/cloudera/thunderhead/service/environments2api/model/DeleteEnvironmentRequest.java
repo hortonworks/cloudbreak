@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DeleteEnvironmentRequest.JSON_PROPERTY_CASCADING,
   DeleteEnvironmentRequest.JSON_PROPERTY_FORCED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DeleteEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CASCADING = "cascading";
+  @javax.annotation.Nullable
   private Boolean cascading;
 
   public static final String JSON_PROPERTY_FORCED = "forced";
+  @javax.annotation.Nullable
   private Boolean forced;
 
   public DeleteEnvironmentRequest() {
   }
 
-  public DeleteEnvironmentRequest environmentName(String environmentName) {
+  public DeleteEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -66,21 +69,20 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public DeleteEnvironmentRequest cascading(Boolean cascading) {
+  public DeleteEnvironmentRequest cascading(@javax.annotation.Nullable Boolean cascading) {
     
     this.cascading = cascading;
     return this;
   }
 
-   /**
+  /**
    * Delete all connected resources too.
    * @return cascading
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CASCADING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CASCADING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCascading(Boolean cascading) {
+  public void setCascading(@javax.annotation.Nullable Boolean cascading) {
     this.cascading = cascading;
   }
 
-
-  public DeleteEnvironmentRequest forced(Boolean forced) {
+  public DeleteEnvironmentRequest forced(@javax.annotation.Nullable Boolean forced) {
     
     this.forced = forced;
     return this;
   }
 
-   /**
+  /**
    * Force delete action removes CDP resources and may leave cloud provider resources running even if the deletion did not succeed.
    * @return forced
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORCED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FORCED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setForced(Boolean forced) {
+  public void setForced(@javax.annotation.Nullable Boolean forced) {
     this.forced = forced;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,24 +30,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   UpdateAwsCredentialResponse.JSON_PROPERTY_CREDENTIAL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateAwsCredentialResponse {
   public static final String JSON_PROPERTY_CREDENTIAL = "credential";
+  @javax.annotation.Nullable
   private Credential credential;
 
   public UpdateAwsCredentialResponse() {
   }
 
-  public UpdateAwsCredentialResponse credential(Credential credential) {
+  public UpdateAwsCredentialResponse credential(@javax.annotation.Nullable Credential credential) {
     
     this.credential = credential;
     return this;
   }
 
-   /**
+  /**
    * Get credential
    * @return credential
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -59,9 +60,10 @@ public class UpdateAwsCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCredential(Credential credential) {
+  public void setCredential(@javax.annotation.Nullable Credential credential) {
     this.credential = credential;
   }
+
 
   @Override
   public boolean equals(Object o) {

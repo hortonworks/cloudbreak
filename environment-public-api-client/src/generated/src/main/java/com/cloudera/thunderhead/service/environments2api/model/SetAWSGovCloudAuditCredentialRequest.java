@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   SetAWSGovCloudAuditCredentialRequest.JSON_PROPERTY_ROLE_ARN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetAWSGovCloudAuditCredentialRequest {
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
+  @javax.annotation.Nonnull
   private String roleArn;
 
   public SetAWSGovCloudAuditCredentialRequest() {
   }
 
-  public SetAWSGovCloudAuditCredentialRequest roleArn(String roleArn) {
+  public SetAWSGovCloudAuditCredentialRequest roleArn(@javax.annotation.Nonnull String roleArn) {
     
     this.roleArn = roleArn;
     return this;
   }
 
-   /**
+  /**
    * The ARN of the delegated access role.
    * @return roleArn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class SetAWSGovCloudAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleArn(String roleArn) {
+  public void setRoleArn(@javax.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
   }
+
 
   @Override
   public boolean equals(Object o) {

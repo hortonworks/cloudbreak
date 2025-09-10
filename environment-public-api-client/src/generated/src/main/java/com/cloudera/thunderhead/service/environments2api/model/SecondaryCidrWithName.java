@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SecondaryCidrWithName.JSON_PROPERTY_NAME,
   SecondaryCidrWithName.JSON_PROPERTY_CIDR
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SecondaryCidrWithName {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_CIDR = "cidr";
+  @javax.annotation.Nonnull
   private String cidr;
 
   public SecondaryCidrWithName() {
   }
 
-  public SecondaryCidrWithName name(String name) {
+  public SecondaryCidrWithName name(@javax.annotation.Nonnull String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * The name of the secondary range.
    * @return name
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class SecondaryCidrWithName {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
   }
 
-
-  public SecondaryCidrWithName cidr(String cidr) {
+  public SecondaryCidrWithName cidr(@javax.annotation.Nonnull String cidr) {
     
     this.cidr = cidr;
     return this;
   }
 
-   /**
+  /**
    * The cidr of the secondary range.
    * @return cidr
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class SecondaryCidrWithName {
 
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCidr(String cidr) {
+  public void setCidr(@javax.annotation.Nonnull String cidr) {
     this.cidr = cidr;
   }
+
 
   @Override
   public boolean equals(Object o) {

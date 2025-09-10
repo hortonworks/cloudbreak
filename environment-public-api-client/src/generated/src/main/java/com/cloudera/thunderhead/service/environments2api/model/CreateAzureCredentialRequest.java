@@ -34,36 +34,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAzureCredentialRequest.JSON_PROPERTY_TENANT_ID,
   CreateAzureCredentialRequest.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateAzureCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
+  @javax.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_APP_BASED = "appBased";
+  @javax.annotation.Nonnull
   private CreateAzureCredentialRequestAppBased appBased;
 
   public static final String JSON_PROPERTY_SUBSCRIPTION_ID = "subscriptionId";
+  @javax.annotation.Nullable
   private String subscriptionId;
 
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
+  @javax.annotation.Nullable
   private String tenantId;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public CreateAzureCredentialRequest() {
   }
 
-  public CreateAzureCredentialRequest credentialName(String credentialName) {
+  public CreateAzureCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
     
     this.credentialName = credentialName;
     return this;
   }
 
-   /**
+  /**
    * The name of the credential.
    * @return credentialName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -75,21 +80,20 @@ public class CreateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(String credentialName) {
+  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-
-  public CreateAzureCredentialRequest appBased(CreateAzureCredentialRequestAppBased appBased) {
+  public CreateAzureCredentialRequest appBased(@javax.annotation.Nonnull CreateAzureCredentialRequestAppBased appBased) {
     
     this.appBased = appBased;
     return this;
   }
 
-   /**
+  /**
    * Get appBased
    * @return appBased
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -101,21 +105,20 @@ public class CreateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppBased(CreateAzureCredentialRequestAppBased appBased) {
+  public void setAppBased(@javax.annotation.Nonnull CreateAzureCredentialRequestAppBased appBased) {
     this.appBased = appBased;
   }
 
-
-  public CreateAzureCredentialRequest subscriptionId(String subscriptionId) {
+  public CreateAzureCredentialRequest subscriptionId(@javax.annotation.Nullable String subscriptionId) {
     
     this.subscriptionId = subscriptionId;
     return this;
   }
 
-   /**
+  /**
    * The Azure subscription ID. Required for secret based credentials and optional for certificate based ones.
    * @return subscriptionId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -127,21 +130,20 @@ public class CreateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubscriptionId(String subscriptionId) {
+  public void setSubscriptionId(@javax.annotation.Nullable String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
-
-  public CreateAzureCredentialRequest tenantId(String tenantId) {
+  public CreateAzureCredentialRequest tenantId(@javax.annotation.Nullable String tenantId) {
     
     this.tenantId = tenantId;
     return this;
   }
 
-   /**
+  /**
    * The Azure AD tenant ID for the Azure subscription. Required for secret based credentials and optional for certificate based ones.
    * @return tenantId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -153,21 +155,20 @@ public class CreateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTenantId(String tenantId) {
+  public void setTenantId(@javax.annotation.Nullable String tenantId) {
     this.tenantId = tenantId;
   }
 
-
-  public CreateAzureCredentialRequest description(String description) {
+  public CreateAzureCredentialRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * A description for the credential.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -179,9 +180,10 @@ public class CreateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
+
 
   @Override
   public boolean equals(Object o) {

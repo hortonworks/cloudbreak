@@ -32,18 +32,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvironmentTags.JSON_PROPERTY_USER_DEFINED,
   EnvironmentTags.JSON_PROPERTY_DEFAULTS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvironmentTags {
   public static final String JSON_PROPERTY_USER_DEFINED = "userDefined";
+  @javax.annotation.Nullable
   private Map<String, String> userDefined = new HashMap<>();
 
   public static final String JSON_PROPERTY_DEFAULTS = "defaults";
+  @javax.annotation.Nullable
   private Map<String, String> defaults = new HashMap<>();
 
   public EnvironmentTags() {
   }
 
-  public EnvironmentTags userDefined(Map<String, String> userDefined) {
+  public EnvironmentTags userDefined(@javax.annotation.Nullable Map<String, String> userDefined) {
     
     this.userDefined = userDefined;
     return this;
@@ -57,10 +59,10 @@ public class EnvironmentTags {
     return this;
   }
 
-   /**
+  /**
    * Map of tag names to values, for user-defined tags.
    * @return userDefined
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER_DEFINED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -72,12 +74,11 @@ public class EnvironmentTags {
 
   @JsonProperty(JSON_PROPERTY_USER_DEFINED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserDefined(Map<String, String> userDefined) {
+  public void setUserDefined(@javax.annotation.Nullable Map<String, String> userDefined) {
     this.userDefined = userDefined;
   }
 
-
-  public EnvironmentTags defaults(Map<String, String> defaults) {
+  public EnvironmentTags defaults(@javax.annotation.Nullable Map<String, String> defaults) {
     
     this.defaults = defaults;
     return this;
@@ -91,10 +92,10 @@ public class EnvironmentTags {
     return this;
   }
 
-   /**
+  /**
    * Map of tag names to values, for default tags.
    * @return defaults
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -106,9 +107,10 @@ public class EnvironmentTags {
 
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaults(Map<String, String> defaults) {
+  public void setDefaults(@javax.annotation.Nullable Map<String, String> defaults) {
     this.defaults = defaults;
   }
+
 
   @Override
   public boolean equals(Object o) {

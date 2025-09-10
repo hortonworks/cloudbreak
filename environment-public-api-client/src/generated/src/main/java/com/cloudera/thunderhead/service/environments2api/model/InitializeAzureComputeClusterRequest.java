@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   InitializeAzureComputeClusterRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
   InitializeAzureComputeClusterRequest.JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class InitializeAzureComputeClusterRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
+  @javax.annotation.Nullable
   private AzureComputeClusterConfigurationRequest computeClusterConfiguration;
 
   public InitializeAzureComputeClusterRequest() {
   }
 
-  public InitializeAzureComputeClusterRequest environmentName(String environmentName) {
+  public InitializeAzureComputeClusterRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -63,21 +65,20 @@ public class InitializeAzureComputeClusterRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public InitializeAzureComputeClusterRequest computeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public InitializeAzureComputeClusterRequest computeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
     
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
 
-   /**
+  /**
    * Get computeClusterConfiguration
    * @return computeClusterConfiguration
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class InitializeAzureComputeClusterRequest {
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public void setComputeClusterConfiguration(@javax.annotation.Nullable AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
   }
+
 
   @Override
   public boolean equals(Object o) {

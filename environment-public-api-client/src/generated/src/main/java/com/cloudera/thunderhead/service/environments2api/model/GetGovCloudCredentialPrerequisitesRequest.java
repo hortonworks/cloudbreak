@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   GetGovCloudCredentialPrerequisitesRequest.JSON_PROPERTY_CLOUD_PLATFORM
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetGovCloudCredentialPrerequisitesRequest {
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
+  @javax.annotation.Nonnull
   private String cloudPlatform;
 
   public GetGovCloudCredentialPrerequisitesRequest() {
   }
 
-  public GetGovCloudCredentialPrerequisitesRequest cloudPlatform(String cloudPlatform) {
+  public GetGovCloudCredentialPrerequisitesRequest cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     
     this.cloudPlatform = cloudPlatform;
     return this;
   }
 
-   /**
+  /**
    * The kind of cloud platform. As of now, the following cloud provider is accepted as the value of this field - AWS
    * @return cloudPlatform
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class GetGovCloudCredentialPrerequisitesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(String cloudPlatform) {
+  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
+
 
   @Override
   public boolean equals(Object o) {

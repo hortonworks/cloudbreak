@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ConnectedDataService.JSON_PROPERTY_NAME,
   ConnectedDataService.JSON_PROPERTY_CLUSTERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ConnectedDataService {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_CLUSTERS = "clusters";
+  @javax.annotation.Nonnull
   private List<String> clusters = new ArrayList<>();
 
   public ConnectedDataService() {
   }
 
-  public ConnectedDataService name(String name) {
+  public ConnectedDataService name(@javax.annotation.Nonnull String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * The name of the given Data Service.
    * @return name
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class ConnectedDataService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
   }
 
-
-  public ConnectedDataService clusters(List<String> clusters) {
+  public ConnectedDataService clusters(@javax.annotation.Nonnull List<String> clusters) {
     
     this.clusters = clusters;
     return this;
@@ -84,10 +85,10 @@ public class ConnectedDataService {
     return this;
   }
 
-   /**
+  /**
    * List of resource names for the given Data Service.
    * @return clusters
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -99,9 +100,10 @@ public class ConnectedDataService {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusters(List<String> clusters) {
+  public void setClusters(@javax.annotation.Nonnull List<String> clusters) {
     this.clusters = clusters;
   }
+
 
   @Override
   public boolean equals(Object o) {

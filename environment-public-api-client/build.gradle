@@ -37,6 +37,7 @@ openApiGenerate {
   inputSpec = "$projectDir/src/main/yaml/environments2.yaml"
   outputDir = "$projectDir/src/generated"
   modelPackage = "com.cloudera.thunderhead.service.environments2api.model"
+  templateDir = "$projectDir/openapi-templates".toString()
   configOptions.set([
           openApiNullable: "false",
           dateLibrary: "java8"

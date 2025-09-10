@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetCliForCredentialResponse.JSON_PROPERTY_COMMAND,
   GetCliForCredentialResponse.JSON_PROPERTY_ADDITIONAL_COMMANDS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class GetCliForCredentialResponse {
   public static final String JSON_PROPERTY_COMMAND = "command";
+  @javax.annotation.Nullable
   private String command;
 
   public static final String JSON_PROPERTY_ADDITIONAL_COMMANDS = "additionalCommands";
+  @javax.annotation.Nullable
   private List<String> additionalCommands = new ArrayList<>();
 
   public GetCliForCredentialResponse() {
   }
 
-  public GetCliForCredentialResponse command(String command) {
+  public GetCliForCredentialResponse command(@javax.annotation.Nullable String command) {
     
     this.command = command;
     return this;
   }
 
-   /**
+  /**
    * cdp cli command string for creating the credential
    * @return command
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -65,12 +67,11 @@ public class GetCliForCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommand(String command) {
+  public void setCommand(@javax.annotation.Nullable String command) {
     this.command = command;
   }
 
-
-  public GetCliForCredentialResponse additionalCommands(List<String> additionalCommands) {
+  public GetCliForCredentialResponse additionalCommands(@javax.annotation.Nullable List<String> additionalCommands) {
     
     this.additionalCommands = additionalCommands;
     return this;
@@ -84,10 +85,10 @@ public class GetCliForCredentialResponse {
     return this;
   }
 
-   /**
+  /**
    * additional cdp cli commands for creating the credential
    * @return additionalCommands
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_COMMANDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,9 +100,10 @@ public class GetCliForCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_COMMANDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalCommands(List<String> additionalCommands) {
+  public void setAdditionalCommands(@javax.annotation.Nullable List<String> additionalCommands) {
     this.additionalCommands = additionalCommands;
   }
+
 
   @Override
   public boolean equals(Object o) {

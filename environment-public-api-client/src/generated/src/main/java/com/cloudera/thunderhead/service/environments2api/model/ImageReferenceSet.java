@@ -33,21 +33,24 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ImageReferenceSet.JSON_PROPERTY_AZURE,
   ImageReferenceSet.JSON_PROPERTY_GCP
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ImageReferenceSet {
   public static final String JSON_PROPERTY_AWS = "aws";
+  @javax.annotation.Nullable
   private Map<String, String> aws = new HashMap<>();
 
   public static final String JSON_PROPERTY_AZURE = "azure";
+  @javax.annotation.Nullable
   private Map<String, String> azure = new HashMap<>();
 
   public static final String JSON_PROPERTY_GCP = "gcp";
+  @javax.annotation.Nullable
   private Map<String, String> gcp = new HashMap<>();
 
   public ImageReferenceSet() {
   }
 
-  public ImageReferenceSet aws(Map<String, String> aws) {
+  public ImageReferenceSet aws(@javax.annotation.Nullable Map<String, String> aws) {
     
     this.aws = aws;
     return this;
@@ -61,10 +64,10 @@ public class ImageReferenceSet {
     return this;
   }
 
-   /**
+  /**
    * AWS-related region-to-image mappings.
    * @return aws
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -76,12 +79,11 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(Map<String, String> aws) {
+  public void setAws(@javax.annotation.Nullable Map<String, String> aws) {
     this.aws = aws;
   }
 
-
-  public ImageReferenceSet azure(Map<String, String> azure) {
+  public ImageReferenceSet azure(@javax.annotation.Nullable Map<String, String> azure) {
     
     this.azure = azure;
     return this;
@@ -95,10 +97,10 @@ public class ImageReferenceSet {
     return this;
   }
 
-   /**
+  /**
    * Azure-related region-to-image mappings.
    * @return azure
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -110,12 +112,11 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(Map<String, String> azure) {
+  public void setAzure(@javax.annotation.Nullable Map<String, String> azure) {
     this.azure = azure;
   }
 
-
-  public ImageReferenceSet gcp(Map<String, String> gcp) {
+  public ImageReferenceSet gcp(@javax.annotation.Nullable Map<String, String> gcp) {
     
     this.gcp = gcp;
     return this;
@@ -129,10 +130,10 @@ public class ImageReferenceSet {
     return this;
   }
 
-   /**
+  /**
    * GCP-related region-to-image mappings.
    * @return gcp
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -144,9 +145,10 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(Map<String, String> gcp) {
+  public void setGcp(@javax.annotation.Nullable Map<String, String> gcp) {
     this.gcp = gcp;
   }
+
 
   @Override
   public boolean equals(Object o) {

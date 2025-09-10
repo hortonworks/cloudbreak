@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AzureDatabaseResources.JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID,
   AzureDatabaseResources.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AzureDatabaseResources {
   public static final String JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDnsZoneId";
+  @javax.annotation.Nullable
   private String databasePrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
+  @javax.annotation.Nullable
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
   public AzureDatabaseResources() {
   }
 
-  public AzureDatabaseResources databasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public AzureDatabaseResources databasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
 
-   /**
+  /**
    * The full Azure resource ID of the existing Private DNS Zone used for Flexible Server and Single Server Databases.
    * @return databasePrivateDnsZoneId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -65,12 +67,11 @@ public class AzureDatabaseResources {
 
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public void setDatabasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
   }
 
-
-  public AzureDatabaseResources flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public AzureDatabaseResources flexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
@@ -84,10 +85,10 @@ public class AzureDatabaseResources {
     return this;
   }
 
-   /**
+  /**
    * The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
    * @return flexibleServerSubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,9 +100,10 @@ public class AzureDatabaseResources {
 
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public void setFlexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
   }
+
 
   @Override
   public boolean equals(Object o) {

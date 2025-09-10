@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AuthenticationRequest.JSON_PROPERTY_PUBLIC_KEY,
   AuthenticationRequest.JSON_PROPERTY_PUBLIC_KEY_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AuthenticationRequest {
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
+  @javax.annotation.Nullable
   private String publicKey;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY_ID = "publicKeyId";
+  @javax.annotation.Nullable
   private String publicKeyId;
 
   public AuthenticationRequest() {
   }
 
-  public AuthenticationRequest publicKey(String publicKey) {
+  public AuthenticationRequest publicKey(@javax.annotation.Nullable String publicKey) {
     
     this.publicKey = publicKey;
     return this;
   }
 
-   /**
+  /**
    * Public SSH key string. Mutually exclusive with publicKeyId.
    * @return publicKey
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -62,21 +64,20 @@ public class AuthenticationRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKey(String publicKey) {
+  public void setPublicKey(@javax.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
   }
 
-
-  public AuthenticationRequest publicKeyId(String publicKeyId) {
+  public AuthenticationRequest publicKeyId(@javax.annotation.Nullable String publicKeyId) {
     
     this.publicKeyId = publicKeyId;
     return this;
   }
 
-   /**
+  /**
    * Public SSH key ID already registered in the cloud provider. Mutually exclusive with publicKey.
    * @return publicKeyId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,9 +89,10 @@ public class AuthenticationRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKeyId(String publicKeyId) {
+  public void setPublicKeyId(@javax.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -53,22 +53,23 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CollectFreeipaDiagnosticsRequest.JSON_PROPERTY_UPDATE_PACKAGE,
   CollectFreeipaDiagnosticsRequest.JSON_PROPERTY_STORAGE_VALIDATION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CollectFreeipaDiagnosticsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   /**
    * Destination of the diagnostics collection (Support, Own cloud storage, Engineering or collect only on the nodes)
    */
   public enum DestinationEnum {
-    SUPPORT("SUPPORT"),
+    SUPPORT(String.valueOf("SUPPORT")),
     
-    CLOUD_STORAGE("CLOUD_STORAGE"),
+    CLOUD_STORAGE(String.valueOf("CLOUD_STORAGE")),
     
-    ENG("ENG"),
+    ENG(String.valueOf("ENG")),
     
-    LOCAL("LOCAL");
+    LOCAL(String.valueOf("LOCAL"));
 
     private String value;
 
@@ -98,66 +99,82 @@ public class CollectFreeipaDiagnosticsRequest {
   }
 
   public static final String JSON_PROPERTY_DESTINATION = "destination";
+  @javax.annotation.Nonnull
   private DestinationEnum destination;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nonnull
   private String description;
 
   public static final String JSON_PROPERTY_CASE_NUMBER = "caseNumber";
+  @javax.annotation.Nullable
   private String caseNumber;
 
   public static final String JSON_PROPERTY_LABELS = "labels";
+  @javax.annotation.Nullable
   private Set<String> labels = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
+  @javax.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
+  @javax.annotation.Nullable
   private OffsetDateTime endDate;
 
   public static final String JSON_PROPERTY_ADDITIONAL_LOGS = "additionalLogs";
+  @javax.annotation.Nullable
   private List<FreeipaVmLogRequest> additionalLogs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_HOSTS = "hosts";
+  @javax.annotation.Nullable
   private Set<String> hosts = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_HOST_GROUPS = "hostGroups";
+  @javax.annotation.Nullable
   private Set<String> hostGroups = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_EXCLUDE_HOSTS = "excludeHosts";
+  @javax.annotation.Nullable
   private Set<String> excludeHosts = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_SKIP_UNRESPONSIVE_HOSTS = "skipUnresponsiveHosts";
+  @javax.annotation.Nullable
   private Boolean skipUnresponsiveHosts;
 
   public static final String JSON_PROPERTY_INCLUDE_NGINX_REPORT = "includeNginxReport";
+  @javax.annotation.Nullable
   private Boolean includeNginxReport;
 
   public static final String JSON_PROPERTY_INCLUDE_SALT_LOGS = "includeSaltLogs";
+  @javax.annotation.Nullable
   private Boolean includeSaltLogs;
 
   public static final String JSON_PROPERTY_INCLUDE_SAR_OUTPUT = "includeSarOutput";
+  @javax.annotation.Nullable
   private Boolean includeSarOutput;
 
   public static final String JSON_PROPERTY_UPDATE_PACKAGE = "updatePackage";
+  @javax.annotation.Nullable
   private Boolean updatePackage = false;
 
   public static final String JSON_PROPERTY_STORAGE_VALIDATION = "storageValidation";
+  @javax.annotation.Nullable
   private Boolean storageValidation = false;
 
   public CollectFreeipaDiagnosticsRequest() {
   }
 
-  public CollectFreeipaDiagnosticsRequest environmentName(String environmentName) {
+  public CollectFreeipaDiagnosticsRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -169,21 +186,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest destination(DestinationEnum destination) {
+  public CollectFreeipaDiagnosticsRequest destination(@javax.annotation.Nonnull DestinationEnum destination) {
     
     this.destination = destination;
     return this;
   }
 
-   /**
+  /**
    * Destination of the diagnostics collection (Support, Own cloud storage, Engineering or collect only on the nodes)
    * @return destination
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DESTINATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -195,21 +211,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_DESTINATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDestination(DestinationEnum destination) {
+  public void setDestination(@javax.annotation.Nonnull DestinationEnum destination) {
     this.destination = destination;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest description(String description) {
+  public CollectFreeipaDiagnosticsRequest description(@javax.annotation.Nonnull String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * Additional information / title for the diagnostics collection.
    * @return description
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -221,21 +236,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nonnull String description) {
     this.description = description;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest caseNumber(String caseNumber) {
+  public CollectFreeipaDiagnosticsRequest caseNumber(@javax.annotation.Nullable String caseNumber) {
     
     this.caseNumber = caseNumber;
     return this;
   }
 
-   /**
+  /**
    * Optional support case number in case of SUPPORT destination, otherwise only act as additional data.
    * @return caseNumber
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CASE_NUMBER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -247,12 +261,11 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_CASE_NUMBER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCaseNumber(String caseNumber) {
+  public void setCaseNumber(@javax.annotation.Nullable String caseNumber) {
     this.caseNumber = caseNumber;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest labels(Set<String> labels) {
+  public CollectFreeipaDiagnosticsRequest labels(@javax.annotation.Nullable Set<String> labels) {
     
     this.labels = labels;
     return this;
@@ -266,10 +279,10 @@ public class CollectFreeipaDiagnosticsRequest {
     return this;
   }
 
-   /**
+  /**
    * Array of labels that can filter logs that are collected during diagnostics collection.
    * @return labels
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LABELS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -282,21 +295,20 @@ public class CollectFreeipaDiagnosticsRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_LABELS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLabels(Set<String> labels) {
+  public void setLabels(@javax.annotation.Nullable Set<String> labels) {
     this.labels = labels;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest startDate(OffsetDateTime startDate) {
+  public CollectFreeipaDiagnosticsRequest startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     
     this.startDate = startDate;
     return this;
   }
 
-   /**
+  /**
    * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this.
    * @return startDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -308,21 +320,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(OffsetDateTime startDate) {
+  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest endDate(OffsetDateTime endDate) {
+  public CollectFreeipaDiagnosticsRequest endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     
     this.endDate = endDate;
     return this;
   }
 
-   /**
+  /**
    * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this.
    * @return endDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -334,12 +345,11 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(OffsetDateTime endDate) {
+  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest additionalLogs(List<FreeipaVmLogRequest> additionalLogs) {
+  public CollectFreeipaDiagnosticsRequest additionalLogs(@javax.annotation.Nullable List<FreeipaVmLogRequest> additionalLogs) {
     
     this.additionalLogs = additionalLogs;
     return this;
@@ -353,10 +363,10 @@ public class CollectFreeipaDiagnosticsRequest {
     return this;
   }
 
-   /**
+  /**
    * Array of log descriptors that should be additionally collected during diagnostics collection.
    * @return additionalLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -368,12 +378,11 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalLogs(List<FreeipaVmLogRequest> additionalLogs) {
+  public void setAdditionalLogs(@javax.annotation.Nullable List<FreeipaVmLogRequest> additionalLogs) {
     this.additionalLogs = additionalLogs;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest hosts(Set<String> hosts) {
+  public CollectFreeipaDiagnosticsRequest hosts(@javax.annotation.Nullable Set<String> hosts) {
     
     this.hosts = hosts;
     return this;
@@ -387,10 +396,10 @@ public class CollectFreeipaDiagnosticsRequest {
     return this;
   }
 
-   /**
+  /**
    * Array of host names (fqdn), collection will run only on the dedicated hosts.
    * @return hosts
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -403,12 +412,11 @@ public class CollectFreeipaDiagnosticsRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHosts(Set<String> hosts) {
+  public void setHosts(@javax.annotation.Nullable Set<String> hosts) {
     this.hosts = hosts;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest hostGroups(Set<String> hostGroups) {
+  public CollectFreeipaDiagnosticsRequest hostGroups(@javax.annotation.Nullable Set<String> hostGroups) {
     
     this.hostGroups = hostGroups;
     return this;
@@ -422,10 +430,10 @@ public class CollectFreeipaDiagnosticsRequest {
     return this;
   }
 
-   /**
+  /**
    * Array of host groups, collection will run only on the dedicated hosts that belongs to these host groups.
    * @return hostGroups
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HOST_GROUPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -438,12 +446,11 @@ public class CollectFreeipaDiagnosticsRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_HOST_GROUPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHostGroups(Set<String> hostGroups) {
+  public void setHostGroups(@javax.annotation.Nullable Set<String> hostGroups) {
     this.hostGroups = hostGroups;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest excludeHosts(Set<String> excludeHosts) {
+  public CollectFreeipaDiagnosticsRequest excludeHosts(@javax.annotation.Nullable Set<String> excludeHosts) {
     
     this.excludeHosts = excludeHosts;
     return this;
@@ -457,10 +464,10 @@ public class CollectFreeipaDiagnosticsRequest {
     return this;
   }
 
-   /**
+  /**
    * Array of host names (fqdn or IP address), collection will not run on the excluded hosts.
    * @return excludeHosts
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXCLUDE_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -473,21 +480,20 @@ public class CollectFreeipaDiagnosticsRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_EXCLUDE_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExcludeHosts(Set<String> excludeHosts) {
+  public void setExcludeHosts(@javax.annotation.Nullable Set<String> excludeHosts) {
     this.excludeHosts = excludeHosts;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest skipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+  public CollectFreeipaDiagnosticsRequest skipUnresponsiveHosts(@javax.annotation.Nullable Boolean skipUnresponsiveHosts) {
     
     this.skipUnresponsiveHosts = skipUnresponsiveHosts;
     return this;
   }
 
-   /**
+  /**
    * Skip unhealthy hosts from the diagnostics collection.
    * @return skipUnresponsiveHosts
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SKIP_UNRESPONSIVE_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -499,21 +505,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_SKIP_UNRESPONSIVE_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSkipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+  public void setSkipUnresponsiveHosts(@javax.annotation.Nullable Boolean skipUnresponsiveHosts) {
     this.skipUnresponsiveHosts = skipUnresponsiveHosts;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest includeNginxReport(Boolean includeNginxReport) {
+  public CollectFreeipaDiagnosticsRequest includeNginxReport(@javax.annotation.Nullable Boolean includeNginxReport) {
     
     this.includeNginxReport = includeNginxReport;
     return this;
   }
 
-   /**
+  /**
    * Include Nginx report generated by GoAccess (if available).
    * @return includeNginxReport
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INCLUDE_NGINX_REPORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -525,21 +530,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_INCLUDE_NGINX_REPORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIncludeNginxReport(Boolean includeNginxReport) {
+  public void setIncludeNginxReport(@javax.annotation.Nullable Boolean includeNginxReport) {
     this.includeNginxReport = includeNginxReport;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest includeSaltLogs(Boolean includeSaltLogs) {
+  public CollectFreeipaDiagnosticsRequest includeSaltLogs(@javax.annotation.Nullable Boolean includeSaltLogs) {
     
     this.includeSaltLogs = includeSaltLogs;
     return this;
   }
 
-   /**
+  /**
    * Include salt minion/master/api system logs in the diagnostics collection.
    * @return includeSaltLogs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INCLUDE_SALT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -551,21 +555,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_INCLUDE_SALT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIncludeSaltLogs(Boolean includeSaltLogs) {
+  public void setIncludeSaltLogs(@javax.annotation.Nullable Boolean includeSaltLogs) {
     this.includeSaltLogs = includeSaltLogs;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest includeSarOutput(Boolean includeSarOutput) {
+  public CollectFreeipaDiagnosticsRequest includeSarOutput(@javax.annotation.Nullable Boolean includeSarOutput) {
     
     this.includeSarOutput = includeSarOutput;
     return this;
   }
 
-   /**
+  /**
    * Include SAR (System Activity Report) generated outputs in the diagnostics collection (if available).
    * @return includeSarOutput
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INCLUDE_SAR_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -577,21 +580,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_INCLUDE_SAR_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIncludeSarOutput(Boolean includeSarOutput) {
+  public void setIncludeSarOutput(@javax.annotation.Nullable Boolean includeSarOutput) {
     this.includeSarOutput = includeSarOutput;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest updatePackage(Boolean updatePackage) {
+  public CollectFreeipaDiagnosticsRequest updatePackage(@javax.annotation.Nullable Boolean updatePackage) {
     
     this.updatePackage = updatePackage;
     return this;
   }
 
-   /**
+  /**
    * If enabled, required package (cdp-telemetry) will be upgraded or installed on the nodes. (useful if package is not installed or needs to be upgraded) Network is required for this operation.
    * @return updatePackage
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_UPDATE_PACKAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -603,21 +605,20 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_UPDATE_PACKAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUpdatePackage(Boolean updatePackage) {
+  public void setUpdatePackage(@javax.annotation.Nullable Boolean updatePackage) {
     this.updatePackage = updatePackage;
   }
 
-
-  public CollectFreeipaDiagnosticsRequest storageValidation(Boolean storageValidation) {
+  public CollectFreeipaDiagnosticsRequest storageValidation(@javax.annotation.Nullable Boolean storageValidation) {
     
     this.storageValidation = storageValidation;
     return this;
   }
 
-   /**
+  /**
    * Enable/disable node level storage validation (can be disabled for example, if you have too many hosts and do not want to do too much parallel writes to s3/abfs)
    * @return storageValidation
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_VALIDATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -629,9 +630,10 @@ public class CollectFreeipaDiagnosticsRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_VALIDATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageValidation(Boolean storageValidation) {
+  public void setStorageValidation(@javax.annotation.Nullable Boolean storageValidation) {
     this.storageValidation = storageValidation;
   }
+
 
   @Override
   public boolean equals(Object o) {

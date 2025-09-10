@@ -42,33 +42,39 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   PrivateDatalakeDetails.JSON_PROPERTY_INSTANCES,
   PrivateDatalakeDetails.JSON_PROPERTY_KERBEROS_INFO
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class PrivateDatalakeDetails {
   public static final String JSON_PROPERTY_DATALAKE_NAME = "datalakeName";
+  @javax.annotation.Nullable
   private String datalakeName;
 
   public static final String JSON_PROPERTY_ENABLE_RANGER_RAZ = "enableRangerRaz";
+  @javax.annotation.Nullable
   private Boolean enableRangerRaz;
 
   public static final String JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS = "creationTimeEpochMillis";
+  @javax.annotation.Nullable
   private Long creationTimeEpochMillis;
 
   public static final String JSON_PROPERTY_CM_F_Q_D_N = "cmFQDN";
+  @javax.annotation.Nullable
   private String cmFQDN;
 
   public static final String JSON_PROPERTY_CM_I_P = "cmIP";
+  @javax.annotation.Nullable
   private String cmIP;
 
   public static final String JSON_PROPERTY_CM_SERVER_ID = "cmServerId";
+  @javax.annotation.Nullable
   private String cmServerId;
 
   /**
    * Status of the datalake.
    */
   public enum StatusEnum {
-    AVAILABLE("AVAILABLE"),
+    AVAILABLE(String.valueOf("AVAILABLE")),
     
-    NOT_AVAILABLE("NOT_AVAILABLE");
+    NOT_AVAILABLE(String.valueOf("NOT_AVAILABLE"));
 
     private String value;
 
@@ -98,27 +104,30 @@ public class PrivateDatalakeDetails {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
+  @javax.annotation.Nullable
   private List<Instance> instances = new ArrayList<>();
 
   public static final String JSON_PROPERTY_KERBEROS_INFO = "kerberosInfo";
+  @javax.annotation.Nullable
   private KerberosInfo kerberosInfo;
 
   public PrivateDatalakeDetails() {
   }
 
-  public PrivateDatalakeDetails datalakeName(String datalakeName) {
+  public PrivateDatalakeDetails datalakeName(@javax.annotation.Nullable String datalakeName) {
     
     this.datalakeName = datalakeName;
     return this;
   }
 
-   /**
+  /**
    * Name of the datalake.
    * @return datalakeName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +139,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalakeName(String datalakeName) {
+  public void setDatalakeName(@javax.annotation.Nullable String datalakeName) {
     this.datalakeName = datalakeName;
   }
 
-
-  public PrivateDatalakeDetails enableRangerRaz(Boolean enableRangerRaz) {
+  public PrivateDatalakeDetails enableRangerRaz(@javax.annotation.Nullable Boolean enableRangerRaz) {
     
     this.enableRangerRaz = enableRangerRaz;
     return this;
   }
 
-   /**
+  /**
    * Whether Ranger RAZ is enabled for the datalake.
    * @return enableRangerRaz
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_RANGER_RAZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,21 +164,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_RANGER_RAZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableRangerRaz(Boolean enableRangerRaz) {
+  public void setEnableRangerRaz(@javax.annotation.Nullable Boolean enableRangerRaz) {
     this.enableRangerRaz = enableRangerRaz;
   }
 
-
-  public PrivateDatalakeDetails creationTimeEpochMillis(Long creationTimeEpochMillis) {
+  public PrivateDatalakeDetails creationTimeEpochMillis(@javax.annotation.Nullable Long creationTimeEpochMillis) {
     
     this.creationTimeEpochMillis = creationTimeEpochMillis;
     return this;
   }
 
-   /**
+  /**
    * The timestamp in Unix epoch when the datalake was created.
    * @return creationTimeEpochMillis
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -182,21 +189,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreationTimeEpochMillis(Long creationTimeEpochMillis) {
+  public void setCreationTimeEpochMillis(@javax.annotation.Nullable Long creationTimeEpochMillis) {
     this.creationTimeEpochMillis = creationTimeEpochMillis;
   }
 
-
-  public PrivateDatalakeDetails cmFQDN(String cmFQDN) {
+  public PrivateDatalakeDetails cmFQDN(@javax.annotation.Nullable String cmFQDN) {
     
     this.cmFQDN = cmFQDN;
     return this;
   }
 
-   /**
+  /**
    * The Cloudera Manager FQDN.
    * @return cmFQDN
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -208,21 +214,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmFQDN(String cmFQDN) {
+  public void setCmFQDN(@javax.annotation.Nullable String cmFQDN) {
     this.cmFQDN = cmFQDN;
   }
 
-
-  public PrivateDatalakeDetails cmIP(String cmIP) {
+  public PrivateDatalakeDetails cmIP(@javax.annotation.Nullable String cmIP) {
     
     this.cmIP = cmIP;
     return this;
   }
 
-   /**
+  /**
    * The Cloudera Manager IP.
    * @return cmIP
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -234,21 +239,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmIP(String cmIP) {
+  public void setCmIP(@javax.annotation.Nullable String cmIP) {
     this.cmIP = cmIP;
   }
 
-
-  public PrivateDatalakeDetails cmServerId(String cmServerId) {
+  public PrivateDatalakeDetails cmServerId(@javax.annotation.Nullable String cmServerId) {
     
     this.cmServerId = cmServerId;
     return this;
   }
 
-   /**
+  /**
    * The Cloudera Manager server ID.
    * @return cmServerId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_SERVER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -260,21 +264,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_SERVER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmServerId(String cmServerId) {
+  public void setCmServerId(@javax.annotation.Nullable String cmServerId) {
     this.cmServerId = cmServerId;
   }
 
-
-  public PrivateDatalakeDetails status(StatusEnum status) {
+  public PrivateDatalakeDetails status(@javax.annotation.Nullable StatusEnum status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of the datalake.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -286,12 +289,11 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(StatusEnum status) {
+  public void setStatus(@javax.annotation.Nullable StatusEnum status) {
     this.status = status;
   }
 
-
-  public PrivateDatalakeDetails instances(List<Instance> instances) {
+  public PrivateDatalakeDetails instances(@javax.annotation.Nullable List<Instance> instances) {
     
     this.instances = instances;
     return this;
@@ -305,10 +307,10 @@ public class PrivateDatalakeDetails {
     return this;
   }
 
-   /**
+  /**
    * Hosts information for instances within the on premises datalake cluster.
    * @return instances
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -320,21 +322,20 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstances(List<Instance> instances) {
+  public void setInstances(@javax.annotation.Nullable List<Instance> instances) {
     this.instances = instances;
   }
 
-
-  public PrivateDatalakeDetails kerberosInfo(KerberosInfo kerberosInfo) {
+  public PrivateDatalakeDetails kerberosInfo(@javax.annotation.Nullable KerberosInfo kerberosInfo) {
     
     this.kerberosInfo = kerberosInfo;
     return this;
   }
 
-   /**
+  /**
    * Get kerberosInfo
    * @return kerberosInfo
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KERBEROS_INFO)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -346,9 +347,10 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_KERBEROS_INFO)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKerberosInfo(KerberosInfo kerberosInfo) {
+  public void setKerberosInfo(@javax.annotation.Nullable KerberosInfo kerberosInfo) {
     this.kerberosInfo = kerberosInfo;
   }
+
 
   @Override
   public boolean equals(Object o) {

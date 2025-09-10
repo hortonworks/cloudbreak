@@ -37,36 +37,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeOpdbServicesResponse.JSON_PROPERTY_DETAILS,
   DescribeOpdbServicesResponse.JSON_PROPERTY_SERVICES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeOpdbServicesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nullable
   private String environment;
 
   public static final String JSON_PROPERTY_DATABASE = "database";
+  @javax.annotation.Nullable
   private String database;
 
   public static final String JSON_PROPERTY_LAST_UPDATED = "lastUpdated";
+  @javax.annotation.Nullable
   private Long lastUpdated;
 
   public static final String JSON_PROPERTY_DETAILS = "details";
+  @javax.annotation.Nullable
   private OpDB details;
 
   public static final String JSON_PROPERTY_SERVICES = "services";
+  @javax.annotation.Nullable
   private Map<String, Service> services = new HashMap<>();
 
   public DescribeOpdbServicesResponse() {
   }
 
-  public DescribeOpdbServicesResponse environment(String environment) {
+  public DescribeOpdbServicesResponse environment(@javax.annotation.Nullable String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -78,21 +83,20 @@ public class DescribeOpdbServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nullable String environment) {
     this.environment = environment;
   }
 
-
-  public DescribeOpdbServicesResponse database(String database) {
+  public DescribeOpdbServicesResponse database(@javax.annotation.Nullable String database) {
     
     this.database = database;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the Operational Database (OpDB).
    * @return database
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -104,21 +108,20 @@ public class DescribeOpdbServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_DATABASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabase(String database) {
+  public void setDatabase(@javax.annotation.Nullable String database) {
     this.database = database;
   }
 
-
-  public DescribeOpdbServicesResponse lastUpdated(Long lastUpdated) {
+  public DescribeOpdbServicesResponse lastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     
     this.lastUpdated = lastUpdated;
     return this;
   }
 
-   /**
+  /**
    * The RFC3339 timestamp of the last change to the OpDB config.
    * @return lastUpdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +133,20 @@ public class DescribeOpdbServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_UPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastUpdated(Long lastUpdated) {
+  public void setLastUpdated(@javax.annotation.Nullable Long lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
-
-  public DescribeOpdbServicesResponse details(OpDB details) {
+  public DescribeOpdbServicesResponse details(@javax.annotation.Nullable OpDB details) {
     
     this.details = details;
     return this;
   }
 
-   /**
+  /**
    * Get details
    * @return details
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,12 +158,11 @@ public class DescribeOpdbServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDetails(OpDB details) {
+  public void setDetails(@javax.annotation.Nullable OpDB details) {
     this.details = details;
   }
 
-
-  public DescribeOpdbServicesResponse services(Map<String, Service> services) {
+  public DescribeOpdbServicesResponse services(@javax.annotation.Nullable Map<String, Service> services) {
     
     this.services = services;
     return this;
@@ -175,10 +176,10 @@ public class DescribeOpdbServicesResponse {
     return this;
   }
 
-   /**
+  /**
    * The services that make up the Operational Database.
    * @return services
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,9 +191,10 @@ public class DescribeOpdbServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServices(Map<String, Service> services) {
+  public void setServices(@javax.annotation.Nullable Map<String, Service> services) {
     this.services = services;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -35,33 +35,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   LogStorage.JSON_PROPERTY_AZURE_DETAILS,
   LogStorage.JSON_PROPERTY_GCP_DETAILS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class LogStorage {
   public static final String JSON_PROPERTY_ENABLED = "enabled";
+  @javax.annotation.Nonnull
   private Boolean enabled;
 
   public static final String JSON_PROPERTY_AWS_DETAILS = "awsDetails";
+  @javax.annotation.Nullable
   private LogStorageAwsDetails awsDetails;
 
   public static final String JSON_PROPERTY_AZURE_DETAILS = "azureDetails";
+  @javax.annotation.Nullable
   private LogStorageAzureDetails azureDetails;
 
   public static final String JSON_PROPERTY_GCP_DETAILS = "gcpDetails";
+  @javax.annotation.Nullable
   private LogStorageGcpDetails gcpDetails;
 
   public LogStorage() {
   }
 
-  public LogStorage enabled(Boolean enabled) {
+  public LogStorage enabled(@javax.annotation.Nonnull Boolean enabled) {
     
     this.enabled = enabled;
     return this;
   }
 
-   /**
+  /**
    * Whether external log storage is enabled.
    * @return enabled
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -73,21 +77,20 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnabled(Boolean enabled) {
+  public void setEnabled(@javax.annotation.Nonnull Boolean enabled) {
     this.enabled = enabled;
   }
 
-
-  public LogStorage awsDetails(LogStorageAwsDetails awsDetails) {
+  public LogStorage awsDetails(@javax.annotation.Nullable LogStorageAwsDetails awsDetails) {
     
     this.awsDetails = awsDetails;
     return this;
   }
 
-   /**
+  /**
    * Get awsDetails
    * @return awsDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -99,21 +102,20 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDetails(LogStorageAwsDetails awsDetails) {
+  public void setAwsDetails(@javax.annotation.Nullable LogStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
   }
 
-
-  public LogStorage azureDetails(LogStorageAzureDetails azureDetails) {
+  public LogStorage azureDetails(@javax.annotation.Nullable LogStorageAzureDetails azureDetails) {
     
     this.azureDetails = azureDetails;
     return this;
   }
 
-   /**
+  /**
    * Get azureDetails
    * @return azureDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -125,21 +127,20 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDetails(LogStorageAzureDetails azureDetails) {
+  public void setAzureDetails(@javax.annotation.Nullable LogStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
   }
 
-
-  public LogStorage gcpDetails(LogStorageGcpDetails gcpDetails) {
+  public LogStorage gcpDetails(@javax.annotation.Nullable LogStorageGcpDetails gcpDetails) {
     
     this.gcpDetails = gcpDetails;
     return this;
   }
 
-   /**
+  /**
    * Get gcpDetails
    * @return gcpDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -151,9 +152,10 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpDetails(LogStorageGcpDetails gcpDetails) {
+  public void setGcpDetails(@javax.annotation.Nullable LogStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
   }
+
 
   @Override
   public boolean equals(Object o) {

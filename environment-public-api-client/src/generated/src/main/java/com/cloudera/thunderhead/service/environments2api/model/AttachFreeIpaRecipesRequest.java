@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AttachFreeIpaRecipesRequest.JSON_PROPERTY_ENVIRONMENT,
   AttachFreeIpaRecipesRequest.JSON_PROPERTY_RECIPES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class AttachFreeIpaRecipesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
+  @javax.annotation.Nonnull
   private List<String> recipes = new ArrayList<>();
 
   public AttachFreeIpaRecipesRequest() {
   }
 
-  public AttachFreeIpaRecipesRequest environment(String environment) {
+  public AttachFreeIpaRecipesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The environment name or CRN of the FreeIPA.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class AttachFreeIpaRecipesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public AttachFreeIpaRecipesRequest recipes(List<String> recipes) {
+  public AttachFreeIpaRecipesRequest recipes(@javax.annotation.Nonnull List<String> recipes) {
     
     this.recipes = recipes;
     return this;
@@ -84,10 +85,10 @@ public class AttachFreeIpaRecipesRequest {
     return this;
   }
 
-   /**
+  /**
    * The list of recipes to attach.
    * @return recipes
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -99,9 +100,10 @@ public class AttachFreeIpaRecipesRequest {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRecipes(List<String> recipes) {
+  public void setRecipes(@javax.annotation.Nonnull List<String> recipes) {
     this.recipes = recipes;
   }
+
 
   @Override
   public boolean equals(Object o) {

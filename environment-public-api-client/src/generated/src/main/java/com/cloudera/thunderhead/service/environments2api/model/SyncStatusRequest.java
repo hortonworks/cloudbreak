@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   SyncStatusRequest.JSON_PROPERTY_OPERATION_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SyncStatusRequest {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nonnull
   private String operationId;
 
   public SyncStatusRequest() {
   }
 
-  public SyncStatusRequest operationId(String operationId) {
+  public SyncStatusRequest operationId(@javax.annotation.Nonnull String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * operationId for the previously requested sync operation for user sync or password.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class SyncStatusRequest {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nonnull String operationId) {
     this.operationId = operationId;
   }
+
 
   @Override
   public boolean equals(Object o) {

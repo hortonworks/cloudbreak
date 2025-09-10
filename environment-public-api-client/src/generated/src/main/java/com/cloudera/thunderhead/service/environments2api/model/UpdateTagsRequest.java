@@ -32,27 +32,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateTagsRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateTagsRequest.JSON_PROPERTY_TAGS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateTagsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
+  @javax.annotation.Nonnull
   private Map<String, String> tags = new HashMap<>();
 
   public UpdateTagsRequest() {
   }
 
-  public UpdateTagsRequest environment(String environment) {
+  public UpdateTagsRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or the CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -64,12 +66,11 @@ public class UpdateTagsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateTagsRequest tags(Map<String, String> tags) {
+  public UpdateTagsRequest tags(@javax.annotation.Nonnull Map<String, String> tags) {
     
     this.tags = tags;
     return this;
@@ -80,10 +81,10 @@ public class UpdateTagsRequest {
     return this;
   }
 
-   /**
+  /**
    * Map of tag names to values for the environment.
    * @return tags
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -95,9 +96,10 @@ public class UpdateTagsRequest {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTags(Map<String, String> tags) {
+  public void setTags(@javax.annotation.Nonnull Map<String, String> tags) {
     this.tags = tags;
   }
+
 
   @Override
   public boolean equals(Object o) {

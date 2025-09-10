@@ -31,31 +31,34 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EnvironmentQuota.JSON_PROPERTY_MEMORY_QUOTA,
   EnvironmentQuota.JSON_PROPERTY_GPU_QUOTA
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class EnvironmentQuota {
   public static final String JSON_PROPERTY_CPU_QUOTA = "cpuQuota";
+  @javax.annotation.Nullable
   private Long cpuQuota;
 
   public static final String JSON_PROPERTY_MEMORY_QUOTA = "memoryQuota";
+  @javax.annotation.Nullable
   private Long memoryQuota;
 
   public static final String JSON_PROPERTY_GPU_QUOTA = "gpuQuota";
+  @javax.annotation.Nullable
   private Long gpuQuota;
 
   public EnvironmentQuota() {
   }
 
-  public EnvironmentQuota cpuQuota(Long cpuQuota) {
+  public EnvironmentQuota cpuQuota(@javax.annotation.Nullable Long cpuQuota) {
     
     this.cpuQuota = cpuQuota;
     return this;
   }
 
-   /**
+  /**
    * CPU quota (in Cores) for the Environment. Must be a positive number. By default, a quota won&#39;t be set for this resource type in the environment.
    * minimum: 1
    * @return cpuQuota
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -67,22 +70,21 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_CPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCpuQuota(Long cpuQuota) {
+  public void setCpuQuota(@javax.annotation.Nullable Long cpuQuota) {
     this.cpuQuota = cpuQuota;
   }
 
-
-  public EnvironmentQuota memoryQuota(Long memoryQuota) {
+  public EnvironmentQuota memoryQuota(@javax.annotation.Nullable Long memoryQuota) {
     
     this.memoryQuota = memoryQuota;
     return this;
   }
 
-   /**
+  /**
    * Memory quota (in GigaBytes) for the Environment. Must be a positive number. By default, a quota won&#39;t be set for this resource type in the environment.
    * minimum: 1
    * @return memoryQuota
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MEMORY_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -94,22 +96,21 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_MEMORY_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMemoryQuota(Long memoryQuota) {
+  public void setMemoryQuota(@javax.annotation.Nullable Long memoryQuota) {
     this.memoryQuota = memoryQuota;
   }
 
-
-  public EnvironmentQuota gpuQuota(Long gpuQuota) {
+  public EnvironmentQuota gpuQuota(@javax.annotation.Nullable Long gpuQuota) {
     
     this.gpuQuota = gpuQuota;
     return this;
   }
 
-   /**
+  /**
    * GPU quota (in Cores) for the Environment. Must be a positive number. By default, a quota won&#39;t be set for this resource type in the environment.
    * minimum: 1
    * @return gpuQuota
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -121,9 +122,10 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_GPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGpuQuota(Long gpuQuota) {
+  public void setGpuQuota(@javax.annotation.Nullable Long gpuQuota) {
     this.gpuQuota = gpuQuota;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -33,15 +33,16 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CheckEnvironmentConnectivityResponse.JSON_PROPERTY_CLUSTERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CheckEnvironmentConnectivityResponse {
   public static final String JSON_PROPERTY_CLUSTERS = "clusters";
+  @javax.annotation.Nonnull
   private List<CdpCluster> clusters = new ArrayList<>();
 
   public CheckEnvironmentConnectivityResponse() {
   }
 
-  public CheckEnvironmentConnectivityResponse clusters(List<CdpCluster> clusters) {
+  public CheckEnvironmentConnectivityResponse clusters(@javax.annotation.Nonnull List<CdpCluster> clusters) {
     
     this.clusters = clusters;
     return this;
@@ -55,10 +56,10 @@ public class CheckEnvironmentConnectivityResponse {
     return this;
   }
 
-   /**
+  /**
    * List of discovered clusters
    * @return clusters
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -70,9 +71,10 @@ public class CheckEnvironmentConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusters(List<CdpCluster> clusters) {
+  public void setClusters(@javax.annotation.Nonnull List<CdpCluster> clusters) {
     this.clusters = clusters;
   }
+
 
   @Override
   public boolean equals(Object o) {

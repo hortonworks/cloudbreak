@@ -40,48 +40,57 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   NetworkAzureParams.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS,
   NetworkAzureParams.JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class NetworkAzureParams {
   public static final String JSON_PROPERTY_NETWORK_ID = "networkId";
+  @javax.annotation.Nonnull
   private String networkId;
 
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
+  @javax.annotation.Nonnull
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
+  @javax.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
+  @javax.annotation.Nullable
   private String networkName;
 
   public static final String JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDnsZoneId";
+  @javax.annotation.Nullable
   private String databasePrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
+  @javax.annotation.Nullable
   private String aksPrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER = "enableOutboundLoadBalancer";
+  @javax.annotation.Nullable
   private Boolean enableOutboundLoadBalancer;
 
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
+  @javax.annotation.Nullable
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS = "usePublicDnsForPrivateAks";
+  @javax.annotation.Nullable
   private Boolean usePublicDnsForPrivateAks;
 
   public NetworkAzureParams() {
   }
 
-  public NetworkAzureParams networkId(String networkId) {
+  public NetworkAzureParams networkId(@javax.annotation.Nonnull String networkId) {
     
     this.networkId = networkId;
     return this;
   }
 
-   /**
+  /**
    * The id of the Azure VNet.
    * @return networkId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -93,21 +102,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkId(String networkId) {
+  public void setNetworkId(@javax.annotation.Nonnull String networkId) {
     this.networkId = networkId;
   }
 
-
-  public NetworkAzureParams resourceGroupName(String resourceGroupName) {
+  public NetworkAzureParams resourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
     
     this.resourceGroupName = resourceGroupName;
     return this;
   }
 
-   /**
+  /**
    * The name of the resource group associated with the VNet.
    * @return resourceGroupName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -119,21 +127,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResourceGroupName(String resourceGroupName) {
+  public void setResourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-
-  public NetworkAzureParams usePublicIp(Boolean usePublicIp) {
+  public NetworkAzureParams usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     
     this.usePublicIp = usePublicIp;
     return this;
   }
 
-   /**
+  /**
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -145,21 +152,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(Boolean usePublicIp) {
+  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-
-  public NetworkAzureParams networkName(String networkName) {
+  public NetworkAzureParams networkName(@javax.annotation.Nullable String networkName) {
     
     this.networkName = networkName;
     return this;
   }
 
-   /**
+  /**
    * The name of the Azure VNet.
    * @return networkName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -171,21 +177,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkName(String networkName) {
+  public void setNetworkName(@javax.annotation.Nullable String networkName) {
     this.networkName = networkName;
   }
 
-
-  public NetworkAzureParams databasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public NetworkAzureParams databasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
 
-   /**
+  /**
    * The full Azure resource ID of the existing Private DNS Zone used for Flexible Server and Single Server Databases.
    * @return databasePrivateDnsZoneId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -197,21 +202,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+  public void setDatabasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
   }
 
-
-  public NetworkAzureParams aksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+  public NetworkAzureParams aksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
     
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     return this;
   }
 
-   /**
+  /**
    * The full Azure resource ID of an existing Private DNS zone used for the AKS.
    * @return aksPrivateDnsZoneId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -223,21 +227,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+  public void setAksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
   }
 
-
-  public NetworkAzureParams enableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+  public NetworkAzureParams enableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
     return this;
   }
 
-   /**
+  /**
    * Whether the outbound load balancer was created for this environment.
    * @return enableOutboundLoadBalancer
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -249,12 +252,11 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+  public void setEnableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
   }
 
-
-  public NetworkAzureParams flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public NetworkAzureParams flexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
@@ -268,10 +270,10 @@ public class NetworkAzureParams {
     return this;
   }
 
-   /**
+  /**
    * The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
    * @return flexibleServerSubnetIds
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -283,21 +285,20 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+  public void setFlexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
   }
 
-
-  public NetworkAzureParams usePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+  public NetworkAzureParams usePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
     return this;
   }
 
-   /**
+  /**
    * Use public DNS for all DNS records in a private cluster.
    * @return usePublicDnsForPrivateAks
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -309,9 +310,10 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUsePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+  public void setUsePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
   }
+
 
   @Override
   public boolean equals(Object o) {

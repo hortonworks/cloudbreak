@@ -38,36 +38,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DescribeDatalakeServicesResponse.JSON_PROPERTY_APPLICATIONS,
   DescribeDatalakeServicesResponse.JSON_PROPERTY_METADATA
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class DescribeDatalakeServicesResponse {
   public static final String JSON_PROPERTY_CLUSTERID = "clusterid";
+  @javax.annotation.Nullable
   private String clusterid;
 
   public static final String JSON_PROPERTY_LASTUPDATED = "lastupdated";
+  @javax.annotation.Nullable
   private Long lastupdated;
 
   public static final String JSON_PROPERTY_DEPLOYMENT_TYPE = "deploymentType";
+  @javax.annotation.Nullable
   private DeploymentType deploymentType;
 
   public static final String JSON_PROPERTY_APPLICATIONS = "applications";
+  @javax.annotation.Nullable
   private Map<String, Application> applications = new HashMap<>();
 
   public static final String JSON_PROPERTY_METADATA = "metadata";
+  @javax.annotation.Nullable
   private Metadata metadata;
 
   public DescribeDatalakeServicesResponse() {
   }
 
-  public DescribeDatalakeServicesResponse clusterid(String clusterid) {
+  public DescribeDatalakeServicesResponse clusterid(@javax.annotation.Nullable String clusterid) {
     
     this.clusterid = clusterid;
     return this;
   }
 
-   /**
+  /**
    * The Service Discovery cluster CRN for the services described
    * @return clusterid
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTERID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -79,21 +84,20 @@ public class DescribeDatalakeServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterid(String clusterid) {
+  public void setClusterid(@javax.annotation.Nullable String clusterid) {
     this.clusterid = clusterid;
   }
 
-
-  public DescribeDatalakeServicesResponse lastupdated(Long lastupdated) {
+  public DescribeDatalakeServicesResponse lastupdated(@javax.annotation.Nullable Long lastupdated) {
     
     this.lastupdated = lastupdated;
     return this;
   }
 
-   /**
+  /**
    * The number of milliseconds since the last update
    * @return lastupdated
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LASTUPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -105,21 +109,20 @@ public class DescribeDatalakeServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_LASTUPDATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastupdated(Long lastupdated) {
+  public void setLastupdated(@javax.annotation.Nullable Long lastupdated) {
     this.lastupdated = lastupdated;
   }
 
-
-  public DescribeDatalakeServicesResponse deploymentType(DeploymentType deploymentType) {
+  public DescribeDatalakeServicesResponse deploymentType(@javax.annotation.Nullable DeploymentType deploymentType) {
     
     this.deploymentType = deploymentType;
     return this;
   }
 
-   /**
+  /**
    * Get deploymentType
    * @return deploymentType
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -131,12 +134,11 @@ public class DescribeDatalakeServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_DEPLOYMENT_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDeploymentType(DeploymentType deploymentType) {
+  public void setDeploymentType(@javax.annotation.Nullable DeploymentType deploymentType) {
     this.deploymentType = deploymentType;
   }
 
-
-  public DescribeDatalakeServicesResponse applications(Map<String, Application> applications) {
+  public DescribeDatalakeServicesResponse applications(@javax.annotation.Nullable Map<String, Application> applications) {
     
     this.applications = applications;
     return this;
@@ -150,10 +152,10 @@ public class DescribeDatalakeServicesResponse {
     return this;
   }
 
-   /**
+  /**
    * A map of applications that provide services for the Service Discovery
    * @return applications
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -165,21 +167,20 @@ public class DescribeDatalakeServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setApplications(Map<String, Application> applications) {
+  public void setApplications(@javax.annotation.Nullable Map<String, Application> applications) {
     this.applications = applications;
   }
 
-
-  public DescribeDatalakeServicesResponse metadata(Metadata metadata) {
+  public DescribeDatalakeServicesResponse metadata(@javax.annotation.Nullable Metadata metadata) {
     
     this.metadata = metadata;
     return this;
   }
 
-   /**
+  /**
    * Get metadata
    * @return metadata
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -191,9 +192,10 @@ public class DescribeDatalakeServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMetadata(Metadata metadata) {
+  public void setMetadata(@javax.annotation.Nullable Metadata metadata) {
     this.metadata = metadata;
   }
+
 
   @Override
   public boolean equals(Object o) {

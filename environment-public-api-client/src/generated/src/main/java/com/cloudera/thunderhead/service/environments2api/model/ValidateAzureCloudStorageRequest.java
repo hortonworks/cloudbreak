@@ -34,39 +34,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ValidateAzureCloudStorageRequest.JSON_PROPERTY_ACCOUNT_NAME,
   ValidateAzureCloudStorageRequest.JSON_PROPERTY_SECURE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ValidateAzureCloudStorageRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_CRN = "credentialCrn";
+  @javax.annotation.Nonnull
   private String credentialCrn;
 
   public static final String JSON_PROPERTY_STORAGE_LOCATION = "storageLocation";
+  @javax.annotation.Nonnull
   private String storageLocation;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
+  @javax.annotation.Nullable
   private String managedIdentity;
 
   public static final String JSON_PROPERTY_ACCOUNT_KEY = "accountKey";
+  @javax.annotation.Nullable
   private String accountKey;
 
   public static final String JSON_PROPERTY_ACCOUNT_NAME = "accountName";
+  @javax.annotation.Nullable
   private String accountName;
 
   public static final String JSON_PROPERTY_SECURE = "secure";
+  @javax.annotation.Nullable
   private Boolean secure;
 
   public ValidateAzureCloudStorageRequest() {
   }
 
-  public ValidateAzureCloudStorageRequest credentialCrn(String credentialCrn) {
+  public ValidateAzureCloudStorageRequest credentialCrn(@javax.annotation.Nonnull String credentialCrn) {
     
     this.credentialCrn = credentialCrn;
     return this;
   }
 
-   /**
+  /**
    * The CRN of the credential.
    * @return credentialCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -78,21 +84,20 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialCrn(String credentialCrn) {
+  public void setCredentialCrn(@javax.annotation.Nonnull String credentialCrn) {
     this.credentialCrn = credentialCrn;
   }
 
-
-  public ValidateAzureCloudStorageRequest storageLocation(String storageLocation) {
+  public ValidateAzureCloudStorageRequest storageLocation(@javax.annotation.Nonnull String storageLocation) {
     
     this.storageLocation = storageLocation;
     return this;
   }
 
-   /**
+  /**
    * Azure storage location for logging.
    * @return storageLocation
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -104,21 +109,20 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocation(String storageLocation) {
+  public void setStorageLocation(@javax.annotation.Nonnull String storageLocation) {
     this.storageLocation = storageLocation;
   }
 
-
-  public ValidateAzureCloudStorageRequest managedIdentity(String managedIdentity) {
+  public ValidateAzureCloudStorageRequest managedIdentity(@javax.annotation.Nullable String managedIdentity) {
     
     this.managedIdentity = managedIdentity;
     return this;
   }
 
-   /**
+  /**
    * Azure managed identity.
    * @return managedIdentity
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -130,21 +134,20 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setManagedIdentity(String managedIdentity) {
+  public void setManagedIdentity(@javax.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
 
-
-  public ValidateAzureCloudStorageRequest accountKey(String accountKey) {
+  public ValidateAzureCloudStorageRequest accountKey(@javax.annotation.Nullable String accountKey) {
     
     this.accountKey = accountKey;
     return this;
   }
 
-   /**
+  /**
    * Azure account key.
    * @return accountKey
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -156,21 +159,20 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountKey(String accountKey) {
+  public void setAccountKey(@javax.annotation.Nullable String accountKey) {
     this.accountKey = accountKey;
   }
 
-
-  public ValidateAzureCloudStorageRequest accountName(String accountName) {
+  public ValidateAzureCloudStorageRequest accountName(@javax.annotation.Nullable String accountName) {
     
     this.accountName = accountName;
     return this;
   }
 
-   /**
+  /**
    * Azure account name.
    * @return accountName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -182,21 +184,20 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountName(String accountName) {
+  public void setAccountName(@javax.annotation.Nullable String accountName) {
     this.accountName = accountName;
   }
 
-
-  public ValidateAzureCloudStorageRequest secure(Boolean secure) {
+  public ValidateAzureCloudStorageRequest secure(@javax.annotation.Nullable Boolean secure) {
     
     this.secure = secure;
     return this;
   }
 
-   /**
+  /**
    * Azure secure flag.
    * @return secure
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -208,9 +209,10 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecure(Boolean secure) {
+  public void setSecure(@javax.annotation.Nullable Boolean secure) {
     this.secure = secure;
   }
+
 
   @Override
   public boolean equals(Object o) {

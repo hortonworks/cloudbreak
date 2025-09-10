@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   LastSyncStatusRequest.JSON_PROPERTY_ENV_NAME_OR_CRN
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class LastSyncStatusRequest {
   public static final String JSON_PROPERTY_ENV_NAME_OR_CRN = "envNameOrCrn";
+  @javax.annotation.Nonnull
   private String envNameOrCrn;
 
   public LastSyncStatusRequest() {
   }
 
-  public LastSyncStatusRequest envNameOrCrn(String envNameOrCrn) {
+  public LastSyncStatusRequest envNameOrCrn(@javax.annotation.Nonnull String envNameOrCrn) {
     
     this.envNameOrCrn = envNameOrCrn;
     return this;
   }
 
-   /**
+  /**
    * Name or Crn of the environment.
    * @return envNameOrCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENV_NAME_OR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class LastSyncStatusRequest {
 
   @JsonProperty(JSON_PROPERTY_ENV_NAME_OR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvNameOrCrn(String envNameOrCrn) {
+  public void setEnvNameOrCrn(@javax.annotation.Nonnull String envNameOrCrn) {
     this.envNameOrCrn = envNameOrCrn;
   }
+
 
   @Override
   public boolean equals(Object o) {

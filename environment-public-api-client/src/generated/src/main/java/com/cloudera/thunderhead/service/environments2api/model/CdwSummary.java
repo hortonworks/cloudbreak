@@ -32,27 +32,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CdwSummary.JSON_PROPERTY_CDW_CLUSTER,
   CdwSummary.JSON_PROPERTY_CDW_DBC
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CdwSummary {
   public static final String JSON_PROPERTY_CDW_CLUSTER = "cdwCluster";
+  @javax.annotation.Nullable
   private CdwCluster cdwCluster;
 
   public static final String JSON_PROPERTY_CDW_DBC = "cdwDbc";
+  @javax.annotation.Nullable
   private CdwDbc cdwDbc;
 
   public CdwSummary() {
   }
 
-  public CdwSummary cdwCluster(CdwCluster cdwCluster) {
+  public CdwSummary cdwCluster(@javax.annotation.Nullable CdwCluster cdwCluster) {
     
     this.cdwCluster = cdwCluster;
     return this;
   }
 
-   /**
+  /**
    * Get cdwCluster
    * @return cdwCluster
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -64,21 +66,20 @@ public class CdwSummary {
 
   @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwCluster(CdwCluster cdwCluster) {
+  public void setCdwCluster(@javax.annotation.Nullable CdwCluster cdwCluster) {
     this.cdwCluster = cdwCluster;
   }
 
-
-  public CdwSummary cdwDbc(CdwDbc cdwDbc) {
+  public CdwSummary cdwDbc(@javax.annotation.Nullable CdwDbc cdwDbc) {
     
     this.cdwDbc = cdwDbc;
     return this;
   }
 
-   /**
+  /**
    * Get cdwDbc
    * @return cdwDbc
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_DBC)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -90,9 +91,10 @@ public class CdwSummary {
 
   @JsonProperty(JSON_PROPERTY_CDW_DBC)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwDbc(CdwDbc cdwDbc) {
+  public void setCdwDbc(@javax.annotation.Nullable CdwDbc cdwDbc) {
     this.cdwDbc = cdwDbc;
   }
+
 
   @Override
   public boolean equals(Object o) {

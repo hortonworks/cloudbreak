@@ -39,42 +39,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetIdBrokerMappingsRequest.JSON_PROPERTY_MAPPINGS,
   SetIdBrokerMappingsRequest.JSON_PROPERTY_SET_EMPTY_MAPPINGS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetIdBrokerMappingsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
+  @javax.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_DATA_ACCESS_ROLE = "dataAccessRole";
+  @javax.annotation.Nonnull
   private String dataAccessRole;
 
   public static final String JSON_PROPERTY_RANGER_AUDIT_ROLE = "rangerAuditRole";
+  @javax.annotation.Nullable
   private String rangerAuditRole;
 
   public static final String JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE = "rangerCloudAccessAuthorizerRole";
+  @javax.annotation.Nullable
   private String rangerCloudAccessAuthorizerRole;
 
   public static final String JSON_PROPERTY_BASELINE_ROLE = "baselineRole";
+  @javax.annotation.Nullable
   private String baselineRole;
 
   public static final String JSON_PROPERTY_MAPPINGS = "mappings";
+  @javax.annotation.Nullable
   private List<IdBrokerMappingRequest> mappings = new ArrayList<>();
 
   public static final String JSON_PROPERTY_SET_EMPTY_MAPPINGS = "setEmptyMappings";
+  @javax.annotation.Nullable
   private Boolean setEmptyMappings = false;
 
   public SetIdBrokerMappingsRequest() {
   }
 
-  public SetIdBrokerMappingsRequest environmentName(String environmentName) {
+  public SetIdBrokerMappingsRequest environmentName(@javax.annotation.Nonnull String environmentName) {
     
     this.environmentName = environmentName;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environmentName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -86,21 +93,20 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(String environmentName) {
+  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-
-  public SetIdBrokerMappingsRequest dataAccessRole(String dataAccessRole) {
+  public SetIdBrokerMappingsRequest dataAccessRole(@javax.annotation.Nonnull String dataAccessRole) {
     
     this.dataAccessRole = dataAccessRole;
     return this;
   }
 
-   /**
+  /**
    * The cloud provider role to which data access services will be mapped (e.g. an ARN in AWS, a Resource ID in Azure).
    * @return dataAccessRole
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATA_ACCESS_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -112,21 +118,20 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_DATA_ACCESS_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDataAccessRole(String dataAccessRole) {
+  public void setDataAccessRole(@javax.annotation.Nonnull String dataAccessRole) {
     this.dataAccessRole = dataAccessRole;
   }
 
-
-  public SetIdBrokerMappingsRequest rangerAuditRole(String rangerAuditRole) {
+  public SetIdBrokerMappingsRequest rangerAuditRole(@javax.annotation.Nullable String rangerAuditRole) {
     
     this.rangerAuditRole = rangerAuditRole;
     return this;
   }
 
-   /**
+  /**
    * The cloud provider role to which services that write to Ranger audit logs will be mapped (e.g. an ARN in AWS, a Resource ID in Azure). Note that some data access services also write to Ranger audit logs; such services will be mapped to the dataAccessRole, not the rangerAuditRole. &#x60;&#x60;THIS PARAMETER IS REQUIRED.&#x60;&#x60;
    * @return rangerAuditRole
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RANGER_AUDIT_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -138,21 +143,20 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_RANGER_AUDIT_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRangerAuditRole(String rangerAuditRole) {
+  public void setRangerAuditRole(@javax.annotation.Nullable String rangerAuditRole) {
     this.rangerAuditRole = rangerAuditRole;
   }
 
-
-  public SetIdBrokerMappingsRequest rangerCloudAccessAuthorizerRole(String rangerCloudAccessAuthorizerRole) {
+  public SetIdBrokerMappingsRequest rangerCloudAccessAuthorizerRole(@javax.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
     
     this.rangerCloudAccessAuthorizerRole = rangerCloudAccessAuthorizerRole;
     return this;
   }
 
-   /**
+  /**
    * The cloud provider role to which the Ranger RAZ service will be mapped (e.g. an ARN in AWS, a Resource ID in Azure). This is required in RAZ-enabled environments.
    * @return rangerCloudAccessAuthorizerRole
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -164,21 +168,20 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRangerCloudAccessAuthorizerRole(String rangerCloudAccessAuthorizerRole) {
+  public void setRangerCloudAccessAuthorizerRole(@javax.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
     this.rangerCloudAccessAuthorizerRole = rangerCloudAccessAuthorizerRole;
   }
 
-
-  public SetIdBrokerMappingsRequest baselineRole(String baselineRole) {
+  public SetIdBrokerMappingsRequest baselineRole(@javax.annotation.Nullable String baselineRole) {
     
     this.baselineRole = baselineRole;
     return this;
   }
 
-   /**
+  /**
    * Deprecated. Please use rangerAuditRole instead.
    * @return baselineRole
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BASELINE_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,12 +193,11 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_BASELINE_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBaselineRole(String baselineRole) {
+  public void setBaselineRole(@javax.annotation.Nullable String baselineRole) {
     this.baselineRole = baselineRole;
   }
 
-
-  public SetIdBrokerMappingsRequest mappings(List<IdBrokerMappingRequest> mappings) {
+  public SetIdBrokerMappingsRequest mappings(@javax.annotation.Nullable List<IdBrokerMappingRequest> mappings) {
     
     this.mappings = mappings;
     return this;
@@ -209,10 +211,10 @@ public class SetIdBrokerMappingsRequest {
     return this;
   }
 
-   /**
+  /**
    * ID Broker mappings for individual actors and groups. Does not include mappings for data access services. If omitted or set to an empty list, you must also specify the &#x60;&#x60;--set-empty-mappings&#x60;&#x60; option, to confirm that you want to remove any existing individual mappings.
    * @return mappings
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -224,21 +226,20 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMappings(List<IdBrokerMappingRequest> mappings) {
+  public void setMappings(@javax.annotation.Nullable List<IdBrokerMappingRequest> mappings) {
     this.mappings = mappings;
   }
 
-
-  public SetIdBrokerMappingsRequest setEmptyMappings(Boolean setEmptyMappings) {
+  public SetIdBrokerMappingsRequest setEmptyMappings(@javax.annotation.Nullable Boolean setEmptyMappings) {
     
     this.setEmptyMappings = setEmptyMappings;
     return this;
   }
 
-   /**
+  /**
    * Whether to install an empty set of individual mappings, deleting any existing mappings. The &#x60;&#x60;--set-empty-mappings&#x60;&#x60; option is required if &#x60;&#x60;--mappings&#x60;&#x60; is omitted or if its value is an empty list, and disallowed otherwise.
    * @return setEmptyMappings
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SET_EMPTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -250,9 +251,10 @@ public class SetIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_SET_EMPTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSetEmptyMappings(Boolean setEmptyMappings) {
+  public void setSetEmptyMappings(@javax.annotation.Nullable Boolean setEmptyMappings) {
     this.setEmptyMappings = setEmptyMappings;
   }
+
 
   @Override
   public boolean equals(Object o) {

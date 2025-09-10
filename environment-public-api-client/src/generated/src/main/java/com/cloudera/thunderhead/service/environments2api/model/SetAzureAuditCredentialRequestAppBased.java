@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SetAzureAuditCredentialRequestAppBased.JSON_PROPERTY_SECRET_KEY
 })
 @JsonTypeName("SetAzureAuditCredentialRequest_appBased")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class SetAzureAuditCredentialRequestAppBased {
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
+  @javax.annotation.Nonnull
   private String applicationId;
 
   public static final String JSON_PROPERTY_SECRET_KEY = "secretKey";
+  @javax.annotation.Nonnull
   private String secretKey;
 
   public SetAzureAuditCredentialRequestAppBased() {
   }
 
-  public SetAzureAuditCredentialRequestAppBased applicationId(String applicationId) {
+  public SetAzureAuditCredentialRequestAppBased applicationId(@javax.annotation.Nonnull String applicationId) {
     
     this.applicationId = applicationId;
     return this;
   }
 
-   /**
+  /**
    * The id of the application registered in Azure.
    * @return applicationId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -63,21 +65,20 @@ public class SetAzureAuditCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setApplicationId(String applicationId) {
+  public void setApplicationId(@javax.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
   }
 
-
-  public SetAzureAuditCredentialRequestAppBased secretKey(String secretKey) {
+  public SetAzureAuditCredentialRequestAppBased secretKey(@javax.annotation.Nonnull String secretKey) {
     
     this.secretKey = secretKey;
     return this;
   }
 
-   /**
+  /**
    * The client secret key (also referred to as application password) for the registered application.
    * @return secretKey
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -89,9 +90,10 @@ public class SetAzureAuditCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecretKey(String secretKey) {
+  public void setSecretKey(@javax.annotation.Nonnull String secretKey) {
     this.secretKey = secretKey;
   }
+
 
   @Override
   public boolean equals(Object o) {

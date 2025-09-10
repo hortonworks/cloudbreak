@@ -33,27 +33,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   UpdateGcpAvailabilityZonesRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateGcpAvailabilityZonesRequest.JSON_PROPERTY_AVAILABILITY_ZONES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class UpdateGcpAvailabilityZonesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_AVAILABILITY_ZONES = "availabilityZones";
+  @javax.annotation.Nonnull
   private List<String> availabilityZones = new ArrayList<>();
 
   public UpdateGcpAvailabilityZonesRequest() {
   }
 
-  public UpdateGcpAvailabilityZonesRequest environment(String environment) {
+  public UpdateGcpAvailabilityZonesRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The name or CRN of the environment.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -65,12 +67,11 @@ public class UpdateGcpAvailabilityZonesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public UpdateGcpAvailabilityZonesRequest availabilityZones(List<String> availabilityZones) {
+  public UpdateGcpAvailabilityZonesRequest availabilityZones(@javax.annotation.Nonnull List<String> availabilityZones) {
     
     this.availabilityZones = availabilityZones;
     return this;
@@ -84,10 +85,10 @@ public class UpdateGcpAvailabilityZonesRequest {
     return this;
   }
 
-   /**
+  /**
    * List of availability zones for the environment.
    * @return availabilityZones
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -99,9 +100,10 @@ public class UpdateGcpAvailabilityZonesRequest {
 
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAvailabilityZones(List<String> availabilityZones) {
+  public void setAvailabilityZones(@javax.annotation.Nonnull List<String> availabilityZones) {
     this.availabilityZones = availabilityZones;
   }
+
 
   @Override
   public boolean equals(Object o) {

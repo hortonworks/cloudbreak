@@ -31,27 +31,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   LogStorageAwsDetails.JSON_PROPERTY_INSTANCE_PROFILE
 })
 @JsonTypeName("LogStorage_awsDetails")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class LogStorageAwsDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
+  @javax.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_INSTANCE_PROFILE = "instanceProfile";
+  @javax.annotation.Nullable
   private String instanceProfile;
 
   public LogStorageAwsDetails() {
   }
 
-  public LogStorageAwsDetails storageLocationBase(String storageLocationBase) {
+  public LogStorageAwsDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     
     this.storageLocationBase = storageLocationBase;
     return this;
   }
 
-   /**
+  /**
    * The base location to store logs in S3. This should be an s3a:// url.
    * @return storageLocationBase
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -63,21 +65,20 @@ public class LogStorageAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(String storageLocationBase) {
+  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-
-  public LogStorageAwsDetails instanceProfile(String instanceProfile) {
+  public LogStorageAwsDetails instanceProfile(@javax.annotation.Nullable String instanceProfile) {
     
     this.instanceProfile = instanceProfile;
     return this;
   }
 
-   /**
+  /**
    * The AWS instance profile that which contains the necessary permissions to access the S3 storage location.
    * @return instanceProfile
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -89,9 +90,10 @@ public class LogStorageAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceProfile(String instanceProfile) {
+  public void setInstanceProfile(@javax.annotation.Nullable String instanceProfile) {
     this.instanceProfile = instanceProfile;
   }
+
 
   @Override
   public boolean equals(Object o) {

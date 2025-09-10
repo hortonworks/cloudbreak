@@ -41,42 +41,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OperationResponse.JSON_PROPERTY_START_DATE,
   OperationResponse.JSON_PROPERTY_END_DATE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class OperationResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
+  @javax.annotation.Nullable
   private String operationId;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private OperationStatus status;
 
   public static final String JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS = "successfulOperationDetails";
+  @javax.annotation.Nullable
   private List<OperationDetails> successfulOperationDetails = new ArrayList<>();
 
   public static final String JSON_PROPERTY_FAILURE_OPERATION_DETAILS = "failureOperationDetails";
+  @javax.annotation.Nullable
   private List<OperationDetails> failureOperationDetails = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ERROR = "error";
+  @javax.annotation.Nullable
   private String error;
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
+  @javax.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
+  @javax.annotation.Nullable
   private OffsetDateTime endDate;
 
   public OperationResponse() {
   }
 
-  public OperationResponse operationId(String operationId) {
+  public OperationResponse operationId(@javax.annotation.Nullable String operationId) {
     
     this.operationId = operationId;
     return this;
   }
 
-   /**
+  /**
    * Operation ID of the request for this operation. This ID can be used for getting status of the operation.
    * @return operationId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -88,21 +95,20 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(String operationId) {
+  public void setOperationId(@javax.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
-
-  public OperationResponse status(OperationStatus status) {
+  public OperationResponse status(@javax.annotation.Nullable OperationStatus status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Get status
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -114,12 +120,11 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(OperationStatus status) {
+  public void setStatus(@javax.annotation.Nullable OperationStatus status) {
     this.status = status;
   }
 
-
-  public OperationResponse successfulOperationDetails(List<OperationDetails> successfulOperationDetails) {
+  public OperationResponse successfulOperationDetails(@javax.annotation.Nullable List<OperationDetails> successfulOperationDetails) {
     
     this.successfulOperationDetails = successfulOperationDetails;
     return this;
@@ -133,10 +138,10 @@ public class OperationResponse {
     return this;
   }
 
-   /**
+  /**
    * List of details for all successful operations. If the operation is only partially successful both successful and failure operation details will be populated.
    * @return successfulOperationDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -148,12 +153,11 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSuccessfulOperationDetails(List<OperationDetails> successfulOperationDetails) {
+  public void setSuccessfulOperationDetails(@javax.annotation.Nullable List<OperationDetails> successfulOperationDetails) {
     this.successfulOperationDetails = successfulOperationDetails;
   }
 
-
-  public OperationResponse failureOperationDetails(List<OperationDetails> failureOperationDetails) {
+  public OperationResponse failureOperationDetails(@javax.annotation.Nullable List<OperationDetails> failureOperationDetails) {
     
     this.failureOperationDetails = failureOperationDetails;
     return this;
@@ -167,10 +171,10 @@ public class OperationResponse {
     return this;
   }
 
-   /**
+  /**
    * List of details for failed operations. If the operation is only partially successful both successful and failure operation details will be populated.
    * @return failureOperationDetails
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FAILURE_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -182,21 +186,20 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_FAILURE_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFailureOperationDetails(List<OperationDetails> failureOperationDetails) {
+  public void setFailureOperationDetails(@javax.annotation.Nullable List<OperationDetails> failureOperationDetails) {
     this.failureOperationDetails = failureOperationDetails;
   }
 
-
-  public OperationResponse error(String error) {
+  public OperationResponse error(@javax.annotation.Nullable String error) {
     
     this.error = error;
     return this;
   }
 
-   /**
+  /**
    * The error will be populated on any error and it may be populated when the operation failure details are empty. Typically contains high level information such as the associated failure phase.
    * @return error
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -208,21 +211,20 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(String error) {
+  public void setError(@javax.annotation.Nullable String error) {
     this.error = error;
   }
 
-
-  public OperationResponse startDate(OffsetDateTime startDate) {
+  public OperationResponse startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     
     this.startDate = startDate;
     return this;
   }
 
-   /**
+  /**
    * Date when the operation started.
    * @return startDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -234,21 +236,20 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(OffsetDateTime startDate) {
+  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-
-  public OperationResponse endDate(OffsetDateTime endDate) {
+  public OperationResponse endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     
     this.endDate = endDate;
     return this;
   }
 
-   /**
+  /**
    * Date when the operation ended. Omitted if operation has not ended.
    * @return endDate
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -260,9 +261,10 @@ public class OperationResponse {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(OffsetDateTime endDate) {
+  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
+
 
   @Override
   public boolean equals(Object o) {

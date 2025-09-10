@@ -39,42 +39,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExposedService.JSON_PROPERTY_STATUS,
   ExposedService.JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ExposedService {
   public static final String JSON_PROPERTY_NAME = "name";
+  @javax.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_TYPE = "type";
+  @javax.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
+  @javax.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_SERVICE_URL = "serviceUrl";
+  @javax.annotation.Nullable
   private String serviceUrl;
 
   public static final String JSON_PROPERTY_SERVICE_VERSION = "serviceVersion";
+  @javax.annotation.Nullable
   private String serviceVersion;
 
   public static final String JSON_PROPERTY_STATUS = "status";
+  @javax.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES = "serviceValidationMessages";
+  @javax.annotation.Nullable
   private List<EnvValidation> serviceValidationMessages = new ArrayList<>();
 
   public ExposedService() {
   }
 
-  public ExposedService name(String name) {
+  public ExposedService name(@javax.annotation.Nullable String name) {
     
     this.name = name;
     return this;
   }
 
-   /**
+  /**
    * Name of service.
    * @return name
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -86,21 +93,20 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(String name) {
+  public void setName(@javax.annotation.Nullable String name) {
     this.name = name;
   }
 
-
-  public ExposedService type(String type) {
+  public ExposedService type(@javax.annotation.Nullable String type) {
     
     this.type = type;
     return this;
   }
 
-   /**
+  /**
    * Type of service.
    * @return type
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -112,21 +118,20 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(String type) {
+  public void setType(@javax.annotation.Nullable String type) {
     this.type = type;
   }
 
-
-  public ExposedService displayName(String displayName) {
+  public ExposedService displayName(@javax.annotation.Nullable String displayName) {
     
     this.displayName = displayName;
     return this;
   }
 
-   /**
+  /**
    * Display name of service.
    * @return displayName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -138,21 +143,20 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(String displayName) {
+  public void setDisplayName(@javax.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-
-  public ExposedService serviceUrl(String serviceUrl) {
+  public ExposedService serviceUrl(@javax.annotation.Nullable String serviceUrl) {
     
     this.serviceUrl = serviceUrl;
     return this;
   }
 
-   /**
+  /**
    * URL of service.
    * @return serviceUrl
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -164,21 +168,20 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceUrl(String serviceUrl) {
+  public void setServiceUrl(@javax.annotation.Nullable String serviceUrl) {
     this.serviceUrl = serviceUrl;
   }
 
-
-  public ExposedService serviceVersion(String serviceVersion) {
+  public ExposedService serviceVersion(@javax.annotation.Nullable String serviceVersion) {
     
     this.serviceVersion = serviceVersion;
     return this;
   }
 
-   /**
+  /**
    * Version of service.
    * @return serviceVersion
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -190,21 +193,20 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceVersion(String serviceVersion) {
+  public void setServiceVersion(@javax.annotation.Nullable String serviceVersion) {
     this.serviceVersion = serviceVersion;
   }
 
-
-  public ExposedService status(String status) {
+  public ExposedService status(@javax.annotation.Nullable String status) {
     
     this.status = status;
     return this;
   }
 
-   /**
+  /**
    * Status of service.
    * @return status
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -216,12 +218,11 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(String status) {
+  public void setStatus(@javax.annotation.Nullable String status) {
     this.status = status;
   }
 
-
-  public ExposedService serviceValidationMessages(List<EnvValidation> serviceValidationMessages) {
+  public ExposedService serviceValidationMessages(@javax.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
     
     this.serviceValidationMessages = serviceValidationMessages;
     return this;
@@ -235,10 +236,10 @@ public class ExposedService {
     return this;
   }
 
-   /**
+  /**
    * List of service validation message.
    * @return serviceValidationMessages
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -250,9 +251,10 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceValidationMessages(List<EnvValidation> serviceValidationMessages) {
+  public void setServiceValidationMessages(@javax.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
     this.serviceValidationMessages = serviceValidationMessages;
   }
+
 
   @Override
   public boolean equals(Object o) {

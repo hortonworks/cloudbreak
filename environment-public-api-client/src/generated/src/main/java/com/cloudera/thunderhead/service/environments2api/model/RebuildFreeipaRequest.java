@@ -33,36 +33,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RebuildFreeipaRequest.JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION,
   RebuildFreeipaRequest.JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class RebuildFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @javax.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_FREEIPA_CRN = "freeipaCrn";
+  @javax.annotation.Nonnull
   private String freeipaCrn;
 
   public static final String JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN = "instanceToRestoreFqdn";
+  @javax.annotation.Nonnull
   private String instanceToRestoreFqdn;
 
   public static final String JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION = "fullBackupStorageLocation";
+  @javax.annotation.Nonnull
   private String fullBackupStorageLocation;
 
   public static final String JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION = "dataBackupStorageLocation";
+  @javax.annotation.Nonnull
   private String dataBackupStorageLocation;
 
   public RebuildFreeipaRequest() {
   }
 
-  public RebuildFreeipaRequest environment(String environment) {
+  public RebuildFreeipaRequest environment(@javax.annotation.Nonnull String environment) {
     
     this.environment = environment;
     return this;
   }
 
-   /**
+  /**
    * The environment name or CRN.
    * @return environment
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -74,21 +79,20 @@ public class RebuildFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(String environment) {
+  public void setEnvironment(@javax.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-
-  public RebuildFreeipaRequest freeipaCrn(String freeipaCrn) {
+  public RebuildFreeipaRequest freeipaCrn(@javax.annotation.Nonnull String freeipaCrn) {
     
     this.freeipaCrn = freeipaCrn;
     return this;
   }
 
-   /**
+  /**
    * CRN of the FreeIPA to rebuild. Must be in the environment specified in &#39;environmentName&#39;.
    * @return freeipaCrn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FREEIPA_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -100,21 +104,20 @@ public class RebuildFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFreeipaCrn(String freeipaCrn) {
+  public void setFreeipaCrn(@javax.annotation.Nonnull String freeipaCrn) {
     this.freeipaCrn = freeipaCrn;
   }
 
-
-  public RebuildFreeipaRequest instanceToRestoreFqdn(String instanceToRestoreFqdn) {
+  public RebuildFreeipaRequest instanceToRestoreFqdn(@javax.annotation.Nonnull String instanceToRestoreFqdn) {
     
     this.instanceToRestoreFqdn = instanceToRestoreFqdn;
     return this;
   }
 
-   /**
+  /**
    * The instance&#39;s Fully Qualified Domain Name (FQDN) that will be restored from the backups. This must match the FQDN of the instance from which the backup was taken.
    * @return instanceToRestoreFqdn
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -126,21 +129,20 @@ public class RebuildFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TO_RESTORE_FQDN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInstanceToRestoreFqdn(String instanceToRestoreFqdn) {
+  public void setInstanceToRestoreFqdn(@javax.annotation.Nonnull String instanceToRestoreFqdn) {
     this.instanceToRestoreFqdn = instanceToRestoreFqdn;
   }
 
-
-  public RebuildFreeipaRequest fullBackupStorageLocation(String fullBackupStorageLocation) {
+  public RebuildFreeipaRequest fullBackupStorageLocation(@javax.annotation.Nonnull String fullBackupStorageLocation) {
     
     this.fullBackupStorageLocation = fullBackupStorageLocation;
     return this;
   }
 
-   /**
+  /**
    * Full backup location on the cloud storage. This backup was created during the provisioning of the instance. By default, no additional full backups are created for a single instance.
    * @return fullBackupStorageLocation
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -152,21 +154,20 @@ public class RebuildFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_FULL_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFullBackupStorageLocation(String fullBackupStorageLocation) {
+  public void setFullBackupStorageLocation(@javax.annotation.Nonnull String fullBackupStorageLocation) {
     this.fullBackupStorageLocation = fullBackupStorageLocation;
   }
 
-
-  public RebuildFreeipaRequest dataBackupStorageLocation(String dataBackupStorageLocation) {
+  public RebuildFreeipaRequest dataBackupStorageLocation(@javax.annotation.Nonnull String dataBackupStorageLocation) {
     
     this.dataBackupStorageLocation = dataBackupStorageLocation;
     return this;
   }
 
-   /**
+  /**
    * Data/hourly backup location on the cloud storage. These are created in every hour. Usually the lastest one is required, so there won&#39;t be any data loss.
    * @return dataBackupStorageLocation
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -178,9 +179,10 @@ public class RebuildFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_DATA_BACKUP_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDataBackupStorageLocation(String dataBackupStorageLocation) {
+  public void setDataBackupStorageLocation(@javax.annotation.Nonnull String dataBackupStorageLocation) {
     this.dataBackupStorageLocation = dataBackupStorageLocation;
   }
+
 
   @Override
   public boolean equals(Object o) {

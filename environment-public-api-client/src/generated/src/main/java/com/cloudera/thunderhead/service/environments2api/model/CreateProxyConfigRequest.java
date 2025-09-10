@@ -40,48 +40,57 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateProxyConfigRequest.JSON_PROPERTY_PASSWORD,
   CreateProxyConfigRequest.JSON_PROPERTY_INBOUND_PROXY_CIDR
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CreateProxyConfigRequest {
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
+  @javax.annotation.Nonnull
   private String proxyConfigName;
 
   public static final String JSON_PROPERTY_PROTOCOL = "protocol";
+  @javax.annotation.Nonnull
   private String protocol;
 
   public static final String JSON_PROPERTY_HOST = "host";
+  @javax.annotation.Nonnull
   private String host;
 
   public static final String JSON_PROPERTY_PORT = "port";
+  @javax.annotation.Nonnull
   private Integer port;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
+  @javax.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_NO_PROXY_HOSTS = "noProxyHosts";
+  @javax.annotation.Nullable
   private String noProxyHosts;
 
   public static final String JSON_PROPERTY_USER = "user";
+  @javax.annotation.Nullable
   private String user;
 
   public static final String JSON_PROPERTY_PASSWORD = "password";
+  @javax.annotation.Nullable
   private String password;
 
   public static final String JSON_PROPERTY_INBOUND_PROXY_CIDR = "inboundProxyCidr";
+  @javax.annotation.Nullable
   private List<String> inboundProxyCidr = new ArrayList<>();
 
   public CreateProxyConfigRequest() {
   }
 
-  public CreateProxyConfigRequest proxyConfigName(String proxyConfigName) {
+  public CreateProxyConfigRequest proxyConfigName(@javax.annotation.Nonnull String proxyConfigName) {
     
     this.proxyConfigName = proxyConfigName;
     return this;
   }
 
-   /**
+  /**
    * The name of the proxy config.
    * @return proxyConfigName
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -93,21 +102,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProxyConfigName(String proxyConfigName) {
+  public void setProxyConfigName(@javax.annotation.Nonnull String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
-
-  public CreateProxyConfigRequest protocol(String protocol) {
+  public CreateProxyConfigRequest protocol(@javax.annotation.Nonnull String protocol) {
     
     this.protocol = protocol;
     return this;
   }
 
-   /**
+  /**
    * The protocol.
    * @return protocol
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PROTOCOL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -119,21 +127,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_PROTOCOL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProtocol(String protocol) {
+  public void setProtocol(@javax.annotation.Nonnull String protocol) {
     this.protocol = protocol;
   }
 
-
-  public CreateProxyConfigRequest host(String host) {
+  public CreateProxyConfigRequest host(@javax.annotation.Nonnull String host) {
     
     this.host = host;
     return this;
   }
 
-   /**
+  /**
    * The proxy host.
    * @return host
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -145,21 +152,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setHost(String host) {
+  public void setHost(@javax.annotation.Nonnull String host) {
     this.host = host;
   }
 
-
-  public CreateProxyConfigRequest port(Integer port) {
+  public CreateProxyConfigRequest port(@javax.annotation.Nonnull Integer port) {
     
     this.port = port;
     return this;
   }
 
-   /**
+  /**
    * The proxy port.
    * @return port
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -171,21 +177,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPort(Integer port) {
+  public void setPort(@javax.annotation.Nonnull Integer port) {
     this.port = port;
   }
 
-
-  public CreateProxyConfigRequest description(String description) {
+  public CreateProxyConfigRequest description(@javax.annotation.Nullable String description) {
     
     this.description = description;
     return this;
   }
 
-   /**
+  /**
    * A description for the proxy config.
    * @return description
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -197,21 +202,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(String description) {
+  public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
   }
 
-
-  public CreateProxyConfigRequest noProxyHosts(String noProxyHosts) {
+  public CreateProxyConfigRequest noProxyHosts(@javax.annotation.Nullable String noProxyHosts) {
     
     this.noProxyHosts = noProxyHosts;
     return this;
   }
 
-   /**
+  /**
    * Comma-separated list of &#39;CIDR&#39;, &#39;[.]host[:port]&#39; (can be a subdomain as well) and &#39;IP[:port]&#39; entries that should not be proxied. Wildcards are not accepted. For example .cloudera.com,192.168.1.1
    * @return noProxyHosts
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NO_PROXY_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -223,21 +227,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_NO_PROXY_HOSTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNoProxyHosts(String noProxyHosts) {
+  public void setNoProxyHosts(@javax.annotation.Nullable String noProxyHosts) {
     this.noProxyHosts = noProxyHosts;
   }
 
-
-  public CreateProxyConfigRequest user(String user) {
+  public CreateProxyConfigRequest user(@javax.annotation.Nullable String user) {
     
     this.user = user;
     return this;
   }
 
-   /**
+  /**
    * The proxy user.
    * @return user
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -249,21 +252,20 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUser(String user) {
+  public void setUser(@javax.annotation.Nullable String user) {
     this.user = user;
   }
 
-
-  public CreateProxyConfigRequest password(String password) {
+  public CreateProxyConfigRequest password(@javax.annotation.Nullable String password) {
     
     this.password = password;
     return this;
   }
 
-   /**
+  /**
    * The proxy password.
    * @return password
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -275,12 +277,11 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPassword(String password) {
+  public void setPassword(@javax.annotation.Nullable String password) {
     this.password = password;
   }
 
-
-  public CreateProxyConfigRequest inboundProxyCidr(List<String> inboundProxyCidr) {
+  public CreateProxyConfigRequest inboundProxyCidr(@javax.annotation.Nullable List<String> inboundProxyCidr) {
     
     this.inboundProxyCidr = inboundProxyCidr;
     return this;
@@ -294,10 +295,10 @@ public class CreateProxyConfigRequest {
     return this;
   }
 
-   /**
+  /**
    * Allow these CIDR for Inbound communication.
    * @return inboundProxyCidr
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INBOUND_PROXY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -309,9 +310,10 @@ public class CreateProxyConfigRequest {
 
   @JsonProperty(JSON_PROPERTY_INBOUND_PROXY_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInboundProxyCidr(List<String> inboundProxyCidr) {
+  public void setInboundProxyCidr(@javax.annotation.Nullable List<String> inboundProxyCidr) {
     this.inboundProxyCidr = inboundProxyCidr;
   }
+
 
   @Override
   public boolean equals(Object o) {

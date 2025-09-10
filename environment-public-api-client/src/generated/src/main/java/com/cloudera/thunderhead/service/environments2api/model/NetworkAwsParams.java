@@ -29,24 +29,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   NetworkAwsParams.JSON_PROPERTY_VPC_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class NetworkAwsParams {
   public static final String JSON_PROPERTY_VPC_ID = "vpcId";
+  @javax.annotation.Nonnull
   private String vpcId;
 
   public NetworkAwsParams() {
   }
 
-  public NetworkAwsParams vpcId(String vpcId) {
+  public NetworkAwsParams vpcId(@javax.annotation.Nonnull String vpcId) {
     
     this.vpcId = vpcId;
     return this;
   }
 
-   /**
+  /**
    * VPC ids of the specified networks.
    * @return vpcId
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -58,9 +59,10 @@ public class NetworkAwsParams {
 
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVpcId(String vpcId) {
+  public void setVpcId(@javax.annotation.Nonnull String vpcId) {
     this.vpcId = vpcId;
   }
+
 
   @Override
   public boolean equals(Object o) {

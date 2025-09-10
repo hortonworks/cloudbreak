@@ -34,30 +34,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FreeIpaLoadBalancer.JSON_PROPERTY_FQDN,
   FreeIpaLoadBalancer.JSON_PROPERTY_PRIVATE_IPS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class FreeIpaLoadBalancer {
   public static final String JSON_PROPERTY_RESOURCE_ID = "resourceId";
+  @javax.annotation.Nullable
   private String resourceId;
 
   public static final String JSON_PROPERTY_FQDN = "fqdn";
+  @javax.annotation.Nullable
   private String fqdn;
 
   public static final String JSON_PROPERTY_PRIVATE_IPS = "privateIps";
+  @javax.annotation.Nullable
   private List<String> privateIps = new ArrayList<>();
 
   public FreeIpaLoadBalancer() {
   }
 
-  public FreeIpaLoadBalancer resourceId(String resourceId) {
+  public FreeIpaLoadBalancer resourceId(@javax.annotation.Nullable String resourceId) {
     
     this.resourceId = resourceId;
     return this;
   }
 
-   /**
+  /**
    * The cloud resource ID of the provisioned load balancer.
    * @return resourceId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -69,21 +72,20 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceId(String resourceId) {
+  public void setResourceId(@javax.annotation.Nullable String resourceId) {
     this.resourceId = resourceId;
   }
 
-
-  public FreeIpaLoadBalancer fqdn(String fqdn) {
+  public FreeIpaLoadBalancer fqdn(@javax.annotation.Nullable String fqdn) {
     
     this.fqdn = fqdn;
     return this;
   }
 
-   /**
+  /**
    * The fully qualified domain name of the load balancer.
    * @return fqdn
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -95,12 +97,11 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFqdn(String fqdn) {
+  public void setFqdn(@javax.annotation.Nullable String fqdn) {
     this.fqdn = fqdn;
   }
 
-
-  public FreeIpaLoadBalancer privateIps(List<String> privateIps) {
+  public FreeIpaLoadBalancer privateIps(@javax.annotation.Nullable List<String> privateIps) {
     
     this.privateIps = privateIps;
     return this;
@@ -114,10 +115,10 @@ public class FreeIpaLoadBalancer {
     return this;
   }
 
-   /**
+  /**
    * The private IP addresses of the load balancer.
    * @return privateIps
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_IPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -129,9 +130,10 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_IPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateIps(List<String> privateIps) {
+  public void setPrivateIps(@javax.annotation.Nullable List<String> privateIps) {
     this.privateIps = privateIps;
   }
+
 
   @Override
   public boolean equals(Object o) {

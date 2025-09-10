@@ -31,30 +31,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ImageInfo.JSON_PROPERTY_IMAGE_CATALOG_NAME,
   ImageInfo.JSON_PROPERTY_IMAGE_OS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class ImageInfo {
   public static final String JSON_PROPERTY_IMAGE_ID = "imageId";
+  @javax.annotation.Nullable
   private String imageId;
 
   public static final String JSON_PROPERTY_IMAGE_CATALOG_NAME = "imageCatalogName";
+  @javax.annotation.Nullable
   private String imageCatalogName;
 
   public static final String JSON_PROPERTY_IMAGE_OS = "imageOs";
+  @javax.annotation.Nullable
   private String imageOs;
 
   public ImageInfo() {
   }
 
-  public ImageInfo imageId(String imageId) {
+  public ImageInfo imageId(@javax.annotation.Nullable String imageId) {
     
     this.imageId = imageId;
     return this;
   }
 
-   /**
+  /**
    * The ID of the image.
    * @return imageId
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -66,21 +69,20 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageId(String imageId) {
+  public void setImageId(@javax.annotation.Nullable String imageId) {
     this.imageId = imageId;
   }
 
-
-  public ImageInfo imageCatalogName(String imageCatalogName) {
+  public ImageInfo imageCatalogName(@javax.annotation.Nullable String imageCatalogName) {
     
     this.imageCatalogName = imageCatalogName;
     return this;
   }
 
-   /**
+  /**
    * The name of the image catalog of the image.
    * @return imageCatalogName
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -92,21 +94,20 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageCatalogName(String imageCatalogName) {
+  public void setImageCatalogName(@javax.annotation.Nullable String imageCatalogName) {
     this.imageCatalogName = imageCatalogName;
   }
 
-
-  public ImageInfo imageOs(String imageOs) {
+  public ImageInfo imageOs(@javax.annotation.Nullable String imageOs) {
     
     this.imageOs = imageOs;
     return this;
   }
 
-   /**
+  /**
    * The OS of the image.
    * @return imageOs
-  **/
+   */
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -118,9 +119,10 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageOs(String imageOs) {
+  public void setImageOs(@javax.annotation.Nullable String imageOs) {
     this.imageOs = imageOs;
   }
+
 
   @Override
   public boolean equals(Object o) {

@@ -30,27 +30,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CredentialGranularPolicyResponse.JSON_PROPERTY_SERVICE,
   CredentialGranularPolicyResponse.JSON_PROPERTY_POLICY_JSON
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
+
 public class CredentialGranularPolicyResponse {
   public static final String JSON_PROPERTY_SERVICE = "service";
+  @javax.annotation.Nonnull
   private String service;
 
   public static final String JSON_PROPERTY_POLICY_JSON = "policyJson";
+  @javax.annotation.Nonnull
   private String policyJson;
 
   public CredentialGranularPolicyResponse() {
   }
 
-  public CredentialGranularPolicyResponse service(String service) {
+  public CredentialGranularPolicyResponse service(@javax.annotation.Nonnull String service) {
     
     this.service = service;
     return this;
   }
 
-   /**
+  /**
    * The name of the service that requires the given policy for resource management.
    * @return service
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVICE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -62,21 +64,20 @@ public class CredentialGranularPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_SERVICE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setService(String service) {
+  public void setService(@javax.annotation.Nonnull String service) {
     this.service = service;
   }
 
-
-  public CredentialGranularPolicyResponse policyJson(String policyJson) {
+  public CredentialGranularPolicyResponse policyJson(@javax.annotation.Nonnull String policyJson) {
     
     this.policyJson = policyJson;
     return this;
   }
 
-   /**
+  /**
    * The policy JSON encoded in base64.
    * @return policyJson
-  **/
+   */
   @javax.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
@@ -88,9 +89,10 @@ public class CredentialGranularPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPolicyJson(String policyJson) {
+  public void setPolicyJson(@javax.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
   }
+
 
   @Override
   public boolean equals(Object o) {
