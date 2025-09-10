@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.ProxyConfigService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +28,9 @@ class SdxInternalControllerTest {
     @Mock
     private SdxCluster sdxCluster;
 
+    @Mock
+    private ProxyConfigService proxyConfigService;
+
     @BeforeEach
     void setUp() {
         when(sdxService.getByCrn(SDX_CRN)).thenReturn(sdxCluster);
@@ -39,7 +43,7 @@ class SdxInternalControllerTest {
 
         underTest.modifyProxy(SDX_CRN, previousProxyCrn, initiatorUserCrn);
 
-        verify(sdxService).modifyProxyConfig(sdxCluster, previousProxyCrn);
+        verify(proxyConfigService).modifyProxyConfig(sdxCluster, previousProxyCrn);
     }
 
 }

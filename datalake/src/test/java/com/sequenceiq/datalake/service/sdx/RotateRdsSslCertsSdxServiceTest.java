@@ -33,7 +33,7 @@ public class RotateRdsSslCertsSdxServiceTest {
     private StackV4Endpoint stackV4Endpoint;
 
     @InjectMocks
-    private SdxService underTest;
+    private StackService underTest;
 
     @Test
     void testValidateRdsSslCertRotation() {

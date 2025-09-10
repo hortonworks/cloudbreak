@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.RecipeService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxRecipeEndpoint;
 
@@ -29,46 +30,49 @@ public class SdxRecipeController implements SdxRecipeEndpoint {
     @Inject
     private SdxService sdxService;
 
+    @Inject
+    private RecipeService recipeService;
+
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public UpdateRecipesV4Response refreshRecipesByCrn(@ResourceCrn String crn, UpdateRecipesV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.refreshRecipes(sdxCluster, request);
+        return recipeService.refreshRecipes(sdxCluster, request);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public UpdateRecipesV4Response refreshRecipesByName(@ResourceName String name, UpdateRecipesV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxService.refreshRecipes(sdxCluster, request);
+        return recipeService.refreshRecipes(sdxCluster, request);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public AttachRecipeV4Response attachRecipeByCrn(@ResourceCrn String crn, AttachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.attachRecipe(sdxCluster, request);
+        return recipeService.attachRecipe(sdxCluster, request);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public AttachRecipeV4Response attachRecipeByName(@ResourceName String name, AttachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxService.attachRecipe(sdxCluster, request);
+        return recipeService.attachRecipe(sdxCluster, request);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public DetachRecipeV4Response detachRecipeByCrn(@ResourceCrn String crn, DetachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.detachRecipe(sdxCluster, request);
+        return recipeService.detachRecipe(sdxCluster, request);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE)
     public DetachRecipeV4Response detachRecipeByName(@ResourceName String name, DetachRecipeV4Request request) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxService.detachRecipe(sdxCluster, request);
+        return recipeService.detachRecipe(sdxCluster, request);
     }
 
     private SdxCluster getSdxClusterByCrn(String crn) {

@@ -55,6 +55,7 @@ import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SELinuxService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -120,6 +121,9 @@ class SdxControllerTest {
 
     @Mock
     private SELinuxService seLinuxService;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -538,7 +542,7 @@ class SdxControllerTest {
         when(sdxService.getByNameInAccount(any(), eq("TEST"))).thenReturn(sdxCluster);
         StackV4Response stackV4Response = mock(StackV4Response.class);
         Set<String> entries = Set.of();
-        when(sdxService.getDetailWithResources("TEST", entries, "accountId")).thenReturn(stackV4Response);
+        when(stackService.getDetailWithResources("TEST", entries, "accountId")).thenReturn(stackV4Response);
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxController.getSdxDetailWithResourcesByName("TEST", entries);
         assertEquals(stackV4Response, sdxClusterDetailResponse.getStackV4Response());
         assertEquals(sdxCluster.getClusterName(), sdxClusterDetailResponse.getName());

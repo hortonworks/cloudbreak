@@ -27,6 +27,7 @@ import com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsFlowConfig;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -60,10 +61,13 @@ public class DiagnosticsService {
     @Inject
     private Flow2Handler flow2Handler;
 
+    @Inject
+    private StackService stackService;
+
     public FlowIdentifier collectDiagnostics(DiagnosticsCollectionRequest request) {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByCrn(userId, request.getStackCrn());
-        StackV4Response stackV4Response = sdxService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
+        StackV4Response stackV4Response = stackService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
         diagnosticsCollectionValidator.validate(request, stackV4Response);
         Map<String, Object> properties = diagnosticsParamsConverter.convertFromRequest(request);
         SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);
@@ -96,7 +100,7 @@ public class DiagnosticsService {
     public FlowIdentifier collectCmDiagnostics(CmDiagnosticsCollectionRequest request) {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByCrn(userId, request.getStackCrn());
-        StackV4Response stackV4Response = sdxService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
+        StackV4Response stackV4Response = stackService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
         diagnosticsCollectionValidator.validate(request, stackV4Response);
         Map<String, Object> properties = diagnosticsParamsConverter.convertFromCmRequest(request);
         SdxCmDiagnosticsCollectionEvent event = new SdxCmDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);

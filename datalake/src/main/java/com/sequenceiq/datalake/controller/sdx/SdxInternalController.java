@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.service.sdx.ProxyConfigService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -36,6 +37,9 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
     private CertRenewalService certRenewalService;
+
+    @Inject
+    private ProxyConfigService proxyConfigService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -68,6 +72,6 @@ public class SdxInternalController implements SdxInternalEndpoint {
     @InternalOnly
     public FlowIdentifier modifyProxy(@ResourceCrn String crn, String previousProxyCrn, @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
-        return sdxService.modifyProxyConfig(sdxCluster, previousProxyCrn);
+        return proxyConfigService.modifyProxyConfig(sdxCluster, previousProxyCrn);
     }
 }

@@ -35,6 +35,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -70,13 +71,16 @@ public class SdxDatabaseCertificateRotationService {
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
+    @Inject
+    private StackService stackService;
+
     public SdxRotateRdsCertificateV1Response rotateCertificate(String dlCrn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(dlCrn);
         if (sdxCluster == null) {
             return noDatalakeAnswer(dlCrn);
         }
-        sdxService.validateRdsSslCertRotation(dlCrn);
-        StackV4Response stack = sdxService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(dlCrn));
+        stackService.validateRdsSslCertRotation(dlCrn);
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(dlCrn));
         return checkPrerequisitesAndTrigger(sdxCluster, stack);
     }
 

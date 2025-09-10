@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -65,6 +66,9 @@ public class SdxCcmUpgradeService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
+    @Inject
+    private StackService stackService;
+
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
         checkEnvironment(environmentCrn);
         Optional<SdxCluster> sdxClusterOpt = getSdxCluster(environmentCrn);
@@ -72,7 +76,7 @@ public class SdxCcmUpgradeService {
             return noDatalakeAnswer(environmentCrn);
         }
         SdxCluster sdxCluster = sdxClusterOpt.get();
-        StackV4Response stack = sdxService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(environmentCrn));
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(environmentCrn));
 
         if (Tunnel.getUpgradables().contains(stack.getTunnel())) {
             return checkPrerequisitesAndTrigger(sdxCluster, stack);

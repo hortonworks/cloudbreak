@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertResponseType;
@@ -60,6 +61,9 @@ class SdxDatabaseCertificateRotationServiceTest {
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private SdxDatabaseCertificateRotationService underTest;
 
@@ -81,13 +85,13 @@ class SdxDatabaseCertificateRotationServiceTest {
         String expectedMessage = "Uh-oh, it could not be triggered";
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxService.getByCrn(eq(USER_CRN), eq("stackCrn"))).thenReturn(sdxCluster);
-        doThrow(new BadRequestException(expectedMessage)).when(sdxService).validateRdsSslCertRotation(anyString());
+        doThrow(new BadRequestException(expectedMessage)).when(stackService).validateRdsSslCertRotation(anyString());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateCertificate("stackCrn")));
 
         assertEquals(expectedMessage, exception.getMessage());
-        verify(sdxService, times(1)).validateRdsSslCertRotation(anyString());
+        verify(stackService, times(1)).validateRdsSslCertRotation(anyString());
         verifyNoMoreInteractions(sdxService);
         verifyNoInteractions(sdxReactorFlowManager);
     }
@@ -97,7 +101,7 @@ class SdxDatabaseCertificateRotationServiceTest {
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxCluster.getClusterName()).thenReturn("clusterName");
         when(sdxService.getByCrn(eq(USER_CRN), eq("stackCrn"))).thenReturn(sdxCluster);
-        when(sdxService.getDetail(anyString(), any(), any())).thenReturn(null);
+        when(stackService.getDetail(anyString(), any(), any())).thenReturn(null);
 
         SdxRotateRdsCertificateV1Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateCertificate("stackCrn"));
 
@@ -114,7 +118,7 @@ class SdxDatabaseCertificateRotationServiceTest {
 
         StackV4Response stack = mock(StackV4Response.class);
         when(stack.getStatus()).thenReturn(Status.AMBIGUOUS);
-        when(sdxService.getDetail(anyString(), any(), any())).thenReturn(stack);
+        when(stackService.getDetail(anyString(), any(), any())).thenReturn(stack);
 
         SdxRotateRdsCertificateV1Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateCertificate(dlCrn));
 

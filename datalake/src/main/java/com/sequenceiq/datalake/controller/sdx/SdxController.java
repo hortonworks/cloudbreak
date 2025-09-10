@@ -67,6 +67,7 @@ import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
@@ -174,6 +175,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SELinuxService seLinuxService;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -286,7 +290,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
     public SdxClusterDetailResponse getDetail(@ResourceName String name, Set<String> entries) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        StackV4Response stackV4Response = sdxService.getDetail(name, entries, sdxCluster.getAccountId());
+        StackV4Response stackV4Response = stackService.getDetail(name, entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
     }
@@ -295,7 +299,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
     public SdxClusterDetailResponse getDetailByCrn(@ResourceCrn String clusterCrn, Set<String> entries) {
         SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
-        StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
+        StackV4Response stackV4Response = stackService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
     }
@@ -325,7 +329,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATALAKE)
     public void sync(@ResourceName String name) {
-        sdxService.sync(name, ThreadBasedUserCrnProvider.getAccountId());
+        stackService.sync(name, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -614,7 +618,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = UPGRADE_DATALAKE)
     public FlowIdentifier setDefaultJavaVersionByName(@ResourceName String name, SetDefaultJavaVersionRequest request) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        sdxService.validateDefaultJavaVersionUpdate(sdxCluster.getCrn(), request);
+        stackService.validateDefaultJavaVersionUpdate(sdxCluster.getCrn(), request);
         return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices(),
                 request.isRestartCM(), request.isRollingRestart());
     }
@@ -623,7 +627,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = UPGRADE_DATALAKE)
     public FlowIdentifier setDefaultJavaVersionByCrn(@ResourceCrn String crn, SetDefaultJavaVersionRequest request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        sdxService.validateDefaultJavaVersionUpdate(crn, request);
+        stackService.validateDefaultJavaVersionUpdate(crn, request);
         return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices(),
                 request.isRestartCM(), request.isRollingRestart());
     }
@@ -631,7 +635,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
     public List<String> listAvailableJavaVersionsByCrn(@ResourceCrn String crn) {
-        return sdxService.listAvailableJavaVersions(crn);
+        return stackService.listAvailableJavaVersions(crn);
     }
 
     @Override
@@ -717,7 +721,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
     public SdxClusterDetailResponse getSdxDetailWithResourcesByName(@ResourceName String name, Set<String> entries) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        StackV4Response stackV4Response = sdxService.getDetailWithResources(name, entries, sdxCluster.getAccountId());
+        StackV4Response stackV4Response = stackService.getDetailWithResources(name, entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
     }

@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -76,6 +77,9 @@ class SdxCcmUpgradeServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private SdxCcmUpgradeService underTest;
@@ -119,7 +123,7 @@ class SdxCcmUpgradeServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
-        when(sdxService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(tunnel, Status.AVAILABLE));
+        when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(tunnel, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("not upgradeable");
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
         assertThat(response.getReason()).isEqualTo("not upgradeable");
@@ -131,7 +135,7 @@ class SdxCcmUpgradeServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
-        when(sdxService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCMV2_JUMPGATE, Status.AVAILABLE));
+        when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCMV2_JUMPGATE, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("latest");
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
         assertThat(response.getReason()).isEqualTo("latest");
@@ -143,7 +147,7 @@ class SdxCcmUpgradeServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
-        when(sdxService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.STOPPED));
+        when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.STOPPED));
         when(messagesService.getMessage(any())).thenReturn("unavailable");
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
         assertThat(response.getReason()).isEqualTo("unavailable");
@@ -156,7 +160,7 @@ class SdxCcmUpgradeServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
-        when(sdxService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.AVAILABLE));
+        when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.AVAILABLE));
         when(messagesService.getMessage(any(), any())).thenReturn("success");
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flowId");
         when(sdxReactorFlowManager.triggerCcmUpgradeFlow(sdxCluster)).thenReturn(flowId);

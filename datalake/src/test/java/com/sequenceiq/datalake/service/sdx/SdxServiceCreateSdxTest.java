@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -60,9 +59,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -148,9 +144,6 @@ class SdxServiceCreateSdxTest {
     private SdxStatusService sdxStatusService;
 
     @Mock
-    private RecipeV4Endpoint recipeV4Endpoint;
-
-    @Mock
     private CDPConfigService cdpConfigService;
 
     @Mock
@@ -182,6 +175,9 @@ class SdxServiceCreateSdxTest {
 
     @Mock
     private SdxVersionRuleEnforcer versionRuleEnforcer;
+
+    @Mock
+    private RecipeService recipeService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1036,11 +1032,7 @@ class SdxServiceCreateSdxTest {
         withCloudStorage(sdxClusterRequest);
         withRecipe(sdxClusterRequest);
         withCustomInstanceGroups(sdxClusterRequest);
-        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
-        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-service-deployment");
-        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
-        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
+
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -1059,7 +1051,6 @@ class SdxServiceCreateSdxTest {
         assertEquals(id, createdSdxCluster.getId());
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
-        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
         assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
         StackV4Request stackRequest = JsonUtil.readValue(capturedSdx.getStackRequest(), StackV4Request.class);
@@ -1122,11 +1113,6 @@ class SdxServiceCreateSdxTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         withCloudStorage(sdxClusterRequest);
         withRecipe(sdxClusterRequest);
-        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
-        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-service-deployment");
-        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
-        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -1143,7 +1129,6 @@ class SdxServiceCreateSdxTest {
         assertEquals(id, createdSdxCluster.getId());
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
-        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
         assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
     }
@@ -1185,11 +1170,7 @@ class SdxServiceCreateSdxTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         withCloudStorage(sdxClusterRequest);
         withRecipe(sdxClusterRequest);
-        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
-        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-service-deployment");
-        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
-        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
+
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -1204,7 +1185,6 @@ class SdxServiceCreateSdxTest {
         assertEquals(id, createdSdxCluster.getId());
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
-        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
         assertEquals(ENTERPRISE, capturedSdx.getClusterShape());
     }
