@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -49,16 +50,17 @@ public class SeLinuxValidationService {
 
     public void validateSeLinuxSupportedOnTargetImage(StackDtoDelegate stack, Image targetImage) {
         SeLinux selinuxModeOfStack = getSelinuxModeOfStack(stack);
-        validateSeLinuxSupportedOnTargetImage(selinuxModeOfStack, targetImage.getTags(), targetImage.getUuid(), targetImage.getStackDetails().getVersion());
+        validateSeLinuxSupportedOnTargetImage(selinuxModeOfStack, targetImage.getTags(), targetImage.getUuid(),
+                Optional.ofNullable(targetImage.getStackDetails()).map(ImageStackDetails::getVersion));
     }
 
     public void validateSeLinuxSupportedOnTargetImage(SeLinux selinuxModeOfStack, com.sequenceiq.cloudbreak.cloud.model.Image targetImage) {
-        String stackVersion = Optional.ofNullable(targetImage.getPackageVersions().get(ImagePackageVersion.STACK.getKey())).orElseThrow(() ->
-                new CloudbreakServiceException(String.format("Could not determine the stack version of image '%s'", targetImage.toString())));
+        Optional<String> stackVersion = Optional.ofNullable(targetImage.getPackageVersions().get(ImagePackageVersion.STACK.getKey()));
         validateSeLinuxSupportedOnTargetImage(selinuxModeOfStack, targetImage.getTags(), targetImage.getImageId(), stackVersion);
     }
 
-    private void validateSeLinuxSupportedOnTargetImage(SeLinux selinuxModeOfStack, Map<String, String> imageTags, String imageId, String stackVersion) {
+    private void validateSeLinuxSupportedOnTargetImage(SeLinux selinuxModeOfStack, Map<String, String> imageTags, String imageId,
+            Optional<String> stackVersion) {
         if (SeLinux.ENFORCING.equals(selinuxModeOfStack)) {
             Boolean selinuxSupportedOnTargetImage = Boolean.valueOf(imageTags.getOrDefault(SELINUX_SUPPORTED_TAG, Boolean.TRUE.toString()));
             LOGGER.debug("SELinux supported on target image '{}': '{}'", imageId, selinuxSupportedOnTargetImage);
@@ -67,10 +69,12 @@ public class SeLinuxValidationService {
                         "Please select another image!");
             }
 
-            LOGGER.debug("Stack version of target image '{}': '{}'", imageId, stackVersion);
-            if (!isVersionNewerOrEqualThanLimited(stackVersion, CLOUDERA_STACK_VERSION_7_2_18)) {
-                throw new CloudbreakServiceException("SELinux enforcing mode is only supported on Cloudera Stack Version 7.2.18 or newer. " +
-                        "Please select another image!");
+            if (stackVersion.isPresent()) {
+                LOGGER.debug("Stack version of target image '{}': '{}'", imageId, stackVersion.get());
+                if (!isVersionNewerOrEqualThanLimited(stackVersion.get(), CLOUDERA_STACK_VERSION_7_2_18)) {
+                    throw new CloudbreakServiceException("SELinux enforcing mode is only supported on Cloudera Stack Version 7.2.18 or newer. " +
+                            "Please select another image!");
+                }
             }
         }
     }

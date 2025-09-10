@@ -162,6 +162,18 @@ class SeLinuxValidationServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.Image image = mock();
         when(image.getPackageVersions()).thenReturn(Map.of());
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.validateSeLinuxSupportedOnTargetImage(SeLinux.ENFORCING, image));
+        assertDoesNotThrow(() -> underTest.validateSeLinuxSupportedOnTargetImage(SeLinux.ENFORCING, image));
+    }
+
+    @Test
+    void testValidateSeLinuxSupportedOnTargetImageWhenImageStackDetailsIsNull() {
+        StackDto stack = mock();
+        SecurityConfig securityConfig = mock();
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
+        when(securityConfig.getSeLinux()).thenReturn(SeLinux.ENFORCING);
+        Image image = mock();
+        when(image.getStackDetails()).thenReturn(null);
+
+        assertDoesNotThrow(() -> underTest.validateSeLinuxSupportedOnTargetImage(stack, image));
     }
 }
