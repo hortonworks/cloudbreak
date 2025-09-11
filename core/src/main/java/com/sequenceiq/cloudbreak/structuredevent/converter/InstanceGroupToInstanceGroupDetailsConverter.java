@@ -1,24 +1,27 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.VolumeDetails;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class InstanceGroupToInstanceGroupDetailsConverter {
 
-    public InstanceGroupDetails convert(InstanceGroupView source, int nodeCount) {
+    public InstanceGroupDetails convert(InstanceGroupView source, List<InstanceMetadataView> instanceMetadatas) {
         InstanceGroupDetails instanceGroupDetails = new InstanceGroupDetails();
         instanceGroupDetails.setGroupName(source.getGroupName());
         instanceGroupDetails.setGroupType(source.getInstanceGroupType().name());
-        instanceGroupDetails.setNodeCount(nodeCount);
+        instanceGroupDetails.setNodeCount(instanceMetadatas.size());
         Template template = source.getTemplate();
         if (template != null) {
             instanceGroupDetails.setInstanceType(template.getInstanceType());
@@ -37,6 +40,7 @@ public class InstanceGroupToInstanceGroupDetailsConverter {
                 instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
             }
         }
+        instanceGroupDetails.setRunningInstances(getRunningInstances(instanceMetadatas, template != null ? template.getInstanceType() : "unknown"));
         return instanceGroupDetails;
     }
 
@@ -50,5 +54,15 @@ public class InstanceGroupToInstanceGroupDetailsConverter {
             attributes = new HashMap<>();
         }
         return attributes;
+    }
+
+    private Map<String, Long> getRunningInstances(List<InstanceMetadataView> instanceMetadatas, String templateInstanceType) {
+        return instanceMetadatas.stream()
+                .filter(instance -> StackDtoToMeteringEventConverter.REPORTING_INSTANCE_STATUSES.contains(instance.getInstanceStatus()))
+                .collect(Collectors.groupingBy(instance -> getInstanceType(instance.getProviderInstanceType(), templateInstanceType), Collectors.counting()));
+    }
+
+    private String getInstanceType(String providerInstanceType, String templateInstanceType) {
+        return providerInstanceType != null ? providerInstanceType : templateInstanceType;
     }
 }

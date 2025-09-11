@@ -89,7 +89,7 @@ public class StackToStackDetailsConverter {
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups(
                 instanceGroupDtos.stream()
-                        .map(ig -> instanceGroupToInstanceGroupDetailsConverter.convert(ig.getInstanceGroup(), ig.getInstanceMetadataViews().size()))
+                        .map(ig -> instanceGroupToInstanceGroupDetailsConverter.convert(ig.getInstanceGroup(), ig.getInstanceMetadataViews()))
                         .collect(Collectors.toList()));
         stackDetails.setTags(source.getTags());
         convertComponents(stackDetails, source);

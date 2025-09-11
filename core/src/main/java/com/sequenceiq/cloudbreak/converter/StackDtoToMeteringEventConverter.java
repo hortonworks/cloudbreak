@@ -3,9 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType.Value.DATAHUB;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Sync;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,6 +24,7 @@ import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Resource;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.StatusChange;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -38,6 +36,9 @@ import com.sequenceiq.common.model.DefaultApplicationTag;
 public class StackDtoToMeteringEventConverter {
 
     public static final String CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG = "Cloudera-External-Resource-Name";
+
+    public static final Set<InstanceStatus> REPORTING_INSTANCE_STATUSES = Set.of(InstanceStatus.SERVICES_RUNNING, InstanceStatus.SERVICES_HEALTHY,
+            InstanceStatus.SERVICES_UNHEALTHY);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDtoToMeteringEventConverter.class);
 
@@ -65,7 +66,7 @@ public class StackDtoToMeteringEventConverter {
 
     private Stream<Resource> convertInstanceGroup(InstanceGroupDto instanceGroup) {
         return instanceGroup.getNotDeletedInstanceMetaData().stream()
-                .filter(instanceMetadata -> Set.of(SERVICES_RUNNING, SERVICES_HEALTHY, SERVICES_UNHEALTHY).contains(instanceMetadata.getInstanceStatus()))
+                .filter(instanceMetadata -> REPORTING_INSTANCE_STATUSES.contains(instanceMetadata.getInstanceStatus()))
                 .map(instanceMetadata -> convertInstance(instanceMetadata, instanceGroup.getInstanceGroup().getTemplate().getInstanceType()));
     }
 

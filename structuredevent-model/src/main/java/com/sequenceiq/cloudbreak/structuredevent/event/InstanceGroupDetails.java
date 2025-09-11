@@ -32,6 +32,9 @@ public class InstanceGroupDetails implements Serializable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> attributes = new HashMap<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Long> runningInstances = new HashMap<>();
+
     public String getGroupName() {
         return groupName;
     }
@@ -94,5 +97,13 @@ public class InstanceGroupDetails implements Serializable {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Map<String, Long> getRunningInstances() {
+        return runningInstances;
+    }
+
+    public void setRunningInstances(Map<String, Long> runningInstances) {
+        this.runningInstances = runningInstances;
     }
 }

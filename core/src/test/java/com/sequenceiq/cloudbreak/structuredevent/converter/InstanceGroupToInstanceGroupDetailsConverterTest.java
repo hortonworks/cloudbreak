@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,14 @@ public class InstanceGroupToInstanceGroupDetailsConverterTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setSecurityGroup(new SecurityGroup());
 
-        InstanceGroupDetails instanceGroupDetails = underTest.convert(instanceGroup, 0);
+        InstanceGroupDetails instanceGroupDetails = underTest.convert(instanceGroup, List.of());
 
         assertThat(instanceGroupDetails).isNotNull();
     }
 
     @Test
     void convert() {
-        InstanceGroupDetails instanceGroupDetails = underTest.convert(createInstanceGroup(), 0);
+        InstanceGroupDetails instanceGroupDetails = underTest.convert(createInstanceGroup(), List.of());
 
         assertEquals("ATTACHED_VOLUMES", instanceGroupDetails.getTemporaryStorage());
         // keep only encryted

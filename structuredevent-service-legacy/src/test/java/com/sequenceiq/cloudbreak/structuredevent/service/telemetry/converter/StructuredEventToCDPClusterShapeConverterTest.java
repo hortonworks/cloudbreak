@@ -250,7 +250,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("[{\"groupName\":\"master\",\"nodeCount\":2,\"volumes\":[],\"attributes\":{}}]",
+        Assertions.assertEquals("[{\"groupName\":\"master\",\"nodeCount\":2,\"volumes\":[],\"attributes\":{},\"runningInstances\":{}}]",
                 flowClusterShape.getDefinitionDetails());
 
         master = createInstanceGroupDetails("master", 2, null);
