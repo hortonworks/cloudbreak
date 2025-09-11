@@ -9,6 +9,7 @@ import javax.net.ssl.SSLContext;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.ServiceUnavailableException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.UriBuilder;
@@ -151,8 +152,12 @@ public class YarnMetricsClient {
             yarnMetricsURI = yarnMetricsURI.queryParam(queryParam[0], queryParam[1]);
         }
 
-        YarnScalingServiceV1Response yarnResponse =
-                invokeYarnAPIWithExceptionHandling(restClient, yarnMetricsURI, pollingUserCrn, yarnScalingServiceV1Request, cluster);
+        YarnScalingServiceV1Response yarnResponse;
+        try {
+            yarnResponse = invokeYarnAPIWithExceptionHandling(restClient, yarnMetricsURI, pollingUserCrn, yarnScalingServiceV1Request, cluster);
+        } catch (Exception ex) {
+            throw new ServiceUnavailableException("Currently yarn is not available please try again in some time");
+        }
 
         LOGGER.info("YarnScalingAPI response for cluster crn '{}',  response '{}'", cluster.getStackCrn(), yarnResponse);
         return yarnResponse;
