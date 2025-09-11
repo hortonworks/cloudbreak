@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -296,7 +298,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         instanceGroupNetwork.setAttributes(new Json("{\"subnetIds\":[\"subnet1\",\"subnet2\",\"subnet3\"]}"));
         stack.getInstanceGroups().forEach(ig -> ig.setInstanceGroupNetwork(instanceGroupNetwork));
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
         when(environmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
         when(environmentNetworkResponse.getSubnetMetas())
                 .thenReturn(Map.of("subnet1", new CloudSubnet.Builder().id("id1").name("name1").availabilityZone("eu-central-1a").cidr("cidr1").build(),
@@ -525,7 +527,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         instanceGroupNetwork.setCloudPlatform(CloudPlatform.AWS.name());
         instanceGroupNetwork.setAttributes(new Json("{\"subnetIds\":[\"subnet1\",\"subnet2\",\"subnet3\"]}"));
         stack.getInstanceGroups().forEach(ig -> ig.setInstanceGroupNetwork(instanceGroupNetwork));
-        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
         when(environmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
         when(environmentNetworkResponse.getSubnetMetas())
                 .thenReturn(Map.of("subnet1", new CloudSubnet.Builder().id("id1").name("name1").availabilityZone("az1").cidr("cidr1").build(),
@@ -599,6 +601,50 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
                 .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
         assertEquals(Map.of("1", 1L, "2", 1L, "3", 1L), zoneNodeCount);
+        Assertions.assertTrue(notDeletedInstanceMetaDataSet.stream()
+                .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()))
+                .allMatch(im -> subnetId.equals(im.getSubnetId())));
+    }
+
+    @Test
+    void testPopulateForScalingWhenPopulationIsNeededAndRepairButAzCouldNotBeFoundInVolumeAndOnInstanceGroupLevel() {
+        boolean repair = Boolean.TRUE;
+        List<String> groupAvailabilityZonesForMetadata = List.of("1");
+        List<String> groupAvailabilityZonesForGroup = List.of();
+        String subnetId = "aSubnetId";
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
+        stack.getInstanceGroups().stream()
+                .filter(ig -> "is1".equals(ig.getGroupName()))
+                .forEach(ig -> {
+                    Set<InstanceMetaData> instancesToAdd = getInstanceMetaData(1, groupAvailabilityZonesForGroup, ig, Set.of());
+                    instancesToAdd.forEach(im -> {
+                        im.setInstanceStatus(InstanceStatus.REQUESTED);
+                        im.setAvailabilityZone(null);
+                        im.setRackId(null);
+                    });
+                    ig.getInstanceMetaData().addAll(instancesToAdd);
+                });
+
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString())).thenReturn(null);
+        when(instanceGroupSubnetCollector.collect(any(), any())).thenReturn(Set.of(subnetId));
+        DetailedEnvironmentResponse env = mock(DetailedEnvironmentResponse.class, RETURNS_DEEP_STUBS);
+        when(env.getNetwork().getSubnetMetas())
+                .thenReturn(Map.of(subnetId, new CloudSubnet.Builder().id(subnetId).name(subnetId).availabilityZone("1").build()));
+        when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(env);
+
+        underTest.populateForScaling(stack, groupNamesToScale, repair, NetworkScaleDetails.getEmpty());
+
+        verify(instanceGroupSubnetCollector).collect(any(), any());
+        Map<String, Long> zoneNodeCount = new HashMap<>();
+        notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
+                .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
+        assertEquals(Map.of("1", 2L), zoneNodeCount);
         Assertions.assertTrue(notDeletedInstanceMetaDataSet.stream()
                 .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()))
                 .allMatch(im -> subnetId.equals(im.getSubnetId())));
