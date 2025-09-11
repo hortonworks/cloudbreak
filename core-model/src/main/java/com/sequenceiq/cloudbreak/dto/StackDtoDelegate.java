@@ -7,9 +7,10 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -53,7 +54,15 @@ public interface StackDtoDelegate {
     Set<Resource> getResources();
 
     default String getBlueprintJsonText() {
-        return Objects.requireNonNullElse(getCluster().getExtendedBlueprintText(), getBlueprint().getBlueprintJsonText());
+        String result;
+        if (getCluster() == null) {
+            result = null;
+        } else if (StringUtils.isBlank(getCluster().getExtendedBlueprintText())) {
+            result = getBlueprint() == null ? null : getBlueprint().getBlueprintJsonText();
+        } else {
+            result = getCluster().getExtendedBlueprintText();
+        }
+        return result;
     }
 
     default String getOriginalName() {
