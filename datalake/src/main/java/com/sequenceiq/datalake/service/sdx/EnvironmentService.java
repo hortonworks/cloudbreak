@@ -2,13 +2,19 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +22,15 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.google.common.collect.Maps;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
+import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
+import com.sequenceiq.authorization.service.list.Resource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
@@ -25,6 +38,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxClusterView;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxClusterViewRepository;
@@ -38,7 +52,7 @@ import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformReso
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 
 @Service
-public class EnvironmentService {
+public class EnvironmentService implements EnvironmentPropertyProvider, CompositeAuthResourcePropertyProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Value("${sdx.environment.sleeptime_sec:10}")
@@ -174,5 +188,38 @@ public class EnvironmentService {
 
     public DetailedEnvironmentResponse getDetailedEnvironmentResponseByName(String environmentName) {
         return getByName(environmentName);
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        List<ResourceWithId> dlsByEnv = sdxClusterRepository
+                .findAuthorizationResourcesByAccountIdAndEnvName(ThreadBasedUserCrnProvider.getAccountId(), resourceName);
+        return dlsByEnv
+                .stream()
+                .filter(dl -> dl.getParentResourceCrn().isPresent())
+                .findFirst().orElseThrow(() -> new NotFoundException(String.format("There is no environment with name %s", resourceName)))
+                .getParentResourceCrn().orElseThrow(() -> new NotFoundException(String.format("There is no environment with name %s", resourceName)));
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        List<ResourceWithId> dlsByEnvs = sdxClusterRepository
+                .findAuthorizationResourcesByAccountIdAndEnvNames(ThreadBasedUserCrnProvider.getAccountId(), resourceNames);
+        return dlsByEnvs.stream()
+                .map(Resource::getParentResourceCrn)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
+        Set<SdxClusterView> dlByEnvCrns = sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(ThreadBasedUserCrnProvider.getAccountId(), crns);
+        Map<String, Optional<String>> result = Maps.newHashMap();
+        dlByEnvCrns.stream()
+                .filter(dl -> StringUtils.isNotBlank(dl.getEnvCrn()) && StringUtils.isNotBlank(dl.getEnvName()))
+                .forEach(dl -> result.putIfAbsent(dl.getEnvCrn(), Optional.of(dl.getEnvName())));
+        return result;
     }
 }
