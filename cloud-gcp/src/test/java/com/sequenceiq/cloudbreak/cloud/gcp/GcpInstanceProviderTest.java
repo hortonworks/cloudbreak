@@ -226,6 +226,32 @@ class GcpInstanceProviderTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    void testCollectCdpInstancesWhenInstanceByNameListIsNull() throws IOException {
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudInstance cloudInstance = mock(CloudInstance.class);
+        Compute.Instances.List computeInstanceList = mock(Compute.Instances.List.class);
+        when(cloudInstance.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
+        when(cloudStack.getGroups()).thenReturn(List.of(Group.builder().withInstances(List.of(cloudInstance)).build()));
+        when(instancesMock.list(PROJECT_ID, AVAILABILITY_ZONE)).thenReturn(computeInstanceList);
+        when(computeInstanceList.setFilter(anyString())).thenReturn(computeInstanceList);
+        when(computeInstanceList.execute())
+                .thenReturn(new InstanceList().setItems(List.of(createInstance(INSTANCE_NAME1, MACHINE_TYPE_URL + "n2-standard-4", "RUNNING"))))
+                .thenReturn(new InstanceList());
+        when(gcpLabelUtil.transformLabelKeyOrValue(DefaultApplicationTag.RESOURCE_CRN.key())).thenReturn(DefaultApplicationTag.RESOURCE_CRN.key());
+        when(gcpLabelUtil.transformLabelKeyOrValue(RESOURCE_CRN)).thenReturn(RESOURCE_CRN);
+
+        List<InstanceCheckMetadata> result = underTest.collectCdpInstances(authenticatedContext, RESOURCE_CRN, cloudStack, List.of(INSTANCE_NAME2));
+
+        verify(computeInstanceList, times(2)).setFilter(filterCaptor.capture());
+        assertEquals("labels." + DefaultApplicationTag.RESOURCE_CRN.key() + " eq " + RESOURCE_CRN, filterCaptor.getAllValues().get(0));
+        assertEquals("name eq \"(" + INSTANCE_NAME2 + ")\"", filterCaptor.getAllValues().get(1));
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceId).containsExactlyInAnyOrder(INSTANCE_NAME1);
+        assertThat(result).extracting(InstanceCheckMetadata::instanceType).containsExactlyInAnyOrder("n2-standard-4");
+        assertThat(result).extracting(InstanceCheckMetadata::status).containsExactlyInAnyOrder(InstanceStatus.STARTED);
+    }
+
     private Instance createInstance(String name) {
         Instance instance = new Instance();
         instance.setName(name);

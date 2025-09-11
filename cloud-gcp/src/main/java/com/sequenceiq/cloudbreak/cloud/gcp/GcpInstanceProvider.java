@@ -99,7 +99,9 @@ public class GcpInstanceProvider {
                             .setFilter("labels." + gcpLabelUtil.transformLabelKeyOrValue(RESOURCE_CRN.key()) + " eq " +
                                     gcpLabelUtil.transformLabelKeyOrValue(resourceCrn))
                             .execute()
-                            .getItems()).orElseGet(List::of).stream()
+                            .getItems())
+                    .orElseGet(List::of)
+                    .stream()
                     .collect(Collectors.toMap(Instance::getName, Function.identity()));
             instances.putAll(retrieveKnownInstancesFromProviderIfAnyMissing(knownInstanceIds, instances, gcpComputeInstances, projectId, zone));
 
@@ -122,10 +124,12 @@ public class GcpInstanceProvider {
         Set<String> instanceIdsRetrievedByTag = instancesRetrievedByTag.keySet();
         List<String> knownInstanceIdsNotRetrievedByTag = knownInstanceIds.stream().filter(Predicate.not(instanceIdsRetrievedByTag::contains)).toList();
         if (!knownInstanceIdsNotRetrievedByTag.isEmpty()) {
-            return gcpComputeInstances.list(projectId, zone)
-                    .setFilter(knownInstanceIdsNotRetrievedByTag.stream().collect(Collectors.joining("|", "name eq \"(", ")\"")))
-                    .execute()
-                    .getItems().stream()
+            return Optional.ofNullable(gcpComputeInstances.list(projectId, zone)
+                            .setFilter(knownInstanceIdsNotRetrievedByTag.stream().collect(Collectors.joining("|", "name eq \"(", ")\"")))
+                            .execute()
+                            .getItems())
+                    .orElseGet(List::of)
+                    .stream()
                     .collect(Collectors.toMap(Instance::getName, Function.identity()));
         }
         return Map.of();
