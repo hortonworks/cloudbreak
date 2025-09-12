@@ -2,7 +2,7 @@
   "name": "7.3.1 - Search Analytics (ARM) for AWS",
   "description": "",
   "type": "DISCOVERY_DATA_AND_EXPLORATION",
-  "featureState": "RELEASED",
+  "featureState": "INTERNAL",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
