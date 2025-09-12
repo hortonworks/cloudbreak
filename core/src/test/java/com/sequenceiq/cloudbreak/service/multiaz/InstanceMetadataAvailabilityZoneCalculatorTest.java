@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupSubnetCollector;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -71,6 +72,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private InstanceGroupSubnetCollector instanceGroupSubnetCollector;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -298,6 +302,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .thenReturn(Map.of("subnet1", new CloudSubnet.Builder().id("id1").name("name1").availabilityZone("eu-central-1a").cidr("cidr1").build(),
                         "subnet2", new CloudSubnet.Builder().id("id2").name("name2").availabilityZone("eu-central-1b").cidr("cidr2").build(),
                         "subnet3", new CloudSubnet.Builder().id("id3").name("name3").availabilityZone("eu-central-1c").cidr("cidr3").build()));
+        when(instanceGroupSubnetCollector.collect(any(), any())).thenReturn(Set.of("subnet1", "subnet2", "subnet3"));
         if (CollectionUtils.isNotEmpty(groupAvailabilityZones)) {
             stack.getInstanceGroups()
                     .forEach(ig -> {
@@ -509,6 +514,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         Map<String, String> expectedSubnetIdForAz = Map.of("az1", "subnet1", "az2", "subnet2", "az3", "subnet3");
         List<String> groupAvailabilityZonesForMetadata = List.of();
         List<String> groupAvailabilityZonesForGroup = List.of("az1", "az2", "az3");
+        when(instanceGroupSubnetCollector.collect(any(), any())).thenReturn(expectedSubnetIdForAz.values().stream().collect(Collectors.toSet()));
         Map<String, String> expectedAvailabilityZoneByFqdn = new HashMap<>();
         Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
         stack.setCloudPlatform(CloudPlatform.AWS.name());
