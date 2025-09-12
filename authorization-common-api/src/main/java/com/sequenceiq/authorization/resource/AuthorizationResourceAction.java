@@ -115,6 +115,7 @@ public enum AuthorizationResourceAction {
     CREATE_ENCRYPTION_PROFILE("environments/createEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
     DESCRIBE_ENCRYPTION_PROFILE("environments/describeEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
     DELETE_ENCRYPTION_PROFILE("environments/deleteEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
+    MIGRATE_ZOOKEEPER_TO_KRAFT("datahub/migrateZookeeperToKRaft", AuthorizationResourceType.DATAHUB),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),
