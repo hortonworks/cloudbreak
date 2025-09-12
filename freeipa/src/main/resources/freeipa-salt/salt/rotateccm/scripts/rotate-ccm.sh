@@ -48,8 +48,10 @@ backup_ccmv2_config() {
   echo "Backup CCM V2 config.toml"
 
   CONFIG_FILE=/etc/jumpgate/config.toml
-  if [ -f "$CONFIG_FILE" ]; then
-    cp -p "${CONFIG_FILE}" "${CONFIG_FILE}.backup"
+  if [ -f "${CONFIG_FILE}.backup" ]; then
+    echo "Backup file already exist, skipping backup."
+  elif [ -f "$CONFIG_FILE" ]; then
+    cp -np "${CONFIG_FILE}" "${CONFIG_FILE}.backup"
     echo "config.toml.backup created"
   fi
 }
@@ -80,12 +82,6 @@ main() {
   if [[ $? -ne 0 ]] ; then
     echo "Check agent state failed"
     exit 1
-  fi
-
-  is_ccmv2_connectivity_accessible
-  if [[ $? -ne 0 ]] ; then
-    echo "Check CCM V2 connectivity failed"
-    exit 2
   fi
 
   echo "Restart jumpgate agent"
