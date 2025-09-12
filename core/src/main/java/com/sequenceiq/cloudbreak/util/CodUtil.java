@@ -12,9 +12,9 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 public class CodUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CodUtil.class);
+    public static final String OPERATIONAL_DB = "OPERATIONAL_DB";
 
-    private static final String OPERATIONAL_DB = "OPERATIONAL_DB";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodUtil.class);
 
     private CodUtil() {
 

@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.util.CodUtil;
 
 @Component
 public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
@@ -31,9 +33,10 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         long numberOfInstances = validationRequest.stack().getFullNodeCount();
-        if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled()) {
+        if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled(validationRequest.stack())) {
             validateClusterSizeForRollingUpgrade(numberOfInstances);
-        } else if (validationRequest.replaceVms() && rollingUpgradeValidationEnabled()) {
+        }
+        if (validationRequest.replaceVms()) {
             validateForOsUpgrade(numberOfInstances);
         }
     }
@@ -53,12 +56,16 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
         return numberOfInstances > maxNumberOfInstancesForRollingUpgrade;
     }
 
-    private boolean rollingUpgradeValidationEnabled() {
-        boolean skipRollingUpgradeValidationEnabled = entitlementService.isSkipRollingUpgradeValidationEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        if (skipRollingUpgradeValidationEnabled) {
-            LOGGER.debug("Skipping cluster size validation because rolling upgrade validation is disabled.");
+    private boolean rollingUpgradeValidationEnabled(StackDto stack) {
+        if (entitlementService.isSkipRollingUpgradeValidationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.debug("Skipping rolling upgrade cluster size validation because rolling upgrade validation is disabled.");
+            return false;
         }
-        return !skipRollingUpgradeValidationEnabled;
+        if (CodUtil.isCodCluster(stack)) {
+            LOGGER.debug("Skipping rolling upgrade cluster size validation because this is a COD cluster.");
+            return false;
+        }
+        return true;
     }
 
     private void validateForOsUpgrade(long numberOfInstances) {
@@ -66,7 +73,7 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
         LOGGER.debug("Instance count: {} and limit: [{}]", numberOfInstances, upgradeNodeCountLimit);
         if (numberOfInstances > upgradeNodeCountLimit) {
             throw new UpgradeValidationFailedException(
-                    String.format("There are %s nodes in the cluster. Upgrade is supported up to %s nodes. " +
+                    String.format("There are %s nodes in the cluster. OS upgrade is supported up to %s nodes. " +
                             "Please downscale the cluster below the limit and retry the upgrade.", numberOfInstances, upgradeNodeCountLimit));
         }
     }
