@@ -54,7 +54,6 @@ public class DefaultInternalAccountTagServiceTest {
                 { "hey!",                       "car",                          false },
                 { "why?",                       "apple",                        false },
                 { "*pear*",                     "apple",                        false },
-                { "Pear",                       "apple",                        false },
                 { "{creatorCrn}",               "apple",                        false },
                 { "{{creatorCrn}}",             "pear",                         false },
                 { "azureapple",                 "apple",                        false },
@@ -90,6 +89,10 @@ public class DefaultInternalAccountTagServiceTest {
                 { "apple",                      "microsoftapple",               true  },
                 { "apple",                      "azure",                        true  },
                 { "apple",                      "windows",                      true  },
+                { "Pear",                       "apple",                        true  },
+                { "UPPER",                      "CASE",                         true  },
+                { "lower",                      "case",                         true  },
+                { "aCar",                       "aCar",                         true  },
         };
     }
     // CHECKSTYLE:ON

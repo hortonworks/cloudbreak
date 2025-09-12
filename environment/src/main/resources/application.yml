@@ -79,7 +79,7 @@ environment:
   account:
       tag:
           validator:
-              key: ^(?!microsoft|azure|windows|\s)[a-z\{][a-zA-Z0-9\{\-_\}]*[a-zA-Z0-9\}]$
+              key: ^(?!microsoft|azure|windows|\s)[a-zA-Z0-9\{\-_\}]*[a-zA-Z0-9\}]$
               value: ^[^\s][a-zA-Z0-9\{\-\_\}]*[a-zA-Z0-9\-\_\}]$
   structuredevent:
     rest:
