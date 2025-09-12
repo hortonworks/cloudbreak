@@ -25,7 +25,7 @@ dependencies {
     implementation group: 'org.apache.commons',            name: 'commons-lang3',                              version: apacheCommonsLangVersion
     implementation group: 'commons-io',                    name: 'commons-io',                                 version: apacheCommonsIoVersion
     implementation group: 'commons-codec',                 name: 'commons-codec',                              version: commonsCodecVersion
-    implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20250807-2.0.0') {
+    implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20250902-2.0.0') {
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
     implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                   version: 'v1-rev20231026-2.0.0') {
