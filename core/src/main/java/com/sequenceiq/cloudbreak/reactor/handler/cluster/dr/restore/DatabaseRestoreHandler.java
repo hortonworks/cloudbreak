@@ -101,7 +101,10 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             if (event.getData().isDryRun()) {
                 hostOrchestrator.restoreDryRunValidation(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
             } else {
-                hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
+                int timeout = Objects.nonNull(sdxBackupRestoreSettingsResponse) && sdxBackupRestoreSettingsResponse.getRestoreTimeoutInMinutes() > 0 ?
+                        sdxBackupRestoreSettingsResponse.getRestoreTimeoutInMinutes() : request.getDatabaseMaxDurationInMin();
+                LOGGER.info("Restoring database with timeout {}, databaseMaxDurationInMin: {}", timeout, request.getDatabaseMaxDurationInMin());
+                hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, timeout);
             }
 
             result = new DatabaseRestoreSuccess(stackId);

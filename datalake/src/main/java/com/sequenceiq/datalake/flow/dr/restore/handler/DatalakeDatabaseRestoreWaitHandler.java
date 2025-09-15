@@ -19,6 +19,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFail
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.dr.BackupRestoreTimeoutService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -32,11 +33,14 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     @Value("${sdx.stack.restore.status.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.restore.status.duration_min:90}")
+    @Value("${sdx.stack.restore.status.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private BackupRestoreTimeoutService backupRestoreTimeoutService;
 
     @Override
     public String selector() {
@@ -53,7 +57,8 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
         DatalakeDatabaseRestoreWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
-        int duration = request.getDatabaseMaxDurationInMin() == 0 ? durationInMinutes : request.getDatabaseMaxDurationInMin();
+        int duration = backupRestoreTimeoutService.getRestoreTimeout(sdxId, request.getDatabaseMaxDurationInMin(), durationInMinutes, 0);
+        LOGGER.info("Timeout duration for database restore set to {} minutes.", duration);
         Selectable response;
         try {
             LOGGER.info("Start polling datalake database restore for id: {} with timeout duration: {}", sdxId, duration);

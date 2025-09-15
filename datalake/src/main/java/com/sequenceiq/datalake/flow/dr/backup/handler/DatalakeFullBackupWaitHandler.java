@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -23,6 +21,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.dr.BackupRestoreTimeoutService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -46,7 +45,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
     private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Inject
-    private EntitlementService entitlementService;
+    private BackupRestoreTimeoutService backupRestoreTimeoutService;
 
     @Override
     public String selector() {
@@ -63,14 +62,10 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         DatalakeFullBackupWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
+        int duration = backupRestoreTimeoutService.getBackupTimeout(sdxId, request.getFullDrMaxDurationInMin(), durationInMinutes, longDurationInMinutes);
+        LOGGER.info("Timeout duration for full backup set to {} minutes", duration);
+
         Selectable response;
-        int duration;
-        if (request.getFullDrMaxDurationInMin() != 0) {
-            duration = request.getFullDrMaxDurationInMin();
-        } else {
-            duration = entitlementService.isLongTimeBackupEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                    ? longDurationInMinutes : durationInMinutes;
-        }
         try {
             LOGGER.info("Start polling datalake full backup status for id: {} with timeout duration: {}", sdxId, duration);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
@@ -106,4 +101,5 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         }
         return response;
     }
+
 }
