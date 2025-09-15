@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.NON_RECOVERABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.RECOVERABLE;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +22,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
@@ -58,11 +64,29 @@ public class ClusterRecoveryService {
     @Inject
     private FreeipaService freeipaService;
 
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
     public FlowIdentifier recoverCluster(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
+        restorePreviousImageVersion(stackNameOrCrn, stack);
         LOGGER.debug("Recovery has been initiated for stack {}", stackNameOrCrn.getNameOrCrn());
         return flowManager.triggerDatalakeClusterRecovery(stack.getId());
+    }
+
+    private void restorePreviousImageVersion(NameOrCrn stackNameOrCrn, Stack stack) {
+        try {
+            Component imageComponent = componentConfigProviderService.getImageComponent(stack.getId());
+            String imageId = imageComponent.getAttributes().get(Image.class).getImageId();
+            LOGGER.debug("Restore previous image version for stack {}. Current image: {}", stackNameOrCrn.getNameOrCrn(), imageId);
+            componentConfigProviderService.restoreSecondToLastVersion(imageComponent);
+        } catch (IOException e) {
+            LOGGER.debug("Failed to deserialize image attributes for stack {}", stackNameOrCrn.getNameOrCrn(), e);
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.debug("Stack image not found for stack {}", stackNameOrCrn.getNameOrCrn(), e);
+            throw new NotFoundException("Could not restore previous image before recovery. Image not found for stack " + stackNameOrCrn.getNameOrCrn(), e);
+        }
     }
 
     public RecoveryValidationV4Response validateRecovery(Long workspaceId, NameOrCrn stackNameOrCrn) {

@@ -2,13 +2,19 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
+import org.hibernate.envers.exception.NotAuditedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,13 +22,17 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -30,8 +40,16 @@ public class ComponentConfigProviderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComponentConfigProviderService.class);
 
+    private static final String RELEASE_VERSION = "release-version";
+
     @Inject
     private ComponentRepository componentRepository;
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private EntityManager entityManager;
 
     @Nullable
     public Component getComponent(Long stackId, ComponentType componentType, String name) {
@@ -195,5 +213,58 @@ public class ComponentConfigProviderService {
         }
         LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
         return component;
+    }
+
+    public void restoreSecondToLastVersion(Component component) {
+        LOGGER.info("Trying to revert to previous version for {}", component);
+        try {
+            transactionService.required(() -> getRevision(component));
+        } catch (NotAuditedException e) {
+            LOGGER.warn("Not audited class", e);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Couldn't fetch revision for {}", component, e);
+        } catch (Exception e) {
+            LOGGER.error("Couldn't revert to previous version for {}", component, e);
+        }
+    }
+
+    private void getRevision(Component component) {
+        AuditReader auditReader = AuditReaderFactory.get(entityManager);
+        List<Number> revisions = auditReader.getRevisions(Component.class, component.getId());
+        if (!revisions.isEmpty()) {
+            Number latestRevision = revisions.get(revisions.size() - 2);
+            Component previousImageComponent = auditReader.find(Component.class, component.getId(), latestRevision);
+            if (isCurrentRuntimeEqualsOrOlderThanPrevious(component, previousImageComponent)) {
+                LOGGER.info("Current runtime version is older than the previous one, no need reverting to previous version. Current: {}, Previous: {}",
+                        getRuntimeVersion(component), getRuntimeVersion(previousImageComponent));
+                return;
+            }
+            LOGGER.info("Previous version found: {}", previousImageComponent);
+            componentRepository.save(previousImageComponent);
+        } else {
+            LOGGER.info("No previous version found for {}", component);
+        }
+    }
+
+    private boolean isCurrentRuntimeEqualsOrOlderThanPrevious(Component component, Component previousImageComponent) {
+        String currentRuntimeVersion = getRuntimeVersion(component);
+        String previousRuntimeVersion = getRuntimeVersion(previousImageComponent);
+
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> currentRuntimeVersion, () -> previousRuntimeVersion) < 1;
+    }
+
+    private String getRuntimeVersion(Component imageComponent) {
+        String releaseVersion;
+        try {
+            Image image = imageComponent.getAttributes().get(Image.class);
+            releaseVersion = image.getTags().get(RELEASE_VERSION);
+            if (StringUtils.isEmpty(releaseVersion)) {
+                image.getPackageVersions().get(ImagePackageVersion.STACK.getKey());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return releaseVersion;
     }
 }
