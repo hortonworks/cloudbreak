@@ -302,9 +302,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private Pair<Boolean, Map<String, List<String>>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event, StackDto stack) {
         if (event.isReplaceVms() && !event.isLockComponents()) {
             LOGGER.info("Force OS upgrade is enabled by entitlement or requested by explicitly specifying replaceVms as true and lockComponents as false.");
-            if ((clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) && event.isRollingUpgradeEnabled()
-                    || CodUtil.isCodCluster(stack)) {
-                LOGGER.info("Cluster size is larger than allowed for rolling upgrade or its a COD cluster. Replace only the Salt master nodes.");
+            if (replaceMasterNodesOnly(event.isRollingUpgradeEnabled(), stack)) {
                 Set<String> gatewayInstanceIds = stack.getAllAvailableGatewayInstances().stream()
                         .map(InstanceMetadataView::getInstanceId)
                         .collect(toSet());
@@ -316,6 +314,20 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ALL,
                 event.getResourceId(), Set.of(), false);
         return Pair.of(Boolean.TRUE, filterBasedOnImageAndConvertToFqdn(validationResult.getSuccess(), event.getImageChangeDto().getImageId()));
+    }
+
+    private boolean replaceMasterNodesOnly(boolean rollingUpgradeEnabled, StackDto stack) {
+        if (rollingUpgradeEnabled && clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(stack.getFullNodeCount())) {
+            LOGGER.info("This is a rolling upgrade with a cluster size exceeding the allowed limit, replace master nodes only. " +
+                    "Upgrade validation may fail if the cluster size is too large (controlled by CDP_SKIP_ROLLING_UPGRADE_VALIDATION flag).");
+            return true;
+        } else if (CodUtil.isCodCluster(stack)) {
+            LOGGER.info("This is a COD cluster, replace master nodes only.");
+            return true;
+        } else {
+            LOGGER.info("This is a regular upgrade, replace all nodes");
+            return false;
+        }
     }
 
     private Map<String, List<String>> filterBasedOnImageAndConvertToFqdn(Map<HostGroupName, Set<InstanceMetaData>> repairableNodes, String stackImageId) {
