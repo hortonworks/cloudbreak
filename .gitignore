@@ -71,3 +71,6 @@ ImageId*
 resource_names_*.json
 
 *.log
+
+environment-public-api-client/src/generated/
+servicediscovery-api-client/src/generated/
