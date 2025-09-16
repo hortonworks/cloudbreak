@@ -37,6 +37,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
@@ -62,6 +63,9 @@ public class SshJClientActions {
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private EncryptionProfileAssertions encryptionProfileAssertions;
 
     private List<String> getInstanceMetadataIps(Set<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
         return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
@@ -549,6 +553,40 @@ public class SshJClientActions {
         });
 
         return testDto;
+    }
+
+    public <T extends CloudbreakTestDto> T checkCipherSuiteConfiguration(T testDto, List<String> instanceIps) {
+
+        for (Entry<String, String> service : EncryptionProfileAssertions.MONITORING_SERVICES_CONFIG_PATH.entrySet()) {
+            String serviceName = service.getKey();
+            String configFilePath = service.getValue();
+            String readConfigCommand = "sudo cat " + configFilePath;
+
+            Map<String, Pair<Integer, String>> configContentByIp = instanceIps.stream()
+                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, readConfigCommand)));
+
+            for (Entry<String, Pair<Integer, String>> configEntry : configContentByIp.entrySet()) {
+                String instanceIp = configEntry.getKey();
+                Pair<Integer, String> result = configEntry.getValue();
+
+                if (result.getKey() != 0) {
+                    Log.error(LOGGER, format("Failed to read '%s' config file at '%s' instance! Exit code: %d, Error: %s",
+                            serviceName, instanceIp, result.getKey(), result.getValue()));
+                    throw new TestFailException(format("Failed to read '%s' config file at '%s' instance!",
+                            serviceName, instanceIp));
+                }
+
+                String configContent = result.getValue();
+                encryptionProfileAssertions.validateCipherSuitesConfiguration(serviceName, configContent, instanceIp);
+                Log.log(LOGGER, format("%s cipher suites configuration validated successfully at '%s' instance!", serviceName, instanceIp));
+            }
+        }
+        return testDto;
+    }
+
+    public FreeIpaTestDto checkCipherSuiteConfiguration(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        return checkCipherSuiteConfiguration(testDto, instanceIps);
     }
 
     public FreeIpaTestDto checkNetworkStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {

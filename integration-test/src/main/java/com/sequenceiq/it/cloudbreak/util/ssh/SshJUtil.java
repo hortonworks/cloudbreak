@@ -66,6 +66,10 @@ public class SshJUtil {
         return sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, environmentCrn, freeipaClient);
     }
 
+    public FreeIpaTestDto checkCipherSuiteConfiguration(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkCipherSuiteConfiguration(testDto, environmentCrn, freeipaClient);
+    }
+
     public <T extends CloudbreakTestDto> T checkNetworkStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         return sshJClientActions.checkNetworkStatus(testDto, instanceGroups, hostGroupNames);
     }

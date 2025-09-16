@@ -103,6 +103,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
                             List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
                     sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
+                    sshJUtil.checkCipherSuiteConfiguration(testDto, testDto.getEnvironmentCrn(), client);
                     return testDto;
                 })
                 .given(EnvironmentTestDto.class)
