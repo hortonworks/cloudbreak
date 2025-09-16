@@ -8,7 +8,6 @@ import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangeP
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SELECTION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SELECTION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_FINISHED_EVENT;
@@ -47,7 +46,7 @@ public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstract
 
                     .from(CHANGE_PRIMARY_GATEWAY_SELECTION).to(CHANGE_PRIMARY_GATEWAY_METADATA_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_SELECTION_FINISHED_EVENT)
-                    .failureEvent(CHANGE_PRIMARY_GATEWAY_SELECTION_FAILED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(CHANGE_PRIMARY_GATEWAY_METADATA_STATE).to(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_METADATA_FINISHED_EVENT)

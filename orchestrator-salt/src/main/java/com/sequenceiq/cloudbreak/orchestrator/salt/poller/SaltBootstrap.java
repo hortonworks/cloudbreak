@@ -99,16 +99,18 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             createMinionAcceptor().acceptMinions();
         }
 
-        MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(sc);
-        if (minionIpAddressesResponse != null) {
-            originalTargets.forEach(node -> {
-                if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
-                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
-                    targets.add(node);
-                }
-            });
-        } else {
-            throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value");
+        for (SaltConnector saltConnector : saltConnectors) {
+            MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(saltConnector);
+            if (minionIpAddressesResponse != null) {
+                originalTargets.forEach(node -> {
+                    if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
+                        LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                        targets.add(node);
+                    }
+                });
+            } else {
+                throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value from " + saltConnector.getHostname());
+            }
         }
         if (!targets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
