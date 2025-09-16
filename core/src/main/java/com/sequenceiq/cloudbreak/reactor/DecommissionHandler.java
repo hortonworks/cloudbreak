@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -113,6 +114,9 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     @Inject
     private CloudbreakEventService eventService;
 
+    @Inject
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DecommissionRequest.class);
@@ -140,11 +144,13 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             if (!hostsToRemove.isEmpty()) {
                 executePreTerminationRecipes(stackDto, hostsToRemove.keySet());
             }
+            clusterHostServiceRunner.redeployGatewayPillarOnly(stackDto, hostNames);
 
             Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(cluster.getId());
             if (entitlementService.bulkHostsRemovalFromCMSupported(Crn.fromString(stack.getResourceCrn()).getAccountId()) &&
                     CMRepositoryVersionUtil.isCmBulkHostsRemovalAllowed(runtimeVersion)) {
-                result = bulkHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
+                result =
+                        bulkHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
             } else {
                 result = singleHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
             }

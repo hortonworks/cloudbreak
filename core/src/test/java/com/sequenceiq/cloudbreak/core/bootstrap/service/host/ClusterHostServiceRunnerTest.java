@@ -100,6 +100,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -523,7 +524,8 @@ class ClusterHostServiceRunnerTest {
         verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         Set<Node> reachableNodes = reachableCandidates.getValue();
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
@@ -590,7 +592,8 @@ class ClusterHostServiceRunnerTest {
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         verify(recipeEngine).executePreServiceDeploymentRecipes(any(), anyMap(), anySet());
         Set<Node> reachableNodes = reachableCandidates.getValue();
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
@@ -635,7 +638,8 @@ class ClusterHostServiceRunnerTest {
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         verifyNoInteractions(recipeEngine);
         Set<Node> reachableNodes = reachableCandidates.getValue();
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
@@ -673,7 +677,7 @@ class ClusterHostServiceRunnerTest {
         underTest.redeployGatewayCertificate(stack);
 
         verify(hostOrchestrator, times(1)).initServiceRun(eq(stack), eq(gwConfigs), eq(nodes), eq(nodes), any(), any(), eq(CloudPlatform.AWS.name()));
-        verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any());
     }
 
     @Test
@@ -687,13 +691,43 @@ class ClusterHostServiceRunnerTest {
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         Set<Node> allNodes = allNodesCaptor.getValue();
         assertEquals(5, allNodes.size());
         SaltConfig saltConfig = saltConfigCaptor.getValue();
         assertTrue(saltConfig.getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayPillarOnlyWithOneRemoveableNode() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        Node gateway3 = node("gateway3");
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), gateway3);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        GrainProperties grainProperties = new GrainProperties();
+        grainProperties.put("gateway1", Map.of("roles", "knox"));
+        grainProperties.put("gateway3", Map.of("roles", "knox"));
+        grainProperties.put("fqdn1", Map.of("roles", "solr"));
+        grainProperties.put("fqdn2", Map.of("roles", "solr"));
+        grainProperties.put("fqdn3", Map.of("roles", "solr"));
+        when(grainPropertiesService.createGrainProperties(any(), any(), any())).thenReturn(List.of(grainProperties));
+
+        underTest.redeployGatewayPillarOnly(stack, Set.of("gateway1", "fqdn1"));
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        assertTrue(saltConfig.getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+        verify(hostOrchestrator).runService(any(), eq(Set.of(gateway3)), any());
     }
 
     @Test
@@ -730,7 +764,7 @@ class ClusterHostServiceRunnerTest {
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
-        verify(hostOrchestrator).runService(any(), any(), any(), any());
+        verify(hostOrchestrator).runService(any(), any(), any());
         verify(javaPillarDecorator).createJavaPillars(eq(stack), any());
     }
 
@@ -748,7 +782,7 @@ class ClusterHostServiceRunnerTest {
         when(componentLocatorService.getImpalaCoordinatorLocations(any()))
                 .thenReturn(Map.of("ip1", List.of("ip1", "ip2")));
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
@@ -767,7 +801,7 @@ class ClusterHostServiceRunnerTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
@@ -784,7 +818,7 @@ class ClusterHostServiceRunnerTest {
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(Collections.emptyList());
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
@@ -799,7 +833,7 @@ class ClusterHostServiceRunnerTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
@@ -839,7 +873,7 @@ class ClusterHostServiceRunnerTest {
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(loadBalancerFqdnUtil.getLoadBalancersForStack(STACK_ID)).thenReturn(loadBalancers);
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
 
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
@@ -885,7 +919,7 @@ class ClusterHostServiceRunnerTest {
         bp.setBlueprintText(edlBP);
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         Set<Node> allNodes = allNodesCaptor.getValue();
@@ -928,7 +962,7 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
 
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
@@ -972,7 +1006,7 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
 
-        underTest.redeployGatewayPillarOnly(stack);
+        underTest.redeployGatewayPillarOnly(stack, Set.of());
 
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
@@ -1036,7 +1070,7 @@ class ClusterHostServiceRunnerTest {
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
         verifyEncryptionProfile(saltConfig.getValue());
@@ -1075,7 +1109,7 @@ class ClusterHostServiceRunnerTest {
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
 
         verifySecretEncryption(true, saltConfig.getValue());
         verifyEncryptionProfile(saltConfig.getValue());
@@ -1106,7 +1140,7 @@ class ClusterHostServiceRunnerTest {
 
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
 
-        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         verifyEncryptionProfile(saltConfig.getValue());
         verifyCmVersionSupportsTlsSetup(saltConfig.getValue(), true);
     }

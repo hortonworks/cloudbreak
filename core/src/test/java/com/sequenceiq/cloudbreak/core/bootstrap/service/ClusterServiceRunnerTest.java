@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +78,7 @@ class ClusterServiceRunnerTest {
     void testRedeployGatewayPillar() {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         underTest.redeployGatewayPillar(1L);
-        verify(hostRunner).redeployGatewayPillarOnly(stackDto);
+        verify(hostRunner).redeployGatewayPillarOnly(stackDto, Set.of());
     }
 
     @Test

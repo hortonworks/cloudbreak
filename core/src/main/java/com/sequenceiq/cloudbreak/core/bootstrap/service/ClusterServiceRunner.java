@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -88,7 +89,7 @@ public class ClusterServiceRunner {
 
     public void redeployGatewayPillar(Long stackId) {
         StackDto stack = stackDtoService.getById(stackId);
-        hostRunner.redeployGatewayPillarOnly(stack);
+        hostRunner.redeployGatewayPillarOnly(stack, Set.of());
     }
 
     public void redeployStates(Long stackId) {

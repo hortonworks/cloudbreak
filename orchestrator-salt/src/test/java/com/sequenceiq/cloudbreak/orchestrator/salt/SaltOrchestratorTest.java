@@ -323,7 +323,7 @@ class SaltOrchestratorTest {
         when(orchestratorAware.getAllNotDeletedNodes()).thenReturn(Set.of());
         saltOrchestrator.initServiceRun(orchestratorAware, Collections.singletonList(gatewayConfig), targets, targets,
                 saltConfig, exitCriteriaModel, "testPlatform");
-        saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
+        saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
 
         verify(saltCommandRunner, times(1)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));

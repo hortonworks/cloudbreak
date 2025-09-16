@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -387,7 +388,7 @@ public class ClusterHostServiceRunner {
         if (runPreServiceDeploymentRecipe) {
             recipeEngine.executePreServiceDeploymentRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
         }
-        hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+        hostOrchestrator.runService(gatewayConfigs, reachableNodes, exitCriteriaModel);
         modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
     }
 
@@ -413,7 +414,7 @@ public class ClusterHostServiceRunner {
                 modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.ADD);
             }
             hostOrchestrator.initSaltConfig(stackDto, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
-            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, exitCriteriaModel);
             if (distributeSalt) {
                 LOGGER.debug("Removing GRAIN.ADD operation after execution - removing startup_mount role");
                 modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
@@ -471,7 +472,7 @@ public class ClusterHostServiceRunner {
             SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
             hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel, stackDto.getCloudPlatform());
-            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -479,7 +480,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployGatewayPillarOnly(StackDto stackDto) {
+    public void redeployGatewayPillarOnly(StackDto stackDto, Set<String> removableHosts) {
         ClusterView cluster = stackDto.getCluster();
         throwIfNull(stackDto, () -> new IllegalArgumentException("Stack should not be null"));
         throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
@@ -488,10 +489,14 @@ public class ClusterHostServiceRunner {
             Set<Node> reachableNodes = stackUtil.collectReachableNodes(stackDto);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
-            SaltConfig saltConfig = createSaltConfigWithGatewayPillarOnly(stackDto, grainsProperties);
+            SaltConfig saltConfig = createSaltConfigWithGatewayPillarOnly(stackDto, grainsProperties, removableHosts);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getId(), stackDto.getId());
             LOGGER.debug("Calling orchestrator to upload gateway pillar");
             hostOrchestrator.uploadGatewayPillar(gatewayConfigs, allNodes, exitCriteriaModel, saltConfig);
+            if (!CollectionUtils.isEmpty(removableHosts)) {
+                Set<Node> knoxNodes = getHostsWithKnoxRole(grainsProperties, reachableNodes, removableHosts);
+                hostOrchestrator.runService(gatewayConfigs, knoxNodes, exitCriteriaModel);
+            }
         } catch (CloudbreakOrchestratorCancelledException e) {
             LOGGER.debug("Orchestration cancelled during redeploying gateway pillar", e);
             throw new CancellationException(e.getMessage());
@@ -499,6 +504,18 @@ public class ClusterHostServiceRunner {
             LOGGER.debug("Orchestration exception during redeploying gateway pillar", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private Set<Node> getHostsWithKnoxRole(List<GrainProperties> grainsProperties, Set<Node> nodes, Set<String> removableHosts) {
+        Set<String> hostsWithKnoxRole = new HashSet<>();
+        for (GrainProperties properties : grainsProperties) {
+            properties.getProperties().forEach((fqdn, grains) -> {
+                if (!removableHosts.contains(fqdn) && "knox".equals(grains.get("roles"))) {
+                    hostsWithKnoxRole.add(fqdn);
+                }
+            });
+        }
+        return nodes.stream().filter(node -> hostsWithKnoxRole.contains(node.getHostname())).collect(Collectors.toSet());
     }
 
     public void redeployStates(StackDto stackDto) {
@@ -648,14 +665,14 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltConfig createSaltConfigWithGatewayPillarOnly(StackDto stackDto, List<GrainProperties> grainsProperties)
+    private SaltConfig createSaltConfigWithGatewayPillarOnly(StackDto stackDto, List<GrainProperties> grainsProperties, Set<String> removableHosts)
             throws IOException, CloudbreakOrchestratorException {
         StackView stack = stackDto.getStack();
         ClusterView cluster = stackDto.getCluster();
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
-        Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
+        Map<String, List<String>> serviceLocations = filterRemovableHostFromServiceLocations(getServiceLocations(stackDto), removableHosts);
         LOGGER.debug("Getting LDAP config for Gateway pillar");
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
@@ -669,6 +686,16 @@ public class ClusterHostServiceRunner {
                         clouderaManagerRepo));
 
         return new SaltConfig(servicePillar, grainsProperties);
+    }
+
+    private Map<String, List<String>> filterRemovableHostFromServiceLocations(Map<String, List<String>> serviceLocations, Set<String> removableHosts) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
+        serviceLocations.forEach((service, locations) -> {
+            result.put(service, locations.stream()
+                    .filter(location -> removableHosts.stream().noneMatch(location::contains))
+                    .toList());
+        });
+        return result;
     }
 
     private Map<String, String> getMountPath(StackDto stack, InstanceGroupView group) {
