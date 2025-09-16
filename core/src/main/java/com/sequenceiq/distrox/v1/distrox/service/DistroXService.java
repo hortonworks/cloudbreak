@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -134,7 +135,7 @@ public class DistroXService {
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (entitlementService.isSingleServerRejectEnabled(accountId)) {
-            validateAzureDatabaseType(request.getExternalDatabase());
+            validateAzureDatabaseType(request.getExternalDatabase(), environment.getCloudPlatform());
         }
         validateLoadBalancerSku(request.getAzure());
     }
@@ -179,17 +180,19 @@ public class DistroXService {
         }
     }
 
-    private void validateAzureDatabaseType(DistroXDatabaseRequest externalDatabase) {
-        Optional.ofNullable(externalDatabase)
-                .map(DistroXDatabaseRequest::getDatabaseAzureRequest)
-                .map(DistroXDatabaseAzureRequest::getAzureDatabaseType)
-                .ifPresent(azureDatabaseType -> {
-                    if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
-                        throw new BadRequestException("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
-                                "Check documentation for more information: " +
-                                "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
-                    }
-                });
+    private void validateAzureDatabaseType(DistroXDatabaseRequest externalDatabase, String cloudPlatform) {
+        if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
+            Optional.ofNullable(externalDatabase)
+                    .map(DistroXDatabaseRequest::getDatabaseAzureRequest)
+                    .map(DistroXDatabaseAzureRequest::getAzureDatabaseType)
+                    .ifPresent(azureDatabaseType -> {
+                        if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                            throw new BadRequestException("Azure Database for PostgreSQL - Single Server is retired. " +
+                                    "New deployments cannot be created anymore. Check documentation for more information: " +
+                                    "https://learn.microsoft.com/en-us/azure/postgresql/migrate/whats-happening-to-postgresql-single-server");
+                        }
+                    });
+        }
     }
 
 }

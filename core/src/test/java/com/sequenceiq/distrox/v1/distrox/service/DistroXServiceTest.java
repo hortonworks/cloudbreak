@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
@@ -566,6 +567,7 @@ class DistroXServiceTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn(CRN);
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
