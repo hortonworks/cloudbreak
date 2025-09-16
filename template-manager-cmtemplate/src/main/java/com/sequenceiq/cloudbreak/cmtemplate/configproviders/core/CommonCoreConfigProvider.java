@@ -8,7 +8,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRole
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.RESOURCE_CRN;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
@@ -62,5 +64,21 @@ public class CommonCoreConfigProvider extends CoreConfigProvider {
     @Override
     public Predicate<HostgroupView> filterByHostGroupViewType() {
         return hgv -> true;
+    }
+
+    @Override
+    public boolean isServiceConfigUpdateNeededForUpgrade(String fromCmVersion, String toCmVersion) {
+        return isVersionNewerOrEqualThanLimited(cmVersionFromGbn(toCmVersion), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500);
+    }
+
+    @Override
+    public Map<String, String> getUpdatedServiceConfigForUpgrade(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+        CloudPlatform cloudPlatform = source.getCloudPlatform();
+        Map<String, String> updatedConfigs = new HashMap<>();
+        updatedConfigs.put(ENVIRONMENT_CRN, source.getGeneralClusterConfigs().getEnvironmentCrn());
+        updatedConfigs.put(RESOURCE_CRN, source.getGeneralClusterConfigs().getResourceCrn());
+        updatedConfigs.put(ENVIRONMENT_ACCOUNT_ID, source.getGeneralClusterConfigs().getAccountId().orElse("UNKNOWN"));
+        updatedConfigs.put(ENVIRONMENT_CLOUD_PROVIDER, cloudPlatform == null ? null : cloudPlatform.name());
+        return updatedConfigs;
     }
 }

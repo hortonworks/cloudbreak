@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,10 +54,34 @@ public class CmTemplateComponentConfigProviderProcessor {
                 LOGGER.info("Adding roleConfigVariables: {} ", roleConfigVariables);
                 cmTemplateProcessor.addVariables(roleConfigVariables);
             } else {
-                LOGGER.info("No need for configure the {}", provider.getClass().getSimpleName());
+                LOGGER.info("No need for configure the {}", simpleName);
             }
         }
         return cmTemplateProcessor;
+    }
+
+    public Map<String, Map<String, String>> getServiceConfigsToBeUpdatedDuringUpgrade(
+            CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template, String fromCmVersion, String toCmVersion) {
+        Map<String, Map<String, String>> servicesNeedingServiceConfigUpdate = new HashMap<>();
+        for (CmTemplateComponentConfigProvider provider : providers) {
+            String simpleName = provider.getClass().getSimpleName();
+            if (provider.isServiceConfigUpdateNeededForUpgrade(fromCmVersion, toCmVersion)) {
+                LOGGER.info("{} is updating service configs during upgrade", simpleName);
+                Map<String, String> updatedServiceConfigs = provider.getUpdatedServiceConfigForUpgrade(cmTemplateProcessor, template);
+                if (!updatedServiceConfigs.isEmpty()) {
+                    servicesNeedingServiceConfigUpdate.merge(provider.getServiceType(), updatedServiceConfigs, (oldMap, newMap) -> {
+                        Map<String, String> mergedMap = new HashMap<>(oldMap);
+                        mergedMap.putAll(newMap);
+                        return mergedMap;
+                    });
+                } else {
+                    LOGGER.warn("Service config map is empty from the {} during upgrade", simpleName);
+                }
+            } else {
+                LOGGER.info("No need for update the service configs during upgrade for the {}", simpleName);
+            }
+        }
+        return servicesNeedingServiceConfigUpdate;
     }
 
     public Table<String, String, String> collectDataConfigurations(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {

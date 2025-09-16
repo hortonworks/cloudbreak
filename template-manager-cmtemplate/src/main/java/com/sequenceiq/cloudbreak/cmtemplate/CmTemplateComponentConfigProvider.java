@@ -43,4 +43,12 @@ public interface CmTemplateComponentConfigProvider {
         return Map.of();
     }
 
+    default boolean isServiceConfigUpdateNeededForUpgrade(String fromCmVersion, String toCmVersion) {
+        return false;
+    }
+
+    default Map<String, String> getUpdatedServiceConfigForUpgrade(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return Map.of();
+    }
+
 }

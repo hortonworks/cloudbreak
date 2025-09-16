@@ -169,12 +169,10 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpgradeContext context) {
-                return new ConfigureClusterManagerManagementServicesRequest(context.getStackId());
+                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
+                StatedImage targetStatedImage = getTargetImage(variables);
+                Selectable event = new ConfigureClusterManagerManagementServicesRequest(context.getStackId(), currentImage, targetStatedImage);
+                sendEvent(context, event);
             }
         };
     }
