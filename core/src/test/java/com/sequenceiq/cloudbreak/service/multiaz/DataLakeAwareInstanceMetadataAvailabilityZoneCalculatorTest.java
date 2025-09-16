@@ -145,7 +145,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
 
@@ -162,7 +162,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         stack.setMultiAz(Boolean.FALSE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(null);
-        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrnAsInternal(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
 
         underTest.populate(1L);
 
