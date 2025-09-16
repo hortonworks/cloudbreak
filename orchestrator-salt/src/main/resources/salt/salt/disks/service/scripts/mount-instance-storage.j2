@@ -47,9 +47,29 @@ mount_one() {
       local uuid=$1
       local path=$2
       local device=$(blkid -U $uuid)
+      local fstab_entry="UUID=${uuid} ${path} ${FS_TYPE} defaults,noatime,nofail 0 2"
 
       log $LOG_FILE "mounting to path $path"
       mkdir $path >> $LOG_FILE 2>&1
+
+      # Check if the mount point is already in /etc/fstab and update it if necessary.
+      # First, check for an entry with the target mount path
+      if grep -q "${path}" /etc/fstab; then
+        # Check if the existing entry is correct (i.e., has the right UUID and path)
+        if ! grep -q "${fstab_entry}" /etc/fstab; then
+          log $LOG_FILE "WARNING: Found an incorrect fstab entry for path '$path'. Updating it."
+          # Use sed to replace the line. This is safer than appending if an old entry exists.
+          sudo sed -i "s|.*${path}.*|${fstab_entry}|g" /etc/fstab >> $LOG_FILE 2>&1
+          umount ${path}
+        else
+          log $LOG_FILE "INFO: Correct fstab entry for '$path' already exists."
+        fi
+      else
+        # No entry found for this mount point, so add it
+        log $LOG_FILE "INFO: Adding new entry for '$path' to /etc/fstab."
+        echo "${fstab_entry}" | sudo tee -a /etc/fstab >> $LOG_FILE 2>&1
+      fi
+
       mount -t $FS_TYPE -o defaults,noatime,nofail $device $path >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
         log $LOG_FILE "error mounting device on $path"
