@@ -4,9 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -96,27 +98,48 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 params.setRestartNeeded(false);
             }
 
-            createMinionAcceptor().acceptMinions();
-        }
-
-        for (SaltConnector saltConnector : saltConnectors) {
-            MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(saltConnector);
-            if (minionIpAddressesResponse != null) {
-                originalTargets.forEach(node -> {
-                    if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
-                        LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
-                        targets.add(node);
-                    }
-                });
-            } else {
-                throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value from " + saltConnector.getHostname());
+            try {
+                createMinionAcceptor().acceptMinions();
+            } catch (CloudbreakOrchestratorFailedException e) {
+                handleMinionAcceptingError(e);
             }
         }
+
+        MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(sc);
+        if (minionIpAddressesResponse != null) {
+            originalTargets.forEach(node -> {
+                if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
+                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                    targets.add(node);
+                }
+            });
+        } else {
+            throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value from " + sc.getHostname());
+        }
+
         if (!targets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
         }
         LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
         return true;
+    }
+
+    private void handleMinionAcceptingError(CloudbreakOrchestratorFailedException e) throws CloudbreakOrchestratorFailedException {
+        if (e.getNodesWithErrors().isEmpty()) {
+            targets = originalTargets;
+        } else {
+            Set<Node> nodesWithError = e.getNodesWithErrors().keySet().stream()
+                    .filter(StringUtils::isNotBlank)
+                    .map(nodeName ->
+                            originalTargets.stream()
+                                    .filter(node -> nodeName.equalsIgnoreCase(node.getHostname() + "." + node.getDomain()))
+                                    .findFirst())
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toSet());
+            targets = nodesWithError.isEmpty() ? originalTargets : nodesWithError;
+        }
+        throw e;
     }
 
     protected MinionAcceptor createMinionAcceptor() {

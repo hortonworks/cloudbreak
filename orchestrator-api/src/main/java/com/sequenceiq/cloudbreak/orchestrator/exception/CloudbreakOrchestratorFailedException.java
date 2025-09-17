@@ -15,6 +15,10 @@ public class CloudbreakOrchestratorFailedException extends CloudbreakOrchestrato
         super(message, cause);
     }
 
+    public CloudbreakOrchestratorFailedException(String message, Throwable cause, Multimap<String, String> nodesWithErrors) {
+        super(message, cause, nodesWithErrors);
+    }
+
     public CloudbreakOrchestratorFailedException(Throwable cause) {
         super(cause);
     }

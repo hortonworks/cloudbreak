@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResp
 class MinionAcceptorTest {
 
     private final SaltConnector sc = mock(SaltConnector.class);
+
+    @BeforeEach
+    void init() {
+        when(sc.getHostname()).thenReturn("hostname.domain");
+    }
 
     @Test
     void handleIfAMinionInUnacceptedAndDeniedAtTheSameTime() {

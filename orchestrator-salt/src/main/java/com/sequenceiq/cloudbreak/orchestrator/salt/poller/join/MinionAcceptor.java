@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Fingerprint;
@@ -76,7 +77,9 @@ public class MinionAcceptor {
                     minionIdsInBothDeniedAndUnacceptedState);
             sc.wheel("key.delete", minionIdsInBothDeniedAndUnacceptedState, Object.class);
             throw new CloudbreakOrchestratorFailedException("There were minions in denied and unaccepted state at the same time: " +
-                    minionIdsInBothDeniedAndUnacceptedState);
+                    minionIdsInBothDeniedAndUnacceptedState,
+                    ImmutableMultimap.of(sc.getHostname(), "There were minions in denied and unaccepted state at the same time: " +
+                            minionIdsInBothDeniedAndUnacceptedState));
         }
         return minionIdsInBothDeniedAndUnacceptedState;
     }
@@ -138,7 +141,8 @@ public class MinionAcceptor {
         MinionKeysOnMasterResponse response = sc.wheel("key.list_all", null, MinionKeysOnMasterResponse.class);
         LOGGER.debug("Minion keys on master response: {}", response);
         if (!response.getAllMinions().containsAll(minionId)) {
-            throw new CloudbreakOrchestratorFailedException("There are missing minions from salt response");
+            throw new CloudbreakOrchestratorFailedException("There are missing minions from salt response",
+                    ImmutableMultimap.of(sc.getHostname(), "There are missing minions from salt response"));
         }
         return response;
     }
@@ -151,16 +155,19 @@ public class MinionAcceptor {
             unacceptedMinions = response.getUnacceptedMinions();
         } catch (Exception e) {
             LOGGER.error("Error during fetching fingerprints from master for minions: {}", minions, e);
-            throw new CloudbreakOrchestratorFailedException("Error during fetching fingerprints from master for minions", e);
+            throw new CloudbreakOrchestratorFailedException("Error during fetching fingerprints from master for minions", e,
+                    ImmutableMultimap.of(sc.getHostname(), "Error during fetching fingerprints from master for minions"));
         }
-        validateMasterFingerprintResponse(minions, unacceptedMinions);
+        validateMasterFingerprintResponse(minions, unacceptedMinions, sc);
         return unacceptedMinions;
     }
 
-    private void validateMasterFingerprintResponse(List<String> minions, Map<String, String> unacceptedMinions) throws CloudbreakOrchestratorFailedException {
+    private void validateMasterFingerprintResponse(List<String> minions, Map<String, String> unacceptedMinions, SaltConnector sc)
+            throws CloudbreakOrchestratorFailedException {
         if (!unacceptedMinions.keySet().containsAll(minions)) {
             LOGGER.error("Fingerprints from master {} doesn't contain all requested minions {}", unacceptedMinions.keySet(), minions);
-            throw new CloudbreakOrchestratorFailedException("Fingerprints from master doesn't contain all requested minions");
+            throw new CloudbreakOrchestratorFailedException("Fingerprints from master doesn't contain all requested minions",
+                    ImmutableMultimap.of(sc.getHostname(), "Fingerprints from master doesn't contain all requested minions"));
         }
     }
 }

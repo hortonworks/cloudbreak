@@ -22,6 +22,13 @@ public abstract class CloudbreakOrchestratorException extends Exception {
         super(message, cause);
     }
 
+    protected CloudbreakOrchestratorException(String message, Throwable cause, Multimap<String, String> nodesWithErrors) {
+        super(message, cause);
+        if (nodesWithErrors != null && !nodesWithErrors.isEmpty()) {
+            this.nodesWithErrors.putAll(nodesWithErrors);
+        }
+    }
+
     protected CloudbreakOrchestratorException(Throwable cause) {
         super(cause);
     }
