@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
 import static java.lang.String.format;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -28,10 +31,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -63,6 +68,12 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
+    private CdhPatchVersionProvider cdhPatchVersionProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeRequest.class);
@@ -89,7 +100,8 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
                 clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
                 Optional<String> remoteDataContext = getRemoteDataContext(stackDto.getStack());
-                connector.upgradeClusterRuntime(request.getUpgradeCandidateProducts(), request.isPatchUpgrade(), remoteDataContext,
+                boolean patchUpgrade = isPatchUpgrade(stackId, connector, stackDto);
+                connector.upgradeClusterRuntime(request.getUpgradeCandidateProducts(), patchUpgrade, remoteDataContext,
                         request.isRollingUpgradeEnabled());
                 return removeUnusedParcelsAfterRuntimeUpgrade(stackDto);
             }
@@ -97,6 +109,25 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             LOGGER.error("Cluster upgrade event failed", e);
             return new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         }
+    }
+
+    private boolean isPatchUpgrade(Long stackId, ClusterApi connector, StackDto stackDto) throws Exception {
+        Image currentImage = componentConfigProviderService.getImage(stackId);
+        String targetImageCdhStackVersion = currentImage.getPackageVersions().get(STACK.getKey());
+        String targetImageCdhBuildNumber = currentImage.getPackageVersions().get(CDH_BUILD_NUMBER.getKey());
+        return isPatchUpgrade(connector, stackDto.getName(), targetImageCdhStackVersion, targetImageCdhBuildNumber);
+    }
+
+    private boolean isPatchUpgrade(ClusterApi connector, String stackName, String targetImageCdhStackVersion,
+            String targetImageCdhBuildNumber) throws Exception {
+        String currentCdhVersion = connector.getStackCdhVersion(stackName);
+        String currentCdhStackVersion = currentCdhVersion != null ? currentCdhVersion.split("-")[0] : null;
+        Optional<Integer> currentBuildNumberOpt = cdhPatchVersionProvider.getPatchFromVersionString(currentCdhVersion);
+        LOGGER.debug("Current CDH version on the cluster is: {}, target image CDH version is: {}", currentCdhVersion, targetImageCdhBuildNumber);
+        return targetImageCdhStackVersion.equals(currentCdhStackVersion)
+                && currentBuildNumberOpt.isPresent() && StringUtils.isNoneBlank(targetImageCdhBuildNumber)
+                && !currentBuildNumberOpt.map(currentBuildNumber -> currentBuildNumber.equals(Integer.valueOf(targetImageCdhBuildNumber)))
+                .orElse(true);
     }
 
     private Optional<String> getRemoteDataContext(StackView stack) {

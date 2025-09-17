@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 
 public class ClusterUpgradeRequest extends AbstractClusterUpgradeEvent {
 
+    @Deprecated
     private final boolean patchUpgrade;
 
     private final boolean rollingUpgradeEnabled;

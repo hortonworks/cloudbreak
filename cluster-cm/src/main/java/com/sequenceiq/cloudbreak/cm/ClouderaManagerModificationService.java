@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_10_0;
@@ -64,6 +65,8 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiParcel;
+import com.cloudera.api.swagger.model.ApiParcelList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
@@ -610,6 +613,20 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } else {
             LOGGER.info("Memory relocation is not supported for Cloudera Manager version: {}", clouderaManagerRepoDetails.getVersion());
         }
+    }
+
+    @Override
+    public String getStackCdhVersion(String stackName) throws ApiException {
+        LOGGER.debug("Retrieving CDH version for stack: [{}]", stackName);
+        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(v31Client);
+        ApiParcelList parcelList = parcelsResourceApi.readParcels(stackName, SUMMARY);
+        String fullVersion = parcelList.getItems().stream()
+                .filter(parcel -> ACTIVATED.name().equals(parcel.getStage()) && CDH.name().equals(parcel.getProduct()))
+                .map(ApiParcel::getVersion)
+                .findFirst()
+                .orElseThrow(() -> new ClouderaManagerOperationFailedException("No activated CDH parcel found for stack: " + stackName));
+        LOGGER.debug("Retrieved CDH version for stack: [{}] is: [{}]", stackName, fullVersion);
+        return fullVersion;
     }
 
     @VisibleForTesting

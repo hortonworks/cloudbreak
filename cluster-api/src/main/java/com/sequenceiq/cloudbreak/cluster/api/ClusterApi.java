@@ -196,4 +196,8 @@ public interface ClusterApi {
     ClusterDiagnosticsService clusterDiagnosticsService();
 
     ClusterHealthService clusterHealthService();
+
+    default String getStackCdhVersion(String stackName) throws Exception {
+        return clusterModificationService().getStackCdhVersion(stackName);
+    }
 }

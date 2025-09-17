@@ -116,4 +116,6 @@ public interface ClusterModificationService {
     void restartMgmtServices() throws Exception;
 
     void reallocateMemory() throws Exception;
+
+    String getStackCdhVersion(String stackName) throws Exception;
 }

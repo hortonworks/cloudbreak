@@ -14,7 +14,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED_NOVERSION;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -143,20 +142,6 @@ public class ClusterUpgradeServiceTest {
         );
     }
 
-    private static Stream<Arguments> patchUpgradeArguments() {
-        return Stream.of(
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), createPackageVersionMap("7.2.15", "12346"), true),
-                Arguments.of(null, createPackageVersionMap("7.2.15", "12346"), false),
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), null, false),
-                Arguments.of(createPackageVersionMap("", "12345"), createPackageVersionMap("7.2.15", "12346"), false),
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), createPackageVersionMap("", "12346"), false),
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), createPackageVersionMap("7.2.16", "12346"), false),
-                Arguments.of(createPackageVersionMap("7.2.15", ""), createPackageVersionMap("7.2.15", "12346"), false),
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), createPackageVersionMap("7.2.15", ""), false),
-                Arguments.of(createPackageVersionMap("7.2.15", "12345"), createPackageVersionMap("7.2.15", "12345"), false)
-        );
-    }
-
     private static Map<String, String> createPackageVersionMap(String cdhVersion, String cdhBuildNumber) {
         return Map.of(STACK.getKey(), cdhVersion, CDH_BUILD_NUMBER.getKey(), cdhBuildNumber);
     }
@@ -242,12 +227,6 @@ public class ClusterUpgradeServiceTest {
 
         verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, ERROR_MESSAGE);
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchUpgradeArguments")
-    void testIsPatchUpgradeShouldReturnTrue(Map<String, String> currentImagePackages, Map<String, String> targetImagePackages, boolean expected) {
-        assertEquals(expected, underTest.isPatchUpgrade(currentImagePackages, targetImagePackages));
     }
 
     @Test

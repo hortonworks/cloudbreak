@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY;
+import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
+import static com.sequenceiq.cloudbreak.cm.util.TestUtil.FLINK;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
@@ -75,6 +79,8 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiParcel;
+import com.cloudera.api.swagger.model.ApiParcelList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -1648,5 +1654,28 @@ class ClouderaManagerModificationServiceTest {
                 "Cluster was terminated while waiting for Cloudera Runtime services to start",
                 "Timeout while stopping Cloudera Manager services.");
         verify(clusterCommandService, times(2)).delete(any(ClusterCommand.class));
+    }
+
+    @Test
+    public void testGetStackCdhVersion() throws Exception {
+        String expectedCdhVersion = "7.2.18";
+        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
+        ApiParcelList parcelList = new ApiParcelList();
+        parcelList.addItemsItem(new ApiParcel().stage(ACTIVATED.name()).product(CDH).version(expectedCdhVersion));
+        parcelList.addItemsItem(new ApiParcel().stage(ACTIVATED.name()).product(FLINK).version(expectedCdhVersion));
+        when(parcelsResourceApi.readParcels(STACK_NAME, SUMMARY)).thenReturn(parcelList);
+        String stackCdhVersion = underTest.getStackCdhVersion(STACK_NAME);
+        assertEquals(expectedCdhVersion, stackCdhVersion);
+    }
+
+    @Test
+    public void testGetStackCdhVersionNoActivatedParcel() throws Exception {
+        String expectedCdhVersion = "7.2.18";
+        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
+        ApiParcelList parcelList = new ApiParcelList();
+        parcelList.addItemsItem(new ApiParcel().stage("DISTRIBUTED").product(CDH).version(expectedCdhVersion));
+        parcelList.addItemsItem(new ApiParcel().stage("DISTRIBUTED").product(FLINK).version(expectedCdhVersion));
+        when(parcelsResourceApi.readParcels(STACK_NAME, SUMMARY)).thenReturn(parcelList);
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.getStackCdhVersion(STACK_NAME));
     }
 }

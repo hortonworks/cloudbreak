@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -20,8 +21,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
@@ -56,6 +62,12 @@ public class ClusterRecoveryServiceTest {
     @Mock
     private FreeipaService freeipaService;
 
+    @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Mock
+    private ReactorFlowManager flowManager;
+
     @InjectMocks
     private ClusterRecoveryService underTest;
 
@@ -76,6 +88,19 @@ public class ClusterRecoveryServiceTest {
 
         Assertions.assertEquals(expectedRecoveryStatus, response.getStatus());
         Assertions.assertEquals(expectedMessage, response.getReason());
+    }
+
+    @Test
+    public void testRestorePreviousImageVersion() throws Exception {
+        NameOrCrn stackNameOrCrn = NameOrCrn.ofName(STACK.getName());
+        when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
+        Component component = new Component();
+        String imageId = "image-id";
+        component.setAttributes(new Json(Image.builder().withImageId(imageId).build()));
+        when(componentConfigProviderService.getImageComponent(STACK.getId())).thenReturn(component);
+        underTest.recoverCluster(WORKSPACE_ID, stackNameOrCrn);
+        verify(componentConfigProviderService).restoreSecondToLastVersion(component);
+        verify(flowManager).triggerDatalakeClusterRecovery(STACK.getId());
     }
 
     @Parameterized.Parameters(name = "{index}: Cluster with available={1} FreeIPA is {2} with previous statuses {0} with message: {3}")

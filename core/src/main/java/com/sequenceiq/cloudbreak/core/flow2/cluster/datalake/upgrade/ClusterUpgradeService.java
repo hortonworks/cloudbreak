@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAILED;
@@ -83,14 +82,6 @@ public class ClusterUpgradeService {
         } else {
             flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
         }
-    }
-
-    public boolean isPatchUpgrade(Map<String, String> currentImagePackages, Map<String, String> targetImagePackages) {
-        return currentImagePackages != null && targetImagePackages != null
-                && StringUtils.isNoneBlank(currentImagePackages.get(STACK.getKey()), targetImagePackages.get(STACK.getKey()))
-                && currentImagePackages.get(STACK.getKey()).equals(targetImagePackages.get(STACK.getKey()))
-                && StringUtils.isNoneBlank(currentImagePackages.get(CDH_BUILD_NUMBER.getKey()), targetImagePackages.get(CDH_BUILD_NUMBER.getKey()))
-                && !currentImagePackages.get(CDH_BUILD_NUMBER.getKey()).equals(targetImagePackages.get(CDH_BUILD_NUMBER.getKey()));
     }
 
     public boolean isRuntimeUpgradeNecessary(Set<ClouderaManagerProduct> upgradeCandidateProducts) {

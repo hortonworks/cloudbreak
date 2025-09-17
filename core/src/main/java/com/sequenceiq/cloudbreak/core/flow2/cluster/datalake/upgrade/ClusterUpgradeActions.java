@@ -15,7 +15,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -135,13 +134,10 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
-                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetStatedImage = getTargetImage(variables);
-                Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
-                boolean patchUpgrade = clusterUpgradeService.isPatchUpgrade(currentImage.getPackageVersions(), targetImage.getPackageVersions());
-                Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), patchUpgrade, rollingUpgradeEnabled);
+                Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), false, rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
