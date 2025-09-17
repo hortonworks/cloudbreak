@@ -54,7 +54,6 @@ allprojects {
         includeGroupByRegex "com.cloudera.cdp.*"
       }
     }
-    maven { url = "$cdpRepoUrl" }
     maven {
       url = "$repoUrl"
       allowInsecureProtocol = true
@@ -303,16 +302,6 @@ subprojects {
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
-    maven {
-      authentication {
-        basic(BasicAuthentication)
-      }
-      credentials(PasswordCredentials) {
-        username "$cmPrivateRepoUser"
-        password "$cmPrivateRepoPassword"
-      }
-      url "https://repository.cloudera.com/cloudera/list/cm-private/"
-    }
   }
 
   eclipse {
