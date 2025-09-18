@@ -250,6 +250,7 @@ class GcpForwardingRuleResourceBuilderTest {
         ForwardingRule arg = forwardingRuleArg.getValue();
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/global/networks/default-network", arg.getNetwork());
         assertEquals("https://www.googleapis.com/compute/v1/projects/id/regions/us-west2/subnetworks/default-subnet", arg.getSubnetwork());
+        assertEquals(true, arg.getAllowGlobalAccess());
         assertEquals("super", cloudResources.get(0).getName());
         assertEquals(8080, cloudResources.get(0).getParameter("hcport", HealthProbeParameters.class).getPort());
     }

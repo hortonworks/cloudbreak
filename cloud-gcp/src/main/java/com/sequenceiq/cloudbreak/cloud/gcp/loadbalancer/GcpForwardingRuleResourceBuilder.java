@@ -123,6 +123,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                 }
                 forwardingRule.setNetwork(networkUrl);
                 forwardingRule.setSubnetwork(subnetUrl);
+                forwardingRule.setAllowGlobalAccess(true);
                 LOGGER.debug("Set network to '{}' and subnet to '{}' for {} load balancer", networkUrl, subnetUrl, scheme);
             }
 
