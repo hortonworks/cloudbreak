@@ -43,7 +43,7 @@ public interface OperationV1Endpoint {
             operationId = "getLatestOperationStatusByEnvironmentAndTypeV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationStatus getLatestOperationStatusByEnvironmentAndType(@PathParam("environmentCrn") String environmentCrn,
-            @NotNull @QueryParam("operationType") String operationType);
+            @QueryParam("operationType") String operationType);
 
     @GET
     @Path("/resource/crn/{environmentCrn}")
