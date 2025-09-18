@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -29,6 +30,8 @@ class OperationServiceTest {
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:envId1";
 
     private static final OperationType OPERATION_TYPE = OperationType.TRUST_SETUP;
+
+    private static final PageRequest FIRST_RECORD = PageRequest.of(0, 1);
 
     @Mock
     private OperationRepository operationRepository;
@@ -60,7 +63,7 @@ class OperationServiceTest {
 
     @Test
     void getLatestOperationForEnvironmentCrnAndOperationTypeFound() {
-        when(operationRepository.findLatestByEnvironmentCrnAndOperationType(eq(ACCOUNT_ID), eq(ENV_CRN), eq(OPERATION_TYPE)))
+        when(operationRepository.findLatestByEnvironmentCrnAndOperationType(eq(ACCOUNT_ID), eq(ENV_CRN), eq(OPERATION_TYPE), eq(FIRST_RECORD)))
                 .thenReturn(Optional.of(operation));
         Operation result = underTest.getLatestOperationForEnvironmentCrnAndOperationType(ENV_CRN, OPERATION_TYPE);
         assertThat(result).isEqualTo(operation);
@@ -68,7 +71,7 @@ class OperationServiceTest {
 
     @Test
     void getLatestOperationForEnvironmentCrnAndOperationTypeNotFound() {
-        when(operationRepository.findLatestByEnvironmentCrnAndOperationType(eq(ACCOUNT_ID), eq(ENV_CRN), eq(OPERATION_TYPE)))
+        when(operationRepository.findLatestByEnvironmentCrnAndOperationType(eq(ACCOUNT_ID), eq(ENV_CRN), eq(OPERATION_TYPE), eq(FIRST_RECORD)))
                 .thenReturn(Optional.empty());
         assertThatThrownBy(() -> underTest.getLatestOperationForEnvironmentCrnAndOperationType(ENV_CRN, OPERATION_TYPE))
                 .isInstanceOf(NotFoundException.class);

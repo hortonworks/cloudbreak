@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,20 +30,22 @@ public interface OperationRepository extends JpaRepository<Operation, Long> {
     List<Operation> findUpgradeStaleRunning(@Param("startBeforeTime") Long startBeforeTime);
 
     /**
-     * @param accountId needed for query optimization as environmentList is not indexed (but accountId is)
+     * @param accountId      needed for query optimization as environmentList is not indexed (but accountId is)
      * @param environmentCrn environment crn
-     * @param operationType operation type
+     * @param operationType  operation type
+     * @param first PageRequest that filters the first result
      */
     @Query("""
             SELECT s FROM Operation s
             WHERE s.accountId = :accountId
-                AND s.operationType = :operationType
+                AND (:operationType IS NULL OR s.operationType = :operationType)
                 AND s.environmentList LIKE CONCAT('%', :environmentCrn, '%')
             ORDER BY startTime DESC
-            LIMIT 1
     """)
     Optional<Operation> findLatestByEnvironmentCrnAndOperationType(
             @Param("accountId") String accountId,
             @Param("environmentCrn") String environmentCrn,
-            @Param("operationType") OperationType operationType);
+            @Param("operationType") OperationType operationType,
+            PageRequest first);
+
 }

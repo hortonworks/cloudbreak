@@ -103,8 +103,8 @@ public class OperationService {
 
     public Operation getLatestOperationForEnvironmentCrnAndOperationType(String environmentCrn, OperationType operationType) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
-        PageRequest first = PageRequest.of(0, 1);
-        Optional<Operation> operationOptional = operationRepository.findLatestByEnvironmentCrnAndOperationType(accountId, environmentCrn, operationType);
+        final PageRequest first = PageRequest.of(0, 1);
+        Optional<Operation> operationOptional = operationRepository.findLatestByEnvironmentCrnAndOperationType(accountId, environmentCrn, operationType, first);
         if (operationOptional.isEmpty()) {
             LOGGER.info("Operation with type [{}] for environment [{}] not found", operationType, environmentCrn);
             throw NotFoundException.notFound("Operation").get();
