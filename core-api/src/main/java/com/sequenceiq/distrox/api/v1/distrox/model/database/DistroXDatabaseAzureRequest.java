@@ -21,7 +21,7 @@ public class DistroXDatabaseAzureRequest implements Serializable {
     private String flexibleServerDelegatedSubnetId;
 
     public AzureDatabaseType getAzureDatabaseType() {
-        return azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER : azureDatabaseType;
+        return azureDatabaseType == null ? AzureDatabaseType.FLEXIBLE_SERVER : azureDatabaseType;
     }
 
     public void setAzureDatabaseType(AzureDatabaseType azureDatabaseType) {

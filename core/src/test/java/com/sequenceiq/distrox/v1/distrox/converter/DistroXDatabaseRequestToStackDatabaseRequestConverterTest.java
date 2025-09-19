@@ -63,7 +63,7 @@ class DistroXDatabaseRequestToStackDatabaseRequestConverterTest {
         source.setDatabaseEngineVersion(DB_VERSION);
         source.setDatabaseAzureRequest(new DistroXDatabaseAzureRequest());
         DatabaseRequest result = underTest.convert(source);
-        assertThat(result.getDatabaseAzureRequest().getAzureDatabaseType()).isEqualTo(AzureDatabaseType.SINGLE_SERVER);
+        assertThat(result.getDatabaseAzureRequest().getAzureDatabaseType()).isEqualTo(AzureDatabaseType.FLEXIBLE_SERVER);
     }
 
     @Test
@@ -85,7 +85,7 @@ class DistroXDatabaseRequestToStackDatabaseRequestConverterTest {
         source.setDatabaseEngineVersion(DB_VERSION);
         source.setDatabaseAzureRequest(new DatabaseAzureRequest());
         DistroXDatabaseRequest result = underTest.convert(source);
-        assertThat(result.getDatabaseAzureRequest().getAzureDatabaseType()).isEqualTo(AzureDatabaseType.SINGLE_SERVER);
+        assertThat(result.getDatabaseAzureRequest().getAzureDatabaseType()).isEqualTo(AzureDatabaseType.FLEXIBLE_SERVER);
     }
 
     @Test
