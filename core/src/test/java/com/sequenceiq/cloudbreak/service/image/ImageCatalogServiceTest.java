@@ -268,7 +268,7 @@ public class ImageCatalogServiceTest {
 
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
-        lenient().when(imageOsService.getDefaultOs()).thenReturn("centos7");
+        lenient().when(imageOsService.getPreferredOs()).thenReturn("centos7");
         ImageComparator comparator = new ImageComparator();
         ReflectionTestUtils.setField(comparator, "imageOsService", imageOsService);
         ReflectionTestUtils.setField(underTest, "imageComparator", comparator);

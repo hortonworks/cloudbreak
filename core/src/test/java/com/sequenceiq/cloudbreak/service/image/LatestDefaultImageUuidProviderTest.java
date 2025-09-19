@@ -60,7 +60,7 @@ public class LatestDefaultImageUuidProviderTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(imageOsService.getDefaultOs()).thenReturn("centos7");
+        lenient().when(imageOsService.getPreferredOs()).thenReturn("centos7");
         ImageComparator comparator = new ImageComparator();
         ReflectionTestUtils.setField(comparator, "imageOsService", imageOsService);
         underTest = new LatestDefaultImageUuidProvider(comparator);

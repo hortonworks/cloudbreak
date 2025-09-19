@@ -33,7 +33,7 @@ public class ImageComparatorTest {
     public void setup() {
         underTest = new ImageComparator();
         ReflectionTestUtils.setField(underTest, "imageOsService", imageOsService);
-        lenient().when(imageOsService.getDefaultOs()).thenReturn(OS_CENTOS7);
+        lenient().when(imageOsService.getPreferredOs()).thenReturn(OS_CENTOS7);
     }
 
     @Test

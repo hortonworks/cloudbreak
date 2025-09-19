@@ -70,6 +70,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PREFER_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
@@ -639,5 +640,9 @@ public class EntitlementService {
         } else {
             return true;
         }
+    }
+
+    public boolean isRhel9ImagePreferred(String accountId) {
+        return isEntitledToUseOS(accountId, OsType.RHEL9) && isEntitlementRegistered(accountId, CDP_PREFER_RHEL9_IMAGES);
     }
 }

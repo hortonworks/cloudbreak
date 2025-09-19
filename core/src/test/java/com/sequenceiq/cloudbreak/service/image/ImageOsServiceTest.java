@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.common.model.OsType;
 
@@ -80,7 +81,13 @@ class ImageOsServiceTest {
     @Test
     public void getDefaultOs() {
         setDefaultOs(RHEL8.getOs());
-        assertEquals(RHEL8.getOs(), underTest.getPreferredOs(null));
+        assertEquals(RHEL8.getOs(), underTest.getDefaultOs());
+    }
+
+    @Test
+    public void getPreferredOsFromEntitlement() {
+        setDefaultOs(RHEL8.getOs());
+        assertEquals(RHEL8.getOs(), ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getPreferredOs()));
     }
 
     @Test

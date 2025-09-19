@@ -75,6 +75,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         MockitoAnnotations.initMocks(this);
         when(imageOsService.isSupported(any())).thenReturn(true);
         when(imageOsService.getDefaultOs()).thenReturn(OS);
+        when(imageOsService.getPreferredOs()).thenReturn(OS);
     }
 
     @Test

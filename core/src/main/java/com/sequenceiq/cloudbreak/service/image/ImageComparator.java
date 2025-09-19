@@ -23,7 +23,7 @@ public class ImageComparator implements Comparator<Image>, Serializable {
     }
 
     private Comparator<String> osComparator() {
-        return Comparator.comparing(imageOsService.getDefaultOs()::equalsIgnoreCase);
+        return Comparator.comparing(imageOsService.getPreferredOs()::equalsIgnoreCase);
     }
 
     private Comparator<Image> imageDateComparator() {

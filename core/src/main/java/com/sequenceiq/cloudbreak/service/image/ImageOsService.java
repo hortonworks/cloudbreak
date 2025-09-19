@@ -4,12 +4,20 @@ import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+
 @Component
 public class ImageOsService {
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Value("${cb.image.catalog.default.os}")
     private String defaultOs;
@@ -25,11 +33,17 @@ public class ImageOsService {
         return defaultOs;
     }
 
+    public String getPreferredOs() {
+        return getPreferredOs(null);
+    }
+
     public String getPreferredOs(String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
+        } else if (entitlementService.isRhel9ImagePreferred(ThreadBasedUserCrnProvider.getAccountId())) {
+            return RHEL9.getOs();
         } else {
-            return getDefaultOs();
+            return defaultOs;
         }
     }
 }
