@@ -623,10 +623,11 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                         im.setInstanceStatus(InstanceStatus.REQUESTED);
                         im.setAvailabilityZone(null);
                         im.setRackId(null);
+                        im.setPrivateId(1L);
                     });
                     ig.getInstanceMetaData().addAll(instancesToAdd);
                 });
-
+        stack.getNotDeletedInstanceMetaDataSet().forEach(im -> im.setInstanceId(""));
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();

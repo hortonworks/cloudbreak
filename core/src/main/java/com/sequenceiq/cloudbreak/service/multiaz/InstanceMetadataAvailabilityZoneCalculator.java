@@ -182,7 +182,9 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                                 (isNullOrEmpty(instance.getSubnetId()) ? DEFAULT_RACK : instance.getSubnetId())
                                 : availabilityZone));
                 updatedInstances.add(instance);
-                LOGGER.info("Set availability zone('{}') for instance '{}'", instance.getAvailabilityZone(), instance.getInstanceId());
+                String privateIdWithGroupName = String.format("group: %s, private id: %s", groupName, instance.getPrivateId());
+                String instanceName = StringUtils.isNotEmpty(instance.getInstanceId()) ? instance.getInstanceId() : privateIdWithGroupName;
+                LOGGER.info("Set availability zone('{}') for instance '{}'", instance.getAvailabilityZone(), instanceName);
                 LOGGER.info("Rack Id updated from {} to {}", previousRackId, instance.getRackId());
             }
         }
