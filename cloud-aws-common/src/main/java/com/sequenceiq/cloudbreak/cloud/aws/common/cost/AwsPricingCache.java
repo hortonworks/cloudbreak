@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ARCHITECTURE;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 
 import software.amazon.awssdk.core.auth.policy.Action;
 import software.amazon.awssdk.core.auth.policy.Policy;
@@ -77,7 +80,8 @@ public class AwsPricingCache implements PricingCache {
         if (classPathResource.exists()) {
             try {
                 String json = FileReaderUtils.readFileFromClasspath(AWS_STORAGE_PRICING_JSON_LOCATION);
-                return JsonUtil.readValue(json, new TypeReference<>() { });
+                return JsonUtil.readValue(json, new TypeReference<>() {
+                });
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load AWS storage price json!", e);
             }
@@ -171,7 +175,7 @@ public class AwsPricingCache implements PricingCache {
 
     private Optional<VmTypeMeta> getVmMetadata(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredential, region,
-                getCloudPlatform().name(), CdpResourceType.DEFAULT, Map.of());
+                getCloudPlatform().name(), CdpResourceType.DEFAULT, Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
         Optional<Set<VmType>> vmTypesOptional = cloudVmTypes.getCloudVmResponses().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(region))
                 .map(Map.Entry::getValue)
