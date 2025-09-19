@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.service;
+package com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -34,13 +34,17 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
+import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
+import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
+import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
 
 @Service
-public class RemoteEnvironmentService implements PayloadContextProvider {
+public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadContextProvider, RemoteEnvironmentConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteEnvironmentService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrivateControlPlaneRemoteEnvironmentConnector.class);
 
     @Inject
     private PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter privateControlPlaneEnvironmentToRemoteEnvironmentConverter;
@@ -57,7 +61,13 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironments(String publicCloudAccountId) {
+    @Override
+    public RemoteEnvironmentConnectorType type() {
+        return RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE;
+    }
+
+    @Override
+    public SimpleRemoteEnvironmentResponses list(String publicCloudAccountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -68,11 +78,12 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
             privateControlPlanes
                     .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlaneWithActor(item, userCrn)));
         }
-        return responses;
+        return new SimpleRemoteEnvironmentResponses(responses);
     }
 
-    public DescribeEnvironmentV2Response getDescribeEnvironmentResponse(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
-        DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
+    @Override
+    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+        DescribeEnvironmentResponse describeEnvironmentResponse = callRemoteEnvironment(
                 publicCloudAccountId,
                 environment.getCrn(),
                 this::describeRemoteEnvironmentWithActor);
@@ -80,7 +91,8 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return describeEnvironmentResponse;
     }
 
-    public DescribeEnvironmentV2Response getDescribeRemoteEnvironmentResponse(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+    @Override
+    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
         String privateCloudAccountId = Crn.safeFromString(environment.getCrn()).getAccountId();
         DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
                 publicCloudAccountId,
@@ -93,14 +105,14 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
                         publicCloudAccountId);
 
         DescribeEnvironmentV2Response describeEnvironmentV2Response =
-                getDescribeRemoteEnvironmentResponse(
+                getDescribeRemoteEnvironmentV2Response(
                         describeEnvironmentResponse,
                         privateControlPlane);
 
         return describeEnvironmentV2Response;
     }
 
-    private DescribeEnvironmentV2Response getDescribeRemoteEnvironmentResponse(
+    private DescribeEnvironmentV2Response getDescribeRemoteEnvironmentV2Response(
             DescribeEnvironmentV2Response describeEnvironmentResponse,
             Optional<PrivateControlPlane> privateControlPlane) {
 
@@ -126,23 +138,22 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return describeRemoteEnvironmentWithActor(controlPlane, environmentCrn, actor.getCrn());
     }
 
+    @Override
     public GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
         return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRootCertificateWithActor);
     }
 
-    public GetRootCertificateResponse getRootCertificateInternal(String publicCloudAccountId, String environmentCrn) {
-        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRootCertificateWithActor);
-    }
-
-    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcForEnvironment(String publicCloudAccountId, String environmentCrn) {
+    @Override
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String publicCloudAccountId, String environmentCrn) {
         return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRdcForEnvironmentWithActor);
     }
 
-    public DescribeDatalakeServicesResponse getDatalakeServicesForEnvironment(String publicCloudAccountId, String environmentCrn) {
+    @Override
+    public DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
         return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getDatalakeServicesForEnvironmentWithActor);
     }
 
-    private <T> T callRemoteEnvironment(String publicCloudAccountId, String environmentCrn, RemoteEnvironmentCaller<T> function) {
+    private <T> T callRemoteEnvironment(String publicCloudAccountId, String environmentCrn, PrivateControlPlaneCaller<T> function) {
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             try {
                 String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();

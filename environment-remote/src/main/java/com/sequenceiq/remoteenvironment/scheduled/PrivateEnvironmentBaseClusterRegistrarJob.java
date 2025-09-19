@@ -20,14 +20,14 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnv
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 import com.sequenceiq.remoteenvironment.service.PrivateEnvironmentBaseClusterService;
-import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
+import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
 
 @Component
 public class PrivateEnvironmentBaseClusterRegistrarJob extends MdcQuartzJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(PrivateEnvironmentBaseClusterRegistrarJob.class);
 
     @Inject
-    private RemoteEnvironmentService remoteEnvironmentService;
+    private PrivateControlPlaneRemoteEnvironmentConnector remoteEnvironmentService;
 
     @Inject
     private PrivateControlPlaneService privateControlPlaneService;

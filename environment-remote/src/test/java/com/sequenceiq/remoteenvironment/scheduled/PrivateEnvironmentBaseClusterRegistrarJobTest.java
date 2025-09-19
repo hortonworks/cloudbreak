@@ -23,13 +23,13 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnv
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 import com.sequenceiq.remoteenvironment.service.PrivateEnvironmentBaseClusterService;
-import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
+import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
 
 @ExtendWith(MockitoExtension.class)
 class PrivateEnvironmentBaseClusterRegistrarJobTest {
 
     @Mock
-    private RemoteEnvironmentService remoteEnvironmentService;
+    private PrivateControlPlaneRemoteEnvironmentConnector remoteEnvironmentService;
 
     @Mock
     private PrivateControlPlaneService privateControlPlaneService;
