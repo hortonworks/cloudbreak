@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DescribeRemoteEnvironment {
 
-    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.CLASSIC_CLUSTER})
     @Schema(description = ModelDescriptions.CRN)
     private String crn;
 

@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.RdcConstants;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
@@ -153,16 +151,17 @@ public class PlatformAwareSdxConnector {
     }
 
     private static TargetPlatform calculatePlatform(Set<String> sdxCrns) {
-        if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(crn)))) {
-            return TargetPlatform.CDL;
-        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn))
-                || CrnResourceDescriptor.DATAHUB.checkIfCrnMatches(Crn.safeFromString(crn)))) {
+        Set<TargetPlatform> targetPlatforms = sdxCrns.stream().map(TargetPlatform::getByCrn).collect(Collectors.toSet());
+        if (targetPlatforms.isEmpty()) {
+            // FIXME CB-30627: workaround for mock tests that use stack api (bypassing distrox's sdx validation)
             return TargetPlatform.PAAS;
-        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.ENVIRONMENT.checkIfCrnMatches(Crn.safeFromString(crn)))) {
-            return TargetPlatform.PDL;
+        } else if (targetPlatforms.size() > 1) {
+            String joinedSdxCrns = Joiner.on(",").join(sdxCrns);
+            LOGGER.error("Could not decide target SDX platform based on SDX CRN list [{}].", joinedSdxCrns);
+            throw new IllegalStateException(
+                    String.format("Could not determine Data Lake platform from CRNs [%s], please contact Cloudera support!", joinedSdxCrns));
         }
-        LOGGER.error("Could not decide target SDX platform based on SDX CRN list [{}].", Joiner.on(",").join(sdxCrns));
-        throw new IllegalStateException("Invalid Data Lake CRN has been found, please contact Cloudera support!");
+        return targetPlatforms.iterator().next();
     }
 
     private AttemptResult<Object> getAttemptResultForPolling(Map<PollingResult, String> sdxCrnsByPollingResult) {

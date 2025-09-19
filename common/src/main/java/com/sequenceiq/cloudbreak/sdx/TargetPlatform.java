@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,23 +12,20 @@ public enum TargetPlatform {
 
     PAAS(CrnResourceDescriptor.VM_DATALAKE),
     CDL(CrnResourceDescriptor.CDL),
-    PDL(CrnResourceDescriptor.ENVIRONMENT);
+    PDL(CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.CLASSIC_CLUSTER);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TargetPlatform.class);
 
-    private CrnResourceDescriptor crnResourceDescriptor;
+    private final Set<CrnResourceDescriptor> crnResourceDescriptors;
 
-    TargetPlatform(CrnResourceDescriptor crnResourceDescriptor) {
-        this.crnResourceDescriptor = crnResourceDescriptor;
-    }
-
-    public CrnResourceDescriptor getCrnResourceDescriptor() {
-        return crnResourceDescriptor;
+    TargetPlatform(CrnResourceDescriptor... crnResourceDescriptors) {
+        this.crnResourceDescriptors = Set.of(crnResourceDescriptors);
     }
 
     public static TargetPlatform getByCrn(String crn) {
+        CrnResourceDescriptor crnResourceDescriptor = CrnResourceDescriptor.getByCrnString(crn);
         return Arrays.stream(values())
-                .filter(platform -> platform.getCrnResourceDescriptor().equals(CrnResourceDescriptor.getByCrnString(crn)))
+                .filter(platform -> platform.crnResourceDescriptors.contains(crnResourceDescriptor))
                 .findFirst()
                 .orElseGet(() -> {
                     LOGGER.warn("Based on CRN we were not able to decide the target platform, fallback to PAAS");

@@ -1,9 +1,8 @@
 package com.sequenceiq.thunderhead.service;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -66,9 +65,8 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
         return classicClusterRepository.findAll();
     }
 
-    public ClassicCluster findByCrn(String crn) {
-        return classicClusterRepository.findById(crn)
-                .orElseThrow(notFound("Classic Cluster with CRN: " + crn));
+    public Optional<ClassicCluster> findByCrn(String crn) {
+        return classicClusterRepository.findById(crn);
     }
 
     private void registerClusterProxy(ClassicCluster classicCluster) {

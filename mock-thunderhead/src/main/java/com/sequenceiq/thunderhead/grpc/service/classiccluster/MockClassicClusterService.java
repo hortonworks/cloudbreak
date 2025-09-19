@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.thunderhead.entity.ClassicCluster;
 import com.sequenceiq.thunderhead.service.ClassicClusterService;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 @Component
@@ -61,12 +62,13 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
     @Override
     public void describeCluster(OnPremisesApiProto.DescribeClusterRequest request, StreamObserver<OnPremisesApiProto.DescribeClusterResponse> responseObserver) {
-        ClassicCluster classicCluster = classicClusterService.findByCrn(request.getClusterCrn());
-        OnPremisesApiProto.DescribeClusterResponse response = OnPremisesApiProto.DescribeClusterResponse.newBuilder()
-                .setCluster(convertWithCache(classicCluster))
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        classicClusterService.findByCrn(request.getClusterCrn()).ifPresentOrElse(classicCluster -> {
+            OnPremisesApiProto.DescribeClusterResponse response = OnPremisesApiProto.DescribeClusterResponse.newBuilder()
+                    .setCluster(convertWithCache(classicCluster))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(Status.NOT_FOUND.withDescription("Classic Cluster not found with crn " + request.getClusterCrn()).asException()));
     }
 
     private OnPremisesApiProto.Cluster convertWithCache(ClassicCluster classicCluster) {
@@ -82,10 +84,13 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
             return OnPremisesApiProto.Cluster.newBuilder()
                     .setName(classicCluster.getName())
+                    .setDatacenterName(classicCluster.getName())
                     .setClusterCrn(classicCluster.getCrn())
+                    .setManagerUri(classicCluster.getUrl())
                     .setData(OnPremisesApiProto.ClusterData.newBuilder()
                             .setVersion(apiCluster.getFullVersion())
                             .build())
+                    .setProperties(String.format("{\"entityStatus\": \"GOOD_HEALTH\", \"clusterUrl\": \"%s\"}", classicCluster.getUrl()))
                     .setLastCreateTime(new Date().getTime())
                     .build();
         } catch (Exception e) {
