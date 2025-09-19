@@ -92,7 +92,7 @@ auth:
     enforce.aws.native.single.az.enabled: true
     azure.database.flexibleserver.upgrade.enabled: true
     azure.database.flexibleserver.upgrade.longpolling.enabled: false
-    azure.database.singleserver.reject.enabled: false
+    azure.database.singleserver.reject.enabled: true
     secret.encryption.enabled: false
     cdl:
       enabled: true
