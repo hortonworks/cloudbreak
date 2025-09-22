@@ -77,6 +77,15 @@ clusterProxy:
   maxAttempts: 20
   maxFailure: 1
 
+cb:
+  cm.client:
+    cluster.proxy.timeout: 120000
+    connect.timeout.seconds: 125
+    read.timeout.seconds: 125
+    write.timeout.seconds: 125
+    syncCommandPoller:
+      interrupt.timeout.seconds: 120
+
 remoteenvironment:
   cert.dir: /certs/
   client.id: remoteenvironment

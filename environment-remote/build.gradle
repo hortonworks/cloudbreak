@@ -75,6 +75,7 @@ dependencies {
     implementation project(':cluster-proxy')
     implementation project(':service-common')
     implementation project(':remote-cluster-connector')
+    implementation project(':client-cm')
 
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: springBootVersion
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: springBootVersion
