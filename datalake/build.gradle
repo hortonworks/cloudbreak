@@ -45,6 +45,7 @@ configurations {
   all {
     resolutionStrategy {
       force "org.yaml:snakeyaml:$snakeYamlVersion"
+      force "io.netty:netty-codec:$nettyVersion"
     }
   }
 }

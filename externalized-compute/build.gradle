@@ -20,6 +20,14 @@ plugins {
     id 'com.google.protobuf' version "${protobufPluginVersion}"
 }
 
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  dependencies {
+    dependency group: 'io.netty', name: 'netty-codec', version: nettyVersion
+  }
+}
+
 dependencies {
     implementation project(':common')
     implementation project(':grpc-common')
