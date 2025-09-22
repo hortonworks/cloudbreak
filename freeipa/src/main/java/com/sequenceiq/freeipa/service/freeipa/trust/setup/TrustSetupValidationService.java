@@ -37,6 +37,8 @@ public class TrustSetupValidationService {
 
     private static final String AD_DNS_VALIDATION_STATE = "trustsetup/validation/ad_dns_validation";
 
+    private static final String AD_REVERSE_DNS_VALIDATION_STATE = "trustsetup/validation/ad_reverse_dns_validation";
+
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
 
@@ -64,6 +66,7 @@ public class TrustSetupValidationService {
         TaskResults taskResults = new TaskResults();
         taskResults.addTaskResult(validatePackageAvailability(stackId));
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
+        taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
         return taskResults;
     }
 
@@ -79,19 +82,28 @@ public class TrustSetupValidationService {
     }
 
     private TaskResult validateDns(Stack stack, CrossRealmTrust crossRealmTrust) {
+        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "Dns validation");
+    }
+
+    private TaskResult validateReverseDns(Stack stack, CrossRealmTrust crossRealmTrust) {
+        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse dns validation");
+    }
+
+    private TaskResult executeSaltState(Stack stack, CrossRealmTrust crossRealmTrust, String stateName, String messagePrefix) {
         try {
-            OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, AD_DNS_VALIDATION_STATE, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
+            OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, stateName, true,
+                    MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
                     AD_DOMAIN, crossRealmTrust.getFqdn(),
                     AD_IP, crossRealmTrust.getIp()))));
             hostOrchestrator.runOrchestratorState(stateParams);
-            return new TaskResult(TaskResultType.INFO, "Successful dns validation", Map.of());
+            return new TaskResult(TaskResultType.INFO, "Successful " + messagePrefix, Map.of());
         } catch (CloudbreakOrchestratorException orchestratorException) {
-            LOGGER.error("Dns validation failed on AD: {}", crossRealmTrust.getFqdn(), orchestratorException);
+            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getFqdn(), orchestratorException);
             Map<String, String> params = OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException);
-            return new TaskResult(TaskResultType.ERROR, "Dns validation failed: " + orchestratorException.getMessage(), params);
+            return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed: " + orchestratorException.getMessage(), params);
         } catch (Exception ex) {
-            LOGGER.error("Dns validation failed on AD: {}", crossRealmTrust.getFqdn(), ex);
+            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getFqdn(), ex);
             return new TaskResult(TaskResultType.ERROR, ex.getMessage(), Map.of());
         }
     }

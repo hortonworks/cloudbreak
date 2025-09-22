@@ -1,0 +1,40 @@
+#!/bin/bash
+
+dns_name=$1
+dns_server=$2
+ip_address=$3
+
+if [[ -z "$dns_name" ]]; then
+  echo "Missing active directory server domain parameter" >&2
+  exit 1
+fi
+
+if [[ -z "$dns_server" ]]; then
+  echo "Missing active directory dns server ip address parameter" >&2
+  exit 1
+fi
+
+if [[ -z "$ip_address" ]]; then
+  echo "Missing active directory server ip address parameter" >&2
+  exit 1
+fi
+
+ptr_record=$(dig +short @"$dns_server" -x "$ip_address")
+
+if [[ -z "$ptr_record" ]]; then
+  echo "Reverse DNS lookup failed: No PTR record for $ip_address" >&2
+  exit 3
+fi
+
+echo "PTR record for $ip_address is: $ptr_record"
+
+# Ensure trailing dot is ignored in comparison
+normalized_ptr=$(echo "$ptr_record" | sed 's/\.$//')
+
+if [[ "${normalized_ptr,,}" == "${dns_name,,}" ]]; then
+  echo "Reverse DNS validation: Success (PTR matches $dns_name)"
+  exit 0
+else
+  echo "Reverse DNS validation: Failure (expected PTR: $dns_name, got: $normalized_ptr)" >&2
+  exit 4
+fi

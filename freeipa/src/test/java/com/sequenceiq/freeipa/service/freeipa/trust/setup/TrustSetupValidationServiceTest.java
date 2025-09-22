@@ -98,7 +98,7 @@ class TrustSetupValidationServiceTest {
     void testValidateWhenDnsValidationFailure() throws Exception {
         setup();
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
-        doThrow(new RuntimeException("DNS validation error")).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(new RuntimeException("DNS validation error")).doNothing().when(hostOrchestrator).runOrchestratorState(any());
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
@@ -111,7 +111,7 @@ class TrustSetupValidationServiceTest {
         setup();
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         CloudbreakOrchestratorFailedException orchestratorException = new CloudbreakOrchestratorFailedException("Dns validation error");
-        doThrow(orchestratorException).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(orchestratorException).doNothing().when(hostOrchestrator).runOrchestratorState(any());
         Map<String, String> params = Map.of("key1", "value1", "key2", "value2");
         when(OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException)).thenReturn(params);
 
@@ -125,14 +125,16 @@ class TrustSetupValidationServiceTest {
     @Test
     void testValidateWhenMultipleFailure() throws Exception {
         setup();
-        doThrow(new RuntimeException("DNS validation error")).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(new RuntimeException("DNS validation error")).doThrow(new RuntimeException("Reverse DNS validation error"))
+                .when(hostOrchestrator).runOrchestratorState(any());
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
-        assertEquals(2L, result.getErrors().size());
+        assertEquals(3L, result.getErrors().size());
         assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
                 result.getErrors().get(0).message());
         assertEquals("DNS validation error", result.getErrors().get(1).message());
+        assertEquals("Reverse DNS validation error", result.getErrors().get(2).message());
     }
 
     private void setup() {
