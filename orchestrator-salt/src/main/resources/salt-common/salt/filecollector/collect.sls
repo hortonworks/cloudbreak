@@ -38,6 +38,19 @@ generate_nginx_report:
         - HOME: "/tmp/.goaccess"
 {% endif %}
 
+{%- if filecollector.includeSeLinuxReport %}
+/tmp/generate_selinux_report.sh:
+  file.managed:
+    - source: salt://{{ slspath }}/scripts/generate_selinux_report.sh
+    - mode: 750
+    - user: root
+    - group: root
+
+generate_selinux_report:
+  cmd.run:
+    - name: "/tmp/generate_selinux_report.sh"
+{%- endif %}
+
 filecollector_collect_start:
   cmd.run:
 {% if filecollector.destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}

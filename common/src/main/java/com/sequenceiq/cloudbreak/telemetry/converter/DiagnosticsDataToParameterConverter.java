@@ -47,6 +47,7 @@ public class DiagnosticsDataToParameterConverter {
                 .withIncludeSaltLogs(request.getIncludeSaltLogs())
                 .withIncludeSarOutput(request.getIncludeSarOutput())
                 .withIncludeNginxReport(request.getIncludeNginxReport())
+                .withIncludeSeLinuxReport(request.getIncludeSeLinuxReport())
                 .withUpdatePackage(request.getUpdatePackage())
                 .withSkipValidation(request.getSkipValidation())
                 .withSkipWorkspaceCleanupOnStartup(request.getSkipWorkspaceCleanupOnStartup())

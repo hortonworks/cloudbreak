@@ -63,6 +63,26 @@ collector:
       skipAnonymization: true
       useFullPath: false
       folderPrefix: report{% endif %}
+{%- if filecollector.includeSeLinuxReport %}
+    - path: /tmp/selinux_report.log
+      label: selinux_report
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+    - path: /tmp/selinux_denies.log
+      label: selinux_denies
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+    - path: /tmp/selinux_audit2allow.log
+      label: selinux_audit2allow
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+{%- endif %}
     - path: /tmp/cdp_report.html
       label: report
       skipLabelFromPath: true

@@ -59,6 +59,9 @@ public class BaseDiagnosticsCollectionRequest {
     @Schema(description = DiagnosticsModelDescription.INCLUDE_NGINX_REPORT)
     private Boolean includeNginxReport = Boolean.FALSE;
 
+    @Schema(description = DiagnosticsModelDescription.INCLUDE_SELINUX_REPORT)
+    private Boolean includeSeLinuxReport = Boolean.FALSE;
+
     @Schema(description = DiagnosticsModelDescription.UPDATE_PACKAGE)
     private Boolean updatePackage = Boolean.FALSE;
 
@@ -165,6 +168,14 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setIncludeNginxReport(Boolean includeNginxReport) {
         this.includeNginxReport = includeNginxReport;
+    }
+
+    public Boolean getIncludeSeLinuxReport() {
+        return includeSeLinuxReport;
+    }
+
+    public void setIncludeSeLinuxReport(Boolean includeSeLinuxReport) {
+        this.includeSeLinuxReport = includeSeLinuxReport;
     }
 
     public Boolean getUpdatePackage() {

@@ -53,6 +53,8 @@ public class DiagnosticParameters {
 
     private Boolean includeNginxReport = Boolean.FALSE;
 
+    private Boolean includeSeLinuxReport = Boolean.FALSE;
+
     private Boolean updatePackage = Boolean.FALSE;
 
     private Boolean skipValidation = Boolean.FALSE;
@@ -104,6 +106,7 @@ public class DiagnosticParameters {
         parameters.put("includeSaltLogs", Optional.ofNullable(includeSaltLogs).orElse(false));
         parameters.put("includeSarOutput", Optional.ofNullable(includeSarOutput).orElse(false));
         parameters.put("includeNginxReport", Optional.ofNullable(includeNginxReport).orElse(false));
+        parameters.put("includeSeLinuxReport", Optional.ofNullable(includeSeLinuxReport).orElse(false));
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
         parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
         parameters.put("skipUnresponsiveHosts", Optional.ofNullable(skipUnresponsiveHosts).orElse(false));
@@ -186,6 +189,10 @@ public class DiagnosticParameters {
 
     public void setIncludeNginxReport(Boolean includeNginxReport) {
         this.includeNginxReport = includeNginxReport;
+    }
+
+    public void setIncludeSeLinuxReport(Boolean includeSeLinuxReport) {
+        this.includeSeLinuxReport = includeSeLinuxReport;
     }
 
     public void setUpdatePackage(Boolean updatePackage) {
@@ -302,6 +309,10 @@ public class DiagnosticParameters {
 
     public Boolean getIncludeNginxReport() {
         return includeNginxReport;
+    }
+
+    public Boolean getIncludeSeLinuxReport() {
+        return includeSeLinuxReport;
     }
 
     public Boolean getUpdatePackage() {
@@ -481,6 +492,11 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withIncludeNginxReport(Boolean includeNginxReport) {
             diagnosticParameters.setIncludeNginxReport(includeNginxReport);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withIncludeSeLinuxReport(Boolean includeSeLinuxReport) {
+            diagnosticParameters.setIncludeSeLinuxReport(includeSeLinuxReport);
             return this;
         }
 

@@ -26,6 +26,7 @@
 {% else %}
   {% set include_nginx_report = False %}
 {% endif %}
+{% set include_selinux_report = salt['pillar.get']('filecollector:includeSeLinuxReport') %}
 {% set update_package = salt['pillar.get']('filecollector:updatePackage') %}
 {% set skip_test_cloud_storage = salt['pillar.get']('filecollector:skipTestCloudStorage') %}
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
@@ -143,6 +144,7 @@
     "includeSaltLogs": include_salt_logs,
     "includeSarOutput": include_sar_output,
     "includeNginxReport": include_nginx_report,
+    "includeSeLinuxReport": include_selinux_report,
     "updatePackage": update_package,
     "skipValidation": skip_validation,
     "skipWorkspaceCleanupOnStartup": skip_workspace_cleanup_on_startup,

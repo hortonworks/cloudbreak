@@ -54,6 +54,8 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_INCLUDE_NGINX_REPORT = "includeNginxReport";
 
+    private static final String PARAMS_INCLUDE_SELINUX_REPORT = "includeSeLinuxReport";
+
     private static final String PARAMS_UPDATE_PACKAGE = "updatePackage";
 
     private static final String PARAMS_SKIP_VALIDATION = "skipValidation";
@@ -82,6 +84,7 @@ public class DiagnosticsParamsConverter {
         props.put(PARAMS_INCLUDE_SALT_LOGS, request.getIncludeSaltLogs());
         props.put(PARAMS_INCLUDE_SAR_OUTPUT, request.getIncludeSarOutput());
         props.put(PARAMS_INCLUDE_NGINX_REPORT, request.getIncludeNginxReport());
+        props.put(PARAMS_INCLUDE_SELINUX_REPORT, request.getIncludeSeLinuxReport());
         props.put(PARAMS_UPDATE_PACKAGE, request.getUpdatePackage());
         props.put(PARAMS_SKIP_VALIDATION, request.getSkipValidation());
         props.put(PARAMS_SKIP_WORKSPACE_CLEANUP_ON_STARTUP, request.getSkipWorkspaceCleanupOnStartup());
@@ -106,6 +109,7 @@ public class DiagnosticsParamsConverter {
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
         request.setIncludeSarOutput((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SAR_OUTPUT)).orElse(false));
         request.setIncludeNginxReport((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_NGINX_REPORT)).orElse(false));
+        request.setIncludeSeLinuxReport((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SELINUX_REPORT)).orElse(false));
         request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
         request.setSkipUnresponsiveHosts((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_UNRESPONSIVE_HOSTS)).orElse(false));
