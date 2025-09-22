@@ -63,6 +63,12 @@ ext {
     junit_version = "5.8.2"
 }
 
+dependencyManagement {
+  dependencies {
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+  }
+}
+
 dependencies {
     implementation project(':authorization-common')
     implementation project(':auth-connector')
