@@ -64,9 +64,10 @@ ext {
 }
 
 dependencyManagement {
-  dependencies {
-    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
-  }
+    dependencies {
+        dependency group: 'org.apache.commons',       name: 'commons-lang3',      version: apacheCommonsLangVersion
+        dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    }
 }
 
 dependencies {

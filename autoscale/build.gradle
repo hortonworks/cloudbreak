@@ -140,6 +140,7 @@ dependencyManagement {
         dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: mybatisMigrationVersion
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
         dependency group: 'com.openpojo',                       name: 'openpojo',                  version: openPojoVersion
+        dependency group: 'org.apache.commons',                 name: 'commons-lang3',             version: apacheCommonsLangVersion
         dependency group: 'org.apache.tomcat.embed',            name: 'tomcat-embed-core',         version: tomcatVersion
     }
 }
