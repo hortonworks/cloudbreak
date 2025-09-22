@@ -34,7 +34,7 @@ public class DefaultResourceAuthorizationProvider {
             defaultResourceChecker = defaultResourceCheckerMap.get(authorizationResourceType);
         }
         if (defaultResourceChecker != null && defaultResourceChecker.isDefault(resourceCrn)) {
-            commonPermissionCheckingUtils.throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
+            commonPermissionCheckingUtils.throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), Optional.of(defaultResourceChecker));
             return Optional.empty();
         } else {
             return supplier.get();
@@ -47,7 +47,8 @@ public class DefaultResourceAuthorizationProvider {
         if (defaultResourceChecker != null) {
             CrnsByCategory crnsByCategory = defaultResourceChecker.getDefaultResourceCrns(resourceCrns);
             if (!crnsByCategory.getDefaultResourceCrns().isEmpty()) {
-                commonPermissionCheckingUtils.throwAccessDeniedIfActionNotAllowed(action, crnsByCategory.getDefaultResourceCrns(), defaultResourceChecker);
+                commonPermissionCheckingUtils.throwAccessDeniedIfActionNotAllowed(action, crnsByCategory.getDefaultResourceCrns(),
+                        Optional.of(defaultResourceChecker));
             }
             if (!crnsByCategory.getNotDefaultResourceCrns().isEmpty()) {
                 return function.apply(crnsByCategory.getNotDefaultResourceCrns());

@@ -19,12 +19,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.authorization.StackViewAuthorizationService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -52,6 +54,9 @@ public class EventV4Controller implements EventV4Endpoint {
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private StackViewAuthorizationService stackViewAuthorizationService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public CloudbreakEventV4Responses list(Long since, @AccountId String accountId) {
@@ -59,21 +64,22 @@ public class EventV4Controller implements EventV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CustomPermissionCheck
     public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView = getStackViewByNameIfAvailable(name);
+        stackViewAuthorizationService.checkReadPermissionForStackView(stackView);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CustomPermissionCheck
     public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         return getCloudbreakEventsByStack(name, page, size, accountId).getContent();
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CustomPermissionCheck
     public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(@ResourceCrn String crn, Integer page, Integer size, boolean onlyAlive) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView;
@@ -82,6 +88,7 @@ public class EventV4Controller implements EventV4Endpoint {
         } else {
             stackView = getStackViewByCrn(crn);
         }
+        stackViewAuthorizationService.checkReadPermissionForStackView(stackView);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable).getContent();
     }
 
@@ -101,15 +108,19 @@ public class EventV4Controller implements EventV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CustomPermissionCheck
     public StructuredEventContainer structured(String name, @AccountId String accountId) {
-        return legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        stackViewAuthorizationService.checkReadPermissionForStackName(name, workspaceId);
+        return legacyStructuredEventService.getStructuredEventsForStack(name, workspaceId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CustomPermissionCheck
     public StructuredEventContainer structuredByCrn(@ResourceCrn String crn, boolean onlyAlive) {
-        return legacyStructuredEventService.getStructuredEventsForStackByCrn(crn, workspaceService.getForCurrentUser().getId(), onlyAlive);
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        stackViewAuthorizationService.checkReadPermissionForStackCrn(crn, workspaceId);
+        return legacyStructuredEventService.getStructuredEventsForStackByCrn(crn, workspaceId, onlyAlive);
     }
 
     @Override

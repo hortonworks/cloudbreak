@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ public class CommonPermissionCheckingUtils {
     @Inject
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
+    @Inject
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
 
     public void checkPermissionForUser(AuthorizationResourceAction action, String userCrn) {
@@ -58,7 +60,7 @@ public class CommonPermissionCheckingUtils {
         if (defaultResourceChecker == null || !defaultResourceChecker.isDefault(resourceCrn)) {
             umsResourceAuthorizationService.checkRightOfUserOnResource(userCrn, action, resourceCrn);
         } else {
-            throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
+            throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), Optional.of(defaultResourceChecker));
         }
     }
 
@@ -70,7 +72,7 @@ public class CommonPermissionCheckingUtils {
         } else {
             CrnsByCategory crnsByCategory = defaultResourceChecker.getDefaultResourceCrns(resourceCrns);
             if (!crnsByCategory.getDefaultResourceCrns().isEmpty()) {
-                throwAccessDeniedIfActionNotAllowed(action, resourceCrns, defaultResourceChecker);
+                throwAccessDeniedIfActionNotAllowed(action, resourceCrns, Optional.of(defaultResourceChecker));
             }
             if (!crnsByCategory.getNotDefaultResourceCrns().isEmpty()) {
                 umsResourceAuthorizationService.checkRightOfUserOnResources(userCrn, action, crnsByCategory.getNotDefaultResourceCrns());
@@ -134,12 +136,12 @@ public class CommonPermissionCheckingUtils {
     }
 
     public void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns) {
-        throwAccessDeniedIfActionNotAllowed(action, resourceCrns, defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action)));
+        throwAccessDeniedIfActionNotAllowed(action, resourceCrns, Optional.ofNullable(defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action))));
     }
 
     public void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns,
-            DefaultResourceChecker defaultResourceChecker) {
-        if (!defaultResourceChecker.isAllowedAction(action)) {
+            Optional<DefaultResourceChecker> defaultResourceChecker) {
+        if (defaultResourceChecker.isEmpty() || !defaultResourceChecker.get().isAllowedAction(action)) {
             String right = umsRightProvider.getRight(action);
             String unauthorizedMessage = authorizationMessageUtilsService.formatTemplate(right, resourceCrns);
             LOGGER.error(unauthorizedMessage);

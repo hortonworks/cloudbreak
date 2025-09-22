@@ -90,7 +90,7 @@ public class DefaultResourceAuthorizationProviderTest {
     public void testDefaultNotAllowed() {
         when(defaultResourceChecker.isDefault(eq(RESOURCE_CRN_1))).thenReturn(true);
         doThrow(new ForbiddenException("Bad")).when(commonPermissionCheckingUtils)
-                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(defaultResourceChecker));
+                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(Optional.of(defaultResourceChecker)));
 
         ForbiddenException accessDeniedException =
                 assertThrows(ForbiddenException.class, () -> underTest.authorizeDefaultOrElseCompute(RESOURCE_CRN_1, ACTION, externalSupplier));
@@ -103,7 +103,7 @@ public class DefaultResourceAuthorizationProviderTest {
     public void testDefaultAllowed() {
         when(defaultResourceChecker.isDefault(eq(RESOURCE_CRN_1))).thenReturn(true);
         doNothing().when(commonPermissionCheckingUtils)
-                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(defaultResourceChecker));
+                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(Optional.of(defaultResourceChecker)));
 
         Optional<AuthorizationRule> authorization = underTest.authorizeDefaultOrElseCompute(RESOURCE_CRN_1, ACTION, externalSupplier);
 
@@ -138,7 +138,7 @@ public class DefaultResourceAuthorizationProviderTest {
         Optional<AuthorizationRule> authorization = underTest.authorizeDefaultOrElseCompute(resourceCrns, ACTION, externalFunction);
 
         assertEquals(expected, authorization);
-        verify(commonPermissionCheckingUtils).throwAccessDeniedIfActionNotAllowed(ACTION, defaultResourceCrns, defaultResourceChecker);
+        verify(commonPermissionCheckingUtils).throwAccessDeniedIfActionNotAllowed(ACTION, defaultResourceCrns, Optional.of(defaultResourceChecker));
         verify(externalFunction).apply(notDefaultResourceCrns);
     }
 
@@ -151,7 +151,7 @@ public class DefaultResourceAuthorizationProviderTest {
                         .notDefaultResourceCrns(List.of(RESOURCE_CRN_2))
                         .build());
         doThrow(new ForbiddenException("Bad")).when(commonPermissionCheckingUtils)
-                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(defaultResourceChecker));
+                .throwAccessDeniedIfActionNotAllowed(any(), anyCollection(), eq(Optional.of(defaultResourceChecker)));
 
         ForbiddenException accessDeniedException =
                 assertThrows(ForbiddenException.class, () -> underTest.authorizeDefaultOrElseCompute(resourceCrns, ACTION, externalFunction));
