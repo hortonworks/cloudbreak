@@ -782,6 +782,18 @@
                 {% for hostloc in salt['pillar.get']('gateway:location')['STREAMS_MESSAGING_MANAGER_UI'] -%}
                 <url>{{ protocol }}://{{ hostloc }}:{{ ports['SMM-UI'] }}</url>
                 {%- endfor %}
+                <param>
+                    <name>httpclient.connectionTimeout</name>
+                    <value>1m</value>
+                </param>
+                <param>
+                    <name>httpclient.socketTimeout</name>
+                    <value>1m</value>
+                </param>
+                <param>
+                    <name>replayBufferSize</name>
+                    <value>512</value>
+                </param>
             </service>
         {%- endif %}
      {%- endif %}
