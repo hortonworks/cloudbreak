@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
+import static com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider.API_V_51;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -32,6 +34,14 @@ class ClassicClusterClouderaManagerApiClientProvider {
             return clouderaManagerApiClientProvider.getClouderaManagerRootClient(getHttpClientConfig(cluster), null, null, null);
         } catch (ClouderaManagerClientInitException e) {
             throw new RemoteEnvironmentException("Failed to initialize Cloudera Manager root client for " + cluster.getManagerUri(), e);
+        }
+    }
+
+    public ApiClient getClouderaManagerV51Client(OnPremisesApiProto.Cluster cluster)  {
+        try {
+            return clouderaManagerApiClientProvider.getClouderaManagerClient(getHttpClientConfig(cluster), null, null, null, API_V_51);
+        } catch (ClouderaManagerClientInitException e) {
+            throw new RemoteEnvironmentException("Failed to initialize Cloudera Manager v51 client for " + cluster.getManagerUri(), e);
         }
     }
 

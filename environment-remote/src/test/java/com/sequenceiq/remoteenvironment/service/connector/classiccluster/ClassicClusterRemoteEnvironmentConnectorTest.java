@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 
@@ -26,6 +27,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @Mock
     private ClassicClusterRemoteDataContextProvider remoteDataContextProvider;
+
+    @Mock
+    private ClassicClusterDatalakeServicesProvider datalakeServicesProvider;
 
     @InjectMocks
     private ClassicClusterRemoteEnvironmentConnector underTest;
@@ -46,6 +50,16 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext("", CLUSTER_CRN);
 
         assertThat(result).isEqualTo(rdc);
+    }
+
+    @Test
+    void getDatalakeServices() throws Exception {
+        DescribeDatalakeServicesResponse datalakeServices = mock();
+        when(datalakeServicesProvider.getDatalakeServices(cluster)).thenReturn(datalakeServices);
+
+        DescribeDatalakeServicesResponse result = underTest.getDatalakeServices("", CLUSTER_CRN);
+
+        assertThat(result).isEqualTo(datalakeServices);
     }
 
 }

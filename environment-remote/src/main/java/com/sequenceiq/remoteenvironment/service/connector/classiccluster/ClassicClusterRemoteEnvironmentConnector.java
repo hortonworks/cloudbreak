@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
+import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
@@ -19,6 +20,9 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     @Inject
     private ClassicClusterRemoteDataContextProvider remoteDataContextProvider;
 
+    @Inject
+    private ClassicClusterDatalakeServicesProvider datalakeServicesProvider;
+
     @Override
     public RemoteEnvironmentConnectorType type() {
         return RemoteEnvironmentConnectorType.CLASSIC_CLUSTER;
@@ -28,6 +32,12 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String publicCloudAccountId, String environmentCrn) {
         OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
         return remoteDataContextProvider.getRemoteDataContext(cluster);
+    }
+
+    @Override
+    public DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+        return datalakeServicesProvider.getDatalakeServices(cluster);
     }
 
     private OnPremisesApiProto.Cluster getCluster(String crn) {
