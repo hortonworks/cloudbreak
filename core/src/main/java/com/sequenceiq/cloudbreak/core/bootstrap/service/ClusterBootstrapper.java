@@ -358,6 +358,7 @@ public class ClusterBootstrapper {
             Optional<Integer> cpuCountForInstanceType =
                     pricingCache.get().getCpuCountForInstanceType(stack.getRegion(), masterInstanceType, extendedCloudCredential);
             if (cpuCountForInstanceType.isPresent()) {
+                LOGGER.debug("Calculating master worker threads, cpu count for instanceType available: '{}'", cpuCountForInstanceType.get());
                 result = cpuCountForInstanceType.get() - BootstrapParams.WORKER_THREAD_REDUCTION_COUNT;
             }
         }
