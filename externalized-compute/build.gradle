@@ -16,15 +16,15 @@ plugins {
     id "checkstyle"
     id "jacoco"
     id "maven-publish"
+    id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
     id "org.springframework.boot" version "${springBootVersion}"
     id 'com.google.protobuf' version "${protobufPluginVersion}"
 }
 
-apply plugin: 'io.spring.dependency-management'
-
 dependencyManagement {
   dependencies {
-    dependency group: 'io.netty', name: 'netty-codec', version: nettyVersion
+    dependency group: 'org.springframework',  name: 'spring-webmvc',  version: springFrameworkVersion
+    dependency group: 'io.netty',             name: 'netty-codec',    version: nettyVersion
   }
 }
 

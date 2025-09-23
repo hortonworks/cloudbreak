@@ -16,6 +16,7 @@ plugins {
   id "checkstyle"
   id "jacoco"
   id "maven-publish"
+  id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
   id "org.springframework.boot" version "${springBootVersion}"
   id "org.sonarqube" version "${sonarVersion}"
 }
@@ -47,6 +48,12 @@ configurations {
       force "org.yaml:snakeyaml:$snakeYamlVersion"
       force "io.netty:netty-codec:$nettyVersion"
     }
+  }
+}
+
+dependencyManagement {
+  dependencies {
+    dependency group: 'org.springframework', name: 'spring-webmvc', version: springFrameworkVersion
   }
 }
 

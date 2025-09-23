@@ -15,6 +15,7 @@ plugins {
   id "checkstyle"
   id "jacoco"
   id "maven-publish"
+  id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
   id "org.springframework.boot" version "${springBootVersion}"
   id "org.sonarqube" version "${sonarVersion}"
 }
@@ -37,6 +38,12 @@ sonar {
     property("org.gradle.internal.http.connectionTimeout", "600000")
     property("sonar.coverage.exclusions", "**/proto/**,**/generated/**")
     property("sonar.exclusions", "**/proto/**,**/generated/**")
+  }
+}
+
+dependencyManagement {
+  dependencies {
+    dependency group: 'org.springframework', name: 'spring-webmvc', version: springFrameworkVersion
   }
 }
 
