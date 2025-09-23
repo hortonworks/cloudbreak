@@ -38,6 +38,10 @@ public class DefaultInternalAccountTagService {
 
     private AccountTagResponses internalAccountTagResponses;
 
+    private Pattern keyPattern;
+
+    private Pattern valuePattern;
+
     private final CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     public DefaultInternalAccountTagService(CloudbreakResourceReaderService cloudbreakResourceReaderService) {
@@ -57,6 +61,8 @@ public class DefaultInternalAccountTagService {
             responses.add(accountTagResponse);
         }
         internalAccountTagResponses = new AccountTagResponses(responses);
+        keyPattern = Pattern.compile(keyAccountTagPattern);
+        valuePattern = Pattern.compile(valueAccountValueTagPattern);
     }
 
     private AccountTagResponses getDefaults() {
@@ -94,13 +100,11 @@ public class DefaultInternalAccountTagService {
             }
         }
         for (AccountTag accountTag : accountTags) {
-            Pattern keyPattern = Pattern.compile(keyAccountTagPattern);
             Matcher keyMatcher = keyPattern.matcher(accountTag.getTagKey());
-            Pattern valuePattern = Pattern.compile(valueAccountValueTagPattern);
             Matcher valueMatcher = valuePattern.matcher(accountTag.getTagValue());
             if (!keyMatcher.matches()) {
                 throw new BadRequestException(
-                        String.format("The key '%s' must start with a lowecase letter and can not start with microsoft or azure or windows "
+                        String.format("The key '%s' must start with a letter and can not start with microsoft or azure or windows "
                                 + "or space and can contains only '-', '_', upper/lowercase alphanumeric characters and variables in the format of "
                                 + "'{{{variable}}}'.", accountTag.getTagValue()));
             }

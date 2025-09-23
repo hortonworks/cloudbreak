@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -103,6 +104,8 @@ public class DefaultInternalAccountTagServiceTest {
         ReflectionTestUtils.setField(underTest, "applyInternalTags", false);
         ReflectionTestUtils.setField(underTest, "keyAccountTagPattern", keyAccountTagPattern);
         ReflectionTestUtils.setField(underTest, "valueAccountValueTagPattern", valueAccountValueTagPattern);
+        ReflectionTestUtils.setField(underTest, "keyPattern", Pattern.compile(keyAccountTagPattern));
+        ReflectionTestUtils.setField(underTest, "valuePattern", Pattern.compile(valueAccountValueTagPattern));
     }
 
     @ParameterizedTest(name = "When key={0} and value={1} should be valid: {2}")
