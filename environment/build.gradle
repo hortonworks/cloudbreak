@@ -50,6 +50,12 @@ sonar {
     }
 }
 
+dependencyManagement {
+  dependencies {
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http',  version: reactorNettyHttp
+  }
+}
+
 dependencies {
     implementation     project(':audit-connector')
     implementation     project(":authorization-common")
