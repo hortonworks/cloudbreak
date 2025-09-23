@@ -32,8 +32,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
-import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
 import com.sequenceiq.it.cloudbreak.search.SearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrlFactory;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 
@@ -95,7 +95,7 @@ public class ReportListener extends TestListenerAdapter {
         if (listOfSearchables.isEmpty()) {
             return;
         }
-        SearchUrl searchUrl = new KibanaSearchUrl();
+        SearchUrl searchUrl = SearchUrlFactory.getSearchUrl();
         Date startTime = tr.getTestContext().getStartDate();
         Date endTime = tr.getTestContext().getEndDate();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");

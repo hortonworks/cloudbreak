@@ -420,7 +420,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 resourceName,
                 resourceCrn,
                 getCloudStorageUrl(resourceName, resourceCrn),
-                getKibanaUrl(listOfSearchables),
+                getLogSearchUrl(listOfSearchables),
                 auditEvents,
                 List.of(),
                 getResponse(),

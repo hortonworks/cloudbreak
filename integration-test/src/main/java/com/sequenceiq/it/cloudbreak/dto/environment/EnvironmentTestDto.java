@@ -585,7 +585,7 @@ public class EnvironmentTestDto
                 getResponse().getName(),
                 getResponse().getCrn(),
                 null,
-                getKibanaUrl(listOfSearchables),
+                getLogSearchUrl(listOfSearchables),
                 null,
                 structuredEvents,
                 getResponse(),

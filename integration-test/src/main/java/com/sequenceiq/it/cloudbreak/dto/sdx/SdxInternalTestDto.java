@@ -641,7 +641,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 resourceName,
                 resourceCrn,
                 getCloudStorageUrl(resourceName, resourceCrn),
-                getKibanaUrl(listOfSearchables),
+                getLogSearchUrl(listOfSearchables),
                 auditEvents,
                 structuredEvents,
                 getResponse(),

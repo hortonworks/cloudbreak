@@ -42,8 +42,8 @@ import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
-import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
 import com.sequenceiq.it.cloudbreak.search.SearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrlFactory;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> implements CloudbreakTestDto {
@@ -475,14 +475,14 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
                 String.format("The entity(%s) must be implement the getCloudStorageUrl(String resourceName, String resourceCrn) method.", getClass()));
     }
 
-    public String getKibanaUrl(List<Searchable> searchables) {
+    public String getLogSearchUrl(List<Searchable> searchables) {
         Date testStartDate = getTestContext().getTestStartTime();
         Date testStopDate = getTestContext().getTestEndTime();
         CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
         if (CloudPlatform.MOCK.equalsIgnoreCase(cloudProviderProxy.getCloudPlatform().name())) {
             return null;
         } else {
-            SearchUrl searchUrl = new KibanaSearchUrl();
+            SearchUrl searchUrl = SearchUrlFactory.getSearchUrl();
             return searchUrl.getSearchUrl(searchables, testStartDate, testStopDate);
         }
     }

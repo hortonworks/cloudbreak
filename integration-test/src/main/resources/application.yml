@@ -440,6 +440,12 @@ integrationtest:
     cluster:
     app:
 
+  splunk:
+    url: https://search.secops-corp.cloudera.com/app/cldr_cdp_app/search
+    index: cldr_mow_nonprod
+    cluster:
+    app:
+
   authdistributor:
     host: thunderhead-mock
 
