@@ -756,7 +756,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
-        BigDecimal deployCommandId = clouderaManagerClientConfigDeployService.deployClientConfigWithoutPoll(
+        BigDecimal deployCommandId = clouderaManagerClientConfigDeployService.deployClientConfig(
                 ClouderaManagerClientConfigDeployRequest.builder()
                         .pollerMessage("Deploy client configurations from activateParcels")
                         .clustersResourceApi(clustersResourceApi)

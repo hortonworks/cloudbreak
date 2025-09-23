@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,7 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.support.RetrySynchronizationManager;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -64,20 +69,29 @@ class ClouderaManagerClientConfigDeployServiceTest {
                 .willReturn(new ApiCommand().name(COMMAND_NAME).id(BigDecimal.ONE));
         given(clustersResourceApi.listActiveCommands(any(), any(), any()))
                 .willReturn(new ApiCommandList());
+        RetryContext retryContext = mock(RetryContext.class);
+        when(retryContext.getRetryCount()).thenReturn(1);
         // WHEN
-        BigDecimal result = underTest.deployClientConfigWithoutPoll(
-                ClouderaManagerClientConfigDeployRequest.builder()
-                        .stack(stack)
-                        .client(apiClient)
-                        .clustersResourceApi(clustersResourceApi)
-                        .build()
-        );
+        try (MockedStatic<RetrySynchronizationManager> retrySynchronizationManagerMockedStatic = mockStatic(RetrySynchronizationManager.class)) {
+            when(RetrySynchronizationManager.getContext()).thenReturn(retryContext);
+            BigDecimal result = underTest.deployClientConfig(
+                    ClouderaManagerClientConfigDeployRequest.builder()
+                            .stack(stack)
+                            .client(apiClient)
+                            .clustersResourceApi(clustersResourceApi)
+                            .build()
+            );
+
+            assertEquals(BigDecimal.ONE, result);
+        }
         // THEN
-        assertEquals(BigDecimal.ONE, result);
+
     }
 
     @Test
     public void testGetDeployClientConfigCommandIdWithSyncApiPolling() throws CloudbreakException, ApiException {
+        RetryContext retryContext = mock(RetryContext.class);
+        when(retryContext.getRetryCount()).thenReturn(1);
         // GIVEN
         ApiClient apiClient = mock(ApiClient.class);
         given(stack.getResourceCrn()).willReturn(STACK_CRN);
@@ -87,15 +101,20 @@ class ClouderaManagerClientConfigDeployServiceTest {
         given(clustersResourceApi.listActiveCommands(any(), any(), any()))
                 .willReturn(new ApiCommandList());
         // WHEN
-        BigDecimal result = underTest.deployClientConfigWithoutPoll(
-                ClouderaManagerClientConfigDeployRequest.builder()
-                        .stack(stack)
-                        .client(apiClient)
-                        .clustersResourceApi(clustersResourceApi)
-                        .build()
-        );
+        try (MockedStatic<RetrySynchronizationManager> retrySynchronizationManagerMockedStatic = mockStatic(RetrySynchronizationManager.class)) {
+            when(RetrySynchronizationManager.getContext()).thenReturn(retryContext);
+            BigDecimal result = underTest.deployClientConfig(
+                    ClouderaManagerClientConfigDeployRequest.builder()
+                            .stack(stack)
+                            .client(apiClient)
+                            .clustersResourceApi(clustersResourceApi)
+                            .build()
+            );
+
+            assertEquals(BigDecimal.ONE, result);
+        }
         // THEN
-        assertEquals(BigDecimal.ONE, result);
+
         verify(clouderaManagerSyncApiCommandIdProvider, times(1)).executeSyncApiCommandAndGetCommandId(anyString(), any(), any(), any(), any());
     }
 
