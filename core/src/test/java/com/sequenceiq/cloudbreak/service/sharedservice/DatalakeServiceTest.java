@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
@@ -120,5 +122,43 @@ public class DatalakeServiceTest {
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");
         Assertions.assertFalse(res.isDatalakeCluster());
+    }
+
+    @Test
+    void testDecorateWithDataLakeResponseAnyPlatform() {
+        StackV4Response stackV4Response = new StackV4Response();
+        String envCrn = "envCrn";
+        stackV4Response.setEnvironmentCrn(envCrn);
+        SdxBasicView sdxBasicView = new SdxBasicView("dlaname", "dlcrn", "7.3.1", false,
+                0L, null, null, TargetPlatform.PAAS);
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(envCrn)).thenReturn(Optional.of(sdxBasicView));
+
+        underTest.decorateWithDataLakeResponseAnyPlatform(StackType.WORKLOAD, stackV4Response);
+
+        assertEquals(sdxBasicView.name(), stackV4Response.getDataLakeResponse().name());
+        assertEquals(sdxBasicView.crn(), stackV4Response.getDataLakeResponse().crn());
+        assertEquals(sdxBasicView.platform().name(), stackV4Response.getDataLakeResponse().platform());
+    }
+
+    @Test
+    void testDecorateWithDataLakeResponseAnyPlatformNoDatalake() {
+        StackV4Response stackV4Response = new StackV4Response();
+        String envCrn = "envCrn";
+        stackV4Response.setEnvironmentCrn(envCrn);
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(envCrn)).thenReturn(Optional.empty());
+
+        underTest.decorateWithDataLakeResponseAnyPlatform(StackType.WORKLOAD, stackV4Response);
+
+        assertNull(stackV4Response.getDataLakeResponse());
+    }
+
+    @Test
+    void testDecorateWithDataLakeResponseAnyPlatformIsDatalake() {
+        StackV4Response stackV4Response = new StackV4Response();
+        underTest.decorateWithDataLakeResponseAnyPlatform(StackType.DATALAKE, stackV4Response);
+
+        assertNull(stackV4Response.getDataLakeResponse());
+
+        verifyNoInteractions(platformAwareSdxConnector);
     }
 }

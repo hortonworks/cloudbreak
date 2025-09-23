@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -150,6 +151,9 @@ class StackOperationsTest {
     @Mock
     private BlueprintService blueprintService;
 
+    @Mock
+    private DatalakeService datalakeService;
+
     @Captor
     private ArgumentCaptor<List<String>> stringListCaptor;
 
@@ -189,6 +193,7 @@ class StackOperationsTest {
 
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
+        verify(datalakeService).decorateWithDataLakeResponseAnyPlatform(STACK_TYPE, result);
     }
 
     @Test
@@ -203,6 +208,7 @@ class StackOperationsTest {
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(
                 nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
+        verify(datalakeService).decorateWithDataLakeResponseAnyPlatform(STACK_TYPE, result);
     }
 
     @Test

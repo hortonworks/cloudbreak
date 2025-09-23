@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DataLakeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
@@ -113,5 +114,17 @@ public class DatalakeService {
         sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
         sharedServiceConfigsView.setAttachedCluster(false);
         sharedServiceConfigsView.setRangerAdminPort(DEFAULT_RANGER_PORT);
+    }
+
+    public void decorateWithDataLakeResponseAnyPlatform(StackType stackType, StackV4Response stackResponse) {
+        if (!StackType.WORKLOAD.equals(stackType)) {
+            LOGGER.debug("Skipping datalake decoration for non-workload stack.");
+            return;
+        }
+        platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackResponse.getEnvironmentCrn())
+                .ifPresent(datalake -> {
+                    DataLakeV4Response datalakeV4Response = new DataLakeV4Response(datalake.name(), datalake.crn(), datalake.platform().name());
+                    stackResponse.setDataLakeResponse(datalakeV4Response);
+                });
     }
 }

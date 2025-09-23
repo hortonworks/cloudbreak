@@ -74,6 +74,7 @@ public class EnvironmentServiceDecorator {
             stackResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
             stackResponse.setCredentialName(credential.getName());
             stackResponse.setCredentialCrn(credential.getCrn());
+            stackResponse.setEnvironmentType(byCrn.getEnvironmentType());
         } catch (Exception e) {
             LOGGER.warn("Environment deleted which had crn: {}.", stackResponse.getEnvironmentCrn());
         }

@@ -206,6 +206,7 @@ public class ModelDescriptions {
         public static final String ATTACHED_RESOURCES = "List of resources attached to the stack";
         public static final String SECURITY = "Security related objects";
         public static final String PROVIDER_SYNC_STATES = "Contains information about provider issues. No issues found if empty or 'VALID'.";
+        public static final String DATA_LAKE = "Details about the data lake associated with the stack";
     }
 
     public static class ClusterModelDescription {

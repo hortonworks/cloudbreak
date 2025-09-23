@@ -84,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -180,6 +181,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     @Inject
     private BlueprintService blueprintService;
 
+    @Inject
+    private DatalakeService datalakeService;
+
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
@@ -246,6 +250,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, accountId, entries, stackType, withResources);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
+        datalakeService.decorateWithDataLakeResponseAnyPlatform(stackType, stackResponse);
         LOGGER.info("Query Stack successfully decorated.");
         return stackResponse;
     }

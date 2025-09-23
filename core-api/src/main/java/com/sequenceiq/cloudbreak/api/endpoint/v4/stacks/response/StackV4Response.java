@@ -55,6 +55,8 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private String environmentName;
 
+    private String environmentType;
+
     private String credentialName;
 
     private String credentialCrn;
@@ -124,8 +126,12 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Valid
     private PlacementSettingsV4Response placement;
 
+    @Deprecated
     @Schema(description = ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Response sharedService;
+
+    @Schema(description = StackModelDescription.DATA_LAKE)
+    private DataLakeV4Response dataLakeV4Response;
 
     @Schema(description = StackModelDescription.CLOUD_PLATFORM)
     private CloudPlatform cloudPlatform;
@@ -512,6 +518,22 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.providerSyncStates = providerSyncStates;
     }
 
+    public void setEnvironmentType(String environmentType) {
+        this.environmentType = environmentType;
+    }
+
+    public String getEnvironmentType() {
+        return environmentType;
+    }
+
+    public DataLakeV4Response getDataLakeResponse() {
+        return dataLakeV4Response;
+    }
+
+    public void setDataLakeResponse(DataLakeV4Response dataLakeV4Response) {
+        this.dataLakeV4Response = dataLakeV4Response;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -522,6 +544,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", region='" + region + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", environmentName='" + environmentName + '\'' +
+                ", environmentType='" + environmentType + '\'' +
                 ", credentialName='" + credentialName + '\'' +
                 ", credentialCrn='" + credentialCrn + '\'' +
                 ", status=" + status +
@@ -556,6 +579,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", architecture=" + architecture +
                 ", security=" + security +
                 ", providerSyncStates=" + providerSyncStates +
+                ", dataLakeV4Response=" + dataLakeV4Response +
                 '}';
     }
 }
