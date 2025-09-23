@@ -11,19 +11,23 @@ import java.util.Set;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -41,6 +45,9 @@ public class MultiAzValidator {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     @PostConstruct
     public void initSupportedVariants() {
@@ -81,27 +88,78 @@ public class MultiAzValidator {
         return false;
     }
 
-    public boolean supportedForInstanceMetadataGeneration(InstanceGroupNetwork instanceGroupNetwork) {
-        if (instanceGroupNetwork != null) {
-            return supportedInstanceMetadataPlatforms.contains(instanceGroupNetwork.cloudPlatform());
-        }
-        return false;
+    public ValidationResult validateNetworkScaleRequest(StackDto stack, NetworkScaleV4Request networkScaleV4Request,
+            String groupName) {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        validatePreferredAvailabilityZones(validationResultBuilder, stack, networkScaleV4Request, groupName);
+        validatePreferredSubnetIds(validationResultBuilder, stack, networkScaleV4Request, groupName);
+        return validationResultBuilder.build();
     }
 
-    public Set<String> collectSubnetIds(Iterable<InstanceGroupView> instanceGroups) {
+    private void validatePreferredAvailabilityZones(ValidationResult.ValidationResultBuilder validationBuilder, StackDto stack,
+            NetworkScaleV4Request stackNetworkScaleV4Request, String groupName) {
+        if (stackNetworkScaleV4Request != null && CollectionUtils.isNotEmpty(stackNetworkScaleV4Request.getPreferredAvailabilityZones())) {
+            getScaledInstanceGroupView(stack, groupName)
+                    .ifPresent(igv -> {
+                        Set<String> instanceGroupZones = instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(igv.getId());
+                        if (!instanceGroupZones.containsAll(stackNetworkScaleV4Request.getPreferredAvailabilityZones())) {
+                            String message = String.format("The list of preferred availability zones is invalid! Preferred availability zones must be " +
+                                    "the subset of '%s'", String.join(", ", instanceGroupZones));
+                            LOGGER.info(message);
+                            validationBuilder.error(message);
+                        }
+                    });
+        }
+    }
+
+    private void validatePreferredSubnetIds(ValidationResult.ValidationResultBuilder validationBuilder, StackDto stack,
+            NetworkScaleV4Request stackNetworkScaleV4Request, String groupName) {
+        if (stackNetworkScaleV4Request != null && CollectionUtils.isNotEmpty(stackNetworkScaleV4Request.getPreferredSubnetIds())) {
+            Set<InstanceGroupView> instanceGroupViews = new HashSet<>(stack.getInstanceGroupViews());
+            Set<String> subnetIds = collectSubnetIds(instanceGroupViews);
+            if (subnetIds.size() < 2) {
+                String message = "It does not make sense to prefer subnets on a cluster that has been provisioned in a single subnet";
+                LOGGER.info(message);
+                validationBuilder.error(message);
+            }
+            getScaledInstanceGroupView(stack, groupName)
+                    .ifPresent(igv -> {
+                        Set<String> subnetIdsFromInstanceGroupNetwork = getSubnetIdsFromInstanceGroupNetwork(igv);
+                        if (!subnetIdsFromInstanceGroupNetwork.containsAll(stackNetworkScaleV4Request.getPreferredSubnetIds())) {
+                            String message = String.format("The list of preferred subnets is invalid! Preferred subnets must be the subset of '%s'",
+                                    String.join(", ", subnetIds));
+                            LOGGER.info(message);
+                            validationBuilder.error(message);
+                        }
+                    });
+        }
+    }
+
+    private Optional<InstanceGroupView> getScaledInstanceGroupView(StackDto stack, String groupName) {
+        return stack.getInstanceGroupViews().stream()
+                .filter(igv -> groupName.equalsIgnoreCase(igv.getGroupName()))
+                .findFirst();
+    }
+
+    private Set<String> collectSubnetIds(Iterable<InstanceGroupView> instanceGroups) {
         Set<String> allSubnetIds = new HashSet<>();
         for (InstanceGroupView instanceGroup : instanceGroups) {
-            InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
-            if (instanceGroupNetwork != null) {
-                Json attributes = instanceGroupNetwork.getAttributes();
-                if (attributes != null) {
-                    List<String> subnetIds = (List<String>) attributes
-                            .getMap()
-                            .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
-                    allSubnetIds.addAll(subnetIds);
-                }
-            }
+            allSubnetIds.addAll(getSubnetIdsFromInstanceGroupNetwork(instanceGroup));
         }
         return allSubnetIds;
+    }
+
+    private Set<String> getSubnetIdsFromInstanceGroupNetwork(InstanceGroupView instanceGroup) {
+        Set<String> result = new HashSet<>();
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork != null) {
+            Json attributes = instanceGroupNetwork.getAttributes();
+            if (attributes != null) {
+                result.addAll((List<String>) attributes
+                        .getMap()
+                        .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>()));
+            }
+        }
+        return result;
     }
 }

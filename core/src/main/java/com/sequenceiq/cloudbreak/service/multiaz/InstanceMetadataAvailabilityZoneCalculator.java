@@ -139,7 +139,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         if (CollectionUtils.isNotEmpty(availabilityZonesForGroup)) {
             LOGGER.info("Availability zones to distribute the instances over: '{}' for group: '{}'", availabilityZonesForGroup, groupName);
             Set<InstanceMetaData> instancesInGroup = instanceGroup.getNotDeletedInstanceMetaDataSet();
-            return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instancesInGroup, groupName, instanceGroup, stackLevelSubnetId, network);
+            return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instancesInGroup, instanceGroup, stackLevelSubnetId, network);
         } else {
             String msg = String.format("Multi-AZ is enabled for the stack, but no availability zone is available for the group: '%s'", groupName);
             LOGGER.warn(msg);
@@ -148,12 +148,18 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     protected Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
-            String groupName, InstanceGroup instanceGroup, String stackLevelSubnetId, Network network) {
+            InstanceGroup instanceGroup, String stackLevelSubnetId, Network network) {
+        return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instanceMetaDataSet, instanceGroup, stackLevelSubnetId, network, Set.of());
+    }
+
+    private Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
+                InstanceGroup instanceGroup, String stackLevelSubnetId, Network network, Set<String> preferredSubnetIds) {
         Set<InstanceMetaData> updatedInstances = new HashSet<>();
+        String groupName = instanceGroup.getGroupName();
         Map<String, Long> zoneToNodeCountMap = getAvailabilityZoneNodeCountMap(availabilityZonesForGroup, instanceMetaDataSet);
         LOGGER.debug("Initialized zoneToNodeCountMap {} for group '{}'", zoneToNodeCountMap, groupName);
         Map<String, Map<String, Long>> subnetUsageGroupedByAzMap = new HashMap<>();
-        Optional<String> optCloudPlatform = Optional.ofNullable(instanceGroup)
+        Optional<String> optCloudPlatform = Optional.of(instanceGroup)
                 .map(InstanceGroup::getInstanceGroupNetwork)
                 .map(InstanceGroupNetwork::getCloudPlatform);
         if (optCloudPlatform.isPresent() && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(optCloudPlatform.get())) {
@@ -166,29 +172,37 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 instance.setAvailabilityZone(availabilityZone);
 
                 if (!subnetUsageGroupedByAzMap.isEmpty()) {
-                    String subnetId = getLeastUsedSubnetIdInAvailabilityZone(subnetUsageGroupedByAzMap, instance.getAvailabilityZone());
-                    instance.setSubnetId(subnetId);
-                    Long existingInstanceCountInSubnet = subnetUsageGroupedByAzMap.get(instance.getAvailabilityZone()).getOrDefault(subnetId, 0L);
-                    subnetUsageGroupedByAzMap.get(instance.getAvailabilityZone()).put(subnetId, existingInstanceCountInSubnet + 1);
-                    LOGGER.debug("Subnet usage has been incremented to {} for subnet '{}' and AZ '{}'", existingInstanceCountInSubnet + 1,
-                            subnetId, instance.getAvailabilityZone());
+                    setSubnetIdAndIncreaseUsageCount(preferredSubnetIds, instance, subnetUsageGroupedByAzMap);
                 } else if (StringUtils.isEmpty(instance.getSubnetId())) {
                     instance.setSubnetId(stackLevelSubnetId);
                 }
-
-                String previousRackId = instance.getRackId();
-                instance.setRackId("/" +
-                        (isNullOrEmpty(availabilityZone) ?
-                                (isNullOrEmpty(instance.getSubnetId()) ? DEFAULT_RACK : instance.getSubnetId())
-                                : availabilityZone));
+                setInstanceRackIdAndLogUpdateDetails(instance, availabilityZone, groupName);
                 updatedInstances.add(instance);
-                String privateIdWithGroupName = String.format("group: %s, private id: %s", groupName, instance.getPrivateId());
-                String instanceName = StringUtils.isNotEmpty(instance.getInstanceId()) ? instance.getInstanceId() : privateIdWithGroupName;
-                LOGGER.info("Set availability zone('{}') for instance '{}'", instance.getAvailabilityZone(), instanceName);
-                LOGGER.info("Rack Id updated from {} to {}", previousRackId, instance.getRackId());
             }
         }
         return updatedInstances;
+    }
+
+    private void setSubnetIdAndIncreaseUsageCount(Set<String> preferredSubnetIds, InstanceMetaData instance,
+            Map<String, Map<String, Long>> subnetUsageGroupedByAzMap) {
+        String subnetId = getLeastUsedSubnetIdInAvailabilityZone(subnetUsageGroupedByAzMap, instance.getAvailabilityZone(), preferredSubnetIds);
+        instance.setSubnetId(subnetId);
+        Long existingInstanceCountInSubnet = subnetUsageGroupedByAzMap.get(instance.getAvailabilityZone()).getOrDefault(subnetId, 0L);
+        subnetUsageGroupedByAzMap.get(instance.getAvailabilityZone()).put(subnetId, existingInstanceCountInSubnet + 1);
+        LOGGER.debug("Subnet usage has been incremented to {} for subnet '{}' and AZ '{}'", existingInstanceCountInSubnet + 1,
+                subnetId, instance.getAvailabilityZone());
+    }
+
+    private void setInstanceRackIdAndLogUpdateDetails(InstanceMetaData instance, String availabilityZone, String groupName) {
+        String previousRackId = instance.getRackId();
+        instance.setRackId("/" +
+                (isNullOrEmpty(availabilityZone) ?
+                        (isNullOrEmpty(instance.getSubnetId()) ? DEFAULT_RACK : instance.getSubnetId())
+                        : availabilityZone));
+        String privateIdWithGroupName = String.format("group: %s, private id: %s", groupName, instance.getPrivateId());
+        String instanceName = StringUtils.isNotEmpty(instance.getInstanceId()) ? instance.getInstanceId() : privateIdWithGroupName;
+        LOGGER.info("Set availability zone('{}') and subnet('{}') for instance '{}'", availabilityZone, instance.getSubnetId(), instanceName);
+        LOGGER.info("Rack Id updated from {} to {} for instance '{}'", previousRackId, instance.getRackId(), instanceName);
     }
 
     protected String getStackSubnetIdIfExists(StackDtoDelegate stack) {
@@ -219,9 +233,15 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         }
     }
 
-    private String getLeastUsedSubnetIdInAvailabilityZone(Map<String, Map<String, Long>> subnetUsageGroupedByAzMap, String availabilityZone) {
+    private String getLeastUsedSubnetIdInAvailabilityZone(Map<String, Map<String, Long>> subnetUsageGroupedByAzMap, String availabilityZone,
+            Set<String> preferredSubnetIds) {
         Map<String, Long> subnetIdUsageInAzMap = subnetUsageGroupedByAzMap.get(availabilityZone);
-
+        if (CollectionUtils.isNotEmpty(preferredSubnetIds)) {
+            subnetIdUsageInAzMap = subnetIdUsageInAzMap.entrySet()
+                    .stream()
+                    .filter(subnetIdUsage -> preferredSubnetIds.contains(subnetIdUsage.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
         return Collections.min(subnetIdUsageInAzMap.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
@@ -270,18 +290,9 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         Long instanceGroupId = instanceGroupDto.getInstanceGroup().getId();
         Set<InstanceMetaData> notDeletedInstancesForGroup = getInstancesByInstanceGroupId(notDeletedInstances, instanceGroupId);
         if (repair) {
-            updatedInstances.addAll(populateOnInstancesOfGroupForRepair(
-                    stack,
-                    hostGroupName,
-                    notDeletedInstancesForGroup,
-                    networkScaleDetails));
+            updatedInstances.addAll(populateOnInstancesOfGroupForRepair(stack, hostGroupName, notDeletedInstancesForGroup, networkScaleDetails));
         } else {
-            updatedInstances.addAll(populateOnInstancesOfGroupForScaling(
-                    stack,
-                    hostGroupName,
-                    instanceGroupId,
-                    notDeletedInstancesForGroup,
-                    networkScaleDetails));
+            updatedInstances.addAll(populateOnInstancesOfGroupForScaling(stack, hostGroupName, notDeletedInstancesForGroup, networkScaleDetails));
         }
     }
 
@@ -324,7 +335,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                     populateAvailabilityZoneOfInstances(
                             zonesOfInstanceGroup,
                             notDeletedInstancesForGroup,
-                            hostGroupName, instanceGroup,
+                            instanceGroup,
                             stackLevelSubnetId,
                             stack.getNetwork()
                     )
@@ -347,7 +358,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         }
     }
 
-    private Set<InstanceMetaData> populateOnInstancesOfGroupForScaling(StackDtoDelegate stack, String hostGroupName, Long instanceGroupId,
+    private Set<InstanceMetaData> populateOnInstancesOfGroupForScaling(StackDtoDelegate stack, String hostGroupName,
             Set<InstanceMetaData> notDeletedInstancesForGroup, NetworkScaleDetails networkScaleDetails) {
         LOGGER.info("Populating availability zones of instances for upscale in group: '{}'", hostGroupName);
         String stackLevelSubnetId = getStackSubnetIdIfExists(stack);
@@ -360,10 +371,10 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         return populateAvailabilityZoneOfInstances(
                 zonesOfInstanceGroup,
                 notDeletedInstancesForGroup,
-                hostGroupName,
                 instanceGroup,
                 stackLevelSubnetId,
-                stack.getNetwork()
+                stack.getNetwork(),
+                new HashSet<>(networkScaleDetails.getPreferredSubnetIds())
         );
     }
 
@@ -372,10 +383,16 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         Set<String> zones = new HashSet<>();
         String groupName = instanceGroup.getGroupName();
         if (CollectionUtils.isEmpty(networkScaleDetails.getPreferredAvailabilityZones()) && ZONAL_SUBNET_CLOUD_PLATFORMS.contains(stack.getCloudPlatform())) {
-            Set<String> instanceGroupSubnetIds = instanceGroupSubnetCollector.collect(instanceGroup, stack.getNetwork());
-            LOGGER.debug("Adding subnet ids({}) from instance group level network for group: '{}'",
-                    String.join(",", instanceGroupSubnetIds), groupName);
-            zones.addAll(collectAvailabilityZonesOfSubnetsFromEnv(stack.getEnvironmentCrn(), instanceGroupSubnetIds));
+            Set<String> subnetIdsToCollectZonesFrom = new HashSet<>();
+            if (CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds())) {
+                LOGGER.debug("Adding preferred subnet ids({}) for group: '{}'", String.join(",", networkScaleDetails.getPreferredSubnetIds()), groupName);
+                subnetIdsToCollectZonesFrom.addAll(networkScaleDetails.getPreferredSubnetIds());
+            } else {
+                Set<String> instanceGroupSubnetIds = instanceGroupSubnetCollector.collect(instanceGroup, stack.getNetwork());
+                LOGGER.debug("Adding subnet ids({}) from instance group level network for group: '{}'", String.join(",", instanceGroupSubnetIds), groupName);
+                subnetIdsToCollectZonesFrom.addAll(instanceGroupSubnetIds);
+            }
+            zones.addAll(collectAvailabilityZonesOfSubnetsFromEnv(stack.getEnvironmentCrn(), subnetIdsToCollectZonesFrom));
         } else {
             zones.addAll(CollectionUtils.isEmpty(networkScaleDetails.getPreferredAvailabilityZones()) ?
                     stack.getAvailabilityZonesByInstanceGroup(instanceGroup.getId())
