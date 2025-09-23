@@ -72,8 +72,10 @@ public class AzureNatGatewaySyncer implements ProviderResourceSyncer<ResourceTyp
     @Override
     public boolean shouldSync(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         // we should sync if NAT Gateway is deleted, too
-        return !getResourceReferencesByType(resources).isEmpty() ||
-                azureOutboundManager.shouldSyncForOutbound(resources);
+        boolean natGatewayExists = !getResourceReferencesByType(resources).isEmpty();
+        boolean shouldSyncForOutbound = azureOutboundManager.shouldSyncForOutbound(resources);
+        LOGGER.debug("Checking if we should sync NAT Gateways. NAT Gateways found: {}, should sync for outbound: {}", natGatewayExists, shouldSyncForOutbound);
+        return natGatewayExists || shouldSyncForOutbound;
     }
 
     private List<CloudResourceStatus> checkNatGateways(List<CloudResource> resources, AzureClient client) {

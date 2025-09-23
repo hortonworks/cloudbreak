@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.job.provider;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
+
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -85,9 +88,10 @@ public class ProviderSyncService {
         if (hasBasicSku.isPresent()) {
             LOGGER.info("Basic SKU migration is needed for {}, updating status", hasBasicSku.get());
             stackUpdater.addProviderState(stack.getId(), ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
-        } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent() || shouldUpgradeOutbound(cloudResources).isPresent()) {
+        } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent() ||
+                shouldUpgradeOutbound(filterSyncedResources(cloudResources, syncedCloudResources)).isPresent()) {
             LOGGER.info("Outbound upgrade is needed for {}, updating status",
-                    shouldUpgradeOutbound(syncedCloudResources).or(() -> shouldUpgradeOutbound(cloudResources)));
+                    shouldUpgradeOutbound(syncedCloudResources).or(() -> shouldUpgradeOutbound(filterSyncedResources(cloudResources, syncedCloudResources))));
             stackUpdater.addProviderState(stack.getId(), ProviderSyncState.OUTBOUND_UPGRADE_NEEDED);
         } else {
             LOGGER.debug("Provider sync have not detected errors for {}, cleaning up error states",
@@ -100,7 +104,7 @@ public class ProviderSyncService {
         return syncedCloudResources.stream()
                 .map(cloudResource -> {
                     try {
-                        return cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class);
+                        return cloudResource.getParameter(ATTRIBUTES, SkuAttributes.class);
                     } catch (CloudbreakServiceException e) {
                         return new SkuAttributes();
                     }
@@ -113,13 +117,14 @@ public class ProviderSyncService {
         return syncedCloudResources.stream()
                 .map(cloudResource -> {
                     try {
-                        return cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class);
+                        return cloudResource.getParameter(ATTRIBUTES, NetworkAttributes.class);
                     } catch (CloudbreakServiceException e) {
-                        return new NetworkAttributes();
+                        return null;
                     }
-                }).filter(networkAttributes ->
-                        Optional.ofNullable(networkAttributes)
-                                .map(NetworkAttributes::getOutboundType)
+                })
+                .filter(Objects::nonNull)
+                .filter(networkAttributes ->
+                        Optional.ofNullable(networkAttributes.getOutboundType())
                                 .map(OutboundType::isUpgradeable)
                                 .orElse(false))
                 .findFirst();
@@ -131,5 +136,14 @@ public class ProviderSyncService {
                 .stream()
                 .filter(cloudResource -> resourceTypesToSync.contains(cloudResource.getType()))
                 .collect(Collectors.toList());
+    }
+
+    private List<CloudResource> filterSyncedResources(List<CloudResource> allResources, List<CloudResource> syncedResources) {
+        Set<String> syncedNames = syncedResources.stream()
+                .map(CloudResource::getName)
+                .collect(Collectors.toSet());
+        return allResources.stream()
+                .filter(resource -> !syncedNames.contains(resource.getName()))
+                .toList();
     }
 }

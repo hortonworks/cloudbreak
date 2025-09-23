@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,6 +52,28 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class ProviderSyncServiceTest {
+
+    private static final String INSTANCE_1 = "instance1";
+
+    private static final String INSTANCE_2 = "instance2";
+
+    private static final String IP_1 = "ip1";
+
+    private static final String IP_2 = "ip2";
+
+    private static final String NETWORK_1 = "network1";
+
+    private static final String NATGW_VNET_001 = "natgw-vnet-001";
+
+    private static final String INSTANCE_ID = "instanceId";
+
+    private static final String TEST_GROUP = "test";
+
+    private static final String TEST_EXCEPTION_MESSAGE = "Test Exception";
+
+    private static final String NO_SKU_ATTRIBUTES_MESSAGE = "No SKU attributes";
+
+    private static final String EXTERNAL_RESOURCE_ATTRIBUTES_MESSAGE = "Resource has ExternalResourceAttributes, not NetworkAttributes";
 
     @Mock
     private ProviderSyncConfig providerSyncConfig;
@@ -103,17 +126,21 @@ class ProviderSyncServiceTest {
         lenient().when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         lenient().when(cloudConnector.authentication()).thenReturn(authenticator);
         lenient().when(cloudConnector.resources()).thenReturn(resourceConnector);
-        lenient().when(providerSyncConfig.getResourceTypeList()).thenReturn(Set.of(AZURE_INSTANCE));
+        lenient().when(providerSyncConfig.getResourceTypeList()).thenReturn(Set.of(AZURE_INSTANCE, ResourceType.AZURE_NETWORK));
 
+        // Set up lenient stubbing for resourceConnector to avoid strict argument matching issues
+        lenient().when(resourceConnector.checkForSyncer(any(AuthenticatedContext.class), any(List.class)))
+                .thenReturn(List.of());
     }
 
     @Test
+    @DisplayName("Test that syncResources successfully syncs filtered cloud resources and notifies updates")
     void testSyncResources() {
         List<CloudResource> cloudResources = List.of(
-                createCloudResource("instance1", AZURE_INSTANCE),
-                createCloudResource("instance2", AZURE_INSTANCE),
-                createCloudResource("ip1", ResourceType.AZURE_PUBLIC_IP),
-                createCloudResource("ip2", ResourceType.AZURE_PUBLIC_IP));
+                createCloudResource(INSTANCE_1, AZURE_INSTANCE),
+                createCloudResource(INSTANCE_2, AZURE_INSTANCE),
+                createCloudResource(IP_1, ResourceType.AZURE_PUBLIC_IP),
+                createCloudResource(IP_2, ResourceType.AZURE_PUBLIC_IP));
 
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(cloudResources);
         List<CloudResource> filteredList = cloudResources.stream().filter(r -> r.getType() == AZURE_INSTANCE).toList();
@@ -128,16 +155,18 @@ class ProviderSyncServiceTest {
     }
 
     @Test
+    @DisplayName("Test that syncResources properly handles exceptions and doesn't notify updates when resource service fails")
     void testSyncResourcesHandlesException() {
-        when(resourceService.getAllCloudResource(anyLong())).thenThrow(new CloudbreakServiceException("Test Exception"));
+        when(resourceService.getAllCloudResource(anyLong())).thenThrow(new CloudbreakServiceException(TEST_EXCEPTION_MESSAGE));
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stack));
-        assertEquals("Test Exception", exception.getMessage());
+        assertEquals(TEST_EXCEPTION_MESSAGE, exception.getMessage());
         verify(resourceNotifier, never()).notifyUpdates(any(), any());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"Basic", "Standard"})
+    @DisplayName("Test provider sync status setting based on SKU type - Basic SKU should trigger migration, Standard should clean up states")
     void setProviderSyncStatusWithSku(String sku) throws CloudbreakServiceException {
         CloudResource cloudResource = mock(CloudResource.class);
         SkuAttributes skuAttributes = new SkuAttributes();
@@ -162,10 +191,11 @@ class ProviderSyncServiceTest {
     }
 
     @Test
+    @DisplayName("Test that provider sync status properly handles exceptions when getting SKU attributes and removes provider states")
     void setProviderSyncStatusWithException() throws CloudbreakServiceException {
         CloudResource cloudResource = mock(CloudResource.class);
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(List.of(cloudResource));
-        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(new CloudbreakServiceException("Test Exception"));
+        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(new CloudbreakServiceException(TEST_EXCEPTION_MESSAGE));
         List<CloudResource> resourceList = List.of(cloudResource);
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(resourceList);
         when(cloudResource.getType()).thenReturn(AZURE_INSTANCE);
@@ -183,6 +213,7 @@ class ProviderSyncServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"NOT_DEFINED", "DEFAULT"})
+    @DisplayName("Test that upgradeable outbound types (NOT_DEFINED, DEFAULT) trigger outbound upgrade state")
     void testSetProviderSyncStatusWithUpgradeableOutboundType(String outboundTypeStr) throws CloudbreakServiceException {
         // Given
         List<CloudResource> resourceList = getCloudResourceList(outboundTypeStr);
@@ -201,6 +232,7 @@ class ProviderSyncServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"LOAD_BALANCER", "PUBLIC_IP", "USER_ASSIGNED_NATGATEWAY", "USER_DEFINED_ROUTING"})
+    @DisplayName("Test that non-upgradeable outbound types remove provider sync states instead of triggering upgrades")
     void testSetProviderSyncStatusWithNonUpgradeableOutboundType(String outboundTypeStr) throws CloudbreakServiceException {
         // Given
         List<CloudResource> resourceList = getCloudResourceList(outboundTypeStr);
@@ -218,17 +250,357 @@ class ProviderSyncServiceTest {
                 Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
     }
 
-    private List<CloudResource> getCloudResourceList(String outboundTypeStr) {
+    @Test
+    @DisplayName("Test Azure network present in both lists with upgradeable outbound type triggers upgrade without duplicate processing")
+    void testAzureNetworkInBothListsUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK with upgradeable outbound type in both original and synced resources
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("DEFAULT");
+        CloudResource azureNetworkSynced = createAzureNetworkResource("DEFAULT");
+        CloudResource otherResource = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResource);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResource))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed from synced resources only (no duplicate check)
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @Test
+    @DisplayName("Test Azure network present in both lists with non-upgradeable outbound type removes provider states")
+    void testAzureNetworkInBothListsNonUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK with non-upgradeable outbound type in both lists
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("USER_ASSIGNED_NATGATEWAY");
+        CloudResource azureNetworkSynced = createAzureNetworkResource("USER_ASSIGNED_NATGATEWAY");
+        CloudResource otherResource = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResource);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResource))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since no upgrade needed
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test Azure network only in original list with upgradeable outbound type triggers upgrade from unsynced resources")
+    void testAzureNetworkOnlyInOriginalListUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK only in original resources with upgradeable outbound type
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("DEFAULT");
+        CloudResource otherResourceOriginal = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+        CloudResource otherResourceSynced = createCloudResource(INSTANCE_2, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResourceOriginal);
+        List<CloudResource> syncedResources = List.of(otherResourceSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResourceOriginal))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed from unsync resources check
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @Test
+    @DisplayName("Test Azure network only in original list with non-upgradeable outbound type removes provider states")
+    void testAzureNetworkOnlyInOriginalListNonUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK only in original resources with non-upgradeable outbound type
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("LOAD_BALANCER");
+        CloudResource otherResourceOriginal = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+        CloudResource otherResourceSynced = createCloudResource(INSTANCE_2, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResourceOriginal);
+        List<CloudResource> syncedResources = List.of(otherResourceSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResourceOriginal))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since no upgrade needed
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test Azure network only in synced list with upgradeable outbound type triggers upgrade from synced resources")
+    void testAzureNetworkOnlyInSyncedListUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK only in synced resources with upgradeable outbound type
+        CloudResource azureNetworkSynced = createAzureNetworkResource("NOT_DEFINED");
+        CloudResource otherResourceOriginal = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+        CloudResource otherResourceSynced = createCloudResource(INSTANCE_2, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(otherResourceOriginal);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced, otherResourceSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, originalResources)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed from synced resources check
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @Test
+    @DisplayName("Test Azure network only in synced list with non-upgradeable outbound type removes provider states")
+    void testAzureNetworkOnlyInSyncedListNonUpgradeable() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK only in synced resources with non-upgradeable outbound type
+        CloudResource azureNetworkSynced = createAzureNetworkResource("PUBLIC_IP");
+        CloudResource otherResourceOriginal = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+        CloudResource otherResourceSynced = createCloudResource(INSTANCE_2, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(otherResourceOriginal);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced, otherResourceSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, originalResources)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since no upgrade needed
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test that when no Azure network is present in either list, provider states are removed")
+    void testNoAzureNetworkInEitherList() throws CloudbreakServiceException {
+        // Given: No AZURE_NETWORK in either original or synced resources
+        CloudResource instanceOriginal = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+        CloudResource instanceSynced = createCloudResource(INSTANCE_2, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(instanceOriginal);
+        List<CloudResource> syncedResources = List.of(instanceSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, originalResources)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since no network attributes to check
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test same network with upgradeable type in synced resources and non-upgradeable in original triggers upgrade")
+    void testSameNetworkWithUpgradeableInSyncedAndNonUpgradeableInOriginal() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK with different outbound types - upgradeable in synced, non-upgradeable in original
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("LOAD_BALANCER");
+        CloudResource azureNetworkSynced = createAzureNetworkResource("DEFAULT");
+        CloudResource otherResource = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResource);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResource))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed from synced resources (checked first)
+        // Original network with non-upgradeable type should be filtered out from second check
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @Test
+    @DisplayName("Test same network with non-upgradeable type in synced resources and upgradeable in original removes states due to filtering")
+    void testSameNetworkWithNonUpgradeableInSyncedAndUpgradeableInOriginal() throws CloudbreakServiceException {
+        // Given: AZURE_NETWORK with different outbound types - non-upgradeable in synced, upgradeable in original
+        CloudResource azureNetworkOriginal = createAzureNetworkResource("DEFAULT");
+        CloudResource azureNetworkSynced = createAzureNetworkResource("USER_ASSIGNED_NATGATEWAY");
+        CloudResource otherResource = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(azureNetworkOriginal, otherResource);
+        List<CloudResource> syncedResources = List.of(azureNetworkSynced);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, List.of(azureNetworkOriginal, otherResource))).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since synced network (checked first) is not upgradeable
+        // Original network with upgradeable type should be filtered out from second check
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test that resources without NetworkAttributes (NAT Gateway, instances) return Optional.empty and remove provider states")
+    void testResourcesWithoutNetworkAttributesReturnOptionalEmpty() throws CloudbreakServiceException {
+        // Given: Resources that don't have NetworkAttributes (NAT Gateway with ExternalResourceAttributes, Instance without any attributes)
+        CloudResource natGateway = createCloudResourceWithExternalAttributes(NATGW_VNET_001);
+        CloudResource instance = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(natGateway, instance);
+        List<CloudResource> syncedResources = List.of(natGateway);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since no resources have upgradeable NetworkAttributes
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test mixed resources with some having NetworkAttributes and others without, where NetworkAttributes has non-upgradeable type")
+    void testMixedResourcesWithAndWithoutNetworkAttributes() throws CloudbreakServiceException {
+        // Given: Mix of resources - some with NetworkAttributes, some without
+        CloudResource natGateway = createCloudResourceWithExternalAttributes(NATGW_VNET_001);
+        CloudResource azureNetwork = createAzureNetworkResource("USER_ASSIGNED_NATGATEWAY");
+        CloudResource instance = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(natGateway, azureNetwork, instance);
+        List<CloudResource> syncedResources = List.of(natGateway, azureNetwork);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since the only NetworkAttributes has non-upgradeable outbound type
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test mixed resources where NetworkAttributes has upgradeable type triggers upgrade despite other resources lacking attributes")
+    void testMixedResourcesWithUpgradeableNetworkAttributes() throws CloudbreakServiceException {
+        // Given: Mix of resources - some with NetworkAttributes (upgradeable), some without
+        CloudResource natGateway = createCloudResourceWithExternalAttributes(NATGW_VNET_001);
+        CloudResource azureNetwork = createAzureNetworkResource("DEFAULT");
+        CloudResource instance = createCloudResource(INSTANCE_1, AZURE_INSTANCE);
+
+        List<CloudResource> originalResources = List.of(natGateway, azureNetwork, instance);
+        List<CloudResource> syncedResources = List.of(natGateway, azureNetwork);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed from the upgradeable NetworkAttributes
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    @Test
+    @DisplayName("Test real-world scenario with NAT Gateway and Network having USER_ASSIGNED_NATGATEWAY removes provider states")
+    void testRealWorldScenarioWithNatGatewayAndNetwork() throws CloudbreakServiceException {
+        // Given: Real-world scenario similar to the log - NAT Gateway + Network with USER_ASSIGNED_NATGATEWAY
+        CloudResource natGateway = createCloudResourceWithExternalAttributes("natgw-001");
+        CloudResource azureNetwork = createAzureNetworkResourceWithDetails("USER_ASSIGNED_NATGATEWAY");
+
+        List<CloudResource> originalResources = List.of(natGateway, azureNetwork);
+        List<CloudResource> syncedResources = List.of(natGateway, azureNetwork);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should remove provider states since USER_ASSIGNED_NATGATEWAY is not upgradeable
+        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+    }
+
+    @Test
+    @DisplayName("Test resource with NetworkAttributes but null outbound type defaults to NOT_DEFINED and triggers upgrade")
+    void testResourceWithNetworkAttributesButNullOutboundType() throws CloudbreakServiceException {
+        // Given: Resource with NetworkAttributes but outboundType is null (should default to NOT_DEFINED)
+        CloudResource azureNetworkWithNullOutbound = createAzureNetworkResourceWithNullOutboundType();
+
+        List<CloudResource> originalResources = List.of(azureNetworkWithNullOutbound);
+        List<CloudResource> syncedResources = List.of(azureNetworkWithNullOutbound);
+
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .toList();
+        when(resourceConnector.checkForSyncer(authenticatedContext, originalResources)).thenReturn(resourceStatusList);
+
+        // When
+        underTest.syncResources(stack);
+
+        // Then: Should detect upgrade needed since null outboundType defaults to NOT_DEFINED (upgradeable)
+        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+    }
+
+    private CloudResource createAzureNetworkResource(String outboundTypeStr) {
         CloudResource cloudResource = mock(CloudResource.class);
         NetworkAttributes networkAttributes = new NetworkAttributes();
         OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
         networkAttributes.setOutboundType(outboundType);
 
+        lenient().when(cloudResource.getName()).thenReturn(NETWORK_1);
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(
+                new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
-        List<CloudResource> resourceList = List.of(cloudResource);
-        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(resourceList);
-        when(cloudResource.getType()).thenReturn(AZURE_INSTANCE);
-        return resourceList;
+        when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NETWORK - " + NETWORK_1);
+
+        return cloudResource;
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {
@@ -236,8 +608,76 @@ class ProviderSyncServiceTest {
                 .withName(name)
                 .withStatus(CREATED)
                 .withType(resourceType)
-                .withInstanceId("instanceId")
-                .withGroup("test")
+                .withInstanceId(INSTANCE_ID)
+                .withGroup(TEST_GROUP)
                 .build();
+    }
+
+    private List<CloudResource> getCloudResourceList(String outboundTypeStr) throws CloudbreakServiceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        NetworkAttributes networkAttributes = new NetworkAttributes();
+        OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
+        networkAttributes.setOutboundType(outboundType);
+
+        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
+        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+        when(cloudResource.getType()).thenReturn(AZURE_INSTANCE);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(List.of(cloudResource));
+
+        return List.of(cloudResource);
+    }
+
+    private CloudResource createCloudResourceWithExternalAttributes(String name) {
+        CloudResource cloudResource = mock(CloudResource.class);
+
+        lenient().when(cloudResource.getName()).thenReturn(name);
+        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NAT_GATEWAY);
+        lenient().when(cloudResource.getReference()).thenReturn("/subscriptions/test/resourceGroups/test/providers/Microsoft.Network/natGateways/" + name);
+
+        // Simulate that this resource has ExternalResourceAttributes, not NetworkAttributes
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class))
+                .thenThrow(new CloudbreakServiceException(EXTERNAL_RESOURCE_ATTRIBUTES_MESSAGE));
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
+                .thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+
+        lenient().when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NAT_GATEWAY - " + name);
+
+        return cloudResource;
+    }
+
+    private CloudResource createAzureNetworkResourceWithDetails(String outboundTypeStr) {
+        CloudResource cloudResource = mock(CloudResource.class);
+        NetworkAttributes networkAttributes = new NetworkAttributes();
+        networkAttributes.setSubnetId("subnet-live");
+        networkAttributes.setCloudPlatform("AZURE");
+        networkAttributes.setResourceGroupName("rg-network");
+        networkAttributes.setNetworkId("vnet-001");
+        OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
+        networkAttributes.setOutboundType(outboundType);
+
+        lenient().when(cloudResource.getName()).thenReturn("vnet-001");
+        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
+        lenient().when(cloudResource.getReference()).thenReturn(null);
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
+                .thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+        lenient().when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NETWORK - " + "vnet-001");
+
+        return cloudResource;
+    }
+
+    private CloudResource createAzureNetworkResourceWithNullOutboundType() {
+        CloudResource cloudResource = mock(CloudResource.class);
+        NetworkAttributes networkAttributes = new NetworkAttributes();
+        // Don't set outboundType - it will be null and getOutboundType() should return NOT_DEFINED
+
+        lenient().when(cloudResource.getName()).thenReturn(NETWORK_1);
+        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
+        lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
+                .thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+        lenient().when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NETWORK - " + NETWORK_1);
+
+        return cloudResource;
     }
 }
