@@ -606,7 +606,7 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        EncryptionProfileResponse encryptionProfileResponse =  environmentService.getEncryptionProfileByName(
+        EncryptionProfileResponse encryptionProfileResponse =  environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(
                 detailedEnvironmentResponse.getEncryptionProfileName());
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
@@ -897,7 +897,7 @@ public class ClusterHostServiceRunner {
         }
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
         EncryptionProfileResponse encryptionProfileResponse = environmentService
-                .getEncryptionProfileByName(detailedEnvironmentResponse.getEncryptionProfileName());
+                .getEncryptionProfileByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName());
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getTlsVersions)

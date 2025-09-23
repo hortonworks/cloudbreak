@@ -8,10 +8,12 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -91,6 +93,14 @@ public class EncryptionProfileController extends NotificationController implemen
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
     public EncryptionProfileResponse getByCrn(@ResourceCrn String encryptionProfileCrn) {
         EncryptionProfile encryptionProfile = encryptionProfileService.getByCrn(encryptionProfileCrn);
+        return encryptionProfileResponseConverter.convert(encryptionProfile);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public EncryptionProfileResponse getDefaultEncryptionProfile() {
+        EncryptionProfile encryptionProfile = encryptionProfileService.getClouderaDefaultEncryptionProfile();
         return encryptionProfileResponseConverter.convert(encryptionProfile);
     }
 

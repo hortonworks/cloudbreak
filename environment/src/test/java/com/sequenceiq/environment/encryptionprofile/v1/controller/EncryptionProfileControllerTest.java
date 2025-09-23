@@ -285,4 +285,19 @@ public class EncryptionProfileControllerTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("TLS 1.3 only is not supported yet. Use TLSv1.2 and TLSv1.3 or TLSv1.2 only");
     }
+
+    @Test
+    public void testGetClouderaDefaultEncryptionProfile() {
+        EncryptionProfile encryptionProfile = new EncryptionProfile();
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+
+        when(encryptionProfileService.getClouderaDefaultEncryptionProfile())
+                .thenReturn(encryptionProfile);
+        when(responseConverter.convert(encryptionProfile))
+                .thenReturn(response);
+
+        EncryptionProfileResponse actualResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> controller.getDefaultEncryptionProfile());
+
+        assertThat(actualResponse).isEqualTo(response);
+    }
 }

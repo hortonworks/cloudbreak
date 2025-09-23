@@ -114,7 +114,7 @@ public class FreeIpaConfigService {
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
                 .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider,
-                        cachedEncryptionProfileClientService.getByName(environmentResponse.getEncryptionProfileName())))
+                        cachedEncryptionProfileClientService.getByNameOrDefaultIfEmpty(environmentResponse.getEncryptionProfileName())))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))
