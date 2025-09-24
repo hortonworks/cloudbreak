@@ -2,7 +2,7 @@
   {
     "name": "transactions",
     "type": "REAL",
-    "url": "https://transactions-master0.hybrid.cloudera.org:7183",
+    "url": "https://10.84.205.230:7183",
     "auth": "cbd:Password123!"
   }
 ]

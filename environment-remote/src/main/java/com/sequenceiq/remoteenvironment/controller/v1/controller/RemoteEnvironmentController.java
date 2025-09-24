@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.controller.v1.controller;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
@@ -10,51 +12,45 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
-import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentConnectorProvider;
-import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
+import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
 
 @DisableCheckPermissions
 @Controller
 public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
-
     @Inject
-    private RemoteEnvironmentConnectorProvider remoteEnvironmentConnectorProvider;
+    private RemoteEnvironmentService remoteEnvironmentService;
 
     @Override
-    public SimpleRemoteEnvironmentResponses list() {
+    public SimpleRemoteEnvironmentResponses list(List<String> types) {
         MDCBuilder.buildMdcContext();
-        // TODO CB-30614 extend for all remote environment types
-        return remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE)
-                .list(ThreadBasedUserCrnProvider.getAccountId());
+        return remoteEnvironmentService.list(types);
     }
 
     @Override
     public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV1(ThreadBasedUserCrnProvider.getAccountId(), request);
+        return remoteEnvironmentService.getByCrn(request);
     }
 
     @Override
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {
-        return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .getRemoteDataContext(ThreadBasedUserCrnProvider.getAccountId(), request.getCrn());
+        MDCBuilder.buildMdcContext();
+        return remoteEnvironmentService.getRdcByCrn(request);
     }
 
     @Override
     public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
-        return remoteEnvironmentConnectorProvider.getForCrn(request.getClusterid())
-                .getDatalakeServices(ThreadBasedUserCrnProvider.getAccountId(), request.getClusterid());
+        MDCBuilder.buildMdcContext();
+        return remoteEnvironmentService.getDatalakeServicesByCrn(request);
     }
 
     @Override
     public GetRootCertificateResponse getRootCertificateByCrn(String environmentCrn) {
-        return remoteEnvironmentConnectorProvider.getForCrn(environmentCrn)
-                .getRootCertificate(ThreadBasedUserCrnProvider.getAccountId(), environmentCrn);
+        MDCBuilder.buildMdcContext();
+        return remoteEnvironmentService.getRootCertificateByCrn(environmentCrn);
     }
 }

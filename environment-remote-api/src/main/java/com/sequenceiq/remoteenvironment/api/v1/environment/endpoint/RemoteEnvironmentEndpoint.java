@@ -8,6 +8,8 @@ import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.Remot
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.POST_BY_CRN;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -45,7 +47,7 @@ public interface RemoteEnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = LIST, description = ENVIRONMENT_NOTES, operationId = "listRemoteEnvironmentsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SimpleRemoteEnvironmentResponses list();
+    SimpleRemoteEnvironmentResponses list(@QueryParam("type") List<String> types);
 
     @POST
     @Path("/crn")

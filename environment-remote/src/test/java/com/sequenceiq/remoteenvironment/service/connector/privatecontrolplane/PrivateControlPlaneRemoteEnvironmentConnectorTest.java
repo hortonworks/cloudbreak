@@ -129,7 +129,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(converterMock.convert(eq(environment1), eq(privateControlPlane1))).thenReturn(response1);
         when(converterMock.convert(eq(environment2), eq(privateControlPlane2))).thenReturn(response2);
 
-        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId").getResponses();
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId");
 
         assertEquals(2, result.size());
         assertTrue(result.stream()
@@ -151,7 +151,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         environmentResponses1.setEnvironments(List.of(environment1));
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
 
-        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId").getResponses();
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId");
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(converterMock);
@@ -161,7 +161,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     public void testListRemoteEnvironmentWhenEntitlementNotGrantedShouldThrowBadRequest() {
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(false);
 
-        Collection<SimpleRemoteEnvironmentResponse> responses = underTest.list("sampleAccountId").getResponses();
+        Collection<SimpleRemoteEnvironmentResponse> responses = underTest.list("sampleAccountId");
 
         assertEquals(responses.size(), 0);
     }

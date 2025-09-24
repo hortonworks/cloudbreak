@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +35,6 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
-import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
@@ -67,7 +67,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public SimpleRemoteEnvironmentResponses list(String publicCloudAccountId) {
+    public Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -78,7 +78,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             privateControlPlanes
                     .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlaneWithActor(item, userCrn)));
         }
-        return new SimpleRemoteEnvironmentResponses(responses);
+        return responses;
     }
 
     @Override

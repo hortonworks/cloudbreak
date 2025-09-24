@@ -89,8 +89,8 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
                     .setManagerUri(classicCluster.getUrl())
                     .setData(OnPremisesApiProto.ClusterData.newBuilder()
                             .setVersion(apiCluster.getFullVersion())
+                            .setProperties(String.format("{\"entityStatus\": \"GOOD_HEALTH\", \"clusterUrl\": \"%s\"}", classicCluster.getUrl()))
                             .build())
-                    .setProperties(String.format("{\"entityStatus\": \"GOOD_HEALTH\", \"clusterUrl\": \"%s\"}", classicCluster.getUrl()))
                     .setLastCreateTime(new Date().getTime())
                     .build();
         } catch (Exception e) {

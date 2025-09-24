@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 public enum RemoteEnvironmentConnectorType {
-
     PRIVATE_CONTROL_PLANE(CrnResourceDescriptor.ENVIRONMENT),
     CLASSIC_CLUSTER(CrnResourceDescriptor.CLASSIC_CLUSTER);
 
@@ -27,5 +26,14 @@ public enum RemoteEnvironmentConnectorType {
                 .filter(platform -> platform.crnResourceDescriptors.contains(crnResourceDescriptor))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Based on CRN we were not able to decide the remote environment type"));
+    }
+
+    public static RemoteEnvironmentConnectorType safeValueOf(String type) {
+        try {
+            return valueOf(type);
+        } catch (RuntimeException ex) {
+            LOGGER.warn("No RemoteEnvironmentConnectorType value for {}", type);
+            return null;
+        }
     }
 }

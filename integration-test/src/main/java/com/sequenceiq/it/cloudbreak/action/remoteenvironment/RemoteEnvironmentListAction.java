@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.microservice.RemoteEnvironmentClient;
 public class RemoteEnvironmentListAction implements Action<RemoteEnvironmentTestDto, RemoteEnvironmentClient> {
     @Override
     public RemoteEnvironmentTestDto action(TestContext testContext, RemoteEnvironmentTestDto testDto, RemoteEnvironmentClient client) throws Exception {
-        testDto.setResponses(new HashSet<>(client.getEndpoint().remoteEnvironmentEndpoint().list().getResponses()));
+        testDto.setResponses(new HashSet<>(client.getEndpoint().remoteEnvironmentEndpoint().list(null).getResponses()));
         Log.whenJson("Remote Environment list response: ", testDto.getResponses());
 
         return testDto;
