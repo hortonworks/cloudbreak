@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -57,7 +58,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         filterChain.doFilter(wrappedRequest, wrappedResponse);
 
         String requestPath = request.getRequestURI();
-        if (restLoggerEnabled && !excludePathPattern(requestPath)) {
+        if (restLoggerEnabled && !excludePathPattern(requestPath, response.getStatus())) {
             FORMATTER.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date end = new Date(System.currentTimeMillis());
             String log = new StringBuilder(MAX_SIZE)
@@ -121,8 +122,12 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         return request.getMethod().equalsIgnoreCase(method);
     }
 
-    private boolean excludePathPattern(String requestPath) {
-        return requestPath.contains("/metrics") || requestPath.contains("/autoscale");
+    private boolean excludePathPattern(String requestPath, int statusCode) {
+        return (requestPath.contains("/metrics") || requestPath.contains("/autoscale")) && responseIsSuccessful(statusCode);
+    }
+
+    private boolean responseIsSuccessful(int statusCode) {
+        return HttpStatus.valueOf(statusCode).is2xxSuccessful();
     }
 
     private boolean isUberSensitive(String requestPath) {
