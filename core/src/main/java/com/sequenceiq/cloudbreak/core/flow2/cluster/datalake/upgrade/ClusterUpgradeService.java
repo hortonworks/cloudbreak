@@ -74,8 +74,7 @@ public class ClusterUpgradeService {
                 rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_FINISHED : DetailedStackStatus.CLUSTER_UPGRADE_FINISHED,
                 "Cluster was successfully upgraded.");
 
-        Optional<String> stackVersion = getStackVersionFromImage(targetIm);
-        stackVersion.ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
+        getStackVersionFromImage(targetIm).ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
                 () -> LOGGER.warn("Cluster runtime could not be upgraded for stack with id {}", stackId));
         if (clusterRuntimeUpgradeNeeded) {
             flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, clusterStackVersion);

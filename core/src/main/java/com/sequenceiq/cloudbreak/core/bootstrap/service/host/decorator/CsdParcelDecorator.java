@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
@@ -33,15 +33,16 @@ public class CsdParcelDecorator {
     private ParcelService parcelService;
 
     @Inject
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     public void decoratePillarWithCsdParcels(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {
         StackView stack = stackDto.getStack();
         if (StackType.WORKLOAD.equals(stack.getType())) {
             LOGGER.debug("Decorating service pillar with CSD parcels.");
             Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stackDto);
-            Set<ClouderaManagerProduct> products = clouderaManagerProductsProvider.getProducts(componentsByBlueprint);
-            addCsdParcelsToServicePillar(products, servicePillar);
+            addCsdParcelsToServicePillar(
+                    centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint),
+                    servicePillar);
         } else {
             LOGGER.debug("Skipping the CSD downloading because the stack type is {}", stack.getType());
         }

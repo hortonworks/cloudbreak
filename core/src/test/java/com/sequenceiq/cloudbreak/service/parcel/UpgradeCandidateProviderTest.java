@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeCandidateProviderTest {
@@ -34,7 +34,7 @@ class UpgradeCandidateProviderTest {
     private UpgradeCandidateProvider underTest;
 
     @Mock
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Mock
     private ClusterApi connector;
@@ -54,7 +54,7 @@ class UpgradeCandidateProviderTest {
         Set<ParcelInfo> activeParcels = Set.of(createParcelInfo(CDH, "7.2.15"), createParcelInfo(CFM, "1.2.3"));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(createProduct(CDH, "7.2.16"), createProduct(CFM, "1.2.4"));
         when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(activeParcels);
-        when(clouderaManagerProductsProvider.getProducts(componentsByBlueprint)).thenReturn(candidateProducts);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)).thenReturn(candidateProducts);
 
         Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsForUpgrade(connector, stackDto, componentsByBlueprint);
 
@@ -66,7 +66,7 @@ class UpgradeCandidateProviderTest {
         Set<ParcelInfo> activeParcels = Set.of(createParcelInfo(CDH, "7.2.15"), createParcelInfo(CFM, "1.2.3"));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(createProduct(CDH, "7.2.15"), createProduct(CFM, "1.2.3"));
         when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(activeParcels);
-        when(clouderaManagerProductsProvider.getProducts(componentsByBlueprint)).thenReturn(candidateProducts);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)).thenReturn(candidateProducts);
 
         Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsForUpgrade(connector, stackDto, componentsByBlueprint);
 
@@ -79,7 +79,7 @@ class UpgradeCandidateProviderTest {
         ClouderaManagerProduct cdhProduct = createProduct(CDH, "7.2.16");
         Set<ClouderaManagerProduct> candidateProducts = Set.of(cdhProduct, createProduct(CFM, "1.2.3"));
         when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(activeParcels);
-        when(clouderaManagerProductsProvider.getProducts(componentsByBlueprint)).thenReturn(candidateProducts);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)).thenReturn(candidateProducts);
 
         Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsForUpgrade(connector, stackDto, componentsByBlueprint);
 

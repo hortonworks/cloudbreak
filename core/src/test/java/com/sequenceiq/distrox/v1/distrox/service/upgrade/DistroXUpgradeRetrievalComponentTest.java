@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.ImageCatalogMock.DEFAULT_IMAGE_CATALOG_P
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.PYTHON38;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
@@ -63,7 +64,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.support.SupportedVersionSe
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.GeneratedCmTemplateService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -99,6 +100,7 @@ import com.sequenceiq.cloudbreak.service.parcel.ManifestRetrieverService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -259,6 +261,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private StackDtoService stackDtoService;
+
+    @MockBean
+    private StackRepository stackRepository;
 
     @MockBean
     private CurrentImagePackageProvider currentImagePackageProvider;
@@ -457,8 +462,12 @@ public class DistroXUpgradeRetrievalComponentTest {
     void testUpgradeClusterByNameWhenTheCurrentIs7217p200RedHatAndInternalTenantDisabled()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getImage("e40a5467-4237-4c86-a6d5-ab3639024cd6");
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setName("test");
+        clouderaManagerProduct.setVersion("7.2.17");
         setupImageCatalogMocks(currentCatalogImage);
         when(entitlementService.internalTenant(anyString())).thenReturn(false);
+        //when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(anySet())).thenReturn(Set.of(clouderaManagerProduct));
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
@@ -552,7 +561,7 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     private ClusterComponentView createClusterComponent(Image currentCatalogImage) {
         ClusterComponentView clusterComponentView = new ClusterComponentView();
-        clusterComponentView.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        clusterComponentView.setComponentType(cdhProductDetails());
         clusterComponentView.setAttributes(new Json(new ClouderaManagerProduct()
                 .withName("CDH")
                 .withVersion(currentCatalogImage.getStackDetails().getRepo().getStack().get(StackRepoDetails.REPOSITORY_VERSION))));
@@ -661,6 +670,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             CurrentImageRetrieverService.class,
             ClusterUpgradeCandidateFilterService.class,
             ClusterUpgradeImageFilter.class,
+            StackRepository.class,
+            CentralCDHVersionCoordinator.class,
             BlueprintUpgradeOptionValidator.class,
             CmTemplateProcessorFactory.class,
             BlueprintUpgradeOptionCondition.class,

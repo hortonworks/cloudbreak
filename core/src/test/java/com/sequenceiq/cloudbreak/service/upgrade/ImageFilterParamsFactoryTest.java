@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +48,9 @@ public class ImageFilterParamsFactoryTest {
 
     @Mock
     private ParcelService parcelService;
+
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Mock
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
@@ -96,7 +100,7 @@ public class ImageFilterParamsFactoryTest {
         ClouderaManagerProduct nifi = createCMProduct(nifiName, nifiVersion);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(CLOUD_PLATFORM));
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
-        when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
         ImageFilterParams actual = underTest.create(null, currentImage, true, false, stack, new InternalUpgradeSettings(true, true, true), false);
 
@@ -112,7 +116,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(CLOUD_PLATFORM, actual.getImageCatalogPlatform().nameToUpperCase());
         assertFalse(actual.isGetAllImages());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
-        verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(cdhClusterComponent);
     }
 
     @Test

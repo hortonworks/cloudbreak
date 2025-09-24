@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -297,7 +298,7 @@ public class ClusterV4RequestToClusterConverterTest {
 
         assertAll(cluster.getComponents()
                 .stream()
-                .map(component -> () -> assertEquals(ComponentType.CDH_PRODUCT_DETAILS, component.getComponentType())));
+                .map(component -> () -> assertEquals(cdhProductDetails(), component.getComponentType())));
 
         List<Json> cdps = cluster.getComponents()
                 .stream().map(ClusterComponent::getAttributes).filter(attr -> attr.getValue().contains("cdp")).collect(Collectors.toList());

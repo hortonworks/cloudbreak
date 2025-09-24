@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -67,6 +68,9 @@ class ClusterCreationSetupServiceTest {
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
+
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @InjectMocks
     private ClusterCreationSetupService underTest;
@@ -115,6 +119,7 @@ class ClusterCreationSetupServiceTest {
 
     @Test
     void testMissingDomain() throws CloudbreakImageCatalogException, IOException, TransactionService.TransactionExecutionException {
+        when(centralCDHVersionCoordinator.isCdhProductDetails(any(Component.class))).thenReturn(true);
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }

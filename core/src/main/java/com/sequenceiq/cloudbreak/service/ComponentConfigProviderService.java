@@ -146,7 +146,7 @@ public class ComponentConfigProviderService {
         }
     }
 
-    public static <T> T getComponent(Collection<Component> components, Class<T> clazz, ComponentType componentType) {
+    public <T> T getComponent(Collection<Component> components, Class<T> clazz, ComponentType componentType) {
         try {
             Optional<Component> comp = components.stream()
                     .filter(c -> c.getComponentType() == componentType)

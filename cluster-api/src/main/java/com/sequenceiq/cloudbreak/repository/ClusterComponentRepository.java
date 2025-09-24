@@ -22,13 +22,6 @@ public interface ClusterComponentRepository extends CrudRepository<ClusterCompon
     ClusterComponent findComponentByClusterIdComponentTypeName(@Param("clusterId") Long clusterId, @Param("componentType") ComponentType componentType,
             @Param("name") String name);
 
-    @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId AND cv.componentType = :componentType AND cv.name = :name")
-    Set<ClusterComponent> findComponentsByClusterIdComponentTypeName(@Param("clusterId") Long clusterId, @Param("componentType") ComponentType componentType,
-            @Param("name") String name);
-
-    @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId AND cv.componentType = :componentType")
-    Set<ClusterComponent> findComponentsByClusterIdAndComponentType(@Param("clusterId") Long clusterId, @Param("componentType") ComponentType componentType);
-
     @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId")
     Set<ClusterComponent> findComponentByClusterId(@Param("clusterId") Long clusterId);
 

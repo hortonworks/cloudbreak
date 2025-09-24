@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.DEFAULT_REGION;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.OTHER_REGION;
@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -143,6 +144,9 @@ public class ImageServiceTest {
     @Mock
     private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
     @InjectMocks
     private ImageService underTest;
 
@@ -176,6 +180,7 @@ public class ImageServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(PLATFORM, PLATFORM)).thenReturn(IMAGE_CATALOG_PLATFORM);
         when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, OS, Architecture.X86_64, IMAGE_CATALOG_NAME))
                 .thenReturn(Set.of(OS));
+        when(centralCDHVersionCoordinator.requestedComponentTypesContainsCdhComponentType(any())).thenReturn(true);
     }
 
     @Test
@@ -689,7 +694,7 @@ public class ImageServiceTest {
         Set<Component> components = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> {
                     try {
-                        return underTest.getComponents(stack, statedImage, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+                        return underTest.getComponents(stack, statedImage, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
                     } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                         throw new RuntimeException(e);
                     }
@@ -698,7 +703,7 @@ public class ImageServiceTest {
         assertEquals(3, components.size());
         for (Component component : components) {
             ComponentType componentType = component.getComponentType();
-            assertTrue(EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS).contains(componentType));
+            assertTrue(EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS).contains(componentType));
             if (componentType == IMAGE) {
                 assertEquals(EXISTING_ID, component.getAttributes().getString("imageName"));
             }

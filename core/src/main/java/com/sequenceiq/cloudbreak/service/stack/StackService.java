@@ -3,10 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -19,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +54,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -83,7 +80,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
@@ -93,7 +89,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackPlatformVariantView;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -148,7 +143,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -302,6 +296,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -674,8 +671,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
             setArchitecture(stack, imgFromCatalog);
-            setRuntime(stack, components);
-            setDbVersion(stack, imgFromCatalog);
+            updateRuntimeVersion(stack, components);
+            setDbVersion(stack);
             Stack savedStackWithAllDetails = stackRepository.save(stack);
             measure(() -> addTemplateForStack(savedStackWithAllDetails, connector.waitGetTemplate(templateRequest)),
                     LOGGER, "Save cluster template took {} ms for stack {}", stackName);
@@ -689,43 +686,35 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
+    public void updateRuntimeVersion(Long stackId, String stackVersion) {
+        if (isNotBlank(stackVersion)) {
+            stackRepository.updateStackVersion(stackId, stackVersion);
+        }
+    }
+
+    public void updateRuntimeVersion(Stack stack, Collection<Component> components) {
+        String stackVersion = centralCDHVersionCoordinator.calculateStackVersionFromComponents(components);
+        if (isNotBlank(stackVersion)) {
+            stack.setStackVersion(stackVersion);
+        }
+    }
+
+    public void updateRuntimeVersion(Long stackId, Set<Component> components) {
+        String stackVersion = centralCDHVersionCoordinator.calculateStackVersionFromComponents(components);
+        updateRuntimeVersion(stackId, stackVersion);
+    }
+
     private void setArchitecture(Stack stack, StatedImage imgFromCatalog) {
         Architecture architecture = Architecture.fromStringWithFallback(imgFromCatalog.getImage().getArchitecture());
         stack.setArchitecture(architecture);
     }
 
-    private void setRuntime(Stack stack, Set<Component> components) {
-        String stackVersion = calculateStackVersion(components);
-        Optional.ofNullable(stackVersion).ifPresent(stack::setStackVersion);
-    }
-
-    private void setDbVersion(Stack stack, StatedImage imgFromCatalog) {
-        boolean flexibleServerRequested = !isSingleServerRequested(stack);
+    private void setDbVersion(Stack stack) {
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(
                 stack.getStackVersion(), stack.getExternalDatabaseEngineVersion()
         );
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
-        }
-    }
-
-    private boolean isSingleServerRequested(Stack stack) {
-        return Optional.ofNullable(stack.getDatabase())
-                .map(Database::getAttributesMap)
-                .map(attributeMap -> azureDatabaseServerParameterDecorator.getDatabaseType(attributeMap).orElse(AzureDatabaseType.FLEXIBLE_SERVER))
-                .map(AzureDatabaseType::isSingleServer)
-                .orElse(Boolean.FALSE);
-    }
-
-    private String calculateStackVersion(Set<Component> components) {
-        ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
-        if (Objects.nonNull(runtime)) {
-            String stackVersion = substringBefore(runtime.getVersion(), "-");
-            LOGGER.debug("Setting runtime version {} for stack", stackVersion);
-            return stackVersion;
-        } else {
-            LOGGER.warn("Product component is not present amongst components, runtime could not be set! This is normal in case of base images");
-            return null;
         }
     }
 
@@ -1142,16 +1131,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.setTunnelByStackId(stackId, tunnel);
     }
 
-    public void updateSecurityConfigByStackId(Long stackId, SecurityConfig securityConfig) {
-        stackRepository.updateSecurityConfigByStackId(stackId, securityConfig);
-    }
-
     public void updateCustomDomainByStackId(Long stackId, String customDomain) {
         stackRepository.updateCustomDomainByStackId(stackId, customDomain);
-    }
-
-    public void updateStackVersion(Long stackId, String stackVersion) {
-        stackRepository.updateStackVersion(stackId, stackVersion);
     }
 
     public void updateJavaVersion(Long stackId, String javaVersion) {

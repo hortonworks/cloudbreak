@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
+
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 
 //TODO: this shouldn't be in cloud-common, but ComponentType is in cloud-common too..
@@ -8,7 +10,7 @@ public enum StackType {
     // Currently only HDP_REPO_DETAILS is handled
     HDF(ComponentType.HDP_REPO_DETAILS),
 
-    CDH(ComponentType.CDH_PRODUCT_DETAILS);
+    CDH(cdhProductDetails());
 
     private final ComponentType componentType;
 

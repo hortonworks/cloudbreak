@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.common.model.ProviderSyncState;
@@ -52,6 +53,9 @@ public class StackUpdater {
     @Inject
     private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;
 
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, "");
     }
@@ -74,7 +78,7 @@ public class StackUpdater {
     }
 
     public void updateStackVersion(Long stackId, String stackVersion) {
-        stackService.updateStackVersion(stackId, stackVersion);
+        stackService.updateRuntimeVersion(stackId, stackVersion);
     }
 
     public void updateJavaVersion(Long stackId, String javaVersion) {

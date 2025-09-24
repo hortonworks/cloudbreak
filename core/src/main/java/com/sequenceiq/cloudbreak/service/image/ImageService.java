@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V1;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -82,6 +83,9 @@ public class ImageService {
 
     @Inject
     private StackMatrixService stackMatrixService;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -129,7 +133,7 @@ public class ImageService {
         LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                 platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-        Set<Component> components = getComponents(stack, imgFromCatalog, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+        Set<Component> components = getComponents(stack, imgFromCatalog, EnumSet.of(IMAGE, cdhProductDetails(), CM_REPO_DETAILS));
         componentConfigProviderService.store(components);
         return components;
     }
@@ -367,7 +371,7 @@ public class ImageService {
 
     public Set<Component> getComponentsWithoutUserData(Stack stack, StatedImage statedImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getComponents(stack, statedImage, EnumSet.of(CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+        return getComponents(stack, statedImage, EnumSet.of(cdhProductDetails(), CM_REPO_DETAILS));
     }
 
     public Set<Component> getComponents(Stack stack, StatedImage statedImage, EnumSet<ComponentType> requestedComponents)
@@ -384,7 +388,7 @@ public class ImageService {
             );
             addImage(stack, statedImage, imageName, catalogBasedImage, components);
         }
-        if (requestedComponents.contains(CDH_PRODUCT_DETAILS)) {
+        if (centralCDHVersionCoordinator.requestedComponentTypesContainsCdhComponentType(requestedComponents)) {
             addStackRepo(stack, components, catalogBasedImage);
             addPrewarmParcels(stack, statedImage, components);
         }
@@ -443,7 +447,7 @@ public class ImageService {
 
     private Component getStackComponent(Stack stack, ImageStackDetails stackDetails, StackType stackType, String osType) {
         ComponentType componentType = stackType.getComponentType();
-        if (CDH_PRODUCT_DETAILS.equals(componentType)) {
+        if (centralCDHVersionCoordinator.isCdhProductDetails(componentType)) {
             ClouderaManagerProduct product = createProductRepo(stackDetails, osType);
             return new Component(componentType, componentType.name(), new Json(product), stack);
         } else {

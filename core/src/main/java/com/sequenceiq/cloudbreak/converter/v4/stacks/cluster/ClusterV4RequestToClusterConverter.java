@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class ClusterV4RequestToClusterConverter {
             cluster.setCustomContainerDefinition(null);
         }
         updateDatabases(source, cluster, workspace);
-        extractClusterManagerAndHdpRepoConfig(cluster, source);
+        extractClusterManagerAndCmRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setRangerRazEnabled(source.isRangerRazEnabled());
         cluster.setRangerRmsEnabled(source.isRangerRmsEnabled());
@@ -138,7 +139,7 @@ public class ClusterV4RequestToClusterConverter {
         return configs;
     }
 
-    private void extractClusterManagerAndHdpRepoConfig(Cluster cluster, ClusterV4Request clusterRequest) {
+    private void extractClusterManagerAndCmRepoConfig(Cluster cluster, ClusterV4Request clusterRequest) {
         Set<ClusterComponent> components = new HashSet<>();
 
         ClouderaManagerV4Request clouderaManagerRequest = clusterRequest.getCm();
@@ -160,7 +161,7 @@ public class ClusterV4RequestToClusterConverter {
                 .map(this::convertCMProductRequestToCMProduct)
                 .map(product -> {
                     Json json = toJsonWrapException().apply(product);
-                    return new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, product.getName(), json, cluster);
+                    return new ClusterComponent(cdhProductDetails(), product.getName(), json, cluster);
                 })
                 .forEach(components::add);
         cluster.setComponents(components);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.multiCheckedMeasure;
 
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -70,6 +72,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Measure(ClusterCreationSetupService.class)
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
@@ -110,7 +115,7 @@ public class ClusterCreationSetupService {
                 (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageCatalogException>) () -> {
                     if (blueprint != null) {
                         Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
-                                Sets.newHashSet(ComponentType.CM_REPO_DETAILS, ComponentType.CDH_PRODUCT_DETAILS, ComponentType.IMAGE));
+                                Sets.newHashSet(ComponentType.CM_REPO_DETAILS, cdhProductDetails(), ComponentType.IMAGE));
 
                         Component stackCmRepoConfig = allComponent.stream()
                                 .filter(c -> c.getComponentType().equals(ComponentType.CM_REPO_DETAILS))
@@ -118,7 +123,7 @@ public class ClusterCreationSetupService {
                                 .orElse(null);
 
                         List<Component> stackCdhRepoConfig = allComponent.stream()
-                                .filter(c -> c.getComponentType().equals(ComponentType.CDH_PRODUCT_DETAILS))
+                                .filter(c -> centralCDHVersionCoordinator.isCdhProductDetails(c))
                                 .collect(Collectors.toList());
 
                         Component stackImageComponent = allComponent.stream()

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterComponentUpdaterTest {
@@ -32,6 +35,9 @@ public class ClusterComponentUpdaterTest {
     private ClusterComponentUpdater underTest;
 
     @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
+    @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Test
@@ -39,11 +45,11 @@ public class ClusterComponentUpdaterTest {
         Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
         Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
-        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(anyLong())).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(anyLong());
         verifyNoMoreInteractions(clusterComponentConfigProvider);
     }
 
@@ -52,11 +58,11 @@ public class ClusterComponentUpdaterTest {
         Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
         Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
-        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(anyLong())).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(anyLong());
         verifyNoMoreInteractions(clusterComponentConfigProvider);
     }
 
@@ -67,12 +73,12 @@ public class ClusterComponentUpdaterTest {
         ClusterComponentView cdhComponent = createComponent(CDH);
         Set<ClusterComponentView> clusterComponentsFromDb = Set.of(flinkComponent, cdhComponent);
 
-        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(anyLong())).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint,
                 new ParcelOperationStatus(Map.of("FLINK", "version"), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(anyLong());
         verify(clusterComponentConfigProvider).deleteClusterComponentViews(Set.of(flinkComponent));
     }
 
@@ -85,7 +91,7 @@ public class ClusterComponentUpdaterTest {
     private ClusterComponentView createComponent(String name) {
         ClusterComponentView component = new ClusterComponentView();
         component.setName(name);
-        component.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        component.setComponentType(cdhProductDetails());
         return component;
     }
 

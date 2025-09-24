@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -16,9 +18,13 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
 @Component
 public class ClusterToClouderaManagerV4RequestConverter {
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     public ClouderaManagerV4Request convert(Cluster cluster) {
         Predicate<ClusterComponent> cmRepoFilter = component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType());
@@ -37,7 +43,7 @@ public class ClusterToClouderaManagerV4RequestConverter {
                         .findFirst()
                         .orElse(null))
                 .withProducts(components.stream()
-                        .filter(component -> ComponentType.CDH_PRODUCT_DETAILS.equals(component.getComponentType()))
+                        .filter(component -> centralCDHVersionCoordinator.isCdhProductDetails(component))
                         .map(ClusterComponent::getAttributes)
                         .map(toAttributeClass(ClouderaManagerProduct.class))
                         .map(ClouderaManagerProductToClouderaManagerProductV4Request::convert)

@@ -4,9 +4,6 @@ import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
 public class TestUtil {
 
@@ -26,35 +23,7 @@ public class TestUtil {
 
     private static final String CM_VERSION = "7.0.0";
 
-    private static final String PARCEL_TEMPLATE = "{\"name\":\"%s\",\"version\":\"%s\","
-            + "\"parcel\":\"https://archive.cloudera.com/cdh7/7.0.0/parcels/\"}";
-
-    private static final String CDH_ATTRIBUTES = String.format(PARCEL_TEMPLATE, CDH, CDH_VERSION);
-
-    private static final String CDSW_ATTRIBUTES = String.format(PARCEL_TEMPLATE, CDSW, CDSW_VERSION);
-
-    private static final String CM_ATTRIBUTES = "{\"predefined\":false,\"version\":\"7.0.0\","
-            + "\"baseUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/\","
-            + "\"gpgKeyUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/RPM-GPG-KEY-cloudera\"}";
-
     private TestUtil() { }
-
-    private static ClusterComponentView createClusterComponent(String attributeString, String name, ComponentType componentType, Long clusterId) {
-        Json attributes = new Json(attributeString);
-        ClusterComponentView clusterComponentView = new ClusterComponentView();
-        clusterComponentView.setClusterId(clusterId);
-        clusterComponentView.setAttributes(attributes);
-        clusterComponentView.setName(name);
-        clusterComponentView.setComponentType(componentType);
-        return clusterComponentView;
-    }
-
-    public static Set<ClusterComponentView> clusterComponentSet(Long clusterId) {
-        ClusterComponentView cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, clusterId);
-        ClusterComponentView cdswComponent = createClusterComponent(CDSW_ATTRIBUTES, CDSW, ComponentType.CDH_PRODUCT_DETAILS, clusterId);
-        ClusterComponentView cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, clusterId);
-        return Set.of(cdhComponent, cdswComponent, cmComponent);
-    }
 
     public static Set<ClouderaManagerProduct> clouderaManagerProducts() {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion(CDH_VERSION);

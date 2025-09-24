@@ -19,15 +19,14 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -37,9 +36,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 public class ParcelService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelService.class);
-
-    @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
@@ -55,6 +51,9 @@ public class ParcelService {
 
     @Inject
     private ImageReaderService imageReaderService;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDtoDelegate stack) {
         Set<ClusterComponentView> components = getComponents(stack.getCluster().getId());
@@ -122,7 +121,7 @@ public class ParcelService {
     }
 
     private Set<ClusterComponentView> getComponents(Long clusterId) {
-        return clusterComponentConfigProvider.getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        return centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(clusterId);
     }
 
     private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {

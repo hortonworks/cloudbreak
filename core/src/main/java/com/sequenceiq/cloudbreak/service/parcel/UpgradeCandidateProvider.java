@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
 @Component
 public class UpgradeCandidateProvider {
@@ -22,11 +22,11 @@ public class UpgradeCandidateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCandidateProvider.class);
 
     @Inject
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     public Set<ClouderaManagerProduct> getRequiredProductsForUpgrade(ClusterApi connector, StackDto stackDto, Set<ClusterComponentView> componentsByBlueprint) {
         Set<ParcelInfo> activeParcels = getActiveParcels(connector, stackDto);
-        Set<ClouderaManagerProduct> products = clouderaManagerProductsProvider.getProducts(componentsByBlueprint);
+        Set<ClouderaManagerProduct> products = centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint);
         Set<ClouderaManagerProduct> upgradeCandidates = findUpgradeCandidates(products, activeParcels);
         LOGGER.debug("Active parcels: {}, Required parcels for the cluster: {}, Upgrade candidate parcels: {}", activeParcels, products, upgradeCandidates);
         return upgradeCandidates;

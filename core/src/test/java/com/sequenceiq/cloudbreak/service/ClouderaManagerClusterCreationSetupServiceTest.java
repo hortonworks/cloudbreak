@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.Architecture;
@@ -105,6 +107,9 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Mock
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @InjectMocks
     private ClouderaManagerClusterCreationSetupService underTest;
@@ -168,7 +173,18 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Test
     void specificVersionUsedIfAvailable() throws IOException, CloudbreakImageCatalogException {
+        ClusterComponent clusterComponent = new ClusterComponent(
+                cdhProductDetails(),
+                new Json(new ClouderaManagerProduct()
+                        .withName("CDH")
+                        .withVersion(OLDER_CDH_VERSION)
+                        .withParcel("https://archive.cloudera.com/cdh6/6.2.0/parcels/")),
+                cluster
+        );
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(List.of(clusterComponent));
+        when(centralCDHVersionCoordinator.isCdhProductDetails(clusterComponent)).thenReturn(true);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 null, List.of(), imageComponent);
@@ -178,7 +194,18 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Test
     void latestUsedIfVersionUnspecified() throws IOException, CloudbreakImageCatalogException {
+        ClusterComponent clusterComponent = new ClusterComponent(
+                cdhProductDetails(),
+                new Json(new ClouderaManagerProduct()
+                        .withName("CDH")
+                        .withVersion(NEWER_CDH_VERSION)
+                        .withParcel("https://archive.cloudera.com/cdh6/6.2.0/parcels/")),
+                cluster
+        );
+        when(centralCDHVersionCoordinator.isCdhProductDetails(any(ClusterComponent.class))).thenReturn(true);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), any()))
+                .thenReturn(List.of(clusterComponent));
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 null, List.of(), imageComponent);
@@ -199,12 +226,26 @@ class ClouderaManagerClusterCreationSetupServiceTest {
     void testPrewarmedClouderaManagerClusterComponents() throws IOException, CloudbreakImageCatalogException {
         Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
                 ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
-        Component productComponent = spy(new Component(ComponentType.CDH_PRODUCT_DETAILS,
-                ComponentType.CDH_PRODUCT_DETAILS.name(), new Json(getClouderaManagerProductRepo()), stack));
+        Component productComponent = spy(new Component(
+                cdhProductDetails(),
+                cdhProductDetails().name(),
+                new Json(getClouderaManagerProductRepo()),
+                stack)
+        );
+        ClusterComponent productClusterComponent = spy(new ClusterComponent(
+                cdhProductDetails(),
+                cdhProductDetails().name(),
+                new Json(getClouderaManagerProductRepo()),
+                stack.getCluster())
+        );
         List<Component> productComponentList = List.of(productComponent);
+        List<ClusterComponent> productClusterComponentList = List.of(productClusterComponent);
         Set<ClouderaManagerProduct> clouderaManagerProductSet = new HashSet<>();
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.5.0"));
 
+        when(centralCDHVersionCoordinator.isCdhProductDetails(productClusterComponent)).thenReturn(true);
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(productClusterComponentList);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
         when(parcelFilterService.filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
@@ -219,12 +260,30 @@ class ClouderaManagerClusterCreationSetupServiceTest {
     void testPrewarmedClouderaManagerClusterComponentsWhenTheStackTypeIsDataLake() throws IOException, CloudbreakImageCatalogException {
         Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
                 ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
-        Component productComponent = spy(new Component(ComponentType.CDH_PRODUCT_DETAILS,
-                ComponentType.CDH_PRODUCT_DETAILS.name(), new Json(getClouderaManagerProductRepo()), stack));
+        Component productComponent = spy(
+                new Component(
+                        cdhProductDetails(),
+                        cdhProductDetails().name(),
+                        new Json(getClouderaManagerProductRepo()),
+                        stack
+                )
+        );
+        ClusterComponent productClusterComponent = spy(
+                new ClusterComponent(
+                        cdhProductDetails(),
+                        cdhProductDetails().name(),
+                        new Json(getClouderaManagerProductRepo()),
+                        stack.getCluster()
+                )
+        );
         List<Component> productComponentList = List.of(productComponent);
+        List<ClusterComponent> productClusterComponentList = List.of(productClusterComponent);
         ClouderaManagerProduct cdhProduct = clouderaManagerProduct("CDH", "1.5.0");
         stack.setType(StackType.DATALAKE);
 
+        when(centralCDHVersionCoordinator.isCdhProductDetails(productClusterComponent)).thenReturn(true);
+        when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
+                .thenReturn(productClusterComponentList);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
         when(clouderaManagerProductsProvider.getCdhProduct(anySet())).thenReturn(Optional.of(cdhProduct));
 
@@ -240,7 +299,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         assertNotNull(clusterComponents);
         assertEquals(2, clusterComponents.size());
         assertContainsVersion(cmVersion, findComponentByType(clusterComponents, ComponentType.CM_REPO_DETAILS));
-        assertContainsVersion(cdhVersion, findComponentByType(clusterComponents, ComponentType.CDH_PRODUCT_DETAILS));
+        assertContainsVersion(cdhVersion, findComponentByType(clusterComponents, cdhProductDetails()));
     }
 
     private void assertContainsVersion(String expectedVersion, ClusterComponent component) {

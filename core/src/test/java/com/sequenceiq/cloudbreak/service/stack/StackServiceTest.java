@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -125,7 +124,6 @@ import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.FlowLogService;
 
@@ -173,6 +171,9 @@ class StackServiceTest {
 
     @Mock
     private ServiceProviderConnectorAdapter connector;
+
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Mock
     private Variant variant;
@@ -342,9 +343,10 @@ class StackServiceTest {
         when(variant.value()).thenReturn(VARIANT_VALUE);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(centralCDHVersionCoordinator.calculateStackVersionFromComponents(any())).thenReturn(stackVersion);
         when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
-        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        Component cdhComponent = new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
@@ -369,9 +371,10 @@ class StackServiceTest {
         when(variant.value()).thenReturn(VARIANT_VALUE);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(centralCDHVersionCoordinator.calculateStackVersionFromComponents(any())).thenReturn(stackVersion);
         when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
-        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        Component cdhComponent = new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
@@ -381,7 +384,6 @@ class StackServiceTest {
         String calculatedDbVersion = "11";
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackVersion, dbVersion))
                 .thenReturn(calculatedDbVersion);
-        when(azureDatabaseServerParameterDecorator.getDatabaseType(anyMap())).thenReturn(Optional.of(AzureDatabaseType.SINGLE_SERVER));
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
@@ -394,11 +396,12 @@ class StackServiceTest {
     void testCreateWithRuntimeFlexibleEnabledFlexibleRequested() throws Exception {
         when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
         when(variant.value()).thenReturn(VARIANT_VALUE);
-        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(centralCDHVersionCoordinator.calculateStackVersionFromComponents(any())).thenReturn(stackVersion);
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
-        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        Component cdhComponent = new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
@@ -423,9 +426,10 @@ class StackServiceTest {
         when(variant.value()).thenReturn(VARIANT_VALUE);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(centralCDHVersionCoordinator.calculateStackVersionFromComponents(any())).thenReturn(stackVersion);
         when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
-        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        Component cdhComponent = new Component(cdhProductDetails(), cdhProductDetails().name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
         String dbVersion = "10";
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);

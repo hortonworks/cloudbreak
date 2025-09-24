@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
@@ -66,7 +67,10 @@ public class StackDtoService implements LocalPaasSdxService {
 
     private static final Logger LOGGER = getLogger(StackDtoService.class);
 
-    private static final List<ComponentType> COMPONENT_TYPES_TO_FETCH = List.of(ComponentType.CDH_PRODUCT_DETAILS, ComponentType.CM_REPO_DETAILS);
+    private static final List<ComponentType> COMPONENT_TYPES_TO_FETCH = List.of(
+            cdhProductDetails(),
+            ComponentType.CM_REPO_DETAILS
+    );
 
     @Inject
     private StackService stackService;

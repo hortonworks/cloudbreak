@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -70,7 +71,7 @@ class ClusterComponentConfigProviderTest {
     @Test
     void getNormalizedCdhProductFromRegularCdhVersion() {
         ClusterComponentView component = new ClusterComponentView();
-        component.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        component.setComponentType(cdhProductDetails());
         component.setName("CDH");
         component.setAttributes(new Json(json));
         Set<ClusterComponentView> components = new HashSet<>();

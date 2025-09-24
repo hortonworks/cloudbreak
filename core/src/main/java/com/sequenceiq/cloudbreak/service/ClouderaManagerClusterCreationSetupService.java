@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
@@ -60,6 +60,9 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Inject
     private StackMatrixService stackMatrixService;
@@ -137,8 +140,10 @@ public class ClouderaManagerClusterCreationSetupService {
         List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts)
                 .orElse(Collections.emptyList());
         if (products.isEmpty()) {
-            Set<ClouderaManagerProduct> filteredProducts = determineCdhRepoConfig(cluster, stackCdhRepoConfig, blueprintCdhVersion, image);
-            components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
+            components.addAll(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(
+                    cluster,
+                    determineCdhRepoConfig(cluster, stackCdhRepoConfig, blueprintCdhVersion, image))
+            );
         }
         if (isCdhParcelMissing(products, components)) {
             throw new BadRequestException("CDH parcel is missing from the cluster. "
@@ -146,12 +151,6 @@ public class ClouderaManagerClusterCreationSetupService {
         }
         components.addAll(cluster.getComponents());
         return components;
-    }
-
-    private List<ClusterComponent> convertParcelsToClusterComponents(Cluster cluster, Set<ClouderaManagerProduct> filteredProducts) {
-        return filteredProducts.stream()
-                .map(product -> new ClusterComponent(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), cluster))
-                .collect(Collectors.toList());
     }
 
     private void checkCmStackRepositories(ClusterComponent cmRepoConfig, Image image)
@@ -257,7 +256,7 @@ public class ClouderaManagerClusterCreationSetupService {
                 .noneMatch(product -> CDH.equals(product.getName()));
 
         boolean missingFromComponents = components.stream()
-                .filter(component -> component.getComponentType() == CDH_PRODUCT_DETAILS)
+                .filter(component -> centralCDHVersionCoordinator.isCdhProductDetails(component))
                 .map(component -> component.getAttributes().getUnchecked(ClouderaManagerProduct.class))
                 .noneMatch(product -> CDH.equals(product.getName()));
 

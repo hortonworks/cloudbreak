@@ -22,12 +22,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CsdParcelDecoratorTest {
@@ -38,7 +38,7 @@ public class CsdParcelDecoratorTest {
     private ParcelService parcelService;
 
     @Mock
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @InjectMocks
     private CsdParcelDecorator underTest;
@@ -51,7 +51,7 @@ public class CsdParcelDecoratorTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(componentsByBlueprint);
-        when(clouderaManagerProductsProvider.getProducts(componentsByBlueprint)).thenReturn(products);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)).thenReturn(products);
 
         underTest.decoratePillarWithCsdParcels(stack, servicePillar);
 
@@ -60,7 +60,7 @@ public class CsdParcelDecoratorTest {
         Map<String, List<String>> csdUrls = (Map<String, List<String>>) pillarProperties.getProperties().get("cloudera-manager");
         assertTrue(csdUrls.get("csd-urls").containsAll(CSD_LIST));
         verify(parcelService).getParcelComponentsByBlueprint(stack);
-        verify(clouderaManagerProductsProvider).getProducts(componentsByBlueprint);
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(componentsByBlueprint);
     }
 
     @Test
@@ -70,13 +70,13 @@ public class CsdParcelDecoratorTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(componentsByBlueprint);
-        when(clouderaManagerProductsProvider.getProducts(componentsByBlueprint)).thenReturn(Collections.emptySet());
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)).thenReturn(Collections.emptySet());
 
         underTest.decoratePillarWithCsdParcels(stack, servicePillar);
 
         assertNull(servicePillar.get("csd-downloader"));
         verify(parcelService).getParcelComponentsByBlueprint(stack);
-        verify(clouderaManagerProductsProvider).getProducts(Collections.emptySet());
+        verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(Collections.emptySet());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class CsdParcelDecoratorTest {
         underTest.decoratePillarWithCsdParcels(stack, servicePillar);
 
         assertNull(servicePillar.get("csd-downloader"));
-        verifyNoInteractions(parcelService, clouderaManagerProductsProvider);
+        verifyNoInteractions(parcelService, centralCDHVersionCoordinator);
     }
 
     private StackDto createStack(StackType stackType) {

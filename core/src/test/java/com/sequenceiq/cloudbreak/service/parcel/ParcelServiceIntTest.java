@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
@@ -61,6 +62,9 @@ public class ParcelServiceIntTest {
 
     @MockBean
     private ClusterComponentUpdater clusterComponentUpdater;
+
+    @MockBean
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @MockBean
     private ImageReaderService imageReaderService;

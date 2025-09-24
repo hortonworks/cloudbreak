@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
 @Component
@@ -33,6 +34,9 @@ public class ImageFilterParamsFactory {
 
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -52,7 +56,7 @@ public class ImageFilterParamsFactory {
             LOGGER.debug("For datalake clusters only the CDH parcel is related in CM: {}", stackProduct);
             return Map.of(stackProduct.getName(), stackProduct.getVersion());
         } else {
-            Set<ClouderaManagerProduct> products = clouderaManagerProductsProvider.getProducts(componentsByBlueprint);
+            Set<ClouderaManagerProduct> products = centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint);
             LOGGER.debug("The following parcels are related for this datahub cluster: {}", products);
             return products.stream().collect(Collectors.toMap(ClouderaManagerProduct::getName, ClouderaManagerProduct::getVersion));
         }

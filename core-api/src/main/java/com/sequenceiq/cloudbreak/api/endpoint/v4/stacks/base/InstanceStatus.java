@@ -22,6 +22,10 @@ public enum InstanceStatus {
     TERMINATED,
     ZOMBIE;
 
+    public static boolean isActive(InstanceStatus status) {
+        return status == SERVICES_RUNNING || status == SERVICES_HEALTHY;
+    }
+
     public String getAsHostState() {
         switch (this) {
             case SERVICES_HEALTHY:

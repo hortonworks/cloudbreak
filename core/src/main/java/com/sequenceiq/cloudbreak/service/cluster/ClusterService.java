@@ -363,10 +363,12 @@ public class ClusterService implements LocalPaasRdcViewExtender {
     }
 
     private void fireHostStatusUpdateNotification(Long stackId, List<InstanceMetadataView> updatedInstanceMetaData) {
-        String hostsWithStatuses = updatedInstanceMetaData.stream()
-                .map(im -> im.getDiscoveryFQDN() + " - " + im.getInstanceStatus())
-                .collect(Collectors.joining("\n"));
-        eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(), CLUSTER_HOSTS_STATES_UPDATED, Collections.singleton(hostsWithStatuses));
+        if (!updatedInstanceMetaData.isEmpty()) {
+            String hostsWithStatuses = updatedInstanceMetaData.stream()
+                    .map(im -> im.getDiscoveryFQDN() + " - " + im.getInstanceStatus())
+                    .collect(Collectors.joining("\n"));
+            eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(), CLUSTER_HOSTS_STATES_UPDATED, Collections.singleton(hostsWithStatuses));
+        }
     }
 
     private List<InstanceMetadataView> updateInstanceStatuses(List<InstanceMetadataView> notTerminatedInstanceMetaDatas,

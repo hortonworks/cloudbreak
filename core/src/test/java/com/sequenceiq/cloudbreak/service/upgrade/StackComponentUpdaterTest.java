@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +33,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageTestUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +50,12 @@ class StackComponentUpdaterTest {
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Mock
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private StackComponentUpdater underTest;
 
@@ -58,6 +70,7 @@ class StackComponentUpdaterTest {
         Image originalImage = ImageTestUtil.getImage(true, "originalImageUuid", STACK_VERSION, null);
         Component originalImageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
 
+        doNothing().when(stackService).updateRuntimeVersion(anyLong(), anySet());
         when(componentConfigProviderService.getComponentsByStackId(stack.getId())).thenReturn(Set.of(originalImageComponent));
         Set<Component> targetComponents = createComponents(stack, targetImage);
 
@@ -101,7 +114,7 @@ class StackComponentUpdaterTest {
     }
 
     private Component createStackRepoComponent(Stack stack) {
-        return new Component(ComponentType.CDH_PRODUCT_DETAILS, ComponentType.CDH_PRODUCT_DETAILS.name(), new Json("{\"dummy\":{}}"), stack);
+        return new Component(cdhProductDetails(), cdhProductDetails().name(), new Json("{\"dummy\":{}}"), stack);
     }
 
     private Component createCMComponennt(Stack stack) {

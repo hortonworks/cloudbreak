@@ -14,12 +14,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class ClusterComponentUpdater {
@@ -29,10 +30,24 @@ public class ClusterComponentUpdater {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
+    @Inject
+    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+
+    @Inject
+    private StackService stackService;
+
     public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents, boolean removeUnused) {
         Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
-        targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(clusterComponentsFromDb, targetComponent, stack.getCluster()));
+        targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(
+                clusterComponentsFromDb,
+                targetComponent,
+                stack.getCluster())
+        );
         clusterComponentConfigProvider.store(clusterComponentsFromDb);
+        stackService.updateRuntimeVersion(
+                stack.getId(),
+                centralCDHVersionCoordinator.calculateStackVersionFromClusterComponents(clusterComponentsFromDb)
+        );
         if (removeUnused) {
             removeUnusedComponents(targetComponents, clusterComponentsFromDb);
         }
@@ -40,7 +55,8 @@ public class ClusterComponentUpdater {
     }
 
     private Predicate<ClusterComponent> filterDiffBetweenComponentsFromImageAndDatabase(Set<Component> targetComponents) {
-        return component -> targetComponents.stream().noneMatch(componentFromImage -> componentFromImage.getName().contains(component.getName()));
+        return component -> targetComponents.stream()
+                .noneMatch(componentFromImage -> componentFromImage.getName().contains(component.getName()));
     }
 
     private void updateComponentFromDbAttributeField(Set<ClusterComponent> clusterComponentsFromDb, Component targetComponent, Cluster targetCluster) {
@@ -79,7 +95,7 @@ public class ClusterComponentUpdater {
 
     private void removeUnusedComponents(Set<Component> targetComponents, Set<ClusterComponent> clusterComponentsFromDb) {
         Set<ClusterComponent> unusedCdhProductDetails = clusterComponentsFromDb.stream()
-                .filter(component -> ComponentType.CDH_PRODUCT_DETAILS.equals(component.getComponentType()))
+                .filter(component -> centralCDHVersionCoordinator.isCdhProductDetails(component))
                 .filter(filterDiffBetweenComponentsFromImageAndDatabase(targetComponents))
                 .collect(Collectors.toSet());
         LOGGER.debug("Removing unused components: {}", unusedCdhProductDetails);
@@ -88,7 +104,7 @@ public class ClusterComponentUpdater {
 
     public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponentView> clusterComponentsByBlueprint,
             ParcelOperationStatus removalStatus) {
-        Set<ClusterComponentView> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        Set<ClusterComponentView> clusterComponentsFromDb = centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(clusterId);
         Set<ClusterComponentView> unusedComponents = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
         if (unusedComponents.isEmpty()) {
             LOGGER.debug("There is no cluster component to be deleted.");

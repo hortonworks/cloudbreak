@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measureAndWarnIfLong;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -82,10 +83,6 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterId(clusterId);
     }
 
-    public Set<ClusterComponentView> getComponentViewsByClusterId(Long clusterId) {
-        return componentViewRepository.findComponentViewByClusterId(clusterId);
-    }
-
     public Set<ClusterComponentView> getComponentsByClusterIdAndInComponentType(Long clusterId, Collection<ComponentType> types) {
         return componentViewRepository.findComponentsByClusterIdAndInComponentType(clusterId, types);
     }
@@ -108,7 +105,7 @@ public class ClusterComponentConfigProvider {
     }
 
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
-        Set<ClusterComponentView> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        Set<ClusterComponentView> components = getComponentListByType(clusterId, cdhProductDetails());
         return components.stream()
                 .map(component -> retrieveFromAttribute(component, ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
