@@ -102,7 +102,7 @@ public class EnvironmentDtoConverter {
                 .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()))
                 .withEnvironmentType(environmentView.getEnvironmentType())
                 .withRemoteEnvironmentCrn(environmentView.getRemoteEnvironmentCrn())
-                .withEncryptionProfileName(environmentView.getEncryptionProfileName());
+                .withEncryptionProfile(encryptionProfileDtoConverter.encryptionProfileToDto(environmentView.getEncryptionProfile()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -153,7 +153,7 @@ public class EnvironmentDtoConverter {
                 .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()))
                 .withEnvironmentType(environment.getEnvironmentType())
                 .withRemoteEnvironmentCrn(environment.getRemoteEnvironmentCrn())
-                .withEncryptionProfileName(environment.getEncryptionProfileName());
+                .withEncryptionProfile(encryptionProfileDtoConverter.encryptionProfileToDto(environment.getEncryptionProfile()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
@@ -346,4 +346,5 @@ public class EnvironmentDtoConverter {
     private boolean isComputeClusterEnabled(DefaultComputeCluster defaultComputeCluster) {
         return defaultComputeCluster != null && defaultComputeCluster.isCreate();
     }
+
 }

@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -21,6 +22,9 @@ public class EnvironmentServiceTest {
 
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
+
+    @Mock
+    private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
     @InjectMocks
     private EnvironmentService underTest;

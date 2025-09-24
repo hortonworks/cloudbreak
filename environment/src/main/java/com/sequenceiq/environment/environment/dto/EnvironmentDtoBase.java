@@ -104,7 +104,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String remoteEnvironmentCrn;
 
-    private String encryptionProfileName;
+    private EncryptionProfileDto encryptionProfile;
 
     @Override
     public Long getResourceId() {
@@ -460,12 +460,12 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
+    public EncryptionProfileDto getEncryptionProfile() {
+        return encryptionProfile;
     }
 
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
+    public void setEncryptionProfile(EncryptionProfileDto encryptionProfile) {
+        this.encryptionProfile = encryptionProfile;
     }
 
     public EnvironmentTelemetryDetails getTelemetryDetails() {
@@ -488,7 +488,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfileName=" + encryptionProfileName +
+                ", encryptionProfile=" + encryptionProfile +
                 '}';
     }
 
@@ -572,7 +572,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
         private String remoteEnvironmentCrn;
 
-        private String encryptionProfileName;
+        private EncryptionProfileDto encryptionProfile;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -767,8 +767,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
-        public B withEncryptionProfileName(String encryptionProfileName) {
-            this.encryptionProfileName = encryptionProfileName;
+        public B withEncryptionProfile(EncryptionProfileDto encryptionProfile) {
+            this.encryptionProfile = encryptionProfile;
             return (B) this;
         }
 
@@ -810,7 +810,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnableComputeCluster(enableComputeCluster);
             environmentDto.setEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType);
             environmentDto.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
-            environmentDto.setEncryptionProfileName(encryptionProfileName);
+            environmentDto.setEncryptionProfile(encryptionProfile);
         }
 
         public abstract T build();

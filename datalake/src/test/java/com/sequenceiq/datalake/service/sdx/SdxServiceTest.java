@@ -2473,46 +2473,6 @@ class SdxServiceTest {
         verify(multiAzDecorator, never()).decorateStackRequestWithPreviousNetwork(any(), any(), eq(subnetsByAz));
     }
 
-    @Test
-    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsNotSupportedByRuntime() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.1");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("custom-ep");
-
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(false);
-
-        BadRequestException exception =
-                assertThrows(BadRequestException.class, () -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-
-        assertEquals("Encryption Profile is not supported in 7.3.1 runtime. Please use 7.3.2 or above", exception.getMessage());
-    }
-
-    @Test
-    void testValidateRuntimeAndImageWhenDefaultEncryptionProfileIsUsed() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.1");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("cdp_default_1");
-
-        assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-    }
-
-    @Test
-    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsSupportedByRuntime() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.2");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("custom-ep");
-
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(true);
-
-        assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-    }
-
     private List<InstanceGroupV4Response> getInstanceGroups(CloudPlatform cloudPlatform) {
         List<InstanceGroupV4Response> instanceGroups = new ArrayList<>();
         if (cloudPlatform.equals(AZURE)) {

@@ -6,6 +6,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -126,7 +127,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String remoteEnvironmentCrn;
 
-        private String encryptionProfileName;
+        private EncryptionProfileResponse encryptionProfile;
 
         private Builder() {
         }
@@ -311,8 +312,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withEncryptionProfileName(String encryptionProfileName) {
-            this.encryptionProfileName = encryptionProfileName;
+        public Builder withEncryptionProfile(EncryptionProfileResponse encryptionProfile) {
+            this.encryptionProfile = encryptionProfile;
             return this;
         }
 
@@ -353,7 +354,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             simpleEnvironmentResponse.setEnvironmentType(environmentType);
             simpleEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
-            simpleEnvironmentResponse.setEncryptionProfileName(encryptionProfileName);
+            simpleEnvironmentResponse.setEncryptionProfile(encryptionProfile);
             return simpleEnvironmentResponse;
         }
     }

@@ -35,8 +35,6 @@ public class SdxVersionRuleEnforcer {
 
     public static final Versioned MIN_RUNTIME_VERSION_FOR_RMS = () -> "7.2.18";
 
-    public static final Versioned CUSTOM_ENCRYPTION_PROFILE_VERSION = () -> "7.3.2";
-
     private Map<CloudPlatform, Versioned> minRuntimeVersionForRaz;
 
     @PostConstruct
@@ -63,8 +61,4 @@ public class SdxVersionRuleEnforcer {
         return minRuntimeVersionForRaz.get(cloudPlatform).getVersion();
     }
 
-    protected boolean isCustomEncryptionProfileSupported(String runtime) {
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, CUSTOM_ENCRYPTION_PROFILE_VERSION) > -1;
-    }
 }

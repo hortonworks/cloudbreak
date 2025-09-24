@@ -508,6 +508,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
                 environment.setNetwork(null);
                 environment.setParentEnvironment(null);
                 environment.setProxyConfig(null);
+                environment.setEncryptionProfile(null);
                 measure(() -> environmentRepository.save(environment),
                         LOGGER,
                         "Environment detach took {} ms for environment {}", crn
