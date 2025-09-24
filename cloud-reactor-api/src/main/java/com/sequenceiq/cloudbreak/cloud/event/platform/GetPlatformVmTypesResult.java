@@ -18,4 +18,15 @@ public class GetPlatformVmTypesResult extends CloudPlatformResult {
     public CloudVmTypes getCloudVmTypes() {
         return vmTypes;
     }
+
+    @Override
+    public String toString() {
+        return "GetPlatformVmTypesResult{"
+                + "status=" + getStatus()
+                + ", statusReason='" + getStatusReason() + '\''
+                + ", errorDetails='" + getErrorDetails() + '\''
+                + ", resourceId='" + getResourceId() + '\''
+                + ", vmTypes='" + vmTypes + '\''
+                + '}';
+    }
 }
