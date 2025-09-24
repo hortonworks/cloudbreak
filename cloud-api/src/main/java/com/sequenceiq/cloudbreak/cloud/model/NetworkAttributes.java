@@ -96,7 +96,7 @@ public class NetworkAttributes implements Serializable {
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", networkId='" + networkId + '\'' +
-                ", outboundType=" + outboundType +
+                ", outboundType=" + getOutboundType() +
                 ", attributeType=" + attributeType +
                 '}';
     }
