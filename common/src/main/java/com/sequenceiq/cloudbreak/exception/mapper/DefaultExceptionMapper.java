@@ -11,7 +11,7 @@ public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 
     @Override
     protected String getErrorMessage(Exception exception) {
-        return "Default error handler: " + exception.getMessage();
+        return "Default error handler: " + super.getErrorMessage(exception);
     }
 
     @Override

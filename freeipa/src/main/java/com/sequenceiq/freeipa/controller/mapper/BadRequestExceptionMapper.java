@@ -11,11 +11,6 @@ import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 public class BadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
     @Override
-    protected String getErrorMessage(BadRequestException exception) {
-        return exception.getMessage();
-    }
-
-    @Override
     public Status getResponseStatus(BadRequestException exception) {
         return Status.BAD_REQUEST;
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.exception.mapper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ abstract class EnvironmentBaseExceptionMapper<T extends Throwable> extends BaseE
 
     protected String getErrorMessage(T throwable) {
         Validate.notNull(throwable, "Throwable should not be null!");
-        return ExceptionUtils.getRootCause(throwable).getMessage();
+        Throwable rootCause = ExceptionUtils.getRootCause(throwable);
+        String message = rootCause.getMessage();
+        return StringUtils.isNotEmpty(message) ? message : rootCause.getClass().getSimpleName();
     }
 }

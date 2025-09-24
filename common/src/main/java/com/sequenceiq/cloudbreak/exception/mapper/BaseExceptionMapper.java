@@ -9,6 +9,7 @@ import static ch.qos.logback.classic.Level.WARN_INT;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +48,7 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
     }
 
     protected String getErrorMessage(E exception) {
-        String message = exception.getMessage();
-        LOGGER.debug("Exception text has been mapped: {}", message);
-        return message;
+        return StringUtils.isNotEmpty(exception.getMessage()) ? exception.getMessage() : exception.getClass().getSimpleName();
     }
 
     public String getErrorMessageFromThrowable(Throwable e) {
