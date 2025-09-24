@@ -338,7 +338,7 @@ integrationtest:
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
-      volumeType: pd-standard
+      volumeType: pd-balanced
     storageOptimizedInstance:
       type: n2-highmem-8
       rootVolumeSize: 200
