@@ -9,14 +9,16 @@ import org.testng.annotations.Test;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.ShowBlueprintUtil;
@@ -27,7 +29,10 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Override
     protected BlueprintTestClient blueprintTestClient() {
@@ -46,15 +51,15 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
         String cm = resourcePropertyProvider().getName();
 
         testContext
-                .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterTestDto.class)
+                .given(cm, DistroXClouderaManagerTestDto.class)
+                .given(cmcluster, DistroXClusterTestDto.class)
                 .withClouderaManager(cm)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE)
-                .given(StackTestDto.class)
+                .given(DistroXTestDto.class)
                 .withCluster(cmcluster)
                 .withName(clusterName)
-                .when(stackTestClient.blueprintRequestV4())
+                .when(distroXTestClient.blueprintRequest())
                 .then(ShowBlueprintUtil::checkFutureBlueprint)
                 .then(this::checkValidFutureClouderaManagerTemplate)
                 .validate();
@@ -71,33 +76,36 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
         String cmcluster = resourcePropertyProvider().getName();
         String cm = resourcePropertyProvider().getName();
         testContext
-                .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterTestDto.class)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(cm, DistroXClouderaManagerTestDto.class)
+                .given(cmcluster, DistroXClusterTestDto.class)
                 .withClouderaManager(cm)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE)
-                .given(StackTestDto.class).withCluster(cmcluster)
+                .given(DistroXTestDto.class).withCluster(cmcluster)
                 .withName(clusterName)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .when(stackTestClient.getV4())
+                .when(distroXTestClient.create())
+                .awaitForFlow()
+                .when(distroXTestClient.get())
                 .then(ShowBlueprintUtil::checkGeneratedBlueprint)
                 .then(this::checkValidClouderaManagerTemplate)
                 .validate();
     }
 
-    private StackTestDto checkValidFutureClouderaManagerTemplate(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getGeneratedBlueprint().getBlueprintText();
+    private DistroXTestDto checkValidFutureClouderaManagerTemplate(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedBlueprintText = distroXTestDto.getGeneratedBlueprint().getBlueprintText();
         ApiClusterTemplate cmTemplate = parseCmTemplate(extendedBlueprintText);
         checkHostNumberNullOrZero(cmTemplate);
-        return stackTestDto;
+        return distroXTestDto;
     }
 
-    private StackTestDto checkValidClouderaManagerTemplate(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getResponse().getCluster().getExtendedBlueprintText();
+    private DistroXTestDto checkValidClouderaManagerTemplate(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedBlueprintText = distroXTestDto.getResponse().getCluster().getExtendedBlueprintText();
         ApiClusterTemplate cmTemplate = parseCmTemplate(extendedBlueprintText);
         checkHostNumberGreaterThanZero(cmTemplate);
-        return stackTestDto;
+        return distroXTestDto;
     }
 
     private void checkHostNumberGreaterThanZero(ApiClusterTemplate cmTemplate) {

@@ -25,10 +25,7 @@ import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
-import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
-import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -55,12 +52,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private RecipeTestClient recipeTestClient;
-
-    @Inject
-    private StackTestClient stackTestClient;
-
-    @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
@@ -68,9 +59,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private SshJClientActions sshJClientActions;
-
-    @Inject
-    private ImageCatalogTestClient imageCatalogTestClient;
 
     @Inject
     private SdxAssertion sdxAssertion;

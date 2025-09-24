@@ -4,20 +4,20 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class LdapClusterTest extends AbstractMockTest {
 
     @Inject
-    private LdapTestClient ldapTestClient;
+    private SdxTestClient sdxTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -27,10 +27,12 @@ public class LdapClusterTest extends AbstractMockTest {
     public void testCreateClusterWithLdap(MockedTestContext testContext) {
 
         testContext
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withCluster()
-                .when(stackTestClient.createV4())
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockCm().externalUserMappings().post().times(1).verify()

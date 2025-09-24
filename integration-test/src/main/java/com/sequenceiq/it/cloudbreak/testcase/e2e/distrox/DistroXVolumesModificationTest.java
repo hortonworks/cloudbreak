@@ -25,7 +25,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -69,9 +68,6 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
-
-    @Inject
-    private StackTestClient stackTestClient;
 
     @Inject
     private SELinuxAssertions selinuxAssertions;
@@ -130,7 +126,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
-            .when(stackTestClient.getStackWithResources(), RunningParameter.key("dx"))
+            .when(distroXTestClient.getStackWithResources(), RunningParameter.key("dx"))
             .then((tc, testDto, client) -> {
                 validateRootDisks(testDto, tc, client, cloudPlatform);
                 return testDto;

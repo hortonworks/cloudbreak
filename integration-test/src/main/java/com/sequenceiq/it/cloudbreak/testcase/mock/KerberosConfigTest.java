@@ -9,25 +9,23 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerber
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
-import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class KerberosConfigTest extends AbstractMockTest {
 
     private static final String SALT_HIGHSTATE = "state.highstate";
 
     @Inject
-    private KerberosTestClient kerberosTestClient;
+    private SdxTestClient sdxTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
 
     @Test(dataProvider = "dataProviderForTest")
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
@@ -35,13 +33,12 @@ public class KerberosConfigTest extends AbstractMockTest {
         CreateKerberosConfigRequest request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given("master", InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.MASTER)
-                .withNodeCount(1)
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-                .when(stackTestClient.createV4())
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockSalt().run().post().bodyContains(SALT_HIGHSTATE, 1).atLeast(1).verify()
@@ -56,13 +53,12 @@ public class KerberosConfigTest extends AbstractMockTest {
             then = "the cluster should not been kerberized")
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         testContext
-                .given("master", InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.MASTER)
-                .withNodeCount(1)
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-                .when(stackTestClient.createV4())
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .await(STACK_AVAILABLE)
                 .validate();
     }

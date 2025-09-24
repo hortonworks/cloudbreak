@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -73,9 +72,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
-
-    @Inject
-    private StackTestClient stackTestClient;
 
     @Inject
     private SshJUtil sshJUtil;

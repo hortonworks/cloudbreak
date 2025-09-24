@@ -8,14 +8,16 @@ import jakarta.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTest {
 
@@ -23,7 +25,10 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -35,14 +40,17 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         testContext
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(clouderaManager, DistroXClouderaManagerTestDto.class)
+                .given(cluster, DistroXClusterTestDto.class)
                 .withBlueprintName(name)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
+                .given(DistroXTestDto.class).withCluster(cluster)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .validate();
     }
 
@@ -56,39 +64,24 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String partialProduct = "partialProduct";
-        String versionKey = "versionEx";
-        String parcelKey = "parcelEx";
-        String nameKey = "nameEx";
 
-        String versionValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.version\",\"result\":\"must not be empty\"\\}\\]";
-        String parcelValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.parcel\",\"result\":\"must not be empty\"\\}\\]";
-        String nameValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.name\",\"result\":\"must not be empty\"\\}\\]";
+        String nameValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.name\",\"result\":\"must not be null\"\\}\\]";
 
         testContext
-                .given(partialProduct, ClouderaManagerProductTestDto.class)
-                .withName("CDH")
-                .withVersion("")
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(partialProduct, DistroXClouderaManagerProductTestDto.class)
+                .withVersion("7.0.0.0")
                 .withParcel("http://cdh/parcel")
-                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .given(clouderaManager, DistroXClouderaManagerTestDto.class)
                 .withClouderaManagerProduct(partialProduct)
-                .given(cluster, ClusterTestDto.class)
+                .given(cluster, DistroXClusterTestDto.class)
                 .withBlueprintName(name)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(versionValidation))
-                .given(partialProduct, ClouderaManagerProductTestDto.class)
-                .withName("CDH")
-                .withVersion("7.0.0.0")
-                .withParcel("")
-                .given(StackTestDto.class)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(parcelValidation))
-                .given(partialProduct, ClouderaManagerProductTestDto.class)
-                .withName("")
-                .withVersion("7.0.0.0")
-                .withParcel("http://cdh/parcel")
-                .given(StackTestDto.class)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(nameValidation))
+                .given(DistroXTestDto.class).withCluster(cluster)
+                .whenException(distroXTestClient.create(), BadRequestException.class, expectedPayload(nameValidation))
                 .validate();
     }
 

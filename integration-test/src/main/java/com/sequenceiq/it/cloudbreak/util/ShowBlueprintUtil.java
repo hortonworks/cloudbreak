@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
@@ -15,16 +15,16 @@ public class ShowBlueprintUtil {
 
     }
 
-    public static StackTestDto checkFutureBlueprint(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getGeneratedBlueprint().getBlueprintText();
+    public static DistroXTestDto checkFutureBlueprint(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedBlueprintText = distroXTestDto.getGeneratedBlueprint().getBlueprintText();
         validateGeneratedBlueprint(extendedBlueprintText);
-        return stackTestDto;
+        return distroXTestDto;
     }
 
-    public static StackTestDto checkGeneratedBlueprint(TestContext testContext, StackTestDto stackTestDto, CloudbreakClient cloudbreakClient) {
-        String extendedBlueprintText = stackTestDto.getResponse().getCluster().getExtendedBlueprintText();
+    public static DistroXTestDto checkGeneratedBlueprint(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        String extendedBlueprintText = distroXTestDto.getResponse().getCluster().getExtendedBlueprintText();
         validateGeneratedBlueprint(extendedBlueprintText);
-        return stackTestDto;
+        return distroXTestDto;
     }
 
     private static void validateGeneratedBlueprint(String extendedBlueprintText) {

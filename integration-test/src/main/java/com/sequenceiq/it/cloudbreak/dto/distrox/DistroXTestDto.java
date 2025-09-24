@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 import static java.lang.String.format;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -327,6 +328,23 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto withRecipe(String recipeName) {
         InstanceGroupV1Request instanceGroupV1Request = getRequest().getInstanceGroups().iterator().next();
+        instanceGroupV1Request.setRecipeNames(Sets.newHashSet());
+        instanceGroupV1Request.getRecipeNames().add(recipeName);
+        return this;
+    }
+
+    public DistroXTestDto withRecipes(String... recipeNames) {
+        InstanceGroupV1Request instanceGroupV1Request = getRequest().getInstanceGroups().iterator().next();
+        instanceGroupV1Request.setRecipeNames(Sets.newHashSet());
+        instanceGroupV1Request.getRecipeNames().addAll(Arrays.stream(recipeNames).toList());
+        return this;
+    }
+
+    public DistroXTestDto withRecipe(String recipeName, String groupName) {
+        InstanceGroupV1Request instanceGroupV1Request = getRequest().getInstanceGroups().stream()
+                .filter(group -> StringUtils.equalsIgnoreCase(group.getName(), groupName))
+                .findFirst()
+                .orElseThrow();
         instanceGroupV1Request.setRecipeNames(Sets.newHashSet());
         instanceGroupV1Request.getRecipeNames().add(recipeName);
         return this;

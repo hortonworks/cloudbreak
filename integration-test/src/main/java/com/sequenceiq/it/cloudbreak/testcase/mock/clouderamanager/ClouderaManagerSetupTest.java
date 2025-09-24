@@ -4,16 +4,21 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 
 public class ClouderaManagerSetupTest extends AbstractMockTest {
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private SdxTestClient sdxTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -22,8 +27,12 @@ public class ClouderaManagerSetupTest extends AbstractMockTest {
             then = "ClouderaManager user endpoints should be invoked with the proper requests")
     public void verifyCallsAgainstCmUserCreation(MockedTestContext testContext) {
         testContext
-                .given(StackTestDto.class)
-                .when(stackTestClient.createV4())
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockCm().users().get().atLeast(1).verify()

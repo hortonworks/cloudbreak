@@ -5,15 +5,20 @@ import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class MockStackCreationTest extends AbstractMockTest {
 
     @Inject
-    private StackTestClient stackTestClient;
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -21,9 +26,14 @@ public class MockStackCreationTest extends AbstractMockTest {
             when = "create stack twice",
             then = "getting BadRequestException in the second time because the names are same")
     public void testAttemptToCreateTwoRegularClusterWithTheSameName(MockedTestContext testContext) {
-        testContext.given(StackTestDto.class)
-                .when(stackTestClient.createV4())
-                .whenException(stackTestClient.createV4(), BadRequestException.class)
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withEnvironment()
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .whenException(distroXTestClient.create(), BadRequestException.class)
                 .validate();
     }
 }

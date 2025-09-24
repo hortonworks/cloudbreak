@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXAttachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCmPackageSyncAction;
@@ -44,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXVerticalScaleAction;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetWithResourcesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -194,5 +196,13 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> syncPackages() {
         return new DistroXCmPackageSyncAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> getStackWithResources() {
+        return new StackGetWithResourcesAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> attachRecipe() {
+        return new DistroXAttachRecipeAction();
     }
 }

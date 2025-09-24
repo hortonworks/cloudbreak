@@ -4,22 +4,23 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AV
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
@@ -29,9 +30,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
     private static final String NEW_CREDENTIAL_KEY = "newCred";
 
     @Inject
-    private StackTestClient stackTestClient;
-
-    @Inject
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
@@ -39,6 +37,12 @@ public class EnvironmentClusterTest extends AbstractMockTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -61,13 +65,15 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
-                .given(StackTestDto.class)
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .given(newStack, StackTestDto.class)
-                .when(stackTestClient.createV4(), RunningParameter.key(newStack))
-                .await(STACK_AVAILABLE, RunningParameter.key(newStack))
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
+                .given(newStack, DistroXTestDto.class)
+                .when(distroXTestClient.create(), RunningParameter.key(newStack))
+                .awaitForFlow(RunningParameter.key(newStack))
                 .validate();
     }
 
@@ -84,10 +90,12 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
-                .given(StackTestDto.class)
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .given(NEW_CREDENTIAL_KEY, CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
@@ -106,23 +114,32 @@ public class EnvironmentClusterTest extends AbstractMockTest {
     public void testClusterWithEmptyEnvironmentRequest(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
-                .given(StackTestDto.class)
-                .withEnvironmentCrn("")
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage("Environment CRN cannot be null or empty."))
+                .given(FreeIpaTestDto.class)
+                .withEnvironment()
+                .when(freeIpaTestClient.create())
+                .awaitForFlow()
+                .given(SdxInternalTestDto.class)
+                .withEnvironment()
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .withEnvironmentName("")
+                .whenException(distroXTestClient.create(), TestFailException.class, expectedMessage("Env name cannot be null"))
                 .validate();
     }
 
     private void checkCredentialAttachedToCluster(MockedTestContext testContext) {
-        testContext.given(StackTestDto.class)
-                .withName(testContext.get(StackTestDto.class).getName())
-                .when(stackTestClient.getV4())
+        testContext.given(DistroXTestDto.class)
+                .withName(testContext.get(DistroXTestDto.class).getName())
+                .when(distroXTestClient.get())
                 .then(EnvironmentClusterTest::checkNewCredentialInStack)
                 .validate();
     }
 
-    private static StackTestDto checkNewCredentialInStack(TestContext testContext, StackTestDto stack, CloudbreakClient client) {
+    private static DistroXTestDto checkNewCredentialInStack(TestContext testContext, DistroXTestDto stack, CloudbreakClient client) {
         String credentialName = stack.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
             throw new TestFailException("Credential is not attached to cluster");

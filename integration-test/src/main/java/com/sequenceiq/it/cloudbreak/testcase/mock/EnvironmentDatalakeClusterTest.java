@@ -1,182 +1,66 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
-
-    private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
-
-    private static final String VALID_LOCATION = "London";
-
-    @Inject
-    private LdapTestClient ldapTestClient;
-
-    @Inject
-    private StackTestClient stackTestClient;
-
-    @Inject
-    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultBlueprints(testContext);
-    }
+    @Inject
+    private SdxTestClient sdxTestClient;
 
-    // TODO: Update to SDX endpoint
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Inject
+    private DistroXTestClient distroXTestClient;
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "Create datalake cluster and then delete",
             when = "create cluster and if available then delete",
             then = "the cluster should work")
     public void testCreateDatalakeDelete(MockedTestContext testContext) {
-        String hivedb = resourcePropertyProvider().getName();
-        String rangerdb = resourcePropertyProvider().getName();
-        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentTestDto.class)
-                .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.create())
-                .given(ClusterTestDto.class).valid()
-                .withRdsConfigNames(rdsList)
-                .given("placement", PlacementSettingsTestDto.class)
-
-                .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-
-                .when(stackTestClient.createV4())
-                .when(stackTestClient.deleteV4(), RunningParameter.withoutLogError())
-                .await(AbstractMockTest.STACK_DELETED)
-
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withEnvironment()
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .withEnvironment()
+                .when(distroXTestClient.create())
+                .awaitForFlow()
+                .when(distroXTestClient.delete(), RunningParameter.withoutLogError())
+                .await(STACK_DELETED)
                 .given(EnvironmentTestDto.class)
-                .withName(testContext.get(EnvironmentTestDto.class).getName())
-
                 .when(environmentTestClient.describe())
                 .validate();
     }
 
-    // TODO: Update to new SDX endpoint
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "Create datalake cluster and then delete resources",
-            when = "create cluster and then delete resources",
-            then = "the resource deletion does not work because the resources attached to the cluster")
-    public void testCreateDatalakeDeleteFails(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        String hivedb = resourcePropertyProvider().getName();
-        String rangerdb = resourcePropertyProvider().getName();
-        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentTestDto.class)
-                .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.create())
-                .given(ClusterTestDto.class).valid()
-                .withRdsConfigNames(rdsList)
-                .given("placement", PlacementSettingsTestDto.class)
-                .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-                .when(stackTestClient.createV4())
-                .given(LdapTestDto.class)
-                .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV1(), RunningParameter.key(forbiddenKey))
-                .given(RedbeamsDatabaseTestDto.class)
-                .deleteGiven(RedbeamsDatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
-                .given(EnvironmentTestDto.class)
-                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.delete(), RunningParameter.key(forbiddenKey))
-                .validate();
-    }
-
-    // TODO: Update to SDX endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "Create two datalake cluster in one environment",
-            when = "create cluster called twice",
-            then = "the cluster creation should work in both case")
-    public void testSameEnvironmentWithDifferentDatalakes(MockedTestContext testContext) {
-        String hivedb = resourcePropertyProvider().getName();
-        String rangerdb = resourcePropertyProvider().getName();
-        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.create())
-                .validate();
-        createDatalake(testContext, rdsList);
-        createDatalake(testContext, rdsList);
-    }
-
-    // TODO: Update to SDX endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "Create datalake cluster and workload",
             when = "call create cluster with datalake and with workload config",
             then = "will work fine")
     public void testSameEnvironmentInDatalakeAndWorkload(MockedTestContext testContext) {
-        String dlName = resourcePropertyProvider().getName();
-        String hivedb = resourcePropertyProvider().getName();
-        String rangerdb = resourcePropertyProvider().getName();
-        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.create())
-                .given("placement", PlacementSettingsTestDto.class)
-                .given(StackTestDto.class)
-                .withName(dlName)
-                .withPlacement("placement")
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .validate();
-        createDatalake(testContext, rdsList);
-    }
-
-    private void createDatalake(MockedTestContext testContext, Set<String> rdsList) {
-        testContext.given("placement", PlacementSettingsTestDto.class)
-                .given(ClusterTestDto.class).valid()
-                .withRdsConfigNames(rdsList)
-                .given(StackTestDto.class)
-                .withName(resourcePropertyProvider().getName())
-                .withPlacement("placement")
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-                .when(stackTestClient.createV4())
-                .validate();
-    }
-
-    private Set<String> createDatalakeResources(MockedTestContext testContext, String hiveDb, String rangerDb) {
-        createDefaultLdapConfig(testContext);
-        createDefaultKerberosConfig(testContext);
         testContext
-                .given(RedbeamsDatabaseTestDto.class)
-                .withName(hiveDb)
-                .when(databaseTestClient.createV4())
-                .withName(rangerDb)
-                .withType("RANGER")
-                .when(databaseTestClient.createV4());
-        Set<String> rdsSet = new HashSet<>();
-        rdsSet.add(hiveDb);
-        rdsSet.add(rangerDb);
-        return rdsSet;
+                .given(SdxInternalTestDto.class)
+                .withEnvironment()
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .withEnvironment()
+                .when(distroXTestClient.create())
+                .validate();
     }
 }
