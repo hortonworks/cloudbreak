@@ -55,14 +55,6 @@ public interface EncryptionProfileEndpoint {
     EncryptionProfileResponse getByCrn(@PathParam("crn") String encryptionProfileCrn);
 
     @GET
-    @Path("default")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EncryptionProfileOpDescription.GET_DEFAULT,
-            description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES, operationId = "getDefaultEncryptionProfile",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    EncryptionProfileResponse getDefaultEncryptionProfile();
-
-    @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = EncryptionProfileOpDescription.LIST, description = EncryptionProfileDescriptor.ENCRYPTION_PROFILE_NOTES,

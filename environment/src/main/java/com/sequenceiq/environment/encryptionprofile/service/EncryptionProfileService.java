@@ -95,15 +95,16 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
     }
 
     public EncryptionProfile getByNameAndAccountId(String encryptionProfileName, String accountId) {
+        Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
         if (StringUtils.isNotEmpty(encryptionProfileName)) {
-            return getEncryptionProfileByName(encryptionProfileName, accountId);
+            return getEncryptionProfileByName(encryptionProfileName, accountId, defaultEncryptionProfileMap);
         } else {
-            return getClouderaDefaultEncryptionProfile();
+            return getClouderaDefaultEncryptionProfile(defaultEncryptionProfileMap);
         }
     }
 
-    private EncryptionProfile getEncryptionProfileByName(String encryptionProfileName, String accountId) {
-        Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
+    private EncryptionProfile getEncryptionProfileByName(String encryptionProfileName, String accountId, Map<String,
+            EncryptionProfile> defaultEncryptionProfileMap) {
         Optional<EncryptionProfile> encryptionProfileOp = repository.findByNameAndAccountId(encryptionProfileName, accountId);
         if (encryptionProfileOp.isPresent()) {
             return encryptionProfileOp.get();
@@ -116,8 +117,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         }
     }
 
-    public EncryptionProfile getClouderaDefaultEncryptionProfile() {
-        Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
+    private EncryptionProfile getClouderaDefaultEncryptionProfile(Map<String, EncryptionProfile> defaultEncryptionProfileMap) {
         return defaultEncryptionProfileMap.get(DEFAULT_NAME);
     }
 

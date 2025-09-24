@@ -9,8 +9,6 @@ public class EncryptionProfileOpDescription {
 
     public static final String GET_BY_CRN = "get encryption profile by crn";
 
-    public static final String GET_DEFAULT = "get default encryption profile";
-
     public static final String LIST = "list encryption profiles";
 
     public static final String DELETE_BY_NAME = "delete encryption profile by name";

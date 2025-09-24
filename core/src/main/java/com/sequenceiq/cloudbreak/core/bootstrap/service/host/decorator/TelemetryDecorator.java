@@ -128,8 +128,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setTelemetry(telemetry);
         DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
 
-        EncryptionProfileResponse encryptionProfileResponse = environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(
-                environmentResponse.getEncryptionProfileName());
+        EncryptionProfileResponse encryptionProfileResponse = environmentService.getEncryptionProfileByName(environmentResponse.getEncryptionProfileName());
         Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)

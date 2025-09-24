@@ -9,7 +9,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -130,14 +129,10 @@ public class EnvironmentService {
         return false;
     }
 
-    public EncryptionProfileResponse getEncryptionProfileByNameOrDefaultIfEmpty(String name) {
+    public EncryptionProfileResponse getEncryptionProfileByName(String name) {
         try {
-            if (StringUtils.isNotEmpty(name)) {
-                return ThreadBasedUserCrnProvider.doAsInternalActor(
-                        () -> encryptionProfileEndpoint.getByName(name));
-            } else {
-                return getDefaultEncryptionProfile();
-            }
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByName(name));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to GET encryption profile by name: %s, due to: %s. %s.", name, e.getMessage(), errorMessage);
@@ -149,10 +144,4 @@ public class EnvironmentService {
             throw new CloudbreakServiceException(message, e);
         }
     }
-
-    private EncryptionProfileResponse getDefaultEncryptionProfile() {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> encryptionProfileEndpoint.getDefaultEncryptionProfile());
-    }
-
 }
