@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -26,7 +26,6 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -79,10 +78,7 @@ public class FreeIpaConfigService {
     private HybridReverseDnsZoneCalculator hybridReverseDnsZoneCalculator;
 
     @Inject
-    private EncryptionProfileProvider encryptionProfileProvider;
-
-    @Inject
-    private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
@@ -113,8 +109,7 @@ public class FreeIpaConfigService {
                 .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider,
-                        cachedEncryptionProfileClientService.getByName(environmentResponse.getEncryptionProfileName())))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(defaultEncryptionProfileProvider, environmentResponse.getEncryptionProfile()))
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -88,7 +88,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final EnvironmentService environmentService;
 
-    private final EncryptionProfileProvider encryptionProfileProvider;
+    private final DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
@@ -97,7 +97,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             MonitoringUrlResolver monitoringUrlResolver,
             ComponentConfigProviderService componentConfigProviderService,
             ClusterComponentConfigProvider clusterComponentConfigProvider,
-            EncryptionProfileProvider encryptionProfileProvider,
+            DefaultEncryptionProfileProvider defaultEncryptionProfileProvider,
             @Value("${info.app.version:}") String version,
             EnvironmentService environmentService) {
         this.altusMachineUserService = altusMachineUserService;
@@ -109,7 +109,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
         this.environmentService = environmentService;
-        this.encryptionProfileProvider = encryptionProfileProvider;
+        this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
     }
 
     @Override
@@ -127,13 +127,12 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
         DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
-
-        EncryptionProfileResponse encryptionProfileResponse = environmentService.getEncryptionProfileByName(environmentResponse.getEncryptionProfileName());
+        EncryptionProfileResponse encryptionProfileResponse = environmentResponse.getEncryptionProfile();
         Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);
-        List<String> tlsCipherSuitesBlackBoxExporter = encryptionProfileProvider
+        List<String> tlsCipherSuitesBlackBoxExporter = defaultEncryptionProfileProvider
                 .getTlsCipherSuitesIanaList(userCipherSuits, BLACKBOX_EXPORTER);
         telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         try {

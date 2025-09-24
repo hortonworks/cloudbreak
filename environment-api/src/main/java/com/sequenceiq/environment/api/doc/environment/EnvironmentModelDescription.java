@@ -203,7 +203,7 @@ public class EnvironmentModelDescription {
 
     public static final String REMOTE_ENV_CRN = "CRN of remote Environment for hybrid environment";
 
-    public static final String ENCRYPTION_PROFILE = "Encryption profile name for TLS and ciphers configuration";
+    public static final String ENCRYPTION_PROFILE = "Encryption profile for TLS and ciphers configuration";
 
     public static final String ENCRYPTION_PROFILE_NAME = "Name of encryption profile to be used. " +
             "If not specified, the default encryption profile will be used.";
