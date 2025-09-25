@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -68,7 +68,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
-import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -121,10 +120,7 @@ public class TelemetryConfigServiceTest {
     private CachedEnvironmentClientService environmentService;
 
     @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
-
-    @Mock
-    private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -232,19 +228,17 @@ public class TelemetryConfigServiceTest {
                         "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
-        detailedEnvironmentResponse.setEncryptionProfileName("epName");
+        detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true));
-        given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+        given(defaultEncryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
                 .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(cachedEncryptionProfileClientService.getByName(detailedEnvironmentResponse.getEncryptionProfileName())).willReturn(encryptionProfileResponse);
-
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(stack);
         // THEN
@@ -269,7 +263,7 @@ public class TelemetryConfigServiceTest {
                         "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
-        detailedEnvironmentResponse.setEncryptionProfileName("epName");
+        detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
@@ -284,8 +278,7 @@ public class TelemetryConfigServiceTest {
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(cachedEncryptionProfileClientService.getByName(detailedEnvironmentResponse.getEncryptionProfileName())).willReturn(encryptionProfileResponse);
-        given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+        given(defaultEncryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
                 .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
 
         // WHEN

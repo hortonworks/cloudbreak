@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 
@@ -21,14 +21,14 @@ import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @InjectMocks
     private EncryptionProfileRequestToEncryptionProfileConverter underTest;
 
     @Test
     void testConvertName() {
-        when(encryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
                 .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
@@ -39,7 +39,7 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertDescription() {
-        when(encryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
                 .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
@@ -50,7 +50,7 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertTlsVersions() {
-        when(encryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
                 .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(
@@ -62,7 +62,7 @@ class EncryptionProfileRequestToEncryptionProfileConverterTest {
 
     @Test
     void testConvertCipherSuites() {
-        when(encryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
+        when(defaultEncryptionProfileProvider.convertCipherSuitesToIana(CIPHER_SUITES))
                 .thenReturn(CIPHER_SUITES);
 
         EncryptionProfile result = underTest.convert(

@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -127,21 +126,5 @@ public class EnvironmentService {
             return desiredStatuses.contains(environmentResponse.getEnvironmentStatus());
         }
         return false;
-    }
-
-    public EncryptionProfileResponse getEncryptionProfileByName(String name) {
-        try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> encryptionProfileEndpoint.getByName(name));
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to GET encryption profile by name: %s, due to: %s. %s.", name, e.getMessage(), errorMessage);
-            LOGGER.error(message, e);
-            throw new CloudbreakServiceException(message, e);
-        } catch (Exception e) {
-            String message = String.format("Failed to GET encryption profile by name: %s, due to: '%s' ", name, e.getMessage());
-            LOGGER.error(message, e);
-            throw new CloudbreakServiceException(message, e);
-        }
     }
 }

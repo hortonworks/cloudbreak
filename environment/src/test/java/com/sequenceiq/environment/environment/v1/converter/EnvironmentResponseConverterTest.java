@@ -61,6 +61,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EncryptionProfileDto.Builder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoBase;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
@@ -136,7 +137,7 @@ class EnvironmentResponseConverterTest {
         ProxyResponse proxyResponse = mock(ProxyResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(credentialConverter.convert(environment.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -147,6 +148,7 @@ class EnvironmentResponseConverterTest {
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
         when(dataServicesConverter.convertToResponse(environment.getDataServices())).thenReturn(dataServicesResponse);
+        when(encryptionProfileResponseConverter.dtoToResponse(environment.getEncryptionProfile())).thenReturn(encryptionProfileResponse);
 
         DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
 
@@ -194,6 +196,8 @@ class EnvironmentResponseConverterTest {
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
         verify(dataServicesConverter).convertToResponse(environment.getDataServices());
         verify(dataServicesConverter).convertToResponse(environment.getDataServices());
+        verify(encryptionProfileResponseConverter).dtoToResponse(environment.getEncryptionProfile());
+
     }
 
     @ParameterizedTest
@@ -209,7 +213,7 @@ class EnvironmentResponseConverterTest {
                 .build();
         environment.setEnvironmentType(null);
         environment.setRemoteEnvironmentCrn(null);
-        environment.setEncryptionProfileName(null);
+        environment.setEncryptionProfile(null);
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -229,6 +233,7 @@ class EnvironmentResponseConverterTest {
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
         when(dataServicesConverter.convertToResponse(environment.getDataServices())).thenReturn(dataServicesResponse);
+        when(encryptionProfileResponseConverter.dtoToResponse(environment.getEncryptionProfile())).thenReturn(null);
 
         DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
 
@@ -272,7 +277,7 @@ class EnvironmentResponseConverterTest {
         assertEquals("outbound", actual.getExternalizedComputeCluster().getAzure().getOutboundType());
         assertNull(actual.getEnvironmentType());
         assertNull(actual.getRemoteEnvironmentCrn());
-        assertNull(actual.getEncryptionProfileName());
+        assertNull(actual.getEncryptionProfile());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -281,6 +286,8 @@ class EnvironmentResponseConverterTest {
         verify(proxyConfigToProxyResponseConverter).convert(environment.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
         verify(dataServicesConverter).convertToResponse(environment.getDataServices());
+        verify(encryptionProfileResponseConverter).dtoToResponse(environment.getEncryptionProfile());
+
     }
 
     @ParameterizedTest
@@ -294,7 +301,7 @@ class EnvironmentResponseConverterTest {
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(credentialViewConverter.convertResponse(environmentDto.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -304,6 +311,7 @@ class EnvironmentResponseConverterTest {
         when(networkDtoToResponseConverter.convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
         when(dataServicesConverter.convertToResponse(environmentDto.getDataServices())).thenReturn(dataServicesResponse);
+        when(encryptionProfileResponseConverter.dtoToResponse(environmentDto.getEncryptionProfile())).thenReturn(encryptionProfileResponse);
 
         SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentDto, true, true);
 
@@ -344,6 +352,8 @@ class EnvironmentResponseConverterTest {
         verify(proxyConfigToProxyResponseConverter).convertToView(environmentDto.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false);
         verify(dataServicesConverter).convertToResponse(environmentDto.getDataServices());
+        verify(encryptionProfileResponseConverter).dtoToResponse(environmentDto.getEncryptionProfile());
+
     }
 
     @ParameterizedTest
@@ -357,7 +367,7 @@ class EnvironmentResponseConverterTest {
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(credentialViewConverter.convert(environmentViewDto.getCredentialView())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentViewDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -367,6 +377,7 @@ class EnvironmentResponseConverterTest {
         when(networkDtoToResponseConverter.convert(environmentViewDto.getNetwork(), environmentViewDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
         when(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices())).thenReturn(dataServicesResponse);
+        when(encryptionProfileResponseConverter.dtoToResponse(environmentViewDto.getEncryptionProfile())).thenReturn(encryptionProfileResponse);
 
         SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentViewDto);
 
@@ -407,6 +418,7 @@ class EnvironmentResponseConverterTest {
         verify(proxyConfigToProxyResponseConverter).convertToView(environmentViewDto.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environmentViewDto.getNetwork(), environmentViewDto.getExperimentalFeatures().getTunnel(), false);
         verify(dataServicesConverter).convertToResponse(environmentViewDto.getDataServices());
+        verify(encryptionProfileResponseConverter).dtoToResponse(environmentViewDto.getEncryptionProfile());
     }
 
     private void assertParameters(EnvironmentDtoBase environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
@@ -491,7 +503,7 @@ class EnvironmentResponseConverterTest {
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(EnvironmentType.HYBRID)
                 .withRemoteEnvironmentCrn("remoteEnvironmentCrn")
-                .withEncryptionProfileName("encryptionProfName");
+                .withEncryptionProfile(Builder.builder().withName("encryptionProfName").build());
     }
 
     private EnvironmentViewDto createEnvironmentViewDto(CloudPlatform cloudPlatform) {
@@ -526,7 +538,7 @@ class EnvironmentResponseConverterTest {
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(EnvironmentType.HYBRID)
                 .withRemoteEnvironmentCrn("remoteEnvironmentCrn")
-                .withEncryptionProfileName("epName")
+                .withEncryptionProfile(Builder.builder().build())
                 .build();
     }
 

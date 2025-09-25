@@ -426,7 +426,7 @@ class ClouderaManagerModificationServiceTest {
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
         String exceptionMessage = "Timeout while Cloudera Manager was config deploying services.";
 
-        doThrow(new CloudbreakException(exceptionMessage)).when(clouderaManagerClientConfigDeployService).deployClientConfigWithoutPoll(any());
+        doThrow(new CloudbreakException(exceptionMessage)).when(clouderaManagerClientConfigDeployService).deployClientConfig(any());
 
         CloudbreakException exception = assertThrows(CloudbreakException.class,
                 () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(instanceMetaDataList))));

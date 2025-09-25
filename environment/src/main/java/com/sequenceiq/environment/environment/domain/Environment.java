@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
@@ -206,8 +207,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "remoteenvironmentcrn")
     private String remoteEnvironmentCrn;
 
-    @Column(name = "encryption_profile_name")
-    private String encryptionProfileName;
+    @ManyToOne
+    @JoinColumn(name = "encryption_profile_id")
+    private EncryptionProfile encryptionProfile;
 
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
@@ -701,12 +703,12 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
+    public EncryptionProfile getEncryptionProfile() {
+        return encryptionProfile;
     }
 
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
+    public void setEncryptionProfile(EncryptionProfile encryptionProfile) {
+        this.encryptionProfile = encryptionProfile;
     }
 
     @Override
@@ -727,7 +729,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", seLinux=" + seLinux +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfileName=" + encryptionProfileName +
+                ", encryptionProfile=" + encryptionProfile +
                 '}';
     }
 

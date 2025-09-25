@@ -7,8 +7,8 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPH
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE_JAVA;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerCipherService.TLS_CIPHER_SUITE_JAVA_EXCLUDE;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -21,24 +21,24 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerCipherServiceTest {
 
     @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @InjectMocks
     private ClouderaManagerCipherService underTest;
 
-    private EncryptionProfileProvider testData = new EncryptionProfileProvider();
+    private DefaultEncryptionProfileProvider testData = new DefaultEncryptionProfileProvider();
 
     @Test
     void testGetApiConfigEnforcements() {
-        when(encryptionProfileProvider.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR))
+        when(defaultEncryptionProfileProvider.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR))
                 .thenReturn(testData.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR));
-        when(encryptionProfileProvider.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR))
+        when(defaultEncryptionProfileProvider.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR))
                 .thenReturn(testData.getCipherSuiteString(OPENSSL_INTERMEDIATE2018, POLICY_SEPARATOR));
 
         List<ApiConfigEnforcement> result = underTest.getApiConfigEnforcements();

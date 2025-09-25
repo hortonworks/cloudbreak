@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 
 @Service
 public class ClouderaManagerCipherService {
@@ -35,7 +35,7 @@ public class ClouderaManagerCipherService {
                     "^.*CCM.*$";
 
     @Inject
-    private EncryptionProfileProvider encryptionProfileProvider;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     public List<ApiConfigEnforcement> getApiConfigEnforcements() {
         List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>();
@@ -48,7 +48,7 @@ public class ClouderaManagerCipherService {
         tlsChipherSuiteJavaEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA);
 
         tlsChipherSuiteJavaEnforcement.setDefaultValue(
-                encryptionProfileProvider.getCipherSuiteString(
+                defaultEncryptionProfileProvider.getCipherSuiteString(
                         JAVA_INTERMEDIATE2018,
                         POLICY_SEPARATOR
                 )
@@ -63,7 +63,7 @@ public class ClouderaManagerCipherService {
         ApiConfigEnforcement tlsChipherListOpenSslEnforcement = new ApiConfigEnforcement();
         tlsChipherListOpenSslEnforcement.setLabel(TLS_CIPHERS_LIST_OPENSSL);
         tlsChipherListOpenSslEnforcement.setDefaultValue(
-                encryptionProfileProvider.getCipherSuiteString(
+                defaultEncryptionProfileProvider.getCipherSuiteString(
                         OPENSSL_INTERMEDIATE2018,
                         POLICY_SEPARATOR
                 )

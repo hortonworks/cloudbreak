@@ -2,16 +2,11 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.doCallRealMethod;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -21,9 +16,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxServiceValidateRuntimeAndImageTest {
-
-    @Mock
-    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
 
     @InjectMocks
     private SdxService underTest;
@@ -141,27 +133,5 @@ public class SdxServiceValidateRuntimeAndImageTest {
 
         assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
                 .hasMessage("Image with requested id has different os than requested.");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"7.3.1", "7.2.18", "7.2.17"})
-    void runtime731AndBelowShouldThrowExceptionWhenEncryptioProfileIsUsed(String runtime) {
-        clusterRequest.setRuntime(runtime);
-        environment.setEncryptionProfileName("epName");
-
-        doCallRealMethod().when(sdxVersionRuleEnforcer).isCustomEncryptionProfileSupported(clusterRequest.getRuntime());
-
-        assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
-                .hasMessage("Encryption Profile is not supported in " + runtime + " runtime. Please use 7.3.2 or above");
-    }
-
-    @Test
-    void runtime732ShouldNotThrowExceptionWhenEncryptioProfileIsUsed() {
-        clusterRequest.setRuntime("7.3.2");
-        environment.setEncryptionProfileName("epName");
-
-        doCallRealMethod().when(sdxVersionRuleEnforcer).isCustomEncryptionProfileSupported(clusterRequest.getRuntime());
-
-        assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response));
     }
 }

@@ -11,7 +11,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
@@ -23,14 +23,14 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
     private EncryptionProfileConfig encryptionProfileConfig;
 
     @Autowired
-    private EncryptionProfileProvider encryptionProfileProvider;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @Override
     public boolean isValid(EncryptionProfileRequest request, ConstraintValidatorContext context) {
         Set<TlsVersion> tlsVersions = request.getTlsVersions();
         List<String> cipherSuites;
         try {
-            cipherSuites = encryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CollectionUtils.emptyIfNull(request.getCipherSuites())));
+            cipherSuites = defaultEncryptionProfileProvider.convertCipherSuitesToIana(new ArrayList<>(CollectionUtils.emptyIfNull(request.getCipherSuites())));
         } catch (IllegalArgumentException e) {
             ValidatorUtil.addConstraintViolation(context, e.getMessage());
             return false;
@@ -69,7 +69,7 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
         this.encryptionProfileConfig = encryptionProfileConfig;
     }
 
-    public void setEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider) {
-        this.encryptionProfileProvider = encryptionProfileProvider;
+    public void setDefaultEncryptionProfileProvider(DefaultEncryptionProfileProvider defaultEncryptionProfileProvider) {
+        this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
     }
 }

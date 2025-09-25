@@ -130,7 +130,7 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -324,7 +324,7 @@ class ClusterHostServiceRunnerTest {
     private BackUpDecorator backUpDecorator;
 
     @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
+    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
     @Spy
     private KerberosPillarConfigGenerator kerberosPillarConfigGenerator;
@@ -514,8 +514,8 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
@@ -584,8 +584,8 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Map.of(), true);
@@ -630,8 +630,8 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Map.of(), false);
@@ -668,8 +668,8 @@ class ClusterHostServiceRunnerTest {
         List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         setupMocksForRunClusterServices();
@@ -758,8 +758,8 @@ class ClusterHostServiceRunnerTest {
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
@@ -775,7 +775,7 @@ class ClusterHostServiceRunnerTest {
         setupMockforRangerRaz(StackType.DATALAKE, true);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
-        when(encryptionProfileProvider.getTlsVersions(anySet(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsVersions(anySet(), any())).thenReturn("TLSv1.2,TLSv1.3");
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
@@ -1063,8 +1063,8 @@ class ClusterHostServiceRunnerTest {
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
@@ -1102,8 +1102,8 @@ class ClusterHostServiceRunnerTest {
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
@@ -1132,8 +1132,8 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
-        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+        when(defaultEncryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(defaultEncryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);

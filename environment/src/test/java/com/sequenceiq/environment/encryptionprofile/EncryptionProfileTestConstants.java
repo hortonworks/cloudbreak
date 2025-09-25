@@ -26,10 +26,6 @@ public class EncryptionProfileTestConstants {
 
     public static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudbreak:encryptionProfile:ecb891ca-18f2-406f-9958-99da466fd0f2";
 
-    public static final String DEFAULT_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_v1";
-
-    public static final String DEFAULT_ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cdp-default-v1";
-
     public static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudbreak:user:ecb891ca-18f2-406f-9958-99da466fd0f2";
 
     private EncryptionProfileTestConstants() {
