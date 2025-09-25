@@ -12,7 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView.Builder;
 
@@ -25,7 +25,7 @@ public class FreeIpaConfigViewTest {
 
     private static final String TLS_CIPHERSUITE = "ECDHE-ECDSA-AES256-GCM-SHA384";
 
-    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider = new DefaultEncryptionProfileProvider();
+    private final EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider();
 
     @ParameterizedTest()
     @ValueSource(booleans = {true, false})
@@ -35,7 +35,7 @@ public class FreeIpaConfigViewTest {
                 .withKerberosSecretLocation(KERBEROS_SECRET_LOCATION)
                 .withBackupConfig(backupConfigView)
                 .withSeLinux(SeLinux.PERMISSIVE.name())
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(defaultEncryptionProfileProvider, null))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, null))
                 .withSecretEncryptionEnabled(secretEncryptionEnabled)
                 .build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
@@ -49,7 +49,7 @@ public class FreeIpaConfigViewTest {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)
-                .withEncryptionConfig(new FreeIpaEncryptionConfigView(defaultEncryptionProfileProvider, null))
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, null))
                 .build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
         Map<String, Object> encryptionConfigMap = (Map<String, Object>) freeIpaConfigMap.get("encryptionConfig");

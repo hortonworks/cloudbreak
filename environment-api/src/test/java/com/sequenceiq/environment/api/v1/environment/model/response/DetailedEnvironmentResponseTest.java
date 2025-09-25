@@ -10,7 +10,6 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -41,7 +40,7 @@ class DetailedEnvironmentResponseTest {
         DataServicesResponse dataServices = new DataServicesResponse();
         String environmentType = EnvironmentType.HYBRID.toString();
         String remoteEnvironmentCrn = "remoteEnvironmentCrn";
-        EncryptionProfileResponse encryptionProfile = new EncryptionProfileResponse();
+        String encryptionProfileName = "epName";
 
         DetailedEnvironmentResponse response = DetailedEnvironmentResponse.builder()
                 .withCrn("crn")
@@ -85,7 +84,7 @@ class DetailedEnvironmentResponseTest {
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(environmentType)
                 .withRemoteEnvironmentCrn(remoteEnvironmentCrn)
-                .withEncryptionProfile(encryptionProfile)
+                .withEncryptionProfileName(encryptionProfileName)
                 .build();
 
         assertThat(response).isNotNull();
@@ -130,7 +129,7 @@ class DetailedEnvironmentResponseTest {
         assertThat(response.isEnableComputeCluster()).isTrue();
         assertThat(response.getEnvironmentType()).isEqualTo(environmentType);
         assertThat(response.getRemoteEnvironmentCrn()).isEqualTo(remoteEnvironmentCrn);
-        assertThat(response.getEncryptionProfile()).isEqualTo(encryptionProfile);
+        assertThat(response.getEncryptionProfileName()).isEqualTo(encryptionProfileName);
     }
 
 }

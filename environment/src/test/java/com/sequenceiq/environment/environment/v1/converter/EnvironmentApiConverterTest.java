@@ -66,6 +66,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -145,6 +146,9 @@ class EnvironmentApiConverterTest {
 
     @Mock
     private ExternalizedComputeService externalizedComputeService;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
 
     @BeforeEach
     void init() {

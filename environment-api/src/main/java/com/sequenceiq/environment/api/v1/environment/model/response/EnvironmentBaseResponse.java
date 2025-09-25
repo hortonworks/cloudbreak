@@ -13,7 +13,6 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -151,7 +150,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     private String remoteEnvironmentCrn;
 
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE)
-    private EncryptionProfileResponse encryptionProfile;
+    private String encryptionProfileName;
 
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
@@ -504,12 +503,12 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public EncryptionProfileResponse getEncryptionProfile() {
-        return encryptionProfile;
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
     }
 
-    public void setEncryptionProfile(EncryptionProfileResponse encryptionProfile) {
-        this.encryptionProfile = encryptionProfile;
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
     }
 
     @Override
@@ -554,7 +553,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", enableComputeCluster=" + enableComputeCluster +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfile=" + encryptionProfile +
+                ", encryptionProfileName=" + encryptionProfileName +
                 '}';
     }
 }

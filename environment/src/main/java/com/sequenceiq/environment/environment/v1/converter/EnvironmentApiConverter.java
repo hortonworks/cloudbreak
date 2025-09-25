@@ -55,6 +55,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -90,8 +91,6 @@ public class EnvironmentApiConverter {
 
     private static final String DEFAULT_CIDR = "0.0.0.0/0";
 
-    private static final String DEFAULT_ENCRYPTION_PROFILE = "cdp-default";
-
     private final CredentialService credentialService;
 
     private final TelemetryApiConverter telemetryApiConverter;
@@ -114,6 +113,8 @@ public class EnvironmentApiConverter {
 
     private final ExternalizedComputeService externalizedComputeService;
 
+    private final EncryptionProfileService encryptionProfileService;
+
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             TunnelConverter tunnelConverter,
@@ -124,7 +125,8 @@ public class EnvironmentApiConverter {
             ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
             DataServicesConverter dataServicesConverter,
-            ExternalizedComputeService externalizedComputeService) {
+            ExternalizedComputeService externalizedComputeService,
+            EncryptionProfileService encryptionProfileService) {
         this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
@@ -136,6 +138,7 @@ public class EnvironmentApiConverter {
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.dataServicesConverter = dataServicesConverter;
         this.externalizedComputeService = externalizedComputeService;
+        this.encryptionProfileService = encryptionProfileService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -183,9 +186,8 @@ public class EnvironmentApiConverter {
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
                 .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
-                .withEncryptionProfileName(request.getEncryptionProfileName() != null && !request.getEncryptionProfileName().isEmpty()
-                        ? request.getEncryptionProfileName()
-                        : DEFAULT_ENCRYPTION_PROFILE);
+                .withEncryptionProfileName(StringUtils.hasText(request.getEncryptionProfileName()) ?
+                        request.getEncryptionProfileName() : encryptionProfileService.getClouderaDefaultEncryptionProfileName());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

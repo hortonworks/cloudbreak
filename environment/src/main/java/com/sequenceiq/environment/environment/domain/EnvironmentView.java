@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.credential.domain.CredentialView;
-import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
@@ -174,9 +173,8 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Column(name = "remoteenvironmentcrn")
     private String remoteEnvironmentCrn;
 
-    @ManyToOne
-    @JoinColumn(name = "encryption_profile_id")
-    private EncryptionProfile encryptionProfile;
+    @Column(name = "encryption_profile_name")
+    private String encryptionProfileName;
 
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
@@ -570,12 +568,12 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public EncryptionProfile getEncryptionProfile() {
-        return encryptionProfile;
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
     }
 
-    public void setEncryptionProfile(EncryptionProfile encryptionProfile) {
-        this.encryptionProfile = encryptionProfile;
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
     }
 
     @Override
@@ -616,7 +614,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfile=" + encryptionProfile +
+                ", encryptionProfileName=" + encryptionProfileName +
                 '}';
     }
 

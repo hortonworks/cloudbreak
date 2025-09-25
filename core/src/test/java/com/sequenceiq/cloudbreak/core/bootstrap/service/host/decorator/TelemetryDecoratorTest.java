@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
-import static com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
+import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
-import com.sequenceiq.cloudbreak.tls.DefaultEncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -72,7 +72,7 @@ public class TelemetryDecoratorTest {
     private AltusMachineUserService altusMachineUserService;
 
     @Mock
-    private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     @Mock
     private VmLogsService vmLogsService;
@@ -112,7 +112,7 @@ public class TelemetryDecoratorTest {
                 monitoringUrlResolver,
                 componentConfigProviderService,
                 clusterComponentConfigProvider,
-                defaultEncryptionProfileProvider,
+                encryptionProfileProvider,
                 "1.0.0",
                 environmentService);
     }
@@ -219,16 +219,19 @@ public class TelemetryDecoratorTest {
                 "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
             )
         );
-        detailedEnvironmentResponse.setEncryptionProfile(encryptionProfileResponse);
+        detailedEnvironmentResponse.setEncryptionProfileName("epName");
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(defaultEncryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+        given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
                 .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
+        given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
+        given(environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName()))
+                .willReturn(encryptionProfileResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
