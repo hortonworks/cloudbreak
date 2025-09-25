@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -59,31 +60,43 @@ public class ClouderaManagerClientConfigDeployService {
     }
 
     @Retryable(
-            value = { CloudbreakException.class, ApiException.class },
+            value = { Exception.class },
             maxAttempts = CLIENT_CONFIG_MAX_ATTEMPTS,
             backoff = @Backoff(delay = CLIENT_CONFIG_BACKOFF)
     )
     public void deployAndPollClientConfig(ClouderaManagerClientConfigDeployRequest request)
             throws ApiException, CloudbreakException {
+        LOGGER.info("deployAndPollClientConfig retry number: {}", RetrySynchronizationManager.getContext().getRetryCount());
         pollingResultErrorHandler.handlePollingResult(
                 clouderaManagerPollingServiceProvider
                         .startDefaultPolling(
                                 request.stack(),
                                 request.client(),
-                                deployClientConfigWithoutPoll(request),
+                                deployClientConfigWithoutPollingResult(request),
                                 request.message()
                         ),
                 "Cluster was terminated while waiting for config deploy",
                 "Timeout while Cloudera Manager was config deploying services.");
     }
 
-    public BigDecimal deployClientConfigWithoutPoll(ClouderaManagerClientConfigDeployRequest request)
+    @Retryable(
+            value = { Exception.class },
+            maxAttempts = CLIENT_CONFIG_MAX_ATTEMPTS,
+            backoff = @Backoff(delay = CLIENT_CONFIG_BACKOFF)
+    )
+    public BigDecimal deployClientConfig(ClouderaManagerClientConfigDeployRequest request)
             throws ApiException, CloudbreakException {
-        List<ApiCommand> commands = request.api().listActiveCommands(request.stack().getName(), SUMMARY, null).getItems();
-        return deployClientConfigWithoutPoll(request.api(), request.stack(), commands);
+        LOGGER.info("deployClientConfig retry number: {}", RetrySynchronizationManager.getContext().getRetryCount());
+        return deployClientConfigWithoutPollingResult(request);
     }
 
-    private BigDecimal deployClientConfigWithoutPoll(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, List<ApiCommand> commands)
+    private BigDecimal deployClientConfigWithoutPollingResult(ClouderaManagerClientConfigDeployRequest request)
+            throws ApiException, CloudbreakException {
+        List<ApiCommand> commands = request.api().listActiveCommands(request.stack().getName(), SUMMARY, null).getItems();
+        return deployClientConfig(request.api(), request.stack(), commands);
+    }
+
+    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
         return getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
     }
