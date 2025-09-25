@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 
@@ -27,6 +28,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @Mock
     private ClassicClusterRemoteDataContextProvider remoteDataContextProvider;
+
+    @Mock
+    private ClassicClusterRootCertificateProvider rootCertificateProvider;
 
     @Mock
     private ClassicClusterDatalakeServicesProvider datalakeServicesProvider;
@@ -60,6 +64,16 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeDatalakeServicesResponse result = underTest.getDatalakeServices("", CLUSTER_CRN);
 
         assertThat(result).isEqualTo(datalakeServices);
+    }
+
+    @Test
+    void getRootCertificate() throws Exception {
+        GetRootCertificateResponse rootCertificate = mock();
+        when(rootCertificateProvider.getRootCertificate(cluster)).thenReturn(rootCertificate);
+
+        GetRootCertificateResponse result = underTest.getRootCertificate("", CLUSTER_CRN);
+
+        assertThat(result).isEqualTo(rootCertificate);
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
@@ -23,6 +24,9 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     @Inject
     private ClassicClusterDatalakeServicesProvider datalakeServicesProvider;
 
+    @Inject
+    private ClassicClusterRootCertificateProvider rootCertificateProvider;
+
     @Override
     public RemoteEnvironmentConnectorType type() {
         return RemoteEnvironmentConnectorType.CLASSIC_CLUSTER;
@@ -38,6 +42,12 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     public DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
         OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
         return datalakeServicesProvider.getDatalakeServices(cluster);
+    }
+
+    @Override
+    public GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+        return rootCertificateProvider.getRootCertificate(cluster);
     }
 
     private OnPremisesApiProto.Cluster getCluster(String crn) {

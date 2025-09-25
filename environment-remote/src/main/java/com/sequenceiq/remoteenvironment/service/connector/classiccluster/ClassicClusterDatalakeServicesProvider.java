@@ -98,13 +98,13 @@ class ClassicClusterDatalakeServicesProvider {
     }
 
     private void parseHdfsSiteXml(InputStream hdfsSiteXml, Application application) {
-        Map<String, String> hdfsSiteConfiguration = getConfigurationFromXml(hdfsSiteXml);
-        if (hdfsSiteConfiguration.containsKey("dfs.nameservices")) {
-            application.getConfig().put("dfs_nameservices", hdfsSiteConfiguration.get("dfs.nameservices"));
-        }
+        LOGGER.debug("Parsing hdfs-site.xml");
+        Map<String, String> hdfsSiteConfiguration = parseConfigurationXml(hdfsSiteXml);
+        addConfigurationItem(application, "dfs_nameservices", hdfsSiteConfiguration.get("dfs.nameservices"));
         hdfsSiteConfiguration.entrySet().stream()
                 .filter(this::isHdfsHAConfig)
-                .forEach(entry -> application.putConfigItem(entry.getKey(), entry.getValue()));
+                .forEach(entry -> addConfigurationItem(application, entry.getKey(), entry.getValue()));
+        LOGGER.debug("Finished parsing configuration entries from hdfs-site.xml");
     }
 
     private boolean isHdfsHAConfig(Map.Entry<String, String> entry) {
@@ -112,17 +112,19 @@ class ClassicClusterDatalakeServicesProvider {
     }
 
     private void parseCoreSiteXml(InputStream coreSiteXml, Application application) {
-        Map<String, String> coreSiteConfiguration = getConfigurationFromXml(coreSiteXml);
+        LOGGER.debug("Parsing core-site.xml");
+        Map<String, String> coreSiteConfiguration = parseConfigurationXml(coreSiteXml);
         coreSiteConfiguration.entrySet().stream()
                 .filter(this::isFileSystemConfig)
-                .forEach(entry -> application.putConfigItem(entry.getKey(), entry.getValue()));
+                .forEach(entry -> addConfigurationItem(application, entry.getKey(), entry.getValue()));
+        LOGGER.debug("Finished parsing configuration entries from core-site.xml");
     }
 
     private boolean isFileSystemConfig(Map.Entry<String, String> entry) {
         return "fs.defaultFS".equals(entry.getKey());
     }
 
-    private Map<String, String> getConfigurationFromXml(InputStream inputStream) {
+    private Map<String, String> parseConfigurationXml(InputStream inputStream) {
         try {
             Map<String, String> configuration = new HashMap<>();
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
@@ -131,6 +133,7 @@ class ClassicClusterDatalakeServicesProvider {
                 Element node = (Element) nodes.item(i);
                 String name = node.getElementsByTagName("name").item(0).getTextContent();
                 String value = node.getElementsByTagName("value").item(0).getTextContent();
+                LOGGER.trace("Parsed configuration key {} from XML", name);
                 configuration.put(name, value);
             }
             return configuration;
@@ -138,6 +141,15 @@ class ClassicClusterDatalakeServicesProvider {
             String message = "Failed to parse XML configuration received from Cloudera Manager";
             LOGGER.error(message, e);
             throw new RemoteEnvironmentException(message + ". Please contact Cloudera support to get this resolved.");
+        }
+    }
+
+    private void addConfigurationItem(Application application, String key, String value) {
+        if (value != null) {
+            LOGGER.debug("Adding {}={} configuration entry", key, value);
+            application.putConfigItem(key, value);
+        } else {
+            LOGGER.debug("Configuration key {} does not have value", key);
         }
     }
 
