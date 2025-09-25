@@ -224,6 +224,10 @@
     "label": "IMPALA_impalad_INFO"
   },
   {
+    "path": "${serviceLogFolderPrefix}/*/profiles/*",
+    "label": "IMPALA_impalad_PROFILES"
+  },
+  {
     "path": "${serviceLogFolderPrefix}/*/impalad.*impala.log.WARNING.*",
     "label": "IMPALA_impalad_WARNING"
   },
