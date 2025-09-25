@@ -107,7 +107,10 @@ class JsonTest {
                 Arguments.of(new Json("{\"key\":\"value\"}"), new Json("[\"key\", \"value\"]"), false),
                 Arguments.of(new Json("invalid json"), new Json("invalid json"), true),
                 Arguments.of(new Json("invalid json"), new Json("{\"key\":\"value\"}"), false),
-                Arguments.of(new Json("{\"key\":\"value\"}"), new Json("invalid json"), false)
+                Arguments.of(new Json("{\"key\":\"value\"}"), new Json("invalid json"), false),
+                Arguments.of(new Json(null), null, false),
+                Arguments.of(new Json(null), new Json(null), true),
+                Arguments.of(new Json(null), new Json(""), false)
         );
     }
 

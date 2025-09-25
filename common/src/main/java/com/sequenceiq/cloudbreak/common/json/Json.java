@@ -246,9 +246,13 @@ public class Json implements Serializable {
     }
 
     private JsonNode readTree() throws CloudbreakJsonProcessingException {
+        return readTree(value);
+    }
+
+    private JsonNode readTree(String json) throws CloudbreakJsonProcessingException {
         try {
-            return JsonUtil.readTree(value);
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+            return JsonUtil.readTree(json);
+        } catch (JsonProcessingException e) {
             throw new CloudbreakJsonProcessingException(e);
         }
     }
@@ -308,15 +312,18 @@ public class Json implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Json)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (value == null || ((Json) o).value == null) {
+            return Objects.equals(value, ((Json) o).value);
         } else {
             try {
                 JsonNode thisJson = readTree();
-                JsonNode thatJson = JsonUtil.readTree(((Json) o).value);
+                JsonNode thatJson = readTree(((Json) o).value);
                 return thisJson.equals(thatJson);
-            } catch (CloudbreakJsonProcessingException | JsonProcessingException | IllegalArgumentException e) {
-                LOGGER.warn("At least one of the Json's value is not a valid JSON, falling back to string comparison", e);
+            } catch (CloudbreakJsonProcessingException e) {
+                LOGGER.warn("Falling back to string comparison, as at least one of the Json's values could not be deserialized with the following error: '{}'",
+                        e.getMessage());
                 return Objects.equals(value, ((Json) o).value);
             }
         }
