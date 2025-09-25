@@ -5,7 +5,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +34,8 @@ public class VolumeResourceCollector {
                 .map(setVolumeAttribute::apply)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
-                .filter(volume -> volume.getId() != null)
                 .map(VolumeSetAttributes.Volume::getId)
+                .filter(Objects::nonNull)
                 .collect(toList());
         return Pair.of(volumeIds, volumeResources);
     }
@@ -44,7 +46,7 @@ public class VolumeResourceCollector {
                 .collect(toList());
         LOGGER.debug("The following cloud resource(s) has been collected based on the requested type ({}): [{}]",
                 resourceType != null ? resourceType.name() : "null",
-                String.join(",", cloudResources.stream().map(CloudResource::toString).collect(toList())));
+                cloudResources.stream().map(CloudResource::toString).collect(Collectors.joining(",")));
         return cloudResources;
     }
 

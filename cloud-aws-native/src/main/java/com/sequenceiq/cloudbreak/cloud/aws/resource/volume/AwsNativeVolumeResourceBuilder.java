@@ -82,7 +82,7 @@ public class AwsNativeVolumeResourceBuilder extends AwsVolumeResourceBuilder {
                 .collect(toList());
         LOGGER.debug("The following cloud resource(s) has been collected based on the requested type ({}): [{}]",
                 resourceType != null ? resourceType.name() : "null",
-                String.join(",", cloudResources.stream().map(CloudResource::toString).collect(toList())));
+                cloudResources.stream().map(CloudResource::toString).collect(Collectors.joining(",")));
         return cloudResources;
     }
 

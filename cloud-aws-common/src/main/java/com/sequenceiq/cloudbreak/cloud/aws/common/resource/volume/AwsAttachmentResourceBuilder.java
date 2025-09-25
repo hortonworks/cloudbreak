@@ -126,7 +126,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
                 .build());
         LOGGER.info("Describe volume result for instanceid: {}, {}", instanceId, describeVolumesResponse);
         List<Volume> volumes = describeVolumesResponse.volumes();
-        List<String> volumeIdsForInstance = volumes.stream().map(Volume::volumeId).collect(Collectors.toList());
+        List<String> volumeIdsForInstance = volumes.stream().map(Volume::volumeId).toList();
         LOGGER.info("Volume IDs to attach {}", volumeIdsToAttach);
         if (!new HashSet<>(volumeIdsForInstance).containsAll(volumeIdsToAttach)) {
             String errorMessage = "Volume attachment were unsuccessful. ";

@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
-import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
@@ -76,6 +75,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
@@ -272,39 +272,50 @@ public class StackToCloudStackConverter {
         fields.putAll(secretAttributes);
 
         List<Volume> volumes = new ArrayList<>();
-        template.getVolumeTemplates().stream().filter(e -> !volumeIsEphemeralWhichMustBeProvisioned(e)).forEach(volumeModel -> {
+
+        // Collect all volume templates and sort them by template ID to ensure consistent ordering
+        List<VolumeTemplate> allVolumeTemplates = sortVolumeTemplates(template);
+
+        int generalVolumeMountCounter = 1;
+
+        // Process all volume templates in order
+        for (VolumeTemplate volumeModel : allVolumeTemplates) {
             for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
-                String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ? VolumeUtils.VOLUME_PREFIX + (i + 1) : VolumeUtils.DATABASE_VOLUME;
+                String mount;
+                if (volumeModel.getUsageType() == VolumeUsageType.GENERAL) {
+                    mount = VolumeUtils.VOLUME_PREFIX + generalVolumeMountCounter;
+                    generalVolumeMountCounter++;
+                } else {
+                    mount = VolumeUtils.DATABASE_VOLUME;
+                }
+
                 Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
                 volumes.add(volume);
+                LOGGER.debug("The volume config is {}.", volume);
             }
-        });
-        int localSsdStart = volumes.size();
-        template.getVolumeTemplates().stream().filter(e -> volumeIsEphemeralWhichMustBeProvisioned(e)).forEach(volumeModel -> {
-            for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
-                String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ?
-                        VolumeUtils.VOLUME_PREFIX + (localSsdStart + i + 1) : VolumeUtils.DATABASE_VOLUME;
-                Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
-                LOGGER.debug("The volume config is %s.", volume);
-                volumes.add(volume);
-            }
-        });
+        }
+
+        LOGGER.debug("The volumes are {}.", volumes);
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId,
                 template.getTemporaryStorage(), Optional.ofNullable(template.getInstanceStorageCount()).orElse(0).longValue());
     }
 
+    private List<VolumeTemplate> sortVolumeTemplates(Template template) {
+        return template.getVolumeTemplates()
+                .stream()
+                .sorted(preserveOrdering())
+                .toList();
+    }
+
+    private Comparator<VolumeTemplate> preserveOrdering() {
+        return Comparator.comparing(VolumeTemplate::getId);
+    }
+
     private CloudVolumeUsageType getVolumeUsageType(VolumeUsageType volumeUsageType) {
-        CloudVolumeUsageType cloudVolumeUsageType;
-        switch (volumeUsageType) {
-            case DATABASE:
-                cloudVolumeUsageType = CloudVolumeUsageType.DATABASE;
-                break;
-            case GENERAL:
-            default:
-                cloudVolumeUsageType = CloudVolumeUsageType.GENERAL;
-                break;
-        }
-        return cloudVolumeUsageType;
+        return switch (volumeUsageType) {
+            case DATABASE -> CloudVolumeUsageType.DATABASE;
+            default -> CloudVolumeUsageType.GENERAL;
+        };
     }
 
     private Map<String, String> getUserDefinedTags(StackView stack) {
