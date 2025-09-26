@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -31,7 +32,7 @@ public class TermsController implements TermsEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
+    @DisableCheckPermissions
     public TermsResponse get(TermType termType) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return getInAccount(accountId, termType);
