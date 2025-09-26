@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -33,7 +34,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
+    @DisableCheckPermissions
     public AzureMarketplaceTermsResponse get() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return getInAccount(accountId);

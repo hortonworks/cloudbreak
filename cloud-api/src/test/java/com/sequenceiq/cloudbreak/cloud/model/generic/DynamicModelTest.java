@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model.generic;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -11,7 +12,10 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.cloud.model.ExternalResourceAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.common.api.type.OutboundType;
 
 class DynamicModelTest {
 
@@ -84,6 +88,19 @@ class DynamicModelTest {
         underTest.putParameter("key", "value");
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.getParameter("key", Integer.class));
+    }
+
+    @Test
+    void getParameterTestWhenKeyAndClassAndCastResultsInNullObject() {
+        ExternalResourceAttributes ea = new ExternalResourceAttributes();
+        underTest.putParameter("key", ea);
+
+        NetworkAttributes na = underTest.getParameter("key", NetworkAttributes.class);
+        assertNull(na.getCloudPlatform());
+        assertNull(na.getNetworkId());
+        assertEquals(OutboundType.NOT_DEFINED, na.getOutboundType());
+        assertEquals(ExternalResourceAttributes.class, na.getAttributeType());
+        assertNull(na.getSubnetId());
     }
 
     @Test
