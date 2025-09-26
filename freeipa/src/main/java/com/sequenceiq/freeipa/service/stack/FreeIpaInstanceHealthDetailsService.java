@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +80,10 @@ public class FreeIpaInstanceHealthDetailsService {
         }
     }
 
-    @Retryable(RetryableFreeIpaClientException.class)
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
         if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
             return toBooleanRpcResponse(freeIpaHealthCheck(stack, instance), instance.getDiscoveryFQDN());
