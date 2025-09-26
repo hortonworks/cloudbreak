@@ -112,7 +112,7 @@ public class ClouderaManagerConfigService {
         };
     }
 
-    private Optional<String> getServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
+    Optional<String> getServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
         Objects.requireNonNull(serviceType);
         try {
             LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
@@ -167,7 +167,7 @@ public class ClouderaManagerConfigService {
         }
     }
 
-    private String getRoleConfigGroupNameByTypeAndServiceName(String roleType, String clusterName, String serviceName,
+    String getRoleConfigGroupNameByTypeAndServiceName(String roleType, String clusterName, String serviceName,
             RoleConfigGroupsResourceApi roleConfigGroupsResourceApi) throws ApiException {
         ApiRoleConfigGroupList roleConfigGroupList = roleConfigGroupsResourceApi.readRoleConfigGroups(clusterName, serviceName);
         return roleConfigGroupList.getItems()

@@ -724,4 +724,15 @@ class StackOperationServiceTest {
 
         verify(flowManager).triggerModifySelinux(STACK_ID, SeLinux.ENFORCING);
     }
+
+    @Test
+    public void testTriggerZookeeperToKraftMigration() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+        underTest.triggerZookeeperToKraftMigration(nameOrCrn, "accountId");
+
+        verify(flowManager).triggerZookeeperToKraftMigration(STACK_ID);
+    }
 }

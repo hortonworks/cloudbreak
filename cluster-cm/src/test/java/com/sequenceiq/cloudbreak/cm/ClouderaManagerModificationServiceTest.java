@@ -248,6 +248,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
 
+    @Mock
+    private ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;
@@ -1677,5 +1680,33 @@ class ClouderaManagerModificationServiceTest {
         parcelList.addItemsItem(new ApiParcel().stage("DISTRIBUTED").product(FLINK).version(expectedCdhVersion));
         when(parcelsResourceApi.readParcels(STACK_NAME, SUMMARY)).thenReturn(parcelList);
         assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.getStackCdhVersion(STACK_NAME));
+    }
+
+    @Test
+    public void testEnableZookeeperMigrationMode() {
+        underTest.enableZookeeperMigrationMode(stack);
+
+        verify(clouderaManagerKraftMigrationService).enableZookeeperMigrationMode(eq(v31Client), eq(stack));
+    }
+
+    @Test
+    public void testRestartKafkaConnectNodes() {
+        underTest.restartKafkaConnectNodes(stack);
+
+        verify(clouderaManagerKraftMigrationService).restartKafkaConnectNodes(eq(v31Client), eq(stack));
+    }
+
+    @Test
+    public void testRestartKafkaBrokerNodes() {
+        underTest.restartKafkaBrokerNodes(stack);
+
+        verify(clouderaManagerKraftMigrationService).restartKafkaBrokerNodes(eq(v31Client), eq(stack));
+    }
+
+    @Test
+    public void testMigrateZookeeperToKraft() {
+        underTest.migrateZookeeperToKraft(stack);
+
+        verify(clouderaManagerKraftMigrationService).migrateZookeeperToKraft(eq(v31Client), eq(stack));
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -216,6 +218,7 @@ class ReactorFlowManagerTest {
         underTest.triggerRotateRdsCertificate(STACK_ID);
         underTest.triggerSkuMigration(STACK_ID, true);
         underTest.triggerExternalDatabaseUserOperation(STACK_ID, "name", "crn", ExternalDatabaseUserOperation.CREATION, DatabaseType.HIVE, "user");
+        underTest.triggerZookeeperToKraftMigration(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -432,6 +435,16 @@ class ReactorFlowManagerTest {
         verify(reactorNotifier).notify(eq(1L), eq(CORE_MODIFY_SELINUX_EVENT.event()), eventCaptor.capture());
         assertEquals(1L, eventCaptor.getValue().getResourceId());
         assertEquals(CORE_MODIFY_SELINUX_EVENT.event(), eventCaptor.getValue().getSelector());
+    }
+
+    @Test
+    void testTriggerZookeeperToKraftMigration() {
+        underTest.triggerZookeeperToKraftMigration(STACK_ID);
+        ArgumentCaptor<MigrateZookeeperToKraftFlowChainTriggerEvent> captor = ArgumentCaptor.forClass(MigrateZookeeperToKraftFlowChainTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT), captor.capture());
+        MigrateZookeeperToKraftFlowChainTriggerEvent event = captor.getValue();
+        assertEquals(1L, captor.getValue().getResourceId());
+        assertEquals(MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT, event.selector());
     }
 
     private static class TestAcceptable implements Acceptable {

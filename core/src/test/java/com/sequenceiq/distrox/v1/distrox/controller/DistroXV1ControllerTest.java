@@ -347,4 +347,16 @@ class DistroXV1ControllerTest {
         });
         verify(stackOperationService).triggerModifySELinux(NameOrCrn.ofCrn(CRN), "accountId", SeLinux.ENFORCING);
     }
+
+    @Test
+    void testMigrateZookeeperToKraftByCrn() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.migrateFromZookeeperToKraftByCrn(CRN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(stackOperationService).triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(CRN), "accountId");
+    }
 }

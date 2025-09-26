@@ -72,6 +72,8 @@ public class FlowChainTriggers {
 
     public static final String CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT = "CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT";
 
+    public static final String MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT = "MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

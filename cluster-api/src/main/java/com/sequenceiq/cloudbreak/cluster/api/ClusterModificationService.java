@@ -15,11 +15,20 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterModificationService {
 
     List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException;
+
+    void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+
+    void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+
+    void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+
+    void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
     void stopCluster(boolean full) throws CloudbreakException;
 

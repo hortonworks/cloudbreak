@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event;
 
-
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftValidationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,17 +9,17 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class MigrateZookeeperToKraftTriggerEvent extends StackEvent {
+public class MigrateZookeeperToKraftValidationTriggerEvent extends StackEvent {
     @JsonCreator
-    public MigrateZookeeperToKraftTriggerEvent(
+    public MigrateZookeeperToKraftValidationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(START_RESTART_KAFKA_BROKER_NODES_EVENT.event(), resourceId, accepted);
+        super(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event(), resourceId, accepted);
     }
 
     @Override
     public String toString() {
-        return "MigrateZookeeperToKraftTriggerEvent{" +
+        return "MigrateZookeeperToKraftValidationTriggerEvent{" +
                 "} " + super.toString();
     }
 }

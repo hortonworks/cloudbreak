@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -49,6 +50,22 @@ public interface ClusterApi {
 
     default void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
         clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
+    }
+
+    default void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().enableZookeeperMigrationMode(stackDtoDelegate);
+    }
+
+    default void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().restartKafkaBrokerNodes(stackDtoDelegate);
+    }
+
+    default void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().restartKafkaConnectNodes(stackDtoDelegate);
+    }
+
+    default void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().migrateZookeeperToKraft(stackDtoDelegate);
     }
 
     default List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {

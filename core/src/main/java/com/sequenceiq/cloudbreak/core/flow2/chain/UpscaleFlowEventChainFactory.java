@@ -148,7 +148,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     private void addClusterDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain) {
         Set<String> hostGroups = getHostGroups(event);
-        if (!event.isRepair() && !hostGroups.isEmpty()) {
+        if (!event.isRepair() && !hostGroups.isEmpty() && !event.isSkipDeletingZombieNodesEnabled()) {
             flowEventChain.add(new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), hostGroups,
                     event.accepted(), new ClusterDownscaleDetails(false, false, true)));
         }
@@ -156,7 +156,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     private void addStackDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain, StackDto stackDto) {
         Set<String> hostGroups = getHostGroups(event);
-        if (!event.isRepair() && !hostGroups.isEmpty()) {
+        if (!event.isRepair() && !hostGroups.isEmpty() && !event.isSkipDeletingZombieNodesEnabled()) {
             flowEventChain.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), Collections.emptyMap(),
                     Collections.emptyMap(), Collections.emptyMap(), stackDto.getPlatformVariant()));
         }

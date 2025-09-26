@@ -197,6 +197,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClouderaManagerClientConfigDeployService clouderaManagerClientConfigDeployService;
 
+    @Inject
+    private ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;
+
     private ApiClient v31Client;
 
     private ApiClient v52Client;
@@ -228,6 +231,26 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V55 client!");
         }
+    }
+
+    @Override
+    public void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.enableZookeeperMigrationMode(v31Client, stackDtoDelegate);
+    }
+
+    @Override
+    public void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.restartKafkaBrokerNodes(v31Client, stackDtoDelegate);
+    }
+
+    @Override
+    public void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.restartKafkaConnectNodes(v31Client, stackDtoDelegate);
+    }
+
+    @Override
+    public void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.migrateZookeeperToKraft(v31Client, stackDtoDelegate);
     }
 
     @Override

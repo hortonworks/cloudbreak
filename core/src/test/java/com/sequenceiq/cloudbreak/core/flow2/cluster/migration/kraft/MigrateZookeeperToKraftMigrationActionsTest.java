@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_UPSCALE_KRAFT_NODES_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_CONNECT_NODES_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -24,21 +27,33 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftTriggerEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
-class MigrateZookeeperToKraftActionsTest {
+class MigrateZookeeperToKraftMigrationActionsTest {
+
+    private static final Long STACK_ID = 1L;
 
     private Map<Object, Object> variables = new HashMap<>();
 
     @InjectMocks
-    private MigrateZookeeperToKraftActions underTest;
+    private MigrateZookeeperToKraftMigrationActions underTest;
+
+    @Mock
+    private StackUpdater stackUpdater;
+
+    @Mock
+    private FlowMessageService flowMessageService;
 
     @Mock
     private FlowRegister runningFlows;
@@ -58,66 +73,42 @@ class MigrateZookeeperToKraftActionsTest {
     private ArgumentCaptor<String> captor;
 
     @Test
-    void testInitMigrateZookeeperToKraftAction() throws Exception {
-        long stackId = 1L;
-        MigrateZookeeperToKraftTriggerEvent event = new MigrateZookeeperToKraftTriggerEvent(stackId);
+    void testRestartKafkaBrokerNodesAction() throws Exception {
+        MigrateZookeeperToKraftTriggerEvent event = new MigrateZookeeperToKraftTriggerEvent(STACK_ID, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent>) underTest.initMigrateZookeeperToKraftAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent>) underTest.restartKafkaBrokerNodesAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = MigrateZookeeperToKraftHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_INIT_EVENT.event();
-        assertEquals(selector, captor.getValue());
-        assertEquals(stackId, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+        assertEquals(RESTART_KAFKA_BROKER_NODES_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
-    void testValidateMigrateZookeeperToKraftAction() throws Exception {
-        long stackId = 1L;
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.name(), stackId);
+    void testRestartKafkaConnectNodesAction() throws Exception {
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), STACK_ID);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.validateMigrateZookeeperToKraftAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaConnectNodesAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = MigrateZookeeperToKraftHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event();
-        assertEquals(selector, captor.getValue());
-        assertEquals(stackId, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
-    }
-
-    @Test
-    void testUpscaleKraftNodesAction() throws Exception {
-        long stackId = 1L;
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_UPSCALE_KRAFT_NODES_EVENT.name(), stackId);
-        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
-
-        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.upscaleKraftNodesAction();
-        initActionPrivateFields(action);
-        context = new MigrateZookeeperToKraftContext(flowParameters, event);
-        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = MigrateZookeeperToKraftHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_UPSCALE_KRAFT_NODES_EVENT.event();
-        assertEquals(selector, captor.getValue());
-        assertEquals(stackId, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+        assertEquals(RESTART_KAFKA_CONNECT_NODES_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testMigrateZookeeperToKraftAction() throws Exception {
-        long stackId = 1L;
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
@@ -128,15 +119,13 @@ class MigrateZookeeperToKraftActionsTest {
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
-        String selector = MigrateZookeeperToKraftHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-        assertEquals(selector, captor.getValue());
-        assertEquals(stackId, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+        assertEquals(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     @Test
     void testMigrateZookeeperToKraftFinished() throws Exception {
-        long stackId = 1L;
-        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), STACK_ID);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
@@ -149,7 +138,25 @@ class MigrateZookeeperToKraftActionsTest {
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         String selector = FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
         assertEquals(selector, captor.getValue());
-        assertEquals(stackId, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testMigrateZookeeperToKraftFailed() throws Exception {
+        RuntimeException error = new RuntimeException("error");
+        MigrateZookeeperToKraftFailureEvent event = new MigrateZookeeperToKraftFailureEvent(STACK_ID, error);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFailureEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFailureEvent>) underTest.migrateZookeeperToKraftFailed();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

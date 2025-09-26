@@ -933,7 +933,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT)
-    public FlowIdentifier migrateFromZookeeperToKraft(@ResourceCrn String crn) {
-        return FlowIdentifier.notTriggered();
+    public FlowIdentifier migrateFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
+        return stackOperationService.triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 }

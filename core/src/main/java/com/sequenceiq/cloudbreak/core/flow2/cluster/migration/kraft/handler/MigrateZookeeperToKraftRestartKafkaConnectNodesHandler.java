@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 
 import jakarta.inject.Inject;
 
@@ -21,8 +21,8 @@ import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class MigrateZookeeperToKraftHandler extends ExceptionCatcherEventHandler<MigrateZookeeperToKraftEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MigrateZookeeperToKraftHandler.class);
+public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends ExceptionCatcherEventHandler<MigrateZookeeperToKraftEvent> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MigrateZookeeperToKraftRestartKafkaConnectNodesHandler.class);
 
     @Inject
     private StackDtoService stackDtoService;
@@ -32,7 +32,7 @@ public class MigrateZookeeperToKraftHandler extends ExceptionCatcherEventHandler
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<MigrateZookeeperToKraftEvent> event) {
-        LOGGER.error("Migrate Zookeeper to KRaft failed.", e);
+        LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka connect nodes) failed.", e);
         return new MigrateZookeeperToKraftFailureEvent(resourceId, e);
     }
 
@@ -42,17 +42,17 @@ public class MigrateZookeeperToKraftHandler extends ExceptionCatcherEventHandler
         StackDto stackDto = stackDtoService.getById(stackId);
         ClusterApi connector = getClusterConnector(stackDto);
         try {
-            connector.migrateZookeeperToKraft(stackDto);
+            connector.restartKafkaConnectNodes(stackDto);
         } catch (Exception e) {
-            LOGGER.error("Migrate Zookeeper to KRaft failed.", e);
+            LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka connect nodes) failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
+        return new MigrateZookeeperToKraftEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), stackId);
     }
 
     @Override
     public String selector() {
-        return MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector();
+        return RESTART_KAFKA_CONNECT_NODES_EVENT.selector();
     }
 
     private ClusterApi getClusterConnector(StackDto stackDto) {

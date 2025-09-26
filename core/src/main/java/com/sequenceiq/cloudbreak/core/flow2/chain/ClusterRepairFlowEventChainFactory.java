@@ -482,7 +482,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupAdjustments, null, groupsWithHostNames, ScalingType.UPSCALE_TOGETHER, singlePrimaryGateway,
                 kerberosSecured, event.accepted(), singleNodeCluster, restartServices, ClusterManagerType.CLOUDERA_MANAGER, adjustmentTypeWithThreshold,
-                event.getTriggeredStackVariant(), rollingRestartEnabled).setRepair();
+                event.getTriggeredStackVariant(), rollingRestartEnabled, false).setRepair();
     }
 
     public boolean isSingleNode(Set<InstanceGroupView> instanceGroupViews) {
