@@ -345,7 +345,7 @@ class DiskValidatorTest {
     }
 
     @Test
-    public void testValidateDisksButTwoDisksAreDifferentSizeOnGCP() throws CloudbreakOrchestratorFailedException {
+    public void testValidateDisksButTwoDisksAreDifferentSizeAndLsblkDiskWithoutSizeOnGCP() throws CloudbreakOrchestratorFailedException {
         Node node1 = new Node("1.1.1.1", null, "i-123", null, "fqdn1", "worker");
         Node node2 = new Node("1.1.1.2", null, "i-456", null, "fqdn2", "worker");
 
@@ -367,6 +367,7 @@ class DiskValidatorTest {
             sdc 1000 /hadoopfs/fs2
             sdd 500 /hadoopfs/fs3
             sde 500 /hadoopfs/fs4
+            sdf
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))

@@ -465,6 +465,56 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     }
 
     @Test
+    void testPopulateForScalingWhenPopulationIsNeededAndUpscaleWhenPreferredSubnetsRequestedOnZonalSubnetPlatform() {
+        List<String> preferredSubnets = List.of("subnet1", "subnet2");
+        List<String> groupAvailabilityZonesForMetadata = List.of("1", "2");
+        List<String> groupAvailabilityZonesForGroup = List.of("1", "2", "3");
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZonesForMetadata, groupAvailabilityZonesForGroup);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.getInstanceGroups().stream()
+                .filter(ig -> "is1".equals(ig.getGroupName()))
+                .forEach(ig -> {
+                    ig.getInstanceMetaData().forEach(im -> im.setSubnetId("subnet1"));
+                    Set<InstanceMetaData> newInstanceMetadata = getInstanceMetaData(2, List.of(), ig, Set.of());
+                    newInstanceMetadata.forEach(im -> im.setInstanceStatus(InstanceStatus.REQUESTED));
+                    ig.getInstanceMetaData().addAll(newInstanceMetadata);
+                    InstanceGroupNetwork ign = new InstanceGroupNetwork();
+                    ign.setCloudPlatform(CloudPlatform.AWS.name());
+                    ig.setInstanceGroupNetwork(ign);
+                    ig.setStack(stack);
+                });
+
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId())).thenReturn(stack.getNotDeletedInstanceMetaDataSet());
+        when(instanceGroupSubnetCollector.collect(any(), any())).thenReturn(Set.of("subnet1", "subnet2", "subnet3"));
+        Map<String, CloudSubnet> subnetMetas = Map.of(
+                "subnet1", new CloudSubnet.Builder().id("id1").name("name1").availabilityZone("1").cidr("cidr1").build(),
+                "subnet2", new CloudSubnet.Builder().id("id2").name("name2").availabilityZone("2").cidr("cidr2").build(),
+                "subnet3", new CloudSubnet.Builder().id("id3").name("name3").availabilityZone("3").cidr("cidr3").build());
+        DetailedEnvironmentResponse detailedEnvironmentResponse = DetailedEnvironmentResponse.builder()
+                .withNetwork(EnvironmentNetworkResponse.builder().withSubnetMetas(subnetMetas).build())
+                .build();
+        when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        boolean actual = underTest.populateForScaling(stack, Set.of("is1"), Boolean.FALSE, new NetworkScaleDetails(preferredSubnets, Set.of()));
+
+        assertTrue(actual);
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataWithNetworkByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).saveAll(any());
+        verify(instanceMetaDataService, times(0)).getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
+        verify(instanceMetaDataService).saveAll(savedInstanceMetadatas.capture());
+        assertEquals(2, savedInstanceMetadatas.getValue().size());
+        savedInstanceMetadatas.getValue()
+                .forEach(im -> {
+                    assertTrue(isNotEmpty(im.getAvailabilityZone()));
+                    assertTrue(preferredSubnets.contains(im.getSubnetId()));
+                    assertTrue(groupAvailabilityZonesForMetadata.contains(im.getAvailabilityZone()));
+                });
+        assertEquals(2, savedInstanceMetadatas.getValue().stream().map(InstanceMetaData::getAvailabilityZone).collect(Collectors.toSet()).size());
+        assertEquals(2, savedInstanceMetadatas.getValue().stream().map(InstanceMetaData::getSubnetId).collect(Collectors.toSet()).size());
+    }
+
+    @Test
     void testPopulateForScalingWhenPopulationIsNeededAndRepair() {
         boolean repair = Boolean.TRUE;
         List<String> groupAvailabilityZonesForMetadata = List.of();
