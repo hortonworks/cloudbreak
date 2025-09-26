@@ -114,8 +114,7 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
                     populateAvailabilityZoneOfInstances(
                             availabilityZones,
                             mergedInstanceMetaData,
-                            "Master/Auxiliary",
-                            masterInstanceGroup.isPresent() ? masterInstanceGroup.get() : auxiliaryInstanceGroup.get(),
+                            masterInstanceGroup.orElseGet(auxiliaryInstanceGroup::get),
                             stackSubnetId,
                             stack.getNetwork()
                     )

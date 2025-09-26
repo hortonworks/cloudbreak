@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -131,7 +132,7 @@ public class DiskValidator {
         List<VolumeInfo> notFoundVolumesBySize = new LinkedList<>(requiredVolumes);
         lsblkLines.forEach(lsblkLine -> {
             if (isMounted(lsblkLine)) {
-                notFoundVolumesBySize.stream().filter(volumeInfo -> lsblkLine.getSize().equals(volumeInfo.getSize())).findFirst()
+                notFoundVolumesBySize.stream().filter(volumeInfo -> Objects.equals(lsblkLine.getSize(), volumeInfo.getSize())).findFirst()
                         .ifPresent(notFoundVolumesBySize::remove);
             } else {
                 LOGGER.debug("Volume {} is not mounted on the instance {}", lsblkLine.getDevice(), fqdn);

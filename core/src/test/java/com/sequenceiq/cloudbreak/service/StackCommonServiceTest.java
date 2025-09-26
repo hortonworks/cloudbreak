@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUST
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -83,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -234,6 +236,7 @@ class StackCommonServiceTest {
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(regionAwareInternalCrnGeneratorFactory.autoscale()).thenReturn(regionAwareInternalCrnGenerator);
         lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+        when(multiAzValidator.validateNetworkScaleRequest(any(), any(), anyString())).thenReturn(ValidationResult.builder().build());
 
         underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest);
 
@@ -597,15 +600,34 @@ class StackCommonServiceTest {
     }
 
     @Test
-    void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
+    void testValidateNetworkScaleRequestWhenValidatorDoesNotFindError() {
+        String groupName = "aGroupName";
         StackDto stack = mock(StackDto.class);
-        when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
-        networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
+        when(multiAzValidator.validateNetworkScaleRequest(stack, networkScaleV4Request, groupName)).thenReturn(ValidationResult.builder().build());
 
-        assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
+        assertDoesNotThrow(() -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request, groupName));
 
-        verify(multiAzValidator, times(1)).collectSubnetIds(any());
+        verify(multiAzValidator, times(1)).validateNetworkScaleRequest(stack, networkScaleV4Request, groupName);
+    }
+
+    @Test
+    void testValidateNetworkScaleRequestWhenValidatorDoesFindError() {
+        String groupName = "aGroupName";
+        StackDto stack = mock(StackDto.class);
+        NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
+        ValidationResult validationResult = ValidationResult.builder()
+                .error("Network Scale Request Error")
+                .build();
+        when(multiAzValidator.validateNetworkScaleRequest(stack, networkScaleV4Request, groupName)).thenReturn(validationResult);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request, groupName));
+
+        verify(multiAzValidator, times(1)).validateNetworkScaleRequest(stack, networkScaleV4Request, groupName);
+        assertThat(badRequestException.getMessage())
+                .startsWith("The provided network scale request is not valid:")
+                .contains("Network Scale Request Error");
     }
 
     @Test
@@ -617,9 +639,7 @@ class StackCommonServiceTest {
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
         when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
-        when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID, SUBNET_ID2));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
-        networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
         StackScaleV4Request updateRequest = new StackScaleV4Request();
         updateRequest.setStackNetworkScaleV4Request(networkScaleV4Request);
         UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();

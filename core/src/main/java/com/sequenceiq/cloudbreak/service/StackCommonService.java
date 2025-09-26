@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -314,7 +314,6 @@ public class StackCommonService {
 
     public FlowIdentifier putScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackScaleV4Request stackScaleV4Request) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        validateNetworkScaleRequest(stack, stackScaleV4Request.getStackNetworkScaleV4Request());
         MDCBuilder.buildMdcContext(stack);
         stackScaleV4Request.setStackId(stack.getId());
         if (Set.of(CloudConstants.AWS, CloudConstants.AZURE).contains(stack.getPlatformVariant())) {
@@ -327,6 +326,7 @@ public class StackCommonService {
         UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(stackScaleV4Request);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack.getStack(), scalingAdjustment);
+        validateNetworkScaleRequest(stack, stackScaleV4Request.getStackNetworkScaleV4Request(), stackScaleV4Request.getGroup());
         if (scalingAdjustment > 0) {
             saltVersionUpgradeService.validateSaltVersion(stack);
         }
@@ -563,17 +563,10 @@ public class StackCommonService {
     }
 
     @VisibleForTesting
-    void validateNetworkScaleRequest(StackDto stack, NetworkScaleV4Request stackNetworkScaleV4Request) {
-        if (stackNetworkScaleV4Request != null
-                && stackNetworkScaleV4Request.getPreferredSubnetIds() != null
-                && stackNetworkScaleV4Request.getPreferredSubnetIds().stream().anyMatch(StringUtils::isNotBlank)) {
-            Set<InstanceGroupView> instanceGroupViews = new HashSet<>(stack.getInstanceGroupViews());
-            Set<String> subnetIds = multiAzValidator.collectSubnetIds(instanceGroupViews);
-            if (subnetIds.size() < 2) {
-                String message = "It does not make sense to prefer subnets on a cluster that has been provisioned in a single subnet";
-                LOGGER.info(message);
-                throw new BadRequestException(message);
-            }
+    void validateNetworkScaleRequest(StackDto stack, NetworkScaleV4Request stackNetworkScaleV4Request, String groupName) {
+        ValidationResult validationResult = multiAzValidator.validateNetworkScaleRequest(stack, stackNetworkScaleV4Request, groupName);
+        if (validationResult.hasError()) {
+            throw new BadRequestException("The provided network scale request is not valid: " + validationResult.getFormattedErrors());
         }
     }
 

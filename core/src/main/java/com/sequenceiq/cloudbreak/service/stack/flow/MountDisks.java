@@ -120,7 +120,11 @@ public class MountDisks {
             Map<String, Map<String, String>> mountInfo =
                     hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);
 
-            diskValidator.validateDisks(stack, nodesWithDiskData);
+            try {
+                diskValidator.validateDisks(stack, nodesWithDiskData);
+            } catch (RuntimeException e) {
+                LOGGER.error("Failed to validate disks", e);
+            }
 
             mountInfo.forEach((hostname, value) -> {
                 Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
