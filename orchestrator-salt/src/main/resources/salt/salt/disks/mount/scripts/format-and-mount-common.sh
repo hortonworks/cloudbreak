@@ -144,7 +144,18 @@ get_nvme_device_names() {
     declare -A serial_id_to_device_path_map
     declare -A serial_id_stripped_to_device_path_map
 
-    for nvme_device in $(nvme list -o json | jq -r '.Devices[] | "\(.SerialNumber)=\(.DevicePath)"'); do
+    STR=$(cat /etc/os-release)
+    SUB="VERSION_ID=\"9.6\""
+    nvme_command_output=""
+
+    if [[ "$STR" == *"$SUB"* ]]
+    then
+        nvme_command_output=$(nvme list | sed '1,2d' | tr -s ' ' | awk '{print $3"="$1}')
+    else
+        nvme_command_output=$(nvme list -o json | jq -r '.Devices[] | "\(.SerialNumber)=\(.DevicePath)"')
+    fi
+
+    for nvme_device in $nvme_command_output; do
         IFS='=' read -r -a split_array <<< "$nvme_device"
         serial_id_to_device_path_map[${split_array[0]}]=${split_array[1]}
         serial_id_stripped=$(strip_serial_id ${split_array[0]})
