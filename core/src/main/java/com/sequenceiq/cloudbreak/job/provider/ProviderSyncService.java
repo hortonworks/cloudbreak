@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -119,10 +120,16 @@ public class ProviderSyncService {
                     try {
                         return cloudResource.getParameter(ATTRIBUTES, NetworkAttributes.class);
                     } catch (CloudbreakServiceException e) {
+                        // This will not be thrown as NetworkAttributes is annotated with @JsonIgnoreProperties(ignoreUnknown = true)
+                        // cloudResource.getParameterStrict() won't throw an exception either as
+                        // even though the strict mapper has FAIL_ON_UNKNOWN_PROPERTIES enabled, that annotation allows silently ignoring it
+                        // All fields in NetworkAttributes that are not present in the JSON become null
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
+                // This filters valid NetworkAttributes only
+                .filter(networkAttributes -> StringUtils.isNotBlank(networkAttributes.getNetworkId()))
                 .filter(networkAttributes ->
                         Optional.ofNullable(networkAttributes.getOutboundType())
                                 .map(OutboundType::isUpgradeable)

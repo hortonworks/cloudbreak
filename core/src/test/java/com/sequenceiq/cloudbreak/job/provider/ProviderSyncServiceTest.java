@@ -2,6 +2,12 @@ package com.sequenceiq.cloudbreak.job.provider;
 
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_LOAD_BALANCER;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NAT_GATEWAY;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_NETWORK_INTERFACE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
 import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
 import static com.sequenceiq.common.model.ProviderSyncState.OUTBOUND_UPGRADE_NEEDED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,7 +132,14 @@ class ProviderSyncServiceTest {
         lenient().when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         lenient().when(cloudConnector.authentication()).thenReturn(authenticator);
         lenient().when(cloudConnector.resources()).thenReturn(resourceConnector);
-        lenient().when(providerSyncConfig.getResourceTypeList()).thenReturn(Set.of(AZURE_INSTANCE, ResourceType.AZURE_NETWORK));
+        lenient().when(providerSyncConfig.getResourceTypeList()).thenReturn(Set.of(
+                AZURE_INSTANCE,
+                AZURE_NETWORK,
+                AZURE_SUBNET,
+                AZURE_PUBLIC_IP,
+                AZURE_NAT_GATEWAY,
+                AZURE_NETWORK_INTERFACE,
+                AZURE_LOAD_BALANCER));
 
         // Set up lenient stubbing for resourceConnector to avoid strict argument matching issues
         lenient().when(resourceConnector.checkForSyncer(any(AuthenticatedContext.class), any(List.class)))
@@ -139,9 +152,10 @@ class ProviderSyncServiceTest {
         List<CloudResource> cloudResources = List.of(
                 createCloudResource(INSTANCE_1, AZURE_INSTANCE),
                 createCloudResource(INSTANCE_2, AZURE_INSTANCE),
-                createCloudResource(IP_1, ResourceType.AZURE_PUBLIC_IP),
-                createCloudResource(IP_2, ResourceType.AZURE_PUBLIC_IP));
+                createCloudResource(IP_1, AZURE_PUBLIC_IP),
+                createCloudResource(IP_2, AZURE_PUBLIC_IP));
 
+        when(providerSyncConfig.getResourceTypeList()).thenReturn(Set.of(AZURE_INSTANCE));
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(cloudResources);
         List<CloudResource> filteredList = cloudResources.stream().filter(r -> r.getType() == AZURE_INSTANCE).toList();
         List<CloudResourceStatus> filteredResourceStatusList = filteredList.stream()
@@ -483,6 +497,9 @@ class ProviderSyncServiceTest {
         List<CloudResource> syncedResources = List.of(natGateway);
 
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(originalResources);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(resourceConnector.checkForSyncer(authenticatedContext, originalResources))
+                .thenReturn(List.of(new CloudResourceStatus(natGateway, ResourceStatus.CREATED)));
         List<CloudResourceStatus> resourceStatusList = syncedResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .toList();
@@ -592,11 +609,12 @@ class ProviderSyncServiceTest {
         NetworkAttributes networkAttributes = new NetworkAttributes();
         OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
         networkAttributes.setOutboundType(outboundType);
+        networkAttributes.setNetworkId(NETWORK_1);
 
         lenient().when(cloudResource.getName()).thenReturn(NETWORK_1);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(
                 new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
-        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
+        lenient().when(cloudResource.getType()).thenReturn(AZURE_NETWORK);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
         when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NETWORK - " + NETWORK_1);
 
@@ -618,6 +636,7 @@ class ProviderSyncServiceTest {
         NetworkAttributes networkAttributes = new NetworkAttributes();
         OutboundType outboundType = OutboundType.valueOf(outboundTypeStr);
         networkAttributes.setOutboundType(outboundType);
+        networkAttributes.setNetworkId(NETWORK_1);
 
         when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
         when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class)).thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
@@ -631,14 +650,14 @@ class ProviderSyncServiceTest {
         CloudResource cloudResource = mock(CloudResource.class);
 
         lenient().when(cloudResource.getName()).thenReturn(name);
-        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NAT_GATEWAY);
+        lenient().when(cloudResource.getType()).thenReturn(AZURE_NAT_GATEWAY);
         lenient().when(cloudResource.getReference()).thenReturn("/subscriptions/test/resourceGroups/test/providers/Microsoft.Network/natGateways/" + name);
 
         // Simulate that this resource has ExternalResourceAttributes, not NetworkAttributes
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class))
-                .thenThrow(new CloudbreakServiceException(EXTERNAL_RESOURCE_ATTRIBUTES_MESSAGE));
+                .thenReturn(new NetworkAttributes());
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
-                .thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
+                .thenReturn(new SkuAttributes());
 
         lenient().when(cloudResource.getDetailedInfo()).thenReturn("AZURE_NAT_GATEWAY - " + name);
 
@@ -656,7 +675,7 @@ class ProviderSyncServiceTest {
         networkAttributes.setOutboundType(outboundType);
 
         lenient().when(cloudResource.getName()).thenReturn("vnet-001");
-        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
+        lenient().when(cloudResource.getType()).thenReturn(AZURE_NETWORK);
         lenient().when(cloudResource.getReference()).thenReturn(null);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
@@ -669,10 +688,11 @@ class ProviderSyncServiceTest {
     private CloudResource createAzureNetworkResourceWithNullOutboundType() {
         CloudResource cloudResource = mock(CloudResource.class);
         NetworkAttributes networkAttributes = new NetworkAttributes();
+        networkAttributes.setNetworkId(NETWORK_1);
         // Don't set outboundType - it will be null and getOutboundType() should return NOT_DEFINED
 
         lenient().when(cloudResource.getName()).thenReturn(NETWORK_1);
-        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AZURE_NETWORK);
+        lenient().when(cloudResource.getType()).thenReturn(AZURE_NETWORK);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, NetworkAttributes.class)).thenReturn(networkAttributes);
         lenient().when(cloudResource.getParameter(CloudResource.ATTRIBUTES, SkuAttributes.class))
                 .thenThrow(new CloudbreakServiceException(NO_SKU_ATTRIBUTES_MESSAGE));
