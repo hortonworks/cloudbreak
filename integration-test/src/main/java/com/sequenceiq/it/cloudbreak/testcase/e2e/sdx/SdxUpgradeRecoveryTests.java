@@ -84,6 +84,7 @@ public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
                 .awaitForFlowFail()
                 .when(sdxTestClient.recoverFromUpgrade(), key(sdx))
                 .awaitForFlow(emptyRunningParameter().withWaitForFlowSuccess())
+                .when(sdxTestClient.refresh(), key(sdx))
                 .then((tc, dto, client) -> validateStackCrn(originalCrn, dto))
                 .then((tc, dto, client) -> validateImageId(originalImageId, dto))
                 .validate();
