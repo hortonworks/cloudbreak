@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
@@ -43,11 +42,6 @@ public class StackStopFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
 
     public StackStopFlowConfig() {
         super(StackStopState.class, StackStopEvent.class);
-    }
-
-    @Override
-    public FlowTriggerCondition getFlowTriggerCondition() {
-        return getApplicationContext().getBean(StackStopFlowTriggerCondition.class);
     }
 
     @Override

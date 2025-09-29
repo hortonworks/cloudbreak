@@ -12,18 +12,17 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.constant.ImdsConstants;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
-public class FreeipaInstanceMetadataUpdateAction implements Action<FreeIpaTestDto, FreeIpaClient> {
+public class FreeipaInstanceMetadataUpdateAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaInstanceMetadataUpdateAction.class);
 
     @Override
-    public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
+    public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA instance metadata update request for environment %n"), testDto.getEnvironmentCrn());
         String currentImdsVersion = testDto.getResponse().getSupportedImdsVersion();
         InstanceMetadataUpdateType targetUpdateType = StringUtils.equals(currentImdsVersion, ImdsConstants.AWS_IMDS_VERSION_V2) ?

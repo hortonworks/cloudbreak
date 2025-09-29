@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -48,12 +47,10 @@ public class FreeIpaStopService {
 
     private void triggerStackStopIfNeeded(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
-        if (!isStopNeeded(stack)) {
-            return;
+        if (isStopNeeded(stack)) {
+            LOGGER.debug("Trigger stop event, stack status: {}", stack.getStackStatus());
+            flowManager.notify(STACK_STOP_EVENT.event(), new StackEvent(STACK_STOP_EVENT.event(), stack.getId()));
         }
-        LOGGER.debug("Trigger stop event, new status: {}", DetailedStackStatus.STOP_REQUESTED);
-        stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOP_REQUESTED, "Stopping of stack infrastructure has been requested.");
-        flowManager.notify(STACK_STOP_EVENT.event(), new StackEvent(STACK_STOP_EVENT.event(), stack.getId()));
     }
 
     private boolean isStopNeeded(Stack stack) {

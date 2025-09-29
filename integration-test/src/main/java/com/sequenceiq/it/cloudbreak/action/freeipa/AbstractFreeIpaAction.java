@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.action.freeipa;
 
+import static jakarta.ws.rs.core.Response.Status.CONFLICT;
+
+import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +29,15 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
                 String message = e.getResponse().readEntity(String.class);
                 LOGGER.info("Exception during executing FreeIPA action: ", e);
                 if (message.contains("Flows under operation")) {
+                    waitTillFlowInOperation(testDto.getFlowUtil());
+                    retries++;
+                } else {
+                    throw e;
+                }
+            } catch (ClientErrorException e) {
+                LOGGER.info("Exception during executing FreeIPA action: ", e);
+                Response response = e.getResponse();
+                if (CONFLICT.getStatusCode() == response.getStatus()) {
                     waitTillFlowInOperation(testDto.getFlowUtil());
                     retries++;
                 } else {

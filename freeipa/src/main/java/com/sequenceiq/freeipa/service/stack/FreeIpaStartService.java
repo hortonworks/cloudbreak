@@ -28,9 +28,6 @@ public class FreeIpaStartService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
-    @Inject
-    private StackUpdater stackUpdater;
-
     public void start(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
         MDCBuilder.addAccountId(accountId);
@@ -47,7 +44,6 @@ public class FreeIpaStartService {
     private void triggerStackStart(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Trigger start event, new status: {}", START_REQUESTED);
-        stackUpdater.updateStackStatus(stack, START_REQUESTED, "Starting of stack infrastructure has been requested.");
         flowManager.notify(STACK_START_EVENT.event(), new StackEvent(STACK_START_EVENT.event(), stack.getId()));
     }
 

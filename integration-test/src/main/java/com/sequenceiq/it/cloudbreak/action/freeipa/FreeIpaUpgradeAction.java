@@ -9,13 +9,12 @@ import org.testng.util.Strings;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
-public class FreeIpaUpgradeAction implements Action<FreeIpaTestDto, FreeIpaClient> {
+public class FreeIpaUpgradeAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeAction.class);
 
@@ -33,7 +32,7 @@ public class FreeIpaUpgradeAction implements Action<FreeIpaTestDto, FreeIpaClien
         this.imageId = imageId;
     }
 
-    public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
+    public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         request.setAllowMajorOsUpgrade(Boolean.TRUE);

@@ -13,13 +13,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
-public class FreeIpaRepairAction implements Action<FreeIpaTestDto, FreeIpaClient> {
+public class FreeIpaRepairAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaRepairAction.class);
 
@@ -29,7 +28,7 @@ public class FreeIpaRepairAction implements Action<FreeIpaTestDto, FreeIpaClient
         this.instanceMetadataType = instanceMetadataType;
     }
 
-    public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
+    public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);

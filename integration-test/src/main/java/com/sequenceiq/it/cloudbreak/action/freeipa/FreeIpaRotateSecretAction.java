@@ -5,13 +5,12 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
-public class FreeIpaRotateSecretAction implements Action<FreeIpaRotationTestDto, FreeIpaClient> {
+public class FreeIpaRotateSecretAction extends AbstractFreeIpaAction<FreeIpaRotationTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaRotateSecretAction.class);
 
@@ -19,7 +18,7 @@ public class FreeIpaRotateSecretAction implements Action<FreeIpaRotationTestDto,
     }
 
     @Override
-    public FreeIpaRotationTestDto action(TestContext testContext, FreeIpaRotationTestDto testDto, FreeIpaClient client) throws Exception {
+    public FreeIpaRotationTestDto freeIpaAction(TestContext testContext, FreeIpaRotationTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA secret rotation request:%n"), testDto.getRequest());
         testDto.setFlow("FreeIPA secret rotation", client.getDefaultClient()
                 .getFreeipaRotationV1Endpoint()

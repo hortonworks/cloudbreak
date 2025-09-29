@@ -11,6 +11,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.util.Strings;
 
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -101,6 +102,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
+        BouncyCastleFipsProviderLoader.load();
         setupTest(testResult);
         setupTest((TestContext) data[0]);
     }

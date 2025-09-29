@@ -48,7 +48,7 @@ public class StackStopService {
     }
 
     public boolean isStopPossible(Stack stack) {
-        if (stack != null && stack.isStopRequested()) {
+        if (stack != null && !stack.isStopped() && !stack.isDeleteCompleted()) {
             return true;
         } else {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
