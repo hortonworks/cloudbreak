@@ -8,9 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
@@ -19,6 +22,9 @@ import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConne
 public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironmentConnector {
     @Inject
     private ClassicClusterListService listService;
+
+    @Inject
+    private ClassicClusterDescribeService describeService;
 
     @Inject
     private RemoteClusterServiceClient remoteClusterServiceClient;
@@ -40,6 +46,19 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     @Override
     public Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
         return listService.list();
+    }
+
+    @Override
+    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+        DescribeEnvironmentResponse describeEnvironmentResponse = new DescribeEnvironmentResponse();
+        describeEnvironmentResponse.setEnvironment(describeV2(publicCloudAccountId, environment).getEnvironment());
+        return describeEnvironmentResponse;
+    }
+
+    @Override
+    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+        OnPremisesApiProto.Cluster cluster = getCluster(environment.getCrn());
+        return describeService.describe(cluster);
     }
 
     @Override
