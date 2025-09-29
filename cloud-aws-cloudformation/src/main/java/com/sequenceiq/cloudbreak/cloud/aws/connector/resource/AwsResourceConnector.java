@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -183,6 +185,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000))
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         return awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
     }
