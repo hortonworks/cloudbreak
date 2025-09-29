@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.ActivityStatus;
@@ -30,8 +32,9 @@ public class CleanupMonitor extends ScalingActivityMonitor {
         Set<ActivityStatus> statuses = ActivityStatus.getStatusesApplicableForCleanup();
         PeriscopeNodeService periscopeNodeService = getPeriscopeNodeService();
         if (periscopeNodeService.isLeader(getPeriscopeNodeConfig().getId())) {
+            Pageable pageable = PageRequest.of(0, Math.toIntExact(CLEANUP_IDS_LIMIT));
             Set<Long> activityIdsToCleanup = getScalingActivityService().findAllInStatusesThatStartedBefore(statuses,
-                    getCleanupConfig().getCleanupDurationHours()).stream().limit(CLEANUP_IDS_LIMIT).collect(toSet());
+                    getCleanupConfig().getCleanupDurationHours(), pageable).stream().limit(CLEANUP_IDS_LIMIT).collect(toSet());
             return activityIdsToCleanup.isEmpty() ? emptyList() :
                     singletonList(new ScalingActivities(scalingActivitiesIdGenerator.incrementAndGet(), activityIdsToCleanup));
         }
