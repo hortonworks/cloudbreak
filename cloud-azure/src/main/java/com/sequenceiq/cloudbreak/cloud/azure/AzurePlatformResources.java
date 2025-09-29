@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -307,6 +308,10 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudVmTypes virtualMachinesNonExtended(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
+        vmTypes = vmTypes.stream()
+                .filter(filterOutV6Instances())
+                .collect(Collectors.toSet());
+
         Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
         Map<String, AzureVmCapabilities> azureVmCapabilities = client.getHostCapabilities(region.value());
 
@@ -485,5 +490,9 @@ public class AzurePlatformResources implements PlatformResources {
                 CollectionUtils.containsAll(emptyIfNull(availabilityZones),
                         Splitter.on(",").splitToList(filters.get(NetworkConstants.AVAILABILITY_ZONES))
                 );
+    }
+
+    private Predicate<VirtualMachineSize> filterOutV6Instances() {
+        return e -> !e.name().toLowerCase(Locale.ROOT).endsWith("_v6");
     }
 }

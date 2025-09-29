@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,11 +13,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +38,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
@@ -63,6 +69,14 @@ import com.sequenceiq.cloudbreak.constant.AzureConstants;
 @ExtendWith(MockitoExtension.class)
 class AzurePlatformResourcesTest {
 
+    private static final String REGION = "eastus";
+
+    private static final int NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE = 0;
+
+    private static final String ARM_VM_DEFAULT = "Standard_D4s_v3";
+
+    private static final int MAX_DISK_SIZE = 2048;
+
     @Mock
     private AzureClient azureClient;
 
@@ -92,7 +106,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testVirtualMachinesWhenNoInstanceTypeShouldBeFilteredOut() {
-        Region region = Region.region("westeruope");
+        Region region = region("westeruope");
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         virtualMachineSizes.add(createVirtualMachineSize("Standard_DS2_v2", 20000));
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
@@ -134,7 +148,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testVirtualMachinesWhenInstanceTypeHasZeroResourceDiskMustBePresented() {
-        Region region = Region.region("westeruope");
+        Region region = region("westeruope");
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         VirtualMachineSize d2sTypeWithoutResourceDisk = createVirtualMachineSize("Standard_D2s_v4", 0);
         VirtualMachineSize e64sVmTypeWithoutResourceDisk = createVirtualMachineSize("Standard_E64s_v4", 0);
@@ -209,7 +223,7 @@ class AzurePlatformResourcesTest {
     @ParameterizedTest
     @MethodSource("dataForFilterVirtualMachines")
     void testVirtualMachinesForFilters(Map<String, List<String>> zoneInfo, List<String> availabilityZones, Set<String> expectedVirtualMachines) {
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
 
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
@@ -248,7 +262,7 @@ class AzurePlatformResourcesTest {
         zoneInfo.put("Standard_E64s_v4", null);
         List<String> availabilityZones = List.of("1");
         Set<String> expectedVirtualMachines = Set.of("Standard_DS2_v2", "Standard_D2s_v4", "Standard_E64ds_v4");
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
 
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
@@ -281,7 +295,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void collectInstanceStorageCountTest() {
-        Region region = Region.region("us-west-1");
+        Region region = region("us-west-1");
         CloudContext cloudContext = new CloudContext.Builder()
                 .withLocation(Location.location(region, availabilityZone("us-west-1")))
                 .build();
@@ -298,7 +312,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void collectInstanceStorageCountWhenInstanceTypeIsNotFoundTest() {
-        Region region = Region.region("us-west-1");
+        Region region = region("us-west-1");
         CloudContext cloudContext = new CloudContext.Builder()
                 .withLocation(Location.location(region, availabilityZone("us-west-1")))
                 .build();
@@ -362,7 +376,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testNetworksWhenNoNetworks() {
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
         AzureListResult<Network> azureListResult = mock(AzureListResult.class);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getNetworks()).thenReturn(azureListResult);
@@ -372,7 +386,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testNetworksWhenNetworkWithoutRegion() {
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
         AzureListResult<Network> azureListResult = mock(AzureListResult.class);
         Network network = mock(Network.class);
         when(azureListResult.getAll()).thenReturn(List.of(network));
@@ -383,7 +397,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testNetworksWhenNetworkWithRegion() {
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
         AzureListResult<Network> azureListResult = mock(AzureListResult.class);
         Network network = mock(Network.class);
         when(network.region()).thenReturn(com.azure.core.management.Region.US_WEST2);
@@ -396,7 +410,7 @@ class AzurePlatformResourcesTest {
 
     @Test
     void testNetworksWhenNetworkWhenResourceGroupAndNetworkIdGiven() {
-        Region region = Region.region("westus2");
+        Region region = region("westus2");
         Map<String, String> filter = Map.ofEntries(
                 Map.entry(AzureConstants.NETWORK_ID, "networkid"),
                 Map.entry(AzureConstants.RESOURCE_GROUP_NAME, "resourcegroup"));
@@ -425,5 +439,47 @@ class AzurePlatformResourcesTest {
         assertEquals(dnsServerIPs, actualNetwork.getProperties().get("dnsServerIPs"));
         assertEquals("rg", actualNetwork.getProperties().get("resourceGroupName"));
         assertEquals("subnet", actualNetwork.getSubnetsMeta().iterator().next().getId());
+    }
+
+    @Test
+    void testGetCloudVmTypesForSupportedVmTypesAndFilterOutV6Family() {
+        ReflectionTestUtils.setField(underTest, "armVmDefault", "Standard_D4s_v3");
+
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        VirtualMachineSize vmA = mockVmSize("Standard_D4s_v3");
+        VirtualMachineSize vmB = mockVmSize("Standard_D2s_v3");
+        VirtualMachineSize vmC = mockVmSize("Standard_D2_v6");
+        Set<VirtualMachineSize> vmSizes = new HashSet<>(Arrays.asList(vmA, vmB, vmC));
+        when(azureClient.getVmTypes(REGION)).thenReturn(vmSizes);
+        when(azureClient.getVmTypes(REGION)).thenReturn(vmSizes);
+
+        Map<String, List<String>> azs = new HashMap<>();
+        azs.put("Standard_D4s_v3", Arrays.asList("1", "2"));
+        azs.put("Standard_D2s_v3", Arrays.asList("1", "3"));
+        when(azureClient.getAvailabilityZones(REGION)).thenReturn(azs);
+
+        Map<String, AzureVmCapabilities> capabilities = new HashMap<>();
+        capabilities.put("Standard_D4s_v3", mock(AzureVmCapabilities.class));
+        capabilities.put("Standard_D2s_v3", mock(AzureVmCapabilities.class));
+        when(azureClient.getHostCapabilities(REGION)).thenReturn(capabilities);
+        when(azureHostEncryptionValidator.isVmSupported(anyString(), anyMap())).thenReturn(true);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(eq("Standard_D4s_v3"), anyMap())).thenReturn(true);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(eq("Standard_D2s_v3"), anyMap())).thenReturn(false);
+
+        CloudVmTypes result = underTest.virtualMachinesNonExtended(cloudCredential, region(REGION), Map.of());
+
+        Set<VmType> returnedTypes = result.getCloudVmResponses().get(REGION);
+        VmType defaultType = result.getDefaultCloudVmResponses().get(REGION);
+        assertThat(returnedTypes)
+                .extracting(VmType::value)
+                .containsExactlyInAnyOrder("Standard_D4s_v3", "Standard_D2s_v3");
+        assertThat(defaultType.value()).isEqualTo("Standard_D4s_v3");
+    }
+
+    private VirtualMachineSize mockVmSize(String name) {
+        VirtualMachineSize vm = mock(VirtualMachineSize.class);
+        when(vm.name()).thenReturn(name);
+        return vm;
     }
 }
