@@ -68,6 +68,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PREFER_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
@@ -598,6 +599,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.rhel9.enabled}")
     private boolean rhel9Enabled;
 
+    @Value("${auth.mock.rhel9.preferred}")
+    private boolean rhel9Preferred;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1118,6 +1122,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (rhel9Enabled) {
             builder.addEntitlements(createEntitlement(CDP_ENABLE_RHEL9_IMAGES));
+        }
+        if (rhel9Preferred) {
+            builder.addEntitlements(createEntitlement(CDP_PREFER_RHEL9_IMAGES));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

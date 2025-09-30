@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.image.PreferredOsService;
 
 @Service
 public class UpgradeImageService {
@@ -43,6 +44,9 @@ public class UpgradeImageService {
 
     @Inject
     private FreeipaPlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private PreferredOsService preferredOsService;
 
     public ImageInfoResponse selectImage(FreeIpaImageFilterSettings imageFilterParams) {
         Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(imageFilterParams);
@@ -162,7 +166,16 @@ public class UpgradeImageService {
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
-        return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), currentImage.getOs(), stack.getRegion(),
-                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false, stack.getArchitecture(), Map.of());
+        return new FreeIpaImageFilterSettings(
+                currentImage.getId(),
+                catalog,
+                currentImage.getOs(),
+                preferredOsService.getPreferredOs(currentImage.getOs()),
+                stack.getRegion(),
+                stack.getCloudPlatform().toLowerCase(Locale.ROOT),
+                false,
+                stack.getArchitecture(),
+                Map.of()
+        );
     }
 }

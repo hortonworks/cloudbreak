@@ -33,6 +33,7 @@ import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.image.PreferredOsService;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeImageServiceTest {
@@ -49,6 +50,9 @@ class UpgradeImageServiceTest {
 
     @Mock
     private FreeipaPlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private PreferredOsService preferredOsService;
 
     @InjectMocks
     private UpgradeImageService underTest;
@@ -129,6 +133,7 @@ class UpgradeImageServiceTest {
 
     @Test
     void testFindTargetImagesImageWithSameId() {
+        ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", "centos7", String.class);
         Stack stack = new Stack();
         Image image = createImage("2021-09-01", "centos7");
         ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
@@ -145,6 +150,7 @@ class UpgradeImageServiceTest {
 
     @Test
     void testFindTargetImagesCurrentImageMissingDate() {
+        ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", "centos7", String.class);
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
@@ -155,6 +161,7 @@ class UpgradeImageServiceTest {
         Image currentImageFromCatalog = createImage("2021-08-01", "centos7");
         ImageWrapper currentImageWrapperFromCatalog = ImageWrapper.ofFreeipaImage(currentImageFromCatalog, "asdf");
         when(imageService.getImage(captor.capture())).thenReturn(currentImageWrapperFromCatalog);
+        when(preferredOsService.getPreferredOs(any())).thenReturn("centos7");
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
         currentImage.setId("222-333");
@@ -181,6 +188,7 @@ class UpgradeImageServiceTest {
 
     @Test
     void testFindTargetImagesCurrentImageMissingDateAndNoDateFromCatalog() {
+        ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", "centos7", String.class);
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");

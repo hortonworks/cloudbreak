@@ -111,10 +111,13 @@ public class ImageCatalogProvider {
     }
 
     private List<FreeIpaVersions> filterVersions(ImageCatalog catalog, List<Image> filterImages) {
-        List<String> filteredUuids = filterImages.stream().map(Image::getUuid).collect(Collectors.toList());
+        List<String> filteredUuids = filterImages.stream()
+                .map(Image::getUuid)
+                .collect(Collectors.toList());
         LOGGER.debug("The following uuids will be removed from defaults and image ids fields: [{}]", filteredUuids);
         return getVersions(catalog).getFreeIpaVersions().stream()
-                .map(versions -> filterDefaultsAndImageIds(filteredUuids, versions)).collect(Collectors.toList());
+                .map(versions -> filterDefaultsAndImageIds(filteredUuids, versions))
+                .collect(Collectors.toList());
     }
 
     private FreeIpaVersions filterDefaultsAndImageIds(List<String> filteredUuids, FreeIpaVersions versions) {

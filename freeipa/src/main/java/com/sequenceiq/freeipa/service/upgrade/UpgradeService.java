@@ -91,14 +91,13 @@ public class UpgradeService {
         ImageInfoResponse selectedImage = imageService.selectImage(freeIpaImageFilterSettings);
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
+        validationService.validateSelectedImageEntitledFor(accountId, selectedImage);
         return triggerUpgrade(request, stack, allInstances, selectedImage, currentImage, accountId);
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
             String currentOs) {
-        if (Optional.ofNullable(stack.getSecurityConfig())
-                .map(SecurityConfig::getSeLinux)
-                .orElse(SeLinux.PERMISSIVE) == SeLinux.ENFORCING) {
+        if (seLinuxEnforced(stack)) {
             return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
                     stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
                     stack.getArchitecture(), Map.of(SELINUX_SUPPORTED_TAG, Boolean.TRUE.toString()));
@@ -107,6 +106,12 @@ public class UpgradeService {
                     stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()),
                     stack.getArchitecture());
         }
+    }
+
+    private boolean seLinuxEnforced(Stack stack) {
+        return Optional.ofNullable(stack.getSecurityConfig())
+                .map(SecurityConfig::getSeLinux)
+                .orElse(SeLinux.PERMISSIVE) == SeLinux.ENFORCING;
     }
 
     @SuppressWarnings("IllegalType")
