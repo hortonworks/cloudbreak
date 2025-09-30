@@ -112,9 +112,15 @@ public final class AzureInstanceView {
         return type;
     }
 
+    // It is not an instance ID, it's a suffix, looks like 'm8-1b2c3c5'
     public String getInstanceId() {
-        String id = instance.getDbIdOrDefaultIfNotExists();
-        return AzureUtils.getInstanceIdWithoutStackName(instanceTemplate.getGroupName(), instanceTemplate.getPrivateId().toString(), id);
+        String instanceName = instance.getStringParameter(CloudInstance.INSTANCE_NAME);
+        if (instanceName != null) {
+            return instanceName.replaceAll(stackName + "-", "");
+        } else {
+            String id = instance.getDbIdOrDefaultIfNotExists();
+            return AzureUtils.getInstanceIdWithoutStackName(instanceTemplate.getGroupName(), instanceTemplate.getPrivateId().toString(), id);
+        }
     }
 
     public long getPrivateId() {
