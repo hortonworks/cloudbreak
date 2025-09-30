@@ -44,10 +44,7 @@ public class DefaultJavaVersionUpdateValidator {
             if (StringUtils.isNotEmpty(runtimeVersion)) {
                 allowableJavaConfigurations.checkValidConfiguration(parseInt(javaVersionRequest.getDefaultJavaVersion()), runtimeVersion);
             } else {
-                String message = String.format("The runtime version could not be found on the VM image('%s') of the cluster with name '%s'.",
-                        image.getImageId(), stack.getName());
-                LOGGER.warn(message);
-                throw new BadRequestException(message);
+                LOGGER.warn("The runtime version could not be found on the VM image('{}') of the cluster with name '{}'.", image.getImageId(), stack.getName());
             }
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             String message = String.format("Image information could not be found for the cluster with name '%s'", stack.getName());
