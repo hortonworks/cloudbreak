@@ -205,9 +205,9 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
                 DOWNSCALE_TRIGGER_SUCCESS, SCALING_FLOW_IN_PROGRESS), Sort.by("startTime")));
     }
 
-    public Set<Long> findAllInStatusesThatStartedBefore(Collection<ActivityStatus> statuses, long durationInHours) {
+    public Set<Long> findAllInStatusesThatStartedBefore(Collection<ActivityStatus> statuses, long durationInHours, Pageable pageable) {
         Date startTimeFrom = new Date(now().minus(durationInHours, ChronoUnit.HOURS).toEpochMilli());
-        return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatusesWithStartTimeBefore(statuses, startTimeFrom));
+        return Sets.newConcurrentHashSet(scalingActivityRepository.findAllIdsInActivityStatusesWithStartTimeBefore(statuses, startTimeFrom, pageable));
     }
 
     public void deleteScalingActivityByIds(Set<Long> activityIds) {
