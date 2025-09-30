@@ -1,5 +1,6 @@
 package com.sequenceiq.remoteenvironment.api.v1.environment.endpoint;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.CLASSIC_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DATALAKE_SERVICES_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DESCRIBE_BY_CRN;
@@ -72,5 +73,5 @@ public interface RemoteEnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Fetch environment root certificate", operationId = "getRootCertificateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    GetRootCertificateResponse getRootCertificateByCrn(@QueryParam("environmentCrn") @ValidCrn(resource = ENVIRONMENT) String environmentCrn);
+    GetRootCertificateResponse getRootCertificateByCrn(@QueryParam("environmentCrn") @ValidCrn(resource = {ENVIRONMENT, CLASSIC_CLUSTER}) String environmentCrn);
 }
