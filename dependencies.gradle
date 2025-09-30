@@ -4,7 +4,7 @@ ext {
   sonarVersion = '6.3.1.5724'
   protobufPluginVersion = '0.9.5'
   springDependencyManagementVersion = '1.1.7'
-  openapiGeneratorGradlePlugin = '7.16.0'
+  openapiGeneratorGradlePlugin = '7.15.0'
 
   // Spring
   caffeineVersion = '3.1.8'
