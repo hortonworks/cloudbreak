@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 @ExtendWith(MockitoExtension.class)
 class SdxHaApplicationTest {
@@ -24,10 +25,13 @@ class SdxHaApplicationTest {
     @Mock
     private SdxService sdxService;
 
+    @Mock
+    private SdxStatusService sdxStatusService;
+
     @Test
     void getDeletingResourcesDoesNotIncludeResizingSdx() {
         Set<Long> resources = Set.of(1L, 2L, 3L);
-        when(sdxService.findByResourceIdsAndStatuses(eq(resources), any())).thenReturn(resources);
+        when(sdxStatusService.findByResourceIdsAndStatuses(eq(resources), any())).thenReturn(resources);
         when(sdxService.findAllNotDetachedIdsByIds(resources)).thenReturn(List.of(1L, 3L));
 
         Set<Long> deletingResources = sdxHaApplication.getDeletingResources(resources);
@@ -37,7 +41,7 @@ class SdxHaApplicationTest {
     @Test
     void getAllDeletingResourcesDoesNotIncludeResizingSdx() {
         Set<Long> resources = Set.of(1L, 2L, 3L);
-        when(sdxService.findByResourceIdsAndStatuses(any(), any())).thenReturn(resources);
+        when(sdxStatusService.findByResourceIdsAndStatuses(any(), any())).thenReturn(resources);
         when(sdxService.findAllNotDetachedIdsByIds(resources)).thenReturn(List.of(1L, 3L));
 
         Set<Long> deletingResources = sdxHaApplication.getAllDeletingResources();

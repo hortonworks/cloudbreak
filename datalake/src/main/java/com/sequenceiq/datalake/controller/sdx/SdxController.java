@@ -60,9 +60,12 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
 import com.sequenceiq.datalake.service.rotation.certificate.SdxDatabaseCertificateRotationService;
+import com.sequenceiq.datalake.service.sdx.RangerRazService;
 import com.sequenceiq.datalake.service.sdx.SELinuxService;
+import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.SdxInstanceService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
@@ -178,6 +181,15 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private RangerRazService rangerRazService;
+
+    @Inject
+    private SdxInstanceService sdxIntanceService;
+
+    @Inject
+    private SaltService saltService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -385,14 +397,14 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_DATALAKE)
     public FlowIdentifier rotateSaltPasswordByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.rotateSaltPassword(sdxCluster);
+        return saltService.rotateSaltPassword(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_SALT_DATALAKE)
     public FlowIdentifier updateSaltByCrn(@ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
-        return sdxService.updateSalt(sdxCluster);
+        return saltService.updateSalt(sdxCluster);
     }
 
     @Override
@@ -431,13 +443,13 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
     public void enableRangerRazByCrn(@ResourceCrn String crn) {
-        sdxService.updateRangerRazEnabled(getSdxClusterByCrn(crn));
+        rangerRazService.updateRangerRazEnabled(getSdxClusterByCrn(crn));
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
     public void enableRangerRazByName(@ResourceName String name) {
-        sdxService.updateRangerRazEnabled(getSdxClusterByName(name));
+        rangerRazService.updateRangerRazEnabled(getSdxClusterByName(name));
     }
 
     @Override
@@ -481,7 +493,7 @@ public class SdxController implements SdxEndpoint {
     public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion,
             String cloudPlatform) {
         validateSdxClusterShape(clusterShape);
-        return sdxService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
+        return sdxIntanceService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
     }
 
     @Override

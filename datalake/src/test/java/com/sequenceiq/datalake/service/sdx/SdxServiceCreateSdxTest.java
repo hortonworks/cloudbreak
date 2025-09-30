@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.CCMV2_JUMPGATE_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
@@ -14,7 +13,6 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,7 +36,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -91,7 +88,6 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -124,9 +120,6 @@ class SdxServiceCreateSdxTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
-
-    @Mock
-    private SdxDatabaseRepository sdxDatabaseRepository;
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
@@ -174,10 +167,19 @@ class SdxServiceCreateSdxTest {
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Mock
-    private SdxVersionRuleEnforcer versionRuleEnforcer;
+    private RecipeService recipeService;
 
     @Mock
-    private RecipeService recipeService;
+    private CcmService ccmService;
+
+    @Mock
+    private RangerRazService rangerRazService;
+
+    @Mock
+    private StorageValidationService storageValidationService;
+
+    @Mock
+    private SdxInstanceService sdxInstanceService;
 
     @InjectMocks
     private SdxService underTest;
@@ -189,63 +191,6 @@ class SdxServiceCreateSdxTest {
                 {"CloudPlatform.AWS multiaz=false", AWS, false},
                 {"CloudPlatform.AZURE multiaz=false", AZURE, false},
                 {"CloudPlatform.GCP multiaz=false", GCP, false}
-        };
-    }
-
-    static Object[][] razCloudPlatformAndRuntimeDataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform runtime
-                {"CloudPlatform.AWS", AWS, "7.2.2"},
-                {"CloudPlatform.AZURE", AZURE, "7.2.2"},
-                {"CloudPlatform.GCP", GCP, "7.2.17"}
-        };
-    }
-
-    static Object[][] razCloudPlatform710DataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform expectedErrorMsg
-                {"CloudPlatform.AWS", AWS, "7.2.2",
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for Cloudera Runtime version " +
-                                "greater than or equal to 7.2.2 and not 7.1.0"},
-                {"CloudPlatform.AZURE", AZURE, "7.2.2",
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for Cloudera Runtime version " +
-                                "greater than or equal to 7.2.2 and not 7.1.0"},
-                {"CloudPlatform.GCP", GCP, "7.2.17",
-                        "Provisioning Ranger Raz on GCP is only valid for Cloudera Runtime version " +
-                                "greater than or equal to 7.2.17 and not 7.1.0"}
-        };
-    }
-
-    static Object[][] razCloudPlatform720DataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform expectedErrorMsg
-                {"CloudPlatform.AWS", AWS},
-                {"CloudPlatform.AZURE", AZURE},
-                {"CloudPlatform.GCP", GCP}
-        };
-    }
-
-    static Object[][] ccmV2Scenarios() {
-        return new Object[][]{
-                // runtime  compatible
-                {null, true},
-                {"7.2.0", false},
-                {"7.2.1", true},
-                {"7.2.5", true},
-                {"7.2.6", true},
-                {"7.2.7", true},
-        };
-    }
-
-    static Object[][] ccmV2JumpgateScenarios() {
-        return new Object[][]{
-                // runtime  compatible
-                {null, true},
-                {"7.2.0", false},
-                {"7.2.1", false},
-                {"7.2.5", false},
-                {"7.2.6", true},
-                {"7.2.7", true},
         };
     }
 
@@ -276,8 +221,6 @@ class SdxServiceCreateSdxTest {
 
     @BeforeEach
     void initMocks() {
-        lenient().when(platformConfig.getRazSupportedPlatforms())
-                .thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
         lenient().when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
@@ -825,89 +768,6 @@ class SdxServiceCreateSdxTest {
         assertThat(capturedSdx.isEnableMultiAz()).isTrue();
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("razCloudPlatformAndRuntimeDataProvider")
-    void testSdxCreateRazEnabled(String testCaseName, CloudPlatform cloudPlatform, String runtime) throws IOException, TransactionExecutionException {
-        mockTransactionServiceRequired();
-        String lightDutyJson = readLightDutyTestTemplate();
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        withCloudStorage(sdxClusterRequest);
-        long id = 10L;
-        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
-            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
-            sdxWithId.setId(id);
-            return sdxWithId;
-        });
-        when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(versionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
-        mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        SdxCluster createdSdxCluster = result.getLeft();
-        assertEquals(id, createdSdxCluster.getId());
-        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster capturedSdx = captor.getValue();
-        assertTrue(capturedSdx.isRangerRazEnabled());
-    }
-
-    @Test
-    void testSdxCreateRazEnabledWithRazNotEnabledCloud() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning Ranger Raz is only valid for Amazon Web Services, Microsoft Azure, GCP", badRequestException.getMessage());
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("razCloudPlatform710DataProvider")
-    void testSdxCreateRazEnabled710Runtime(String testCaseName, CloudPlatform cloudPlatform, String expectedVersion, String expectedErrorMsg) {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        when(versionRuleEnforcer.getSupportedRazVersionForPlatform(cloudPlatform)).thenReturn(expectedVersion);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals(expectedErrorMsg, badRequestException.getMessage());
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("razCloudPlatform720DataProvider")
-    void testSdxCreateRazEnabled720Runtime(String testCaseName, CloudPlatform cloudPlatform) throws IOException {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.7", LIGHT_DUTY);
-        withCloudStorage(sdxClusterRequest);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(versionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
-        mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-
-        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-    }
-
-    @Test
-    void testSdxCreateRazEnabledForGcpEntitilementNotEnabled() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(entitlementService.isRazForGcpEnabled(anyString())).thenReturn(false);
-        when(versionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
-        mockEnvironmentCall(sdxClusterRequest, GCP, null);
-
-        sdxClusterRequest.setEnableRangerRaz(true);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning Ranger Raz on GCP is not enabled for this account", badRequestException.getMessage());
-    }
-
     @Test
     void testSdxCreateWithDifferingOsValues() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
@@ -1018,88 +878,6 @@ class SdxServiceCreateSdxTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
         assertEquals("Custom instance group is not accepted on SDX Internal API.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testCreateSdxClusterWithCustomInstanceGroup() throws Exception {
-        final String runtime = "7.2.12";
-        mockTransactionServiceRequired();
-        String microDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/micro_duty.json");
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
-        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        withCloudStorage(sdxClusterRequest);
-        withRecipe(sdxClusterRequest);
-        withCustomInstanceGroups(sdxClusterRequest);
-
-        long id = 10L;
-        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
-            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
-            sdxWithId.setId(id);
-            return sdxWithId;
-        });
-        when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
-        mockEnvironmentCall(sdxClusterRequest, AWS, null);
-        when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
-
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-
-        SdxCluster createdSdxCluster = result.getLeft();
-        assertEquals(id, createdSdxCluster.getId());
-        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster capturedSdx = captor.getValue();
-        assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
-        StackV4Request stackRequest = JsonUtil.readValue(capturedSdx.getStackRequest(), StackV4Request.class);
-        Optional<InstanceGroupV4Request> masterGroup = stackRequest.getInstanceGroups().stream()
-                .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
-                .findAny();
-        assertTrue(masterGroup.isPresent());
-        assertEquals("verylarge", masterGroup.get().getTemplate().getInstanceType());
-        Optional<InstanceGroupV4Request> idbrokerGroup = stackRequest.getInstanceGroups().stream()
-                .filter(instanceGroup -> "idbroker".equals(instanceGroup.getName()))
-                .findAny();
-        assertTrue(idbrokerGroup.isPresent());
-        assertEquals("notverylarge", idbrokerGroup.get().getTemplate().getInstanceType());
-    }
-
-    @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2 = {1}")
-    @MethodSource("ccmV2Scenarios")
-    void testCcmV2VersionChecker(String runtime, boolean compatible) throws IOException {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
-        lenient().when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.MOCK, Tunnel.CCMV2);
-        if (!compatible) {
-            assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)))
-                    .isInstanceOf(BadRequestException.class)
-                    .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
-                            + "Please try creating a datalake with runtime version at least %s.", runtime, SdxVersionRuleEnforcer.CCMV2_REQUIRED_VERSION));
-        } else {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        }
-    }
-
-    @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2JumpGate = {1}")
-    @MethodSource("ccmV2JumpgateScenarios")
-    void testCcmV2JumpgateVersionChecker(String runtime, boolean compatible) throws IOException {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
-        lenient().when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.MOCK, Tunnel.CCMV2_JUMPGATE);
-        if (!compatible) {
-            assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)))
-                    .isInstanceOf(BadRequestException.class)
-                    .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
-                            + "Please try creating a datalake with runtime version at least %s.", runtime, CCMV2_JUMPGATE_REQUIRED_VERSION));
-        } else {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        }
     }
 
     @Test

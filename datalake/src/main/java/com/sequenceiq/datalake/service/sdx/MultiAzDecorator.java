@@ -1,9 +1,14 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.flow.core.ApplicationFlowInformation.LOGGER;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -231,5 +238,95 @@ public class MultiAzDecorator {
             }
         });
         stackV4Request.setEnableMultiAz(true);
+    }
+
+    public void decorateStackRequestWithMultiAz(StackV4Request stackRequest, StackV4Response stackResponse, DetailedEnvironmentResponse environmentResponse,
+            SdxClusterShape clusterShape, boolean currentSdxIsMultiAz) {
+        if (currentSdxIsMultiAz) {
+            Map<String, Set<String>> subnetsByAz = null;
+            if (stackResponse.getCloudPlatform().equals(AWS)) {
+                subnetsByAz = collectSubnetsByAzFromMetadata(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(AZURE)) {
+                subnetsByAz = collectSubnetsByAzFromAzure(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(GCP)) {
+                subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
+            }
+            if (subnetsByAz != null && subnetsByAz.size() > 1) {
+                decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, subnetsByAz);
+            }
+        }
+    }
+
+    public void decorateRequestWithMultiAz(StackV4Request stackRequest, StackV4Response stackResponse, DetailedEnvironmentResponse environmentResponse,
+            SdxClusterShape clusterShape, boolean currentSdxIsMultiAz) {
+        if (currentSdxIsMultiAz) {
+            Map<String, Set<String>> subnetsByAz = null;
+            if (stackResponse.getCloudPlatform().equals(AWS)) {
+                subnetsByAz = collectSubnetsByAzFromMetadata(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(AZURE)) {
+                subnetsByAz = collectSubnetsByAzFromAzure(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(GCP)) {
+                subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
+            }
+            if (subnetsByAz != null && subnetsByAz.size() > 1) {
+                decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, subnetsByAz);
+            }
+        }
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromMetadata(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from instance metadata");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .filter(metadata -> metadata.getSubnetId() != null && metadata.getAvailabilityZone() != null)
+                .map(meta ->
+                        new SimpleEntry<>(meta.getAvailabilityZone(), meta.getSubnetId()))
+                .collect(Collectors
+                        .toMap(Entry::getKey, entry -> new HashSet<>(Collections.singletonList(entry.getValue())),
+                                (existingSet, newSet) -> {
+                                    existingSet.addAll(newSet);
+                                    return existingSet;
+                                }
+                        ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromAzure(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from Azure network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getAzure()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getAzure().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromGcp(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from GCP network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getGcp()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getGcp().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
     }
 }
