@@ -20,6 +20,7 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -35,6 +36,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.image.userdata.CcmUserDataService;
+import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
 import com.sequenceiq.freeipa.service.orchestrator.SaltPingFailedException;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
@@ -69,6 +71,9 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private UserDataService userDataService;
+
     @Override
     protected void rotate(RotationContext rotationContext) throws Exception {
         String resourceCrn = rotationContext.getResourceCrn();
@@ -78,7 +83,10 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         Optional<String> hmacKey = ccmUserDataService.getHmacKeyOpt(stack);
         InvertingProxyAgent updatedInvertingProxyAgent = ccmV2Client.createAgentAccessKeyPair(environmentCrn.getAccountId(), stack.getCcmV2AgentCrn(), hmacKey);
         ImageEntity image = imageService.getByStack(stack);
-        UserDataReplacer userDataReplacer = new UserDataReplacer(image.getGatewayUserdata())
+        if (image.getGatewayUserdata() == null && image.getUserdata() != null) {
+            image = userDataService.createOrUpdateUserData(stack.getId(), image.getUserdata());
+        }
+        UserDataReplacer userDataReplacer = new UserDataReplacer(image.getUserdataWrapper())
                 .replaceQuoted(CCM_V2_AGENT_ACCESS_KEY_ID, updatedInvertingProxyAgent.getAccessKeyId())
                 .replaceQuoted(CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY, updatedInvertingProxyAgent.getEncipheredAccessKey())
                 .replaceQuoted(CCM_V_2_IV, updatedInvertingProxyAgent.getInitialisationVector())
@@ -102,7 +110,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         ImageEntity image = imageService.getByStack(stack);
         RotationSecret gatewayUserDataSecret = uncachedSecretServiceForRotation.getRotation(image.getGatewayUserdataSecret().getSecret());
-        if (gatewayUserDataSecret.isRotation()) {
+        if (gatewayUserDataSecret != null && gatewayUserDataSecret.isRotation()) {
             String newAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
             ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), newAccessKeyId);
             uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getBackupSecret());
@@ -120,7 +128,11 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         RotationSecret gatewayUserDataSecret = uncachedSecretServiceForRotation.getRotation(image.getGatewayUserdataSecret().getSecret());
         if (gatewayUserDataSecret.isRotation()) {
             String originalAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getBackupSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
-            ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), originalAccessKeyId);
+            try {
+                ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), originalAccessKeyId);
+            } catch (CcmV2Exception e) {
+                LOGGER.warn("Error during deactivating access key in ccmv2 jumpgate rotation.", e);
+            }
             uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getSecret());
         } else {
             LOGGER.warn("Gateway user data is not in rotation state in Vault, finalize is not possible, return without errors.");

@@ -136,6 +136,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.stack = stack;
     }
 
+    /**
+     * @deprecated
+     * The plaintext value of this field is migrated to gatewayUserData in most cases.
+     * Please use {@link ImageEntity#getUserdataWrapper()} till all the migration is done.
+     *
+     * @return plain text userdata in older environmnets, null in most environments
+     */
+    @Deprecated
     public String getUserdata() {
         return userdata;
     }
