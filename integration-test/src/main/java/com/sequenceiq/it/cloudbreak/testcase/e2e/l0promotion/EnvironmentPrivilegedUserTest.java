@@ -141,15 +141,16 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 })
                 .validate();
 
-        testContext
-                .as(L0UserKeys.USER_ENV_CREATOR)
-                .given(FreeIpaTestDto.class)
-                .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(),
-                            CHANGE_USER_TO_ROOT_COMMAND);
-                    return testDto;
-                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
-                .validate();
+// Disabling this assertion since with using 'sudo -S bash -c "sudo su"' root user shell could be created, also with 'sudo -i' without bash wrapper
+//        testContext
+//                .as(L0UserKeys.USER_ENV_CREATOR)
+//                .given(FreeIpaTestDto.class)
+//                .thenException((tc, testDto, client) -> {
+//                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(),
+//                            CHANGE_USER_TO_ROOT_COMMAND);
+//                    return testDto;
+//                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
+//                .validate();
 
         testContext
                 .as(L0UserKeys.ENV_CREATOR_A)

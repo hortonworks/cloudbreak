@@ -61,9 +61,9 @@ class SshSudoCommandActionsTest {
                 echo "SecondLine"\
                 """;
         String expectedCommand = passwordSpecified ?
-                "echo password | sudo -S bash -c \"echo \\\"HelloWorld\\\"\" && " +
-                        "echo password | sudo -S bash -c \"variable=\\$(echo \\\"HelloWorld\\\")\" && " +
-                        "echo password | sudo -S bash -c \"echo \\\"HelloWorld\\\"; echo \\\"SecondLine\\\"\"" :
+                "echo \"password\" | sudo -S bash -c \"echo \\\"HelloWorld\\\"\" && " +
+                        "echo \"password\" | sudo -S bash -c \"variable=\\$(echo \\\"HelloWorld\\\")\" && " +
+                        "echo \"password\" | sudo -S bash -c \"echo \\\"HelloWorld\\\"; echo \\\"SecondLine\\\"\"" :
                 "sudo bash -c \"echo \\\"HelloWorld\\\"\" && " +
                         "sudo bash -c \"variable=\\$(echo \\\"HelloWorld\\\")\" && " +
                         "sudo bash -c \"echo \\\"HelloWorld\\\"; echo \\\"SecondLine\\\"\"";

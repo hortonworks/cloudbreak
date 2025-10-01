@@ -64,9 +64,10 @@ public class SshSudoCommandActions {
                 .replace("$", "\\$");
 
         // Wrap the escaped command in bash -c "<COMMAND>" so that the whole command is executed with sudo
+        String sudoWithPassword = "echo \"" + password + "\" | sudo -S bash -c \"" + escapedCommand + "\"";
         return StringUtils.isEmpty(password)
                 ? "sudo bash -c \"" + escapedCommand + "\""
-                : "echo " + password + " | sudo -S bash -c \"" + escapedCommand + "\"";
+                : sudoWithPassword;
     }
 
     private Pair<Integer, String> executeCommand(String instanceIP, String command) {
