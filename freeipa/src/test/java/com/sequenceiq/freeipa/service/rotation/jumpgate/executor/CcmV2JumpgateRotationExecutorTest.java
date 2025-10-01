@@ -40,6 +40,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.image.userdata.CcmUserDataService;
+import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -109,6 +110,9 @@ class CcmV2JumpgateRotationExecutorTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private UserDataService userDataService;
 
     @InjectMocks
     private CcmV2JumpgateRotationExecutor underTest;
