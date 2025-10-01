@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -19,7 +20,8 @@ public class FreeIpaDownscaleAction extends AbstractFreeIpaAction<FreeIpaDownsca
     public FreeIpaDownscaleTestDto freeIpaAction(TestContext testContext, FreeIpaDownscaleTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA downscale request:%n"), testDto.getRequest());
         DownscaleRequest downscaleRequest = new DownscaleRequest();
-        downscaleRequest.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
+        downscaleRequest.setEnvironmentCrn(environmentCrn);
         downscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
         testDto.setResponse(client.getDefaultClient()
                 .getFreeIpaV1Endpoint()

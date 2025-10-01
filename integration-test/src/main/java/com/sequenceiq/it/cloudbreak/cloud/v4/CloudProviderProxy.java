@@ -558,4 +558,9 @@ public class CloudProviderProxy implements CloudProvider {
     public String getFreeIpaRebuildDataBackup() {
         return delegate.getFreeIpaRebuildDataBackup();
     }
+
+    @Override
+    public String getFreeIpaInstanceType() {
+        return delegate.getFreeIpaInstanceType();
+    }
 }

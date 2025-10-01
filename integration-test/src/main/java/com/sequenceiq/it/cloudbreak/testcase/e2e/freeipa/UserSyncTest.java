@@ -1,14 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaUserSyncDoneWithNoFailures;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaUserSyncDurationLessThan;
@@ -33,11 +30,7 @@ public class UserSyncTest extends AbstractE2ETest {
             then = "all users should be synced successfully with no failure " +
                     "and finished in given (5) minutes")
     public void testUserSyncDuration(TestContext testContext) {
-        String freeIpa = resourcePropertyProvider().getName();
-        testContext.given(freeIpa, FreeIpaTestDto.class)
-                .withTelemetry("telemetry")
-                .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(Status.AVAILABLE)
+        testContext.given(FreeIpaTestDto.class)
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)

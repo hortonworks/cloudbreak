@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
@@ -85,11 +86,15 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        initializeTest(testContext);
+        createDefaultEnvironment(testContext);
+    }
+
+    protected void initializeTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
         initializeAzureMarketplaceTermsPolicy(testContext);
-        createDefaultEnvironment(testContext);
     }
 
     @AfterMethod
@@ -160,28 +165,38 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
      */
     @Override
     protected void createDefaultEnvironment(TestContext testContext) {
-        testContext
+        createEnvironment(testContext, Boolean.TRUE, 1);
+    }
+
+    protected void createEnvironment(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {
+        setUpEnvironmentTestDto(testContext, createFreeIpa, freeIpaInstanceCount)
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().describe())
+                .validate();
+        if (createFreeIpa) {
+            testContext
+                    .given(FreeIpaTestDto.class)
+                    .when(getFreeIpaTestClient().describe())
+                    .validate();
+        }
+    }
+
+    protected EnvironmentTestDto setUpEnvironmentTestDto(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {
+        return testContext
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                     .withTelemetry("telemetry")
                     .withResourceEncryption(testContext.isResourceEncryptionEnabled())
-                    .withCreateFreeIpa(Boolean.FALSE)
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .when(getEnvironmentTestClient().describe())
-                .validate();
+                    .withFreeIpaNodes(freeIpaInstanceCount)
+                    .withCreateFreeIpa(createFreeIpa);
     }
 
     protected void createEnvironmentWithFreeIpa(TestContext testContext, Architecture architecture) {
         createResourceGroup(testContext);
         super.createEnvironmentWithFreeIpa(testContext, architecture);
-    }
-
-    @Override
-    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
-        createEnvironmentWithFreeIpa(testContext, null);
     }
 
     @Override

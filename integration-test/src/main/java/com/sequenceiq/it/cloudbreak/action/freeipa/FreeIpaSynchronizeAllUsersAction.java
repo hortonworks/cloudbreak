@@ -13,6 +13,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -22,11 +23,12 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaSynchronizeAllUsersAction.class);
 
     public FreeIpaUserSyncTestDto action(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
+        Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", environmentCrn, testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA sync request: %n"), testDto.getRequest());
         // checking if there is ongoing usersync
         EnvironmentUserSyncState environmentUserSyncState =
-                client.getDefaultClient().getUserV1Endpoint().getUserSyncState(testDto.getEnvironmentCrn());
+                client.getDefaultClient().getUserV1Endpoint().getUserSyncState(environmentCrn);
         if (UserSyncState.SYNC_IN_PROGRESS.equals(environmentUserSyncState.getState())) {
             // sync already in progress, no need to execute another one
             testDto.setOperationId(environmentUserSyncState.getLastUserSyncOperationId());
@@ -48,7 +50,7 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
             } catch (ClientErrorException e) {
                 // still can happen that a concurrent user sync got initiated
                 if (e.getResponse() != null && HttpStatus.CONFLICT.value() == e.getResponse().getStatus()) {
-                    LOGGER.info("Sync were already initiated for environment {}", testDto.getEnvironmentCrn());
+                    LOGGER.info("Sync were already initiated for environment {}", environmentCrn);
                 } else {
                     throw e;
                 }

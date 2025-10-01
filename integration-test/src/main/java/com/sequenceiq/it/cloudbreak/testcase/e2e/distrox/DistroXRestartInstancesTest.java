@@ -55,7 +55,7 @@ public class DistroXRestartInstancesTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)

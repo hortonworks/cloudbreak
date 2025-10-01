@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -16,11 +17,12 @@ public class FreeIpaStopAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
 
     @Override
     protected FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIPA stop request: %n"), testDto.getRequest());
         client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
-                .stop(testDto.getRequest().getEnvironmentCrn());
+                .stop(environmentCrn);
         return testDto;
     }
 }

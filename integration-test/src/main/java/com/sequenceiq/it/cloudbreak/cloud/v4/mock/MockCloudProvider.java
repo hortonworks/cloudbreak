@@ -149,6 +149,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaInstanceType() {
+        return "large";
+    }
+
+    @Override
     public MockStackV4Parameters stackParameters() {
         return new MockStackV4Parameters();
     }

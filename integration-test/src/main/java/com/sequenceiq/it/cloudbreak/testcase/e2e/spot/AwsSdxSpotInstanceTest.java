@@ -39,7 +39,7 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

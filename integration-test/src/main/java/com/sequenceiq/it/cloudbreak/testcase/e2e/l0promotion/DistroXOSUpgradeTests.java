@@ -43,7 +43,7 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

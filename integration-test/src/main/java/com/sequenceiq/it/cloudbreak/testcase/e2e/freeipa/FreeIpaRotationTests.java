@@ -8,7 +8,6 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRET
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.testng.annotations.Test;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -63,7 +63,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        super.setupTest(testContext);
+        initializeTest(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -75,7 +75,6 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
             then = "the stack should be available AND deletable and have 2 nodes AND the primary gateway should not change" +
                     " AND the rotations should happen")
     public void testFreeIpaRotation(TestContext testContext) {
-        String freeIpa = resourcePropertyProvider().getName();
         Map<String, String> originalPasswordLastChangedMap = new HashMap<>();
         Map<String, String> originalPasswordsFromPillarMap = new HashMap<>();
         String cloudProvider = commonCloudProperties().getCloudProvider();
@@ -88,13 +87,12 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         if (!CloudPlatform.GCP.equalsIgnoreCase(cloudProvider)) {
             secretTypes.add(SALT_BOOT_SECRETS);
         }
-        testContext
-                .given(freeIpa, FreeIpaTestDto.class)
-                .withTelemetry("telemetry")
-                .withOsType(RHEL8.getOs())
-                .withFreeIpaHa(1, 2)
-                .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 2)
+                .withFreeIpaOs(RHEL8.getOs())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
                     getPasswordAndLastChangedFromPillar(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, instanceMetaDataResponses);

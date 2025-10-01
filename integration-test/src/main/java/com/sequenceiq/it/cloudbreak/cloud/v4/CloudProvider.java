@@ -243,4 +243,6 @@ public interface CloudProvider {
     String getFreeIpaRebuildFullBackup();
 
     String getFreeIpaRebuildDataBackup();
+
+    String getFreeIpaInstanceType();
 }

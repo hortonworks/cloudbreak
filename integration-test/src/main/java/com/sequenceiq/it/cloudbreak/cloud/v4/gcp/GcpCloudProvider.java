@@ -538,4 +538,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public String getFreeIpaRebuildDataBackup() {
         return gcpProperties.getFreeipa().getRebuild().getDatabackup();
     }
+
+    @Override
+    public String getFreeIpaInstanceType() {
+        return gcpProperties.getFreeipa().getInstanceType();
+    }
 }

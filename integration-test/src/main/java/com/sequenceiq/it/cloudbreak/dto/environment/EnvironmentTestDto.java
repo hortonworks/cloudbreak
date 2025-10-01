@@ -42,6 +42,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaSecuri
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -413,6 +414,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
         getRequest().setAws(awsEnvironmentParameters);
+        return this;
+    }
+
+    public EnvironmentTestDto withFreeIpaAws(AwsFreeIpaParameters awsEnvironmentParameters) {
+        getRequest().getFreeIpa().setAws(awsEnvironmentParameters);
         return this;
     }
 

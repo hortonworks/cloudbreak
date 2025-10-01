@@ -55,6 +55,19 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
     @Inject
     private SshJUtil sshJUtil;
 
+    public static String recipePattern(String recipePath) {
+        return String.format("Required number [(]1[)] of files are NOT available at '%s' on '.*' instance!", recipePath);
+    }
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        initializeDefaultBlueprints(testContext);
+        initializeAzureMarketplaceTermsPolicy(testContext);
+        createEnvironment(testContext, Boolean.FALSE, 1);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "a default environment is available with no freeIPA",
@@ -75,12 +88,11 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                     .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), key("post1")).getResponse().getName();
 
-        testContext
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, INSTANCE_COUNT_BY_GROUP)
+                .when(getEnvironmentTestClient().create())
                 .given(FreeIpaTestDto.class)
-                    .withFreeIpaHa(INSTANCEGROUP_COUNT, INSTANCE_COUNT_BY_GROUP)
-                    .withTelemetry("telemetry")
-                .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
+                .when(freeIpaTestClient.describe())
                 .awaitForHealthyInstances()
                 .when(freeIpaTestClient.attachRecipes(List.of(preRecipeName, postInstallRecipeName)))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
@@ -112,12 +124,12 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                     .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), key("post2")).getResponse().getName();
 
-        testContext
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, INSTANCE_COUNT_BY_GROUP)
+                .withFreeIpaRecipe(Set.of(preRecipeName, postInstallRecipeName))
+                .when(getEnvironmentTestClient().create())
                 .given(FreeIpaTestDto.class)
-                    .withTelemetry("telemetry")
-                    .withRecipes(Set.of(preRecipeName, postInstallRecipeName))
-                .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
+                .when(freeIpaTestClient.describe())
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1, sshJUtil))
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1, sshJUtil))
@@ -135,9 +147,5 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                                 1, sshJUtil), TestFailException.class,
                         expectedMessage(recipePattern(POST_INSTALL_FILEPATH)))
                 .validate();
-    }
-
-    public static String recipePattern(String recipePath) {
-        return String.format("Required number [(]1[)] of files are NOT available at '%s' on '.*' instance!", recipePath);
     }
 }
