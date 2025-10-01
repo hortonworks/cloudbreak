@@ -22,6 +22,6 @@ public class PullRequestE2ETest extends AbstractE2ETest {
             then    = "all freeipa and environment must came up"
     )
     public void testSimpleCreation(TestContext testContext) {
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
     }
 }

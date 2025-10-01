@@ -37,6 +37,11 @@ public class FreeIpaMarketplaceUpgradeTests extends AbstractE2ETest {
     @Inject
     private FreeIpaAvailabilityAssertion freeIpaAvailabilityAssertion;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        initializeTest(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
@@ -44,18 +49,15 @@ public class FreeIpaMarketplaceUpgradeTests extends AbstractE2ETest {
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testHAFreeIpaFromVHDToMarketplaceImageUpgrade(TestContext testContext) {
-        testContext
-                .given(FreeIpaTestDto.class)
-                    .withFreeIpaHa(1, 3)
-                    .withTelemetry("telemetry")
-                    .withMarketplaceUpgradeCatalogAndImage()
-                .when(freeIpaTestClient.create())
-                .await(FREEIPA_AVAILABLE)
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
+                .withMarketplaceUpgradeFreeIpaImage()
+                .when(getEnvironmentTestClient().create())
                 .given(SdxTestDto.class)
                     .withCloudStorage()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.upgrade())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)

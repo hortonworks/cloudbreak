@@ -71,7 +71,7 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
 
     public void testSDXDatabaseUpgrade(TestContext testContext, String runtimeVersion, String originalDatabaseMajorVersion,
             TargetMajorVersion targetDatabaseMajorVersion) {
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
         String sdx = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
@@ -109,7 +109,7 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
     )
     public void testSDXDatabaseUpgradeWithEncryption(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class).withDatabaseEncryptionKey();
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
         String sdx = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();

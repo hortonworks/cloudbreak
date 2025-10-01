@@ -42,7 +42,7 @@ public class ModifyProxyConfigE2ETest extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
         createProxyConfig(testContext);
         createProxyConfig2(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
     }
 
     private void createProxyConfig2(TestContext testContext) {

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -17,11 +18,12 @@ public class FreeIpaGetLastSyncOperationStatus extends AbstractFreeIpaAction<Fre
 
     @Override
     protected FreeIpaUserSyncTestDto freeIpaAction(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
+        Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", environmentCrn, testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA get last sync status request: %n"), testDto.getRequest());
         SyncOperationStatus syncOperationStatus = client.getDefaultClient()
                 .getUserV1Endpoint()
-                .getLastSyncOperationStatus(testDto.getEnvironmentCrn());
+                .getLastSyncOperationStatus(environmentCrn);
         testDto.setOperationId(syncOperationStatus.getOperationId());
         LOGGER.info("Last sync is in state: [{}], last sync operation: [{}] with type: [{}]", syncOperationStatus.getStatus(),
                 syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());

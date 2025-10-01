@@ -13,9 +13,8 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -28,7 +27,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -59,14 +57,17 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        initializeTest(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak, and freeipa with cloudformation",
             when = "upgrade ",
             then = "migration happens into native")
     public void testSDXUpgradeToMigrate(TestContext testContext) {
-        String freeIpa = resourcePropertyProvider().getName();
-        String subnet = awsCloudProvider.getSubnetId();
         String sdx = resourcePropertyProvider().getName();
 
         List<String> actualVolumeIds = new ArrayList<>();
@@ -76,22 +77,18 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .getCurrentRuntimeVersion(testContext.getCloudProvider().getGovCloud());
         String blueprintName = commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion);
 
-        testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs();
-        FreeIpaTestDto freeipa = testContext.given(freeIpa, FreeIpaTestDto.class)
-                .withNetwork(getNetworkRequest())
-                .withTelemetry("telemetry")
-                .withVariant(AWS)
-                .withUpgradeCatalogAndImage();
-        modifyFreeipaDtoToSingleSubnet(subnet, freeipa);
-        freeipa.when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
+
+        String subnet = awsCloudProvider.getSubnetId();
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
+                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .given(ClusterTestDto.class)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE);
-        SdxInternalTestDto sdxDto = freeipa.given(sdx, SdxInternalTestDto.class)
+        SdxInternalTestDto sdxDto = testContext.given(sdx, SdxInternalTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(runtimeVersion)
                 .withVariant(AWS)
@@ -122,18 +119,6 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .then(cloudformationTemplateForStackDoesNotExist())
                 .validate();
-    }
-
-    private void modifyFreeipaDtoToSingleSubnet(String subnet, FreeIpaTestDto freeipa) {
-        freeipa.getRequest().getInstanceGroups().stream().forEach(igr -> {
-            if (igr.getNetwork() == null) {
-                igr.setNetwork(new InstanceGroupNetworkRequest());
-            }
-            if (igr.getNetwork().getAws() == null) {
-                igr.getNetwork().setAws(new InstanceGroupAwsNetworkParameters());
-            }
-            igr.getNetwork().getAws().setSubnetIds(List.of(subnet));
-        });
     }
 
     private NetworkRequest getNetworkRequest() {

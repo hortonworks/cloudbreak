@@ -52,9 +52,9 @@ public class FreeIpaRepairTest extends AbstractMockTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
+        createDefaultEnvironment(testContext);
     }
 
     // NOTE: set -Dfreeipa.delayed.scale-sec=1 for freeipa application, without this it will time out.

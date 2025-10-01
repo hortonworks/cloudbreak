@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -19,9 +20,10 @@ public class FreeIpaRebuildAction extends AbstractFreeIpaAction<FreeIpaTestDto> 
     }
 
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
         RebuildRequest request = new RebuildRequest();
-        request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
+        request.setEnvironmentCrn(environmentCrn);
         request.setSourceCrn(testDto.getCrn());
         Log.whenJson(LOGGER, format(" FreeIPA rebuild request: %n"), request);
         testDto.setResponse(

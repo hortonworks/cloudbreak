@@ -42,6 +42,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaSecuri
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -186,6 +187,12 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withFreeIpaPlatformVariant(String variant) {
+        getRequest().getFreeIpa().setPlatformVariant(variant);
+        return this;
+
+    }
+
     public EnvironmentTestDto withImageValidationFreeIpaCatalogAndImageIfPresent() {
         return withFreeIpaImage(commonCloudProperties.getImageValidation().getFreeIpaImageCatalog(),
                 commonCloudProperties.getImageValidation().getFreeIpaImageUuid());
@@ -205,6 +212,14 @@ public class EnvironmentTestDto
         FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
         imageRequest.setCatalog(getMarketplaceFreeIpaCatalogUrl());
         imageRequest.setId(getMarketplaceFreeIpaImageUuid());
+        getRequest().getFreeIpa().setImage(imageRequest);
+        return this;
+    }
+
+    public EnvironmentTestDto withMarketplaceUpgradeFreeIpaImage() {
+        FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+        imageRequest.setCatalog(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog());
+        imageRequest.setId(getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
         getRequest().getFreeIpa().setImage(imageRequest);
         return this;
     }
@@ -422,6 +437,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
         getRequest().setAws(awsEnvironmentParameters);
+        return this;
+    }
+
+    public EnvironmentTestDto withFreeIpaAws(AwsFreeIpaParameters awsEnvironmentParameters) {
+        getRequest().getFreeIpa().setAws(awsEnvironmentParameters);
         return this;
     }
 

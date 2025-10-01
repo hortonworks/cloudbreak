@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DiskUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpdateRootVolumeResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -32,9 +33,10 @@ public class FreeIpaDiskUpdateAction extends AbstractFreeIpaAction<FreeIpaTestDt
         diskUpdateRequest.setVolumeType(volumeType);
         diskUpdateRequest.setSize(size);
         Log.whenJson(LOGGER, "FreeIpa DiskUpdate Request: ", diskUpdateRequest);
+        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         UpdateRootVolumeResponse updateRootVolumeResponse = client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
-                .updateRootVolumeByCrn(testDto.getEnvironmentCrn(), diskUpdateRequest);
+                .updateRootVolumeByCrn(environmentCrn, diskUpdateRequest);
         testDto.setFlow("FreeIpaDiskUpdateFlow", updateRootVolumeResponse.getFlowIdentifier());
         Log.whenJson(LOGGER, "FreeIpaDiskUpdateFlow: ", updateRootVolumeResponse.getFlowIdentifier());
         return testDto;

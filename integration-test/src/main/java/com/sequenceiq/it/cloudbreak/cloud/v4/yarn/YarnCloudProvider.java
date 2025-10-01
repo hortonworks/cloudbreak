@@ -103,6 +103,12 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaInstanceType() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         return credential
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
