@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -89,6 +90,9 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
             }
         } catch (RuntimeException exception) {
             LOGGER.error(String.format("Exception while fetching CRN for private datalake with Environment: %s.", environmentCrn), exception);
+            if (exception instanceof BadRequestException) {
+                throw exception;
+            }
         }
         return Optional.empty();
     }

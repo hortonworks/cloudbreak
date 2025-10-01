@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -214,8 +216,18 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> clusterProxyHybridClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
+            handleUnauthorized(environmentCrn, e, "environment");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
             throw new RemoteEnvironmentException(String.format("Unable to fetch environment for crn %s", environmentCrn), e);
+        }
+    }
+
+    private static void handleUnauthorized(String environmentCrn, Exception e, String resourceType) {
+        if (e instanceof ClusterProxyException cpe) {
+            if (cpe.getCause() instanceof HttpClientErrorException.Unauthorized || cpe.getCause() instanceof HttpClientErrorException.Forbidden) {
+                LOGGER.warn("Unauthorized to access {} for crn {}", resourceType, environmentCrn, e);
+                throw new BadRequestException(String.format("Insufficient permissions to access " + resourceType + " %s", environmentCrn), e);
+            }
         }
     }
 
@@ -226,6 +238,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> clusterProxyHybridClient.getRootCertificate(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
+            handleUnauthorized(environmentCrn, e, "environment");
             LOGGER.warn("Failed to fetch root certificate for crn {}", environmentCrn, e);
             throw new RemoteEnvironmentException(String.format("Unable to fetch root certificate for crn %s", environmentCrn), e);
         }
@@ -239,6 +252,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> clusterProxyHybridClient.getRemoteDataContext(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
+            handleUnauthorized(environmentCrn, e, "data lake");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
             throw new CloudbreakServiceException(String.format("Unable to fetch remote data context for crn %s", environmentCrn), e);
         }
@@ -252,6 +266,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
             return measure(() -> clusterProxyHybridClient.getDatalakeServices(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
+            handleUnauthorized(environmentCrn, e, "data lake");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);
             throw new RemoteEnvironmentException(String.format("Unable to fetch data lake services for crn %s", environmentCrn), e);
         }
