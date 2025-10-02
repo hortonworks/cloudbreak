@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
@@ -137,7 +139,18 @@ public class FreeIpaTopologyService {
                 .filter(segment -> !existingTopology.contains(new UnorderedPair(segment.getLeftNode(), segment.getRightNode())))
                 .collect(Collectors.toSet());
         for (TopologySegment segment : segmentsToAdd) {
-            freeIpaClient.addTopologySegment(topologySuffixCn, segment);
+            try {
+                freeIpaClient.addTopologySegment(topologySuffixCn, segment);
+            } catch (RetryableFreeIpaClientException e) {
+                throw e;
+            } catch (FreeIpaClientException e) {
+                if (FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e, Set.of(FreeIpaErrorCodes.VALIDATION_ERROR))) {
+                    LOGGER.warn("Validation error for adding topology segment [{}] to suffix [{}]", segment, topologySuffixCn, e);
+                    throw new RetryableFreeIpaClientException(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
