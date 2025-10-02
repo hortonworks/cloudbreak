@@ -616,6 +616,7 @@ public class ClusterHostServiceRunner {
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)
                         .orElse(null);
+        boolean encryptionProfileEnabled = entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId());
 
         Map<String, ? extends Serializable> clusterProperties = Map.ofEntries(
                 Map.entry("name", stackDto.getCluster().getName()),
@@ -626,6 +627,7 @@ public class ClusterHostServiceRunner {
                 Map.entry("hybridEnabled", hybridEnabled),
                 Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
+                Map.entry("tlsAdvancedControl", encryptionProfileEnabled),
                 Map.entry("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(useTlsVersions, " ")),
                 Map.entry("tlsVersionsCommaSeparated", encryptionProfileProvider.getTlsVersions(useTlsVersions, ",")),
                 Map.entry("cmVersionSupportsTlsSetup", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_0)),

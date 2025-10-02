@@ -3,6 +3,7 @@
 {% set tlsVersionsCommaSeparated = salt['pillar.get']('cluster:tlsVersionsCommaSeparated')%}
 {% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
 {% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",")%}
+{% set tlsAdvancedControl = salt['pillar.get']('cluster:tlsAdvancedControl')%}
 
 install-cloudera-manager-server:
   pkg.installed:
@@ -39,7 +40,13 @@ setup_tls_chipher:
     - text: setsettings CMF_OVERRIDE_TLS_CIPHERS {{ tlsCipherSuitesJavaIntermediate }}
     - unless: grep "CMF_OVERRIDE_TLS_CIPHERS" /etc/cloudera-scm-server/cm.settings
 
-{% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True %}
+{% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
+tls_advanced_control:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - text: setsettings TLS_ADVANCED_CONTROL {{ tlsAdvancedControl }}
+    - unless: grep "TLS_ADVANCED_CONTROL" /etc/cloudera-scm-server/cm.settings
+
 setup_ciphers:
   file.append:
     - name: /etc/cloudera-scm-server/cm.settings

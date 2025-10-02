@@ -1135,6 +1135,7 @@ class ClusterHostServiceRunnerTest {
         when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
         when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -1143,6 +1144,7 @@ class ClusterHostServiceRunnerTest {
         verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         verifyEncryptionProfile(saltConfig.getValue());
         verifyCmVersionSupportsTlsSetup(saltConfig.getValue(), true);
+        verifyTlsAdvancedControl(saltConfig.getValue(), true);
     }
 
     private void setupMocksForRunClusterServices() {
@@ -1266,6 +1268,11 @@ class ClusterHostServiceRunnerTest {
     private void verifyCmVersionSupportsTlsSetup(SaltConfig saltConfig, Boolean cmSupported) {
         Boolean cmVersionSupportsTlsSetup = (Boolean) getClusterProperties(saltConfig).get("cmVersionSupportsTlsSetup");
         assertEquals(cmSupported, cmVersionSupportsTlsSetup);
+    }
+
+    private void verifyTlsAdvancedControl(SaltConfig saltConfig, Boolean tlsAdvancedControlEnabled) {
+        Boolean tlsAdvancedControl = (Boolean) getClusterProperties(saltConfig).get("tlsAdvancedControl");
+        assertEquals(tlsAdvancedControlEnabled, tlsAdvancedControl);
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {
