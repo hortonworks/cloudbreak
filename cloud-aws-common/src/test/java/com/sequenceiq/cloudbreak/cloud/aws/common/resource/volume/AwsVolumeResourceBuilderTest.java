@@ -432,7 +432,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().getFirst().ebs().deleteOnTermination());
     }
 
     @Test
@@ -453,7 +453,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().getFirst().ebs().deleteOnTermination());
     }
 
     @Test
@@ -478,7 +478,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().getFirst().ebs().deleteOnTermination());
     }
 
     @Test()
@@ -498,7 +498,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertFalse(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
+        assertFalse(modifyInstanceAttributeRequest.blockDeviceMappings().getFirst().ebs().deleteOnTermination());
     }
 
     @Test()
@@ -546,7 +546,7 @@ class AwsVolumeResourceBuilderTest {
 
         List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
 
-        assertEquals(ResourceStatus.CREATED, actual.get(0).getStatus());
+        assertEquals(ResourceStatus.CREATED, actual.getFirst().getStatus());
         verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
         verify(amazonEC2Client).describeVolumes(any());
     }
@@ -562,7 +562,7 @@ class AwsVolumeResourceBuilderTest {
 
         List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
 
-        assertEquals(ResourceStatus.DELETED, actual.get(0).getStatus());
+        assertEquals(ResourceStatus.DELETED, actual.getFirst().getStatus());
         verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
         verify(amazonEC2Client).describeVolumes(any());
     }
@@ -574,7 +574,7 @@ class AwsVolumeResourceBuilderTest {
                 .thenReturn(Pair.of(Collections.emptyList(), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
         List<CloudResourceStatus> actual = underTest.checkResources(ResourceType.AWS_VOLUMESET, awsContext, authenticatedContext, resources);
 
-        assertEquals(ResourceStatus.DELETED, actual.get(0).getStatus());
+        assertEquals(ResourceStatus.DELETED, actual.getFirst().getStatus());
         verify(volumeResourceCollector).getVolumeIdsByVolumeResources(any(), any(), any());
         verifyNoInteractions(amazonEC2Client);
     }
@@ -645,7 +645,7 @@ class AwsVolumeResourceBuilderTest {
 
     private List<VolumeSetAttributes.Volume> verifyResultAndGetVolumes(List<CloudResource> result) {
         assertThat(result).hasSize(1);
-        CloudResource cloudResource = result.get(0);
+        CloudResource cloudResource = result.getFirst();
         assertThat(cloudResource.getStatus()).isEqualTo(CommonStatus.CREATED);
         VolumeSetAttributes volumeSet = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         assertThat(volumeSet).isNotNull();
@@ -656,7 +656,7 @@ class AwsVolumeResourceBuilderTest {
 
     private void verifyVolumes(List<VolumeSetAttributes.Volume> volumes, String expectedDevice) {
         assertThat(volumes).hasSize(1);
-        VolumeSetAttributes.Volume volume = volumes.get(0);
+        VolumeSetAttributes.Volume volume = volumes.getFirst();
         assertThat(volume).isNotNull();
         assertThat(volume.getId()).isEqualTo(VOLUME_ID);
         assertThat(volume.getType()).isEqualTo(TYPE_GP2);
@@ -678,7 +678,7 @@ class AwsVolumeResourceBuilderTest {
         List<TagSpecification> tagSpecifications = createVolumeRequest.tagSpecifications();
         assertThat(tagSpecifications).isNotNull();
         assertThat(tagSpecifications).hasSize(1);
-        TagSpecification tagSpecification = tagSpecifications.get(0);
+        TagSpecification tagSpecification = tagSpecifications.getFirst();
         assertThat(tagSpecification).isNotNull();
         assertThat(tagSpecification.resourceType()).isEqualTo(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME);
         assertThat(tagSpecification.tags()).isEqualTo(EC2_TAGS);
@@ -700,4 +700,101 @@ class AwsVolumeResourceBuilderTest {
                 .build();
     }
 
+    @Test
+    void buildTestWhenMultipleAttachedVolumesPreservesOrderWithoutEphemeral() throws Exception {
+        // two attached volumes in a specific order
+        VolumeSetAttributes.Volume vol1 = createVolumeForVolumeSet(TYPE_GP2);
+        VolumeSetAttributes.Volume vol2 = createVolumeForVolumeSet(TYPE_STANDARD);
+        CloudResource cloudResource = createVolumeSet(List.of(vol1, vol2));
+
+        // group with no ephemeral volumes -> device names start at /dev/xvdb
+        Group group = createGroup(List.of(createVolume(TYPE_GP2), createVolume(TYPE_STANDARD)),
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
+
+        // run async tasks inline and stub AWS calls
+        setUpTaskExecutors();
+        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol1), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol1, null, false));
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol2), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol2, null, false));
+
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
+                List.of(cloudResource), cloudStack);
+
+        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
+        assertThat(volumes).hasSize(2);
+        // order must match input order: vol1 then vol2
+        assertThat(volumes.getFirst().getType()).isEqualTo(TYPE_GP2);
+        assertThat(volumes.get(1).getType()).isEqualTo(TYPE_STANDARD);
+        // device names must be deterministic without ephemeral offset
+        assertThat(volumes.getFirst().getDevice()).isEqualTo("/dev/xvdb");
+        assertThat(volumes.get(1).getDevice()).isEqualTo("/dev/xvdc");
+    }
+
+    @Test
+    void buildTestWhenMultipleAttachedVolumesPreservesOrderWithEphemeralOffset() throws Exception {
+        // two attached volumes in a specific order
+        VolumeSetAttributes.Volume vol1 = createVolumeForVolumeSet(TYPE_GP2);
+        VolumeSetAttributes.Volume vol2 = createVolumeForVolumeSet(TYPE_STANDARD);
+        CloudResource cloudResource = createVolumeSet(List.of(vol1, vol2));
+
+        // group with one ephemeral volume -> device names start at /dev/xvdc
+        Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL), createVolume(TYPE_GP2)),
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 1L);
+
+        setUpTaskExecutors();
+        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol1), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol1, null, false));
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol2), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol2, null, false));
+
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
+                List.of(cloudResource), cloudStack);
+
+        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
+        assertThat(volumes).hasSize(2);
+        // ordering preserved
+        assertThat(volumes.getFirst().getType()).isEqualTo(TYPE_GP2);
+        assertThat(volumes.get(1).getType()).isEqualTo(TYPE_STANDARD);
+        // device names deterministically offset by ephemeral count (1)
+        assertThat(volumes.getFirst().getDevice()).isEqualTo("/dev/xvdc");
+        assertThat(volumes.get(1).getDevice()).isEqualTo("/dev/xvdd");
+    }
+
+    @Test
+    void buildTestOrderIsPreservedAcrossRepeatedBuildCalls() throws Exception {
+        // prepare two volumes
+        VolumeSetAttributes.Volume vol1 = createVolumeForVolumeSet(TYPE_GP2);
+        VolumeSetAttributes.Volume vol2 = createVolumeForVolumeSet(TYPE_STANDARD);
+        CloudResource requested = createVolumeSet(List.of(vol1, vol2));
+        Group group = createGroup(List.of(createVolume(TYPE_GP2), createVolume(TYPE_STANDARD)),
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
+
+        setUpTaskExecutors();
+        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol1), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol1, null, false));
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(vol2), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(vol2, null, false));
+
+        // first build creates volumes and sets order
+        List<CloudResource> first = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
+                List.of(requested), cloudStack);
+        List<VolumeSetAttributes.Volume> firstVolumes = verifyResultAndGetVolumes(first);
+        assertThat(firstVolumes).extracting(VolumeSetAttributes.Volume::getDevice)
+                .containsExactly("/dev/xvdb", "/dev/xvdc");
+
+        // second build with the previously created resource should keep the same ordering
+        CloudResource created = first.getFirst();
+        List<CloudResource> second = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
+                List.of(created), cloudStack);
+        // build should return the same created resource without altering volume order
+        List<VolumeSetAttributes.Volume> secondVolumes = second.getFirst().getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getVolumes();
+        assertThat(secondVolumes).extracting(VolumeSetAttributes.Volume::getDevice)
+                .containsExactly("/dev/xvdb", "/dev/xvdc");
+        assertThat(secondVolumes).extracting(VolumeSetAttributes.Volume::getType)
+                .containsExactly(TYPE_GP2, TYPE_STANDARD);
+    }
 }

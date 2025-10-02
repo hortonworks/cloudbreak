@@ -193,7 +193,7 @@ public class VolumeBuilderUtil {
         } catch (Exception ex) {
             String exceptionMessage = format("Exception while querying describe root volumes for volume - %s. " +
                     "returning empty list. Exception - %s", rootVolumeIds, ex.getMessage());
-            LOGGER.warn(exceptionMessage + "This should not prevent instance creation.");
+            LOGGER.warn("{} This should not prevent instance creation.", exceptionMessage);
         }
         return new ArrayList<>();
     }

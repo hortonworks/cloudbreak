@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -11,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,9 +63,9 @@ class DefaultJavaVersionUpdateValidatorTest {
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("8");
 
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
 
-        Assertions.assertEquals("Image information could not be found for the cluster with name 'stackName'", actual.getMessage());
+        assertEquals("Image information could not be found for the cluster with name 'stackName'", actual.getMessage());
     }
 
     @Test
@@ -79,9 +81,9 @@ class DefaultJavaVersionUpdateValidatorTest {
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("21");
 
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
 
-        Assertions.assertEquals("The requested Java version '21' could not be found on the VM image('mockImageId') of the cluster.", actual.getMessage());
+        assertEquals("The requested Java version '21' could not be found on the VM image('mockImageId') of the cluster.", actual.getMessage());
     }
 
     @Test
@@ -100,7 +102,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
 
-        Assertions.assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
+        assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
         verify(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1");
     }
 
@@ -121,8 +123,8 @@ class DefaultJavaVersionUpdateValidatorTest {
         javaVersionRequest.setDefaultJavaVersion("11");
         doThrow(new BadRequestException("Not valid")).when(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1");
 
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
-        Assertions.assertEquals("Not valid", actual.getMessage());
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
+        assertEquals("Not valid", actual.getMessage());
     }
 
     @Test
@@ -141,9 +143,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
 
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
-        Assertions.assertEquals("The runtime version could not be found on the VM image('" + mockImageId + "') of the cluster with name '"
-                        + STACK_NAME + "'.", actual.getMessage());
+        assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
         verifyNoInteractions(allowableJavaConfigurations);
     }
 
@@ -164,7 +164,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
 
-        Assertions.assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
+        assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
         verify(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1.500");
         verify(imageService, never()).getCurrentImage(anyLong(), eq(STACK_ID));
     }

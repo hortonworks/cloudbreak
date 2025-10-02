@@ -4,6 +4,7 @@ import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -54,7 +55,7 @@ class CleanupMonitorTest {
         doReturn(TEST_NODE_ID).when(nodeConfig).getId();
         doReturn(Boolean.TRUE).when(nodeService).isLeader(TEST_NODE_ID);
         doReturn(TEST_CLEANUP_DURATION).when(cleanupConfig).getCleanupDurationHours();
-        doReturn(activityIds).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong());
+        doReturn(activityIds).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong(), any());
 
         List<ScalingActivities> result = underTest.getMonitored();
 
@@ -67,7 +68,7 @@ class CleanupMonitorTest {
         doReturn(TEST_NODE_ID).when(nodeConfig).getId();
         doReturn(Boolean.TRUE).when(nodeService).isLeader(TEST_NODE_ID);
         doReturn(TEST_CLEANUP_DURATION).when(cleanupConfig).getCleanupDurationHours();
-        doReturn(emptySet()).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong());
+        doReturn(emptySet()).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong(), any());
 
         List<ScalingActivities> result = underTest.getMonitored();
 
@@ -92,7 +93,7 @@ class CleanupMonitorTest {
         doReturn(TEST_NODE_ID).when(nodeConfig).getId();
         doReturn(Boolean.TRUE).when(nodeService).isLeader(TEST_NODE_ID);
         doReturn(TEST_CLEANUP_DURATION).when(cleanupConfig).getCleanupDurationHours();
-        doReturn(activityIds).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong());
+        doReturn(activityIds).when(scalingActivityService).findAllInStatusesThatStartedBefore(anyCollection(), anyLong(), any());
 
         List<ScalingActivities> result = underTest.getMonitored();
 

@@ -98,6 +98,10 @@ public class CcmV2JumpgateAgentAccessKeyRotationContextProvider implements Rotat
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         ImageEntity image = imageService.getByStack(stack);
-        return Set.of(image.getGatewayUserdataSecret().getSecret());
+        if (image.getGatewayUserdataSecret().getSecret() != null) {
+            return Set.of(image.getGatewayUserdataSecret().getSecret());
+        } else {
+            return Set.of();
+        }
     }
 }

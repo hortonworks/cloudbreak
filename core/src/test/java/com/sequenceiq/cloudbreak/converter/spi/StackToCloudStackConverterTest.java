@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -78,6 +79,8 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -96,6 +99,7 @@ import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -326,9 +330,9 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertTrue(result.getGroups().get(0).getInstances().isEmpty());
-        assertEquals(new HashSet<>(az1), result.getGroups().get(0).getNetwork().getAvailabilityZones());
-        assertEquals("gp2", result.getGroups().get(0).getRootVolumeType());
+        assertTrue(result.getGroups().getFirst().getInstances().isEmpty());
+        assertEquals(new HashSet<>(az1), result.getGroups().getFirst().getNetwork().getAvailabilityZones());
+        assertEquals("gp2", result.getGroups().getFirst().getRootVolumeType());
     }
 
     @Test
@@ -360,10 +364,11 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getInstances().size());
-        assertEquals(fqdnParsedName, result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
-        assertEquals(instanceMetaData.getSubnetId(), result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
-        assertEquals(instanceMetaData.getInstanceName(), result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+        assertEquals(1L, result.getGroups().getFirst().getInstances().size());
+        assertEquals(fqdnParsedName, result.getGroups().getFirst().getInstances().getFirst().getParameters().get(CloudInstance.DISCOVERY_NAME));
+        assertEquals(instanceMetaData.getSubnetId(), result.getGroups().getFirst().getInstances().getFirst().getParameters().get(NetworkConstants.SUBNET_ID));
+        assertEquals(instanceMetaData.getInstanceName(),
+                result.getGroups().getFirst().getInstances().getFirst().getParameters().get(CloudInstance.INSTANCE_NAME));
     }
 
     @Test
@@ -390,10 +395,10 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getInstances().size());
-        assertEquals(auth.getLoginUserName(), result.getGroups().get(0).getInstances().get(0).getAuthentication().getLoginUserName());
-        assertEquals(auth.getPublicKey(), result.getGroups().get(0).getInstances().get(0).getAuthentication().getPublicKey());
-        assertEquals(auth.getPublicKeyId(), result.getGroups().get(0).getInstances().get(0).getAuthentication().getPublicKeyId());
+        assertEquals(1L, result.getGroups().getFirst().getInstances().size());
+        assertEquals(auth.getLoginUserName(), result.getGroups().getFirst().getInstances().getFirst().getAuthentication().getLoginUserName());
+        assertEquals(auth.getPublicKey(), result.getGroups().getFirst().getInstances().getFirst().getAuthentication().getPublicKey());
+        assertEquals(auth.getPublicKeyId(), result.getGroups().getFirst().getInstances().getFirst().getAuthentication().getPublicKeyId());
     }
 
     @Test
@@ -422,7 +427,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(groupName, result.getGroups().get(0).getReferenceInstanceConfiguration().getTemplate().getGroupName());
+        assertEquals(groupName, result.getGroups().getFirst().getReferenceInstanceConfiguration().getTemplate().getGroupName());
     }
 
     @Test
@@ -443,7 +448,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertNotNull(result.getGroups().get(0).getReferenceInstanceConfiguration());
+        assertNotNull(result.getGroups().getFirst().getReferenceInstanceConfiguration());
     }
 
     @Test
@@ -465,7 +470,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertTrue(result.getGroups().get(0).getParameters().isEmpty());
+        assertTrue(result.getGroups().getFirst().getParameters().isEmpty());
     }
 
     @Test
@@ -490,7 +495,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(expected, result.getGroups().get(0).getParameters());
+        assertEquals(expected, result.getGroups().getFirst().getParameters());
     }
 
     @Test
@@ -514,7 +519,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(expected, result.getGroups().get(0).getRootVolumeSize());
+        assertEquals(expected, result.getGroups().getFirst().getRootVolumeSize());
     }
 
     @Test
@@ -539,7 +544,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(expected, result.getGroups().get(0).getRootVolumeSize());
+        assertEquals(expected, result.getGroups().getFirst().getRootVolumeSize());
         verify(defaultRootVolumeSizeProvider, times(0)).getDefaultRootVolumeForPlatform(any(String.class), eq(true));
     }
 
@@ -561,8 +566,8 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertTrue(result.getGroups().get(0).getSecurity().getRules().isEmpty());
-        assertNull(result.getGroups().get(0).getSecurity().getCloudSecurityId());
+        assertTrue(result.getGroups().getFirst().getSecurity().getRules().isEmpty());
+        assertNull(result.getGroups().getFirst().getSecurity().getCloudSecurityId());
     }
 
     @Test
@@ -587,8 +592,8 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertTrue(result.getGroups().get(0).getSecurity().getRules().isEmpty());
-        assertEquals(securityGroup.getFirstSecurityGroupId(), result.getGroups().get(0).getSecurity().getCloudSecurityId());
+        assertTrue(result.getGroups().getFirst().getSecurity().getRules().isEmpty());
+        assertEquals(securityGroup.getFirstSecurityGroupId(), result.getGroups().getFirst().getSecurity().getCloudSecurityId());
     }
 
     @Test
@@ -616,8 +621,8 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getSecurity().getRules().size());
-        assertEquals(0L, result.getGroups().get(0).getSecurity().getRules().get(0).getPorts().length);
+        assertEquals(1L, result.getGroups().getFirst().getSecurity().getRules().size());
+        assertEquals(0L, result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts().length);
     }
 
     @Test
@@ -632,12 +637,12 @@ public class StackToCloudStackConverterTest {
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, emptyList()));
         Template template = mock(Template.class);
-        when(template.getCloudPlatform()).thenReturn("AWS");
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
         securityGroup.setSecurityRules(securityRules);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
+        when(template.getCloudPlatform()).thenReturn("AWS");
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
@@ -647,10 +652,10 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getSecurity().getRules().size());
-        assertEquals(1L, result.getGroups().get(0).getSecurity().getRules().get(0).getPorts().length);
-        assertEquals(ports[0].split("-")[0], result.getGroups().get(0).getSecurity().getRules().get(0).getPorts()[0].getFrom());
-        assertEquals(ports[0].split("-")[1], result.getGroups().get(0).getSecurity().getRules().get(0).getPorts()[0].getTo());
+        assertEquals(1L, result.getGroups().getFirst().getSecurity().getRules().size());
+        assertEquals(1L, result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts().length);
+        assertEquals(ports[0].split("-")[0], result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts()[0].getFrom());
+        assertEquals(ports[0].split("-")[1], result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts()[0].getTo());
     }
 
     @Test
@@ -681,10 +686,10 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getSecurity().getRules().size());
-        assertEquals(1L, result.getGroups().get(0).getSecurity().getRules().get(0).getPorts().length);
-        assertEquals(ports[0], result.getGroups().get(0).getSecurity().getRules().get(0).getPorts()[0].getFrom());
-        assertEquals(ports[0], result.getGroups().get(0).getSecurity().getRules().get(0).getPorts()[0].getTo());
+        assertEquals(1L, result.getGroups().getFirst().getSecurity().getRules().size());
+        assertEquals(1L, result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts().length);
+        assertEquals(ports[0], result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts()[0].getFrom());
+        assertEquals(ports[0], result.getGroups().getFirst().getSecurity().getRules().getFirst().getPorts()[0].getTo());
     }
 
     @Test
@@ -983,6 +988,72 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(authentication.getLoginUserName(), result.getLoginUserName());
         assertEquals(authentication.getPublicKey(), result.getPublicKey());
+    }
+
+    @Test
+    void testBuildInstanceTemplateVolumeTemplatesAreOrderedByVolumeTemplateId() {
+        Template template = new Template();
+        template.setInstanceType("m5.xlarge");
+
+        VolumeTemplate vol1 = new VolumeTemplate();
+        vol1.setId(1L);
+        vol1.setVolumeCount(1);
+        vol1.setVolumeType("gp3");
+        vol1.setVolumeSize(100);
+        vol1.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate vol3 = new VolumeTemplate();
+        vol3.setId(3L);
+        vol3.setVolumeCount(1);
+        vol3.setVolumeType("gp3");
+        vol3.setVolumeSize(300);
+        vol3.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate vol2 = new VolumeTemplate();
+        vol2.setId(2L);
+        vol2.setVolumeCount(2);
+        vol2.setVolumeType("gp3");
+        vol2.setVolumeSize(200);
+        vol2.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(vol1, vol3, vol2));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "master", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(4, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(200, volumes.get(1).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "3", volumes.get(2).getMount());
+        assertEquals(200, volumes.get(2).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "4", volumes.get(3).getMount());
+        assertEquals(300, volumes.get(3).getSize());
+    }
+
+    @Test
+    void testBuildInstanceTemplateWithMultipleVolumesWithSameType() {
+        Template template = new Template();
+        template.setInstanceType("m5.xlarge");
+
+        VolumeTemplate vol1 = new VolumeTemplate();
+        vol1.setId(1L);
+        vol1.setVolumeCount(2);
+        vol1.setVolumeType("gp2");
+        vol1.setVolumeSize(100);
+        vol1.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(vol1));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "master", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(2, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(100, volumes.get(1).getSize());
     }
 
     @Test
@@ -1419,20 +1490,20 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        assertEquals(1L, result.getGroups().get(0).getInstances().size());
-        assertEquals(1L, result.getGroups().get(0).getDeletedInstances().size());
+        assertEquals(1L, result.getGroups().getFirst().getInstances().size());
+        assertEquals(1L, result.getGroups().getFirst().getDeletedInstances().size());
         assertEquals(fqdnParsedName,
-                result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+                result.getGroups().getFirst().getInstances().getFirst().getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(instanceMetaData.getSubnetId(),
-                result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
+                result.getGroups().getFirst().getInstances().getFirst().getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(instanceMetaData.getInstanceName(),
-                result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+                result.getGroups().getFirst().getInstances().getFirst().getParameters().get(CloudInstance.INSTANCE_NAME));
         assertEquals(terminatedFqdnParsedName,
-                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+                result.getGroups().getFirst().getDeletedInstances().getFirst().getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(terminatedMetaData.getSubnetId(),
-                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
+                result.getGroups().getFirst().getDeletedInstances().getFirst().getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(terminatedMetaData.getInstanceName(),
-                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+                result.getGroups().getFirst().getDeletedInstances().getFirst().getParameters().get(CloudInstance.INSTANCE_NAME));
     }
 
     static Object[][] buildInstanceTestWhenInstanceMetaDataPresentAndSubnetAndAvailabilityZoneDataProvider() {

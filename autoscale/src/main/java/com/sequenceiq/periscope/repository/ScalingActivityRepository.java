@@ -91,7 +91,7 @@ public interface ScalingActivityRepository extends PagingAndSortingRepository<Sc
 
     @Query("SELECT st.id FROM ScalingActivity st WHERE st.activityStatus IN :statuses AND st.startTime <= :startTimeBefore")
     List<Long> findAllIdsInActivityStatusesWithStartTimeBefore(@Param("statuses") Collection<ActivityStatus> statuses,
-            @Param("startTimeBefore") Date startTimeBefore);
+            @Param("startTimeBefore") Date startTimeBefore, Pageable pageable);
 
     @Query("SELECT st.id FROM ScalingActivity st WHERE st.activityStatus IN :statuses")
     List<Long> findAllIdsInActivityStatuses(@Param("statuses") List<ActivityStatus> statuses, Sort sort);

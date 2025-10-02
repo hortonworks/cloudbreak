@@ -217,39 +217,51 @@ public class StackUtil {
                 .filter(volumeSet -> StringUtils.isNotEmpty(volumeSet.getInstanceId()))
                 .map(volumeSet -> Map.entry(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
-                .map(entry -> {
-                    List<Volume> volumes = entry.getValue()
-                            .map(VolumeSetAttributes::getVolumes)
-                            .orElse(List.of())
-                            .stream()
-                            .filter(e -> !volumeIsEphemeralWhichMustBeProvisioned(e))
-                            .collect(Collectors.toList());
-                    List<Volume> volumesWithDataLoss = entry.getValue()
-                            .map(VolumeSetAttributes::getVolumes)
-                            .orElse(List.of())
-                            .stream()
-                            .filter(e -> volumeIsEphemeralWhichMustBeProvisioned(e))
-                            .collect(Collectors.toList());
-                    List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
-                    List<String> dataVolumesWithDataLoss = volumesWithDataLoss.stream().map(Volume::getDevice).collect(Collectors.toList());
-                    List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
-                    List<String> serialIdsWithDataLoss = volumesWithDataLoss.stream().map(Volume::getId).collect(Collectors.toList());
-                    LOGGER.debug("Datavolumes are {}, dataVolumesWithDataLoss are {}, serialIds are {}, serialIdsWithDataLoss are {}",
-                            dataVolumes, dataVolumesWithDataLoss, serialIds, serialIdsWithDataLoss);
-                    int dataBaseVolumeIndex = IntStream.range(0, volumes.size())
-                            .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
-                            .findFirst()
-                            .orElse(-1);
-                    return Map.<String, Map<String, Object>>entry(entry.getKey(), Map.of(
-                            "dataVolumes", String.join(" ", dataVolumes),
-                            "dataVolumesWithDataLoss", String.join(" ", dataVolumesWithDataLoss),
-                            "serialIds", String.join(" ", serialIds),
-                            "serialIdsWithDataLoss", String.join(" ", serialIdsWithDataLoss),
-                            "dataBaseVolumeIndex", dataBaseVolumeIndex,
-                            "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
-                            "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));
-                })
-                .collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> (Map<String, Object>) entry.getValue()));
+                .map(this::getVolumeInfo)
+                // Preserve original order by using LinkedHashMap
+                .collect(Collectors.toMap(
+                        entry -> (String) entry.getKey(),
+                        entry -> (Map<String, Object>) entry.getValue(),
+                        (existing, replacement) -> existing,
+                        java.util.LinkedHashMap::new));
+    }
+
+    private Map.Entry getVolumeInfo(Map.Entry<String, Optional<VolumeSetAttributes>> entry) {
+        List<Volume> allVolumes = entry.getValue()
+                .map(VolumeSetAttributes::getVolumes)
+                .orElse(List.of());
+
+        // Preserve the original order by maintaining index-based iteration
+        List<Volume> volumes = new java.util.ArrayList<>();
+        List<Volume> volumesWithDataLoss = new java.util.ArrayList<>();
+
+        // Iterate through volumes in original order and separate them
+        for (Volume volume : allVolumes) {
+            if (!volumeIsEphemeralWhichMustBeProvisioned(volume)) {
+                volumes.add(volume);
+            } else {
+                volumesWithDataLoss.add(volume);
+            }
+        }
+
+        List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
+        List<String> dataVolumesWithDataLoss = volumesWithDataLoss.stream().map(Volume::getDevice).collect(Collectors.toList());
+        List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
+        List<String> serialIdsWithDataLoss = volumesWithDataLoss.stream().map(Volume::getId).collect(Collectors.toList());
+        LOGGER.debug("Datavolumes are {}, dataVolumesWithDataLoss are {}, serialIds are {}, serialIdsWithDataLoss are {}",
+                dataVolumes, dataVolumesWithDataLoss, serialIds, serialIdsWithDataLoss);
+        int dataBaseVolumeIndex = IntStream.range(0, volumes.size())
+                .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
+                .findFirst()
+                .orElse(-1);
+        return Map.<String, Map<String, Object>>entry(entry.getKey(), Map.of(
+                "dataVolumes", String.join(" ", dataVolumes),
+                "dataVolumesWithDataLoss", String.join(" ", dataVolumesWithDataLoss),
+                "serialIds", String.join(" ", serialIds),
+                "serialIdsWithDataLoss", String.join(" ", serialIdsWithDataLoss),
+                "dataBaseVolumeIndex", dataBaseVolumeIndex,
+                "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
+                "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));
     }
 
     private <T> T getOrDefault(Map<String, Map<String, Object>> instanceToVolumeInfoMap, String instanceId, String innerKey, T defaultValue) {
