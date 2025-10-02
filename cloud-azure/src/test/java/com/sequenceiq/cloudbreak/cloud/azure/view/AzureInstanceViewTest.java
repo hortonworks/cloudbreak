@@ -135,4 +135,34 @@ class AzureInstanceViewTest {
         assertThat(underTest.getDiskEncryptionSetId()).isEqualTo(DISK_ENCRYPTION_SET_ID);
     }
 
+    @Test
+    void getInstanceIdTestWithCustomInstanceName() {
+        String instanceName = "perdos-azure-sdx-3-m0-13664bf0a237bf859";
+
+        when(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME)).thenReturn(instanceName);
+
+        AzureInstanceView underTest = AzureInstanceView.builder(cloudInstance)
+                .withStackName("perdos-azure-sdx-3")
+                .build();
+
+        assertThat(underTest.getInstanceId()).isEqualTo("m0-13664bf0a237bf859");
+    }
+
+    @Test
+    void getInstanceIdTestWithoutInstanceName() {
+        String dbId = "98765";
+        String groupName = "master";
+        Long privateId = 2L;
+
+        when(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME)).thenReturn(null);
+        when(cloudInstance.getDbIdOrDefaultIfNotExists()).thenReturn(dbId);
+        when(instanceTemplate.getGroupName()).thenReturn(groupName);
+        when(instanceTemplate.getPrivateId()).thenReturn(privateId);
+
+        AzureInstanceView underTest = AzureInstanceView.builder(cloudInstance)
+                .withStackName("perdos-azure-sdx-3")
+                .build();
+
+        assertThat(underTest.getInstanceId()).isEqualTo("m2-c37bf859");
+    }
 }

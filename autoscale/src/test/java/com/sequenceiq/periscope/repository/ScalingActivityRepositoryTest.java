@@ -408,11 +408,34 @@ class ScalingActivityRepositoryTest {
                 now.minus(5, MINUTES).toEpochMilli());
 
         saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+        Pageable pageable = PageRequest.of(0, 10);
 
         List<Long> result = underTest.findAllIdsInActivityStatusesWithStartTimeBefore(EnumSet.of(ActivityStatus.SCALING_FLOW_FAILED,
-                ActivityStatus.SCALING_FLOW_SUCCESS), new Date(now.minus(8, MINUTES).toEpochMilli()));
+                ActivityStatus.SCALING_FLOW_SUCCESS), new Date(now.minus(8, MINUTES).toEpochMilli()), pageable);
 
         assertThat(result).hasSize(2).hasSameElementsAs(asList(scalingActivity1.getId(), scalingActivity2.getId()));
+    }
+
+    @Test
+    void testFindAllIdsInStatusesThatStartedBeforeWithLimit2() {
+        Instant now = Instant.now();
+
+        ScalingActivity scalingActivity1 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_FAILED,
+                now.minus(20, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity2 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_SUCCESS,
+                now.minus(30, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity3 = createScalingActivity(testCluster, ActivityStatus.METRICS_COLLECTION_SUCCESS,
+                now.minus(10, MINUTES).toEpochMilli());
+        ScalingActivity scalingActivity4 = createScalingActivity(testCluster, ActivityStatus.SCALING_FLOW_SUCCESS,
+                now.minus(5, MINUTES).toEpochMilli());
+
+        saveScalingActivity(testCluster, scalingActivity1, scalingActivity2, scalingActivity3, scalingActivity4);
+        Pageable pageable = PageRequest.of(0, 1);
+
+        List<Long> result = underTest.findAllIdsInActivityStatusesWithStartTimeBefore(EnumSet.of(ActivityStatus.SCALING_FLOW_FAILED,
+                ActivityStatus.SCALING_FLOW_SUCCESS), new Date(now.minus(8, MINUTES).toEpochMilli()), pageable);
+
+        assertThat(result).hasSize(1);
     }
 
     @Test

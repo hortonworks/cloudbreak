@@ -31,7 +31,7 @@ public class AllowableJavaConfigurations {
 
     public List<String> listValidJavaVersions(String runtimeVersion) {
         return javaVersions.stream()
-                .filter(javaConfiguration -> javaConfiguration.isRuntimeCompatible(runtimeVersion))
+                .filter(javaConfiguration -> runtimeVersion == null || javaConfiguration.isRuntimeCompatible(runtimeVersion))
                 .map(javaConfiguration -> String.valueOf(javaConfiguration.getVersion()))
                 .toList();
     }

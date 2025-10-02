@@ -197,13 +197,19 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         String stackName = auth.getCloudContext().getName();
         String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
         LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
+
+        // Preserve original ordering by using explicit iteration instead of stream filtering
+        List<Volume> orderedVolumes = new ArrayList<>();
+        for (com.sequenceiq.cloudbreak.cloud.model.Volume vol : group.getReferenceInstanceTemplate().getVolumes()) {
+            if (!isVolumeEphemeral(vol)) {
+                orderedVolumes.add(new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()));
+            }
+        }
+
         VolumeSetAttributes attributes = new VolumeSetAttributes.Builder()
                 .withAvailabilityZone(targetAvailabilityZone)
                 .withDeleteOnTermination(Boolean.TRUE)
-                .withVolumes(group.getReferenceInstanceTemplate().getVolumes().stream()
-                        .filter(vol -> !isVolumeEphemeral(vol))
-                        .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
-                        .collect(Collectors.toList()))
+                .withVolumes(orderedVolumes)
                 .build();
         return CloudResource.builder()
                 .withPersistent(true)
@@ -255,6 +261,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         String instanceId = awsInstanceFinder.getInstanceId(privateId, context.getComputeResources(privateId));
         LOGGER.debug("Create volumes on provider for {}: {}", instanceId, buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
+        // Map holds final ordered volume lists per resource
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
@@ -279,31 +286,49 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
         String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         for (CloudResource resource : requestedResources) {
-            volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            List<VolumeSetAttributes.Volume> originalVolumes = volumeSetAttributes.getVolumes();
+            int volumeCount = originalVolumes.size();
+            // Pre-size ordered list with null placeholders; synchronized for safe concurrent writes
+            List<Volume> orderedVolumes = Collections.synchronizedList(new ArrayList<>(Collections.nCopies(volumeCount, (Volume) null)));
+            volumeSetMap.put(resource.getName(), orderedVolumes);
 
-            VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            // Pre-generate deterministic device names in original order so asynchronous completion cannot scramble them
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
-            String volumeSetAvailabilityZone = volumeSet.getAvailabilityZone() == null ? defaultAvailabilityZone : volumeSet.getAvailabilityZone();
-            futures.addAll(volumeSet.getVolumes().stream()
-                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSetAvailabilityZone))
-                    .map(requestWithUsage -> intermediateBuilderExecutor.submit(() -> {
-                        CreateVolumeRequest request = requestWithUsage.getFirst();
-                        CreateVolumeResponse response = client.createVolume(request);
-                        Volume volume = new Volume(response.volumeId(), generator.next(), request.size(), request.volumeTypeAsString(),
-                                requestWithUsage.getSecond());
-                        volumeSetMap.get(resource.getName()).add(volume);
-                    }))
-                    .collect(Collectors.toList()));
+            List<String> deviceNames = new ArrayList<>(volumeCount);
+            for (int i = 0; i < volumeCount; i++) {
+                deviceNames.add(generator.next());
+            }
+
+            String volumeSetAvailabilityZone = volumeSetAttributes.getAvailabilityZone() == null ? defaultAvailabilityZone :
+                    volumeSetAttributes.getAvailabilityZone();
+
+            for (int index = 0; index < volumeCount; index++) {
+                final int volumeIndex = index;
+                VolumeSetAttributes.Volume originalVolume = originalVolumes.get(volumeIndex);
+                Pair<CreateVolumeRequest, CloudVolumeUsageType> requestWithUsage =
+                        createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSetAvailabilityZone).apply(originalVolume);
+                Future<?> future = intermediateBuilderExecutor.submit(() -> {
+                    CreateVolumeRequest request = requestWithUsage.getFirst();
+                    CreateVolumeResponse response = client.createVolume(request);
+                    Volume created = new Volume(response.volumeId(), deviceNames.get(volumeIndex), request.size(), request.volumeTypeAsString(),
+                            requestWithUsage.getSecond());
+                    orderedVolumes.set(volumeIndex, created);
+                });
+                futures.add(future);
+            }
         }
-        LOGGER.debug("Waiting for volumes creation requests");
+
+        LOGGER.debug("Waiting for volumes creation requests ({} futures)", futures.size());
         for (Future<?> future : futures) {
             future.get();
         }
-        LOGGER.debug("Volume creation requests sent");
+
         List<CloudResource> previouslyCreatedVolumeSets = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.CREATED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
         LOGGER.debug("Previously created volumesets: {}", previouslyCreatedVolumeSets);
+
         List<CloudResource> createdResourcesInThisRound = requestedResources.stream()
                 .peek(resource -> {
                     List<Volume> volumes = volumeSetMap.get(resource.getName());
@@ -492,7 +517,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         try {
             client.deleteVolume(request);
         } catch (AwsServiceException e) {
-            LOGGER.debug(String.format("Exception during aws volume (%s) deletion.", request.volumeId()), e);
+            LOGGER.debug("Exception during aws volume ({}) deletion.", request.volumeId(), e);
         }
     }
 
@@ -505,7 +530,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(toResourceStatus())
                     .reduce(ATTACHED, resourceStatusReducer());
         } catch (Ec2Exception e) {
-            LOGGER.debug("Obtaining volume status was not successful due to the following error: " + e.awsErrorDetails().errorCode(), e);
+            LOGGER.debug("Obtaining volume status was not successful due to the following error: {}", e.awsErrorDetails().errorCode(), e);
             return VOLUME_NOT_FOUND.equals(e.awsErrorDetails().errorCode()) ? DELETED : FAILED;
         }
     }
@@ -527,17 +552,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Function<String, ResourceStatus> toResourceStatus() {
         return state -> {
-            switch (state) {
-                case "available":
-                    return CREATED;
-                case "in-use":
-                    return ATTACHED;
-                case "deleting":
-                    return DELETED;
-                case "creating":
-                default:
-                    return IN_PROGRESS;
-            }
+            return switch (state) {
+                case "available" -> CREATED;
+                case "in-use" -> ATTACHED;
+                case "deleting" -> DELETED;
+                default -> IN_PROGRESS;
+            };
         };
     }
 

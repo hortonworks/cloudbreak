@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,6 +29,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -67,7 +68,7 @@ class StackUtilTest {
     @Mock
     private CredentialClientService credentialClientService;
 
-    @Mock
+    @Spy
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Mock
@@ -170,7 +171,7 @@ class StackUtilTest {
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE));
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
         assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertFalse(fqdns.contains("node2.example.com"), "Terminated node should be filtered out");
         assertTrue(fqdns.contains("node3.example.com"));
     }
 
@@ -205,7 +206,7 @@ class StackUtilTest {
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE));
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
         assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertFalse(fqdns.contains("node2.example.com"), "Terminated node should be filtered out");
         assertTrue(fqdns.contains("node3.example.com"));
     }
 
@@ -226,7 +227,7 @@ class StackUtilTest {
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.TRUE));
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
         assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertFalse(fqdns.contains("node2.example.com"), "Terminated node should be filtered out");
         assertTrue(fqdns.contains("node3.example.com"));
         assertTrue(nodeReachabilityResult.getReachableNodes().stream().map(Node::getHostname).collect(Collectors.toSet()).contains("node1.example.com"));
         assertTrue(nodeReachabilityResult.getUnreachableNodes().stream().map(Node::getHostname).collect(Collectors.toSet()).contains("node3.example.com"));
@@ -295,6 +296,38 @@ class StackUtilTest {
         resource.setResourceType(ResourceType.AZURE_VOLUMESET);
         resource.setInstanceId(instanceID);
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes.Builder()
+                .build();
+        resource.setAttributes(new Json(volumeSetAttributes));
+        return resource;
+    }
+
+    @Test
+    void testCreateInstanceToVolumeInfoMapShouldPreserveVolumeOrder() {
+        List<Resource> volumeSets = new ArrayList<>();
+        volumeSets.add(getVolumeSetResource("instanceId1", List.of(
+                new VolumeSetAttributes.Volume("vol-1", "/dev/sda", 100, "type", null),
+                new VolumeSetAttributes.Volume("vol-2", "/dev/sdb", 100, "type", null)
+        )));
+        volumeSets.add(getVolumeSetResource("instanceId2", List.of(
+                new VolumeSetAttributes.Volume("vol-3", "/dev/sdc", 100, "type", null),
+                new VolumeSetAttributes.Volume("vol-4", "/dev/sdd", 100, "type", null)
+        )));
+
+        Map<String, Map<String, Object>> result = stackUtil.createInstanceToVolumeInfoMap(volumeSets);
+
+        assertThat(new ArrayList<>(result.keySet())).containsExactly("instanceId1", "instanceId2");
+        assertThat(result.get("instanceId1").get("dataVolumes")).isEqualTo("/dev/sda /dev/sdb");
+        assertThat(result.get("instanceId1").get("serialIds")).isEqualTo("vol-1 vol-2");
+        assertThat(result.get("instanceId2").get("dataVolumes")).isEqualTo("/dev/sdc /dev/sdd");
+        assertThat(result.get("instanceId2").get("serialIds")).isEqualTo("vol-3 vol-4");
+    }
+
+    private Resource getVolumeSetResource(String instanceID, List<VolumeSetAttributes.Volume> volumes) {
+        Resource resource = new Resource();
+        resource.setResourceType(ResourceType.AZURE_VOLUMESET);
+        resource.setInstanceId(instanceID);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes.Builder()
+                .withVolumes(volumes)
                 .build();
         resource.setAttributes(new Json(volumeSetAttributes));
         return resource;
