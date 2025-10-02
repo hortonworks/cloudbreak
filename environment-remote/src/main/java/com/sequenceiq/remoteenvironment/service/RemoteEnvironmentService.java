@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.service;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -19,15 +21,17 @@ import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificat
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
+import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
-import com.sequenceiq.remoteenvironment.controller.v1.controller.RemoteEnvironmentController;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
 
 @Service
 public class RemoteEnvironmentService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteEnvironmentController.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteEnvironmentService.class);
 
     @Inject
     private RemoteEnvironmentConnectorProvider remoteEnvironmentConnectorProvider;
@@ -48,25 +52,47 @@ public class RemoteEnvironmentService {
         }
     }
 
-    public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentResponse describeV1(DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV1(ThreadBasedUserCrnProvider.getAccountId(), request);
+                .describeV1(accountId, request);
+    }
+
+    public DescribeEnvironmentV2Response describeV2(DescribeRemoteEnvironment request) {
+        MDCBuilder.buildMdcContext();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        throwExceptionIfNotEntitled(accountId);
+        return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
+                .describeV2(accountId, request);
     }
 
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .getRemoteDataContext(ThreadBasedUserCrnProvider.getAccountId(), request.getCrn());
+                .getRemoteDataContext(accountId, request.getCrn());
     }
 
     public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getClusterid())
-                .getDatalakeServices(ThreadBasedUserCrnProvider.getAccountId(), request.getClusterid());
+                .getDatalakeServices(accountId, request.getClusterid());
     }
 
     public GetRootCertificateResponse getRootCertificateByCrn(String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(environmentCrn)
-                .getRootCertificate(ThreadBasedUserCrnProvider.getAccountId(), environmentCrn);
+                .getRootCertificate(accountId, environmentCrn);
+    }
+
+    private void throwExceptionIfNotEntitled(String accountId) {
+        if (!entitlementService.hybridCloudEnabled(accountId)) {
+            throw new RemoteEnvironmentException(String.format("Entitlement %s is required for this operation", CDP_HYBRID_CLOUD));
+        }
     }
 
     private Set<RemoteEnvironmentConnectorType> getConnectorTypes(List<String> types) {

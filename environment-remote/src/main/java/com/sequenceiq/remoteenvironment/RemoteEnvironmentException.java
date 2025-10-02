@@ -1,6 +1,8 @@
 package com.sequenceiq.remoteenvironment;
 
-public class RemoteEnvironmentException extends RuntimeException {
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+
+public class RemoteEnvironmentException extends CloudbreakServiceException {
     public RemoteEnvironmentException(String message) {
         super(message);
     }

@@ -33,7 +33,7 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     @Override
     public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.getByCrn(request);
+        return remoteEnvironmentService.describeV1(request);
     }
 
     @Override
