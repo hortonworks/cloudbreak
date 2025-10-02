@@ -1,8 +1,6 @@
 package com.sequenceiq.freeipa.service.crossrealm;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_FAILED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED;
 
 import java.util.List;
 import java.util.Set;
@@ -38,12 +36,12 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.repair.event.TrustRepairEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.repair.event.FreeIpaTrustRepairEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.config.FreeIpaTrustSetupFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.config.FreeIpaTrustSetupFinishFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishEvent;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -54,17 +52,30 @@ public class TrustSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustSetupService.class);
 
-    private static final Set<DetailedStackStatus> ENABLED_STATUSES_FOR_TRUST_SETUP_FINISH = Set.of(TRUST_SETUP_FINISH_REQUIRED,
-            TRUST_SETUP_FINISH_FAILED, AVAILABLE);
+    private static final Set<DetailedStackStatus> ENABLED_STATUSES_FOR_TRUST_SETUP_FINISH = Set.of(
+            DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED,
+            DetailedStackStatus.TRUST_SETUP_FINISH_FAILED,
+            AVAILABLE
+    );
 
-    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_FINISH = Set.of(TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
-            TrustStatus.TRUST_SETUP_FINISH_FAILED);
+    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_FINISH = Set.of(
+            TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
+            TrustStatus.TRUST_SETUP_FINISH_FAILED
+    );
 
-    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS = Set.of(TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
-            TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS, TrustStatus.TRUST_SETUP_FINISH_FAILED, TrustStatus.TRUST_BROKEN, TrustStatus.TRUST_ACTIVE);
+    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS = Set.of(
+            TrustStatus.TRUST_SETUP_FINISH_REQUIRED,
+            TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS,
+            TrustStatus.TRUST_SETUP_FINISH_FAILED,
+            TrustStatus.TRUST_BROKEN,
+            TrustStatus.TRUST_ACTIVE
+    );
 
-    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_REPAIR_COMMANDS = Set.of(TrustStatus.TRUST_SETUP_FINISH_FAILED,
-            TrustStatus.TRUST_BROKEN, TrustStatus.TRUST_ACTIVE);
+    private static final Set<TrustStatus> ENABLED_TRUSTSTATUSES_FOR_TRUST_REPAIR_COMMANDS = Set.of(
+            TrustStatus.TRUST_SETUP_FINISH_FAILED,
+            TrustStatus.TRUST_BROKEN,
+            TrustStatus.TRUST_ACTIVE
+    );
 
     @Inject
     private StackService stackService;
@@ -100,8 +111,8 @@ public class TrustSetupService {
         createOrUpdateCrossRealmConfigs(request, stack);
 
         Operation operation = operationService.startOperation(accountId, OperationType.TRUST_SETUP, Set.of(environmentCrn), Set.of());
-        TrustSetupEvent trustSetupEvent = new TrustSetupEvent(stack.getId(), operation.getOperationId());
-        FlowIdentifier flowIdentifier = flowManager.notify(trustSetupEvent.selector(), trustSetupEvent);
+        FreeIpaTrustSetupEvent freeIPATrustSetupEvent = new FreeIpaTrustSetupEvent(stack.getId(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(freeIPATrustSetupEvent.selector(), freeIPATrustSetupEvent);
 
         PrepareCrossRealmTrustResponse response = new PrepareCrossRealmTrustResponse();
         response.setFlowIdentifier(flowIdentifier);
@@ -139,8 +150,8 @@ public class TrustSetupService {
         }
 
         Operation operation = operationService.startOperation(accountId, OperationType.TRUST_SETUP_FINISH, Set.of(environmentCrn), Set.of());
-        FinishTrustSetupEvent finishTrustSetupEvent = new FinishTrustSetupEvent(stack.getId(), operation.getOperationId());
-        FlowIdentifier flowIdentifier = flowManager.notify(finishTrustSetupEvent.selector(), finishTrustSetupEvent);
+        FreeIpaTrustSetupFinishEvent freeIPATrustSetupFinishEvent = new FreeIpaTrustSetupFinishEvent(stack.getId(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(freeIPATrustSetupFinishEvent.selector(), freeIPATrustSetupFinishEvent);
 
         FinishSetupCrossRealmTrustResponse response = new FinishSetupCrossRealmTrustResponse();
         response.setFlowIdentifier(flowIdentifier);
@@ -174,7 +185,7 @@ public class TrustSetupService {
         if (isOperationStillRunning(accountId, crossRealmTrust)) {
             List<FlowLog> flowLogs = flowLogDBService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId());
             if (!flowLogs.isEmpty() && (flowLogs.getFirst().isFlowType(FreeIpaTrustSetupFlowConfig.class)
-                    || flowLogs.getFirst().isFlowType(FreeIpaFinishTrustSetupFlowConfig.class))) {
+                    || flowLogs.getFirst().isFlowType(FreeIpaTrustSetupFinishFlowConfig.class))) {
                 LOGGER.info("Canceling running trust setup for {}", stack.getResourceCrn());
                 flowCancelService.cancelFlowSilently(flowLogs.getFirst());
             } else {
@@ -183,8 +194,8 @@ public class TrustSetupService {
         }
 
         Operation operation = operationService.startOperation(accountId, OperationType.CANCEL_TRUST_SETUP, Set.of(environmentCrn), Set.of());
-        CancelTrustSetupEvent cancelTrustSetupEvent = new CancelTrustSetupEvent(stack.getId(), operation.getOperationId());
-        FlowIdentifier flowIdentifier = flowManager.notify(cancelTrustSetupEvent.selector(), cancelTrustSetupEvent);
+        FreeIpaTrustCancelEvent freeIPATrustCancelEvent = new FreeIpaTrustCancelEvent(stack.getId(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(freeIPATrustCancelEvent.selector(), freeIPATrustCancelEvent);
 
         CancelCrossRealmTrustResponse response = new CancelCrossRealmTrustResponse();
         response.setFlowIdentifier(flowIdentifier);
@@ -211,7 +222,7 @@ public class TrustSetupService {
         }
 
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR_TRUST_SETUP, Set.of(environmentCrn), Set.of());
-        TrustRepairEvent trustSetupEvent = new TrustRepairEvent(stack.getId(), operation.getOperationId());
+        FreeIpaTrustRepairEvent trustSetupEvent = new FreeIpaTrustRepairEvent(stack.getId(), operation.getOperationId());
         FlowIdentifier flowIdentifier = flowManager.notify(trustSetupEvent.selector(), trustSetupEvent);
 
         RepairCrossRealmTrustResponse response = new RepairCrossRealmTrustResponse();

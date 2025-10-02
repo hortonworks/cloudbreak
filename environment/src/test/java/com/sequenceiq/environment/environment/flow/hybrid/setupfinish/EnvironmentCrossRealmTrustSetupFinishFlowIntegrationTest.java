@@ -9,10 +9,10 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FAILED_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FINISHED_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_VALIDATION_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -186,21 +186,21 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
                 any(Payload.class),
                 eq(TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED),
-                eq(SETUP_FINISH_TRUST_VALIDATION_STATE)
+                eq(TRUST_SETUP_FINISH_VALIDATION_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(TRUST_SETUP_FINISH_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_STARTED),
-                eq(SETUP_FINISH_TRUST_STATE)
+                eq(TRUST_SETUP_FINISH_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(AVAILABLE),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED),
-                eq(SETUP_FINISH_TRUST_FINISHED_STATE)
+                eq(TRUST_SETUP_FINISH_FINISHED_STATE)
         );
     }
 
@@ -217,21 +217,21 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
                 any(Payload.class),
                 eq(TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED),
-                eq(SETUP_FINISH_TRUST_VALIDATION_STATE)
+                eq(TRUST_SETUP_FINISH_VALIDATION_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(TRUST_SETUP_FINISH_IN_PROGRESS),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_STARTED),
-                eq(SETUP_FINISH_TRUST_STATE)
+                eq(TRUST_SETUP_FINISH_STATE)
         );
         environmentStatusVerify.verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(BaseFailedFlowEvent.class),
                 eq(TRUST_SETUP_FINISH_FAILED),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_FAILED),
-                eq(SETUP_FINISH_TRUST_FAILED_STATE)
+                eq(TRUST_SETUP_FINISH_FAILED_STATE)
         );
     }
 

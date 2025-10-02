@@ -54,11 +54,12 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupConfigurationAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupFailedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.CancelTrustSetupFinishedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.CancelTrustSetupEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.handler.CancelTrustSetupConfigurationHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.FreeIpaTrustCancelConfigurationAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.FreeIpaTrustCancelFailedAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action.FreeIpaTrustCancelFinishedAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.config.FreeIpaTrustCancelFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.handler.FreeIpaTrustCancelConfigurationHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -209,10 +210,10 @@ class CancelTrustSetupFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        CancelTrustSetupEvent cancelTrustSetupEvent = new CancelTrustSetupEvent(STACK_ID, OPERATION_ID);
+        FreeIpaTrustCancelEvent freeIPATrustCancelEvent = new FreeIpaTrustCancelEvent(STACK_ID, OPERATION_ID);
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
-                () -> freeIpaFlowManager.notify(cancelTrustSetupEvent.selector(), cancelTrustSetupEvent));
+                () -> freeIpaFlowManager.notify(freeIPATrustCancelEvent.selector(), freeIPATrustCancelEvent));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
@@ -229,15 +230,15 @@ class CancelTrustSetupFlowIntegrationTest {
     @Profile("integration-test")
     @TestConfiguration
     @Import(value = {
-            FreeIpaCancelTrustSetupFlowConfig.class,
+            FreeIpaTrustCancelFlowConfig.class,
             FlowIntegrationTestConfig.class,
             WebApplicationExceptionMessageExtractor.class,
-            CancelTrustSetupFailedAction.class,
-            CancelTrustSetupConfigurationAction.class,
-            CancelTrustSetupFinishedAction.class,
+            FreeIpaTrustCancelFailedAction.class,
+            FreeIpaTrustCancelConfigurationAction.class,
+            FreeIpaTrustCancelFinishedAction.class,
             CancelTrustService.class,
             CrossRealmTrustService.class,
-            CancelTrustSetupConfigurationHandler.class,
+            FreeIpaTrustCancelConfigurationHandler.class,
             TaskResultConverter.class
     })
     static class Config {

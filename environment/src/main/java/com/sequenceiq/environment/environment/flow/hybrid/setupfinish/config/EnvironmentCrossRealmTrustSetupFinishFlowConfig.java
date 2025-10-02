@@ -29,21 +29,21 @@ public class EnvironmentCrossRealmTrustSetupFinishFlowConfig extends AbstractFlo
             .defaultFailureEvent(FAILED_TRUST_SETUP_FINISH_EVENT)
 
             .from(EnvironmentCrossRealmTrustSetupFinishState.INIT_STATE)
-            .to(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_VALIDATION_STATE)
+            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE)
             .event(TRUST_SETUP_FINISH_VALIDATION_EVENT)
             .defaultFailureEvent()
 
-            .from(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_VALIDATION_STATE)
-            .to(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_STATE)
+            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE)
+            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE)
             .event(TRUST_SETUP_FINISH_EVENT)
             .defaultFailureEvent()
 
-            .from(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_STATE)
-            .to(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FINISHED_STATE)
+            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE)
+            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE)
             .event(FINISH_TRUST_SETUP_FINISH_EVENT)
             .defaultFailureEvent()
 
-            .from(EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FINISHED_STATE)
+            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE)
             .to(EnvironmentCrossRealmTrustSetupFinishState.FINAL_STATE)
             .event(FINALIZE_TRUST_SETUP_FINISH_EVENT)
             .defaultFailureEvent()
@@ -64,7 +64,7 @@ public class EnvironmentCrossRealmTrustSetupFinishFlowConfig extends AbstractFlo
         return new FlowEdgeConfig<>(
                 EnvironmentCrossRealmTrustSetupFinishState.INIT_STATE,
                 EnvironmentCrossRealmTrustSetupFinishState.FINAL_STATE,
-                EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FAILED_STATE,
+                EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE,
                 EnvironmentCrossRealmTrustSetupFinishStateSelectors.HANDLED_FAILED_TRUST_SETUP_FINISH_EVENT
         );
     }

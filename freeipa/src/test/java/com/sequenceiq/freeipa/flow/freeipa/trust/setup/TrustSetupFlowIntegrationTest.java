@@ -59,15 +59,16 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupConfigureDnsAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupFailedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupFinishedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupPrepareIpaServerAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.TrustSetupValidationAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.TrustSetupEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.ConfigureDnsHandler;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.PrepareIpaServerHandler;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.ValidationHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupConfigureDnsAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFailedAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFinishedAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupPrepareServerAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupValidationAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.config.FreeIpaTrustSetupFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupConfigureDnsHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupPrepareServerHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupValidationHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -322,10 +323,10 @@ class TrustSetupFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        TrustSetupEvent trustSetupEvent = new TrustSetupEvent(STACK_ID, OPERATION_ID);
+        FreeIpaTrustSetupEvent freeIPATrustSetupEvent = new FreeIpaTrustSetupEvent(STACK_ID, OPERATION_ID);
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
-                () -> freeIpaFlowManager.notify(trustSetupEvent.selector(), trustSetupEvent));
+                () -> freeIpaFlowManager.notify(freeIPATrustSetupEvent.selector(), freeIPATrustSetupEvent));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
@@ -345,15 +346,15 @@ class TrustSetupFlowIntegrationTest {
             FreeIpaTrustSetupFlowConfig.class,
             FlowIntegrationTestConfig.class,
             WebApplicationExceptionMessageExtractor.class,
-            TrustSetupValidationAction.class,
-            TrustSetupFailedAction.class,
-            TrustSetupPrepareIpaServerAction.class,
-            TrustSetupConfigureDnsAction.class,
-            TrustSetupFinishedAction.class,
-            TrustSetupFailedAction.class,
-            ValidationHandler.class,
-            PrepareIpaServerHandler.class,
-            ConfigureDnsHandler.class,
+            FreeIpaTrustSetupValidationAction.class,
+            FreeIpaTrustSetupFailedAction.class,
+            FreeIpaTrustSetupPrepareServerAction.class,
+            FreeIpaTrustSetupConfigureDnsAction.class,
+            FreeIpaTrustSetupFinishedAction.class,
+            FreeIpaTrustSetupFailedAction.class,
+            FreeIpaTrustSetupValidationHandler.class,
+            FreeIpaTrustSetupPrepareServerHandler.class,
+            FreeIpaTrustSetupConfigureDnsHandler.class,
             CrossRealmTrustService.class,
             TaskResultConverter.class
     })

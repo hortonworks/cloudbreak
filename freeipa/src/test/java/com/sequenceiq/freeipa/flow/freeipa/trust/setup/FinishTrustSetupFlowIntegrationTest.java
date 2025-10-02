@@ -53,12 +53,12 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.FreeIpaFinishTrustSetupFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.action.FinishTrustSetupAddTrustAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.action.FinishTrustSetupFailedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.action.FinishTrustSetupFinishedAction;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.event.FinishTrustSetupEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.finish.handler.AddTrustHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishFailedAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishSuccessAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.config.FreeIpaTrustSetupFinishFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.handler.FreeIpaTrustSetupFinishAddTrustHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -214,7 +214,7 @@ class FinishTrustSetupFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        FinishTrustSetupEvent prepareCrossRealmTrustEvent = new FinishTrustSetupEvent(STACK_ID, OPERATION_ID);
+        FreeIpaTrustSetupFinishEvent prepareCrossRealmTrustEvent = new FreeIpaTrustSetupFinishEvent(STACK_ID, OPERATION_ID);
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(prepareCrossRealmTrustEvent.selector(), prepareCrossRealmTrustEvent));
@@ -234,13 +234,13 @@ class FinishTrustSetupFlowIntegrationTest {
     @Profile("integration-test")
     @TestConfiguration
     @Import(value = {
-            FreeIpaFinishTrustSetupFlowConfig.class,
+            FreeIpaTrustSetupFinishFlowConfig.class,
             FlowIntegrationTestConfig.class,
             WebApplicationExceptionMessageExtractor.class,
-            FinishTrustSetupFailedAction.class,
-            FinishTrustSetupAddTrustAction.class,
-            FinishTrustSetupFinishedAction.class,
-            AddTrustHandler.class,
+            FreeIpaTrustSetupFinishFailedAction.class,
+            FreeIpaTrustSetupFinishAction.class,
+            FreeIpaTrustSetupFinishSuccessAction.class,
+            FreeIpaTrustSetupFinishAddTrustHandler.class,
             CrossRealmTrustService.class,
             TaskResultConverter.class
     })

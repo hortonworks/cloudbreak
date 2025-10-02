@@ -8,10 +8,10 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FI
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FAILED_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_FINISHED_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_STATE;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.SETUP_FINISH_TRUST_VALIDATION_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINALIZE_TRUST_SETUP_FINISH_EVENT;
@@ -57,7 +57,7 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
         this.metricService = metricService;
     }
 
-    @Bean(name = "SETUP_FINISH_TRUST_VALIDATION_STATE")
+    @Bean(name = "TRUST_SETUP_FINISH_VALIDATION_STATE")
     public Action<?, ?> crossRealmFinishValidationAction() {
         return new AbstractEnvironmentCrossRealmTrustSetupFinishAction<>(EnvironmentCrossRealmTrustSetupFinishEvent.class) {
             @Override
@@ -68,14 +68,14 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
                                 payload,
                                 TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS,
                                 ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED,
-                                SETUP_FINISH_TRUST_VALIDATION_STATE
+                                TRUST_SETUP_FINISH_VALIDATION_STATE
                         );
                 sendEvent(context, SETUP_FINISH_TRUST_VALIDATION_HANDLER.selector(), payload);
             }
         };
     }
 
-    @Bean(name = "SETUP_FINISH_TRUST_STATE")
+    @Bean(name = "TRUST_SETUP_FINISH_STATE")
     public Action<?, ?> crossRealmFinishInFreeIpaAction() {
         return new AbstractEnvironmentCrossRealmTrustSetupFinishAction<>(EnvironmentCrossRealmTrustSetupFinishEvent.class) {
 
@@ -87,14 +87,14 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
                                 payload,
                                 TRUST_SETUP_FINISH_IN_PROGRESS,
                                 ENVIRONMENT_SETUP_FINISH_TRUST_STARTED,
-                                SETUP_FINISH_TRUST_STATE
+                                TRUST_SETUP_FINISH_STATE
                         );
                 sendEvent(context, SETUP_FINISH_TRUST_HANDLER.selector(), payload);
             }
         };
     }
 
-    @Bean(name = "SETUP_FINISH_TRUST_FINISHED_STATE")
+    @Bean(name = "TRUST_SETUP_FINISH_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
         return new AbstractEnvironmentCrossRealmTrustSetupFinishAction<>(EnvironmentCrossRealmTrustSetupFinishEvent.class) {
             @Override
@@ -105,7 +105,7 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
                                 payload,
                                 AVAILABLE,
                                 ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED,
-                                SETUP_FINISH_TRUST_FINISHED_STATE
+                                TRUST_SETUP_FINISH_FINISHED_STATE
                         );
                 metricService.incrementMetricCounter(ENV_TRUST_SETUP_FINISH_FINISHED, environmentDto);
                 sendEvent(context, FINALIZE_TRUST_SETUP_FINISH_EVENT.event(), payload);
@@ -113,7 +113,7 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
         };
     }
 
-    @Bean(name = "SETUP_FINISH_TRUST_FAILED_STATE")
+    @Bean(name = "TRUST_SETUP_FINISH_FAILED_STATE")
     public Action<?, ?> failedAction() {
         return new AbstractEnvironmentCrossRealmTrustSetupFinishAction<>(EnvironmentCrossRealmTrustSetupFinishFailedEvent.class) {
 
@@ -135,7 +135,7 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
                                 payload,
                                 payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()),
-                                SETUP_FINISH_TRUST_FAILED_STATE
+                                TRUST_SETUP_FINISH_FAILED_STATE
                         );
                 metricService.incrementMetricCounter(MetricType.ENV_TRUST_SETUP_FAILED, environmentDto, payload.getException());
                 sendEvent(context, HANDLED_FAILED_TRUST_SETUP_FINISH_EVENT.event(), payload);
