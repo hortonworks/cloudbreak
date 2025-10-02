@@ -61,7 +61,7 @@ class SaltTelemetryOrchestratorTest {
 
     private final GatewayConfig gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443,
             "instanceid", "servercert", "clientcert", "clientkey", "saltpasswd", "saltbootpassword",
-            "signkey", false, true, "masterPrivateKey", "masterPublicKey", "privatekey", "publickey", null, null);
+            "signkey", false, true, "masterPrivateKey", "masterPublicKey", "privatekey", "publickey", null, null, null, null);
 
     private final List<GatewayConfig> gatewayConfigs = List.of(gatewayConfig);
 

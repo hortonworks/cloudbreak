@@ -2,14 +2,18 @@ package com.sequenceiq.cloudbreak.certificate;
 
 import static com.sequenceiq.cloudbreak.certificate.PkiUtil.SALT_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -180,5 +184,41 @@ class PkiUtilTest {
                 new MGF1ParameterSpec("SHA-256"), SALT_LENGTH, PSSParameterSpec.DEFAULT.getTrailerField()));
         instance.update(data.getBytes());
         assertTrue(instance.verify(BaseEncoding.base64().decode(signedData)));
+    }
+
+    @Test
+    void testEcdsaGeneration() {
+        Security.addProvider(new BouncyCastleFipsProvider());
+        KeyPair keyPair = PkiUtil.generateEcdsaKeypair();
+        String privateKey = PkiUtil.convertEcPrivateKey(keyPair.getPrivate());
+
+        assertThat(privateKey.trim()).startsWith("-----BEGIN EC PRIVATE KEY-----");
+        assertThat(privateKey.trim()).hasSizeGreaterThan(200);
+        assertThat(privateKey.trim()).endsWith("-----END EC PRIVATE KEY-----");
+    }
+
+    @Test
+    void testNullEcPrivateKey() {
+        assertThrows(PkiException.class, () -> PkiUtil.convertEcPrivateKey(null));
+    }
+
+    @Test
+    void testEcPrivateKey222() {
+        PkiException ex = assertThrows(PkiException.class, PkiUtil::generateEcdsaKeypair);
+        assertEquals("Failed to generate ECDSA PK for the cluster!", ex.getMessage());
+    }
+
+    @Test
+    void testGetSignatureAlgorithmByPrivateKey() {
+        PrivateKey privateKey = mock(PrivateKey.class);
+
+        when(privateKey.getAlgorithm()).thenReturn("EC");
+        assertEquals("SHA384withECDSA", PkiUtil.getSignatureAlgorithmByPrivateKey(privateKey));
+
+        when(privateKey.getAlgorithm()).thenReturn("ECDSA");
+        assertEquals("SHA384withECDSA", PkiUtil.getSignatureAlgorithmByPrivateKey(privateKey));
+
+        when(privateKey.getAlgorithm()).thenReturn("RSA");
+        assertEquals("SHA256withRSA", PkiUtil.getSignatureAlgorithmByPrivateKey(privateKey));
     }
 }

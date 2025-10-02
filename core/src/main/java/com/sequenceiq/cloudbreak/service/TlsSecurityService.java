@@ -140,7 +140,8 @@ public class TlsSecurityService {
                 InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
                 saltMasterPrivateKey, saltMasterPublicKey,
                 new String(decodeBase64(saltSecurityConfig.getSaltSignPrivateKey())), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
+                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey(), securityConfig.getAlternativeUserFacingCert(),
+                securityConfig.getAlternativeUserFacingKey());
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn(), gatewayInstance.getInstanceId()))

@@ -72,7 +72,7 @@ public class NginxClusterSslCertPrivateKeyRotationContextProviderTest {
     void testSwitchCert() throws CloudbreakOrchestratorFailedException {
         when(stackDtoService.getByCrn(any())).thenReturn(mock(StackDto.class));
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(new GatewayConfig(null, null, null,
-                "host", null, "instanceId", null, null, null, null, null, null, null, true, null, null, null, null, null, null)));
+                "host", null, "instanceId", null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null)));
         when(secretRotationSaltService.executeCommand(any(), anySet(), any())).thenReturn(Map.of("host", "cert"));
         doNothing().when(periscopeClientService).updateServerCertificateInPeriscope(any(), any());
         ArgumentCaptor<String> newCertCaptor = ArgumentCaptor.forClass(String.class);

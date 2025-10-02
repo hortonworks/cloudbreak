@@ -380,6 +380,20 @@ public class EncryptionProfileServiceTest {
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
     }
 
+    @Test
+    void testCreateEncryptionProfileShouldHaveAtLeastOneRSACipher() {
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+        encryptionProfile.setCipherSuites(List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Encryption Profile must have at least one RSA cipher suite");
+
+        verify(repository, never()).save(any());
+    }
+
     private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {
         Map<String, EncryptionProfile> defaultEncryptionProfileMap = new HashMap<>();
         EncryptionProfile defaultEncryptionProfile = new EncryptionProfile();

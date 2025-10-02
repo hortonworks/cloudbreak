@@ -1147,6 +1147,34 @@ class ClusterHostServiceRunnerTest {
         verifyTlsAdvancedControl(saltConfig.getValue(), true);
     }
 
+    @Test
+    void testAlternativeUserfacingCert() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices("7.13.2.0");
+        GatewayView clusterGateway = mock(GatewayView.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
+        when(gatewayConfig.getHostname()).thenReturn("hostname");
+        when(gatewayConfig.getAlternativeUserFacingCert()).thenReturn("cert");
+        when(gatewayConfig.getAlternativeUserFacingKey()).thenReturn("key");
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
+        verifyEncryptionProfile(saltConfig.getValue());
+        verifyAlternativeUserfacingCertAndKey(saltConfig.getValue(), true, "cert", "key");
+    }
+
     private void setupMocksForRunClusterServices() {
         setupMocksForRunClusterServices("7.2.2");
     }
@@ -1163,8 +1191,8 @@ class ClusterHostServiceRunnerTest {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getVersion()).thenReturn(cmVersion);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
-        when(gatewayConfig.getHostname()).thenReturn("hostname");
+        lenient().when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
+        lenient().when(gatewayConfig.getHostname()).thenReturn("hostname");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         ExposedService rangerMock = mock(ExposedService.class);
@@ -1265,9 +1293,14 @@ class ClusterHostServiceRunnerTest {
         assertTrue(tlsChipherSuites.contains("TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
     }
 
-    private void verifyCmVersionSupportsTlsSetup(SaltConfig saltConfig, Boolean cmSupported) {
-        Boolean cmVersionSupportsTlsSetup = (Boolean) getClusterProperties(saltConfig).get("cmVersionSupportsTlsSetup");
-        assertEquals(cmSupported, cmVersionSupportsTlsSetup);
+    private void verifyAlternativeUserfacingCertAndKey(SaltConfig saltConfig, Boolean alternativeCertConfigured, String alternativeCert,
+            String alternativeKey) {
+        Boolean alternativeUserfacingCertConfigured = (Boolean) getGatewayProperties(saltConfig).get("alternativeuserfacingcert_configured");
+        String alternativeUserfacingCert = (String) getGatewayProperties(saltConfig).get("alternativeuserfacingcert");
+        String alternativeUserfacingKey = (String) getGatewayProperties(saltConfig).get("alternativeuserfacingkey");
+        assertEquals(alternativeCertConfigured, alternativeUserfacingCertConfigured);
+        assertEquals(alternativeCert, alternativeUserfacingCert);
+        assertEquals(alternativeKey, alternativeUserfacingKey);
     }
 
     private void verifyTlsAdvancedControl(SaltConfig saltConfig, Boolean tlsAdvancedControlEnabled) {
@@ -1283,5 +1316,10 @@ class ClusterHostServiceRunnerTest {
     private void verifyKerberosSecretLocation(String expectedValue, SaltConfig saltConfig) {
         String kerberosSecretLocation = (String) getKerberosProperties(saltConfig).get("kerberosSecretLocation");
         assertEquals(expectedValue, kerberosSecretLocation);
+    }
+
+    private void verifyCmVersionSupportsTlsSetup(SaltConfig saltConfig, Boolean cmSupported) {
+        Boolean cmVersionSupportsTlsSetup = (Boolean) getClusterProperties(saltConfig).get("cmVersionSupportsTlsSetup");
+        assertEquals(cmSupported, cmVersionSupportsTlsSetup);
     }
 }

@@ -118,6 +118,31 @@ generate_user_facing_cert:
 
 {% endif %}
 
+{% if gateway.alternativeuserfacingcert_configured is defined and gateway.alternativeuserfacingcert_configured == True %}
+
+/etc/certs-user-facing/alternative-server-key.pem:
+  file.managed:
+    - contents_pillar: gateway:alternativeuserfacingkey
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 600
+    - require_in:
+    - service: restart_nginx_after_ssl_reconfig_with_user_facing
+
+/etc/certs-user-facing/alternative-server.pem:
+  file.managed:
+    - contents_pillar: gateway:alternativeuserfacingcert
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 600
+    - require_in:
+    - service: restart_nginx_after_ssl_reconfig_with_user_facing
+
+{% endif %}
+
+
 /etc/nginx/sites-enabled/ssl-user-facing.conf:
   file.managed:
     - makedirs: True
@@ -137,4 +162,8 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
       {% if gateway.userfacingcert_configured is defined and gateway.userfacingcert_configured == True %}
       - file: /etc/certs-user-facing/server-key.pem
       - file: /etc/certs-user-facing/server.pem
+      {% endif %}
+      {% if gateway.alternativeuserfacingcert_configured is defined and gateway.alternativeuserfacingcert_configured == True %}
+      - file: /etc/certs-user-facing/alternative-server-key.pem
+      - file: /etc/certs-user-facing/alternative-server.pem
       {% endif %}

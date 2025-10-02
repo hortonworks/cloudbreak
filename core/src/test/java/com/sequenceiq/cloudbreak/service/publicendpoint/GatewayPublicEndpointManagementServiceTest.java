@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +47,11 @@ import org.testcontainers.shaded.org.bouncycastle.asn1.x509.GeneralNames;
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -125,6 +130,12 @@ class GatewayPublicEndpointManagementServiceTest {
 
     @Mock
     private FlowMessageService flowMessageService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @InjectMocks
     private GatewayPublicEndpointManagementService underTest;
@@ -308,6 +319,8 @@ class GatewayPublicEndpointManagementServiceTest {
 
         when(certificateCreationService.create(eq("123"), eq(primaryGatewayEndpointName), eq(envName), any(PKCS10CertificationRequest.class),
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -1023,5 +1036,45 @@ class GatewayPublicEndpointManagementServiceTest {
         });
 
         verifyNoInteractions(dnsManagementService);
+    }
+
+    @Test
+    void testGenerateCertAndSaveForStackAndUpdateDnsEntryWithAlternativeCertificate() throws IOException, PemDnsEntryCreateOrUpdateException {
+        Security.addProvider(new BouncyCastleFipsProvider());
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
+        String commonName = "hashofshorthostname." + environmentDomain;
+        String fqdn = endpointName + '.' + environmentDomain;
+        String envName = "anEnvName";
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withName(envName)
+                .withEnvironmentDomain(environmentDomain)
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
+        when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
+        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.13.2.0");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateAlternativeCertAndSaveForStack(stack));
+
+        verify(environmentClientService, times(1)).getByCrn(anyString());
+        verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
+        verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
+        verify(certificateCreationService, times(1))
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
     }
 }

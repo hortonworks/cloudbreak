@@ -56,6 +56,14 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret userFacingKey = Secret.EMPTY;
 
+    @SecretValue
+    @Convert(converter = SecretToString.class)
+    private Secret alternativeUserFacingCert = Secret.EMPTY;
+
+    @SecretValue
+    @Convert(converter = SecretToString.class)
+    private Secret alternativeUserFacingKey = Secret.EMPTY;
+
     @Convert(converter = SeLinuxConverter.class)
     @Column(name = "selinux")
     private SeLinux seLinux = SeLinux.PERMISSIVE;
@@ -149,6 +157,22 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setUserFacingKey(String userFacingKey) {
         this.userFacingKey = new Secret(userFacingKey);
+    }
+
+    public String getAlternativeUserFacingCert() {
+        return alternativeUserFacingCert.getRaw();
+    }
+
+    public void setAlternativeUserFacingCert(String alternativeUserFacingCert) {
+        this.alternativeUserFacingCert = new Secret(alternativeUserFacingCert);
+    }
+
+    public String getAlternativeUserFacingKey() {
+        return alternativeUserFacingKey.getRaw();
+    }
+
+    public void setAlternativeUserFacingKey(String alternativeUserFacingKey) {
+        this.alternativeUserFacingKey = new Secret(alternativeUserFacingKey);
     }
 
     public SeLinux getSeLinux() {

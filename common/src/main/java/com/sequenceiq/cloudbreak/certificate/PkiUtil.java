@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -21,6 +22,7 @@ import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.MGF1ParameterSpec;
@@ -38,6 +40,7 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
@@ -57,6 +60,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -77,6 +81,10 @@ public class PkiUtil {
     private static final Integer MAX_CACHE_SIZE = 200;
 
     private static final int CSR_PRINT_INDEX = 64;
+
+    private static final String EC_CURVE = "secp384r1";
+
+    private static final String SHA_384_WITH_ECDSA = "SHA384withECDSA";
 
     private static final Map<String, PrivateKey> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
@@ -148,6 +156,17 @@ public class PkiUtil {
         }
     }
 
+    public static KeyPair generateEcdsaKeypair() {
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BCFIPS");
+            ECGenParameterSpec ecSpec = new ECGenParameterSpec(EC_CURVE);
+            keyGen.initialize(ecSpec, SecureRandom.getInstanceStrong());
+            return keyGen.generateKeyPair();
+        } catch (Exception e) {
+            throw new PkiException("Failed to generate ECDSA PK for the cluster!", e);
+        }
+    }
+
     public static String generatePemPrivateKeyInBase64() {
         return BaseEncoding.base64().encode(convert(generateKeypair().getPrivate()).getBytes());
     }
@@ -189,6 +208,22 @@ public class PkiUtil {
     public static String convert(PrivateKey privateKey) {
         try {
             return convertToString(privateKey);
+        } catch (Exception e) {
+            throw new PkiException("Failed to convert Private Key for the cluster!", e);
+        }
+    }
+
+    public static String convertEcPrivateKey(PrivateKey privateKey) {
+        try {
+            PrivateKeyInfo privKeyInfo = PrivateKeyInfo.getInstance(privateKey.getEncoded());
+            byte[] privKeyEncoded = privKeyInfo.parsePrivateKey().toASN1Primitive().getEncoded();
+            StringWriter stringWriter = new StringWriter();
+            try (JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)) {
+                PemObject pemObject = new PemObject("EC PRIVATE KEY", privKeyEncoded);
+                pemWriter.writeObject(pemObject);
+            }
+            return stringWriter.toString();
+
         } catch (Exception e) {
             throw new PkiException("Failed to convert Private Key for the cluster!", e);
         }
@@ -299,10 +334,18 @@ public class PkiUtil {
             }
         }
 
-        ContentSigner sigGen = new JcaContentSignerBuilder(SHA_256_WITH_RSA).build(signKey.getPrivate());
+        ContentSigner sigGen = new JcaContentSignerBuilder(getSignatureAlgorithmByPrivateKey(signKey.getPrivate())).build(signKey.getPrivate());
         X509CertificateHolder holder = myCertificateGenerator.build(sigGen);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(holder.toASN1Structure().getEncoded()));
+    }
+
+    static String getSignatureAlgorithmByPrivateKey(PrivateKey privateKey) {
+        String algorithm = privateKey.getAlgorithm();
+        return switch (algorithm) {
+            case "EC", "ECDSA" -> SHA_384_WITH_ECDSA;
+            default -> SHA_256_WITH_RSA;
+        };
     }
 
     private static PKCS10CertificationRequest generateCsr(KeyPair identity, String publicAddress) throws Exception {
@@ -318,7 +361,7 @@ public class PkiUtil {
             p10Builder = addSubjectAlternativeNames(p10Builder, sanList);
         }
 
-        JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(SHA_256_WITH_RSA);
+        JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(getSignatureAlgorithmByPrivateKey(identity.getPrivate()));
         ContentSigner signer = csBuilder.build(identity.getPrivate());
         return p10Builder.build(signer);
     }

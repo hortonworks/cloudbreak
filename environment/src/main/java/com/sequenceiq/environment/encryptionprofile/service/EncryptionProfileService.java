@@ -43,6 +43,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private static final String DEFAULT_NAME = "cdp_default_fips_v1";
 
+    private static final String RSA = "RSA";
+
     private final EncryptionProfileRepository repository;
 
     private final RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -82,6 +84,10 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                     throw new BadRequestException("Encryption Profile already exists with name: " + name);
                 });
 
+        if (!containsRsaCipherSuite(encryptionProfile.getCipherSuites())) {
+            throw new BadRequestException("Encryption Profile must have at least one RSA cipher suite");
+        }
+
         encryptionProfile.setResourceCrn(createCRN(accountId));
         encryptionProfile.setAccountId(accountId);
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, encryptionProfile.getResourceCrn());
@@ -92,6 +98,19 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             LOGGER.error("Error happened during encryption profile creation: ", e);
             throw new InternalServerErrorException(e);
         }
+    }
+
+    private boolean containsRsaCipherSuite(List<String> cipherSuites) {
+        return cipherSuites
+                .stream()
+                .anyMatch(EncryptionProfileService::isRsa);
+    }
+
+    public static boolean isRsa(String cipherSuite) {
+        if (cipherSuite == null) {
+            return false;
+        }
+        return cipherSuite.contains(RSA);
     }
 
     public EncryptionProfile getByNameAndAccountId(String encryptionProfileName, String accountId) {

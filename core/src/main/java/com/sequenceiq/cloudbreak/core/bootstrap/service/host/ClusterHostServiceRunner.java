@@ -921,6 +921,8 @@ public class ClusterHostServiceRunner {
                 MINIMAL, ":", false));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
+        gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig));
+
         gateway.put("kerberos", kerberosConfig != null);
 
         addRangerServiceIfAvailable(gatewayConfig, stackDto, serviceLocations);
@@ -1074,6 +1076,18 @@ public class ClusterHostServiceRunner {
                     gateway.put("userfacingdomain", Pattern.quote(fqdnParts[1]));
                 }
             }
+        }
+        return gateway;
+    }
+
+    private Map<String, Object> createGatewayAlternativeUserFacingCert(GatewayConfig gatewayConfig) {
+        boolean alternativeUserFacingCertHasBeenGenerated = isNotEmpty(gatewayConfig.getAlternativeUserFacingCert())
+                && isNotEmpty(gatewayConfig.getAlternativeUserFacingKey());
+        Map<String, Object> gateway = new HashMap<>();
+        if (alternativeUserFacingCertHasBeenGenerated) {
+            gateway.put("alternativeuserfacingcert_configured", Boolean.TRUE);
+            gateway.put("alternativeuserfacingkey", gatewayConfig.getAlternativeUserFacingKey());
+            gateway.put("alternativeuserfacingcert", gatewayConfig.getAlternativeUserFacingCert());
         }
         return gateway;
     }
