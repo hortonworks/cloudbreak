@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
-import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
@@ -72,7 +71,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -314,9 +312,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ApiException e) {
             String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);
-        } catch (CloudStorageConfigurationFailedException e) {
-            LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(mapStorageError(e, stack.getResourceCrn(), stack.getCloudPlatform(), cluster), e);
         } catch (Exception e) {
             throw mapException(e);
         }
@@ -372,17 +367,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.error("Policy configuration error occurred.", e);
             throw mapException(e);
         }
-    }
-
-    private String mapStorageError(CloudStorageConfigurationFailedException exception, String stackCrn, String cloudPlatform, ClusterView cluster) {
-        String accountId = Crn.safeFromString(stackCrn).getAccountId();
-        String result = exception.getMessage();
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform) && !entitlementService.awsCloudStorageValidationEnabled(accountId) ||
-                CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform) && !entitlementService.azureCloudStorageValidationEnabled(accountId) ||
-                CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpCloudStorageValidationEnabled(accountId)) {
-            result = clouderaManagerStorageErrorMapper.map(exception, cloudPlatform, cluster);
-        }
-        return result;
     }
 
     @Override

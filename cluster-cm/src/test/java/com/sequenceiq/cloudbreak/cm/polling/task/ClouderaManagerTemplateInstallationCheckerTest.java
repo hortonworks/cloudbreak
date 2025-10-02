@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -30,7 +31,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
+import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerErrorMapperService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -74,6 +75,9 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     @Mock
     private CloudbreakEventService cloudbreakEventService;
 
+    @Mock
+    private ClouderaManagerErrorMapperService clouderaManagerErrorMapperService;
+
     @InjectMocks
     private ClouderaManagerTemplateInstallationChecker underTest;
 
@@ -88,6 +92,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         stack = new Stack();
         stack.setType(StackType.DATALAKE);
         pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, TEMPLATE_INSTALL_ID);
+        lenient().when(clouderaManagerErrorMapperService.map(eq(stack), any(), any())).thenAnswer(i -> i.getArgument(2));
     }
 
     @Test
@@ -179,7 +184,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     }
 
     @Test
-    void testCloudStorageFailure() throws ApiException {
+    void testErrorMessageMapping() throws ApiException {
         ApiCommand auditDirCmd = auditDirCmd().success(Boolean.FALSE)
                 .resultMessage("Aborted");
         ApiCommand deployParcelsCmd = deployParcelsCmd().success(Boolean.FALSE)
@@ -189,9 +194,10 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         ApiCommand templateInstallCmd = templateInstallCmd(auditDirCmd, deployParcelsCmd, firstRunCmd)
                 .resultMessage("Failed to import cluster template");
         expectReadCommandForFailedCommands(templateInstallCmd);
+        String expected = "Mapped error message";
+        when(clouderaManagerErrorMapperService.map(eq(stack), any(), any())).thenReturn(expected);
 
-        CloudStorageConfigurationFailedException ex = assertThrows(CloudStorageConfigurationFailedException.class, () -> underTest.checkStatus(pollerObject));
-        String expected = expectMessageForCommands(auditDirCmd, deployParcelsCmd, firstRunCmd);
+        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
         assertEquals(expected, ex.getMessage());
     }
 

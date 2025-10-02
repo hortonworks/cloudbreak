@@ -54,4 +54,9 @@ public class DocumentationLinkProvider {
     public static String azureFlexibleServerTroubleShootingLink() {
         return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-troubleshooting_flexible_server.html#pnavId2";
     }
+
+    public static String hybridSetupTrustedRealmsLink(String runtimeVersion) {
+        return String.format("https://docs.cloudera.com/cdp-private-cloud-base/" +
+                "%s/security-kerberos-authentication/topics/cm-security-kerberos-authentication-add-trusted-realms.html", runtimeVersion);
+    }
 }

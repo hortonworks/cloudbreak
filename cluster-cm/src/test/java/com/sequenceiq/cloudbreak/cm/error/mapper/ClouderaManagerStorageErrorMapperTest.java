@@ -11,12 +11,16 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -24,9 +28,11 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 
+@ExtendWith(MockitoExtension.class)
 class ClouderaManagerStorageErrorMapperTest {
 
     private static final String EXCEPTION_MESSAGE = "Serious problem.";
@@ -34,6 +40,8 @@ class ClouderaManagerStorageErrorMapperTest {
     private ClouderaManagerStorageErrorMapper underTest;
 
     private CloudStorageConfigurationFailedException exception;
+
+    private StackDtoDelegate stack;
 
     private Cluster cluster;
 
@@ -45,12 +53,17 @@ class ClouderaManagerStorageErrorMapperTest {
 
     private AccountMapping accountMapping;
 
+    @Mock
+    private CommandDetails commandDetails;
+
     @BeforeEach
     void setUp() {
         underTest = new ClouderaManagerStorageErrorMapper();
         exception = new CloudStorageConfigurationFailedException(EXCEPTION_MESSAGE);
 
+        stack = mock();
         cluster = new Cluster();
+        when(stack.getCluster()).thenReturn(cluster);
         fileSystem = new FileSystem();
         cloudStorage = new CloudStorage();
         cloudIdentity = new CloudIdentity();
@@ -83,8 +96,9 @@ class ClouderaManagerStorageErrorMapperTest {
     void mapTestWhenRaz(String testCaseName, String message, String expectedResult) {
         exception = new CloudStorageConfigurationFailedException(message);
         cluster.setRangerRazEnabled(true);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), message);
 
         assertThat(result).isEqualTo(expectedResult);
     }
@@ -92,8 +106,9 @@ class ClouderaManagerStorageErrorMapperTest {
     @Test
     void mapTestWhenNoFileSystem() {
         cluster.setFileSystem(null);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }
@@ -101,8 +116,9 @@ class ClouderaManagerStorageErrorMapperTest {
     @Test
     void mapTestWhenNoCloudStorage() {
         cluster.setFileSystem(new FileSystem());
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }
@@ -113,8 +129,9 @@ class ClouderaManagerStorageErrorMapperTest {
         fileSystem = mock(FileSystem.class);
         when(fileSystem.getCloudStorage()).thenReturn(cloudStorage);
         cluster.setFileSystem(fileSystem);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }
@@ -123,8 +140,9 @@ class ClouderaManagerStorageErrorMapperTest {
     void mapTestWhenNoAccountMapping() {
         cloudStorage.setAccountMapping(null);
         fileSystem.setCloudStorage(cloudStorage);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }
@@ -139,15 +157,18 @@ class ClouderaManagerStorageErrorMapperTest {
         fileSystem = mock(FileSystem.class);
         when(fileSystem.getCloudStorage()).thenReturn(cloudStorage);
         cluster.setFileSystem(fileSystem);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
 
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }
 
     @Test
     void mapTestWhenAwsAndNoIdentity() {
-        String result = underTest.map(exception, CloudPlatform.AWS.name(), cluster);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. " +
                 "Please refer to Cloudera documentation at " +
@@ -157,7 +178,9 @@ class ClouderaManagerStorageErrorMapperTest {
 
     @Test
     void mapTestWhenAzureAndNoIdentity() {
-        String result = underTest.map(exception, CloudPlatform.AZURE.name(), cluster);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.name());
+
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. " +
                 "Please refer to Cloudera documentation at " +
@@ -167,7 +190,9 @@ class ClouderaManagerStorageErrorMapperTest {
 
     @Test
     void mapTestWhenGcpAndNoIdentity() {
-        String result = underTest.map(exception, CloudPlatform.GCP.name(), cluster);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.GCP.name());
+
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. Please refer to Cloudera " +
                 "documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-gcp/topics/" +
@@ -177,7 +202,9 @@ class ClouderaManagerStorageErrorMapperTest {
 
     @Test
     void mapTestWhenNotSupportedCloudPlatform() {
-        String result = underTest.map(exception, CloudPlatform.YARN.name(), cluster);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.YARN.name());
+
+        String result = underTest.map(stack, List.of(commandDetails), EXCEPTION_MESSAGE);
 
         assertThat(result).isEqualTo(EXCEPTION_MESSAGE);
     }

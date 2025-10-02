@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
+import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerErrorMapperService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetailsFormatter;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandUtil;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -31,9 +31,13 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
+    private ClouderaManagerErrorMapperService clouderaManagerErrorMapperService;
+
     public ClouderaManagerTemplateInstallationChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService) {
+            ClusterEventService clusterEventService,
+            ClouderaManagerErrorMapperService clouderaManagerErrorMapperService) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
+        this.clouderaManagerErrorMapperService = clouderaManagerErrorMapperService;
     }
 
     @Override
@@ -46,7 +50,7 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         } else if (apiCommand.isSuccess()) {
             return true;
         } else {
-            fail("", apiCommand, commandsResourceApi, pollerObject.getStack().getType());
+            fail("", apiCommand, commandsResourceApi, pollerObject.getStack());
         }
         return false;
     }
@@ -57,7 +61,7 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         try {
             CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
             ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-            fail(msg, apiCommand, commandsResourceApi, pollerObject.getStack().getType());
+            fail(msg, apiCommand, commandsResourceApi, pollerObject.getStack());
         } catch (ApiException e) {
             LOGGER.info("Cloudera Manager had run into a timeout, and we were unable to determine the failure reason", e);
         }
@@ -69,23 +73,11 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         return "Template install";
     }
 
-    private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi, StackType stackType) {
+    private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi, StackDtoDelegate stack) {
         List<CommandDetails> failedCommands = ClouderaManagerCommandUtil.getFailedOrActiveCommands(apiCommand, commandsResourceApi);
         String msg = messagePrefix + "Installation of CDP with Cloudera Manager has failed. " + CommandDetailsFormatter.formatFailedCommands(failedCommands);
         LOGGER.debug("Top level command {}. Failed or active commands: {}", CommandDetails.fromApiCommand(apiCommand), failedCommands);
-        if (stackType == StackType.DATALAKE) {
-            for (CommandDetails failedCommand : failedCommands) {
-                // Unfortunately CM is not giving back too many details about the errors, and what is returned usually nondeterministic:
-                // In a good case it returns "Failed to create HDFS directory",
-                // but sometimes it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error messages
-                // has no added value, therefore we are just checking whether AuditDir related commands are failing or not.
-                if (CLOUD_STORAGE_RELATED_COMMANDS.contains(failedCommand.getName())
-                        && CommandDetails.CommandStatus.FAILED == failedCommand.getCommandStatus()) {
-                    throw new CloudStorageConfigurationFailedException(msg);
-                }
-            }
-        }
-        throw new ClouderaManagerOperationFailedException(msg);
+        throw new ClouderaManagerOperationFailedException(clouderaManagerErrorMapperService.map(stack, failedCommands, msg));
     }
 
 }

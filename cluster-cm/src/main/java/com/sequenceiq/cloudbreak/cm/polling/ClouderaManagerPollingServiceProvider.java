@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
+import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerErrorMapperService;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerApiCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
@@ -101,6 +102,9 @@ public class ClouderaManagerPollingServiceProvider {
     @Inject
     private ClouderaManagerUpgradePollingTimeoutProvider clouderaManagerUpgradePollingTimeoutProvider;
 
+    @Inject
+    private ClouderaManagerErrorMapperService clouderaManagerErrorMapperService;
+
     public ExtendedPollingResult startPollingCmStartup(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
         return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
@@ -149,7 +153,7 @@ public class ClouderaManagerPollingServiceProvider {
     public ExtendedPollingResult startPollingCmTemplateInstallation(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
-                new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, clusterEventService));
+                new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, clusterEventService, clouderaManagerErrorMapperService));
     }
 
     public ExtendedPollingResult startDefaultPolling(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId, String commandName) {
