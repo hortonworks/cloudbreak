@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIPAEndpointManagementServiceTest {
@@ -155,11 +157,14 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setType(LoadBalancerType.PUBLIC);
         loadBalancer.setDns(LB_DNS);
         loadBalancer.setEndpoint(LB_ENDPOINT);
+
+        DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
 
@@ -172,11 +177,14 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setType(LoadBalancerType.PUBLIC);
         loadBalancer.setIp(LB_IP);
         loadBalancer.setEndpoint(LB_ENDPOINT);
+
+        DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
 
@@ -210,16 +218,40 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setDns("dns.aws.com");
         loadBalancer.setEndpoint("cname");
 
+        DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(new DescribeFreeIpaResponse()));
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
         doThrow(new RuntimeException("DNS deletion error")).when(dnsV1Endpoint).deleteDnsCnameRecord(any(), any(), any());
 
         FreeIpaOperationFailedException ex = assertThrows(FreeIpaOperationFailedException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.deleteLoadBalancerDomainFromFreeIPA(stack)));
 
         assertEquals("Unable to delete load balancer domain from FreeIPA", ex.getMessage());
+    }
+
+    @Test
+    public void testDeleteLoadBalancerWhenFreeIPAIsUnavailable() {
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+        loadBalancer.setDns("dns.aws.com");
+        loadBalancer.setEndpoint("cname");
+
+        DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.UNAVAILABLE);
+        when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
+
+        verify(dnsV1Endpoint, never()).deleteDnsARecord(any(), any(), any());
+        verify(dnsV1Endpoint, never()).deleteDnsCnameRecord(any(), any(), any());
+
     }
 }
