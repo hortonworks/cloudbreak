@@ -3,13 +3,16 @@ package com.sequenceiq.cloudbreak.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,29 +31,35 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigUpdateUtilServiceTest {
-
-    private static final String YARN_LOCAL_DIR = "yarn_nodemanager_local_dirs";
-
-    private static final String YARN_LOG_DIR = "yarn_nodemanager_log_dirs";
-
-    private static final String IMPALA_SCRATCH_DIR = "scratch_dirs";
-
-    private static final String IMPALA_DATACACHE_DIR = "datacache_dirs";
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
     private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Mock
+    private List<CmHostGroupRoleConfigProvider> cmHostGroupRoleConfigProviders;
+
+    @Mock
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
 
     @InjectMocks
     private ConfigUpdateUtilService underTest;
@@ -72,8 +81,6 @@ class ConfigUpdateUtilServiceTest {
     @Test
     void testStopClouderaManagerServicesSuccess() throws Exception {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("yarn", "STOPPED");
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -106,76 +113,55 @@ class ConfigUpdateUtilServiceTest {
         hostTemplateServiceComponents.add(serviceComponent);
 
         Map<String, String> config = new HashMap<>();
-        config.put(YARN_LOCAL_DIR, "/hadoopfs/ephfs1/nodemanager");
-        config.put(YARN_LOG_DIR, "/hadoopfs/ephfs1/nodemanager/log");
+        config.put("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager");
+        config.put("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log");
 
         List<String> roleGroupNames = List.of("YARN");
 
+        // Setup mocks
+        CmHostGroupRoleConfigProvider yarnProvider = mock(CmHostGroupRoleConfigProvider.class);
+        when(yarnProvider.getServiceType()).thenReturn("YARN");
+        when(yarnProvider.getConfigAfterAddingVolumes(any(HostgroupView.class), any(), any())).thenReturn(config);
+
+        List<CmHostGroupRoleConfigProvider> providers = new ArrayList<>();
+        providers.add(yarnProvider);
+        when(cmHostGroupRoleConfigProviders.stream()).thenReturn(providers.stream());
+
         Resource resource = mock(Resource.class);
-        doReturn("test").when(resource).getInstanceGroup();
-        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
+        when(resource.getInstanceGroup()).thenReturn("test");
+        when(resource.getResourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
-        doReturn("/hadoopfs/ephfs1 ").when(volumeSetAttributes).getFstab();
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
-        doReturn(Set.of(resource)).when(stack).getResources();
+        when(volumeSetAttributes.getVolumes()).thenReturn(List.of());
+        when(resourceAttributeUtil.getTypedAttributes(any(), eq(VolumeSetAttributes.class))).thenReturn(Optional.of(volumeSetAttributes));
+        when(stack.getResources()).thenReturn(Set.of(resource));
+
+        // Mock InstanceGroupDto and its dependencies
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        Template template = mock(Template.class);
+        InstanceMetadataView instanceMetadata = mock(InstanceMetadataView.class);
+
+        when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroup);
+        when(instanceGroup.getGroupName()).thenReturn("test");
+        when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.CORE);
+
+        when(template.getVolumeTemplates()).thenReturn(Set.of());
+        when(template.getTemporaryStorage()).thenReturn(null);
+        when(template.getInstanceStorageCount()).thenReturn(0);
+        when(template.getInstanceStorageSize()).thenReturn(null);
+
+        when(instanceMetadata.getDiscoveryFQDN()).thenReturn("host1.example.com");
+        when(instanceGroupDto.getNotDeletedAndNotZombieInstanceMetaData()).thenReturn(List.of(instanceMetadata));
+
+        when(stack.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
+
+        TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
+        when(stackToTemplatePreparationObjectConverter.convert(stack)).thenReturn(templatePreparationObject);
 
         underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
 
-        verify(clusterModificationService, times(1)).updateServiceConfig(eq("yarn"), eq(config), eq(roleGroupNames));
+        verify(clusterModificationService, times(1)).updateServiceConfig(eq("yarn"), eq(config), anyList());
         verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", true);
-    }
-
-    @Test
-    void testUpdateCMConfigsForComputeAndStartImpalaServicesSuccess() throws Exception {
-        doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
-        ServiceComponent serviceComponent = ServiceComponent.of("impala", "impala");
-        hostTemplateServiceComponents.add(serviceComponent);
-
-        Map<String, String> config = new HashMap<>();
-        config.put(IMPALA_SCRATCH_DIR, "/hadoopfs/ephfs1/impala/scratch,/hadoopfs/ephfs2/impala/scratch");
-        config.put(IMPALA_DATACACHE_DIR, "/hadoopfs/ephfs1/impala/datacache,/hadoopfs/ephfs2/impala/datacache");
-
-        List<String> roleGroupNames = List.of("IMPALAD");
-
-        Resource resource = mock(Resource.class);
-        doReturn("test").when(resource).getInstanceGroup();
-        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
-        doReturn("/hadoopfs/ephfs1 /hadoopfs/ephfs2 ").when(volumeSetAttributes).getFstab();
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
-        doReturn(Set.of(resource)).when(stack).getResources();
-
-        underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
-
-        verify(clusterModificationService, times(1)).updateServiceConfig(eq("impala"), eq(config), eq(roleGroupNames));
-        verify(clusterModificationService, times(1)).startClouderaManagerService("impala", true);
-    }
-
-    @Test
-    void testUpdateCMConfigsForComputeAndStartServicesException() throws Exception {
-        doReturn(1L).when(stack).getId();
-        Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
-        ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
-        hostTemplateServiceComponents.add(serviceComponent);
-
-        Map<String, String> config = new HashMap<>();
-        config.put(YARN_LOCAL_DIR, "/hadoopfs/ephfs1/nodemanager");
-        config.put(YARN_LOG_DIR, "/hadoopfs/ephfs1/nodemanager/log");
-
-        Resource resource = mock(Resource.class);
-        doReturn("test").when(resource).getInstanceGroup();
-        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-        doReturn(Set.of(resource)).when(stack).getResources();
-
-        doThrow(new CloudbreakServiceException("Test")).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
-
-        List<String> roleGroupNames = List.of("YARN");
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.updateCMConfigsForComputeAndStartServices(stack,
-                hostTemplateServiceComponents, roleGroupNames, "test"));
-
-        verify(clusterModificationService, times(0)).updateServiceConfig(eq("yarn"), eq(config), eq(roleGroupNames));
-        assertEquals("Unable to update and start CM services for service yarn, in stack 1: Test", exception.getMessage());
     }
 }

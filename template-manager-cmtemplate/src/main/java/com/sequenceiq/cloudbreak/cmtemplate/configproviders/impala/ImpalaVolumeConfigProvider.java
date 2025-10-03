@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildEphemeralVolum
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -105,6 +108,18 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
     @Override
     public boolean sharedRoleType(String roleType) {
         return false;
+    }
+
+    @Override
+    public Map<String, String> getConfigAfterAddingVolumes(HostgroupView hostgroupView, TemplatePreparationObject source, ServiceComponent serviceComponent) {
+        Map<String, String> config = new HashMap<>();
+
+        List<ApiClusterTemplateConfig> roleConfigs = getRoleConfigs(serviceComponent.getComponent(), hostgroupView, source);
+        for (ApiClusterTemplateConfig roleConfig : roleConfigs) {
+            config.put(roleConfig.getName(), roleConfig.getValue());
+        }
+
+        return config;
     }
 
     private boolean checkTemporaryStorage(HostgroupView hostGroupView, Integer temporaryStorageVolumeCount) {

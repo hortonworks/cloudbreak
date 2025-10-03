@@ -1649,4 +1649,64 @@ class ClouderaManagerModificationServiceTest {
                 "Timeout while stopping Cloudera Manager services.");
         verify(clusterCommandService, times(2)).delete(any(ClusterCommand.class));
     }
+
+    @Test
+    public void testStopClouderaManagerServiceWhenServiceIsStarted() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.STARTED));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.stopClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(1)).stopClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    public void testStopClouderaManagerServiceWhenServiceIsAlreadyStopped() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.STOPPED));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.stopClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(0)).stopClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    public void testStopClouderaManagerServiceWhenServiceStatusIsNA() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.NA));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.stopClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(0)).stopClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    public void testStartClouderaManagerServiceWhenServiceIsStopped() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.STOPPED));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.startClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(1)).startClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    public void testStartClouderaManagerServiceWhenServiceIsAlreadyStarted() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.STARTED));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.startClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(0)).startClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    public void testStartClouderaManagerServiceWhenServiceStatusIsNA() {
+        List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.NA));
+        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.startClouderaManagerService("YARN", true);
+
+        verify(clouderaManagerServiceManagementService, times(0)).startClouderaManagerService(v31Client, stack, "YARN", true);
+    }
 }

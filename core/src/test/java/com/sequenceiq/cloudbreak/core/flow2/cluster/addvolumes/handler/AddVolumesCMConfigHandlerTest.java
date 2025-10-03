@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
@@ -76,23 +75,13 @@ class AddVolumesCMConfigHandlerTest {
 
     @Test
     void testAddVolumesCMConfigTest() throws Exception {
-        doReturn(Set.of("IMPALAD")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
         assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), response.getSelector());
         verify(configUpdateUtilService).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(), any(), eq("test"));
     }
 
     @Test
-    void testAddVolumesCMConfigBlacklistedServiceTest() throws Exception {
-        doReturn(Set.of("KUDU_MASTER")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
-        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
-        assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), response.getSelector());
-        verify(configUpdateUtilService, times(0)).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(), any(), eq("test"));
-    }
-
-    @Test
     void testAddVolumesCMConfigException() throws Exception {
-        doReturn(Set.of("IMPALAD")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
         doThrow(new CloudbreakServiceException("TEST")).when(configUpdateUtilService).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(),
                 any(), eq("test"));
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
