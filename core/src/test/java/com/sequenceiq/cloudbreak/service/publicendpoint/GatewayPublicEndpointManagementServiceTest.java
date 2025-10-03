@@ -20,21 +20,27 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testcontainers.shaded.org.bouncycastle.asn1.x509.GeneralNames;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -46,6 +52,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -275,34 +282,55 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setSecurityConfig(securityConfig);
         stack.setCluster(cluster);
 
-        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
-        String endpointName = primaryGatewayInstance.getShortHostname();
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
-        String commonName = "hashofshorthostname." + environmentDomain;
-        String fqdn = endpointName + "." + environmentDomain;
         String envName = "anEnvName";
-
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .withEnvironmentDomain(environmentDomain)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
-        when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
-        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String primaryGatewayEndpointName = primaryGatewayInstance.getShortHostname();
+        String commonName = "hashofshorthostname." + environmentDomain;
+        when(domainNameProvider.getCommonName(primaryGatewayEndpointName, environment)).thenReturn(commonName);
+        String primaryGatewayFQDNEndpointName = primaryGatewayEndpointName + "." + environmentDomain;
+        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), primaryGatewayEndpointName, environment)).thenReturn(primaryGatewayFQDNEndpointName);
+        stack.getGatewayHostGroup().ifPresent(group -> {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceGroup(group);
+            instanceMetaData.setInstanceGroupId(group.getId());
+            instanceMetaData.setDiscoveryFQDN("nonprimarygateway.cldr.work");
+            group.getInstanceMetaData().add(instanceMetaData);
+        });
+        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), "nonprimarygateway", environment))
+                .thenReturn("nonprimarygateway." + environmentDomain);
+
+        when(certificateCreationService.create(eq("123"), eq(primaryGatewayEndpointName), eq(envName), any(PKCS10CertificationRequest.class),
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
+        ArgumentCaptor<PKCS10CertificationRequest> csrCaptor = ArgumentCaptor.forClass(PKCS10CertificationRequest.class);
         verify(environmentClientService, times(2)).getByCrn(anyString());
-        verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
-        verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
+        verify(domainNameProvider, times(1)).getCommonName(primaryGatewayEndpointName, environment);
+        verify(domainNameProvider, times(3)).getFullyQualifiedEndpointName(eq(Set.of()), anyString(), eq(environment));
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
+                .create(eq("123"), eq(primaryGatewayEndpointName), eq(envName), csrCaptor.capture(), eq(stack.getResourceCrn()));
         verify(dnsManagementService, times(1))
-                .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                .createOrUpdateDnsEntryWithIp(eq("123"), eq(primaryGatewayEndpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
         verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
+        Set<String> expectedSANs = Set.of("hashofshorthostname.anenvname.xcu2-8y8x.dev.cldr.work", primaryGatewayFQDNEndpointName,
+                "nonprimarygateway.anenvname.xcu2-8y8x.dev.cldr.work");
+        csrCaptor.getAllValues().forEach(csr -> {
+            ASN1OctetString asn1OctetString = csr.getRequestedExtensions()
+                    .getExtension(Extension.subjectAlternativeName).getExtnValue();
+            Set<String> actualSANs = Arrays.stream(GeneralNames.getInstance(asn1OctetString.getOctets()).getNames())
+                    .map(generalName -> generalName.getName().toString())
+                    .collect(Collectors.toSet());
+            Assertions.assertTrue(actualSANs.containsAll(expectedSANs));
+        });
     }
 
     @Test
