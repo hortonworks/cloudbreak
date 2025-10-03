@@ -35754,6 +35754,46 @@ public final class OnPremisesApiProto {
      */
     com.google.protobuf.ByteString
         getCmClusterUuidBytes();
+
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 32;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 32;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * CRN of the Private Cloud Control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 33;</code>
+     * @return The pvcCrn.
+     */
+    java.lang.String getPvcCrn();
+    /**
+     * <pre>
+     * CRN of the Private Cloud Control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 33;</code>
+     * @return The bytes for pvcCrn.
+     */
+    com.google.protobuf.ByteString
+        getPvcCrnBytes();
   }
   /**
    * <pre>
@@ -35789,6 +35829,8 @@ public final class OnPremisesApiProto {
       newKeyId_ = "";
       properties_ = "";
       cmClusterUuid_ = "";
+      environmentCrn_ = "";
+      pvcCrn_ = "";
     }
 
     @java.lang.Override
@@ -36759,6 +36801,100 @@ public final class OnPremisesApiProto {
       }
     }
 
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 32;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentCrn_ = "";
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 32;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the Private Cloud environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 32;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PVCCRN_FIELD_NUMBER = 33;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pvcCrn_ = "";
+    /**
+     * <pre>
+     * CRN of the Private Cloud Control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 33;</code>
+     * @return The pvcCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getPvcCrn() {
+      java.lang.Object ref = pvcCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvcCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the Private Cloud Control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 33;</code>
+     * @return The bytes for pvcCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvcCrnBytes() {
+      java.lang.Object ref = pvcCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvcCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -36856,6 +36992,12 @@ public final class OnPremisesApiProto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmClusterUuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 31, cmClusterUuid_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 32, environmentCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 33, pvcCrn_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -36964,6 +37106,12 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmClusterUuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(31, cmClusterUuid_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, environmentCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(33, pvcCrn_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -37038,6 +37186,10 @@ public final class OnPremisesApiProto {
           .equals(other.getProperties())) return false;
       if (!getCmClusterUuid()
           .equals(other.getCmClusterUuid())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getPvcCrn()
+          .equals(other.getPvcCrn())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -37118,6 +37270,10 @@ public final class OnPremisesApiProto {
       hash = (53 * hash) + getProperties().hashCode();
       hash = (37 * hash) + CMCLUSTERUUID_FIELD_NUMBER;
       hash = (53 * hash) + getCmClusterUuid().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (37 * hash) + PVCCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getPvcCrn().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37296,6 +37452,8 @@ public final class OnPremisesApiProto {
         }
         properties_ = "";
         cmClusterUuid_ = "";
+        environmentCrn_ = "";
+        pvcCrn_ = "";
         return this;
       }
 
@@ -37419,6 +37577,12 @@ public final class OnPremisesApiProto {
         }
         if (((from_bitField0_ & 0x08000000) != 0)) {
           result.cmClusterUuid_ = cmClusterUuid_;
+        }
+        if (((from_bitField0_ & 0x10000000) != 0)) {
+          result.environmentCrn_ = environmentCrn_;
+        }
+        if (((from_bitField0_ & 0x20000000) != 0)) {
+          result.pvcCrn_ = pvcCrn_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -37577,6 +37741,16 @@ public final class OnPremisesApiProto {
         if (!other.getCmClusterUuid().isEmpty()) {
           cmClusterUuid_ = other.cmClusterUuid_;
           bitField0_ |= 0x08000000;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          bitField0_ |= 0x10000000;
+          onChanged();
+        }
+        if (!other.getPvcCrn().isEmpty()) {
+          pvcCrn_ = other.pvcCrn_;
+          bitField0_ |= 0x20000000;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -37749,6 +37923,16 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x08000000;
                 break;
               } // case 250
+              case 258: {
+                environmentCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x10000000;
+                break;
+              } // case 258
+              case 266: {
+                pvcCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x20000000;
+                break;
+              } // case 266
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -39979,6 +40163,190 @@ public final class OnPremisesApiProto {
         checkByteStringIsUtf8(value);
         cmClusterUuid_ = value;
         bitField0_ |= 0x08000000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 32;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 32;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 32;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentCrn_ = value;
+        bitField0_ |= 0x10000000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 32;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        bitField0_ = (bitField0_ & ~0x10000000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 32;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentCrn_ = value;
+        bitField0_ |= 0x10000000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object pvcCrn_ = "";
+      /**
+       * <pre>
+       * CRN of the Private Cloud Control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 33;</code>
+       * @return The pvcCrn.
+       */
+      public java.lang.String getPvcCrn() {
+        java.lang.Object ref = pvcCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvcCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Private Cloud Control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 33;</code>
+       * @return The bytes for pvcCrn.
+       */
+      public com.google.protobuf.ByteString
+          getPvcCrnBytes() {
+        java.lang.Object ref = pvcCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvcCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Private Cloud Control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 33;</code>
+       * @param value The pvcCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pvcCrn_ = value;
+        bitField0_ |= 0x20000000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Private Cloud Control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 33;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvcCrn() {
+        pvcCrn_ = getDefaultInstance().getPvcCrn();
+        bitField0_ = (bitField0_ & ~0x20000000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Private Cloud Control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 33;</code>
+       * @param value The bytes for pvcCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pvcCrn_ = value;
+        bitField0_ |= 0x20000000;
         onChanged();
         return this;
       }
@@ -47783,7 +48151,7 @@ public final class OnPremisesApiProto {
       "Crn\030\001 \001(\t\022\023\n\013certificate\030\002 \001(\t\022\022\n\ncluste" +
       "rCrn\030\003 \001(\t\022\023\n\013accessKeyId\030\004 \001(\t\022\033\n\023encip" +
       "heredAccessKey\030\005 \001(\t\022\034\n\024encipheredPrivat" +
-      "eKey\030\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\204\006\n\007C" +
+      "eKey\030\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\254\006\n\007C" +
       "luster\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t" +
       "\022\026\n\016datacenterName\030\003 \001(\t\022\n\n\002id\030\004 \001(\003\022\021\n\t" +
       "ipAddress\030\006 \001(\t\0222\n\013clusterType\030\007 \001(\0162\035.o" +
@@ -47802,7 +48170,8 @@ public final class OnPremisesApiProto {
       "tyVersion\030\032 \001(\t\022\033\n\023isUpgradeInProgress\030\033" +
       " \001(\010\022\020\n\010newKeyId\030\034 \001(\t\022&\n\010location\030\035 \001(\013" +
       "2\024.onpremises.Location\022\022\n\nproperties\030\036 \001" +
-      "(\t\022\025\n\rcmClusterUuid\030\037 \001(\t:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "(\t\022\025\n\rcmClusterUuid\030\037 \001(\t\022\026\n\016environment" +
+      "Crn\030  \001(\t\022\016\n\006pvcCrn\030! \001(\t:\026\200\227\"\001\212\227\"\016IN_DE" +
       "VELOPMENT\"V\n\016ClusterService\022\014\n\004name\030\001 \001(" +
       "\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state\030\003 \001(\t:\026\200\227\"\001\212" +
       "\227\"\016IN_DEVELOPMENT\"\320\001\n\013ClusterData\022\014\n\004nam" +
@@ -48118,7 +48487,7 @@ public final class OnPremisesApiProto {
     internal_static_onpremises_Cluster_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Cluster_descriptor,
-        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", });
+        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", "EnvironmentCrn", "PvcCrn", });
     internal_static_onpremises_ClusterService_descriptor =
       getDescriptor().getMessageTypes().get(37);
     internal_static_onpremises_ClusterService_fieldAccessorTable = new

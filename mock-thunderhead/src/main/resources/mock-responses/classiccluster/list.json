@@ -3,6 +3,7 @@
     "name": "transactions",
     "type": "REAL",
     "url": "https://10.84.205.230:7183",
+    "pvcCpEnvironmentCrn": "crn:altus:environments:us-west-1:ed0c7321-7c57-4704-9184-4c520df3a539:environment:transact/6beef733-1755-4a9d-a0f4-5a7e5b800c80",
     "auth": "cbd:Password123!"
   }
 ]

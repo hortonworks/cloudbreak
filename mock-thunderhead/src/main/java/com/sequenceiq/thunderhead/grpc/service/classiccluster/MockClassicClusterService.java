@@ -19,6 +19,9 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiGrpc;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -47,6 +50,9 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Override
     public void listClusters(OnPremisesApiProto.ListClustersRequest request, StreamObserver<OnPremisesApiProto.ListClustersResponse> responseObserver) {
@@ -92,6 +98,9 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
                             .setProperties(String.format("{\"entityStatus\": \"GOOD_HEALTH\", \"clusterUrl\": \"%s\"}", classicCluster.getUrl()))
                             .build())
                     .setLastCreateTime(new Date().getTime())
+                    .setPvcCrn(getPvcCrn(classicCluster))
+                    .setEnvironmentCrn(classicCluster.getPvcCpEnvironmentCrn())
+                    .setCmClusterUuid(apiCluster.getUuid())
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to get additional cluster details from CM", e);
@@ -101,5 +110,11 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     private HttpClientConfig getHttpClientConfig(ClassicCluster classicCluster) {
         return new HttpClientConfig(classicCluster.getUrl())
                 .withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), classicCluster.getCrn(), CLUSTER_PROXY_CONFIG_SERVICE_NAME);
+    }
+
+    private String getPvcCrn(ClassicCluster classicCluster) {
+        String resourceId = Crn.safeFromString(classicCluster.getPvcCpEnvironmentCrn()).getAccountId();
+        String accountId = classicCluster.getAccountId();
+        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.HYBRID, resourceId, accountId);
     }
 }

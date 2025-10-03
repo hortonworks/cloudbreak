@@ -754,6 +754,10 @@ message Cluster {
   string properties = 30;
   // The UUID of the CM Base Cluster.
   string cmClusterUuid = 31;
+  // The CRN of the Private Cloud environment.
+  string environmentCrn = 32;
+  // CRN of the Private Cloud Control plane.
+  string pvcCrn = 33;
 }
 
 // Object containing the service information.

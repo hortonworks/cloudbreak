@@ -4513,6 +4513,11 @@ definitions:
         description: The version of Cloudera Manager that the environment is registered with.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+      clouderaManagerClusterUuid:
+        type: string
+        description: The UUID of Cloudera Manager cluster that the environment is registered with.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       cdpPvcVersion:
         type: string
         description: The version of CDP PVC.
@@ -4695,6 +4700,11 @@ definitions:
       clouderaManagerVersion:
         type: string
         description: The version of Cloudera Manager that the environment is registered with.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      clouderaManagerClusterUuid:
+        type: string
+        description: The UUID of Cloudera Manager cluster that the environment is registered with.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
       cdpPvcVersion:

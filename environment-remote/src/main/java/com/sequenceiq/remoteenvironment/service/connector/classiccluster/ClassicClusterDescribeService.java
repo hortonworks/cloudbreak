@@ -92,6 +92,7 @@ class ClassicClusterDescribeService {
         PvcEnvironmentDetails pvcEnvironmentDetails = createPvcEnvironmentDetails(cluster, cmResources);
         environment.setPvcEnvironmentDetails(pvcEnvironmentDetails);
         environment.setStatus(pvcEnvironmentDetails.getPrivateDatalakeDetails().getStatus().name());
+        environment.setClouderaManagerClusterUuid(cluster.getCmClusterUuid());
         populateVersions(cluster, environment, cmResources);
         return environment;
     }

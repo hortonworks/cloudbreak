@@ -21,6 +21,8 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     private String url;
 
+    private String pvcCpEnvironmentCrn;
+
     private String userName;
 
     @Convert(converter = SecretToString.class)
@@ -51,6 +53,14 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getPvcCpEnvironmentCrn() {
+        return pvcCpEnvironmentCrn;
+    }
+
+    public void setPvcCpEnvironmentCrn(String pvcCpEnvironmentCrn) {
+        this.pvcCpEnvironmentCrn = pvcCpEnvironmentCrn;
     }
 
     public void setAuth(String auth) {
