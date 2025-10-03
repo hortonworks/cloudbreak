@@ -16,12 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -40,11 +42,15 @@ public class OSUpgradeByUpgradeSetsService {
     @Inject
     private ClusterRepairService clusterRepairService;
 
+    @Inject
+    private StackUpgradeService stackUpgradeService;
+
     public FlowIdentifier osUpgradeByUpgradeSets(StackView stackView, ImageChangeDto imageChangeDto, List<OrderedOSUpgradeSet> upgradeSets) {
         LOGGER.info("OS upgrade by upgrade sets: {}", upgradeSets);
         validateOrderNumbers(upgradeSets);
         validateInstanceIdsAndStack(stackView.getId(), upgradeSets);
-        return flowManager.triggerOsUpgradeByUpgradeSetsFlow(stackView.getId(), stackView.getPlatformVariant(), imageChangeDto, upgradeSets);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, ThreadBasedUserCrnProvider.getUserCrn(), false);
+        return flowManager.triggerOsUpgradeByUpgradeSetsFlow(stackView.getId(), upgradeVariant, imageChangeDto, upgradeSets);
     }
 
     private void validateOrderNumbers(List<OrderedOSUpgradeSet> upgradeSets) {

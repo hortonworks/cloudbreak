@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +46,9 @@ class OSUpgradeByUpgradeSetsServiceTest {
 
     @Mock
     private ClusterRepairService clusterRepairService;
+
+    @Mock
+    private StackUpgradeService stackUpgradeService;
 
     @InjectMocks
     private OSUpgradeByUpgradeSetsService osUpgradeByUpgradeSetsService;
@@ -149,7 +155,6 @@ class OSUpgradeByUpgradeSetsServiceTest {
     public void testUpgradeEverythingIsFine() {
         StackView stackView = mock(StackView.class);
         when(stackView.getId()).thenReturn(1L);
-        when(stackView.getPlatformVariant()).thenReturn("AWS");
         StackDto stackDto = mock(StackDto.class);
 
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
@@ -167,10 +172,13 @@ class OSUpgradeByUpgradeSetsServiceTest {
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-2", "i-4")));
         ImageChangeDto imageChangeDto = new ImageChangeDto(1L, "imageId");
-        osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, imageChangeDto, upgradeSets);
+        when(stackUpgradeService.calculateUpgradeVariant(eq(stackView), anyString(), eq(false))).thenReturn("AWS_NATIVE");
+
+        ThreadBasedUserCrnProvider.doAs("somebody", () -> osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, imageChangeDto, upgradeSets));
+
         ArgumentCaptor<Set> selectedPartsCaptor = ArgumentCaptor.forClass(Set.class);
         verify(clusterRepairService, times(1)).validateRepairConditions(eq(ManualClusterRepairMode.ALL), eq(stackDto), selectedPartsCaptor.capture());
         assertEquals(0, selectedPartsCaptor.getValue().size());
-        verify(flowManager, times(1)).triggerOsUpgradeByUpgradeSetsFlow(1L, "AWS", imageChangeDto, upgradeSets);
+        verify(flowManager, times(1)).triggerOsUpgradeByUpgradeSetsFlow(1L, "AWS_NATIVE", imageChangeDto, upgradeSets);
     }
 }

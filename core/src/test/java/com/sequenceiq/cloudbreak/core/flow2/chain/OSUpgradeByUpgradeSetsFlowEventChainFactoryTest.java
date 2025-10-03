@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,12 +23,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -99,62 +96,40 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         when(instanceMetaDataService.findAllViewByStackIdAndInstanceId(1L, Set.of("i-6")))
                 .thenReturn(List.of(instanceMetaData6));
         StackView stackView = mock(StackView.class);
-        when(stackView.getEnvironmentCrn()).thenReturn("envcrn");
-        when(stackView.getName()).thenReturn("envname");
         when(stackDtoService.getStackViewById(1L)).thenReturn(stackView);
-        when(kerberosConfigService.isKerberosConfigExistsForEnvironment(stackView.getEnvironmentCrn(), stackView.getName())).thenReturn(true);
-        when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(1L)).thenReturn(Optional.of(instanceMetaData1));
+
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(new OSUpgradeByUpgradeSetsTriggerEvent(1L, "AWS",
                 new ImageChangeDto(1L, "imageId"), upgradeSets));
-        assertEquals(7, eventQueue.getQueue().size());
+
+        assertEquals(4, eventQueue.getQueue().size());
 
         StackImageUpdateTriggerEvent firstFlow = (StackImageUpdateTriggerEvent) eventQueue.getQueue().poll();
         assertEquals("imageId", firstFlow.getNewImageId());
         assertEquals(1L, firstFlow.getResourceId());
 
-        ClusterAndStackDownscaleTriggerEvent secondFlow = (ClusterAndStackDownscaleTriggerEvent) eventQueue.getQueue().poll();
-        assertEquals("FULL_DOWNSCALE_TRIGGER_EVENT", secondFlow.getSelector());
-        assertTrue(secondFlow.getDetails().isRepair());
-        Map<String, Set<String>> hostGroupsWithHostNames = secondFlow.getHostGroupsWithHostNames();
+        ClusterRepairTriggerEvent secondFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", secondFlow.getSelector());
+        assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, secondFlow.getRepairType());
+        Map<String, List<String>> hostGroupsWithHostNames = secondFlow.getFailedNodesMap();
         assertThat(hostGroupsWithHostNames).containsOnlyKeys("master", "worker");
         assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host1");
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host3", "host5");
 
-        StackAndClusterUpscaleTriggerEvent thirdFlow = (StackAndClusterUpscaleTriggerEvent) eventQueue.getQueue().poll();
-        hostGroupsWithHostNames = thirdFlow.getHostGroupsWithHostNames();
-        assertThat(hostGroupsWithHostNames).containsOnlyKeys("master", "worker");
-        assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host1");
-        assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host3", "host5");
-        Map<String, Integer> hostGroupsWithAdjustment = thirdFlow.getHostGroupsWithAdjustment();
-        assertThat(hostGroupsWithAdjustment).containsExactlyInAnyOrderEntriesOf(Map.of("master", 1, "worker", 2));
-        assertEquals("FULL_UPSCALE_TRIGGER_EVENT", thirdFlow.getSelector());
-
-        ClusterAndStackDownscaleTriggerEvent fourthFlow = (ClusterAndStackDownscaleTriggerEvent) eventQueue.getQueue().poll();
-        assertEquals("FULL_DOWNSCALE_TRIGGER_EVENT", fourthFlow.getSelector());
-        assertTrue(fourthFlow.getDetails().isRepair());
-        hostGroupsWithHostNames = fourthFlow.getHostGroupsWithHostNames();
+        ClusterRepairTriggerEvent thirdFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", thirdFlow.getSelector());
+        assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, thirdFlow.getRepairType());
+        hostGroupsWithHostNames = thirdFlow.getFailedNodesMap();
         assertThat(hostGroupsWithHostNames).containsOnlyKeys("master", "worker");
         assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host2");
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host4");
 
-        StackAndClusterUpscaleTriggerEvent fifthFlow = (StackAndClusterUpscaleTriggerEvent) eventQueue.getQueue().poll();
-        hostGroupsWithHostNames = fifthFlow.getHostGroupsWithHostNames();
-        assertThat(hostGroupsWithHostNames).containsOnlyKeys("master", "worker");
-        assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host2");
-        assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host4");
-        assertEquals("FULL_UPSCALE_TRIGGER_EVENT", fifthFlow.getSelector());
 
-        ClusterAndStackDownscaleTriggerEvent sixthFlow = (ClusterAndStackDownscaleTriggerEvent) eventQueue.getQueue().poll();
-        assertTrue(sixthFlow.getDetails().isRepair());
-        hostGroupsWithHostNames = sixthFlow.getHostGroupsWithHostNames();
+        ClusterRepairTriggerEvent fourthFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", fourthFlow.getSelector());
+        assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, fourthFlow.getRepairType());
+        hostGroupsWithHostNames = fourthFlow.getFailedNodesMap();
         assertThat(hostGroupsWithHostNames).containsOnlyKeys("worker");
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host6");
-
-        StackAndClusterUpscaleTriggerEvent seventhFlow = (StackAndClusterUpscaleTriggerEvent) eventQueue.getQueue().poll();
-        hostGroupsWithHostNames = seventhFlow.getHostGroupsWithHostNames();
-        assertThat(hostGroupsWithHostNames).containsOnlyKeys("worker");
-        assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host6");
-        assertEquals("FULL_UPSCALE_TRIGGER_EVENT", seventhFlow.getSelector());
 
         ArgumentCaptor<List<InstanceMetadataView>> instanceIdsToRepair = ArgumentCaptor.forClass(List.class);
         verify(clusterRepairService, times(3)).markVolumesToNonDeletable(eq(stackView), instanceIdsToRepair.capture());
