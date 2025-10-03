@@ -96,13 +96,19 @@ public class EnvClustersDeleteActions {
         return new AbstractEnvClustersDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED;
-                EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.DATALAKE_CLUSTERS_DELETE_STARTED_STATE;
-                String logDeleteState = "Data Lake clusters";
+                boolean hybridEnvironment = environmentService.isHybridEnvironment(payload.getResourceId());
+                EnvironmentDeletionDto envDto;
+                if (hybridEnvironment) {
+                    envDto = convertToDto(payload);
+                } else {
+                    EnvironmentStatus environmentStatus = EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS;
+                    ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED;
+                    EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.DATALAKE_CLUSTERS_DELETE_STARTED_STATE;
+                    String logDeleteState = "Data Lake clusters";
 
-                EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
-                        envClustersDeleteState, logDeleteState);
+                    envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
+                            envClustersDeleteState, logDeleteState);
+                }
                 sendEvent(context, DELETE_DATALAKE_CLUSTERS_EVENT.selector(), envDto);
             }
         };
@@ -165,7 +171,8 @@ public class EnvClustersDeleteActions {
     }
 
     private EnvironmentDeletionDto commonUpdateEnvironmentAndNotify(CommonContext context, EnvDeleteEvent payload,
-        EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, EnvClustersDeleteState envClustersDeleteState, String logDeleteState) {
+        EnvironmentStatus environmentStatus, ResourceEvent resourceEvent,
+        EnvClustersDeleteState envClustersDeleteState, String logDeleteState) {
 
         environmentService
                 .findEnvironmentById(payload.getResourceId())
@@ -177,11 +184,15 @@ public class EnvClustersDeleteActions {
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
                 }, () -> LOGGER.error("Cannot delete {} because the environment does not exist: {}. "
                         + "But the flow will continue, how can this happen?", logDeleteState, payload.getResourceId()));
+        LOGGER.info("Flow entered into {}", envClustersDeleteState.name());
+        return convertToDto(payload);
+    }
+
+    private EnvironmentDeletionDto convertToDto(EnvDeleteEvent payload) {
         EnvironmentDto envDto = new EnvironmentDto();
         envDto.setId(payload.getResourceId());
         envDto.setResourceCrn(payload.getResourceCrn());
         envDto.setName(payload.getResourceName());
-        LOGGER.info("Flow entered into {}", envClustersDeleteState.name());
 
         EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
                 .withEnvironmentDto(envDto)

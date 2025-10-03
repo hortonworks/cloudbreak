@@ -250,6 +250,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.findById(id);
     }
 
+    public Boolean isHybridEnvironment(Long id) {
+        return environmentRepository.isHybridEnvironment(id);
+    }
+
     public Optional<EnvironmentDto> findById(Long id) {
         return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
     }

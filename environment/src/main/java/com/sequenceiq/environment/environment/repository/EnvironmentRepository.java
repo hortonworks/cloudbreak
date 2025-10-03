@@ -131,6 +131,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId AND e.archived = false")
     boolean existsWithNameAndAccountAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
 
+    @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.id = :id AND e.environmentType = 'HYBRID'")
+    boolean isHybridEnvironment(@Param("id") Long id);
+
     @Query("SELECT e.id FROM Environment e " +
             "WHERE e.id in (:ids) " +
             "AND e.status in (:statuses) " +

@@ -247,17 +247,32 @@ class EnvClustersDeleteActionsTest {
     }
 
     @Test
-    void datalakeClustersDeleteAction() {
+    void datalakeClustersDeleteActionWhenNotHybrid() {
         Action<?, ?> action = configureAction(() -> underTest.datalakeClustersDeleteAction());
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(savedEnvironment);
+        when(environmentService.isHybridEnvironment(any())).thenReturn(false);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
 
         action.execute(stateContext);
 
         verify(environment).setStatus(EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS);
         verify(eventSenderService).sendEventAndNotification(environmentDto, FLOW_TRIGGER_USER_CRN, ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED);
+        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
+
+        verifyDeleteActionSuccessEvent(DELETE_DATALAKE_CLUSTERS_EVENT);
+    }
+
+    @Test
+    void datalakeClustersDeleteActionWhenHybrid() {
+        Action<?, ?> action = configureAction(() -> underTest.datalakeClustersDeleteAction());
+
+        when(environmentService.isHybridEnvironment(any())).thenReturn(true);
+
+        action.execute(stateContext);
+
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
