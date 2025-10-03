@@ -108,8 +108,7 @@ auth:
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: false
     tlsv13.only.enabled: false
-    rhel9.enabled: true
-    rhel9.preferred: false
+    rhel9.enabled: false
 crn:
   partition: cdp
   region: us-west-1

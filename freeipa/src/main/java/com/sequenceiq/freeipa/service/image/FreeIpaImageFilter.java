@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 
 @Component
@@ -25,6 +26,8 @@ public class FreeIpaImageFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaImageFilter.class);
 
     private static final String DEFAULT_REGION = "default";
+
+    private static final String MAJOR_OS_UPGRADE_TARGET = RHEL8.getOs();
 
     @Inject
     private ProviderSpecificImageFilter providerSpecificImageFilter;
@@ -40,7 +43,7 @@ public class FreeIpaImageFilter {
         if (StringUtils.isNotBlank(imageFilterSettings.currentImageId())) {
             return candidateImages.stream()
                     .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
-                    .filter(img -> osSupported(img.getOs()))
+                    .filter(img -> supportedOsService.isSupported(img.getOs()))
                     .filter(img -> filterTags(imageFilterSettings, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
@@ -83,26 +86,10 @@ public class FreeIpaImageFilter {
 
     private boolean filterOs(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
         String candidateImageOs = image.getOs();
-        return osSupported(candidateImageOs)
-                && targetOsEmptyOrTargetOsEquals(imageFilterSettings, candidateImageOs)
-                && majorOsUpgradeAllowedOrCurrentOsEquals(imageFilterSettings, candidateImageOs);
-    }
-
-    private boolean osSupported(String candidateImageOs) {
-        return supportedOsService.isSupported(candidateImageOs);
-    }
-
-    private boolean majorOsUpgradeAllowedOrCurrentOsEquals(FreeIpaImageFilterSettings imageFilterSettings, String candidateImageOs) {
-        return majorOsUpgradeAllowed(imageFilterSettings, candidateImageOs)
-                || currentOsEmptyOrCurrentOsEquals(imageFilterSettings, candidateImageOs);
-    }
-
-    private boolean currentOsEmptyOrCurrentOsEquals(FreeIpaImageFilterSettings imageFilterSettings, String candidateImageOs) {
-        return candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs());
-    }
-
-    private boolean targetOsEmptyOrTargetOsEquals(FreeIpaImageFilterSettings imageFilterSettings, String candidateImageOs) {
-        return StringUtils.isBlank(imageFilterSettings.targetOs()) || imageFilterSettings.targetOs().equalsIgnoreCase(candidateImageOs);
+        return supportedOsService.isSupported(candidateImageOs) &&
+                (StringUtils.isBlank(imageFilterSettings.targetOs()) || imageFilterSettings.targetOs().equalsIgnoreCase(candidateImageOs))
+                && (majorOsUpgradeAllowed(imageFilterSettings, candidateImageOs)
+                || (candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs())));
     }
 
     private boolean filterTags(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
@@ -117,10 +104,7 @@ public class FreeIpaImageFilter {
     }
 
     private boolean majorOsUpgradeAllowed(FreeIpaImageFilterSettings imageFilterSettings, String targetOs) {
-        Optional<OsType> currentOsType = OsType.getByOsOptional(imageFilterSettings.currentOs());
-        Optional<OsType> targetOsOptional = StringUtils.isNotBlank(targetOs) ? OsType.getByOsOptional(targetOs) : Optional.empty();
-        return imageFilterSettings.allowMajorOsUpgrade()
-                && (currentOsType.isPresent() && targetOsOptional.isPresent() && currentOsType.get().getMajorOsTargets().contains(targetOsOptional.get()));
+        return imageFilterSettings.allowMajorOsUpgrade() && MAJOR_OS_UPGRADE_TARGET.equals(targetOs);
     }
 
     private Boolean isMatchingImageIdInRegion(FreeIpaImageFilterSettings imageFilterSettings, Image img) {

@@ -193,7 +193,7 @@ class FreeIpaImageProviderTest {
     @Test
     void testGetImagesWhenMajorOsUpgradeIsEnabled() {
         when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, CENTOS7, REDHAT8, true);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, REDHAT8, true);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 

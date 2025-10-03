@@ -12,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -30,9 +28,6 @@ public class UpgradeValidationService {
 
     @Inject
     private SupportedOsService supportedOsService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public void validateUpgradeRequest(FreeIpaUpgradeRequest request) {
         if (Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()) && !supportedOsService.isRhel8Supported()) {
@@ -77,12 +72,6 @@ public class UpgradeValidationService {
         if (currentImage.getId().equals(selectedImage.getId()) && CollectionUtils.isEmpty(instancesOnOldImage)) {
             LOGGER.warn("Selected {} and current {} image are the same", selectedImage, currentImage);
             throw new BadRequestException("Selected and current image are the same with id: " + currentImage.getId());
-        }
-    }
-
-    public void validateSelectedImageEntitledFor(String accountId, ImageInfoResponse selectedImage) {
-        if (entitlementService.isEntitledToUseOS(accountId, OsType.getByOs(selectedImage.getOs()))) {
-            throw new BadRequestException(String.format("Your account is not entitled to use %s images.", selectedImage.getOs()));
         }
     }
 }
