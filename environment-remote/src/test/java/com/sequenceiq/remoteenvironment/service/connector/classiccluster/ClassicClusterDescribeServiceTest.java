@@ -5,16 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -46,6 +51,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Service;
 import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
@@ -76,6 +82,9 @@ class ClassicClusterDescribeServiceTest {
     @Mock
     private CdpResourceApi cdpResourceApi;
 
+    @Spy
+    private AsyncTaskExecutorTestImpl taskExecutor;
+
     @InjectMocks
     private ClassicClusterDescribeService underTest;
 
@@ -87,6 +96,7 @@ class ClassicClusterDescribeServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client)).thenReturn(cmResourceApi);
         when(clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client)).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getCdpResourceApi(apiClient)).thenReturn(cdpResourceApi);
+        ReflectionTestUtils.setField(underTest, "taskExecutor", taskExecutor);
     }
 
     @Test
@@ -164,6 +174,8 @@ class ClassicClusterDescribeServiceTest {
         assertEquals(apiHosts.getFirst().getHostname(), instance.getDiscoveryFQDN());
         assertEquals(apiHosts.getFirst().getHostId(), instance.getInstanceId());
         assertEquals(apiHosts.getFirst().getIpAddress(), instance.getPrivateIp());
+
+        verify(taskExecutor, times(6)).submit(any(Callable.class));
     }
 
     @Test

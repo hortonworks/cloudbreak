@@ -1,5 +1,7 @@
-package com.sequenceiq.cloudbreak.cloud.aws.component;
+package com.sequenceiq.cloudbreak.util.test;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -9,10 +11,10 @@ import org.slf4j.LoggerFactory;
 public class FutureTestImpl<T> implements Future<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FutureTestImpl.class);
 
-    private T result;
+    private Callable<T> resultProvider;
 
-    public FutureTestImpl(T result) {
-        this.result = result;
+    public FutureTestImpl(Callable<T> resultProvider) {
+        this.resultProvider = resultProvider;
     }
 
     @Override
@@ -34,14 +36,20 @@ public class FutureTestImpl<T> implements Future<T> {
     }
 
     @Override
-    public T get() {
+    public T get() throws InterruptedException, ExecutionException {
         LOGGER.info("get called - returning result");
-        return result;
+        if (resultProvider == null) {
+            return null;
+        }
+        try {
+            return resultProvider.call();
+        } catch (Exception e) {
+            throw new ExecutionException(e);
+        }
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) {
-        LOGGER.info("get called - returning result");
-        return result;
+    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException {
+        return get();
     }
 }

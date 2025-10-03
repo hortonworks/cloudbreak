@@ -8,12 +8,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
@@ -61,6 +63,9 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     @Inject
     private GrpcUmsClient umsClient;
 
+    @Inject
+    private AsyncTaskExecutor taskExecutor;
+
     @Override
     public RemoteEnvironmentConnectorType type() {
         return RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE;
@@ -74,8 +79,18 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.info("Starting to list environments from '{}' control planes with actor('{}')", privateControlPlanes.size(), userCrn);
         String controlPlaneNames = privateControlPlanes.stream().map(PrivateControlPlane::getName).collect(Collectors.joining(","));
         LOGGER.debug("Starting to list environments from control planes with name '{}' actor('{}')", controlPlaneNames, userCrn);
-        privateControlPlanes
-                .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlaneWithActor(item, userCrn)));
+
+        privateControlPlanes.stream()
+                .collect(Collectors.toMap(
+                        PrivateControlPlane::getResourceCrn,
+                        cp -> taskExecutor.submit(() -> listEnvironmentsFromPrivateControlPlaneWithActor(cp, userCrn))))
+                .forEach((controlPlaneCrn, environments)  -> {
+                    try {
+                        responses.addAll(environments.get());
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOGGER.error("Failed to parallelize querying environments from control plane {}", controlPlaneCrn, e);
+                    }
+                });
         return responses;
     }
 

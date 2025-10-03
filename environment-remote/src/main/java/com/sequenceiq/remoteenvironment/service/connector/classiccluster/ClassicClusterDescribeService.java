@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -18,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.CdpResourceApi;
@@ -47,6 +50,7 @@ import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDet
 import com.cloudera.thunderhead.service.environments2api.model.Service;
 import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
@@ -70,18 +74,15 @@ class ClassicClusterDescribeService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
+    @Inject
+    private AsyncTaskExecutor taskExecutor;
+
     public DescribeEnvironmentV2Response describe(OnPremisesApiProto.Cluster cluster) {
-        try {
-            DescribeEnvironmentV2Response describeEnvironmentV2Response = new DescribeEnvironmentV2Response();
-            CMResources cmResources = populateCmResources(cluster);
-            describeEnvironmentV2Response.setAdditionalProperties(createEnvironmentProperties(cluster));
-            describeEnvironmentV2Response.setEnvironment(createEnvironment(cluster, cmResources));
-            return describeEnvironmentV2Response;
-        } catch (ApiException apiException) {
-            String errorMsg = "Cannot collect information from the on premise CM server which is needed to describe the cluster";
-            LOGGER.error(errorMsg, apiException);
-            throw new RemoteEnvironmentException(errorMsg, apiException);
-        }
+        DescribeEnvironmentV2Response describeEnvironmentV2Response = new DescribeEnvironmentV2Response();
+        CMResources cmResources = populateCmResources(cluster);
+        describeEnvironmentV2Response.setAdditionalProperties(createEnvironmentProperties(cluster));
+        describeEnvironmentV2Response.setEnvironment(createEnvironment(cluster, cmResources));
+        return describeEnvironmentV2Response;
     }
 
     private Environment createEnvironment(OnPremisesApiProto.Cluster cluster, CMResources cmResources) {
@@ -233,7 +234,7 @@ class ClassicClusterDescribeService {
         }
     }
 
-    private CMResources populateCmResources(OnPremisesApiProto.Cluster cluster) throws ApiException {
+    private CMResources populateCmResources(OnPremisesApiProto.Cluster cluster) {
         ApiClient apiClient = apiClientProvider.getClouderaManagerRootClient(cluster);
         ApiClient apiV51Client = apiClientProvider.getClouderaManagerV51Client(cluster);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiV51Client);
@@ -241,13 +242,35 @@ class ClassicClusterDescribeService {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client);
         CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(apiClient);
         String clusterName = cluster.getName();
-        ApiParcel cdpParcel = parcelsResourceApi.readParcels(clusterName, "SUMMARY").getItems()
-                .stream()
-                .filter(parcel -> CDP_PARCEL_PRODUCT_NAME.equals(parcel.getProduct()) && CDP_PARCEL_ACTIVATED.equals(parcel.getStage()))
-                .findFirst().orElse(null);
-        return new CMResources(cmResourceApi.getVersion(), cdpParcel, clustersResourceApi.listHosts(clusterName, null, null, "SUMMARY"),
-                clustersResourceApi.readCluster(clusterName), cdpResourceApi.getRemoteContextByCluster(cluster.getName()),
-                cmResourceApi.readInstances(), clustersResourceApi.getKerberosInfo(clusterName));
+
+        Future<ApiParcel> cdpParcel = taskExecutor.submit(() -> parcelsResourceApi.readParcels(clusterName, DataView.SUMMARY.name()).getItems().stream()
+                        .filter(parcel -> CDP_PARCEL_PRODUCT_NAME.equals(parcel.getProduct()) && CDP_PARCEL_ACTIVATED.equals(parcel.getStage()))
+                        .findFirst()
+                        .orElse(null));
+        Future<ApiHostList> hostList = taskExecutor.submit(() -> clustersResourceApi.listHosts(clusterName, null, null, DataView.SUMMARY.name()));
+        Future<ApiCluster> apiCluster = taskExecutor.submit(() -> clustersResourceApi.readCluster(clusterName));
+        Future<ApiRemoteDataContext> remoteDataContext = taskExecutor.submit(() -> cdpResourceApi.getRemoteContextByCluster(cluster.getName()));
+        Future<ApiCmServerList> cmServerList = taskExecutor.submit(cmResourceApi::readInstances);
+        Future<ApiKerberosInfo> kerberosInfo = taskExecutor.submit(() -> clustersResourceApi.getKerberosInfo(clusterName));
+
+        try {
+            return new CMResources(
+                    cmResourceApi.getVersion(),
+                    cdpParcel.get(),
+                    hostList.get(),
+                    apiCluster.get(),
+                    remoteDataContext.get(),
+                    cmServerList.get(),
+                    kerberosInfo.get());
+        } catch (ApiException e) {
+            String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
+            LOGGER.error(message, e);
+            throw new RemoteEnvironmentException(message, e);
+        } catch (ExecutionException | InterruptedException e) {
+            String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
+            LOGGER.error(message, e);
+            throw new RemoteEnvironmentException(message);
+        }
     }
 
     private record CMResources(

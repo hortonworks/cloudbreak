@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -16,12 +18,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
@@ -32,6 +38,7 @@ import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificat
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.RemoteEnvironmentBase;
@@ -61,8 +68,16 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     @Mock
     private ClusterProxyHybridClient clusterProxyHybridClientMock;
 
+    @Spy
+    private AsyncTaskExecutorTestImpl taskExecutor;
+
     @InjectMocks
     private PrivateControlPlaneRemoteEnvironmentConnector underTest;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(underTest, "taskExecutor", taskExecutor);
+    }
 
     @Test
     public void testListRemoteEnvironmentShouldReturnEnvs() {
@@ -126,6 +141,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId");
 
         assertEquals(2, result.size());
+        verify(taskExecutor, times(result.size())).submit(any(Callable.class));
         assertTrue(result.stream()
                 .map(RemoteEnvironmentBase::getName)
                 .anyMatch(e -> e.equalsIgnoreCase(response2.getName())));

@@ -31,7 +31,6 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
     public boolean canRetry(RetryContext context) {
         Throwable lastThrowable = context.getLastThrowable();
         if (lastThrowable == null) {
-            LOGGER.debug("lastThrowable is null");
             return true;
         } else {
             return handleLastThrowableNotNull(context, lastThrowable);

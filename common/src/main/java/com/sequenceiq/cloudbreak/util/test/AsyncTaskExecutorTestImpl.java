@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.component;
+package com.sequenceiq.cloudbreak.util.test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -27,21 +27,12 @@ public class AsyncTaskExecutorTestImpl implements AsyncTaskExecutor {
     @Override
     public <T> Future<T> submit(Callable<T> task) {
         LOGGER.info("submit called");
-        return new FutureTestImpl<>(getResult(task));
+        return new FutureTestImpl<>(task);
     }
 
     @Override
     public void execute(Runnable task) {
         LOGGER.info("execute called");
         task.run();
-    }
-
-    <T> T getResult(Callable<T> task) {
-        try {
-            return task.call();
-        } catch (Exception e) {
-            LOGGER.error("Error completing call to callable", e);
-            throw new RuntimeException("Error in test: calling callable.call returned exception", e);
-        }
     }
 }

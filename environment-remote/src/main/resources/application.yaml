@@ -105,6 +105,9 @@ remoteenvironment:
       schema: public
       cert.file: database.crt
       ssl: false
+  intermediate.threadpool:
+    core.size: 40
+    capacity.size: 4000
 
 cdp.structuredevent:
   rest:
