@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 public class SupportedOsService {
 
     public boolean isSupported(String os) {
-        return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) || RHEL8.getOs().equalsIgnoreCase(os) ||
-                RHEL9.getOs().equalsIgnoreCase(os);
+        return os == null
+                || CENTOS7.getOs().equalsIgnoreCase(os)
+                || CENTOS7.getOsType().equalsIgnoreCase(os)
+                || RHEL8.getOs().equalsIgnoreCase(os)
+                || RHEL9.getOs().equalsIgnoreCase(os);
     }
 
     public boolean isRhel8Supported() {
