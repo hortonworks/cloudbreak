@@ -400,7 +400,8 @@
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
-          "hue-HUE_SERVER-BASE"
+          "hue-HUE_SERVER-BASE",
+          "knox-KNOX_GATEWAY-BASE"
         ]
       },
       {
@@ -435,19 +436,6 @@
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "yarn-NODEMANAGER-COMPUTE"
-        ]
-      },
-      {
-        "refName": "manager",
-        "cardinality": 2,
-        "roleConfigGroupsRefNames": [
-          "knox-KNOX_GATEWAY-BASE",
-          "hive-GATEWAY-BASE",
-          "livy_for_spark3-GATEWAY-BASE",
-          "hdfs-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE",
-          "spark3_on_yarn-GATEWAY-BASE"
         ]
       }
     ]

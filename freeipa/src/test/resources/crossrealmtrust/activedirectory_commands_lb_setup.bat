@@ -3,8 +3,8 @@ set IPA_DOMAIN=freeipa.org
 set IPA_IPS=ipaIp1 ipaIp2 ipaIp3
 set TRUST_SECRET=trustSecret
 
-rem Dns setup for Active Directory cross-realm trust
+REM Dns setup for Active Directory cross-realm trust
 dnscmd 127.0.0.1 /ZoneAdd %IPA_DOMAIN%. /Forwarder %IPA_IPS%
 
-rem Set up trust from the Active Directory server towards the FreeIPA:
+REM Set up trust from the Active Directory server towards the FreeIPA:
 netdom trust %IPA_DOMAIN% /Domain:%AD_DOMAIN% /Add /Twoway /ForestTRANsitive:yes /PasswordT:%TRUST_SECRET% /oneside:trusted

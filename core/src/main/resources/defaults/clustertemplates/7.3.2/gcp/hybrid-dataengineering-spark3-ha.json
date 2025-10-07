@@ -14,25 +14,6 @@
     "enableLoadBalancer": true,
     "instanceGroups": [
       {
-        "name": "manager",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 1,
-              "size": 150,
-              "type": "pd-ssd"
-            }
-          ],
-          "rootVolume": {
-            "size": 150
-          },
-          "instanceType": "e2-standard-16"
-        },
-        "nodeCount": 2,
-        "type": "GATEWAY",
-        "recoveryMode": "MANUAL"
-      },
-      {
         "name": "master",
         "template": {
           "attachedVolumes": [
@@ -49,7 +30,7 @@
         },
         "nodeCount": 2,
         "minimumNodeCount": 2,
-        "type": "CORE",
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL"
       },
       {

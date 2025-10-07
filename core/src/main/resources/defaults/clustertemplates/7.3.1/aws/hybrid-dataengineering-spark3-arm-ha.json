@@ -13,30 +13,7 @@
     },
     "enableLoadBalancer": true,
     "architecture": "arm64",
-    "instanceGroups": [{
-      "nodeCount": 2,
-      "name": "manager",
-      "type": "GATEWAY",
-      "recoveryMode": "MANUAL",
-      "template": {
-        "aws": {
-          "placementGroup" : {
-            "strategy" : "PARTITION"
-          }
-        },
-        "instanceType": "r7gd.2xlarge",
-        "rootVolume": {
-          "size": 150
-        },
-        "attachedVolumes": [{
-          "size": 150,
-          "count": 1,
-          "type": "gp3"
-        }],
-        "cloudPlatform": "AWS"
-      },
-      "recipeNames": []
-    },
+    "instanceGroups": [
       {
         "nodeCount": 1,
         "name": "compute",
@@ -105,7 +82,7 @@
         "nodeCount": 2,
         "minimumNodeCount": 2,
         "name": "master",
-        "type": "CORE",
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {

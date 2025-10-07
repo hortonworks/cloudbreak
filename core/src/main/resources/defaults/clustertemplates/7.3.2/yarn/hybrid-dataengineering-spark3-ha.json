@@ -13,22 +13,6 @@
     },
     "instanceGroups": [
       {
-        "nodeCount": 1,
-        "name": "manager",
-        "type": "GATEWAY",
-        "recoveryMode": "MANUAL",
-        "template": {
-          "rootVolume": {
-            "size": 50
-          },
-          "yarn": {
-            "cpus": 4,
-            "memory": 8192
-          }
-        },
-        "recipeNames": []
-      },
-      {
         "nodeCount": 0,
         "name": "compute",
         "type": "CORE",
@@ -63,7 +47,7 @@
       {
         "nodeCount": 2,
         "name": "master",
-        "type": "CORE",
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
           "rootVolume": {
