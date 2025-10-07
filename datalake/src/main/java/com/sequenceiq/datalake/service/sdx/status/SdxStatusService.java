@@ -7,8 +7,6 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED_ON_PROVI
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -252,11 +250,5 @@ public class SdxStatusService {
         }
         return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
                 stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
-    }
-
-    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
-        LOGGER.info("Searching for SDX cluster by ids: {} and statuses: {}", resourceIds, statuses);
-        List<SdxStatusEntity> sdxStatusEntities = findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(statuses, resourceIds);
-        return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 }

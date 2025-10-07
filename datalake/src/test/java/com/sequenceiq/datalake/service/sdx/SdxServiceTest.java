@@ -31,13 +31,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -87,6 +90,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
@@ -120,6 +124,7 @@ import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -246,6 +251,9 @@ class SdxServiceTest {
     private SdxResizeValidator sdxResizeValidator;
 
     @Mock
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
+    @Mock
     private MultiAzDecorator multiAzDecorator;
 
     @Mock
@@ -253,18 +261,6 @@ class SdxServiceTest {
 
     @Mock
     private RecipeService recipeService;
-
-    @Mock
-    private RangerRazService rangerRazService;
-
-    @Mock
-    private CcmService ccmService;
-
-    @Mock
-    private SdxInstanceService sdxInstanceService;
-
-    @Mock
-    private StorageValidationService storageValidationService;
 
     @InjectMocks
     private SdxService underTest;
@@ -300,6 +296,15 @@ class SdxServiceTest {
                 {EnvironmentStatus.UPDATE_FAILED},
                 {EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE}
         };
+    }
+
+    public static Stream<Arguments> storageBaseLocationsWhiteSpaceValidation() {
+        return Stream.of(
+                Arguments.of(" abfs://myscontainer@mystorage", ValidationResult.State.VALID),
+                Arguments.of("abfs://myscontainer @mystorage ", ValidationResult.State.ERROR),
+                Arguments.of("a bfs://myscontainer@mystorage ", ValidationResult.State.ERROR),
+                Arguments.of("s3a://mybucket/mylocation      ", ValidationResult.State.VALID),
+                Arguments.of("abfs://myscontainer@mystorage ", ValidationResult.State.VALID));
     }
 
     @BeforeEach
@@ -472,6 +477,70 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByNameInAccount(USER_CRN, "sdxcluster"));
         assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
+    }
+
+    @Test
+    void testUpdateRangerRazEnabledForSdxClusterWhenRangerRazIsPresent() throws TransactionExecutionException {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AWS");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackService.rangerRazEnabledInternal(anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(true);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
+
+        assertTrue(sdxCluster.isRangerRazEnabled());
+        verify(sdxClusterRepository, times(1)).save(sdxCluster);
+    }
+
+    @Test
+    void testUpdateRangerRazThrowsExceptionForSdxClusterWhenRangerRazIsNotPresent() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackService.rangerRazEnabledInternal(anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(false);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster)));
+        assertEquals(String.format("Ranger raz is not installed on the datalake: %s!", CLUSTER_NAME), exception.getMessage());
+        verify(sdxClusterRepository, times(0)).save(sdxCluster);
+    }
+
+    @Test
+    void testUpdateRangerRazIsIgnoredIfRangerRazIsInstalledAndFlagAlreadySet() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setRangerRazEnabled(true);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackService.rangerRazEnabledInternal(anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
+
+        verify(sdxClusterRepository, times(0)).save(sdxCluster);
+    }
+
+    @ParameterizedTest
+    @MethodSource("storageBaseLocationsWhiteSpaceValidation")
+    void testValidateBaseLocationWhenWhiteSpaceIsPresent(String input, ValidationResult.State expected) {
+        ValidationResult result = underTest.validateBaseLocation(input);
+        assertEquals(expected, result.getState());
     }
 
     @Test
@@ -1303,6 +1372,18 @@ class SdxServiceTest {
     }
 
     @Test
+    void rotateSaltPassword() {
+        SdxCluster sdxCluster = getSdxCluster();
+        FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
+        when(sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
+
+        assertEquals(sdxFlowIdentifier, result);
+        verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);
+    }
+
+    @Test
     void refreshDatahubsWithoutName() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString()))
@@ -1342,6 +1423,36 @@ class SdxServiceTest {
     }
 
     @Test
+    public void testUpdateSalt() {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatus);
+        when(sdxReactorFlowManager.triggerSaltUpdate(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = underTest.updateSalt(sdxCluster);
+
+        verify(sdxReactorFlowManager, times(1)).triggerSaltUpdate(sdxCluster);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DatalakeStatusEnum.class, names = {"STOPPED", "STOP_IN_PROGRESS", "EXTERNAL_DATABASE_DELETION_IN_PROGRESS", "STACK_DELETED",
+            "STACK_DELETION_IN_PROGRESS", "DELETE_REQUESTED", "DELETED", "DELETE_FAILED"}, mode = EnumSource.Mode.INCLUDE)
+    public void testUpdateSaltThrowsBadRequestWhenDatalakeNotAvailable(DatalakeStatusEnum status) {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxStatusEntity sdxStatus = new SdxStatusEntity();
+        sdxStatus.setStatus(status);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatus);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest.updateSalt(sdxCluster));
+
+        verifyNoInteractions(sdxReactorFlowManager);
+        assertEquals(String.format("SaltStack update cannot be initiated as datalake 'test-sdx-cluster' is currently in '%s' state.", status), ex.getMessage());
+    }
+
+    @Test
     public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
         DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
         when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);
@@ -1357,6 +1468,7 @@ class SdxServiceTest {
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
         when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
         SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
 
         verify(virtualMachineConfiguration, times(1)).isJavaVersionSupported(11);
@@ -1411,8 +1523,6 @@ class SdxServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceType(any(), any(), any(), any(), any());
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
@@ -1517,6 +1627,7 @@ class SdxServiceTest {
         // MEDIUM_DUTY and 7.2.17 => non throws
         sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
         sdxClusterRequest.setRuntime("7.2.17");
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         when(virtualMachineConfiguration.isJavaVersionSupported(21)).thenReturn(true);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
@@ -1724,8 +1835,6 @@ class SdxServiceTest {
         when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyEnterprise))).thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceType(any(), any(), any(), any(), any());
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
@@ -1826,7 +1935,6 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-
         doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
                 .when(sdxRecommendationService).validateVmTypeOverride(any(), any());
 
@@ -1887,6 +1995,7 @@ class SdxServiceTest {
                 .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -1986,6 +2095,7 @@ class SdxServiceTest {
                 .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
+        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -2238,7 +2348,6 @@ class SdxServiceTest {
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
 
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        doCallRealMethod().when(multiAzDecorator).decorateRequestWithMultiAz(any(), any(), any(), any(), eq(true));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -2289,7 +2398,6 @@ class SdxServiceTest {
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
 
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        doCallRealMethod().when(multiAzDecorator).decorateRequestWithMultiAz(any(), any(), any(), any(), eq(true));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 

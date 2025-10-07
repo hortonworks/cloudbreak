@@ -21,7 +21,6 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -52,9 +51,6 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    @Inject
-    private SaltService saltService;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -98,7 +94,7 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
                 if (reasonOptional.isPresent()) {
                     LOGGER.info("Salt password rotation is needed for SDX {} based on response {}", sdxCluster.getCrn(), saltPasswordStatus);
                     try {
-                        saltService.rotateSaltPassword(sdxCluster);
+                        sdxService.rotateSaltPassword(sdxCluster);
                     } catch (WebApplicationException e) {
                         String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                         LOGGER.warn("Salt password rotation failed. {}", errorMessage);

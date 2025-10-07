@@ -12,6 +12,8 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.US
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.CCMV2_JUMPGATE_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.CCMV2_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.ENTERPRISE_DATALAKE_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_MAXIMUM_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
@@ -19,19 +21,24 @@ import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MICRO_D
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MIN_RUNTIME_VERSION_FOR_RMS;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,6 +63,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
@@ -70,13 +78,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -112,6 +124,7 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.SeLinux;
@@ -127,6 +140,7 @@ import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterInitUtil;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.resize.SdxResizeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -137,10 +151,13 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxAzureBase;
+import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseComputeStorageRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 
@@ -178,7 +195,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private DistroxService distroxService;
 
     @Inject
-    private EnvironmentService environmentService;
+    private EnvironmentService environmentClientService;
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -211,6 +228,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
     private PlatformConfig platformConfig;
 
     @Inject
@@ -238,6 +258,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private SdxResizeValidator sdxResizeValidator;
 
     @Inject
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
+    @Inject
     private MultiAzDecorator multiAzDecorator;
 
     @Inject
@@ -245,18 +268,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private RecipeService recipeService;
-
-    @Inject
-    private CcmService ccmService;
-
-    @Inject
-    private RangerRazService rangerRazService;
-
-    @Inject
-    private SdxInstanceService sdxIntanceService;
-
-    @Inject
-    private StorageValidationService storageValidationService;
 
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
@@ -273,6 +284,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public String getStackCrnByClusterCrn(String crn) {
         return sdxClusterRepository.findStackCrnByClusterCrn(Crn.safeFromString(crn).getAccountId(), crn)
                 .orElseThrow(notFound("SdxCluster", crn));
+    }
+
+    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
+        LOGGER.info("Searching for SDX cluster by ids: {} and statuses: {}", resourceIds, statuses);
+        List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(statuses, resourceIds);
+        return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 
     public Optional<String> findResourceCrnById(Long id) {
@@ -405,6 +422,21 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return imageSettingsV4Request;
     }
 
+    public void updateRangerRazEnabled(SdxCluster sdxCluster) {
+        RangerRazEnabledV4Response response = stackService.rangerRazEnabledInternal(sdxCluster.getCrn());
+        if (response.isRangerRazEnabled()) {
+            if (!sdxCluster.isRangerRazEnabled()) {
+                DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
+                validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(),
+                        environmentResponse);
+                sdxCluster.setRangerRazEnabled(true);
+                save(sdxCluster);
+            }
+        } else {
+            throw new BadRequestException(String.format("Ranger raz is not installed on the datalake: %s!", sdxCluster.getClusterName()));
+        }
+    }
+
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
@@ -414,7 +446,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
-                .getPlatformStringForImageCatalog(environment.getCloudPlatform(), environmentService.isGovCloudEnvironment(environment));
+                .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
@@ -424,7 +456,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         Architecture architecture = validateAndGetArchitecture(sdxClusterRequest, imageV4Response, cloudPlatform, accountId);
 
-        ccmService.validateCcmV2Requirement(environment.getTunnel(), runtimeVersion);
+        validateCcmV2Requirement(environment, runtimeVersion);
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setArchitecture(internalStackV4Request, sdxCluster, architecture);
@@ -432,7 +464,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         setSecurity(sdxClusterRequest, sdxCluster, userCrn);
 
         if (isCloudStorageConfigured(sdxClusterRequest)) {
-            storageValidationService.validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
+            validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
@@ -457,8 +489,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
 
-        sdxIntanceService.overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
-                Collections.emptyList(), sdxClusterRequest.getClusterShape());
+        overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList(),
+                sdxClusterRequest.getClusterShape());
         recipeService.validateRecipes(sdxClusterRequest.getRecipes(), stackRequest);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);
@@ -565,6 +597,48 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
+    private void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups,
+            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups,
+            SdxClusterShape sdxClusterShape) {
+        if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
+            LOGGER.debug("Override default template with custom instance groups from request.");
+            customInstanceGroups.forEach(customInstanceGroup -> {
+                InstanceGroupV4Request templateInstanceGroup = getTemplateInstanceGroup(defaultTemplate, customInstanceGroup.getName())
+                        .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
+                overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType());
+            });
+        } else if (CollectionUtils.isNotEmpty(originalInstanceGroups) && CollectionUtils.isNotEmpty(currentInstanceGroups)
+                && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
+            LOGGER.debug("Override default template with previous instance groups");
+            currentInstanceGroups.forEach(currentInstanceGroup -> {
+                originalInstanceGroups
+                        .stream()
+                        .filter(templateGroup -> StringUtils.equals(templateGroup.getName(), currentInstanceGroup.getName()))
+                        .findAny()
+                        .ifPresent(originalInstanceGroup -> overrideDefaultInstanceTypeFromPreviousDatalake(defaultTemplate, currentInstanceGroup,
+                                originalInstanceGroup));
+            });
+        }
+    }
+
+    private void overrideDefaultInstanceTypeFromPreviousDatalake(StackV4Request defaultTemplate, InstanceGroupV4Response currentInstanceGroup,
+            InstanceGroupV4Request originalInstanceGroup) {
+        if (currentInstanceGroup != null && currentInstanceGroup.getTemplate() != null && originalInstanceGroup.getTemplate() != null &&
+                !currentInstanceGroup.getTemplate().getInstanceType().equals(originalInstanceGroup.getTemplate().getInstanceType())) {
+            getTemplateInstanceGroup(defaultTemplate, currentInstanceGroup.getName())
+                    .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceGroup.getTemplate().getInstanceType()));
+        }
+    }
+
+    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType) {
+        InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
+        if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
+            LOGGER.info("Override instance group {} instance type from {} to {}",
+                    templateGroup.getName(), instanceTemplate.getInstanceType(), newInstanceType);
+            instanceTemplate.setInstanceType(newInstanceType);
+        }
+    }
+
     public Pair<SdxCluster, FlowIdentifier> resizeSdx(final String userCrn, final String clusterName, final SdxClusterResizeRequest sdxClusterResizeRequest) {
         LOGGER.info("Re-sizing SDX cluster with name {}", clusterName);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
@@ -621,16 +695,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         List<InstanceGroupV4Request> originalInstanceGroups = getInstanceGroupsByCDPConfig(sdxCluster.getClusterShape(), cloudPlatform, sdxCluster.getRuntime(),
                 sdxCluster.getArchitecture());
-        sdxIntanceService.overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
+        overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
                 stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());
-        sdxIntanceService.overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(),
-                stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());
+        overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(), stackV4Response.getInstanceGroups(),
+                sdxCluster.getClusterShape());
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
                 sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape(), stackV4Response.getCluster().isDbSSLEnabled());
         stackRequest.setNetwork(createNetworkRequestFromCurrentDatalake(stackV4Response.getNetwork()));
 
         if (newSdxCluster.isEnableMultiAz()) {
-            multiAzDecorator.decorateRequestWithMultiAz(stackRequest, stackV4Response, environment, sdxCluster.getClusterShape(), sdxCluster.isEnableMultiAz());
+            decorateRequestWithMultiAz(stackRequest, stackV4Response, environment, sdxCluster.getClusterShape(), sdxCluster.isEnableMultiAz());
         }
 
         newSdxCluster.setStackRequest(stackRequest);
@@ -640,6 +714,79 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
                 sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void decorateRequestWithMultiAz(StackV4Request stackRequest, StackV4Response stackResponse, DetailedEnvironmentResponse environmentResponse,
+            SdxClusterShape clusterShape, boolean currentSdxIsMultiAz) {
+        if (currentSdxIsMultiAz) {
+            Map<String, Set<String>> subnetsByAz = null;
+            if (stackResponse.getCloudPlatform().equals(AWS)) {
+                subnetsByAz = collectSubnetsByAzFromMetadata(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(AZURE)) {
+                subnetsByAz = collectSubnetsByAzFromAzure(stackResponse);
+            } else if (stackResponse.getCloudPlatform().equals(GCP)) {
+                subnetsByAz = collectSubnetsByAzFromGcp(stackResponse);
+            }
+            if (subnetsByAz != null && subnetsByAz.size() > 1) {
+                multiAzDecorator.decorateStackRequestWithPreviousNetwork(stackRequest, environmentResponse, subnetsByAz);
+            }
+        }
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromMetadata(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from instance metadata");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .filter(metadata -> metadata.getSubnetId() != null && metadata.getAvailabilityZone() != null)
+                .map(meta ->
+                        new SimpleEntry<>(meta.getAvailabilityZone(), meta.getSubnetId()))
+                .collect(Collectors
+                        .toMap(Entry::getKey, entry -> new HashSet<>(Collections.singletonList(entry.getValue())),
+                                (existingSet, newSet) -> {
+                                    existingSet.addAll(newSet);
+                                    return existingSet;
+                                }
+                        ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromAzure(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from Azure network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getAzure()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getAzure().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
+    }
+
+    private Map<String, Set<String>> collectSubnetsByAzFromGcp(StackV4Response stackV4Response) {
+        LOGGER.info("Collecting subnets by avaliability zone from GCP network");
+        return stackV4Response
+                .getInstanceGroups()
+                .stream()
+                .map(InstanceGroupV4Response::getNetwork)
+                .flatMap(network -> network
+                        .getGcp()
+                        .getAvailabilityZones()
+                        .stream()
+                        .map(key -> new SimpleEntry<>(key, network.getGcp().getSubnetIds())))
+                .collect(Collectors.toMap(Entry::getKey, entry -> new HashSet<>(entry.getValue()),
+                        (existingSet, newSet) -> {
+                            existingSet.addAll(newSet);
+                            return existingSet;
+                        }
+                ));
     }
 
     private void setSecurityRequest(SdxCluster sdxCluster, StackV4Request stackRequest) {
@@ -667,6 +814,73 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                             ig.setRecipeNames(recipeNames);
                         }
                 );
+    }
+
+    private void overrideDefaultInstanceStorage(StackV4Request defaultTemplate, List<SdxInstanceGroupDiskRequest> customInstanceGroupDisks,
+            List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
+        if (CollectionUtils.isNotEmpty(customInstanceGroupDisks)) {
+            LOGGER.debug("Override default template with custom instance groups from request.");
+            customInstanceGroupDisks.forEach(customInstanceGroupDisk -> {
+                InstanceGroupV4Request templateInstanceGroup =
+                        getTemplateInstanceGroup(defaultTemplate, customInstanceGroupDisk.getName())
+                                .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: "
+                                        + customInstanceGroupDisk.getName()));
+                overrideInstanceStorage(templateInstanceGroup, customInstanceGroupDisk.getInstanceDiskSize());
+            });
+        } else if (CollectionUtils.isNotEmpty(currentInstanceGroups) && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
+            LOGGER.debug("Override default template with modified instance groups from previous datalake.");
+            currentInstanceGroups.forEach(instanceGroupDisk -> {
+                Optional<InstanceGroupV4Request> templateInstanceGroupOp = getTemplateInstanceGroup(defaultTemplate, instanceGroupDisk.getName());
+                overrideInstanceStorageWithPreviousDiskSize(instanceGroupDisk, templateInstanceGroupOp);
+            });
+        }
+    }
+
+    private Optional<InstanceGroupV4Request> getTemplateInstanceGroup(StackV4Request defaultTemplate, String instanceName) {
+        return defaultTemplate
+                .getInstanceGroups()
+                .stream()
+                .filter(templateGroup -> StringUtils.equals(templateGroup.getName(), instanceName))
+                .findAny();
+    }
+
+    private void overrideInstanceStorageWithPreviousDiskSize(InstanceGroupV4Response instanceGroupDisk,
+            Optional<InstanceGroupV4Request> templateInstanceGroupOp) {
+        if (templateInstanceGroupOp.isPresent()) {
+            int previousStorageSize = instanceGroupDisk
+                    .getTemplate()
+                    .getAttachedVolumes()
+                    .stream()
+                    .filter(vol -> vol.getSize() != null)
+                    .mapToInt(VolumeV4Response::getSize)
+                    .max()
+                    .orElse(0);
+            int templateStorageSize = templateInstanceGroupOp
+                    .get()
+                    .getTemplate()
+                    .getAttachedVolumes()
+                    .stream()
+                    .filter(vol -> vol.getSize() != null)
+                    .mapToInt(VolumeV4Request::getSize)
+                    .max()
+                    .orElse(0);
+            if (previousStorageSize > templateStorageSize) {
+                overrideInstanceStorage(templateInstanceGroupOp.get(), previousStorageSize);
+            }
+        }
+    }
+
+    private void overrideInstanceStorage(InstanceGroupV4Request templateGroup, Integer storageSize) {
+        InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
+        if (instanceTemplate != null && storageSize > 0) {
+            instanceTemplate
+                    .getAttachedVolumes()
+                    .forEach(volumeV4Request -> {
+                        LOGGER.info("Override instance group {} storage size from {} to {}",
+                                templateGroup.getName(), volumeV4Request.getSize(), storageSize);
+                        volumeV4Request.setSize(storageSize);
+                    });
+        }
     }
 
     private void overrideDefaultDatabaseProperties(SdxDatabase sdxDatabase, SdxDatabaseComputeStorageRequest customSdxDatabase,
@@ -718,7 +932,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private SdxCluster validateAndCreateNewSdxClusterForResize(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
             String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse) {
         validateShape(shape, sdxCluster.getRuntime(), environmentResponse);
-        rangerRazService.validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
+        validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
         validateRmsEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         validateMultiAz(enableMultiAz, environmentResponse, shape, true);
@@ -743,7 +957,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private SdxCluster validateAndCreateNewSdxCluster(SdxClusterRequest cluster, String version, String clusterName, String userCrn,
             DetailedEnvironmentResponse environmentResponse) {
         validateShape(cluster.getClusterShape(), version, environmentResponse);
-        rangerRazService.validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
+        validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
         validateRmsEnablement(version, cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape(), false);
@@ -1064,6 +1278,87 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return getByNameInAccount(userCrn, resourceName).getId();
     }
 
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
+        if (cloudStorage != null) {
+            ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+            validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
+            validationBuilder.merge(validateBaseLocation(cloudStorage.getBaseLocation()));
+
+            if (StringUtils.isEmpty(cloudStorage.getBaseLocation())) {
+                validationBuilder.error("'baseLocation' must be set in 'cloudStorage'!");
+            } else {
+                if (FileSystemType.S3.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
+                }
+                if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS'!", FileSystemType.ADLS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdls() == null, "'adls' must be set if 'fileSystemType' is 'ADLS'!");
+                }
+                if (FileSystemType.ADLS_GEN_2.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS_GEN_2'!",
+                                    FileSystemType.ADLS_GEN_2.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdlsGen2() == null, "'adlsGen2' must be set if 'fileSystemType' is 'ADLS_GEN_2'!");
+                }
+                if (FileSystemType.WASB.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.WASB.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'WASB'", FileSystemType.WASB.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getWasb() == null, "'wasb' must be set if 'fileSystemType' is 'WASB'!");
+                }
+                if (FileSystemType.GCS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'GCS'!", FileSystemType.GCS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getGcs() == null, "'gcs' must be set if 'fileSystemType' is 'GCS'!");
+                }
+            }
+
+            ValidationResult validationResult = validationBuilder.build();
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
+    }
+
+    ValidationResult validateBaseLocation(String baseLocation) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        if (baseLocation != null) {
+            Pattern pattern = Pattern.compile("\\s");
+            Matcher matcher = pattern.matcher(baseLocation.trim());
+            if (matcher.find()) {
+                resultBuilder.error("You have added some whitespace to the base location: " + baseLocation);
+            }
+        } else {
+            LOGGER.debug("Cannot validate the base location, because it's null");
+        }
+        return resultBuilder.build();
+    }
+
+    private void validateRazEnablement(String runtime, boolean razEnabled, DetailedEnvironmentResponse environment) {
+        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+        if (razEnabled) {
+            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+            if (!platformConfig.getRazSupportedPlatforms().contains(cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning Ranger Raz is only valid for %s",
+                        platformConfig.getRazSupportedPlatforms().stream()
+                                .map(CloudPlatform::getDislayName)
+                                .collect(Collectors.joining(", "))));
+            } else if (!sdxVersionRuleEnforcer.isRazSupported(runtime, cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning Ranger Raz on %s is only valid for Cloudera Runtime version greater than or " +
+                                "equal to %s and not %s", cloudPlatform.getDislayName(),
+                        sdxVersionRuleEnforcer.getSupportedRazVersionForPlatform(cloudPlatform), runtime));
+            } else if (cloudPlatform.equals(GCP) && !entitlementService.isRazForGcpEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
+                validationBuilder.error("Provisioning Ranger Raz on GCP is not enabled for this account");
+            }
+        }
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
     private void validateRmsEnablement(String runtime, boolean razEnabled, boolean rmsEnabled, String cloudPlatformString, String accountId) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, cloudPlatformString);
@@ -1264,6 +1559,29 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
+    private void validateCcmV2Requirement(DetailedEnvironmentResponse environment, String runtimeVersion) {
+        Comparator<Versioned> versionComparator = new VersionComparator();
+
+        if (environment.getTunnel() != null && runtimeVersion != null) {
+            switch (environment.getTunnel()) {
+                case CCMV2:
+                    if (versionComparator.compare(() -> CCMV2_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
+                        throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
+                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_REQUIRED_VERSION));
+                    }
+                    break;
+                case CCMV2_JUMPGATE:
+                    if (versionComparator.compare(() -> CCMV2_JUMPGATE_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
+                        throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
+                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_JUMPGATE_REQUIRED_VERSION));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
         try {
             if (sdxClusterRequest.getTags() == null) {
@@ -1370,9 +1688,15 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private DetailedEnvironmentResponse validateAndGetEnvironment(String environmentName) {
-        DetailedEnvironmentResponse environmentResponse = environmentService.getByName(environmentName);
+        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
         validateEnv(environmentResponse);
         return environmentResponse;
+    }
+
+    private boolean isGovCloudEnvironment(DetailedEnvironmentResponse environmentResponse) {
+        return environmentResponse.getCredential() != null &&
+                environmentResponse.getCredential().getGovCloud() != null &&
+                environmentResponse.getCredential().getGovCloud().booleanValue();
     }
 
     @Override
@@ -1392,7 +1716,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             SdxCluster sdxCluster = getById(resourceId);
             DetailedEnvironmentResponse envResp = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> environmentService.getByCrn(sdxCluster.getEnvCrn()));
+                    () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
             LOGGER.info("Cannot find environment, ignoring", ignored);
@@ -1448,6 +1772,20 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return EnumSet.of(Crn.ResourceType.DATALAKE);
     }
 
+    public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+        if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
+            throw new BadRequestException("The following query params needs to be filled for this request: clusterShape, runtimeVersion, cloudPlatform");
+        }
+        Set<String> result = new HashSet<>();
+        StackV4Request stackV4Request = cdpConfigService.getConfigForKey(new CDPConfigKey(
+                CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion, Architecture.X86_64
+        ));
+        if (stackV4Request != null && CollectionUtils.isNotEmpty(stackV4Request.getInstanceGroups())) {
+            result = stackV4Request.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).collect(Collectors.toSet());
+        }
+        return result;
+    }
+
     public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
     }
@@ -1463,6 +1801,19 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw notFoundException("SdxCluster with", crn + " crn");
         });
         LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
+    }
+
+    public FlowIdentifier updateSalt(SdxCluster sdxCluster) {
+        SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
+        DatalakeStatusEnum status = sdxStatus.getStatus();
+        if (status.isStopState() || status.isDeleteInProgressOrCompleted()) {
+            String message = String.format("SaltStack update cannot be initiated as datalake '%s' is currently in '%s' state.",
+                    sdxCluster.getName(), status);
+            LOGGER.info(message);
+            throw new BadRequestException(message);
+        } else {
+            return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
+        }
     }
 
     private NetworkV4Request createNetworkRequestFromCurrentDatalake(NetworkV4Response networkFromCurrentDatalake) {
@@ -1496,7 +1847,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public void validateSkuMigration(SdxCluster sdxCluster) {
-        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(sdxCluster.getEnvCrn());
+        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
         if (!AZURE.equals(cloudPlatform)) {
             throw new BadRequestException("SKU migration is only supported on Data Lakes running on the Azure platform");

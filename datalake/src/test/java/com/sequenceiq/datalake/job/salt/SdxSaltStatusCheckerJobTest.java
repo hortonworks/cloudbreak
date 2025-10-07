@@ -30,7 +30,6 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -60,6 +59,9 @@ class SdxSaltStatusCheckerJobTest {
     @Mock
     private SdxStatusService sdxStatusService;
 
+    @InjectMocks
+    private SdxSaltStatusCheckerJob underTest;
+
     @Mock
     private SdxCluster sdxCluster;
 
@@ -80,12 +82,6 @@ class SdxSaltStatusCheckerJobTest {
 
     @Mock
     private SaltPasswordStatusResponse saltPasswordStatus;
-
-    @Mock
-    private SaltService saltService;
-
-    @InjectMocks
-    private SdxSaltStatusCheckerJob underTest;
 
     @BeforeEach
     void setUp() {
@@ -169,7 +165,7 @@ class SdxSaltStatusCheckerJobTest {
 
         underTest.executeJob(context);
 
-        verify(saltService).rotateSaltPassword(sdxCluster);
+        verify(sdxService).rotateSaltPassword(sdxCluster);
     }
 
     private void setStatus(DatalakeStatusEnum status) {

@@ -11,14 +11,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -279,21 +275,5 @@ class StorageValidationServiceTest {
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
         Assertions.assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
         Assertions.assertEquals(ValidationResult.State.VALID, validationResult.getState());
-    }
-
-    public static Stream<Arguments> storageBaseLocationsWhiteSpaceValidation() {
-        return Stream.of(
-                Arguments.of(" abfs://myscontainer@mystorage", ValidationResult.State.VALID),
-                Arguments.of("abfs://myscontainer @mystorage ", ValidationResult.State.ERROR),
-                Arguments.of("a bfs://myscontainer@mystorage ", ValidationResult.State.ERROR),
-                Arguments.of("s3a://mybucket/mylocation      ", ValidationResult.State.VALID),
-                Arguments.of("abfs://myscontainer@mystorage ", ValidationResult.State.VALID));
-    }
-
-    @ParameterizedTest
-    @MethodSource("storageBaseLocationsWhiteSpaceValidation")
-    void testValidateBaseLocationWhenWhiteSpaceIsPresent(String input, ValidationResult.State expected) {
-        ValidationResult result = underTest.validateBaseLocation(input);
-        assertEquals(expected, result.getState());
     }
 }

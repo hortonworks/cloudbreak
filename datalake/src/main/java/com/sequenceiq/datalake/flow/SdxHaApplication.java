@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.service.FlowCancelService;
 
@@ -44,18 +43,15 @@ public class SdxHaApplication implements HaApplication {
     @Inject
     private FlowCancelService flowCancelService;
 
-    @Inject
-    private SdxStatusService sdxStatusService;
-
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
-        return filterResizingSdx(sdxStatusService.findByResourceIdsAndStatuses(resourceIds, DELETE_STATUSES));
+        return filterResizingSdx(sdxService.findByResourceIdsAndStatuses(resourceIds, DELETE_STATUSES));
     }
 
     @Override
     public Set<Long> getAllDeletingResources() {
         Set<Long> sdxIds = DatalakeInMemoryStateStore.getAll();
-        return filterResizingSdx(sdxStatusService.findByResourceIdsAndStatuses(sdxIds, DELETE_STATUSES));
+        return filterResizingSdx(sdxService.findByResourceIdsAndStatuses(sdxIds, DELETE_STATUSES));
     }
 
     @Override

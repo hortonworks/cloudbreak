@@ -52,9 +52,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
-import com.sequenceiq.datalake.service.sdx.RangerRazService;
 import com.sequenceiq.datalake.service.sdx.SELinuxService;
-import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StackService;
@@ -126,12 +124,6 @@ class SdxControllerTest {
 
     @Mock
     private StackService stackService;
-
-    @Mock
-    private RangerRazService rangerRazService;
-
-    @Mock
-    private SaltService saltService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -295,7 +287,7 @@ class SdxControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableRangerRazByCrn(sdxCluster.getCrn()));
 
-        verify(rangerRazService).updateRangerRazEnabled(sdxCluster);
+        verify(sdxService).updateRangerRazEnabled(sdxCluster);
     }
 
     @Test
@@ -305,7 +297,7 @@ class SdxControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableRangerRazByName(sdxCluster.getName()));
 
-        verify(rangerRazService).updateRangerRazEnabled(sdxCluster);
+        verify(sdxService).updateRangerRazEnabled(sdxCluster);
     }
 
     @Test
@@ -315,7 +307,7 @@ class SdxControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.rotateSaltPasswordByCrn(sdxCluster.getCrn()));
 
-        verify(saltService).rotateSaltPassword(sdxCluster);
+        verify(sdxService).rotateSaltPassword(sdxCluster);
     }
 
     @Test
@@ -366,12 +358,12 @@ class SdxControllerTest {
     void testUpdateSaltByCrn() {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
-        when(saltService.updateSalt(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(sdxService.updateSalt(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.updateSaltByCrn(sdxCluster.getCrn()));
 
         verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
-        verify(saltService, times(1)).updateSalt(sdxCluster);
+        verify(sdxService, times(1)).updateSalt(sdxCluster);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
     }
