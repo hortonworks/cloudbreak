@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
 
 import java.util.List;
 import java.util.Set;
@@ -42,7 +43,7 @@ public enum CloudbreakSecretType implements SecretType {
     SALT_PASSWORD(List.of(VAULT, CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE)),
     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY(List.of(SALT_STATE_APPLY, CUSTOM_JOB)),
     COMPUTE_MONITORING_CREDENTIALS(List.of(VAULT, CUSTOM_JOB)),
-    EMBEDDED_DB_SSL_CERT(List.of(CUSTOM_JOB, SALT_STATE_APPLY)),
+    EMBEDDED_DB_SSL_CERT(List.of(CUSTOM_JOB, SALT_STATE_APPLY), Set.of(SKIP_STATUS_CHECK)),
     // internal DL related secrets
     INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE, CUSTOM_JOB), Set.of(INTERNAL)),

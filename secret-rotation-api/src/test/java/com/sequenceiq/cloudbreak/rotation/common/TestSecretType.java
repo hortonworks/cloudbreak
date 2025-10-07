@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.common;
 
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP2;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP3;
@@ -17,7 +18,7 @@ public enum TestSecretType implements SecretType {
     TEST(Set.of(SKIP_SALT_UPDATE)),
     TEST_2,
     TEST_3(Set.of(INTERNAL)),
-    TEST_4;
+    TEST_4(Set.of(SKIP_STATUS_CHECK));
 
     private final Set<SecretTypeFlag> flags;
 

@@ -43,6 +43,8 @@ class SecretRotationValidationServiceTest {
 
     private static final SecretType TEST_SECRET = TestSecretType.TEST;
 
+    private static final SecretType TEST_SECRET_4 = TestSecretType.TEST_4;
+
     private static final TestSecretRotationStep TEST_STEP = TestSecretRotationStep.STEP;
 
     @Mock
@@ -106,8 +108,15 @@ class SecretRotationValidationServiceTest {
         when(secretRotationStepProgressService.getProgressList(any())).thenReturn(List.of());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, notAvailable()));
+                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET, TEST_SECRET_4), null, notAvailable()));
         assertEquals("The cluster must be in available state to start secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenStatusIsNotAvailableButStatusCheckNotNeeded() {
+        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(List.of());
+
+        underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET_4), null, notAvailable());
     }
 
     @Test
