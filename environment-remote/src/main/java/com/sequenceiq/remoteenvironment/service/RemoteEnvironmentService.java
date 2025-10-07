@@ -61,7 +61,7 @@ public class RemoteEnvironmentService {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV1(accountId, request);
+                .describeV1(accountId, request.getCrn());
     }
 
     public DescribeEnvironmentV2Response describeV2(DescribeRemoteEnvironment request) {
@@ -69,7 +69,7 @@ public class RemoteEnvironmentService {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         throwExceptionIfNotEntitled(accountId);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV2(accountId, request);
+                .describeV2(accountId, request.getCrn());
     }
 
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {

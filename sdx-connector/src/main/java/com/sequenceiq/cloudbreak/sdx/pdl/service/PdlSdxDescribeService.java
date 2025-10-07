@@ -117,8 +117,8 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
 
     @Override
     public Optional<String> getCACertsForEnvironment(String environmentCrn) {
-        Environment privateEnvironment = getPrivateEnvForPublicEnv(environmentCrn);
-        GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(privateEnvironment.getCrn());
+        String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
+        GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(pvcCrn);
         return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
     }
 }

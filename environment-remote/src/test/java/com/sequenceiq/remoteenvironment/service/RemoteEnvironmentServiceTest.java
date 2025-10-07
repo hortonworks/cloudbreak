@@ -147,7 +147,7 @@ class RemoteEnvironmentServiceTest {
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
         when(remoteEnvironmentConnectorProvider.getForCrn(ENVIRONMENT_CRN)).thenReturn(connector1);
-        when(connector1.describeV1(ACCOUNT_ID, request)).thenReturn(response);
+        when(connector1.describeV1(ACCOUNT_ID, ENVIRONMENT_CRN)).thenReturn(response);
 
         DescribeEnvironmentResponse result = doAs(USER_CRN, () -> underTest.describeV1(request));
 
@@ -172,7 +172,7 @@ class RemoteEnvironmentServiceTest {
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
         when(remoteEnvironmentConnectorProvider.getForCrn(ENVIRONMENT_CRN)).thenReturn(connector1);
-        when(connector1.describeV2(ACCOUNT_ID, request)).thenReturn(response);
+        when(connector1.describeV2(ACCOUNT_ID, ENVIRONMENT_CRN)).thenReturn(response);
 
         DescribeEnvironmentV2Response result = doAs(USER_CRN, () -> underTest.describeV2(request));
 

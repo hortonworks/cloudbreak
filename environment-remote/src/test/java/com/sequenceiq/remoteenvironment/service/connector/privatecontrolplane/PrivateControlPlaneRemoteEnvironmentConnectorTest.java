@@ -172,7 +172,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         describeRemoteEnvironment.setCrn("crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd");
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest
-                .describeV1(PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment));
+                .describeV1(PUBLIC_CLOUD_ACCOUNT_ID, "crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd"));
 
         assertEquals("The provided environment CRN('crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd') is invalid",
                 ex.getMessage());
@@ -189,9 +189,6 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         privateControlPlane.setId(1L);
         privateControlPlane.setPrivateCloudAccountId("5abe6882-ff63-4ad2-af86-a5582872a9cd");
 
-        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
-        describeRemoteEnvironment.setCrn(ENV_CRN);
-
         DescribeEnvironmentV2Response describeEnvironmentResponse = new DescribeEnvironmentV2Response();
 
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
@@ -201,7 +198,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         DescribeEnvironmentResponse result = underTest
                 .describeV1(
-                        PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment
+                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
                         );
 
         assertEquals(describeEnvironmentResponse, result);
@@ -216,9 +213,6 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         privateControlPlane.setId(1L);
         privateControlPlane.setPrivateCloudAccountId("5abe6882-ff63-4ad2-af86-a5582872a9cd");
 
-        DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
-        describeRemoteEnvironment.setCrn(ENV_CRN);
-
         DescribeEnvironmentV2Response describeEnvironmentResponse = new DescribeEnvironmentV2Response();
         Environment environment = new Environment();
         environment.setEnvironmentName("env1");
@@ -231,7 +225,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         DescribeEnvironmentV2Response result = underTest
                 .describeV2(
-                        PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment
+                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
                 );
 
         assertEquals(describeEnvironmentResponse, result);
@@ -249,7 +243,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest
                 .describeV1(
                         PUBLIC_CLOUD_ACCOUNT_ID,
-                        describeRemoteEnvironment));
+                        ENV_CRN));
 
         assertEquals("There is no control plane for this account with account id 5abe6882-ff63-4ad2-af86-a5582872a9cd.",
                 ex.getMessage());
@@ -268,7 +262,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.describeV1(PUBLIC_CLOUD_ACCOUNT_ID, describeRemoteEnvironment));
+                () -> underTest.describeV1(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch environment for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 

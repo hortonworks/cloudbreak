@@ -7,7 +7,6 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
-import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
 public interface RemoteEnvironmentConnector {
@@ -18,11 +17,11 @@ public interface RemoteEnvironmentConnector {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeEnvironmentResponse describeV1(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+    default DescribeEnvironmentResponse describeV1(String publicCloudAccountId, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+    default DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 

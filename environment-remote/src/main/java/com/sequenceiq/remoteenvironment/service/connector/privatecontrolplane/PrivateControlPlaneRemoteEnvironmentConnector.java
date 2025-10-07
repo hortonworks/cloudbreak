@@ -37,7 +37,6 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
-import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
@@ -97,21 +96,21 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
+    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, String environmentCrn) {
         DescribeEnvironmentResponse describeEnvironmentResponse = callRemoteEnvironment(
                 publicCloudAccountId,
-                environment.getCrn(),
+                environmentCrn,
                 this::describeRemoteEnvironmentWithActor);
 
         return describeEnvironmentResponse;
     }
 
     @Override
-    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, DescribeRemoteEnvironment environment) {
-        String privateCloudAccountId = Crn.safeFromString(environment.getCrn()).getAccountId();
+    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, String environmentCrn) {
+        String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
         DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
                 publicCloudAccountId,
-                environment.getCrn(),
+                environmentCrn,
                 this::describeRemoteEnvironmentWithActor);
 
         Optional<PrivateControlPlane> privateControlPlane =

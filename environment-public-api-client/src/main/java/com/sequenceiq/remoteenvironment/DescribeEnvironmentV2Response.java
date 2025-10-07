@@ -21,6 +21,12 @@ public class DescribeEnvironmentV2Response extends DescribeEnvironmentResponse {
         this.additionalProperties = additionalProperties;
     }
 
+    public DescribeEnvironmentResponse toV1Response() {
+        DescribeEnvironmentResponse describeEnvironmentResponse = new DescribeEnvironmentResponse();
+        describeEnvironmentResponse.setEnvironment(getEnvironment());
+        return describeEnvironmentResponse;
+    }
+
     @Override
     public String toString() {
         return "DescribeRemoteEnvironmentResponse{" +
