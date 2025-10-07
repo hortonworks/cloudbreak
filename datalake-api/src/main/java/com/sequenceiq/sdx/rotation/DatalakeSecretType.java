@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEA
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
 
 import java.util.List;
 import java.util.Set;
@@ -36,7 +37,7 @@ public enum DatalakeSecretType implements SecretType {
     SALT_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE)),
     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY(List.of(CLOUDBREAK_ROTATE_POLLING)),
     COMPUTE_MONITORING_CREDENTIALS(List.of(CLOUDBREAK_ROTATE_POLLING)),
-    EMBEDDED_DB_SSL_CERT(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    EMBEDDED_DB_SSL_CERT(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_STATUS_CHECK)),
     DBUS_UMS_ACCESS_KEY(List.of(CLOUDBREAK_ROTATE_POLLING));
 
     private final List<SecretRotationStep> steps;
