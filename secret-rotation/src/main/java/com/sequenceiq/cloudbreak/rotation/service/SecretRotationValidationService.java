@@ -95,7 +95,7 @@ public class SecretRotationValidationService {
     }
 
     private void validateIfAvailableStatusIsNeeded(Collection<SecretType> secretTypes, Supplier<Boolean> isInAvailableStatePredicate) {
-        if (!isInAvailableStatePredicate.get()) {
+        if (secretTypes.stream().anyMatch(SecretType::statusCheckNeeded) && !isInAvailableStatePredicate.get()) {
             throwBadRequest("The cluster must be in available state to start secret rotation.");
         }
     }
