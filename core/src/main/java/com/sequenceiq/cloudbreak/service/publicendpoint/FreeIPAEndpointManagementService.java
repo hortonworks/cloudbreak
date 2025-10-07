@@ -104,19 +104,24 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     public void deleteLoadBalancerDomainFromFreeIPA(StackDtoDelegate stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
         if (loadBalancerOptional.isPresent()) {
-            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeipaClientService.findByEnvironmentCrn(stack.getEnvironmentCrn());
-            if (freeIpaResponse.isPresent()) {
-                LoadBalancer loadBalancer = loadBalancerOptional.get();
-                try {
-                    if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
-                        sendDeleteDnsCnameRecordRequest(stack, loadBalancer);
-                    } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
-                        sendDeleteDnsARecordRequest(stack, loadBalancer);
+            Optional<DescribeFreeIpaResponse> freeIpaResponseOp = freeipaClientService.findByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (freeIpaResponseOp.isPresent()) {
+                DescribeFreeIpaResponse freeIpaResponse = freeIpaResponseOp.get();
+                if (freeIpaResponse.getAvailabilityStatus().isAvailable()) {
+                    LoadBalancer loadBalancer = loadBalancerOptional.get();
+                    try {
+                        if (StringUtils.isNotEmpty(loadBalancer.getDns())) {
+                            sendDeleteDnsCnameRecordRequest(stack, loadBalancer);
+                        } else if (StringUtils.isNotEmpty(loadBalancer.getIp())) {
+                            sendDeleteDnsARecordRequest(stack, loadBalancer);
+                        }
+                    } catch (Exception e) {
+                        String errorMessage = "Unable to delete load balancer domain from FreeIPA";
+                        LOGGER.error(errorMessage, e);
+                        throw new FreeIpaOperationFailedException(errorMessage, e);
                     }
-                } catch (Exception e) {
-                    String errorMessage = "Unable to delete load balancer domain from FreeIPA";
-                    LOGGER.error(errorMessage, e);
-                    throw new FreeIpaOperationFailedException(errorMessage, e);
+                } else {
+                    LOGGER.warn("FreeIPA is not available. Skipping DNS deregistration for Load balancer.");
                 }
             } else {
                 LOGGER.info("FreeIPA is missing for environment. Skipping DNS deregistration for Load balancer.");
