@@ -3,6 +3,7 @@ package com.sequenceiq.remoteenvironment.service;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,11 +41,14 @@ public class RemoteEnvironmentService {
     private EntitlementService entitlementService;
 
     public SimpleRemoteEnvironmentResponses list(List<String> types) {
-        MDCBuilder.buildMdcContext();
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (entitlementService.hybridCloudEnabled(accountId)) {
             Set<SimpleRemoteEnvironmentResponse> responseList = getConnectorTypes(types).parallelStream()
-                    .flatMap(ct -> remoteEnvironmentConnectorProvider.getForType(ct).list(accountId).stream())
+                    .flatMap(ct -> {
+                        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+                        return remoteEnvironmentConnectorProvider.getForType(ct).list(accountId).stream();
+                    })
                     .collect(Collectors.toSet());
             return new SimpleRemoteEnvironmentResponses(responseList);
         } else {
