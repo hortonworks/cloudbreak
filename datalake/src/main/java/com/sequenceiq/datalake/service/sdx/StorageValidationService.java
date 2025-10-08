@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.model.FileSystemType;
@@ -196,5 +199,63 @@ public class StorageValidationService {
             userMapping.put(AccountMappingSubject.RANGER_RAZ_USER, rangerCloudAccessAuthorizerRole);
         }
         return userMapping;
+    }
+
+    public void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
+        if (cloudStorage != null) {
+            ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
+            validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
+            validationBuilder.merge(validateBaseLocation(cloudStorage.getBaseLocation()));
+
+            if (StringUtils.isEmpty(cloudStorage.getBaseLocation())) {
+                validationBuilder.error("'baseLocation' must be set in 'cloudStorage'!");
+            } else {
+                if (FileSystemType.S3.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
+                }
+                if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS'!", FileSystemType.ADLS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdls() == null, "'adls' must be set if 'fileSystemType' is 'ADLS'!");
+                }
+                if (FileSystemType.ADLS_GEN_2.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS_GEN_2'!",
+                                    FileSystemType.ADLS_GEN_2.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdlsGen2() == null, "'adlsGen2' must be set if 'fileSystemType' is 'ADLS_GEN_2'!");
+                }
+                if (FileSystemType.WASB.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.WASB.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'WASB'", FileSystemType.WASB.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getWasb() == null, "'wasb' must be set if 'fileSystemType' is 'WASB'!");
+                }
+                if (FileSystemType.GCS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'GCS'!", FileSystemType.GCS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getGcs() == null, "'gcs' must be set if 'fileSystemType' is 'GCS'!");
+                }
+            }
+
+            ValidationResult validationResult = validationBuilder.build();
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
+    }
+
+    ValidationResult validateBaseLocation(String baseLocation) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        if (baseLocation != null) {
+            Pattern pattern = Pattern.compile("\\s");
+            Matcher matcher = pattern.matcher(baseLocation.trim());
+            if (matcher.find()) {
+                resultBuilder.error("You have added some whitespace to the base location: " + baseLocation);
+            }
+        } else {
+            LOGGER.debug("Cannot validate the base location, because it's null");
+        }
+        return resultBuilder.build();
     }
 }

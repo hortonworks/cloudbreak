@@ -28,6 +28,7 @@ import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.list.Resource;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -81,6 +82,9 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
 
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public DetailedEnvironmentResponse getByName(String environment) {
         try {
@@ -221,5 +225,11 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
                 .filter(dl -> StringUtils.isNotBlank(dl.getEnvCrn()) && StringUtils.isNotBlank(dl.getEnvName()))
                 .forEach(dl -> result.putIfAbsent(dl.getEnvCrn(), Optional.of(dl.getEnvName())));
         return result;
+    }
+
+    public boolean isGovCloudEnvironment(DetailedEnvironmentResponse environmentResponse) {
+        return environmentResponse.getCredential() != null &&
+                environmentResponse.getCredential().getGovCloud() != null &&
+                environmentResponse.getCredential().getGovCloud().booleanValue();
     }
 }
