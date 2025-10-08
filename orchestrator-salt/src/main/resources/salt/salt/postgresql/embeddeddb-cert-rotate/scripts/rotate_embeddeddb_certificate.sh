@@ -33,7 +33,7 @@ ipa cert-find --services=${PGSQL_PRINCIPAL} --status=VALID | grep "Serial number
 mv -f ${CERTS_DIR}/postgres.key ${CERTS_DIR}/postgres_bkp.key
 mv -f ${CERTS_DIR}/postgres.cert ${CERTS_DIR}/postgres_bkp.cert
 
-openssl req -nodes -newkey rsa:2048 -days 365 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
+openssl req -nodes -newkey rsa:2048 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
 cat <<-EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -56,6 +56,6 @@ chmod 600 ${CERTS_DIR}/postgres.key
 rm -f ${CERTS_DIR}/postgres.csr
 
 systemctl --system daemon-reload
-systemctl restart postgresql
+systemctl reload postgresql
 
 set +e

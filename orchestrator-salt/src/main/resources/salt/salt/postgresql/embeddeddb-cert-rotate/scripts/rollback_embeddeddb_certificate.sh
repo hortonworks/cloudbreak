@@ -40,6 +40,6 @@ chmod 600 ${CERTS_DIR}/postgres.key
 rm -f ${CERTS_DIR}/postgres.csr
 
 systemctl --system daemon-reload
-systemctl restart postgresql
+systemctl reload postgresql
 
 set +e
