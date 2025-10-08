@@ -160,7 +160,7 @@ public class JsonUtil {
         return MAPPER.readTree(content);
     }
 
-    public static ObjectNode createJsonTree(Map<String, Object> map) {
+    public static ObjectNode createJsonTree(Map<String, ? extends Object> map) {
         ObjectNode rootNode = MAPPER.createObjectNode();
         map.forEach((key, value) -> rootNode.set(key, MAPPER.valueToTree(value)));
         return rootNode;

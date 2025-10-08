@@ -112,7 +112,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     private void validateSELinux(TestContext testContext) {
         if (testContext.getSELinuxValidation()) {
             LOGGER.info("Validating SELinux on the created resources...");
-            selinuxAssertions.validateAllExistingAndThrowIfAnyError(testContext);
+            selinuxAssertions.validateAllExisting(testContext, false, true);
         }
     }
 

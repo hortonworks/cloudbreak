@@ -50,6 +50,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsIns
 import com.sequenceiq.distrox.api.v1.distrox.model.security.SecurityV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
@@ -551,5 +552,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 .map(SecurityV4Response::getSeLinux)
                 .map(s -> SeLinux.fromStringWithFallback(s))
                 .orElse(SeLinux.PERMISSIVE);
+    }
+
+    public List<String> getAllInstanceIps(TestContext testContext) {
+        CloudbreakClient cloudbreakClient = testContext.getMicroserviceClient(client());
+        return InstanceIPCollectorUtil.getAllInstanceIps(this, cloudbreakClient, false);
     }
 }

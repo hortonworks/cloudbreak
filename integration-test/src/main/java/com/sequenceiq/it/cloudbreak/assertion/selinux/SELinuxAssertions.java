@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.assertion.selinux;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,15 +17,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
-import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSudoCommandActions;
 
 @Component
@@ -62,75 +62,80 @@ public class SELinuxAssertions {
             fi\
             """;
 
+    private static final String REPORT_DIRECTORY = "selinux-reports";
+
     @Inject
     private SshSudoCommandActions sshSudoCommandActions;
 
-    public void validateAllExistingAndThrowIfAnyError(TestContext testContext) {
+    public void validateAllExisting(TestContext testContext, boolean throwIfAnyError, boolean generateDenyReports) {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
         if (freeIpaTestDto != null) {
-            FreeIpaClient freeIpaClient = testContext.getMicroserviceClient(FreeIpaClient.class);
-            SeLinux expectedSelinuxMode = freeIpaTestDto.getSelinuxMode();
-            List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(freeIpaTestDto, freeIpaClient, false);
-            validateAll(validationBuilder, "FreeIpa", instanceIps, expectedSelinuxMode);
+            validateAll(validationBuilder, testContext, "FreeIpa",
+                    freeIpaTestDto.getAllInstanceIps(testContext), freeIpaTestDto.getSelinuxMode(), generateDenyReports);
         }
 
         SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
         if (sdxInternalTestDto != null) {
-            SdxClient sdxClient = testContext.getMicroserviceClient(SdxClient.class);
-            SeLinux expectedSelinuxMode = sdxInternalTestDto.getSelinuxMode();
-            List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(sdxInternalTestDto, sdxClient, false);
-            validateAll(validationBuilder, "DataLake", instanceIps, expectedSelinuxMode);
+            validateAll(validationBuilder, testContext, "DataLake",
+                    sdxInternalTestDto.getAllInstanceIps(testContext), sdxInternalTestDto.getSelinuxMode(), generateDenyReports);
         }
 
         DistroXTestDto distroXTestDto = testContext.get(DistroXTestDto.class);
         if (distroXTestDto != null) {
-            CloudbreakClient cloudbreakClient = testContext.getMicroserviceClient(CloudbreakClient.class);
-            SeLinux expectedSelinuxMode = distroXTestDto.getSelinuxMode();
-            List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(distroXTestDto, cloudbreakClient, false);
-            validateAll(validationBuilder, "DataHub", instanceIps, expectedSelinuxMode);
+            validateAll(validationBuilder, testContext, "DataHub",
+                    distroXTestDto.getAllInstanceIps(testContext), distroXTestDto.getSelinuxMode(), generateDenyReports);
         }
 
         ValidationResult validationResult = validationBuilder.build();
-        if (validationResult.hasError()) {
-            throw new TestFailException(validationResult.getFormattedErrors());
+        if (throwIfAnyError) {
+            throwIfAnyError(validationResult);
+        } else {
+            LOGGER.error("The SELinux validation found the following errors: \n{}", validationResult.getFormattedErrors());
         }
     }
 
-    public FreeIpaTestDto validateAllAndThrowIfAnyError(TestContext testContext, FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(freeIpaTestDto, freeIpaClient, false);
-        ValidationResult validationResult = validateAll("FreeIPA", instanceIps, freeIpaTestDto.getSelinuxMode()).build();
-        if (validationResult.hasError()) {
-            throw new TestFailException(validationResult.getFormattedErrors());
+    public FreeIpaTestDto validateAll(TestContext testContext, FreeIpaTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
+        ValidationResult validationResult = validateAll("FreeIPA", testContext,
+                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+        if (throwIfAnyError) {
+            throwIfAnyError(validationResult);
+        } else {
+            LOGGER.error("The SELinux validation found the following errors on the FreeIPA instances: \n{}", validationResult.getFormattedErrors());
         }
-        return freeIpaTestDto;
+        return testDto;
     }
 
-    public SdxInternalTestDto validateAllAndThrowIfAnyError(TestContext testContext, SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(sdxInternalTestDto, sdxClient, false);
-        ValidationResult validationResult = validateAll("DataLake", instanceIps, sdxInternalTestDto.getSelinuxMode()).build();
-        if (validationResult.hasError()) {
-            throw new TestFailException(validationResult.getFormattedErrors());
+    public SdxInternalTestDto validateAll(TestContext testContext, SdxInternalTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
+        ValidationResult validationResult = validateAll("DataLake", testContext,
+                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+        if (throwIfAnyError) {
+            throwIfAnyError(validationResult);
+        } else {
+            LOGGER.error("The SELinux validation found the following errors on the DataLake instances: \n{}", validationResult.getFormattedErrors());
         }
-        return sdxInternalTestDto;
+        return testDto;
     }
 
-    public DistroXTestDto validateAllAndThrowIfAnyError(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(distroXTestDto, cloudbreakClient, false);
-        ValidationResult validationResult = validateAll("DataHub", instanceIps, distroXTestDto.getSelinuxMode()).build();
-        if (validationResult.hasError()) {
-            throw new TestFailException(validationResult.getFormattedErrors());
+    public DistroXTestDto validateAll(TestContext testContext, DistroXTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
+        ValidationResult validationResult = validateAll("DataHub", testContext,
+                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+        if (throwIfAnyError) {
+            throwIfAnyError(validationResult);
+        } else {
+            LOGGER.error("The SELinux validation found the following errors on the DataHub instances: \n{}", validationResult.getFormattedErrors());
         }
-        return distroXTestDto;
+        return testDto;
     }
 
-    public ValidationResult.ValidationResultBuilder validateAll(String stackType, List<String> instanceIps, SeLinux expectedSelinuxMode) {
-        return validateAll(null, stackType, instanceIps, expectedSelinuxMode);
+    private ValidationResult.ValidationResultBuilder validateAll(String stackType, TestContext testContext, List<String> instanceIps,
+            SeLinux expectedSelinuxMode, boolean generateDenyReports) {
+        return validateAll(null, testContext, stackType, instanceIps, expectedSelinuxMode, generateDenyReports);
     }
 
-    private ValidationResult.ValidationResultBuilder validateAll(ValidationResult.ValidationResultBuilder validationBuilder,
-            String stackType, List<String> instanceIps, SeLinux expectedSelinuxMode) {
+    private ValidationResult.ValidationResultBuilder validateAll(ValidationResult.ValidationResultBuilder validationBuilder, TestContext testContext,
+            String stackType, List<String> instanceIps, SeLinux expectedSelinuxMode, boolean generateDenyReports) {
         ValidationResult.ValidationResultBuilder builder = validationBuilder == null ? ValidationResult.builder() : validationBuilder;
 
         Map<String, String> instancesWithUnexpectedMode = getInstancesWithUnexpectedMode(instanceIps, expectedSelinuxMode);
@@ -149,6 +154,9 @@ public class SELinuxAssertions {
 
         Map<String, String> instancesWithAuditedDenies = getInstancesWithAuditedDenies(instanceIps);
         if (!instancesWithAuditedDenies.isEmpty()) {
+            if (generateDenyReports) {
+                generateReportFromDenies(testContext, stackType, instancesWithAuditedDenies);
+            }
             builder.error(
                     String.format("The SELinux validation found denies on some %s instances. Instances with denies in their audit log: %s",
                             stackType, instancesWithAuditedDenies));
@@ -176,5 +184,26 @@ public class SELinuxAssertions {
         return commandOutputs.entrySet().stream()
                 .filter(entry -> entry.getValue().getLeft() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getRight()));
+    }
+
+    private void generateReportFromDenies(TestContext testContext, String stackType, Map<String, String> instancesWithAuditedDenies) {
+        if (!instancesWithAuditedDenies.isEmpty()) {
+            String filename = REPORT_DIRECTORY + "/" + testContext.getTestMethodName().orElse("unknown") + "/" + stackType + ".json";
+            Path path = Paths.get(filename);
+            try {
+                Files.createDirectories(path.getParent());
+                Files.writeString(path, instancesWithAuditedDenies.toString());
+            } catch (IOException e) {
+                LOGGER.warn("There was an unexpected error during saving the SELinux report to the file '{}'", filename, e);
+            }
+        } else {
+            LOGGER.info("The SELinux validation found no audited denies on {} instances, so no report was generated.", stackType);
+        }
+    }
+
+    private static void throwIfAnyError(ValidationResult validationResult) {
+        if (validationResult.hasError()) {
+            throw new TestFailException(validationResult.getFormattedErrors());
+        }
     }
 }

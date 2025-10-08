@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -756,5 +757,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public String getVariant() {
         return getResponse().getStackV4Response().getVariant();
+    }
+
+    public List<String> getAllInstanceIps(TestContext testContext) {
+        SdxClient sdxClient = testContext.getMicroserviceClient(client());
+        return InstanceIPCollectorUtil.getAllInstanceIps(this, sdxClient, false);
     }
 }

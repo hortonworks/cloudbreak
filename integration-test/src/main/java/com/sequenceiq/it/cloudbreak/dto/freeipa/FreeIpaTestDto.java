@@ -64,6 +64,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -663,5 +664,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto withInstanceType(String instanceType) {
         getRequest().getInstanceGroups().forEach(group -> group.getInstanceTemplate().setInstanceType(instanceType));
         return this;
+    }
+
+    public List<String> getAllInstanceIps(TestContext testContext) {
+        FreeIpaClient freeIpaClient = testContext.getMicroserviceClient(client());
+        return InstanceIPCollectorUtil.getAllInstanceIps(this, freeIpaClient, false);
     }
 }
