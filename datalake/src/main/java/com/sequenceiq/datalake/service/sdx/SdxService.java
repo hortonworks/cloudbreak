@@ -258,6 +258,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private StorageValidationService storageValidationService;
 
+    @Inject
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
     }

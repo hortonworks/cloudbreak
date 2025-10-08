@@ -266,6 +266,9 @@ class SdxServiceTest {
     @Mock
     private StorageValidationService storageValidationService;
 
+    @Mock
+    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
+
     @InjectMocks
     private SdxService underTest;
 
