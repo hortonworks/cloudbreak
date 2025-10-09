@@ -647,4 +647,8 @@ public class EntitlementService {
     public boolean isPreferMinifiLogging(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_PREFER_MINIFI_LOGGING);
     }
+
+    public boolean isAutoJavaUpgaradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, Entitlement.CDP_ALLOW_AUTO_JAVA_UPGRADE);
+    }
 }

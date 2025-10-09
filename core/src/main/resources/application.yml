@@ -897,10 +897,11 @@ vm:
         minRuntimeVersion: 7.1.0
       - version: 17
         minRuntimeVersion: 7.3.1
-  allowable:
-    javaVersions:
-      - version: 8
-        minRuntimeVersion: 7.1.0
-        maxRuntimeVersion: 7.3.1
-      - version: 17
-        minRuntimeVersion: 7.3.1.600
+  update:
+    allowable:
+      javaVersions:
+        - version: 8
+          minRuntimeVersion: 7.1.0
+          maxRuntimeVersion: 7.3.1.X
+        - version: 17
+          minRuntimeVersion: 7.3.1.600

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaConfigurations;
+import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfigurations;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultJavaVersionUpdateValidatorTest {
@@ -46,7 +46,7 @@ class DefaultJavaVersionUpdateValidatorTest {
     private ImageService imageService;
 
     @Mock
-    private AllowableJavaConfigurations allowableJavaConfigurations;
+    private AllowableJavaUpdateConfigurations allowableJavaUpdateConfigurations;
 
     @InjectMocks
     private DefaultJavaVersionUpdateValidator underTest;
@@ -103,7 +103,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         javaVersionRequest.setDefaultJavaVersion("11");
 
         assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
-        verify(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1");
+        verify(allowableJavaUpdateConfigurations).checkValidConfiguration(11, "7.3.1");
     }
 
     @Test
@@ -121,7 +121,7 @@ class DefaultJavaVersionUpdateValidatorTest {
                 .thenReturn(StatedImage.statedImage(mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class), "url", "catalog"));
         SetDefaultJavaVersionRequest javaVersionRequest = new SetDefaultJavaVersionRequest();
         javaVersionRequest.setDefaultJavaVersion("11");
-        doThrow(new BadRequestException("Not valid")).when(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1");
+        doThrow(new BadRequestException("Not valid")).when(allowableJavaUpdateConfigurations).checkValidConfiguration(11, "7.3.1");
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.validate(stack, javaVersionRequest));
         assertEquals("Not valid", actual.getMessage());
@@ -144,7 +144,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         javaVersionRequest.setDefaultJavaVersion("11");
 
         assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
-        verifyNoInteractions(allowableJavaConfigurations);
+        verifyNoInteractions(allowableJavaUpdateConfigurations);
     }
 
     @Test
@@ -165,7 +165,7 @@ class DefaultJavaVersionUpdateValidatorTest {
         javaVersionRequest.setDefaultJavaVersion("11");
 
         assertDoesNotThrow(() -> underTest.validate(stack, javaVersionRequest));
-        verify(allowableJavaConfigurations).checkValidConfiguration(11, "7.3.1.500");
+        verify(allowableJavaUpdateConfigurations).checkValidConfiguration(11, "7.3.1.500");
         verify(imageService, never()).getCurrentImage(anyLong(), eq(STACK_ID));
     }
 }

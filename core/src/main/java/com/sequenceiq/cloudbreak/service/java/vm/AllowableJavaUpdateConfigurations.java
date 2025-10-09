@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
-@ConfigurationProperties(prefix = "vm.allowable")
-public class AllowableJavaConfigurations {
+@ConfigurationProperties(prefix = "vm.update.allowable")
+public class AllowableJavaUpdateConfigurations {
 
     private List<JavaConfiguration> javaVersions;
 
@@ -34,5 +34,13 @@ public class AllowableJavaConfigurations {
                 .filter(javaConfiguration -> runtimeVersion == null || javaConfiguration.isRuntimeCompatible(runtimeVersion))
                 .map(javaConfiguration -> String.valueOf(javaConfiguration.getVersion()))
                 .toList();
+    }
+
+    public Integer getMinJavaVersionForRuntime(String runtimeVersion) {
+        return javaVersions.stream()
+                .filter(javaConfiguration -> javaConfiguration.isRuntimeCompatible(runtimeVersion))
+                .map(JavaConfiguration::getVersion)
+                .min(Integer::compareTo)
+                .orElse(null);
     }
 }

@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaConfigurations;
+import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfigurations;
 
 @Service
 public class DefaultJavaVersionUpdateValidator {
@@ -30,7 +30,7 @@ public class DefaultJavaVersionUpdateValidator {
     private static final String RELEASE_VERSION = "release-version";
 
     @Inject
-    private AllowableJavaConfigurations allowableJavaConfigurations;
+    private AllowableJavaUpdateConfigurations allowableJavaUpdateConfigurations;
 
     @Inject
     private ImageService imageService;
@@ -42,7 +42,7 @@ public class DefaultJavaVersionUpdateValidator {
             validateTheRequestedJavaVersionExistenceOnTheImage(image, javaVersionRequest.getDefaultJavaVersion());
             String runtimeVersion = getRuntimeVersion(stack, image);
             if (StringUtils.isNotEmpty(runtimeVersion)) {
-                allowableJavaConfigurations.checkValidConfiguration(parseInt(javaVersionRequest.getDefaultJavaVersion()), runtimeVersion);
+                allowableJavaUpdateConfigurations.checkValidConfiguration(parseInt(javaVersionRequest.getDefaultJavaVersion()), runtimeVersion);
             } else {
                 LOGGER.warn("The runtime version could not be found on the VM image('{}') of the cluster with name '{}'.", image.getImageId(), stack.getName());
             }
@@ -57,7 +57,7 @@ public class DefaultJavaVersionUpdateValidator {
         try {
             Image image = imageService.getImage(stack.getId());
             String runtimeVersion = getRuntimeVersion(stack, image);
-            return allowableJavaConfigurations.listValidJavaVersions(runtimeVersion);
+            return allowableJavaUpdateConfigurations.listValidJavaVersions(runtimeVersion);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             String message = String.format("Image information could not be found for the cluster with name '%s'", stack.getName());
             LOGGER.warn(message);

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
@@ -64,6 +65,9 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     @Inject
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
+    @Inject
+    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
@@ -73,14 +77,16 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterUpgradeTriggerEvent event) {
         LOGGER.debug("Creating flow trigger event queue for data lake upgrade with event {}", event);
         ClusterUpgradeTriggerEvent upgradeTriggerEvent = getEventForRuntimeUpgrade(event);
+        StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+        ImageChangeDto imageChangeDto = getImageChangeDto(event);
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-
         flowEventChain.addAll(getFullSyncEvent(upgradeTriggerEvent));
-        flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent, stack));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(upgradeTriggerEvent));
-        flowEventChain.addAll(getImageUpdateTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getImageUpdateTriggerEvent(imageChangeDto));
+        flowEventChain.addAll(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, imageChangeDto));
         flowEventChain.addAll(getClusterUpgradeTriggerEvent(upgradeTriggerEvent));
 
         return new FlowTriggerEventQueue(getName(), upgradeTriggerEvent, flowEventChain);
@@ -120,22 +126,20 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         return syncEvents;
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.Image findImage(Long stackId) {
+    private List<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(ImageChangeDto imageChangeDto) {
+        return List.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageChangeDto));
+    }
+
+    private ImageChangeDto getImageChangeDto(ClusterUpgradeTriggerEvent event) {
         try {
-            return componentConfigProviderService.getImage(stackId);
+            com.sequenceiq.cloudbreak.cloud.model.Image image = componentConfigProviderService.getImage(event.getResourceId());
+            return new ImageChangeDto(event.getResourceId(), event.getImageId(), image.getImageCatalogName(), image.getImageCatalogUrl());
         } catch (CloudbreakImageNotFoundException e) {
             throw new NotFoundException("Image not found for stack", e);
         }
     }
 
-    private List<StackImageUpdateTriggerEvent> getImageUpdateTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        com.sequenceiq.cloudbreak.cloud.model.Image image = findImage(event.getResourceId());
-        ImageChangeDto imageChangeDto = new ImageChangeDto(event.getResourceId(), event.getImageId(), image.getImageCatalogName(), image.getImageCatalogUrl());
-        return List.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageChangeDto));
-    }
-
-    private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        StackDto stack = stackDtoService.getById(event.getResourceId());
+    private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event, StackDto stack) {
         boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
         return List.of(
                 new ClusterUpgradeValidationTriggerEvent(

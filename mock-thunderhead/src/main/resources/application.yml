@@ -114,6 +114,7 @@ auth:
     verticalscale.ha.enabled: false
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: false
+    allow.auto.java.upgrade: true
 crn:
   partition: cdp
   region: us-west-1

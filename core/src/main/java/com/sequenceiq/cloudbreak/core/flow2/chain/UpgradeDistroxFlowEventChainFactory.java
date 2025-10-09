@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
@@ -107,6 +108,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     @Inject
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
 
+    @Inject
+    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
+
     @Override
     public String initEvent() {
         return DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
@@ -134,16 +138,18 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
         DistroXUpgradeTriggerEvent eventForRuntimeUpgrade = getEventForRuntimeUpgrade(event);
 
+        StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+
         flowEventChain.addAll(getFullSyncEvent(event));
         flowEventChain.addAll(getUpgradeValidationTriggerEvent(eventForRuntimeUpgrade));
         flowEventChain.addAll(getClusterUpgradePreparationTriggerEvent(eventForRuntimeUpgrade));
         flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(eventForRuntimeUpgrade));
-        flowEventChain.addAll(getClusterUpgradeTriggerEvent(eventForRuntimeUpgrade));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(eventForRuntimeUpgrade, stack));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
-        flowEventChain.addAll(getClusterRepairTriggerEvent(event));
+        flowEventChain.addAll(getClusterRepairTriggerEvent(event, stack));
 
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
@@ -228,13 +234,16 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
-    private List<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<Selectable> getClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event, StackDto stack) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
             return List.of();
         } else {
-            return List.of(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
+            List<Selectable> upgradeEvents =
+                    new ArrayList<>(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, event.getImageChangeDto()));
+            upgradeEvents.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
                     event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled()));
+            return upgradeEvents;
         }
     }
 
@@ -247,10 +256,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private List<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private List<ClusterRepairTriggerEvent> getClusterRepairTriggerEvent(DistroXUpgradeTriggerEvent event, StackDto stack) {
         LOGGER.info("ReplaceVms: {}, lockComponents: {}", event.isReplaceVms(), event.isLockComponents());
         if (event.isReplaceVms()) {
-            StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
             Pair<Boolean, Map<String, List<String>>> variantMigrationFeasibleNodeMapPair = getReplaceableInstancesByHostGroup(event, stack);
             if (variantMigrationFeasibleNodeMapPair.getRight().isEmpty()) {
                 LOGGER.info("OS upgrade is not required, as replaceable node list is empty.");

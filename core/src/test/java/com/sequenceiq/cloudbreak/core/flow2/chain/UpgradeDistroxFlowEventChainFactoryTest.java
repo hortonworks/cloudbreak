@@ -42,8 +42,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
@@ -119,6 +122,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Mock
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
 
+    @Mock
+    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
+
     @Test
     void testInitEvent() {
         assertEquals(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
@@ -126,6 +132,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForNonReplaceVms() {
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
@@ -133,14 +140,20 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
+        SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
+                new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID,
+                        "17", false, false, false);
+        when(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(eq(stackDto), eq(imageChangeDto)))
+                .thenReturn(List.of(setDefaultJavaEvent));
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(8, flowChainQueue.getQueue().size());
+        assertEquals(9, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
         assertClusterSyncTriggerEvent(flowChainQueue);
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertSaltSecretRotationTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
+        assertSetDefaultJavaEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
     }
@@ -469,6 +482,11 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertInstanceOf(ClusterRepairTriggerEvent.class, repairEvent);
         assertEquals(nodeCount, clusterRepairTriggerEvent.getFailedNodesMap().entrySet().iterator().next().getValue().size());
         assertEquals(expectedTriggerStackVariant, clusterRepairTriggerEvent.getTriggeredStackVariant());
+    }
+
+    private void assertSetDefaultJavaEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable javaEvent = flowChainQueue.getQueue().remove();
+        assertInstanceOf(SetDefaultJavaVersionTriggerEvent.class, javaEvent);
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
