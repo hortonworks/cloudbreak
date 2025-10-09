@@ -23,8 +23,9 @@ plugins {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.springframework',  name: 'spring-webmvc',  version: springFrameworkVersion
-    dependency group: 'io.netty',             name: 'netty-codec',    version: nettyVersion
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
+    dependency group: 'io.netty',                 name: 'netty-codec',        version: nettyVersion
   }
 }
 

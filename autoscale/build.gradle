@@ -132,6 +132,7 @@ dependencyManagement {
 
         dependency group: 'com.google.code.gson',               name: 'gson',                      version: gsonVersion
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
+        dependency group: 'org.apache.tomcat.embed',            name: 'tomcat-embed-core',         version: tomcatVersion
         dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
         dependency (group: 'org.quartz-scheduler',               name: 'quartz',                   version: quartzVersion) {
             exclude group: 'com.zaxxer', name: 'HikariCP-java7'
@@ -141,7 +142,6 @@ dependencyManagement {
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
         dependency group: 'com.openpojo',                       name: 'openpojo',                  version: openPojoVersion
         dependency group: 'org.apache.commons',                 name: 'commons-lang3',             version: apacheCommonsLangVersion
-        dependency group: 'org.apache.tomcat.embed',            name: 'tomcat-embed-core',         version: tomcatVersion
     }
 }
 

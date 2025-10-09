@@ -53,7 +53,8 @@ configurations {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.springframework', name: 'spring-webmvc', version: springFrameworkVersion
+    dependency group: 'org.apache.tomcat.embed',  name: 'tomcat-embed-core',  version: tomcatVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
   }
 }
 
