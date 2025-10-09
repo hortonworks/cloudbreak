@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -241,6 +242,11 @@ public class StackUpscaleService {
         return verticalScale(ac, request, connector, group, UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES);
     }
 
+    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, RollingVerticalScaleInstancesRequest request,
+            CloudConnector connector, String group) throws Exception {
+        return verticalScale(ac, request, connector, group, UpdateType.VERTICAL_SCALE);
+    }
+
     private List<CloudResourceStatus> upscaleAndSyncStatusesToInstanceMetadata(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request,
             CloudConnector connector, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold)
             throws QuotaExceededException, TransactionExecutionException {
@@ -272,12 +278,31 @@ public class StackUpscaleService {
         }
     }
 
+    private List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, RollingVerticalScaleInstancesRequest request,
+            CloudConnector connector, String group, UpdateType updateType) throws Exception {
+        CloudStack cloudStack = request.getCloudStack();
+        try {
+            return connector.resources().update(ac, cloudStack, request.getCloudResources(), updateType,
+                    Optional.ofNullable(group));
+        } catch (Exception e) {
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, updateType, group);
+        }
+    }
+
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
             CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type, String group) throws Exception {
         LOGGER.error("Failed to vertically scale the stack", e);
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALE_ISSUE,
                 e.getMessage());
         return connector.resources().update(ac, cloudStack, request.getResourceList(), type, Optional.ofNullable(group));
+    }
+
+    private List<CloudResourceStatus> handleExceptionAndRetryUpdate(RollingVerticalScaleInstancesRequest request,
+            CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type, String group) throws Exception {
+        LOGGER.error("Failed to vertically scale the stack", e);
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALE_ISSUE,
+                e.getMessage());
+        return connector.resources().update(ac, cloudStack, request.getCloudResources(), type, Optional.ofNullable(group));
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,

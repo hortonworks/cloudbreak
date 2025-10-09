@@ -56,6 +56,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -92,6 +94,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RefreshEntitlementParamsFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -161,6 +164,9 @@ public class ReactorFlowManager {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public FlowIdentifier triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -323,9 +329,16 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerVerticalScale(Long stackId, StackVerticalScaleV4Request request) {
-        String selector = STACK_VERTICALSCALE_EVENT.event();
-        CoreVerticalScalingTriggerEvent event = new CoreVerticalScalingTriggerEvent(selector, stackId, request);
-        return reactorNotifier.notify(stackId, selector, event);
+        Stack stack = stackService.getById(stackId);
+        if (entitlementService.isVerticalScaleHaEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
+            String selector = FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT;
+            RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(selector, stackId, request);
+            return reactorNotifier.notify(stackId, selector, event);
+        } else {
+            String selector = STACK_VERTICALSCALE_EVENT.event();
+            CoreVerticalScalingTriggerEvent event = new CoreVerticalScalingTriggerEvent(selector, stackId, request);
+            return reactorNotifier.notify(stackId, selector, event);
+        }
     }
 
     public FlowIdentifier triggerClusterCredentialUpdate(Long stackId, String password) {

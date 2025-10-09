@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustm
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -64,10 +66,12 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
@@ -117,6 +121,9 @@ class ReactorFlowManagerTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     private Stack stack;
 
@@ -471,6 +478,44 @@ class ReactorFlowManagerTest {
         MigrateZookeeperToKraftRollbackTriggerEvent event = captor.getValue();
         assertEquals(1L, captor.getValue().getResourceId());
         assertEquals(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), event.selector());
+    }
+
+    @Test
+    void testTriggerVerticalScaleWithEntitlementEnabled() {
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        String resourceCrn = "crn:cdp:datahub:us-west-1:account123:cluster:cluster-id";
+        String accountId = "account123";
+        stack.setResourceCrn(resourceCrn);
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(entitlementService.isVerticalScaleHaEnabled(accountId)).thenReturn(true);
+
+        underTest.triggerVerticalScale(STACK_ID, request);
+
+        ArgumentCaptor<RollingVerticalScaleFlowChainTriggerEvent> captor = ArgumentCaptor.forClass(RollingVerticalScaleFlowChainTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT), captor.capture());
+        RollingVerticalScaleFlowChainTriggerEvent event = captor.getValue();
+        assertEquals(STACK_ID, event.getResourceId());
+        assertEquals(FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, event.selector());
+        assertEquals(request, event.getRequest());
+    }
+
+    @Test
+    void testTriggerVerticalScaleWithEntitlementDisabled() {
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        String resourceCrn = "crn:cdp:datahub:us-west-1:account123:cluster:cluster-id";
+        String accountId = "account123";
+        stack.setResourceCrn(resourceCrn);
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(entitlementService.isVerticalScaleHaEnabled(accountId)).thenReturn(false);
+
+        underTest.triggerVerticalScale(STACK_ID, request);
+
+        ArgumentCaptor<CoreVerticalScalingTriggerEvent> captor = ArgumentCaptor.forClass(CoreVerticalScalingTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(STACK_VERTICALSCALE_EVENT.event()), captor.capture());
+        CoreVerticalScalingTriggerEvent event = captor.getValue();
+        assertEquals(STACK_ID, event.getResourceId());
+        assertEquals(STACK_VERTICALSCALE_EVENT.event(), event.selector());
+        assertEquals(request, event.getRequest());
     }
 
     private static class TestAcceptable implements Acceptable {

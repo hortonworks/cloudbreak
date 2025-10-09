@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 import static com.sequenceiq.cloudbreak.TestUtil.instanceMetaData;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_ISSUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,11 +57,13 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -515,6 +518,50 @@ class StackUpscaleServiceTest {
         underTest.verticalScaleWithoutInstances(mock(AuthenticatedContext.class), new CoreVerticalScaleRequest<>(mock(CloudContext.class),
                 mock(CloudCredential.class), mock(CloudStack.class), new ArrayList<>(), new StackVerticalScaleV4Request()), cloudConnector, "master");
         verify(resourceConnector, times(1)).update(any(), any(), any(), eq(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES), eq(Optional.of("master")));
+    }
+
+    @Test
+    void testVerticalScaleWithRollingVerticalScaleInstancesRequest() throws Exception {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        List<CloudResource> cloudResources = new ArrayList<>();
+        CloudStack cloudStack = mock(CloudStack.class);
+        RollingVerticalScaleInstancesRequest request = new RollingVerticalScaleInstancesRequest(
+                1L,
+                mock(CloudContext.class),
+                mock(CloudCredential.class),
+                cloudStack,
+                cloudResources,
+                new StackVerticalScaleV4Request(),
+                mock(RollingVerticalScaleResult.class));
+        underTest.verticalScale(mock(AuthenticatedContext.class), request, cloudConnector, "master");
+        verify(resourceConnector, times(1)).update(any(), eq(cloudStack), eq(cloudResources), eq(UpdateType.VERTICAL_SCALE), eq(Optional.of("master")));
+    }
+
+    @Test
+    void testVerticalScaleWithRollingVerticalScaleInstancesRequestWithException() throws Exception {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        List<CloudResource> cloudResources = new ArrayList<>();
+        CloudStack cloudStack = mock(CloudStack.class);
+        String errorMessage = "Test exception";
+        Exception testException = new Exception(errorMessage);
+        when(resourceConnector.update(any(), any(), any(), any(), any()))
+                .thenThrow(testException)
+                .thenReturn(Collections.emptyList());
+        RollingVerticalScaleInstancesRequest request = new RollingVerticalScaleInstancesRequest(
+                1L,
+                mock(CloudContext.class),
+                mock(CloudCredential.class),
+                cloudStack,
+                cloudResources,
+                new StackVerticalScaleV4Request(),
+                mock(RollingVerticalScaleResult.class));
+        underTest.verticalScale(mock(AuthenticatedContext.class), request, cloudConnector, "master");
+        verify(resourceConnector, times(2)).update(any(), eq(cloudStack), eq(cloudResources), eq(UpdateType.VERTICAL_SCALE), eq(Optional.of("master")));
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(1L), eq(UPDATE_IN_PROGRESS.name()), eq(STACK_VERTICALSCALE_ISSUE), eq(errorMessage));
     }
 
     @Test

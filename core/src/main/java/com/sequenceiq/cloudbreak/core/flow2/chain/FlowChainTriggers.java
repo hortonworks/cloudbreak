@@ -74,6 +74,8 @@ public class FlowChainTriggers {
 
     public static final String MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT = "MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT";
 
+    public static final String ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT = "ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

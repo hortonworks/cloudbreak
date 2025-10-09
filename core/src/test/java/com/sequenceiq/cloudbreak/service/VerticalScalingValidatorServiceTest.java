@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -102,6 +103,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private CloudParameterCache cloudParameterCache;
 
     @InjectMocks
     private VerticalScalingValidatorService underTest;
@@ -550,6 +554,94 @@ public class VerticalScalingValidatorServiceTest {
                 eq(CdpResourceType.DATAHUB),
                 any()
         );
+    }
+
+    @Test
+    public void testValidateProviderWhenEntitlementEnabledAndStackAvailable() {
+        String message = "Vertical scaling";
+        String cloudPlatform = "AWS";
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+
+        when(cloudParameterCache.isVerticalScalingSupported(cloudPlatform)).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(true);
+        when(stack.isAvailable()).thenReturn(true);
+
+        underTest.validateProvider(stack, message, request);
+
+        verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
+        verify(entitlementService).isVerticalScaleHaEnabled("default");
+        verify(stack).isAvailable();
+    }
+
+    @Test
+    public void testValidateProviderWhenEntitlementEnabledAndStackNotAvailable() {
+        String message = "Vertical scaling";
+        String cloudPlatform = "AWS";
+        String stackName = "test-stack";
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+
+        when(cloudParameterCache.isVerticalScalingSupported(cloudPlatform)).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(true);
+        when(stack.isAvailable()).thenReturn(false);
+        when(stack.getName()).thenReturn(stackName);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateProvider(stack, message, request);
+        });
+
+        assertEquals(String.format("%s is not supported on unavailable cluster %s", message, stackName), badRequestException.getMessage());
+        verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
+        verify(entitlementService).isVerticalScaleHaEnabled("default");
+        verify(stack).isAvailable();
+    }
+
+    @Test
+    public void testValidateProviderWhenEntitlementDisabledAndStackStopped() {
+        String message = "Vertical scaling";
+        String cloudPlatform = "AWS";
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+
+        when(cloudParameterCache.isVerticalScalingSupported(cloudPlatform)).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(false);
+        when(stack.isStopped()).thenReturn(true);
+
+        underTest.validateProvider(stack, message, request);
+
+        verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
+        verify(entitlementService).isVerticalScaleHaEnabled("default");
+        verify(stack).isStopped();
+        verify(stack, never()).isAvailable();
+    }
+
+    @Test
+    public void testValidateProviderWhenEntitlementDisabledAndStackNotStopped() {
+        String message = "Vertical scaling";
+        String cloudPlatform = "AWS";
+        String stackName = "test-stack";
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+
+        when(cloudParameterCache.isVerticalScalingSupported(cloudPlatform)).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.isVerticalScaleHaEnabled("default")).thenReturn(false);
+        when(stack.isStopped()).thenReturn(false);
+        when(stack.getName()).thenReturn(stackName);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateProvider(stack, message, request);
+        });
+
+        assertEquals(String.format("You must stop Environment for %s of %s.", message, stackName), badRequestException.getMessage());
+        verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
+        verify(entitlementService).isVerticalScaleHaEnabled("default");
+        verify(stack).isStopped();
+        verify(stack, never()).isAvailable();
     }
 
     private Credential credential() {

@@ -51,6 +51,7 @@ public class CoreVerticalScaleService {
     private InstanceMetaDataService instanceMetaDataService;
 
     public void verticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_IN_PROGRESS);
         if (payload.getTemplate().getInstanceType() != null) {
             flowMessageService.fireEventAndLog(stackId,
                     Status.UPDATE_IN_PROGRESS.name(),
