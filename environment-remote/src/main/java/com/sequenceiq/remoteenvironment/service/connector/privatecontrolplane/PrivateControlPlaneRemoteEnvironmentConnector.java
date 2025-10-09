@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -56,7 +55,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     private PrivateControlPlaneService privateControlPlaneService;
 
     @Inject
-    private ClusterProxyHybridClient clusterProxyHybridClient;
+    private PrivateControlPlaneClient privateControlPlaneClient;
 
     @Inject
     private EntitlementService entitlementService;
@@ -192,7 +191,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
                 actorCrn, Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = measure(() -> clusterProxyHybridClient.listEnvironments(cpCrn, actorCrn)
+            responses = measure(() -> privateControlPlaneClient.listEnvironments(cpCrn, actorCrn)
                     .getEnvironments()
                     .stream()
                     .filter(resp -> isCrnValidAndWithinAccount(controlPlane.getPrivateCloudAccountId(), resp.getCrn()))
@@ -212,7 +211,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.debug("The describe of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
         try {
-            return measure(() -> clusterProxyHybridClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+            return measure(() -> privateControlPlaneClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
             handleUnauthorized(environmentCrn, e, "environment");
@@ -234,7 +233,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.debug("Fetching root certificate of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
         try {
-            return measure(() -> clusterProxyHybridClient.getRootCertificate(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+            return measure(() -> privateControlPlaneClient.getRootCertificate(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
             handleUnauthorized(environmentCrn, e, "environment");
@@ -248,7 +247,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.debug("The getRdcForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
         try {
-            return measure(() -> clusterProxyHybridClient.getRemoteDataContext(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+            return measure(() -> privateControlPlaneClient.getRemoteDataContext(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
             handleUnauthorized(environmentCrn, e, "data lake");
@@ -262,7 +261,7 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.debug("The getDatalakeServicesForEnvironmentWithActor of remote environment('{}') with actor('{}') is executed by thread: {}",
                 environmentCrn, actorCrn, Thread.currentThread().getName());
         try {
-            return measure(() -> clusterProxyHybridClient.getDatalakeServices(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+            return measure(() -> privateControlPlaneClient.getDatalakeServices(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
             handleUnauthorized(environmentCrn, e, "data lake");

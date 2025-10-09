@@ -36,7 +36,6 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
@@ -66,7 +65,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     private PrivateControlPlaneService privateControlPlaneServiceMock;
 
     @Mock
-    private ClusterProxyHybridClient clusterProxyHybridClientMock;
+    private PrivateControlPlaneClient privateControlPlaneClient;
 
     @Spy
     private AsyncTaskExecutorTestImpl taskExecutor;
@@ -116,8 +115,8 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         ListEnvironmentsResponse environmentResponses2 = new ListEnvironmentsResponse();
         environmentResponses2.setEnvironments(List.of(environment2));
 
-        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"), any())).thenReturn(environmentResponses1);
-        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN2"), any())).thenReturn(environmentResponses2);
+        when(privateControlPlaneClient.listEnvironments(eq("CRN1"), any())).thenReturn(environmentResponses1);
+        when(privateControlPlaneClient.listEnvironments(eq("CRN2"), any())).thenReturn(environmentResponses2);
 
         SimpleRemoteEnvironmentResponse response1 = new SimpleRemoteEnvironmentResponse();
         response1.setName("NAME1");
@@ -177,7 +176,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         assertEquals("The provided environment CRN('crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd') is invalid",
                 ex.getMessage());
         verifyNoInteractions(privateControlPlaneServiceMock);
-        verifyNoInteractions(clusterProxyHybridClientMock);
+        verifyNoInteractions(privateControlPlaneClient);
     }
 
     @Test
@@ -193,7 +192,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getEnvironment(anyString(), any(), anyString()))
+        when(privateControlPlaneClient.getEnvironment(anyString(), any(), anyString()))
                 .thenReturn(describeEnvironmentResponse);
 
         DescribeEnvironmentResponse result = underTest
@@ -218,7 +217,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         environment.setEnvironmentName("env1");
         describeEnvironmentResponse.setEnvironment(environment);
 
-        when(clusterProxyHybridClientMock.getEnvironment(anyString(), any(), anyString()))
+        when(privateControlPlaneClient.getEnvironment(anyString(), any(), anyString()))
                 .thenReturn(describeEnvironmentResponse);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(any(), any()))
                 .thenReturn(Optional.of(privateControlPlane));
@@ -258,7 +257,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getEnvironment(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+        when(privateControlPlaneClient.getEnvironment(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
@@ -275,7 +274,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+        when(privateControlPlaneClient.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenReturn(describeDatalakeAsApiRemoteDataContextResponse);
 
         DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
@@ -306,7 +305,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+        when(privateControlPlaneClient.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
@@ -323,7 +322,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+        when(privateControlPlaneClient.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenReturn(describeDatalakeServicesResponse);
 
         DescribeDatalakeServicesResponse result = underTest.getDatalakeServices(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
@@ -352,7 +351,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(privateControlPlane.getResourceCrn()).thenReturn(CONTROL_PLANE);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(TENANT, PUBLIC_CLOUD_ACCOUNT_ID))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
+        when(privateControlPlaneClient.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
@@ -371,7 +370,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getRootCertificate(anyString(), any(), anyString()))
+        when(privateControlPlaneClient.getRootCertificate(anyString(), any(), anyString()))
                 .thenReturn(new GetRootCertificateResponse().contents("certecske"));
 
         GetRootCertificateResponse result = underTest

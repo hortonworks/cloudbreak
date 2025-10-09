@@ -32,6 +32,9 @@ public class ClusterProxyConfiguration {
     @Value("${clusterProxy.readConfigPath}")
     private String readConfigPath;
 
+    @Value("${clusterProxy.httpProxyPath:/proxy}")
+    private String httpProxyPath;
+
     private String clusterProxyHost;
 
     private int clusterProxyPort;
@@ -104,6 +107,14 @@ public class ClusterProxyConfiguration {
 
     public void setReadConfigPath(String readConfigPath) {
         this.readConfigPath = readConfigPath;
+    }
+
+    public String getHttpProxyPath() {
+        return httpProxyPath;
+    }
+
+    public void setHttpProxyPath(String httpProxyPath) {
+        this.httpProxyPath = httpProxyPath;
     }
 
     public String getClusterProxyHost() {
