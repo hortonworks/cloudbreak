@@ -56,7 +56,8 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
     }
 
     private ClassicCluster extend(ClassicCluster classicCluster, String accountId) {
-        String crn = regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLASSIC_CLUSTER, classicCluster.getName(), accountId);
+        String sanitizedName = classicCluster.getName().replaceAll("[^A-Za-z0-9]", "");
+        String crn = regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.CLASSIC_CLUSTER, sanitizedName, accountId);
         classicCluster.setCrn(crn);
         return classicCluster;
     }

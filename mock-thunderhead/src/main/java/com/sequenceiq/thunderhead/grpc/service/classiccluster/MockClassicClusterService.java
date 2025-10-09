@@ -7,9 +7,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -90,7 +92,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
             return OnPremisesApiProto.Cluster.newBuilder()
                     .setName(classicCluster.getName())
-                    .setDatacenterName(classicCluster.getName())
+                    .setDatacenterName(classicCluster.getDatacenterName())
                     .setClusterCrn(classicCluster.getCrn())
                     .setManagerUri(classicCluster.getUrl())
                     .setData(OnPremisesApiProto.ClusterData.newBuilder()
@@ -99,7 +101,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
                             .build())
                     .setLastCreateTime(new Date().getTime())
                     .setPvcCrn(getPvcCrn(classicCluster))
-                    .setEnvironmentCrn(classicCluster.getPvcCpEnvironmentCrn())
+                    .setEnvironmentCrn(Objects.requireNonNullElse(classicCluster.getPvcCpEnvironmentCrn(), ""))
                     .setCmClusterUuid(apiCluster.getUuid())
                     .build();
         } catch (Exception e) {
@@ -113,6 +115,9 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     }
 
     private String getPvcCrn(ClassicCluster classicCluster) {
+        if (StringUtils.isEmpty(classicCluster.getPvcCpEnvironmentCrn())) {
+            return "";
+        }
         String resourceId = Crn.safeFromString(classicCluster.getPvcCpEnvironmentCrn()).getAccountId();
         String accountId = classicCluster.getAccountId();
         return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.HYBRID, resourceId, accountId);

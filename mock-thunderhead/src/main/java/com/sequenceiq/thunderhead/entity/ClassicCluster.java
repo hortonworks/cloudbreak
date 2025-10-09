@@ -19,6 +19,8 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     private String name;
 
+    private String datacenterName;
+
     private String url;
 
     private String pvcCpEnvironmentCrn;
@@ -45,6 +47,14 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDatacenterName() {
+        return datacenterName;
+    }
+
+    public void setDatacenterName(String datacenterName) {
+        this.datacenterName = datacenterName;
     }
 
     public String getUrl() {
