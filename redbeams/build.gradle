@@ -43,7 +43,8 @@ sonar {
 
 dependencyManagement {
   dependencies {
-    dependency group: 'org.springframework', name: 'spring-webmvc', version: springFrameworkVersion
+    dependency group: 'org.springframework',      name: 'spring-webmvc',      version: springFrameworkVersion
+    dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: reactorNettyHttp
   }
 }
 
