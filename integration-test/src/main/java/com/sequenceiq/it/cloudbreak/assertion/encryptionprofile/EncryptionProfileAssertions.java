@@ -27,7 +27,7 @@ public class EncryptionProfileAssertions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileAssertions.class);
 
-    private static final String CIPHER_SUITES = "cipher_suites";
+    private static final String CIPHER_SUITES = "cipher_suites:";
 
     // Expected cipher suites in the correct order for monitoring services.
     private static final List<String> DEFAULT_CIPHER_SUITES = List.of(
@@ -43,7 +43,7 @@ public class EncryptionProfileAssertions {
 
     public void validateCipherSuitesConfiguration(String serviceName, String configContent, String instanceIp) {
         // Check if config file contains cipher_suites section
-        if (!configContent.contains("cipher_suites:")) {
+        if (!configContent.contains(CIPHER_SUITES)) {
             Log.error(LOGGER, format("%s config file does not contain 'cipher_suites' section at '%s' instance!",
                     serviceName, instanceIp));
             throw new TestFailException(format("%s config file does not contain 'cipher_suites' section at '%s' instance!",
@@ -90,7 +90,7 @@ public class EncryptionProfileAssertions {
                     // Extract cipher suite name (remove "- " prefix)
                     String cipherSuite = trimmedLine.substring(2).trim();
                     cipherSuites.add(cipherSuite);
-                } else if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("#")) {
+                } else {
                     // End of cipher_suites section
                     break;
                 }
