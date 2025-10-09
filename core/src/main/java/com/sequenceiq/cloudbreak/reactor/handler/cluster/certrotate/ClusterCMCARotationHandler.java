@@ -67,10 +67,10 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
             if (CertificateRotationType.ALL.equals(request.getCertificateRotationType())) {
                 StackDto stackDto = stackDtoService.getById(request.getResourceId());
                 Cluster cluster = clusterService.getCluster(stackDto.getCluster().getId());
-                String newTrustStoreVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(cluster.getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
-                String newKeyStorePwdVaultSecretJson =
-                        uncachedSecretServiceForRotation.update(cluster.getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                String newTrustStoreVaultSecretJson = uncachedSecretServiceForRotation
+                                .update(cluster.getTrustStorePwdSecret().getSecret(), PasswordUtil.generateCmAndPostgresConformPassword());
+                String newKeyStorePwdVaultSecretJson = uncachedSecretServiceForRotation
+                        .update(cluster.getKeyStorePwdSecret().getSecret(), PasswordUtil.generateCmAndPostgresConformPassword());
                 cluster.setTrustStorePwdSecret(new SecretProxy(newTrustStoreVaultSecretJson));
                 cluster.setKeyStorePwdSecret(new SecretProxy(newKeyStorePwdVaultSecretJson));
                 clusterService.save(cluster);

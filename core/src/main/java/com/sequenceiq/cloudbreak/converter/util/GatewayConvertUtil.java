@@ -46,6 +46,6 @@ public class GatewayConvertUtil {
         }
         gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.NONE);
         gateway.setTokenCert(source.getTokenCert());
-        gateway.setKnoxMasterSecret(PasswordUtil.generatePassword());
+        gateway.setKnoxMasterSecret(PasswordUtil.generateCmAndPostgresConformPassword());
     }
 }

@@ -44,10 +44,10 @@ public class CBCMAdminPasswordRotationContextProvider implements RotationContext
         Cluster cluster = clusterService.getClusterByStackResourceCrn(resourceCrn);
 
         String newCbUser = CB_USER_PREFIX + new SimpleDateFormat(DATETIMEFORMAT).format(new Date());
-        String newCbPassword = PasswordUtil.generatePassword();
+        String newCbPassword = PasswordUtil.generateCmAndPostgresConformPassword();
 
         String newMgmtUser = MGMT_USER_PREFIX + new SimpleDateFormat(DATETIMEFORMAT).format(new Date());
-        String newMgmtPassword = PasswordUtil.generatePassword();
+        String newMgmtPassword = PasswordUtil.generateCmAndPostgresConformPassword();
 
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)

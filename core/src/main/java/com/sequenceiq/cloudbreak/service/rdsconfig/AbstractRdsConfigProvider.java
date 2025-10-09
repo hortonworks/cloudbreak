@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +12,6 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -221,7 +217,7 @@ public abstract class AbstractRdsConfigProvider {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(getRdsType().name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setConnectionUserName(dbUserName);
-        rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
+        rdsConfig.setConnectionPassword(PasswordUtil.generateCmAndPostgresConformPassword());
         rdsConfig.setConnectionURL(String.format("jdbc:postgresql://%s:%s/%s", databaseHost, dbPort, dbName));
         rdsConfig.setSslMode(RdsSslMode.fromBoolean(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stack, cluster, database)));
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
@@ -233,16 +229,6 @@ public abstract class AbstractRdsConfigProvider {
         attachedCluster.setId(cluster.getId());
         rdsConfig.setClusters(Collections.singleton(attachedCluster));
         return rdsConfig;
-    }
-
-    protected List<String[]> createPathListFromConfigurations(String[] path, String[] configurations) {
-        List<String[]> pathList = new ArrayList<>();
-        Arrays.stream(configurations).forEach(configuration -> {
-            List<String> pathWithConfig = Lists.newArrayList(path);
-            pathWithConfig.add(configuration);
-            pathList.add(pathWithConfig.toArray(new String[pathWithConfig.size()]));
-        });
-        return pathList;
     }
 
     public abstract DatabaseType getRdsType();

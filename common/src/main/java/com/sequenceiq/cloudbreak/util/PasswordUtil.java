@@ -14,6 +14,8 @@ public class PasswordUtil {
 
     private static final int PWD_PART_LENGTH = 10;
 
+    private static final String SPECIAL_CHARS = ".-!~^";
+
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private PasswordUtil() {
@@ -27,6 +29,21 @@ public class PasswordUtil {
         List<String> list = Arrays.asList(raw.split(""));
         Collections.shuffle(list, SECURE_RANDOM);
         return prefix.concat(String.join("", list));
+    }
+
+    public static String generateCmAndPostgresConformPassword() {
+        String prefix = PasswordUtil.getRandomAlphabetic(PWD_PREFIX_LENGTH);
+        String letters = PasswordUtil.getRandomAlphabetic(PWD_PART_LENGTH);
+        String numbers = PasswordUtil.getRandomNumeric(PWD_PART_LENGTH);
+        String specials = getRandomSpecial(PWD_PART_LENGTH);
+        String raw = letters.concat(numbers).concat(specials);
+        List<String> list = Arrays.asList(raw.split(""));
+        Collections.shuffle(list, SECURE_RANDOM);
+        return prefix.concat(String.join("", list));
+    }
+
+    public static String getRandomSpecial(int count) {
+        return RandomStringUtils.random(count, 0, 0, false, false, SPECIAL_CHARS.toCharArray(), SECURE_RANDOM);
     }
 
     public static String getRandomAlphabetic(int count) {

@@ -320,7 +320,7 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         if (cluster.getCloudbreakClusterManagerMonitoringUser() == null && StringUtils.isNotBlank(cmMonitoringUser)) {
             LOGGER.debug("Update cluster with cm monitoring user. clusterId: {}", cluster.getId());
             cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
-            cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
+            cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generateCmAndPostgresConformPassword());
         }
         return updateCluster(cluster);
     }
