@@ -109,6 +109,7 @@ auth:
     zookeeper.to.kraft.migration.enabled: false
     tlsv13.only.enabled: false
     rhel9.enabled: false
+    verticalscale.ha.enabled: false
 crn:
   partition: cdp
   region: us-west-1

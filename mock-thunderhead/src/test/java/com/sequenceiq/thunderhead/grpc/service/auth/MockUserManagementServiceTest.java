@@ -154,7 +154,10 @@ public class MockUserManagementServiceTest {
                 {"lakehouseOptimizerEnabled true", "lakehouseOptimizerEnabled", true, "CDP_LAKEHOUSE_OPTIMIZER_ENABLED", true},
 
                 {"configureEncryptionProfileEnabled false", "configureEncryptionProfileEnabled", false, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", false},
-                {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true}
+                {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true},
+
+                {"verticalScaleHaEnabled false", "verticalScaleHaEnabled", false, "CDP_CB_VERTICAL_SCALE_HA", false},
+                {"verticalScaleHaEnabled true", "verticalScaleHaEnabled", true, "CDP_CB_VERTICAL_SCALE_HA", true}
         };
     }
 

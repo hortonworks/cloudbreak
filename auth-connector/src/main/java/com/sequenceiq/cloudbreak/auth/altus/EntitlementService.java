@@ -30,6 +30,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_VERTICAL_SCALE_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -644,5 +645,9 @@ public class EntitlementService {
 
     public boolean isRhel9ImagePreferred(String accountId) {
         return isEntitledToUseOS(accountId, OsType.RHEL9) && isEntitlementRegistered(accountId, CDP_PREFER_RHEL9_IMAGES);
+    }
+
+    public boolean isVerticalScaleHaEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_VERTICAL_SCALE_HA);
     }
 }

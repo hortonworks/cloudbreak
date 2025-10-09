@@ -200,6 +200,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_SUPPORTS_TLS_1_3_ONLY", (EntitlementCheckFunction) EntitlementService::isTlsv13OnlyEnabled, false},
                 {"CDP_CB_SUPPORTS_TLS_1_3_ONLY", (EntitlementCheckFunction) EntitlementService::isTlsv13OnlyEnabled, true},
+
+                {"CDP_CB_VERTICAL_SCALE_HA", (EntitlementCheckFunction) EntitlementService::isVerticalScaleHaEnabled, false},
+                {"CDP_CB_VERTICAL_SCALE_HA", (EntitlementCheckFunction) EntitlementService::isVerticalScaleHaEnabled, true},
         };
     }
 

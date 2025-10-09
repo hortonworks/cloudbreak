@@ -34,6 +34,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_VERTICAL_SCALE_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
@@ -598,6 +599,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.rhel9.enabled}")
     private boolean rhel9Enabled;
 
+    @Value("${auth.mock.verticalscale.ha.enabled}")
+    private boolean verticalScaleHaEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1118,6 +1122,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (rhel9Enabled) {
             builder.addEntitlements(createEntitlement(CDP_ENABLE_RHEL9_IMAGES));
+        }
+        if (verticalScaleHaEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_VERTICAL_SCALE_HA));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
