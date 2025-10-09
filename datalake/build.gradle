@@ -87,6 +87,7 @@ dependencies {
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
   implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',          version: swaggerCoreVersion
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: javaxXmlBindJaxbApiVersion
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                   version: apacheCommonsLangVersion
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',               version: jerseyMicrometerVersion

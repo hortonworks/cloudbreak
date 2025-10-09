@@ -79,6 +79,7 @@ dependencies {
   implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM26') {
     exclude group: 'org.apache.mina', module: 'mina-core'
   }
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: apacheCommonsLangVersion
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.7'
   implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion

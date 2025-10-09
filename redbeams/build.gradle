@@ -69,6 +69,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: jerseyMicrometerVersion
+  implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: apacheCommonsLangVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
