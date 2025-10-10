@@ -15,6 +15,8 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper.ZooKeeperRoles;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
@@ -28,14 +30,24 @@ public class KafkaKraftConfigProvider extends AbstractRoleConfigProvider {
 
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_17)) {
             Optional<HostgroupView> kraftHostGroup = source.getHostGroupsWithComponent(KafkaRoles.KAFKA_KRAFT).findFirst();
-            if (kraftHostGroup.isPresent() && kraftHostGroup.get().getNodeCount() > 0) {
+            Optional<HostgroupView> zookeeperHostGroup = source.getHostGroupsWithComponent(ZooKeeperRoles.ZOOKEEPER_SERVER).findFirst();
+            if (zookeeperHostGroup.isEmpty() && kraftHostGroup.isEmpty()) {
+                throw new CloudbreakRuntimeException("KRaft or Zookeeper hostgroup must be present to determine the metadata store type.");
+            }
+            if (kraftHostGroup.isPresent() && kraftHostGroup.get().getNodeCount() > 0
+                // support KRaft only in Workload clusters for now
+                && StackType.WORKLOAD.equals(source.getStackType())) {
                 configs.add(
-                        config(KafkaConfigs.METADATA_STORE, "KRaft")
+                    config(KafkaConfigs.METADATA_STORE, "KRaft")
                 );
-                return configs;
+            // since KRaft is the default, we need to explicitly set Zookeeper on any clusters if KRaft hot group is not present
+            } else if (zookeeperHostGroup.isPresent()) {
+                configs.add(
+                    config(KafkaConfigs.METADATA_STORE, "Zookeeper")
+                );
             }
         }
-        return List.of();
+        return configs;
     }
 
     @Override
@@ -50,6 +62,6 @@ public class KafkaKraftConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return StackType.WORKLOAD.equals(source.getStackType());
+        return StackType.WORKLOAD.equals(source.getStackType()) || StackType.DATALAKE.equals(source.getStackType());
     }
 }
