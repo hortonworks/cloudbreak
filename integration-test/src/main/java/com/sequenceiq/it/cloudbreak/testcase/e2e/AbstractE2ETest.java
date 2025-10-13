@@ -4,12 +4,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.not;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
@@ -32,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
+import com.sequenceiq.it.util.CompressUtil;
 import com.sequenceiq.it.util.TagsUtil;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
@@ -95,6 +102,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
             validateSafeLogic(testContext);
             validateSecretEncryption(testContext);
         }
+        compressSELinuxReportDirectory();
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
 
@@ -116,6 +124,20 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         }
     }
 
+    private void compressSELinuxReportDirectory() {
+        Path reportDir = Paths.get(SELinuxAssertions.SELINUX_REPORT_DIRECTORY);
+        if (Files.isDirectory(reportDir)) {
+            try {
+                CompressUtil.compressDirectoryToTarGz(reportDir);
+                FileUtils.deleteDirectory(reportDir.toFile());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            LOGGER.info("There was no SELinux report directory to compress.");
+        }
+    }
+
     private void validateSafeLogic(TestContext testContext) {
         if (testContext.getSafeLogicValidation()) {
             LOGGER.info("Validating SafeLogic installation of created resources...");
@@ -133,8 +155,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     /**
      * Overrides the integration test environment creation with setting Telemetry up for E2E resources by default.
      *
-     * @param testContext   Spring offers ApplicationContextAware interface to provide configuration of the Integration Test ApplicationContext.
-     *                      Should not be null!
+     * @param testContext Spring offers ApplicationContextAware interface to provide configuration of the Integration Test ApplicationContext.
+     *                    Should not be null!
      */
     @Override
     protected void createDefaultEnvironment(TestContext testContext) {
@@ -188,7 +210,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     /**
      * Given Cloud Platform is the only supported one for the test. (Invoked in the 'setupTest')
-     *
+     * <p>
      * If the actual Cloud provider is different as the provided one, it throws {@link AssertionError}.
      *
      * @param cloudPlatform the supported Cloud Platform. (Must not be null)
@@ -204,7 +226,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     /**
      * Given Cloud Platform is not supported for the test. (Invoked in the 'setupTest')
-     *
+     * <p>
      * If the actual Cloud provider is the same as the provided one, it throws {@link AssertionError}.
      *
      * @param cloudPlatform the NOT supported cloud platform. (Must not be null)

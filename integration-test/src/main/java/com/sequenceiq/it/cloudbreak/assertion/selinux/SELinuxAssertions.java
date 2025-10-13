@@ -27,6 +27,8 @@ import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSudoCommandActions;
 @Component
 public class SELinuxAssertions {
 
+    public static final String SELINUX_REPORT_DIRECTORY = "selinux-reports";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SELinuxAssertions.class);
 
     private static final String CHECK_SELINUX_MODE_COMMAND = "getenforce | tr -d '[:space:]'";
@@ -61,8 +63,6 @@ public class SELinuxAssertions {
                 exit 0; \
             fi\
             """;
-
-    private static final String REPORT_DIRECTORY = "selinux-reports";
 
     @Inject
     private SshSudoCommandActions sshSudoCommandActions;
@@ -188,7 +188,7 @@ public class SELinuxAssertions {
 
     private void generateReportFromDenies(TestContext testContext, String stackType, Map<String, String> instancesWithAuditedDenies) {
         if (!instancesWithAuditedDenies.isEmpty()) {
-            String filename = REPORT_DIRECTORY + "/" + testContext.getTestMethodName().orElse("unknown") + "/" + stackType + ".json";
+            String filename = SELINUX_REPORT_DIRECTORY + "/" + testContext.getTestMethodName().orElse("unknown") + "/" + stackType + ".json";
             Path path = Paths.get(filename);
             try {
                 Files.createDirectories(path.getParent());
