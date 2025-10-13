@@ -76,7 +76,6 @@ public class DistroXRestartInstancesTest extends AbstractE2ETest {
             .given(SdxInternalTestDto.class)
             .withTelemetry("telemetry")
             .addTags(SDX_TAGS)
-            .withoutDatabase()
             .withCloudStorage(getCloudStorageRequest(testContext))
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)

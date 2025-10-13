@@ -174,13 +174,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDatalakeWithoutDatabase(TestContext testContext) {
-        SdxDatabaseRequest database = new SdxDatabaseRequest();
-        database.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        database.setCreate(false);
 
         testContext
                 .given(SdxInternalTestDto.class)
-                .withDatabase(database)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withEnableMultiAz()
                 .withTelemetry("telemetry")

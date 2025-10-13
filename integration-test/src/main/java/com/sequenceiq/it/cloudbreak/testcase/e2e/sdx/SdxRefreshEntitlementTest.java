@@ -26,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxRefreshEntitlementTest extends PreconditionSdxE2ETest {
 
@@ -66,11 +65,8 @@ public class SdxRefreshEntitlementTest extends PreconditionSdxE2ETest {
         String clusterName = resourcePropertyProvider().getName();
         String accountId = testContext.getActingUserCrn().getAccountId();
         String entitlementName = Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name();
-        SdxDatabaseRequest database = new SdxDatabaseRequest();
-        database.setCreate(false);
         testContext
                 .given(clusterName, SdxTestDto.class)
-                .withExternalDatabase(database)
                 .withName(clusterName)
                 .withCloudStorage()
                 .when(sdxTestClient.create(), key(clusterName))

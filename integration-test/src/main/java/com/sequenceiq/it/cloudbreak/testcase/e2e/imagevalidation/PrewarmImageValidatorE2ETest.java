@@ -74,7 +74,6 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
         setupSdxImage(testContext, architecture);
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withoutDatabase()
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
                     .withTelemetry("telemetry")

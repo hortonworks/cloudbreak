@@ -35,8 +35,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.TestUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXUpgradeTests extends AbstractE2ETest {
 
@@ -234,18 +232,10 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .given(SdxTestDto.class)
                 .withRuntimeVersion(currentRuntimeVersion)
                 .withCloudStorage(getCloudStorageRequest(testContext))
-                .withExternalDatabase(sdxDbRequest())
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .validate();
-    }
-
-    private SdxDatabaseRequest sdxDbRequest() {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
-        return sdxDatabaseRequest;
     }
 
     private DistroXTestDto checkImageCatalog(DistroXTestDto testDto, String expectedImageCatalog) {

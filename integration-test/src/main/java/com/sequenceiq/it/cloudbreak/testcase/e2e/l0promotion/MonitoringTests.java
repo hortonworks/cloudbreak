@@ -37,8 +37,6 @@ import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2ETest {
@@ -121,9 +119,6 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
     public void testMonitoringOnFreeIpaSdxDistrox(TestContext testContext) {
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NONE);
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setCreate(false);
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
                 .given(EnvironmentNetworkTestDto.class)
@@ -167,7 +162,6 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .when(environmentTestClient.describe())
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
-                    .withDatabase(sdxDatabaseRequest)
                     .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

@@ -74,7 +74,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
 
         SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
                 .withCloudStorage()
-                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
+                .withEmbeddedDatabase(sdxDbRequest(testContext.getCloudProvider()));
         setupSourceImage(testContext, sdxTestDto);
         sdxTestDto
                 .when(sdxTestClient.create())
@@ -126,7 +126,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
                 .withCloudStorage()
                 .withImageId(patchUpgradePair.getLeft())
-                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
+                .withEmbeddedDatabase(sdxDbRequest(testContext.getCloudProvider()));
         sdxTestDto
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -186,10 +186,14 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
+
         testContext
                 .given(SdxTestDto.class)
                     .withClusterShape(SdxClusterShape.ENTERPRISE)
                     .withCloudStorage()
+                    .withExternalDatabase(sdxDatabaseRequest)
                     .withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
                             .getCurrentHARuntimeVersion(testContext.getCloudProvider().getGovCloud()))
                 .when(sdxTestClient.create())

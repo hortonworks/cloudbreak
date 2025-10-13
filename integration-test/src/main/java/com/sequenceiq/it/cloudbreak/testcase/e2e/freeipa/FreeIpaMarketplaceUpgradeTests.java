@@ -53,7 +53,6 @@ public class FreeIpaMarketplaceUpgradeTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .given(SdxTestDto.class)
                     .withCloudStorage()
-                    .withoutExternalDatabase()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(FreeIpaTestDto.class)

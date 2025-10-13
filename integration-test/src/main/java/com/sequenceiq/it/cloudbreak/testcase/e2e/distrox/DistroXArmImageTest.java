@@ -64,7 +64,6 @@ public class DistroXArmImageTest extends PreconditionSdxE2ETest {
                 .withCloudStorage()
                 .withImageId(sourceImage)
                 .withClusterShape(SdxClusterShape.LIGHT_DUTY)
-                .withoutExternalDatabase()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

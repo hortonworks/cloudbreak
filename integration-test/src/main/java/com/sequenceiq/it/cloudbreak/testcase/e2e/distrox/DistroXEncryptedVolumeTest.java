@@ -59,6 +59,8 @@ import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 /**
  * Google Cloud related features are not completed yet. So this E2E test suite is applicable for AWS and Azure right now.
@@ -164,6 +166,8 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
             and = "SDX then distroX also with encrypted volumes should be created for environment",
             then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
     public void testCreateDistroXWithEncryptedVolumesInSingleRG(TestContext testContext) {
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos = new DistroXInstanceGroupsBuilder(testContext)
                 .defaultHostGroup()
@@ -215,6 +219,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 //create sdx
                 .given(SdxTestDto.class)
                 .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

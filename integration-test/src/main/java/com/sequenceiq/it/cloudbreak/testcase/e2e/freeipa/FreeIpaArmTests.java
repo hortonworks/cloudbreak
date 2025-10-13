@@ -59,7 +59,6 @@ public class FreeIpaArmTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.describe())
                 .given(SdxTestDto.class)
                 .withCloudStorage()
-                .withoutExternalDatabase()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(FreeIpaTestDto.class)

@@ -19,8 +19,6 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
@@ -70,14 +68,11 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
     private SdxInternalTestDto performInitialResizeSteps(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest,
             SdxResizeTestValidator validator, Boolean recoveryTest, Boolean useCustomInstances) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         return testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
                 .given(sdxKey, SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(cloudStorageRequest)
                 .withRuntimeVersion(MDL_RESIZE_FIXED_RUNTIME_VERSION)
                 .withClusterShape(SdxClusterShape.CUSTOM)
@@ -142,8 +137,6 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
     public SdxInternalTestDto givenProvisionEnvironmentAndDatalake(TestContext testContext, String sdxKey, String runtimeVersion,
             SdxClusterShape clusterShape, SdxResizeTestValidator validator) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         SdxCloudStorageRequest cloudStorageRequest = getCloudStorageRequest(testContext);
 
         return testContext
@@ -151,7 +144,6 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
                 .withLogging()
                 .withReportClusterLogs()
                 .given(sdxKey, SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(cloudStorageRequest)
                 .withRuntimeVersion(runtimeVersion)
                 .withClusterShape(clusterShape)

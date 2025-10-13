@@ -60,7 +60,6 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
                 .withTelemetry("telemetry")
                 .withInstanceType(instanceType)
                 .addTags(SDX_TAGS)
-                .withoutDatabase()
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

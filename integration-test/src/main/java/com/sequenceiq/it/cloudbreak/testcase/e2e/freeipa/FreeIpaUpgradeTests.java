@@ -68,7 +68,6 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                 .when(freeIpaTestClient.describe())
                 .given(SdxTestDto.class)
                     .withCloudStorage()
-                    .withoutExternalDatabase()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(FreeIpaTestDto.class)

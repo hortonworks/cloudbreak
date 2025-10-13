@@ -47,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
@@ -104,7 +105,8 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withTags(getCloudProvider().getTags())
                 .withRuntimeVersion(getRequest().getImage() == null ? commonClusterManagerProperties.getRuntimeVersion() : null)
                 .withEnableMultiAz(getCloudProvider().isMultiAZ())
-                .withImageValidationCatalogAndImageIfPresent();
+                .withImageValidationCatalogAndImageIfPresent()
+                .withEmbeddedDatabase();
         return getCloudProvider().sdx(this);
     }
 
@@ -262,15 +264,33 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withExternalDatabase(SdxDatabaseRequest database) {
+        if (isDatabaseAvailabilityTypeNone(database)) {
+            throw new TestFailException("Datalake's database availability type is NONE inside withExternalDatabase() function");
+        }
         getRequest().setExternalDatabase(database);
         return this;
     }
 
-    public SdxTestDto withoutExternalDatabase() {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setCreate(false);
-        return withExternalDatabase(sdxDatabaseRequest);
+    public SdxTestDto withEmbeddedDatabase(SdxDatabaseRequest database) {
+        if (!isDatabaseAvailabilityTypeNone(database)) {
+            throw new TestFailException("Datalake's database availability type is not NONE inside withEmbeddedDatabase() function");
+        }
+        getRequest().setExternalDatabase(database);
+        return this;
+    }
+
+    public SdxTestDto withEmbeddedDatabase() {
+        if (getRequest().getExternalDatabase() == null) {
+            SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+            sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+            sdxDatabaseRequest.setCreate(false);
+            getRequest().setExternalDatabase(sdxDatabaseRequest);
+        }
+        return this;
+    }
+
+    private boolean isDatabaseAvailabilityTypeNone(SdxDatabaseRequest database) {
+        return database.getAvailabilityType() == SdxDatabaseAvailabilityType.NONE;
     }
 
     public SdxTestDto withEnvironment() {

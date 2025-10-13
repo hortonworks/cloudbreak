@@ -10,8 +10,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxTest extends PreconditionSdxE2ETest {
 
@@ -25,12 +23,8 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
             when = "a SDX internal create request is sent",
             then = "SDX is created")
     public void testCreateInternalSdx(TestContext testContext) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withDatabase(sdxDatabaseRequest)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

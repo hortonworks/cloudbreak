@@ -21,8 +21,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxSecurityTests extends PreconditionSdxE2ETest {
 
@@ -48,13 +46,9 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
         List<String> originalCertValidityOutput = new ArrayList<>();
         List<String> renewedCertValidityOutput = new ArrayList<>();
 
-        SdxDatabaseRequest noDatabaseRequest = new SdxDatabaseRequest();
-        noDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         testContext
                 .given(sdx, SdxTestDto.class)
                 .withCloudStorage()
-                .withExternalDatabase(noDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()

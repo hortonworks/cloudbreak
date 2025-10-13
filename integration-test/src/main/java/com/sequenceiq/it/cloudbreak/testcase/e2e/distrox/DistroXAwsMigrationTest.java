@@ -45,7 +45,6 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
         String currentVersion = commonClusterManagerProperties.getUpgrade()
                 .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
         String targetVersion = commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion();
-
         createDatalakeWithVersion(testContext, currentVersion);
 
         testContext

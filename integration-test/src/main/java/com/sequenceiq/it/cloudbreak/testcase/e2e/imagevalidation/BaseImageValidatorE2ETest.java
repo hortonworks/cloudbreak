@@ -124,7 +124,6 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
                     .withRuntimeVersion(runtimeVersion)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
-                    .withoutDatabase()
                 .when(sdxTestClient.createInternal())
                 .then(imageAssertions.validateSdxInternalImageSetupTime())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -144,7 +143,6 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
         testContext
                 .given(SdxInternalTestDto.class)
                     .withDefaultImage()
-                    .withoutDatabase()
                     .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

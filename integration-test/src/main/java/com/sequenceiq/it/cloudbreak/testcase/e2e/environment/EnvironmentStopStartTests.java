@@ -55,6 +55,8 @@ import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class EnvironmentStopStartTests extends AbstractE2ETest {
 
@@ -127,6 +129,9 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
             then = "should be stopped first and started after it, and required services should be in running state in CM ")
     public void testCreateStopStartEnvironment(TestContext testContext) {
         LOGGER.info("Environment stop-start test execution has been started....");
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
         String recipeName = resourcePropertyProvider().getName();
@@ -158,6 +163,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withTelemetry("telemetry")
                 .addTags(SDX_TAGS)
                     .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.createInternal())
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE)

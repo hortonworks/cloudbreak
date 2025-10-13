@@ -14,8 +14,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
 
@@ -30,12 +28,9 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
     )
     public void testCreateSdxWithoutRangerRaz(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
                 .given(SdxTestDto.class)
-                .withExternalDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -52,12 +47,9 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
     )
     public void testCreateSdxWithRangerRaz(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
                 .given(SdxTestDto.class)
-                .withExternalDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withRangerRazEnabled(Boolean.TRUE)
                 .when(sdxTestClient.create(), key(sdx))

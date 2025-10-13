@@ -23,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
 
@@ -52,13 +51,9 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
     public void testSdxOnSpotInstances(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
-        SdxDatabaseRequest database = new SdxDatabaseRequest();
-        database.setCreate(false);
-
         testContext
                 .given(SdxTestDto.class)
                     .withCloudStorage()
-                    .withExternalDatabase(database)
                     .withSpotPercentage(100)
                 .when(sdxTestClient.create(), key(sdx))
                 .then((tc, testDto, client) -> {

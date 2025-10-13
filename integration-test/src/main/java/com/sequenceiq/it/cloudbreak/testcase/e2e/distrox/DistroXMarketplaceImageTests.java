@@ -34,8 +34,6 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMarketplaceImageTests.class);
@@ -73,9 +71,6 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
         String idbrokerInstanceGroup = "idbroker";
         String telemetry = "telemetry";
 
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         String distrox = resourcePropertyProvider().getName();
 
         testContext
@@ -106,7 +101,6 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                     .withLogging()
                     .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withDatabase(sdxDatabaseRequest)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withTelemetry(telemetry)

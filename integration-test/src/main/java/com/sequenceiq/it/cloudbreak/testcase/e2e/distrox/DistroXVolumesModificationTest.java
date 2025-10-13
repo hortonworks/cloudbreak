@@ -102,7 +102,6 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .withTelemetry("telemetry")
             .addTags(SDX_TAGS)
             .withSeLinuxSecurity(SeLinux.ENFORCING.name())
-            .withoutDatabase()
             .withCloudStorage(getCloudStorageRequest(testContext))
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)

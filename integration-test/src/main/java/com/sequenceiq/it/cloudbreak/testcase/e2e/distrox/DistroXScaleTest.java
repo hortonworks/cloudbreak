@@ -67,7 +67,10 @@ public class DistroXScaleTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultDatahub(testContext);
+        createResourceGroup(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+        createDatalakeWithoutDatabase(testContext);
+        createDefaultDatahubForExistingDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT, description = "Resilient Scaling: " +

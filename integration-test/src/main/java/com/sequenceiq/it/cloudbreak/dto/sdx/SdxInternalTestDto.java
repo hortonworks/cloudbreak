@@ -127,7 +127,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
                 .withTags(getCloudProvider().getTags())
                 .withEnableMultiAz(getCloudProvider().isMultiAZ())
-                .withImageValidationCatalogAndImageIfPresent();
+                .withImageValidationCatalogAndImageIfPresent()
+                .withEmbeddedDatabase();
         EnvironmentTestDto environmentTestDto = getTestContext().get(EnvironmentTestDto.class);
 
         if (environmentTestDto != null && environmentTestDto.getResponse() != null) {
@@ -159,11 +160,13 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
-    public SdxInternalTestDto withoutDatabase() {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setCreate(false);
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        getRequest().setExternalDatabase(sdxDatabaseRequest);
+    public SdxInternalTestDto withEmbeddedDatabase() {
+        if (getRequest().getExternalDatabase() == null) {
+            SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+            sdxDatabaseRequest.setCreate(false);
+            sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+            getRequest().setExternalDatabase(sdxDatabaseRequest);
+        }
         return this;
     }
 

@@ -62,7 +62,6 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
         testContext.given(SdxTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(runTimeVersion)
-                .withoutExternalDatabase()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

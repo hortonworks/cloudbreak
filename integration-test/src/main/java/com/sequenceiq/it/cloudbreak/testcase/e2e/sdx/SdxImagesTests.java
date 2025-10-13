@@ -87,9 +87,6 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         CloudProvider cloudProvider = testContext.getCloudProvider();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .withName(cloudProvider.getBaseImageTestCatalogName())
@@ -121,7 +118,6 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                     .withLogging()
                     .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withDatabase(sdxDatabaseRequest)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withTelemetry(telemetry)
