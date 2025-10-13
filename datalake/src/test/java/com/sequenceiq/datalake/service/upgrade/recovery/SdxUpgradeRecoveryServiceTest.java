@@ -2,7 +2,9 @@ package com.sequenceiq.datalake.service.upgrade.recovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -37,6 +40,8 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 public class SdxUpgradeRecoveryServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
+
+    private static final String ACCOUNT_ID = "cloudera";
 
     private static final String CLUSTER_NAME = "dummyCluster";
 
@@ -59,6 +64,9 @@ public class SdxUpgradeRecoveryServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private SdxUpgradeRecoveryService underTest;
 
@@ -69,6 +77,7 @@ public class SdxUpgradeRecoveryServiceTest {
         request = new SdxRecoveryRequest();
         request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
         when(cluster.getClusterName()).thenReturn(CLUSTER_NAME);
+        lenient().when(cluster.getAccountId()).thenReturn(ACCOUNT_ID);
     }
 
     @Test
@@ -103,6 +112,7 @@ public class SdxUpgradeRecoveryServiceTest {
         when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
         when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITHOUT_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(entitlementService.isUpgradeRecoveryEnabled(ACCOUNT_ID)).thenReturn(true);
 
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.validateRecovery(cluster));
@@ -130,6 +140,7 @@ public class SdxUpgradeRecoveryServiceTest {
         when(backupRestoreService.getLastSuccessfulBackupInfoWithRuntime(CLUSTER_NAME, USER_CRN, RUNTIME)).thenReturn(Optional.of(datalakeBackupInfo));
         when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITH_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(entitlementService.isUpgradeRecoveryEnabled(ACCOUNT_ID)).thenReturn(true);
 
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.validateRecovery(cluster, request));
@@ -154,4 +165,17 @@ public class SdxUpgradeRecoveryServiceTest {
         assertEquals(errorMessage, sdxRecoverableResponse.getReason());
     }
 
+    @Test
+    public void testValidateStatusSuccessfulMissingEntitlementShouldFail() {
+        String reason = "Datalake upgrade recovery requested. Cluster will be terminated and re-launched with the original runtime.";
+        RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
+
+        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
+        when(entitlementService.isUpgradeRecoveryEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validateRecovery(cluster));
+        assertEquals("Missing CDP_CB_UPGRADE_RECOVERY entitlement. Please contact support.", sdxRecoverableResponse.getReason());
+        assertTrue(sdxRecoverableResponse.getStatus().nonRecoverable());
+    }
 }

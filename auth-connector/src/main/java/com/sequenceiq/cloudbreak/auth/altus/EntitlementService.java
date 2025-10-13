@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_UPGRADE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_DEV_TELEMETRY_YUM_REPO;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_VERTICAL_SCALE_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
@@ -649,5 +650,9 @@ public class EntitlementService {
 
     public boolean isVerticalScaleHaEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_VERTICAL_SCALE_HA);
+    }
+
+    public boolean isUpgradeRecoveryEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_UPGRADE_RECOVERY);
     }
 }

@@ -203,6 +203,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_VERTICAL_SCALE_HA", (EntitlementCheckFunction) EntitlementService::isVerticalScaleHaEnabled, false},
                 {"CDP_CB_VERTICAL_SCALE_HA", (EntitlementCheckFunction) EntitlementService::isVerticalScaleHaEnabled, true},
+
+                {"CDP_CB_UPGRADE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isUpgradeRecoveryEnabled, false},
+                {"CDP_CB_UPGRADE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isUpgradeRecoveryEnabled, true},
         };
     }
 

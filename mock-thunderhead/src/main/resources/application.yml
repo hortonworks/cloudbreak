@@ -45,6 +45,7 @@ auth:
       select.instance.type.enable: true
       backup.restore.permission.checks.enabled: true
       backup.compression.enable: false
+      upgrade.recovery.enabled: true
     differentdatahubversionthandatalake.enabled: true
     datahub:
       instancetypes.enable: false

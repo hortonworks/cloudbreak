@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -45,6 +46,9 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
     @Inject
     private SdxBackupRestoreService backupRestoreService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest recoverRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -70,7 +74,11 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
             }
             RecoveryValidationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.getClusterRecoverableByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
-            return new SdxRecoverableResponse(response.getReason(), response.getStatus());
+            if (response.getStatus().recoverable() && !entitlementService.isUpgradeRecoveryEnabled(sdxCluster.getAccountId())) {
+                return new SdxRecoverableResponse("Missing CDP_CB_UPGRADE_RECOVERY entitlement. Please contact support.", RecoveryStatus.NON_RECOVERABLE);
+            } else {
+                return new SdxRecoverableResponse(response.getReason(), response.getStatus());
+            }
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack recovery validation failed on cluster: [%s]. Message: [%s]",
