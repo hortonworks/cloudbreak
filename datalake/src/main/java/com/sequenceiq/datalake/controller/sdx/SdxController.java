@@ -280,7 +280,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName, boolean includeDetached) {
-        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(DESCRIBE_DATALAKE, envName);
+        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(DESCRIBE_DATALAKE, envName, includeDetached);
         return includeDetached ? convertSdxClusters(sdxClusters) : convertAttachedSdxClusters(sdxClusters, false);
     }
 

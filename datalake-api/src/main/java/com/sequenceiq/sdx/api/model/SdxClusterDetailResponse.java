@@ -46,6 +46,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withCertExpirationState(sdxClusterResponse.getCertExpirationState())
                     .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
                     .withDetached(sdxClusterResponse.isDetached())
+                    .withDetachedClusterName(sdxClusterResponse.getDetachedClusterName())
                     .withEnableMultiAz(sdxClusterResponse.isEnableMultiAz())
                     .withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion())
                     .withDatabaseServerCrn(sdxClusterResponse.getDatabaseServerCrn())
@@ -129,6 +130,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
         private Set<ProviderSyncState> providerSyncStates;
 
+        private String detachedClusterName;
+
         private Builder() {
         }
 
@@ -148,6 +151,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
         public Builder withName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder withDetachedClusterName(String detachedClusterName) {
+            this.detachedClusterName = detachedClusterName;
             return this;
         }
 
@@ -289,6 +297,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setCertExpirationState(certExpirationState);
             sdxClusterDetailResponse.setSdxClusterServiceVersion(sdxClusterServiceVersion);
             sdxClusterDetailResponse.setDetached(detached);
+            sdxClusterDetailResponse.setDetachedClusterName(detachedClusterName);
             sdxClusterDetailResponse.setSeLinuxPolicy(seLinux);
             sdxClusterDetailResponse.setDatabaseEngineVersion(databaseEngineVersion);
             sdxClusterDetailResponse.setProviderSyncStates(providerSyncStates);

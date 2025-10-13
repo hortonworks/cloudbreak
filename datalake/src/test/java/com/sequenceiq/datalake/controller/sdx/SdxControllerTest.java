@@ -153,7 +153,7 @@ class SdxControllerTest {
         addDatabaseAzureRequest(createSdxClusterRequest, AzureDatabaseType.SINGLE_SERVER, true);
 
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                        () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest)))
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Azure Database for PostgreSQL - Single Server is retired. New deployments cannot be created anymore. " +
                         "Check documentation for more information: " +
@@ -213,6 +213,7 @@ class SdxControllerTest {
         sdxStatusEntity.setCreated(1L);
         lenient().when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxService", sdxService);
         return createSdxClusterRequest;
     }
 
@@ -256,6 +257,7 @@ class SdxControllerTest {
         sdxStatusEntity.setCreated(1L);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxService", sdxService);
 
         SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.get(SDX_CLUSTER_NAME));
         assertEquals(SDX_CLUSTER_NAME, sdxClusterResponse.getName());
@@ -483,8 +485,8 @@ class SdxControllerTest {
     @Test
     void getRecommendationWithInvalidClusterShape() {
         assertThrows(BadRequestException.class,
-            () -> sdxController.getRecommendation("cred-crn", SdxClusterShape.CONTAINERIZED, "7.2.18", "aws", "us-west-1",
-                "az1", null));
+                () -> sdxController.getRecommendation("cred-crn", SdxClusterShape.CONTAINERIZED, "7.2.18", "aws", "us-west-1",
+                        "az1", null));
     }
 
     @Test
@@ -547,6 +549,7 @@ class SdxControllerTest {
         SdxCluster sdxCluster = getValidSdxCluster();
         sdxCluster.setAccountId("accountId");
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxService", sdxService);
         when(sdxService.getByNameInAccount(any(), eq("TEST"))).thenReturn(sdxCluster);
         StackV4Response stackV4Response = mock(StackV4Response.class);
         Set<String> entries = Set.of();
@@ -567,6 +570,7 @@ class SdxControllerTest {
     @MethodSource("getByEnvCrnSource")
     void testGetByEnvCrn(boolean includeDetached, int numberOfDatalakes) {
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxService", sdxService);
 
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("new-sdx-cluster");

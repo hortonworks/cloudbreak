@@ -98,6 +98,9 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.PROVIDER_SYNC_STATES)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
+    @Schema(description = ModelDescriptions.DETACHED_CLUSTER_NAME)
+    private String detachedClusterName;
+
     public String getCrn() {
         return crn;
     }
@@ -258,6 +261,14 @@ public class SdxClusterResponse {
         this.detached = detached;
     }
 
+    public String getDetachedClusterName() {
+        return detachedClusterName;
+    }
+
+    public void setDetachedClusterName(String detachedClusterName) {
+        this.detachedClusterName = detachedClusterName;
+    }
+
     public boolean isEnableMultiAz() {
         return enableMultiAz;
     }
@@ -336,6 +347,7 @@ public class SdxClusterResponse {
                 ", certExpirationDetails='" + certExpirationDetails + '\'' +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +
+                ", detachedClusterName=" + detachedClusterName +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
                 ", sdxDatabaseResponse=" + sdxDatabaseResponse +
                 ", seLinuxPolicy='" + seLinuxPolicy + '\'' +

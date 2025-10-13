@@ -163,6 +163,8 @@ public class ModelDescriptions {
 
     public static final String DETACHED = "Shows whether the cluster is in detached state.";
 
+    public static final String DETACHED_CLUSTER_NAME = "The name of the detached cluster if there is one.";
+
     public static final String DATABASE_ENGINE_VERSION = "Database engine version.";
 
     public static final String AZURE_DATABASE_REQUEST = "Azure Database request.";

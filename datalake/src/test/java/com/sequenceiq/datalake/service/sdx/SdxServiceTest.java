@@ -2408,6 +2408,36 @@ class SdxServiceTest {
         assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
     }
 
+    @Test
+    void testFindDetachedSdxClusterByOriginalCrnNoDetached() {
+        when(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(any(), eq(DATALAKE_CRN))).thenReturn(Collections.emptyList());
+        Optional<SdxCluster> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findDetachedSdxClusterByOriginalCrn(DATALAKE_CRN));
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void testFindDetachedSdxClusterByOriginalCrnMoreThanOneDetached() {
+        when(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(any(), eq(DATALAKE_CRN)))
+                .thenReturn(List.of(createSdxCluster("first"), createSdxCluster("second")));
+        Optional<SdxCluster> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findDetachedSdxClusterByOriginalCrn(DATALAKE_CRN));
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void testFindDetachedSdxClusterByOriginalCrnOneDetached() {
+        when(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(any(), eq(DATALAKE_CRN)))
+                .thenReturn(List.of(createSdxCluster("onlyone")));
+        Optional<SdxCluster> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findDetachedSdxClusterByOriginalCrn(DATALAKE_CRN));
+        assertTrue(result.isPresent());
+        assertEquals("onlyone", result.get().getClusterName());
+    }
+
+    private SdxCluster createSdxCluster(String name) {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName(name);
+        return sdxCluster;
+    }
+
     private List<InstanceGroupV4Response> getInstanceGroups(CloudPlatform cloudPlatform) {
         List<InstanceGroupV4Response> instanceGroups = new ArrayList<>();
         if (cloudPlatform.equals(AZURE)) {

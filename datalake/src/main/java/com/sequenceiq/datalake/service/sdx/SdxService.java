@@ -310,6 +310,22 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return sdxClusterRepository.findAllIdsNotDetachedByIds(ids);
     }
 
+    public Optional<SdxCluster> findDetachedSdxClusterByOriginalCrn(String originalCrn) {
+        LOGGER.info("Searching for detached SDX cluster by original crn {}", originalCrn);
+        Optional<SdxCluster> result = Optional.empty();
+        String accountIdFromCrn = getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn());
+        List<SdxCluster> detachedSdxClusters = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, originalCrn);
+        if (detachedSdxClusters.size() == 1) {
+            result = Optional.ofNullable(detachedSdxClusters.getFirst());
+        } else if (detachedSdxClusters.size() > 1) {
+            LOGGER.info("More than one detached clusters found for original crn '{}', clusterNames: '{}'", originalCrn,
+                    detachedSdxClusters.stream()
+                            .map(SdxCluster::getClusterName)
+                            .collect(Collectors.joining(",")));
+        }
+        return result;
+    }
+
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching for single SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
