@@ -127,6 +127,7 @@ public class TrustSetupService {
                 .orElse(new CrossRealmTrust());
         crossRealmTrust.setStack(stack);
         crossRealmTrust.setEnvironmentCrn(request.getEnvironmentCrn());
+        crossRealmTrust.setRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
         crossRealmTrust.setFqdn(request.getFqdn());
         crossRealmTrust.setIp(request.getIp());
         crossRealmTrust.setRealm(request.getRealm());

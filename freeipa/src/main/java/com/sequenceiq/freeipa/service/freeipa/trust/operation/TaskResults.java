@@ -42,6 +42,10 @@ public record TaskResults(
         return getTaskResultsByType(TaskResultType.ERROR);
     }
 
+    public List<TaskResult> getWarnings() {
+        return getTaskResultsByType(TaskResultType.WARNING);
+    }
+
     public List<TaskResult> getSuccessfulTasks() {
         return Stream.concat(getTaskResultsByType(TaskResultType.INFO).stream(), getTaskResultsByType(TaskResultType.WARNING).stream()).toList();
     }

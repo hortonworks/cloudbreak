@@ -161,6 +161,8 @@ dependencies {
   implementation project(':ccm-connector')
   implementation project(':service-common')
   implementation project(':cluster-dns-connector')
+  implementation project(':environment-remote-api')
+  implementation project(":environment-public-api-client")
 
   implementation project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')

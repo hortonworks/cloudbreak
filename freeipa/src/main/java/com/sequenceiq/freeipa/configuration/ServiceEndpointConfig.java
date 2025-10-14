@@ -36,6 +36,12 @@ public class ServiceEndpointConfig {
     @Value("${freeipa.cloudbreak.serviceId:}")
     private String cloudbreakServiceId;
 
+    @Value("${freeipa.remoteEnvironment.url}")
+    private String remoteEnvironmentServiceUrl;
+
+    @Value("${freeipa.remoteEnvironment.contextPath}")
+    private String remoteEnvironmentRootContextPath;
+
     @Inject
     private ServiceAddressResolver serviceAddressResolver;
 
@@ -52,5 +58,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
+    }
+
+    @Bean
+    public String remoteEnvironmentServiceUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(remoteEnvironmentServiceUrl + remoteEnvironmentRootContextPath, "", null);
     }
 }

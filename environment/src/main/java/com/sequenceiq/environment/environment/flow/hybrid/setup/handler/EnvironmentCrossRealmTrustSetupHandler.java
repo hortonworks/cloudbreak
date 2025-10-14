@@ -105,7 +105,7 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
         prepareCrossRealmTrustRequest.setIp(data.getIp());
         prepareCrossRealmTrustRequest.setTrustSecret(data.getTrustSecret());
         prepareCrossRealmTrustRequest.setEnvironmentCrn(data.getResourceCrn());
+        prepareCrossRealmTrustRequest.setRemoteEnvironmentCrn(data.getRemoteEnvironmentCrn());
         return prepareCrossRealmTrustRequest;
     }
-
 }

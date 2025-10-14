@@ -93,6 +93,9 @@ freeipa:
   cloudbreak:
     url: http://localhost:9091
     contextPath: /cb
+  remoteEnvironment:
+    url: http://localhost:8092
+    contextPath: /remoteenvironmentservice
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000

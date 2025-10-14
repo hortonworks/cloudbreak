@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,11 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Environment;
+import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
+import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -33,6 +39,7 @@ import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
+import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
 
 @ExtendWith(MockitoExtension.class)
 class TrustSetupValidationServiceTest {
@@ -50,6 +57,9 @@ class TrustSetupValidationServiceTest {
 
     @Mock
     private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
 
     @InjectMocks
     private TrustSetupValidationService underTest;
@@ -124,25 +134,72 @@ class TrustSetupValidationServiceTest {
 
     @Test
     void testValidateWhenMultipleFailure() throws Exception {
-        setup();
+        setup(false);
         doThrow(new RuntimeException("DNS validation error")).doThrow(new RuntimeException("Reverse DNS validation error"))
                 .when(hostOrchestrator).runOrchestratorState(any());
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
-        assertEquals(3L, result.getErrors().size());
+        assertEquals(4L, result.getErrors().size());
         assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
                 result.getErrors().get(0).message());
         assertEquals("DNS validation error", result.getErrors().get(1).message());
         assertEquals("Reverse DNS validation error", result.getErrors().get(2).message());
+        assertEquals("The on premises cluster is not kerberized", result.getErrors().get(3).message());
     }
 
-    private void setup() {
+    @Test
+    void testValidateWhenNotKerberized() {
+        setup(false);
+        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
+
+        TaskResults result = underTest.validateTrustSetup(4L);
+
+        assertEquals(1L, result.getErrors().size());
+        assertEquals("The on premises cluster is not kerberized", result.getErrors().get(0).message());
+    }
+
+    @Test
+    void testValidateWhenNoRemoteEnvironment() {
+        setup();
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setFqdn("fqdn");
         crossRealmTrust.setIp("ip");
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
+        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
+
+        TaskResults result = underTest.validateTrustSetup(4L);
+
+        assertEquals(1L, result.getWarnings().size());
+        assertEquals("Remote environment crn is missing", result.getWarnings().get(0).message());
+    }
+
+    private void setup() {
+        setup(true);
+    }
+
+    private void setup(boolean kerberized) {
+        CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
+        crossRealmTrust.setFqdn("fqdn");
+        crossRealmTrust.setIp("ip");
+        crossRealmTrust.setRemoteEnvironmentCrn("remoteenvcrn");
+        when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(stackService.getByIdWithListsInTransaction(4L)).thenReturn(mock(Stack.class));
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
+        lenient().when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(createEnvironmentResponse(kerberized));
+    }
+
+    private DescribeEnvironmentResponse createEnvironmentResponse(boolean kerberized) {
+        KerberosInfo kerberosInfo = new KerberosInfo();
+        kerberosInfo.setKerberized(kerberized);
+        PrivateDatalakeDetails privateDatalakeDetails = new PrivateDatalakeDetails();
+        privateDatalakeDetails.setKerberosInfo(kerberosInfo);
+        PvcEnvironmentDetails pvcEnvironmentDetails = new PvcEnvironmentDetails();
+        pvcEnvironmentDetails.setPrivateDatalakeDetails(privateDatalakeDetails);
+        Environment environment = new Environment();
+        environment.setPvcEnvironmentDetails(pvcEnvironmentDetails);
+        DescribeEnvironmentResponse describeEnvironmentResponse = new DescribeEnvironmentResponse();
+        describeEnvironmentResponse.setEnvironment(environment);
+        return describeEnvironmentResponse;
     }
 }

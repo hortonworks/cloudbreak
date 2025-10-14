@@ -7,6 +7,7 @@ public class ModelDescriptions {
     public static final String DESCRIPTION = "description of the resource";
     public static final String ENVIRONMENT_NAME = "The name of the environment";
     public static final String ENVIRONMENT_CRN = "CRN of the environment";
+    public static final String REMOTE_ENVIRONMENT_CRN = "CRN of the remote environment";
     public static final String PARENT_ENVIRONMENT_CRN = "CRN of the parent environment";
     public static final String CHILD_ENVIRONMENT_CRN = "CRN of the child environment";
     public static final String CLUSTER_CRN = "CRN of the cluster";

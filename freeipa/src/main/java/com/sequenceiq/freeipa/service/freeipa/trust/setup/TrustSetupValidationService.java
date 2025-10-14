@@ -13,10 +13,16 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Environment;
+import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
+import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
+import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -30,6 +36,8 @@ import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
+import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 
 @Service
 public class TrustSetupValidationService {
@@ -54,6 +62,9 @@ public class TrustSetupValidationService {
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
+
     public TaskResults validateTrustSetup(Long stackId) {
         Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stackId);
         return crossRealmTrust
@@ -67,6 +78,7 @@ public class TrustSetupValidationService {
         taskResults.addTaskResult(validatePackageAvailability(stackId));
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
+        taskResults.addTaskResult(validateKerberization(crossRealmTrust));
         return taskResults;
     }
 
@@ -87,6 +99,24 @@ public class TrustSetupValidationService {
 
     private TaskResult validateReverseDns(Stack stack, CrossRealmTrust crossRealmTrust) {
         return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse dns validation");
+    }
+
+    private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
+        if (StringUtils.isNotBlank(crossRealmTrust.getRemoteEnvironmentCrn())) {
+            DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+            describeRemoteEnvironment.setCrn(crossRealmTrust.getRemoteEnvironmentCrn());
+            DescribeEnvironmentResponse describeRemoteEnvironmentResponse = remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment);
+            boolean kerberized = Optional.of(describeRemoteEnvironmentResponse.getEnvironment())
+                    .map(Environment::getPvcEnvironmentDetails)
+                    .map(PvcEnvironmentDetails::getPrivateDatalakeDetails)
+                    .map(PrivateDatalakeDetails::getKerberosInfo)
+                    .map(KerberosInfo::getKerberized)
+                    .orElse(false);
+            return kerberized ? new TaskResult(TaskResultType.INFO, "The on premises cluster is kerberized", Map.of()) :
+                    new TaskResult(TaskResultType.ERROR, "The on premises cluster is not kerberized", Map.of());
+        } else {
+            return new TaskResult(TaskResultType.WARNING, "Remote environment crn is missing", Map.of());
+        }
     }
 
     private TaskResult executeSaltState(Stack stack, CrossRealmTrust crossRealmTrust, String stateName, String messagePrefix) {

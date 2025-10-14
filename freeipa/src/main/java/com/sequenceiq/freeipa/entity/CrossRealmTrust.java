@@ -32,6 +32,8 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     private String environmentCrn;
 
+    private String remoteEnvironmentCrn;
+
     private String fqdn;
 
     private String ip;
@@ -69,6 +71,14 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
     public String getFqdn() {
