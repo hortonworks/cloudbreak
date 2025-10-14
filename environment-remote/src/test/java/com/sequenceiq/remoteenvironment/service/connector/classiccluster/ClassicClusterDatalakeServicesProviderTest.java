@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +20,12 @@ import org.springframework.core.io.ClassPathResource;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.cdp.servicediscovery.model.DeploymentType;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 
@@ -50,13 +54,15 @@ class ClassicClusterDatalakeServicesProviderTest {
     private ServicesResourceApi servicesResourceApi;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ApiException {
         cluster = OnPremisesApiProto.Cluster.newBuilder()
                 .setName(CLUSTER_NAME)
                 .setClusterCrn(CLUSTER_CRN)
                 .build();
         when(apiClientProvider.getClouderaManagerV51Client(cluster)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
+        ApiServiceList services = new ApiServiceList().items(List.of(new ApiService().type("HDFS").name("hdfs")));
+        when(servicesResourceApi.readServices(CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(services);
     }
 
     @Test
@@ -99,6 +105,15 @@ class ClassicClusterDatalakeServicesProviderTest {
         expected.put("dfs.namenode.https-address.ns1.namenode1546336404", "b-dbajzath2-dl-worker1.hybrid.cloudera.org:9871");
         expected.put("fs.defaultFS", "hdfs://ns1");
         assertThat(result.getApplications().get("HDFS").getConfig()).containsExactlyEntriesOf(expected);
+    }
+
+    @Test
+    void testGetDatalakeServicesHdfsNotFound() throws Exception {
+        when(servicesResourceApi.readServices(CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(new ApiServiceList());
+
+        assertThatThrownBy(() -> underTest.getDatalakeServices(cluster))
+                .isInstanceOf(RemoteEnvironmentException.class)
+                .hasMessage("HDFS service not found on on-premises cluster 'clusterName'.");
     }
 
     @Test
