@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -29,10 +28,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class AddVolumesCMConfigHandler extends ExceptionCatcherEventHandler<AddVolumesCMConfigHandlerEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddVolumesCMConfigHandler.class);
-
-    private static final Set<String> BLACKLISTED_ROLES = ImmutableSet.of("DATANODE", "ZEPPELIN_SERVER", "KAFKA_BROKER",
-            "SCHEMA_REGISTRY_SERVER", "STREAMS_MESSAGING_MANAGER_SERVER", "SERVER", "NIFI_NODE", "NAMENODE", "STATESTORE",
-            "CATALOGSERVER", "KUDU_MASTER", "KUDU_TSERVER", "SOLR_SERVER", "NIFI_REGISTRY_SERVER", "HUE_LOAD_BALANCER", "KNOX_GATEWAY");
 
     @Inject
     private ConfigUpdateUtilService configUpdateUtilService;
@@ -62,11 +57,8 @@ public class AddVolumesCMConfigHandler extends ExceptionCatcherEventHandler<AddV
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
             List<String> hostTemplateRoleGroupNames = processor.getHostTemplateRoleNames(requestGroup);
-            Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(requestGroup);
-            if (checkConfigChangeRequired(hostTemplateComponents)) {
-                configUpdateUtilService.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents,
-                        hostTemplateRoleGroupNames, requestGroup);
-            }
+            configUpdateUtilService.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents,
+                    hostTemplateRoleGroupNames, requestGroup);
             response = new AddVolumesCMConfigFinishedEvent(stackId, requestGroup, payload.getNumberOfDisks(), payload.getType(),
                     payload.getSize(), payload.getCloudVolumeUsageType());
         } catch (Exception e) {
@@ -74,15 +66,6 @@ public class AddVolumesCMConfigHandler extends ExceptionCatcherEventHandler<AddV
             response = new AddVolumesFailedEvent(stackId, e);
         }
         return response;
-    }
-
-    private boolean checkConfigChangeRequired(Set<String> hostTemplateComponents) {
-        for (String service : hostTemplateComponents) {
-            if (BLACKLISTED_ROLES.contains(service)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

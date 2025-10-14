@@ -1290,7 +1290,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void stopClouderaManagerService(String serviceType, boolean waitForExecution) {
-        clouderaManagerServiceManagementService.stopClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
+        Map<String, String> serviceStatusMap = fetchServiceStatuses();
+        if (validateServiceCanStopOrStart(serviceType, serviceStatusMap, "STOPPED")) {
+            clouderaManagerServiceManagementService.stopClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
+        }
+    }
+
+    private static boolean validateServiceCanStopOrStart(String serviceType, Map<String, String> serviceStatusMap,
+        String excludedStatus) {
+        return null != serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT))
+                && !"NA".equalsIgnoreCase(serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT)))
+                && !excludedStatus.equalsIgnoreCase(serviceStatusMap.get(serviceType.toLowerCase(Locale.ROOT)));
     }
 
     @Override
@@ -1309,7 +1319,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void startClouderaManagerService(String serviceType, boolean waitForExecution) {
-        clouderaManagerServiceManagementService.startClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
+        Map<String, String> serviceStatusMap = fetchServiceStatuses();
+        if (validateServiceCanStopOrStart(serviceType, serviceStatusMap, "STARTED")) {
+            clouderaManagerServiceManagementService.startClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
+        }
     }
 
     @Override
