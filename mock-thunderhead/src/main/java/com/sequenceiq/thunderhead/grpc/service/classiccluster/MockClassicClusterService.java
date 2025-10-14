@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.thunderhead.entity.ClassicCluster;
+import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.service.ClassicClusterService;
 
 import io.grpc.Status;
@@ -58,7 +59,8 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
     @Override
     public void listClusters(OnPremisesApiProto.ListClustersRequest request, StreamObserver<OnPremisesApiProto.ListClustersResponse> responseObserver) {
-        List<OnPremisesApiProto.Cluster> clusters = classicClusterService.findAll().stream()
+        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        List<OnPremisesApiProto.Cluster> clusters = classicClusterService.findAllByAccountId(accountId).stream()
                 .map(this::convertWithCache)
                 .toList();
         OnPremisesApiProto.ListClustersResponse response = OnPremisesApiProto.ListClustersResponse.newBuilder()

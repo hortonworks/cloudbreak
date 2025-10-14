@@ -4,7 +4,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -16,6 +15,8 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     @Id
     private String crn;
+
+    private String accountId;
 
     private String name;
 
@@ -97,7 +98,11 @@ public class ClassicCluster implements AccountIdAwareResource {
 
     @Override
     public String getAccountId() {
-        return Crn.safeFromString(crn).getAccountId();
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override
