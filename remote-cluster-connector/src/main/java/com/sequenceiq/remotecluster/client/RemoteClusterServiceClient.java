@@ -87,7 +87,8 @@ public class RemoteClusterServiceClient {
                     .setPageSize(LIST_CLUSTERS_PAGE_SIZE)
                     .setPageToken(nextPageToken)
                     .build();
-            LOGGER.info("Created request to list clusters: {}", request);
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            LOGGER.info("Created request to list clusters: {}, with actor('{}')", request, userCrn);
             OnPremisesApiProto.ListClustersResponse response = blockingStub.listClusters(request);
             clusters.addAll(response.getClustersList());
             nextPageToken = response.getNextPageToken();

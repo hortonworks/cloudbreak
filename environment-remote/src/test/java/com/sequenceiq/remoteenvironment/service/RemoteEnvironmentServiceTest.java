@@ -16,15 +16,19 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
@@ -52,8 +56,16 @@ class RemoteEnvironmentServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Spy
+    private AsyncTaskExecutorTestImpl intermediateBuilderExecutor;
+
     @InjectMocks
     private RemoteEnvironmentService underTest;
+
+    @BeforeEach
+    void setup() {
+        ReflectionTestUtils.setField(underTest, "intermediateBuilderExecutor", intermediateBuilderExecutor);
+    }
 
     @Test
     void testListWithAllType() {
