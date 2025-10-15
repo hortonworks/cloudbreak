@@ -1146,9 +1146,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return providerSyncStatesByStackId;
     }
 
-    public void addProviderSyncState(Long stackId, ProviderSyncState state) {
+    public boolean addProviderSyncState(Long stackId, ProviderSyncState state) {
         try {
-            transactionService.required(() -> {
+            return transactionService.required(() -> {
                 Set<ProviderSyncState> providerSyncStates = getProviderSyncStates(stackId);
                 Set<ProviderSyncState> originalStates = Set.copyOf(providerSyncStates);
                 boolean changed = providerSyncStates.add(state);
@@ -1156,15 +1156,16 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                     LOGGER.debug("Adding provider sync state '{}' to original states '{}'.", state, originalStates);
                     stackRepository.updateProviderSyncStates(stackId, providerSyncStates);
                 }
+                return changed;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public void removeProviderSyncStates(Long stackId, Set<ProviderSyncState> states) {
+    public boolean removeProviderSyncStates(Long stackId, Set<ProviderSyncState> states) {
         try {
-            transactionService.required(() -> {
+            return transactionService.required(() -> {
                 Set<ProviderSyncState> providerSyncStates = getProviderSyncStates(stackId);
                 Set<ProviderSyncState> originalStates = Set.copyOf(providerSyncStates);
                 boolean changed = providerSyncStates.removeAll(states);
@@ -1172,6 +1173,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                     LOGGER.info("Removed provider sync states {} from original states {}", states, originalStates);
                     stackRepository.updateProviderSyncStates(stackId, providerSyncStates);
                 }
+                return changed;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);

@@ -152,7 +152,11 @@ public class SkuMigrationActions {
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE);
                 stackService.updateTemplateForStackToLatest(payload.getResourceId());
                 LOGGER.info("Removing BASIC_SKU_MIGRATION_NEEDED from provider sync states for stack: {}", context.getStack().getName());
-                stackUpdater.removeProviderStates(payload.getResourceId(), Set.of(BASIC_SKU_MIGRATION_NEEDED));
+                stackUpdater.removeProviderStates(
+                        stackService.get(payload.getResourceId()).getResourceCrn(),
+                        payload.getResourceId(),
+                        Set.of(BASIC_SKU_MIGRATION_NEEDED)
+                );
                 skuMigrationService.setSkuMigrationParameter(payload.getResourceId());
                 flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), SKU_MIGRATION_FINISHED);
                 sendEvent(context);

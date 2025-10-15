@@ -371,6 +371,26 @@ message Event {
     CDPCMLServingApplicationDeployedEvent cdpCMLServingApplicationDeployedEvent = 181;
     // A CDP CAI Application deletion event
     CDPCMLServingApplicationDeletedEvent cdpCMLServingApplicationDeletedEvent = 182;
+    // CDP CML AI Studio deployment event
+    CDPCMLAiStudioDeploymentEvent cdpCMLAiStudioDeploymentEvent = 183;
+    // A CDP DataEngineering service was requested to be suspended or resumed.
+    CDPCDEAppInstanceSuspendResumeRequested cdpCDEAppInstanceSuspendResumeRequested = 184;
+    // A CDP DataEngineering service's status changed during suspend-resume.
+    CDPCDEAppInstanceSuspendResumeStatusChanged cdpCDEAppInstanceSuspendResumeStatusChanged = 185;
+    // A CDP DataFlow DeployedFlowRequested event
+    CDPDFDeployedFlowRequested cdpDFDeployedFlowRequested = 186;
+    // A CDP DataFlow DeployedFlowStatusChanged event
+    CDPDFDeployedFlowStatusChanged cdpDFDeployedFlowStatusChanged = 187;
+    // A CDP DataFlow Version Change Requested event
+    CDPDFDeployedFlowVersionChangeRequested cdpDFDeployedFlowVersionChangeRequested = 188;
+    // A KPI was added to a DataFlow deployment.
+    CDPDFDeployedFlowKpiCreated cdpDFDeployedFlowKpiCreated = 189;
+    // A KPI of a DataFlow deployment was modified.
+    CDPDFDeployedFlowKpiUpdated cdpDFDeployedFlowKpiUpdated = 190;
+    // A KPI of a DataFlow deployment was deleted.
+    CDPDFDeployedFlowKpiDeleted cdpDFDeployedFlowKpiDeleted = 191;
+    // A CDP Provider sync state change.
+    CDPProviderSyncStateChange cdpProviderSyncStateChange = 192;
   }
 }
 
@@ -1255,6 +1275,14 @@ message CDPCMLWorkspaceStatus {
     REFRESH_CERTIFICATE_FINISHED = 71;
     // The status when the operation to Refresh Certificates for the CML infra pods has failed.
     REFRESH_CERTIFICATE_FAILED = 72;
+
+
+    // The status when the operation to fail over file system is started.
+    FAIL_OVER_FILE_SYSTEM_STARTED = 73;
+    // The status when the operation to fail over file system is finished.
+    FAIL_OVER_FILE_SYSTEM_FINISHED = 74;
+    // The status when the operation to fail over file system has failed.
+    FAIL_OVER_FILE_SYSTEM_FAILED = 75;
   }
 }
 
@@ -1431,6 +1459,13 @@ message CDPCMLResourceStatus {
     REFRESH_CERTIFICATE_FINISHED = 71;
     // The status when the operation to Refresh Certificates for the CML infra pods has failed.
     REFRESH_CERTIFICATE_FAILED = 72;
+
+    // The status when the operation to fail over file system is started.
+    FAIL_OVER_FILE_SYSTEM_STARTED = 73;
+    // The status when the operation to fail over file system is finished.
+    FAIL_OVER_FILE_SYSTEM_FINISHED = 74;
+    // The status when the operation to fail over file system has failed.
+    FAIL_OVER_FILE_SYSTEM_FAILED = 75;
   }
 }
 
@@ -3309,8 +3344,10 @@ message CDPDFSharedParameterGroupLifecycle {
   string username = 10;
   // The source of the shared parameter group.
   CDPDFSharedParameterGroupSource.Value parameterGroupSource = 11;
-  // The count of the associated deployments for the shared parameter group.
-  int32 associatedDeploymentCount = 12;
+  // Deprecated: used associatedDeployedFlowCount field instead. The count of the associated deployments for the shared parameter group.
+  int32 associatedDeploymentCount = 12 [deprecated = true];
+  // The count of the associated deployed flows for the shared parameter group.
+  int32 associatedDeployedFlowCount = 13;
 }
 
 // The various lifecycle actions that can be taken on shared parameter groups.
@@ -3495,6 +3532,8 @@ message CDPDFServiceRequested {
   bool updateNodeImages = 20;
   // The region where the workload is running
   string workloadRegion = 21;
+  // Environment name of the CDP environment being enabled for DF.
+  string environmentName = 22;
 }
 
 message CDPDFServiceStatusChanged {
@@ -3547,6 +3586,8 @@ message CDPDFServiceUpgradeRequested {
   bool runValidations = 16;
   // The region where the workload is running
   string workloadRegion = 17;
+  // Environment name of the CDP environment being upgraded for DF.
+  string environmentName = 18;
 }
 
 message CDPDFServiceUpgradeStatusChanged {
@@ -3847,6 +3888,178 @@ message CDPDFDeploymentUpgradeStatusChanged {
   // The version of NiFi that deployment is upgraded to
   string newNifiVersion = 11;
 
+}
+
+// The status of a deployed flow
+message CDPDFDeployedFlowStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Deployed Flow Creation
+    CREATE_REQUESTED = 1;
+    CREATE_IN_PROGRESS = 2;
+    CREATE_COMPLETED = 3;
+    CREATE_FAILED = 4;
+    // Deployed Flow Deletion
+    DELETE_REQUESTED = 5;
+    DELETE_IN_PROGRESS = 6;
+    DELETE_COMPLETED = 7;
+    DELETE_FAILED = 8;
+    // Deployed Flow Update
+    UPDATE_REQUESTED = 9;
+    UPDATE_IN_PROGRESS = 10;
+    UPDATE_COMPLETED = 11;
+    UPDATE_FAILED = 12;
+    // Flow Operations
+    START_FLOW_REQUESTED = 13;
+    START_FLOW_IN_PROGRESS = 14;
+    START_FLOW_COMPLETED = 15;
+    START_FLOW_FAILED = 16;
+    STOP_FLOW_REQUESTED = 17;
+    STOP_FLOW_IN_PROGRESS = 18;
+    STOP_FLOW_COMPLETED = 19;
+    STOP_FLOW_FAILED = 20;
+    // Flow Version Change
+    FLOW_VERSION_CHANGE_REQUESTED = 21;
+    FLOW_VERSION_CHANGE_IN_PROGRESS = 22;
+    FLOW_VERSION_CHANGE_COMPLETED = 23;
+    FLOW_VERSION_CHANGE_FAILED = 24;
+    FLOW_VERSION_CHANGE_PREPARATION_FAILED = 25;
+    // Cancel Flow Version Change
+    CANCEL_FLOW_VERSION_CHANGE_REQUESTED = 26;
+    CANCEL_FLOW_VERSION_CHANGE_IN_PROGRESS = 27;
+    CANCEL_FLOW_VERSION_CHANGE_COMPLETED = 28;
+    CANCEL_FLOW_VERSION_CHANGE_FAILED = 29;
+  }
+}
+
+message CDPDFDeployedFlowRequested {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The CRN of the CDP environment where the deployed flow is located
+  string environmentCrn = 2;
+  // The CRN of the DataFlow Service
+  string dataFlowServiceCrn = 3;
+  // The CRN of the deployed flow
+  string deployedFlowCrn = 4;
+  // The CRN of the deployment containing this deployed flow
+  string deploymentCrn = 5;
+  // The name of the deployed flow
+  string deployedFlowName = 6;
+  // The name of the deployment containing this deployed flow
+  string deploymentName = 7;
+  // The initial status of the deployed flow operation
+  CDPDFDeployedFlowStatus.Value status = 8;
+  // The number of parameters defined for the deployed flow
+  int32 parameterCount = 9;
+  // Does the deployed flow have asset references
+  bool assetReferences = 10;
+  // Is this a deployment of a ReadyFlow
+  bool readyFlow = 11;
+  // CRN of the flow version
+  string flowVersionCrn = 12;
+  // Username of the actor that is requesting the operation
+  string username = 13;
+  // The NiFi components used in the deployed flow
+  string niFiComponentsUsed = 14;
+  // The number of KPIs monitored in the deployed flow
+  int32 kpiCount = 15;
+}
+
+// A CDP DataFlow Deployed Flow's status changed
+message CDPDFDeployedFlowStatusChanged {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The CRN of the DataFlow Service
+  string dataFlowServiceCrn = 2;
+  // The CRN of the deployed flow
+  string deployedFlowCrn = 3;
+  // The name of the deployed flow
+  string deployedFlowName = 4;
+  // The name of the deployment containing this deployed flow
+  string deploymentName = 5;
+  // The status of the deployed flow before the change
+  CDPDFDeployedFlowStatus.Value oldStatus = 6;
+  // The status of the deployed flow after the change
+  CDPDFDeployedFlowStatus.Value newStatus = 7;
+  // A failure message. This will only be set if newStatus is *_FAILED
+  string failureReason = 8;
+  // CRN of the flow version
+  string flowVersionCrn = 9;
+  // CRN of the deployment
+  string deploymentCrn = 10;
+}
+
+// A CDP DataFlow Deployed Flow version change was requested
+message CDPDFDeployedFlowVersionChangeRequested {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The CRN of the CDP environment where the deployed flow is located
+  string environmentCrn = 2;
+  // The CRN of the DataFlow Service
+  string dataFlowServiceCrn = 3;
+  // The DataFlow Service ID
+  string dataFlowServiceId = 4;
+  // The CRN of the deployed flow
+  string deployedFlowCrn = 5;
+  // The CRN of the deployment containing this deployed flow
+  string deploymentCrn = 6;
+  // The name of the deployed flow
+  string deployedFlowName = 7;
+  // The name of the deployment containing this deployed flow
+  string deploymentName = 8;
+  // The CRN of the version of the deployed flow's flow prior to the update
+  string oldFlowVersionCrn = 9;
+  // The CRN of the version of the flow requested to update to
+  string newFlowVersionCrn = 10;
+  // The initial status of the deployed flow. Should only be FLOW_VERSION_CHANGE_REQUESTED or CANCEL_FLOW_VERSION_CHANGE_REQUESTED
+  CDPDFDeployedFlowStatus.Value status = 11;
+  // The strategy to use during change flow version
+  CDPDFDeploymentFlowVersionChangeStrategy.Value strategy = 12;
+  // The max time in minutes to wait for the flow to process data
+  uint32 waitForFlowToStopInMinutes = 13;
+  // The NiFi components used in the deployed flow
+  string niFiComponentsUsed = 14;
+}
+
+// Message representing the creation of a KPI for a deployed flow.
+message CDPDFDeployedFlowKpiCreated {
+  // Unique identifier for the KPI.
+  string id = 1;
+  // Identifier of the deployed flow associated with the KPI.
+  string deployedFlowId = 2;
+  // CRN of the environment where the KPI is created.
+  string environmentCrn = 3;
+  // Account ID associated with the KPI.
+  string accountId = 4;
+  // Details of the KPI.
+  CDPDFKpiDetails kpiDetails = 5;
+  // Source of the event triggering the KPI creation.
+  CDPDFEventSource.Value eventSource = 6;
+}
+
+// Message representing the update of a KPI for a deployed flow.
+message CDPDFDeployedFlowKpiUpdated {
+  // Unique identifier for the KPI.
+  string id = 1;
+  // Identifier of the deployed flow associated with the KPI.
+  string deployedFlowId = 2;
+  // CRN of the environment where the KPI is updated.
+  string environmentCrn = 3;
+  // Account ID associated with the KPI.
+  string accountId = 4;
+  // Updated details of the KPI.
+  CDPDFKpiDetails kpiDetails = 5;
+  // Source of the event triggering the KPI update.
+  CDPDFEventSource.Value eventSource = 6;
+}
+
+// Message representing the deletion of a KPI for a deployed flow.
+message CDPDFDeployedFlowKpiDeleted {
+  // Unique identifier for the KPI.
+  string id = 1;
+  // Source of the event triggering the KPI deletion.
+  CDPDFEventSource.Value eventSource = 2;
 }
 
 // Generate when a DFX component is failing
@@ -4172,6 +4385,8 @@ message CDPDFProjectResourceType {
     TEST_SESSION_CONFIGURATION = 6;
     // A value indicating a custom python configuration resource.
     CUSTOM_PYTHON_CONFIGURATION = 7;
+    // A value indicating a parameter group resource.
+    PARAMETER_GROUP = 8;
   }
 }
 
@@ -4930,6 +5145,8 @@ message CDPCDEVirtualClusterRequested {
   string memoryRequested = 7;
   // Spark version of the virtual cluster.
   string sparkVersion = 8;
+  // Operating system name for the Spark runtime (e.g., "securityhardened" or "redhat").
+  string sparkOSName = 13;
   // Status of the CDP CDE virtual cluster.
   string status = 11;
   // Set of properties used while requesting virtual clusters. The format of this is a map serialized
@@ -5057,6 +5274,8 @@ message CDPCDEActiveVCDetails{
   string status = 6;
   // Tier of the virtual cluster.
   string appTier = 7;
+  // Operating system name for the Spark runtime (e.g., "securityhardened" or "redhat").
+  string sparkOSName = 8;
 }
 
 // Generated when a CDP CDE job run is initiated or its status changes.
@@ -5139,6 +5358,57 @@ message CDPCDESuspendResumeOperationType {
     RESUME  = 2;
   }
 }
+
+// operation type: suspend OR resume.
+message CDPCDEAppInstanceSuspendResumeOperationType {
+  enum Value {
+    APP_INSTANCE_UNSET   = 0;
+    APP_INSTANCE_SUSPEND = 1;
+    APP_INSTANCE_RESUME  = 2;
+  }
+}
+
+// Generated when a CDP CDE app instance suspend/resume is requested.
+message CDPCDEAppInstanceSuspendResumeRequested {
+  // The ID of the CDE service.
+  string clusterID = 1;
+  // The ID of the App instance
+  string instanceID = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The cluster CRN.
+  string clusterCrn = 4;
+  // The CDP actor CRN of the creator.
+  string actorCrn = 5;
+  // The CDE version.
+  string cdeVersion = 6;
+  // operation type: suspend OR resume.
+  CDPCDEAppInstanceSuspendResumeOperationType.Value operationType = 7;
+  // Number of times it is attempted. For first attempt it's 1 and for each
+  // subsequent retry it's incremented by 1.
+  int32 attemptNumber = 8;
+  // Workflow Id of the CDE CP workflow.
+  string workflowId = 9;
+}
+
+// A CDP DataEngineering VC's status changed during app VC suspend-resume.
+message CDPCDEAppInstanceSuspendResumeStatusChanged {
+  // The ID of the CDP CDE service.
+  string clusterID = 1;
+  // The ID of the App instance
+  string instanceID = 2;
+  // The CRN of the CDP CDE service.
+  string clusterCrn = 3;
+  // The CDP account ID.
+  string accountId = 4;
+  // The workflow ID.
+  string workflowId = 5;
+  // New status of the CDP CDE App Instance(in-progress/success/failed).
+  string status = 6;
+  // Cluster details (If there are any additional details or error messages).
+  string details = 7;
+}
+
 
 // Generated when a CDP CDE service suspend/resume is requested.
 message CDPCDEServiceSuspendResumeRequested {
@@ -6474,6 +6744,34 @@ message CDPSecretRotationEvent {
   string accountId = 5;
 }
 
+// Event about CDP provider sync state change
+message CDPProviderSyncStateChange {
+  // Operation of CDP provider sync state operation which can be ADDED or REMOVED
+  CDPProviderSyncStateOperation.Value operation = 1;
+  // CRN of resource
+  string resourceCrn = 2;
+  // CDP Provider sync state change type
+  string syncState = 3;
+  // Status reason
+  string reason = 4;
+  // Event time stamp
+  uint64 timestamp = 5;
+  // Corresponding account id
+  string accountId = 6;
+}
+
+// Operation of CDP provider sync state change which can be ADDED or REMOVED
+message CDPProviderSyncStateOperation {
+  enum Value {
+    // Indicates that status cannot be recognized
+    UNKNOWN = 0;
+    // Indicates that it is a new status
+    ADDED = 1;
+    // Indicates that it is a removed status
+    REMOVED = 2;
+  }
+}
+
 // Generic event emitted when a Replication Manager user creates a policy
 message RMPolicyCreationEvent {
   string type = 1;
@@ -6886,6 +7184,8 @@ message CDPCloudPrivateLinkAccessAuthorization {
   string errorDescription = 4;
   // The status of privatelink access authorization
   CloudPrivatelinkAccessAuthorizationStatus.Value status = 5;
+  // The crn for authz in which privatelink is requested
+  string resourceCrn = 6;
 }
 
 // Generated when cloud private link access revocation is requested.
@@ -6900,6 +7200,8 @@ message CDPCloudPrivateLinkAccessRevocation {
   string errorDescription = 4;
   // The status of privatelink access revocation
   CloudPrivatelinkAccessRevocationStatus.Value status = 5;
+  // The crn for authz in which privatelink is requested
+  string resourceCrn = 6;
 }
 
 // The status of a CDP cloud privatelink creation.
@@ -7437,4 +7739,16 @@ message CDPCMLServingApplicationDeletedEvent {
   string namespace = 5;
   // Application name hash
   string application_name_hash = 6;
+}
+
+// Event message for tracking AI Studio deployments in CDP CML
+message CDPCMLAiStudioDeploymentEvent {
+  // ID of the project where AI Studio is being deployed
+  uint32 projectId = 1;
+  // Name of the AI Studio instance
+  string studioName = 2;
+  // Type of event (e.g. deployment_completed, deployment_failed)
+  string eventType = 3;
+  // Additional details about the deployment event
+  string eventDetails = 4;
 }

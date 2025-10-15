@@ -25,8 +25,8 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
-import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.usage.service.ProviderSyncStateChangeUsageSenderService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.common.model.ProviderSyncState;
 
@@ -54,7 +54,7 @@ public class StackUpdater {
     private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;
 
     @Inject
-    private CentralCDHVersionCoordinator centralCDHVersionCoordinator;
+    private ProviderSyncStateChangeUsageSenderService providerSyncStateChangeUsageSenderService;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, "");
@@ -85,12 +85,18 @@ public class StackUpdater {
         stackService.updateJavaVersion(stackId, javaVersion);
     }
 
-    public void addProviderState(Long stackId, ProviderSyncState state) {
-        stackService.addProviderSyncState(stackId, state);
+    public void addProviderState(String resourceCrn, Long stackId, ProviderSyncState state) {
+        boolean changed = stackService.addProviderSyncState(stackId, state);
+        if (changed) {
+            providerSyncStateChangeUsageSenderService.addProviderSyncState(state, resourceCrn);
+        }
     }
 
-    public void removeProviderStates(Long stackId, Set<ProviderSyncState> states) {
-        stackService.removeProviderSyncStates(stackId, states);
+    public void removeProviderStates(String resourceCrn, Long stackId, Set<ProviderSyncState> states) {
+        boolean changed = stackService.removeProviderSyncStates(stackId, states);
+        if (changed) {
+            states.forEach(state -> providerSyncStateChangeUsageSenderService.removeProviderSyncState(state, resourceCrn));
+        }
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {

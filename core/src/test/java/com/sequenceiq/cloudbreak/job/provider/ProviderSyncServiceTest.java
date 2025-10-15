@@ -197,10 +197,17 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         if ("Basic".equalsIgnoreCase(sku)) {
-            verify(stackUpdater, times(1)).addProviderState(stack.getId(), BASIC_SKU_MIGRATION_NEEDED);
+            verify(stackUpdater, times(1)).addProviderState(
+                    stack.getResourceCrn(),
+                    stack.getId(),
+                    BASIC_SKU_MIGRATION_NEEDED
+            );
         } else {
-            verify(stackUpdater, times(1)).removeProviderStates(stack.getId(), Set.of(OUTBOUND_UPGRADE_NEEDED,
-                    BASIC_SKU_MIGRATION_NEEDED));
+            verify(stackUpdater, times(1)).removeProviderStates(
+                    stack.getResourceCrn(),
+                    stack.getId(),
+                    Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+            );
         }
     }
 
@@ -221,8 +228,11 @@ class ProviderSyncServiceTest {
 
         underTest.syncResources(stack);
 
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(), Set.of(OUTBOUND_UPGRADE_NEEDED,
-                BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @ParameterizedTest
@@ -241,7 +251,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @ParameterizedTest
@@ -260,8 +274,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -285,7 +302,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should detect upgrade needed from synced resources only (no duplicate check)
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @Test
@@ -309,8 +330,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since no upgrade needed
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -334,7 +358,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should detect upgrade needed from unsync resources check
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @Test
@@ -358,8 +386,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since no upgrade needed
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -383,7 +414,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should detect upgrade needed from synced resources check
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @Test
@@ -407,8 +442,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since no upgrade needed
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -431,8 +469,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since no network attributes to check
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -457,7 +498,11 @@ class ProviderSyncServiceTest {
 
         // Then: Should detect upgrade needed from synced resources (checked first)
         // Original network with non-upgradeable type should be filtered out from second check
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @Test
@@ -482,8 +527,11 @@ class ProviderSyncServiceTest {
 
         // Then: Should remove provider states since synced network (checked first) is not upgradeable
         // Original network with upgradeable type should be filtered out from second check
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -508,8 +556,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since no resources have upgradeable NetworkAttributes
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -532,8 +583,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since the only NetworkAttributes has non-upgradeable outbound type
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -556,7 +610,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should detect upgrade needed from the upgradeable NetworkAttributes
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     @Test
@@ -578,8 +636,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should remove provider states since USER_ASSIGNED_NATGATEWAY is not upgradeable
-        verify(stackUpdater, times(1)).removeProviderStates(stack.getId(),
-                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED));
+        verify(stackUpdater, times(1)).removeProviderStates(
+                stack.getResourceCrn(),
+                stack.getId(),
+                Set.of(OUTBOUND_UPGRADE_NEEDED, BASIC_SKU_MIGRATION_NEEDED)
+        );
     }
 
     @Test
@@ -601,7 +662,11 @@ class ProviderSyncServiceTest {
         underTest.syncResources(stack);
 
         // Then: Should detect upgrade needed since null outboundType defaults to NOT_DEFINED (upgradeable)
-        verify(stackUpdater, times(1)).addProviderState(stack.getId(), OUTBOUND_UPGRADE_NEEDED);
+        verify(stackUpdater, times(1)).addProviderState(
+                stack.getResourceCrn(),
+                stack.getId(),
+                OUTBOUND_UPGRADE_NEEDED
+        );
     }
 
     private CloudResource createAzureNetworkResource(String outboundTypeStr) {

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CHECK_LOAD_BALANCERS
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SKU_MIGRATION_FINISHED;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.SkuMigrationFinished;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.check.CheckSkuRequest;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -153,6 +155,9 @@ class SkuMigrationActionsTest {
         Event event = mock(Event.class);
         ArgumentCaptor<StackEvent> stackEvent = ArgumentCaptor.forClass(StackEvent.class);
         when(reactorEventFactory.createEvent(anyMap(), stackEvent.capture())).thenReturn(event);
+        Stack stack = mock(Stack.class);
+        when(stack.getResourceCrn()).thenReturn("crn:cdp:cloudbreak:us-west-1:1234567890:environment:env-123456");
+        when(stackService.get(any())).thenReturn(stack);
 
         new AbstractActionTestSupport<>(action).doExecute(context, skuMigrationFinished, Map.of());
 

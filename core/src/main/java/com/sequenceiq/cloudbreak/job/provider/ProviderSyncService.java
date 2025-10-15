@@ -88,16 +88,28 @@ public class ProviderSyncService {
         Optional<SkuAttributes> hasBasicSku = hasBasicSku(syncedCloudResources);
         if (hasBasicSku.isPresent()) {
             LOGGER.info("Basic SKU migration is needed for {}, updating status", hasBasicSku.get());
-            stackUpdater.addProviderState(stack.getId(), ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED);
+            stackUpdater.addProviderState(
+                    stack.getResourceCrn(),
+                    stack.getId(),
+                    ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED
+            );
         } else if (shouldUpgradeOutbound(syncedCloudResources).isPresent() ||
                 shouldUpgradeOutbound(filterSyncedResources(cloudResources, syncedCloudResources)).isPresent()) {
             LOGGER.info("Outbound upgrade is needed for {}, updating status",
                     shouldUpgradeOutbound(syncedCloudResources).or(() -> shouldUpgradeOutbound(filterSyncedResources(cloudResources, syncedCloudResources))));
-            stackUpdater.addProviderState(stack.getId(), ProviderSyncState.OUTBOUND_UPGRADE_NEEDED);
+            stackUpdater.addProviderState(
+                    stack.getResourceCrn(),
+                    stack.getId(),
+                    ProviderSyncState.OUTBOUND_UPGRADE_NEEDED
+            );
         } else {
             LOGGER.debug("Provider sync have not detected errors for {}, cleaning up error states",
                     syncedCloudResources.stream().map(CloudResource::getDetailedInfo).toList());
-            stackUpdater.removeProviderStates(stack.getId(), Set.of(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED, ProviderSyncState.OUTBOUND_UPGRADE_NEEDED));
+            stackUpdater.removeProviderStates(
+                    stack.getResourceCrn(),
+                    stack.getId(),
+                    Set.of(ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED, ProviderSyncState.OUTBOUND_UPGRADE_NEEDED)
+            );
         }
     }
 

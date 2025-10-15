@@ -356,6 +356,18 @@ public class UsageReportProcessor implements UsageReporter {
         }
     }
 
+    @Override
+    public void cdpProviderSyncStateChange(UsageProto.CDPProviderSyncStateChange details) {
+        try {
+            checkNotNull(details);
+            usageProcessingStrategy.processUsage(eventBuilder()
+                    .setCdpProviderSyncStateChange(details)
+                    .build(), null);
+        } catch (Exception e) {
+            LOGGER.warn("Could not send provider sync state change usage event: {}! Cause: {}", details, e.getMessage());
+        }
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

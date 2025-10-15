@@ -218,4 +218,10 @@ public interface UsageReporter {
      * @param details the event details
      */
     void cdpCloudbreakFlowEvent(UsageProto.CDPCloudbreakFlowEvent details);
+
+    /**
+     * Reports a CDPProviderSyncStateChange event
+     * @param details the event details
+     */
+    void cdpProviderSyncStateChange(UsageProto.CDPProviderSyncStateChange details);
 }

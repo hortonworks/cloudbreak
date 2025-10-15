@@ -94,7 +94,6 @@ public class StackUpdaterTest {
         assertEquals(newStatusReason, newStack.getStatusReason());
         verify(stackService, times(1)).save(eq(stack));
         verify(clusterService, times(1)).save(eq(stack.getCluster()));
-        verify(usageLoggingUtil, times(1)).logClusterStatusChangeUsageEvent(eq(Status.AVAILABLE), eq(Status.DELETE_COMPLETED), eq(stack.getCluster()));
     }
 
     @Test
