@@ -199,7 +199,7 @@ dependencies {
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonVersion
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '2.0.1'
-  implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.39.1'
+  implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.40.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
