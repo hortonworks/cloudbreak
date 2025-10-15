@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,8 +61,10 @@ public class RemoteEnvironmentService {
         MDCBuilder.buildMdcContext();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         throwExceptionIfNotEntitled(accountId);
-        return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
+        DescribeEnvironmentResponse describeEnvironmentResponse = remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
                 .describeV1(accountId, request.getCrn());
+        Optional.ofNullable(describeEnvironmentResponse.getEnvironment()).ifPresent(environment -> environment.setCrn(request.getCrn()));
+        return describeEnvironmentResponse;
     }
 
     public DescribeEnvironmentV2Response describeV2(DescribeRemoteEnvironment request) {
