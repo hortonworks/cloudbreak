@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 
 import jakarta.ws.rs.core.Response.Status;
 
@@ -14,7 +14,7 @@ public class GetCloudParameterExceptionMapper extends BaseExceptionMapper<GetClo
 
     @Override
     public Status getResponseStatus(GetCloudParameterException exception) {
-        return INTERNAL_SERVER_ERROR;
+        return BAD_REQUEST;
     }
 
     @Override
