@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -24,12 +26,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.cdp.servicediscovery.model.Application;
 import com.cloudera.cdp.servicediscovery.model.DeploymentType;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 
@@ -37,6 +43,8 @@ import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 class ClassicClusterDatalakeServicesProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassicClusterDatalakeServicesProvider.class);
+
+    private static final String HDFS_SERVICE = "HDFS";
 
     private static final XPathExpression PROPERTY_EXPRESSION;
 
@@ -61,7 +69,7 @@ class ClassicClusterDatalakeServicesProvider {
         response.setClusterid(cluster.getClusterCrn());
         response.setDeploymentType(DeploymentType.PDL);
         response.setApplications(Map.of(
-                "HDFS", getHdfsApplication(cluster, apiClient)
+                HDFS_SERVICE, getHdfsApplication(cluster, apiClient)
         ));
         return response;
     }
@@ -89,7 +97,15 @@ class ClassicClusterDatalakeServicesProvider {
 
     private File getHdfsClientConfigFile(OnPremisesApiProto.Cluster cluster, ApiClient apiClient) {
         try {
-            return clouderaManagerApiFactory.getServicesResourceApi(apiClient).getClientConfig(cluster.getName(), "hdfs");
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+            String clusterName = cluster.getName();
+            ApiServiceList apiServiceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
+            ApiService hdfsService = Objects.requireNonNullElse(apiServiceList.getItems(), List.<ApiService>of()).stream()
+                    .filter(apiService -> HDFS_SERVICE.equals(apiService.getType()))
+                    .findFirst()
+                    .orElseThrow(() -> new RemoteEnvironmentException(
+                            String.format("HDFS service not found on on-premises cluster '%s'.", clusterName)));
+            return servicesResourceApi.getClientConfig(clusterName, hdfsService.getName());
         } catch (ApiException e) {
             String message = "Failed to get HDFS client config from Cloudera Manager";
             LOGGER.error(message, e);

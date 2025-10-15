@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -13,7 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -34,6 +37,9 @@ class UpgradeValidationServiceTest {
 
     @Mock
     private SupportedOsService supportedOsService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Test
     void testMajorOsUpgradeNotSupported() {
@@ -160,5 +166,31 @@ class UpgradeValidationServiceTest {
         selectedImage.setId("111-333");
 
         underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, Set.of());
+    }
+
+    @Test
+    void testValidateSelectedImageEntitledForEntitled() {
+        String accountId = "acc123";
+        ImageInfoResponse image = new ImageInfoResponse();
+        image.setOs("redhat9");
+        when(entitlementService.isEntitledToUseOS(accountId, OsType.getByOs("redhat9")))
+                .thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                underTest.validateSelectedImageEntitledFor(accountId, image)
+        );
+    }
+
+    @Test
+    void testValidateSelectedImageEntitledForNotEntitled() {
+        String accountId = "acc123";
+        ImageInfoResponse image = new ImageInfoResponse();
+        image.setOs("redhat9");
+        when(entitlementService.isEntitledToUseOS(accountId, OsType.getByOs("redhat9")))
+                .thenReturn(false);
+
+        assertThrows(BadRequestException.class, () ->
+                underTest.validateSelectedImageEntitledFor(accountId, image)
+        );
     }
 }

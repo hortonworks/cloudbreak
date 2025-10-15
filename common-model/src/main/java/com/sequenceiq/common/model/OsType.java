@@ -2,6 +2,7 @@ package com.sequenceiq.common.model;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 public enum OsType {
 
@@ -47,6 +48,19 @@ public enum OsType {
         return parcelPostfix;
     }
 
+    public Set<OsType> getMajorOsTargets() {
+        switch (this) {
+            case CENTOS7:
+                return Set.of(RHEL8);
+            case RHEL8:
+                return Set.of(RHEL9);
+            case RHEL9:
+                return Set.of();
+            default:
+                throw new IllegalStateException("Unexpected value: " + this);
+        }
+    }
+
     public boolean matches(String os, String osType) {
         return this.os.equalsIgnoreCase(os) && this.osType.equalsIgnoreCase(osType);
     }
@@ -59,8 +73,15 @@ public enum OsType {
         return getOptionalByOsTypeString(osType).orElse(CENTOS7);
     }
 
+    public static Optional<OsType> getByOsOptional(String os) {
+        return Arrays.stream(values())
+                .filter(osType -> osType.os.equalsIgnoreCase(os))
+                .findFirst();
+    }
+
     public static OsType getByOs(String os) {
-        return Arrays.stream(values()).filter(osType -> osType.os.equalsIgnoreCase(os)).findFirst().orElseThrow();
+        return getByOsOptional(os)
+                .orElseThrow();
     }
 
     private static Optional<OsType> getOptionalByOsTypeString(String osType) {

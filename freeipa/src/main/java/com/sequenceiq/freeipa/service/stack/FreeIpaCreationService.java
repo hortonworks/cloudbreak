@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -203,6 +204,9 @@ public class FreeIpaCreationService {
                 if (!Objects.equals(savedStack.getArchitecture(), Architecture.fromStringWithFallback(image.getArchitecture()))) {
                     throw new BadRequestException(String.format("Image architecture doesn't match the selected FreeIPA architecture. Image architecture: %s, " +
                             "FreeIPA architecture: %s.", imageForIm.getArchitecture(), savedStack.getArchitecture()));
+                }
+                if (!entitlementService.isEntitledToUseOS(accountId, OsType.getByOsTypeString(image.getOsType()))) {
+                    throw new BadRequestException(String.format("Your account is not entitled to use %s images.", image.getOs()));
                 }
                 stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
                 savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image).orElse(savedStack);

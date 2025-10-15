@@ -248,7 +248,7 @@ cb:
     GCP: 100
   platform.default.rootVolumeType:
     GCP: SSD
-  enabled.linux.types: redhat6,redhat7,redhat8,centos6,centos7,amazonlinux,amazonlinux2
+  enabled.linux.types: redhat6,redhat7,redhat8,redhat9,centos6,centos7,amazonlinux,amazonlinux2
   publicip:
   etc.config.dir: /etc/freeipa
 

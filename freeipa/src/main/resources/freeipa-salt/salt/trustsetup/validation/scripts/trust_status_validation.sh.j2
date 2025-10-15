@@ -1,8 +1,17 @@
 #!/bin/bash
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 if ! RESULT=$( (kdestroy; echo "$ADMIN_PASSWORD" | kinit admin) 2>&1); then
   echo "Failed to kinit admin:"
   echo "$RESULT"
   exit 1
 fi
-kvno "ldap/${AD_FQDN}@${AD_REALM}"
+
+set -e
+
+kvno "krbtgt/${AD_FQDN}@${AD_REALM}"

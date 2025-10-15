@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +9,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -54,16 +55,17 @@ public class FreeIpaImageProvider implements ImageProvider {
         FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(freeIpaImageFilterSettings);
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
         List<Image> compatibleImages = freeIpaImageFilter.filterImages(cachedImageCatalog.getImages().getFreeipaImages(), imageFilterSettings);
-        List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions()).stream()
+        List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions())
+                .stream()
                 .map(FreeIpaVersions::getImageIds)
                 .flatMap(Collection::stream)
                 .distinct()
-                .collect(Collectors.toList());
+                .collect(toList());
         LOGGER.debug("Compatible images: {} " + System.lineSeparator() + "Images in versions: {}", compatibleImages, imagesInVersions);
         return compatibleImages.stream()
                 .filter(image -> imagesInVersions.contains(image.getUuid()))
                 .map(image -> ImageWrapper.ofFreeipaImage(image, imageFilterSettings.catalog()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private FreeIpaImageFilterSettings populateImageFilterSettings(FreeIpaImageFilterSettings imageFilterSettings) {
@@ -78,8 +80,13 @@ public class FreeIpaImageProvider implements ImageProvider {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
         List<Image> compatibleImages = freeIpaImageFilter.filterImages(catalog.getImages().getFreeipaImages(), freeIpaImageFilterSettings);
         LOGGER.trace("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}, tagFilters: {}",
-                compatibleImages.size(), freeIpaImageFilterSettings.currentImageId(), freeIpaImageFilterSettings.targetOs(), freeIpaImageFilterSettings.region(),
-                freeIpaImageFilterSettings.platform(), freeIpaImageFilterSettings.tagFilters());
+                compatibleImages.size(),
+                freeIpaImageFilterSettings.currentImageId(),
+                freeIpaImageFilterSettings.targetOs(),
+                freeIpaImageFilterSettings.region(),
+                freeIpaImageFilterSettings.platform(),
+                freeIpaImageFilterSettings.tagFilters()
+        );
 
         return findImageInDefaults(versions, compatibleImages)
                 .or(() -> findImageByApplicationVersion(versions, compatibleImages))
@@ -106,19 +113,26 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     private Optional<Image> findImage(List<FreeIpaVersions> freeIpaVersions, List<Image> images, Function<FreeIpaVersions, List<String>> memberFunction) {
-        List<String> imageIds = freeIpaVersions.stream().map(memberFunction).flatMap(Collection::stream).toList();
+        List<String> imageIds = freeIpaVersions.stream()
+                .map(memberFunction)
+                .flatMap(Collection::stream)
+                .toList();
         return images.stream()
                 .filter(image -> imageIds.contains(image.getUuid()))
                 .max(freeIpaImageFilter.newestImageWithPreferredOs());
     }
 
     private List<FreeIpaVersions> filterFreeIpaVersionsByAppVersion(List<FreeIpaVersions> freeIpaVersions) {
-        List<FreeIpaVersions> exactFreeIpaVersionsMatches = freeIpaVersions.stream().filter(toExactVersionMatch()).collect(Collectors.toList());
+        List<FreeIpaVersions> exactFreeIpaVersionsMatches = freeIpaVersions.stream()
+                .filter(toExactVersionMatch())
+                .toList();
         if (!exactFreeIpaVersionsMatches.isEmpty()) {
             LOGGER.trace("Exact version match found in image catalog for app version: {}", freeIpaVersion);
             return exactFreeIpaVersionsMatches;
         }
-        List<FreeIpaVersions> prefixFreeIpaVersions = freeIpaVersions.stream().filter(toPrefixVersionMatch()).collect(Collectors.toList());
+        List<FreeIpaVersions> prefixFreeIpaVersions = freeIpaVersions.stream()
+                .filter(toPrefixVersionMatch())
+                .collect(toList());
         if (!prefixFreeIpaVersions.isEmpty()) {
             LOGGER.trace("Prefix version match found in image catalog for app version: {}", freeIpaVersion);
             return prefixFreeIpaVersions;
