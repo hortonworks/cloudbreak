@@ -98,7 +98,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -682,7 +681,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             throw new BadRequestException(e.getMessage(), e);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.info("Cloudbreak Image Catalog error", e);
-            throw new CloudbreakApiException(e.getMessage(), e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 

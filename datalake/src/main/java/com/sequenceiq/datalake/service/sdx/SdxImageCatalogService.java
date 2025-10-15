@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.core.FlowLogService;
 
@@ -27,30 +25,18 @@ public class SdxImageCatalogService {
 
     public void changeImageCatalog(SdxCluster sdxCluster, String imageCatalog) {
         if (flowLogService.isOtherFlowRunning(sdxCluster.getId())) {
-            throw new CloudbreakApiException(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()));
+            throw new FlowsAlreadyRunningException(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()));
         }
-        try {
-            ChangeImageCatalogV4Request changeImageCatalogRequest = new ChangeImageCatalogV4Request();
-            changeImageCatalogRequest.setImageCatalog(imageCatalog);
-            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.changeImageCatalogInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), initiatorUserCrn,
-                            changeImageCatalogRequest));
-        } catch (CloudbreakServiceException e) {
-            throw new CloudbreakApiException(e.getMessage(), e);
-        }
+        ChangeImageCatalogV4Request changeImageCatalogRequest = new ChangeImageCatalogV4Request();
+        changeImageCatalogRequest.setImageCatalog(imageCatalog);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                stackV4Endpoint.changeImageCatalogInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), initiatorUserCrn, changeImageCatalogRequest));
     }
 
     public CloudbreakImageCatalogV3 generateImageCatalog(String name) {
-        try {
-            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> {
-                        GenerateImageCatalogV4Response response = stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, name, initiatorUserCrn);
-                        return response.getImageCatalog();
-                    });
-        } catch (CloudbreakServiceException e) {
-            throw new CloudbreakApiException(e.getMessage(), e);
-        }
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, name, initiatorUserCrn).getImageCatalog());
     }
 }

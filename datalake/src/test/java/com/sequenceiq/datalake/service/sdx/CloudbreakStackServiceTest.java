@@ -32,8 +32,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -94,7 +94,7 @@ public class CloudbreakStackServiceTest {
         SdxCluster sdxCluster = setupSdxCluster();
         when(stackV4Endpoint.get(WORKSPACE_ID, SDX_NAME, Set.of(), SDX_ACCOUNT_ID)).thenThrow(WebApplicationException.class);
 
-        Assertions.assertThrows(CloudbreakApiException.class, () ->
+        Assertions.assertThrows(CloudbreakServiceException.class, () ->
                 underTest.getStack(sdxCluster)
         );
     }
@@ -127,7 +127,7 @@ public class CloudbreakStackServiceTest {
             threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenThrow(new WebApplicationException());
 
-            Assertions.assertThrows(CloudbreakApiException.class, () ->
+            Assertions.assertThrows(CloudbreakServiceException.class, () ->
                     underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced)
             );
 
@@ -154,7 +154,7 @@ public class CloudbreakStackServiceTest {
                 .checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getName(), targetMajorVersion, USER_CRN);
 
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)))
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(CloudbreakServiceException.class)
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Rds upgrade validation failed: " + ERROR_MSG);
@@ -177,7 +177,7 @@ public class CloudbreakStackServiceTest {
                 .updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
 
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster)))
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(CloudbreakServiceException.class)
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Could not launch Salt update in core, reason: " + ERROR_MSG);
@@ -202,7 +202,7 @@ public class CloudbreakStackServiceTest {
         doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint).instanceMetadataUpdate(any(), any(), any());
 
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateInstanceMetadata(sdxCluster, IMDS_HTTP_TOKEN_REQUIRED)))
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(CloudbreakServiceException.class)
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Could not launch instance metadata update in core, reason: " + ERROR_MSG);

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -105,7 +105,7 @@ public class ExternalizedComputeClusterFlowManager {
                 };
             }
         } catch (InterruptedException e) {
-            throw new CloudbreakApiException(e.getMessage());
+            throw new CloudbreakServiceException(e.getMessage());
         }
     }
 }

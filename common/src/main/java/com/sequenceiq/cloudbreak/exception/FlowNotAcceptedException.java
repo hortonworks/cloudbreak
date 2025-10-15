@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.exception;
 
-public class FlowNotAcceptedException extends CloudbreakApiException {
+public class FlowNotAcceptedException extends RuntimeException {
 
     public FlowNotAcceptedException(String message) {
         super(message);

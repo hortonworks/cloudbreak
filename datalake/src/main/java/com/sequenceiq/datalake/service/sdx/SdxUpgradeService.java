@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -80,7 +80,7 @@ public class SdxUpgradeService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack change image failed on cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -95,7 +95,7 @@ public class SdxUpgradeService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Upgrade failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -116,7 +116,7 @@ public class SdxUpgradeService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Couldn't get image id for cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -145,9 +145,7 @@ public class SdxUpgradeService {
                         sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), stackV4Response.getExternalDatabase().getDatabaseEngineVersion());
                         LOGGER.info("The embedded db engine version has been updated from Cloudbreak for cluster: {}", sdxCluster.getClusterName());
                     }
-                }, () -> {
-                    LOGGER.info("The embedded db version is missing from the stack response, sdx db version update will be skipped!");
-                });
+                }, () -> LOGGER.info("The embedded db version is missing from the stack response, sdx db version update will be skipped!"));
     }
 
     private StackV4Response retrieveStack(SdxCluster sdxCluster) {
@@ -163,7 +161,7 @@ public class SdxUpgradeService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Couldn't fetch image catalog for cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -178,7 +176,7 @@ public class SdxUpgradeService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack upgrade failed on cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 

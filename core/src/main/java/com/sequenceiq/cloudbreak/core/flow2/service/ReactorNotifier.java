@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -117,14 +117,14 @@ public class ReactorNotifier {
                 case RUNNING_IN_FLOW_CHAIN -> new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
             };
         } catch (InterruptedException e) {
-            throw new CloudbreakApiException(e.getMessage(), e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
     private Consumer<Status> isTriggerAllowedInMaintenance(String selector) {
         return status -> {
             if (Status.MAINTENANCE_MODE_ENABLED.equals(status) && !ALLOWED_FLOW_TRIGGERS_IN_MAINTENANCE.contains(selector)) {
-                throw new CloudbreakApiException("Operation not allowed in maintenance mode.");
+                throw new CloudbreakServiceException("Operation not allowed in maintenance mode.");
             }
         };
     }

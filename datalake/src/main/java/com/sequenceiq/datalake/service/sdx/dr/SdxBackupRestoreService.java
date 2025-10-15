@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Res
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -54,7 +55,6 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus.State;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.datalake.entity.SdxBackupRestoreSettings;
@@ -286,7 +286,7 @@ public class SdxBackupRestoreService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Database backup failed for datalake-id: [%d]. Message: [%s]", clusterId, errorMessage);
-            throw new CloudbreakApiException(message);
+            throw new CloudbreakServiceException(message);
         }
     }
 
@@ -300,13 +300,11 @@ public class SdxBackupRestoreService {
                                 backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin, dryRun));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
-            }, () -> {
-                updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("SDX cluster with Id [%d] not found", clusterId));
-            });
+            }, () -> updateFailureStatus(drStatus.getOperationId(), clusterId, String.format("SDX cluster with Id [%d] not found", clusterId)));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Database restore failed for datalake-id: [%d]. Message: [%s]", clusterId, errorMessage);
-            throw new CloudbreakApiException(message);
+            throw new CloudbreakServiceException(message);
         }
     }
 
@@ -543,7 +541,7 @@ public class SdxBackupRestoreService {
         if (!drStatus.getSdxClusterId().equals(sdxCluster.getId())
                 || !drStatus.getOperationType().equals(type)) {
             String message = String.format("Invalid operation-id: [%s]. provided", operationId);
-            throw new CloudbreakApiException(message);
+            throw new CloudbreakServiceException(message);
         }
         return drStatus;
     }
@@ -837,7 +835,7 @@ public class SdxBackupRestoreService {
 
         if (response == null) {
             LOGGER.error("Failed to submit datalake data info for operation: " + operationId);
-            throw new CloudbreakApiException("Failed to submit datalake data info for operation: " + operationId);
+            throw new CloudbreakServiceException("Failed to submit datalake data info for operation: " + operationId);
         }
 
         LOGGER.info("Successfully submitted datalake data info for operation: " + operationId);

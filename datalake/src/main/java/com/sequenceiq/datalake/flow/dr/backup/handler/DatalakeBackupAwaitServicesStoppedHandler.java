@@ -15,8 +15,8 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupAwaitServicesStoppedRequest;
@@ -103,7 +103,7 @@ public class DatalakeBackupAwaitServicesStoppedHandler extends ExceptionCatcherE
         } catch (PollerException exception) {
             LOGGER.info("Backup services stopped polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
-        } catch (CloudbreakApiException exception) {
+        } catch (CloudbreakServiceException exception) {
             LOGGER.info("Datalake services stopped failed. Reason: " + exception.getMessage());
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
         }

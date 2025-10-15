@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
@@ -51,7 +52,6 @@ import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxBackupRestoreSettings;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -197,7 +197,7 @@ public class SdxBackupRestoreServiceTest {
         try {
             underTest.getDatabaseBackupStatus(sdxCluster, BACKUP_ID);
             fail("Exception should have been thrown");
-        } catch (CloudbreakApiException cloudbreakApiException) {
+        } catch (CloudbreakServiceException cloudbreakApiException) {
             String exceptedMessage = String.format("Invalid operation-id: [%s]. provided", BACKUP_ID);
             assertEquals(exceptedMessage, cloudbreakApiException.getLocalizedMessage());
         }
@@ -291,7 +291,7 @@ public class SdxBackupRestoreServiceTest {
                 databaseBackupRequest.isCloseConnections(), new ArrayList<>(), USER_CRN,
                 databaseBackupRequest.getDatabaseMaxDurationInMin(),
                 false)).thenThrow(new WebApplicationException("Failed to get BackupInfo"));
-        CloudbreakApiException exception = assertThrows(CloudbreakApiException.class,
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.databaseBackup(operation, 1L, databaseBackupRequest)));
         assertEquals(String.format("Database backup failed for datalake-id: [%s]. Message: [Database backup failed]",
                 sdxCluster.getId()), exception.getMessage());
@@ -332,7 +332,7 @@ public class SdxBackupRestoreServiceTest {
                 USER_CRN,
                 0,
                 false)).thenThrow(new WebApplicationException("Failed to get BackupInfo"));
-        CloudbreakApiException exception = assertThrows(CloudbreakApiException.class,
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                         () -> underTest.databaseRestore(operation, 1L, "1", "/asdf", 0, false)));
         assertEquals(String.format("Database restore failed for datalake-id: [%s]. Message: [Database backup failed]",
@@ -812,7 +812,7 @@ public class SdxBackupRestoreServiceTest {
         sdxOperation.setOperationType(SdxOperationType.RESTORE);
         sdxOperation.setStatus(SdxOperationStatus.SUCCEEDED);
         when(sdxOperationRepository.findSdxOperationByOperationId("0")).thenReturn(sdxOperation);
-        assertThrows(CloudbreakApiException.class, () -> underTest.getDatabaseRestoreStatus(sdxCluster, "0"));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.getDatabaseRestoreStatus(sdxCluster, "0"));
     }
 
     @Test

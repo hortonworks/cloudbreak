@@ -13,8 +13,8 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
@@ -77,7 +77,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
         } catch (PollerException exception) {
             LOGGER.info("Full restore polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
-        } catch (CloudbreakApiException exception) {
+        } catch (CloudbreakServiceException exception) {
             LOGGER.info("Datalake restore failed. Reason: {}", exception.getMessage());
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         }

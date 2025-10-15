@@ -16,9 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -46,7 +46,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Could not retrieve stack for SDX cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -60,7 +60,7 @@ public class CloudbreakStackService {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = "Rds upgrade validation failed: " + exceptionMessage;
             LOGGER.warn(message);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -77,7 +77,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String message = String.format("Could not launch database server upgrade in core, reason: %s.", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -89,7 +89,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String message = String.format("Could not launch Salt update in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -105,7 +105,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String message = String.format("Could not launch instance metadata update in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -124,7 +124,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String message = String.format("Could not set default java version in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -137,7 +137,7 @@ public class CloudbreakStackService {
         } catch (WebApplicationException e) {
             String message = String.format("Could not migrate Skus in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 }

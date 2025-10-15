@@ -41,10 +41,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -314,11 +314,12 @@ public class SdxDatabaseServerUpgradeServiceTest {
         String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
         when(cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(targetMajorVersion.getMajorVersion()))).thenReturn(expectedCoreMessage);
-        doThrow(new CloudbreakApiException("badrequest")).when(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, false);
+        doThrow(new CloudbreakServiceException("badrequest")).when(cloudbreakStackService).
+                upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, false);
 
         Assertions.assertThatCode(() -> underTest.initUpgradeInCb(sdxCluster, targetMajorVersion, false)
                 )
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(CloudbreakServiceException.class)
                 .hasMessage("badrequest");
 
         verify(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, false);
@@ -339,7 +340,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
                 List.of(targetMajorVersion.getMajorVersion()))).thenReturn(expectedCoreMessage);
         when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(sdxCluster)).thenReturn(Optional.of(MajorVersion.VERSION_11));
 
-        doThrow(new CloudbreakApiException(expectedCoreMessage))
+        doThrow(new CloudbreakServiceException(expectedCoreMessage))
                 .when(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, false);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.initUpgradeInCb(sdxCluster, targetMajorVersion, false));

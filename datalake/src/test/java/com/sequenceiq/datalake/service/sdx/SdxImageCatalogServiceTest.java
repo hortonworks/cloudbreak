@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.Ge
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.core.FlowLogService;
 
@@ -68,7 +68,7 @@ class SdxImageCatalogServiceTest {
         when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(true);
 
         assertThatThrownBy(() -> underTest.changeImageCatalog(SDX_CLUSTER, IMAGE_CATALOG))
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(FlowsAlreadyRunningException.class)
                 .hasMessage("Operation is running for cluster 'cluster-name'. Please try again later.");
     }
 
@@ -78,7 +78,7 @@ class SdxImageCatalogServiceTest {
                 .changeImageCatalogInternal(eq(WORKSPACE_ID_DEFAULT), eq(CLUSTER_NAME), any(), any());
 
         assertThatThrownBy(() -> underTest.changeImageCatalog(SDX_CLUSTER, IMAGE_CATALOG))
-                .isInstanceOf(CloudbreakApiException.class);
+                .isInstanceOf(CloudbreakServiceException.class);
     }
 
     @Test
@@ -105,7 +105,7 @@ class SdxImageCatalogServiceTest {
         when(stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, CLUSTER_NAME, USER_CRN))
                 .thenThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE));
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateImageCatalog(CLUSTER_NAME)))
-                .isInstanceOf(CloudbreakApiException.class)
+                .isInstanceOf(CloudbreakServiceException.class)
                 .hasMessage(EXCEPTION_MESSAGE);
     }
 }

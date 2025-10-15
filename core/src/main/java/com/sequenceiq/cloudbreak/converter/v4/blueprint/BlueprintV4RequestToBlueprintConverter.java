@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedC
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.URLUtils;
 
@@ -56,7 +56,7 @@ public class BlueprintV4RequestToBlueprintConverter {
                 String urlText = URLUtils.readUrl(sourceUrl);
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
-            } catch (IOException | CloudbreakApiException e) {
+            } catch (IOException | CloudbreakServiceException e) {
                 throw new BadRequestException(String.format("Cannot download cluster template from: %s", sourceUrl), e);
             }
         } else if (!CollectionUtils.isEmpty(json.getServices()) && !Strings.isNullOrEmpty(json.getPlatform())) {

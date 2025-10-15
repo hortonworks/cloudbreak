@@ -27,11 +27,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesHandlerRequest;
@@ -114,7 +114,7 @@ public class DeleteVolumesHandler extends ExceptionCatcherEventHandler<DeleteVol
                     DELETE_FAILED.name(),
                     DELETE_VOLUMES_FAILED,
                     requestGroup);
-            throw new CloudbreakApiException(ex.getMessage());
+            throw new CloudbreakServiceException(ex.getMessage());
         }
     }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.exception;
 
-public class FlowsAlreadyRunningException extends CloudbreakApiException {
+public class FlowsAlreadyRunningException extends RuntimeException {
 
     public FlowsAlreadyRunningException(String message) {
         super(message);

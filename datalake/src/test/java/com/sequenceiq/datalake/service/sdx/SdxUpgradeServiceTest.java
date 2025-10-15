@@ -32,9 +32,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -227,7 +227,7 @@ public class SdxUpgradeServiceTest {
         when(stackV4Endpoint.upgradeOsInternal(any(), any(), any(), any())).thenThrow(exception);
         when(exceptionMessageExtractor.getErrorMessage(exception)).thenReturn(exception.getMessage());
 
-        assertThrows(CloudbreakApiException.class, () -> underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeOs(STACK_ID, TARGET_IMAGE_ID, false, true));
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
                 ResourceEvent.DATALAKE_OS_UPGRADE_STARTED, "OS upgrade started", sdxCluster);

@@ -29,12 +29,12 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -89,7 +89,7 @@ public class ReactorNotifierTest {
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
                 .thenReturn(new Event<Acceptable>(baseFlowEvent));
 
-        assertThrows(CloudbreakApiException.class, () -> underTest.notify(1L, "RANDOM", baseFlowEvent, stackService::getByIdWithTransaction));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.notify(1L, "RANDOM", baseFlowEvent, stackService::getByIdWithTransaction));
 
         verify(reactor, never()).notify(anyString(), any(Event.class));
     }

@@ -15,8 +15,8 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeBackupValidationFailedEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeBackupValidationWaitRequest;
@@ -73,7 +73,7 @@ public class DatalakeBackupValidationWaitHandler extends ExceptionCatcherEventHa
         } catch (PollerException exception) {
             LOGGER.info("Backup validation polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
-        } catch (CloudbreakApiException exception) {
+        } catch (CloudbreakServiceException exception) {
             LOGGER.info("Datalake backup validation failed. Reason: " + exception.getMessage());
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
         }

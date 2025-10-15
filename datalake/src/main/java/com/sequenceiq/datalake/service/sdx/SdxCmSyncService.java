@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -48,7 +48,7 @@ public class SdxCmSyncService {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Couldn't call cm sync for cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
             LOGGER.info(message);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 }

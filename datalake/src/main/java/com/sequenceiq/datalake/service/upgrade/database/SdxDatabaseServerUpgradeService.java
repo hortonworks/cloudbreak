@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -167,12 +167,12 @@ public class SdxDatabaseServerUpgradeService {
                 sdxCluster.getStackCrn(), sdxCluster.getName(), targetMajorVersion.getMajorVersion(), forced);
         try {
             cloudbreakStackService.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced);
-        } catch (CloudbreakApiException exception) {
+        } catch (CloudbreakServiceException exception) {
             handleIfAlreadyUpgradedOrThrow(sdxCluster, targetMajorVersion, exception);
         }
     }
 
-    private void handleIfAlreadyUpgradedOrThrow(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion, CloudbreakApiException exception) {
+    private void handleIfAlreadyUpgradedOrThrow(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion, CloudbreakServiceException exception) {
         String message = exception.getMessage();
         String alreadyUpgradedMessage = cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(targetMajorVersion.getMajorVersion()));

@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -86,7 +86,7 @@ public class SdxUpgradeRecoveryServiceTest {
         doThrow(webApplicationException).when(stackV4Endpoint).getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
-        CloudbreakApiException actual = assertThrows(CloudbreakApiException.class,
+        CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster)));
         assertEquals("Stack recovery validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
     }

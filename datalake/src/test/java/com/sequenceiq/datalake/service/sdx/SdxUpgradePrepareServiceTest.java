@@ -15,8 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
@@ -77,7 +77,7 @@ class SdxUpgradePrepareServiceTest {
                 .thenThrow(webApplicationException);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("fail");
 
-        assertThrows(CloudbreakApiException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID)));
+        assertThrows(CloudbreakServiceException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareUpgrade(STACK_ID, IMAGE_ID)));
 
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_PREPARATION_IN_PROGRESS, "Preparing Data Lake for upgrade",
                 cluster);

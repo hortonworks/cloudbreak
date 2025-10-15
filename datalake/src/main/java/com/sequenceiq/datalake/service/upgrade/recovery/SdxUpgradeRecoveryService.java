@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -83,7 +83,7 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack recovery validation failed on cluster: [%s]. Message: [%s]",
                     sdxCluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
