@@ -180,4 +180,29 @@ class ClouderaManagerKraftMigrationServiceTest {
         assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.migrateZookeeperToKraft(apiClient, stackDtoDelegate));
     }
+
+    @Test
+    void testFinalizeZookeeperToKraftMigration() throws ApiException {
+        ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
+        ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
+        ApiCommand migrationCommand = new ApiCommand().id(COMMAND_ID);
+        ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
+
+        when(stackDtoDelegate.getName()).thenReturn(CLUSTER_NAME);
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(eq(CLUSTER_NAME), any())).thenReturn(serviceList);
+        when(servicesResourceApi.serviceCommandByName(eq(CLUSTER_NAME), eq("KRaftFinalizeMigrationCommand"),
+                eq(KAFKA_SERVICE_NAME))).thenReturn(migrationCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingFinalizeZookeeperToKraftMigration(
+                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID))).thenReturn(pollingResult);
+
+        underTest.finalizeZookeeperToKraftMigration(apiClient, stackDtoDelegate);
+
+        verify(servicesResourceApi).serviceCommandByName(eq(CLUSTER_NAME), eq("KRaftFinalizeMigrationCommand"),
+                eq(KAFKA_SERVICE_NAME));
+        verify(clouderaManagerPollingServiceProvider).startPollingFinalizeZookeeperToKraftMigration(
+                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID));
+    }
 }

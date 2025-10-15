@@ -876,4 +876,11 @@ public interface DistroXV1Endpoint {
     @Operation(summary = "Initiate the migration from Zookeeper to KRaft broker in Kafka.", operationId = "migrateFromZookeeperToKraftByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier migrateFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("crn/{crn}/finalize_zookeeper_to_kraft_migration")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Finalize the migration from Zookeeper to KRaft broker in Kafka.", operationId = "finalizeMigrationFromZookeeperToKraftByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 }

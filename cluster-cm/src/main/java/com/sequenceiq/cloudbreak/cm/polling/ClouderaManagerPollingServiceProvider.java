@@ -330,6 +330,11 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Zookeeper to KRaft migration"));
     }
 
+    public ExtendedPollingResult startPollingFinalizeZookeeperToKraftMigration(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_10_MINUTES,
+                new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Finalize Zookeeper to KRaft migration"));
+    }
+
     public ExtendedPollingResult startPollingRemoveHostsFromCluster(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to finish removal of hosts from cluster. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getRemoveHostsTimeout(stack.getCloudPlatform()),

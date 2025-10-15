@@ -254,6 +254,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public void finalizeZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) {
+        clouderaManagerKraftMigrationService.finalizeZookeeperToKraftMigration(v31Client, stackDtoDelegate);
+    }
+
+    @Override
     public List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDatasByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());

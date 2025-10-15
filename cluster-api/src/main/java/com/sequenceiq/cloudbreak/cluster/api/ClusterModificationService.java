@@ -30,6 +30,8 @@ public interface ClusterModificationService {
 
     void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
+    void finalizeZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+
     void stopCluster(boolean full) throws CloudbreakException;
 
     void startCluster() throws CloudbreakException;

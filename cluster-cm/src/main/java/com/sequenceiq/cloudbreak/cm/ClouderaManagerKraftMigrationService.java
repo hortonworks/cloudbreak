@@ -39,6 +39,8 @@ public class ClouderaManagerKraftMigrationService {
 
     private static final String KRAFT_MIGRATION_COMMAND_NAME = "KRaftMigrationCommand";
 
+    private static final String KRAFT_FINALIZE_MIGRATION_COMMAND_NAME = "KRaftFinalizeMigrationCommand";
+
     private static final String KRAFT_ROLE_TYPE = "KRAFT";
 
     private static final String KRAFT_PROPERTIES_ROLE_SAFETY_VALVE = "kraft.properties_role_safety_valve";
@@ -76,6 +78,36 @@ public class ClouderaManagerKraftMigrationService {
                 LOGGER.info("{} service name is missing, skip modifying the {} property.", KAFKA_SERVICE_TYPE, KRAFT_PROPERTIES_ROLE_SAFETY_VALVE);
                 throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", KAFKA_SERVICE_TYPE));
             });
+    }
+
+    public void finalizeZookeeperToKraftMigration(ApiClient client, StackDtoDelegate stackDtoDelegate) {
+        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
+        String clusterName = stackDtoDelegate.getCluster().getName();
+
+        try {
+            Collection<ApiService> apiServices = readServices(client, stackDtoDelegate);
+
+            Optional<ApiService> optionalApiService = apiServices.stream()
+                    .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
+                    .findFirst();
+
+            if (optionalApiService.isPresent()) {
+                ApiService service = optionalApiService.get();
+                LOGGER.info("Finalizing Zookeeper to KRaft migration. Calling /clusters/{}/services/{}/commands/{} CM endpoint",
+                        clusterName, service.getName(), KRAFT_FINALIZE_MIGRATION_COMMAND_NAME);
+
+                ApiCommand kraftMigrationCommand = api.serviceCommandByName(
+                        clusterName, KRAFT_FINALIZE_MIGRATION_COMMAND_NAME, service.getName());
+
+                pollFinalizeZookeeperToKraftMigrationCommand(client, stackDtoDelegate, kraftMigrationCommand.getId());
+            } else {
+                LOGGER.warn("Cannot finalize Zookeeper to KRaft migration. No {} service type found for cluster {}",
+                        KAFKA_SERVICE_TYPE, clusterName);
+            }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.error("Failed to finalize Zookeeper to KRaft migration", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     public void restartKafkaBrokerNodes(ApiClient client, StackDtoDelegate stackDtoDelegate) {
@@ -122,6 +154,20 @@ public class ClouderaManagerKraftMigrationService {
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
+
+        if (pollingResult.isExited()) {
+            throw new CancellationException(
+                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration");
+        } else if (pollingResult.isTimeout()) {
+            throw new CloudbreakException(
+                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration).");
+        }
+    }
+
+    private void pollFinalizeZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
+            throws CloudbreakException {
+        ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
+                .startPollingFinalizeZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
 
         if (pollingResult.isExited()) {
             throw new CancellationException(

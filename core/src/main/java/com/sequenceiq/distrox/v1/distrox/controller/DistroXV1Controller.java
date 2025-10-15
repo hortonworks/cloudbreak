@@ -7,6 +7,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.MIGRATE_ZOOKEEPER_TO_KRAFT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.RECOVER_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATAHUB;
@@ -935,5 +936,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT)
     public FlowIdentifier migrateFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION)
+    public FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
+        return stackOperationService.triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 }

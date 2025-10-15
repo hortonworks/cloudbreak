@@ -562,6 +562,11 @@ public class StackOperationService {
         return flowManager.triggerZookeeperToKraftMigration(stack.getId());
     }
 
+    public FlowIdentifier triggerZookeeperToKraftMigrationFinalization(NameOrCrn name, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        return flowManager.triggerZookeeperToKraftMigrationFinalization(stack.getId());
+    }
+
     public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request,
             String userCrn) {
         try {

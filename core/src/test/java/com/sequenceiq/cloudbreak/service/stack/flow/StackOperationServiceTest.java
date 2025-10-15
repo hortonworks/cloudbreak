@@ -735,4 +735,15 @@ class StackOperationServiceTest {
 
         verify(flowManager).triggerZookeeperToKraftMigration(STACK_ID);
     }
+
+    @Test
+    public void testTriggerZookeeperToKraftMigrationFinalization() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+        underTest.triggerZookeeperToKraftMigrationFinalization(nameOrCrn, "accountId");
+
+        verify(flowManager).triggerZookeeperToKraftMigrationFinalization(STACK_ID);
+    }
 }
