@@ -31,7 +31,7 @@ echo "PTR record for $ip_address is: $ptr_record"
 # Ensure trailing dot is ignored in comparison
 normalized_ptr=$(echo "$ptr_record" | sed 's/\.$//')
 
-if [[ "${normalized_ptr,,}" == "${dns_name,,}" ]]; then
+if [[ "${normalized_ptr,,}" == *"${dns_name,,}" ]]; then
   echo "Reverse DNS validation: Success (PTR matches $dns_name)"
   exit 0
 else
