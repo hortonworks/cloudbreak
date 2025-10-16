@@ -187,9 +187,6 @@ public class FreeIpaCreationService {
         if (stack.getArchitecture() == null) {
             stack.setArchitecture(Architecture.fromStringWithFallback(imageWrapperStringPair.getKey().getImage().getArchitecture()));
         }
-        if (Architecture.ARM64.equals(stack.getArchitecture()) && !entitlementService.isDataLakeArmEnabled(accountId)) {
-            throw new BadRequestException("Arm64 architecture is not enabled in your account.");
-        }
         measure(() -> freeIpaRecommendationService.validateCustomInstanceType(stack, credential), LOGGER,
                 "Validating custom instance type took {} ms for {}", stack.getName());
         validateSeLinux(stack, imageWrapperStringPair.getLeft().getImage());

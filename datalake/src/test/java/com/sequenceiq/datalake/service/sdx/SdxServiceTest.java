@@ -367,20 +367,8 @@ class SdxServiceTest {
         sdxClusterRequest.setArchitecture("arm64");
         ImageV4Response imageV4Response = new ImageV4Response();
         imageV4Response.setArchitecture("arm64");
-        when(entitlementService.isDataLakeArmEnabled(any())).thenReturn(true);
         Architecture architecture = underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AWS, "1");
         assertEquals(Architecture.ARM64, architecture);
-    }
-
-    @Test
-    void testValidateAndGetArchitectureWhenArmRequestedButNotEntitled() {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setArchitecture("arm64");
-        ImageV4Response imageV4Response = new ImageV4Response();
-        imageV4Response.setArchitecture("arm64");
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateAndGetArchitecture(sdxClusterRequest, imageV4Response, AWS, "1"));
-        assertEquals("The current account is not entitled to use arm64 instances.", exception.getMessage());
     }
 
     @Test

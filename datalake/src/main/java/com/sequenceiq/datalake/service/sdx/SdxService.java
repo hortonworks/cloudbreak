@@ -553,9 +553,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (!AWS.equals(cloudPlatform)) {
                 throw new BadRequestException("Arm64 is only supported on AWS cloud provider.");
             }
-            if (!entitlementService.isDataLakeArmEnabled(accountId)) {
-                throw new BadRequestException("The current account is not entitled to use arm64 instances.");
-            }
         }
         return architecture;
     }

@@ -12,9 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -269,7 +267,6 @@ class StackCreatorServiceTest {
         stackRequest.setArchitecture(Architecture.ARM64.getName());
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(Boolean.TRUE);
         when(blueprintService.getCdhVersion(any(), any())).thenReturn("7.3.0.");
 
         BadRequestException e = assertThrows(BadRequestException.class, () ->
@@ -278,63 +275,6 @@ class StackCreatorServiceTest {
         assertEquals("The selected architecture (arm64) is not supported in this cdh version (7.3.0.).", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
-
-    }
-
-    @Test
-    void testArm64ShouldNotBeUsedOnDataLakeWhenEntitlementIsNotEnabled() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-
-        BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)));
-
-        assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isDataLakeArmEnabled(any());
-        verify(entitlementService, never()).isDataHubArmEnabled(any());
-    }
-
-    @Test
-    void testArm64ShouldNotBeUsedOnDataHubWhenCODArmEntitlementIsEnabledButDataHubArmIsNot() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-
-        BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
-
-        assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
-    }
-
-    @Test
-    void testArm64ShouldNotBeUsedOnCODbWhenDataHubArmEntitlementIsNotEnabledAndUserIsInternal() {
-        User user = new User();
-        Workspace workspace = getWorkspace();
-        StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64.getName());
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
-
-        BadRequestException e = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
-
-        assertEquals("The selected architecture (arm64) is not enabled in your account", e.getMessage());
-        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
-        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
-        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
     }
 
     @Test

@@ -199,11 +199,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         }
         Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
         if (Architecture.ARM64.equals(architectureEnum)) {
-            if (entitlementService.isDataHubArmEnabled(accountId)) {
-                filter.put(AwsPlatformResourcesFilterConstants.ARCHITECTURE, architectureEnum.name());
-            } else {
-                throw new BadRequestException("Graviton support is not enabled for your account.");
-            }
+            filter.put(AwsPlatformResourcesFilterConstants.ARCHITECTURE, architectureEnum.name());
         }
         request.setFilters(filter);
     }
