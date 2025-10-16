@@ -12,9 +12,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: idbrokermappingmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class IdBrokerMappingManagementGrpc {
 
@@ -252,6 +249,21 @@ public final class IdBrokerMappingManagementGrpc {
         }
       };
     return IdBrokerMappingManagementStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static IdBrokerMappingManagementBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<IdBrokerMappingManagementBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<IdBrokerMappingManagementBlockingV2Stub>() {
+        @java.lang.Override
+        public IdBrokerMappingManagementBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new IdBrokerMappingManagementBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return IdBrokerMappingManagementBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -496,6 +508,104 @@ public final class IdBrokerMappingManagementGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service IdBrokerMappingManagement.
+   * <pre>
+   * Protocol for ID Broker Mapping Management Service. This service runs in the
+   * CDP control plane. It receives requests to get and set ID Broker mappings
+   * from the CDP Environments API Service, and from backend services that need
+   * access to the mappings (for example, the Datalake Management Service).
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class IdBrokerMappingManagementBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<IdBrokerMappingManagementBlockingV2Stub> {
+    private IdBrokerMappingManagementBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected IdBrokerMappingManagementBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new IdBrokerMappingManagementBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get all ID Broker mappings for an environment.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse getMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set all ID Broker mappings for an environment. WARNING: overwrites all
+     * existing mapping state, including the dataAccessRole, the baselineRole,
+     * and the rangerCloudAccessAuthorizerRole.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes all ID Broker mappings for an environment.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse deleteMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sync ID Broker mappings for an environment to all associated datalake clusters.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse syncMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSyncMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the status of an ID Broker mapping sync attempt.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse getMappingsSyncStatus(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetMappingsSyncStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get all ID Broker mappings for an environment in a form that matches
+     * ID Broker's configuration model.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse getMappingsConfig(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetMappingsConfigMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service IdBrokerMappingManagement.
    * <pre>
    * Protocol for ID Broker Mapping Management Service. This service runs in the
    * CDP control plane. It receives requests to get and set ID Broker mappings

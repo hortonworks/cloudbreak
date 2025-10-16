@@ -7,9 +7,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * OnPremises Service :: OnPremises Service is a web service to manage the on-prem clusters and control planes.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: onpremisesapi.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class OnPremisesApiGrpc {
 
@@ -560,6 +557,21 @@ public final class OnPremisesApiGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static OnPremisesApiBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<OnPremisesApiBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<OnPremisesApiBlockingV2Stub>() {
+        @java.lang.Override
+        public OnPremisesApiBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new OnPremisesApiBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return OnPremisesApiBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static OnPremisesApiBlockingStub newBlockingStub(
@@ -990,6 +1002,196 @@ public final class OnPremisesApiGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service OnPremisesApi.
+   * <pre>
+   * OnPremises Service :: OnPremises Service is a web service to manage the on-prem clusters and control planes.
+   * </pre>
+   */
+  public static final class OnPremisesApiBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<OnPremisesApiBlockingV2Stub> {
+    private OnPremisesApiBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected OnPremisesApiBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new OnPremisesApiBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Lists all registered clusters. :: Lists all registered on-premise clusters.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListClustersResponse listClusters(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListClustersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListClustersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Register an existing cluster :: Register an existing cluster as an on-premise cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterClusterResponse registerCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get cluster details. :: Get details of a registered on-premise cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DescribeClusterResponse describeCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DescribeClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update an existing cluster :: Update registration of an on-premise cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterResponse updateCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Extract clusters :: Extracts cluster information by using authenticated access to the cluster-manager.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractClustersResponse extractClusters(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractClustersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getExtractClustersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List service details of a cluster. :: Gets the service details of a cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListClusterServicesResponse listClusterServices(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListClusterServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListClusterServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List the locations and its details. :: List the locations and its details.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListLocationsResponse listLocations(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListLocationsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListLocationsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Syncs the remote cluster data with the latest cluster service details. :: Syncs the remote cluster data with the latest cluster service details.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.SyncClusterDataResponse syncClusterData(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.SyncClusterDataRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSyncClusterDataMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete a cluster. :: Delete a cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeleteClusterResponse deleteCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeleteClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List partially registered clusters. :: API to list all the partially registered clusters.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListPartiallyRegisteredClustersResponse listPartiallyRegisteredClusters(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ListPartiallyRegisteredClustersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListPartiallyRegisteredClustersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set-up Cluster Connectivity. :: Sets the cluster connectivity for the unregistered cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.SetupClusterConnectivityResponse setupClusterConnectivity(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.SetupClusterConnectivityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetupClusterConnectivityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describes the partially registered cluster. :: Describes the partially registered cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DescribePartiallyRegisteredClusterResponse describePartiallyRegisteredCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DescribePartiallyRegisteredClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribePartiallyRegisteredClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Register agent API call. :: Registers the agent with cloudera manager.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterAgentResponse registerAgent(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterAgentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterAgentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse extractSetupScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getExtractSetupScriptMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterStateResponse updateClusterState(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterStateRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateClusterStateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Check cluster connectivity. :: Checks the connection between CDP and Cloudera Manager.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.CheckClusterConnectivityResponse checkClusterConnectivity(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.CheckClusterConnectivityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCheckClusterConnectivityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete partially registered cluster. :: Delete the partially registered cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse deletePartiallyRegisteredCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeletePartiallyRegisteredClusterMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service OnPremisesApi.
    * <pre>
    * OnPremises Service :: OnPremises Service is a web service to manage the on-prem clusters and control planes.
    * </pre>

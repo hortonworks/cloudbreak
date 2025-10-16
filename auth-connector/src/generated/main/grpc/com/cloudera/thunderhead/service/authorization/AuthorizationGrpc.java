@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: authorization.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class AuthorizationGrpc {
 
@@ -124,6 +121,21 @@ public final class AuthorizationGrpc {
         }
       };
     return AuthorizationStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static AuthorizationBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<AuthorizationBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuthorizationBlockingV2Stub>() {
+        @java.lang.Override
+        public AuthorizationBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuthorizationBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return AuthorizationBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -276,6 +288,62 @@ public final class AuthorizationGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service Authorization.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class AuthorizationBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<AuthorizationBlockingV2Stub> {
+    private AuthorizationBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected AuthorizationBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new AuthorizationBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Does a rights check for the input actor. Fails with a PERMISSION_DENIED
+     * error with a user-appropriate message if the check fails.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCheckRightMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Performs a number of rights checks returning results rather than throwing.
+     * This call should be used by clients to perform multiple rights checks as
+     * part of a single operation. It is the caller's responsibility to craft an
+     * appropriate error if the results indicate authorization failure. See
+     * Scrutinizer.java for examples of user-appropriate errors.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getHasRightsMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service Authorization.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

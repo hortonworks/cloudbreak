@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: personalresourceview.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class PersonalResourceViewGrpc {
 
@@ -93,6 +90,21 @@ public final class PersonalResourceViewGrpc {
         }
       };
     return PersonalResourceViewStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static PersonalResourceViewBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewBlockingV2Stub>() {
+        @java.lang.Override
+        public PersonalResourceViewBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new PersonalResourceViewBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return PersonalResourceViewBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -216,6 +228,48 @@ public final class PersonalResourceViewGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service PersonalResourceView.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class PersonalResourceViewBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<PersonalResourceViewBlockingV2Stub> {
+    private PersonalResourceViewBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected PersonalResourceViewBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new PersonalResourceViewBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Checks whether or not the requested resources are part of the the
+     * personal view requested.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getHasResourcesByRightMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service PersonalResourceView.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

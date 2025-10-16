@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * Basic functions of the SDX Service Discovery
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: servicediscovery.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class ServiceDiscoveryGrpc {
 
@@ -375,6 +372,21 @@ public final class ServiceDiscoveryGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static ServiceDiscoveryBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<ServiceDiscoveryBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<ServiceDiscoveryBlockingV2Stub>() {
+        @java.lang.Override
+        public ServiceDiscoveryBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new ServiceDiscoveryBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return ServiceDiscoveryBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static ServiceDiscoveryBlockingStub newBlockingStub(
@@ -700,6 +712,146 @@ public final class ServiceDiscoveryGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service ServiceDiscovery.
+   * <pre>
+   **
+   * Basic functions of the SDX Service Discovery
+   * </pre>
+   */
+  public static final class ServiceDiscoveryBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<ServiceDiscoveryBlockingV2Stub> {
+    private ServiceDiscoveryBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected ServiceDiscoveryBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new ServiceDiscoveryBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Get the Services for a specific Datalake cluster
+     * Get the Services for a specific Datalake cluster
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesResponse describeDatalakeServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeDatalakeServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Get the services for an Environment
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesResponse describeEnvironmentServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeEnvironmentServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Get the list of Datalakes available for an Environment
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvResponse listDatalakesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListDatalakesForEnvMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deprecated - Please use ListVirtualWarehousesForEnv as replacement.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseResponse describeWarehouse(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeWarehouseMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deprecated - Please use ListVirtualWarehousesForEnv as replacement.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvResponse listWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListWarehousesForEnvMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * List the Virtual Warehouses for a specific Environment.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvResponse listVirtualWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListVirtualWarehousesForEnvMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Describe services for a specific Virtual Warehouse.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesResponse describeVirtualWarehouseServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeVirtualWarehouseServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * List the Operational Databases (OpDBs) for a specific environment.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvResponse listOpdbsForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListOpdbsForEnvMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Describe the services for an Operational Database (OpDBs) in a specific environment.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesResponse describeOpdbServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeOpdbServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Describe a specific datalake as ApiRemoteDataContext.
+     * </pre>
+     */
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextResponse describeDatalakeAsApiRemoteDataContext(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeDatalakeAsApiRemoteDataContextMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service ServiceDiscovery.
    * <pre>
    **
    * Basic functions of the SDX Service Discovery

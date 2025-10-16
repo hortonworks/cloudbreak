@@ -46,7 +46,7 @@ protobuf {
   }
   generateProtoTasks {
     all()*.plugins {
-      grpc {}
+      grpc { option '@generated=omit' }
     }
   }
   generatedFilesBaseDir = "$projectDir/src/generated"

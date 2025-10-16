@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: minasshdmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MinaSshdManagementGrpc {
 
@@ -248,6 +245,21 @@ public final class MinaSshdManagementGrpc {
         }
       };
     return MinaSshdManagementStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static MinaSshdManagementBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<MinaSshdManagementBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MinaSshdManagementBlockingV2Stub>() {
+        @java.lang.Override
+        public MinaSshdManagementBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MinaSshdManagementBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return MinaSshdManagementBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -500,6 +512,110 @@ public final class MinaSshdManagementGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service MinaSshdManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MinaSshdManagementBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<MinaSshdManagementBlockingV2Stub> {
+    private MinaSshdManagementBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected MinaSshdManagementBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new MinaSshdManagementBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Acquire an open MinaSshdService. This always returns a MinaSshdService
+     * open to rececive new connections of which there will always be at most
+     * one per account.
+     * The MinaSshdService may not be ready. If one already exists, it will
+     * be returned. If one does not, a new one will have been created, but the
+     * initializing workflows may not have completed yet.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceResponse acquireMinaSshdService(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAcquireMinaSshdServiceMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Currently there can only be one MinaSshdService open per account.
+     * Use this to check if the MinaSshdService is ready as well as to get
+     * the public key for the server.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse listMinaSshdServices(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListMinaSshdServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Generates a ssh key pair, registers the public key, and returns the
+     * enciphered private key and public key
+     * MinaSshdService must be ready or this will fail.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse generateAndRegisterSshTunnelingKeyPair(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGenerateAndRegisterSshTunnelingKeyPairMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Register an ssh tunneling public key in case you want to generate the ssh
+     * tunneling key pair separately or use a different algorithm from the
+     * default.
+     * Right now only RSA or ED25519 are supported
+     * MinaSshdService must be ready or this will fail.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyResponse registerSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterSshTunnelingKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unregister Ssh Tunneling Key
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnregisterSshTunnelingKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * For minaSshdService
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysResponse listSshTunnelingKeys(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListSshTunnelingKeysMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service MinaSshdManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

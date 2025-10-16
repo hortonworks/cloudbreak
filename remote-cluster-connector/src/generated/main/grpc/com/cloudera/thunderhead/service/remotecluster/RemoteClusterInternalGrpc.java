@@ -7,9 +7,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * RemoteClusterInternal Service :: RemoteClusterInternal Service lists RemoteCluster endpoints for internal use only.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: remoteclusterinternal.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class RemoteClusterInternalGrpc {
 
@@ -154,6 +151,21 @@ public final class RemoteClusterInternalGrpc {
         }
       };
     return RemoteClusterInternalStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static RemoteClusterInternalBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<RemoteClusterInternalBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<RemoteClusterInternalBlockingV2Stub>() {
+        @java.lang.Override
+        public RemoteClusterInternalBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new RemoteClusterInternalBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return RemoteClusterInternalBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -314,6 +326,66 @@ public final class RemoteClusterInternalGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service RemoteClusterInternal.
+   * <pre>
+   * RemoteClusterInternal Service :: RemoteClusterInternal Service lists RemoteCluster endpoints for internal use only.
+   * </pre>
+   */
+  public static final class RemoteClusterInternalBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<RemoteClusterInternalBlockingV2Stub> {
+    private RemoteClusterInternalBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected RemoteClusterInternalBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new RemoteClusterInternalBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * ListAllPvcControlPlanes method :: Lists all registered Private Cloud control plane configurations across all accounts.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse listAllPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAllPvcControlPlanesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * GeneratePvcControlPlaneAuthToken method :: Generates an auth token for the requests sent to Private Cloud control plane.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse generatePvcControlPlaneAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGeneratePvcControlPlaneAuthTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse generatePvcWorkloadAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGeneratePvcWorkloadAuthTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse registerPvcBaseCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterPvcBaseClusterMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service RemoteClusterInternal.
    * <pre>
    * RemoteClusterInternal Service :: RemoteClusterInternal Service lists RemoteCluster endpoints for internal use only.
    * </pre>

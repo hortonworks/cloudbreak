@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: publicendpointmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class PublicEndpointManagementGrpc {
 
@@ -313,6 +310,21 @@ public final class PublicEndpointManagementGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static PublicEndpointManagementBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<PublicEndpointManagementBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<PublicEndpointManagementBlockingV2Stub>() {
+        @java.lang.Override
+        public PublicEndpointManagementBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new PublicEndpointManagementBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return PublicEndpointManagementBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static PublicEndpointManagementBlockingStub newBlockingStub(
@@ -600,6 +612,128 @@ public final class PublicEndpointManagementGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service PublicEndpointManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class PublicEndpointManagementBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<PublicEndpointManagementBlockingV2Stub> {
+    private PublicEndpointManagementBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected PublicEndpointManagementBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new PublicEndpointManagementBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create or update a DNS entry. :: Create or update a DNS entry.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse createDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateDnsEntryMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete a DNS entry. :: Delete a DNS entry.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse deleteDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteDnsEntryMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get a TLS certificate. :: Get a TLS certificate
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse createCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateCertificateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse pollCertificateCreation(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getPollCertificateCreationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in a list subdomain patterns as a list with accountId and name of the environment
+     * and returns a map of subdomain pattern and generate domain name/pattern
+     * For example, if workloadSubdomain of provided accountId is `workload-subdomain`,
+     * name of the environment is `env-name` and the supplied array of subdomain patterns
+     * is [ "host-a", "*.mlx", "subdomain.mlx" ], the method would return the result as following:
+     * {
+     *    "host-a": "host-a.env-name.workload-subdomain.cloudera.site",
+     *    "*.mlx": "*.mlx.env-name.workload-subdomain.cloudera.site",
+     *    "subdomain.mlx": "subdomain.mlx.env-name.workload-subdomain.cloudera.site"
+     *  }
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGenerateManagedDomainNamesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in byte array representing a DER/binary formatted CSR with accountId and name of the environment,
+     * validates the domains in CSR and triggers a workflow to submit it to LetsEncrypt and returns a workflowId
+     * using which a client can poll the workflow's progress and finally get the signed certificate
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSignCertificateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in a workflowId representing a workflow in system which tracks the signing of a CSR
+     * If successfully complete, it returns a list of certificates in the trust chain with status as SigningStatus.SUCCESS
+     * In case of error, it returns the status as SigningStatus.FAILED
+     * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getPollCertificateSigningMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     *Revoke a TLS certificate
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRevokeCertificateMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service PublicEndpointManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

@@ -7,9 +7,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: remotecluster.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class RemoteClusterGrpc {
 
@@ -250,6 +247,21 @@ public final class RemoteClusterGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static RemoteClusterBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<RemoteClusterBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<RemoteClusterBlockingV2Stub>() {
+        @java.lang.Override
+        public RemoteClusterBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new RemoteClusterBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return RemoteClusterBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static RemoteClusterBlockingStub newBlockingStub(
@@ -470,6 +482,96 @@ public final class RemoteClusterGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service RemoteCluster.
+   * <pre>
+   * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
+   * </pre>
+   */
+  public static final class RemoteClusterBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<RemoteClusterBlockingV2Stub> {
+    private RemoteClusterBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected RemoteClusterBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new RemoteClusterBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Register a Private Cloud control plane. :: Register a Private Cloud control plane in Public Cloud.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneResponse registerPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterPvcControlPlaneMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud, and clean up the Public Cloud resources from Private Cloud control plane resulting complete termination of the connection.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnregisterPvcControlPlaneMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describe a registered Private Cloud control plane configuration. :: Describe a registered Private Cloud control plane configuration.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse describePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribePvcControlPlaneMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Rotates the agent credentials. :: Rotates the Jumpgate Agent's credentials in PvC.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsResponse rotateAgentCredentials(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RotateAgentCredentialsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRotateAgentCredentialsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List registered Private Cloud control plane configurations. :: List registered Private Cloud control plane configurations.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse listPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListPvcControlPlanesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Test the connectivity to the Private Cloud control plane. :: Test the connectivity from Public Cloud control plane to the registered Private Cloud control plane.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse testPvcControlPlaneConnectivity(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getTestPvcControlPlaneConnectivityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update the Private Cloud control plane registration. :: Update the Private Cloud control plane registration in Public Cloud.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneResponse updatePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UpdatePvcControlPlaneRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdatePvcControlPlaneMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service RemoteCluster.
    * <pre>
    * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
    * </pre>

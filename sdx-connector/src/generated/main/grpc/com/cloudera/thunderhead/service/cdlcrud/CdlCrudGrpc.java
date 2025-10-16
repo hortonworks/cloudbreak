@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: cdlcrud.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class CdlCrudGrpc {
 
@@ -499,6 +496,21 @@ public final class CdlCrudGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static CdlCrudBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<CdlCrudBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<CdlCrudBlockingV2Stub>() {
+        @java.lang.Override
+        public CdlCrudBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new CdlCrudBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return CdlCrudBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static CdlCrudBlockingStub newBlockingStub(
@@ -890,6 +902,177 @@ public final class CdlCrudGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service CdlCrud.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class CdlCrudBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<CdlCrudBlockingV2Stub> {
+    private CdlCrudBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected CdlCrudBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new CdlCrudBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Create a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse createDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeResponse deleteDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describe a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeResponse describeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describe a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse findDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.FindDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getFindDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describe Datalake Services
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesResponse describeServices(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeServicesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Start DataLake diagnostics collection
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse collectDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCollectDatalakeDiagnosticsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List recent Datalake diagnostics collections
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse listDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListDatalakeDiagnosticsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Cancel running Datalake diagnostics collections
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse cancelDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCancelDatalakeDiagnosticsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List all Datalakes of an environment or datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse listDatalakes(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListDatalakesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Upgrades specified Datalake to a later version of its layout
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse upgradeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpgradeDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Synchronize IBBroker mappings
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse syncIDBrokerMappings(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSyncIDBrokerMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Backup or restore database of a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse backupRestoreDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getBackupRestoreDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get operation status and status reason
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse getDatalakeOperationStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetDatalakeOperationStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Stop a datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse stopDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getStopDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Start a datalake which is in Stopped state
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse startDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getStartDatalakeMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service CdlCrud.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: sigmadbus.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class SigmaDbusGrpc {
 
@@ -155,6 +152,21 @@ public final class SigmaDbusGrpc {
         }
       };
     return SigmaDbusStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static SigmaDbusBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<SigmaDbusBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<SigmaDbusBlockingV2Stub>() {
+        @java.lang.Override
+        public SigmaDbusBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new SigmaDbusBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return SigmaDbusBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -312,6 +324,64 @@ public final class SigmaDbusGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service SigmaDbus.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class SigmaDbusBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<SigmaDbusBlockingV2Stub> {
+    private SigmaDbusBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected SigmaDbusBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new SigmaDbusBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Put a new record.
+     * </pre>
+     */
+    public com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getPutRecordMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the service version
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getValidateUuidMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * notify about the file arrival (on prem)
+     * </pre>
+     */
+    public com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getNotifyFileUploadMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service SigmaDbus.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

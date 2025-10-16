@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: usermanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class UserManagementGrpc {
 
@@ -3878,6 +3875,21 @@ public final class UserManagementGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static UserManagementBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<UserManagementBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<UserManagementBlockingV2Stub>() {
+        @java.lang.Override
+        public UserManagementBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new UserManagementBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return UserManagementBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static UserManagementBlockingStub newBlockingStub(
@@ -6650,6 +6662,1313 @@ public final class UserManagementGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service UserManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class UserManagementBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<UserManagementBlockingV2Stub> {
+    private UserManagementBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected UserManagementBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new UserManagementBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Handles an interactive login for a user from a Cloudera identity provider.
+     * The user record will be created if necessary.
+     * The account record must already exist.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInteractiveLoginMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles an interactive login for a user in who is logging in using a
+     * their own IdP. We assume that the account is created. The user will be
+     * be created and their group membership synchronized with their Altus state.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInteractiveLogin3rdPartyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles an interactive login for a user in who is logging in using the CDP control plane local
+     * identity provider. We assume that the account had been created.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInteractiveLoginLocalMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes the account from Altus tests only.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete an actor from Altus.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteActorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete trial user from Altus for tests only.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteTrialUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Gets all the information associated with an access key needed to verify a
+     * request signature produced that key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAccessKeyVerificationDataMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Verifies an interactive user session key. If the session key is expired an
+     * exception is thrown. If the session key is found and is valid,
+     * information about the user and their account is returned.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getVerifyInteractiveUserSessionTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Verifies an access token. If the access token is invalid (not found, expired, doesn't match),
+     * an exception is thrown. If the access token is valid, information about the actor and their
+     * account is returned.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getVerifyAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Authenticate an actor. This method currently supports session tokens and
+     * access key authentication.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAuthenticateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles access key usage, marking the last time it was used and the last
+     * service on which it was used.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAccessKeyUsageMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create user. Can only be used to create a user associated with a customer
+     * identity provider connector.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get user.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List users.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Find users by Email.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getFindUsersByEmailMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Find users.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getFindUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Updates an access key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get access key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List access keys.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAccessKeysMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get an access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List access tokens.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAccessTokensMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new SCIM access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateScimAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes a SCIM access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteScimAccessTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List SCIM access tokens.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListScimAccessTokensMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAccountsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the rights for an actor.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetRightsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Checks if an actor has the input rights on the input resources.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCheckRightsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a regular account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a trial account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateTrialAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create an email based account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateC1CAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * An endpoint called when a user verifies their email by clicking the link we sent
+     * them.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getVerifyC1CEmailMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Grant Entitlement to an Account
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGrantEntitlementMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Revoke Entitlement from an Account
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRevokeEntitlementMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Ensure default entitlements are granted to an Account
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getEnsureDefaultEntitlementsGrantedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a role to an assignee
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAssignRoleMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a role from an assignee
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnassignRoleMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List the assigned roles for an assignee:
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAssignedRolesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a resource role to an assignee
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAssignResourceRoleMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a resource role from an assignee
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnassignResourceRoleMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List the assigned resource roles for an assignee:
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAssignedResourceRolesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List roles.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListRolesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List resource roles.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListResourceRolesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List resource assignees.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListResourceAssigneesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update Cloudera Manager License Key
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateClouderaManagerLicenseKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Initiates a support case creation pipeline.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInitiateSupportCaseMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Notify that a resource was deleted. All resource role assignments
+     * associated with this resource will be deleted.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getNotifyResourceDeletedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a machine user
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateMachineUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * list machine users
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListMachineUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete a machine user
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteMachineUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListResourceRoleAssignmentsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the account messages.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetAccountMessagesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Terms acceptance
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAcceptTermsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Clearing accepted terms. This will clear the accepted terms with the
+     * same version as the current Terms found in the TermsProvider.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getClearAcceptedTermsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Terms description
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeTermsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Terms listing
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListTermsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Entitlements listing
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListEntitlementsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set terms acceptance expiry
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetTermsAcceptanceExpiryMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Confirm whether Altus account and Azure Subscription Id
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getConfirmAzureSubscriptionVerifiedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Insert Azure Subscriptions
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInsertAzureSubscriptionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get groups
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List groups
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListGroupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Add member to group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAddMemberToGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Remove member from group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRemoveMemberFromGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List group members
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListGroupMembersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List of groupCRNs corresponding to the member
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListGroupsForMemberMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List workload administration group names corresponding to the member
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsForMemberMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new cluster ssh private key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateClusterSshPrivateKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get cluster ssh private key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetClusterSshPrivateKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the authorization information about an assignee.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAssigneeAuthorizationInformationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates the identity provider connector
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists identity provider connectors
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListIdentityProviderConnectorsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes identity provider connector
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describes an identity provider connector
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update an identity provider connector
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set whether login using Cloudera SSO is enabled.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetClouderaSSOLoginEnabledMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieves the control plane IdP metadata file for a workload
+     * SSO service.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetIdPMetadataForWorkloadSSOMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Process a workload SSO AuthNRequest. If the user is already authenticated
+     * an appropriate authn response will be generated to the workload SSO. If not,
+     * an appropriate authn request will be generated to either cloudera-sso or
+     * to one of the customer defined identity providers.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getProcessWorkloadSSOAuthnReqMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Generate a SSO AuthNRequest for control plane SP-initiated login.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGenerateControlPlaneSSOAuthnReqMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set the workload subdomain for an account if no such workload domain has
+     * been set for a different account before.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetWorkloadSubdomainMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a machine-user, assign the resource roles and roles to it, create
+     * an access key for it, and return it. This is exposed as a convenience method
+     * for applications. Callers must be internal actors. The call is idempotent
+     * and safe to be called multiple times. Machine users created through this
+     * interface should be deleted by called DeleteWorkloadMachineUser.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateWorkloadMachineUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete the workload machine user, all the role and resource role assignments,
+     * as well as any access keys. This is a convenience method for application who
+     * created a machine user using CreateWorkloadMachineUser.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteWorkloadMachineUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Returns the the workload administration group name for the
+     * (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+     * for the workload administration group has been set yet.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload administration group name for the (account, right, resource)
+     * tuple. If the name was already set for the workload administration group
+     * this is a no-op and the name generated for the workload administration group
+     * will be returned.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes the workload administration group name for the (account, right, resource)
+     * tuple. Throws a NOT_FOUND exception if no such workload administration group
+     * can be found.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists the workload administration groups in an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the actor workloads credentials. This will replace and overwrite any
+     * existing actor credentials.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetActorWorkloadCredentialsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Validates the actor workloads credentials based on the password policy for the account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getValidateActorWorkloadCredentialsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieves the actor workload credentials.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetActorWorkloadCredentialsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Removes workload password minimum lifetime date for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnsetWorkloadPasswordMinLifetimeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Returns a unique ID for the following events:
+     * * Role assignment events.
+     * * Resource role assignment events.
+     * * Group membership changes events.
+     * * Actor deletion events.
+     * * Actor workload credentials change events.
+     * The IDs are guaranteed to be unique and can be used to track the above
+     * changes in a specific account. If no such event has happened in the account
+     * since tracking started an empty string will be returned instead of an ID.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetEventGenerationIdsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Adds an SSH public key for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAddActorSshPublicKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists the SSH public keys for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListActorSshPublicKeysMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describes an SSH public key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDescribeActorSshPublicKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an SSH public key for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeleteActorSshPublicKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload password policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetWorkloadPasswordPolicyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unsets the workload password policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnsetWorkloadPasswordPolicyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the authentication policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetAuthenticationPolicyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to an actor or group.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAssignCloudIdentityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from an actor or group.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnassignCloudIdentityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to a service principal.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getAssignServicePrincipalCloudIdentityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from a service principal.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnassignServicePrincipalCloudIdentityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List cloud identity mappings for service principals.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListServicePrincipalCloudIdentitiesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetDefaultIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetDefaultIdentityProviderConnectorMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get user sync state model, including actors, groups, workload administration groups, etc
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetUserSyncStateModelMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List all role assignments in an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListRoleAssignmentsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Generate authentication token for workload API.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGenerateWorkloadAuthTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get authentication configuration for workload API.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetWorkloadAuthConfigurationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update user.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set Cloudera SSO strict mode for the account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSetCssoStrictModeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles interactive logout requests from console.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getInteractiveLogoutMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists users for SCIM client. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getScimListUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getScimRemoveAllMembersFromGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getScimReplaceAllMembersOfGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getScimListGroupsMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service UserManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

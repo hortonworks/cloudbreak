@@ -4,9 +4,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: authdistributor.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class AuthDistributorGrpc {
 
@@ -154,6 +151,21 @@ public final class AuthDistributorGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static AuthDistributorBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<AuthDistributorBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuthDistributorBlockingV2Stub>() {
+        @java.lang.Override
+        public AuthDistributorBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuthDistributorBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return AuthDistributorBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static AuthDistributorBlockingStub newBlockingStub(
@@ -284,6 +296,54 @@ public final class AuthDistributorGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service AuthDistributor.
+   */
+  public static final class AuthDistributorBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<AuthDistributorBlockingV2Stub> {
+    private AuthDistributorBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected AuthDistributorBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new AuthDistributorBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentResponse fetchAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getFetchAuthViewForEnvironmentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentResponse removeAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRemoveAuthViewForEnvironmentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentResponse updateAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateAuthViewForEnvironmentMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service AuthDistributor.
    */
   public static final class AuthDistributorBlockingStub
       extends io.grpc.stub.AbstractBlockingStub<AuthDistributorBlockingStub> {

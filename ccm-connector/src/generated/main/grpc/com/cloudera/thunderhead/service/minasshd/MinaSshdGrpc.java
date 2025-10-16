@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: minasshd.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MinaSshdGrpc {
 
@@ -93,6 +90,21 @@ public final class MinaSshdGrpc {
         }
       };
     return MinaSshdStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static MinaSshdBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<MinaSshdBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MinaSshdBlockingV2Stub>() {
+        @java.lang.Override
+        public MinaSshdBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MinaSshdBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return MinaSshdBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -214,6 +226,47 @@ public final class MinaSshdGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service MinaSshd.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MinaSshdBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<MinaSshdBlockingV2Stub> {
+    private MinaSshdBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected MinaSshdBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new MinaSshdBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get service endpoints.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetServiceEndpointMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service MinaSshd.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

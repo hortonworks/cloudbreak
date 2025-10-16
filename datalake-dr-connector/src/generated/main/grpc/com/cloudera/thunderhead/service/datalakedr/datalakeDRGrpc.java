@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: datalakedr.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class datalakeDRGrpc {
 
@@ -313,6 +310,21 @@ public final class datalakeDRGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static datalakeDRBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<datalakeDRBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<datalakeDRBlockingV2Stub>() {
+        @java.lang.Override
+        public datalakeDRBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new datalakeDRBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return datalakeDRBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static datalakeDRBlockingStub newBlockingStub(
@@ -594,6 +606,125 @@ public final class datalakeDRGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service datalakeDR.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class datalakeDRBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<datalakeDRBlockingV2Stub> {
+    private datalakeDRBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected datalakeDRBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new datalakeDRBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Backup datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse backupDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getBackupDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Restore datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse restoreDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRestoreDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Get the status datalake backup
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse backupDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getBackupDatalakeStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Get the status datalake restore
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse restoreDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRestoreDatalakeStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * List the Backup's of a datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse listDatalakeBackups(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListDatalakeBackupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel backup operation
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse cancelDatalakeBackup(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCancelDatalakeBackupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel restore operation
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse cancelDatalakeRestore(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCancelDatalakeRestoreMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Submit datalake data info for persisting and processing
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse submitDatalakeDataInfo(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSubmitDatalakeDataInfoMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service datalakeDR.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

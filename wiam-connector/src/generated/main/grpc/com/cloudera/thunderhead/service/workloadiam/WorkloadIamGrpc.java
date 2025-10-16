@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: workloadiam.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class WorkloadIamGrpc {
 
@@ -344,6 +341,21 @@ public final class WorkloadIamGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static WorkloadIamBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<WorkloadIamBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<WorkloadIamBlockingV2Stub>() {
+        @java.lang.Override
+        public WorkloadIamBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new WorkloadIamBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return WorkloadIamBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static WorkloadIamBlockingStub newBlockingStub(
@@ -650,6 +662,137 @@ public final class WorkloadIamGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service WorkloadIam.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class WorkloadIamBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<WorkloadIamBlockingV2Stub> {
+    private WorkloadIamBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected WorkloadIamBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new WorkloadIamBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new sync event. A sync event indicates that a state change is about to be made in
+     * the control plane (usually in UMS). This service will persist the event and will asynchronously
+     * sync the changes into the customer environment. In order to give time for the control plane
+     * changes to go through before attempting a sync, a processing delay is included in the sync
+     * event. To allow processing an event earlier, the CommitSyncEvent rpc should be called.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventResponse createSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateSyncEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update an existing sync event to indicate that it's ready for processing.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventResponse commitSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCommitSyncEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the sync event state for an environment.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusResponse getAutomatedSyncEnvironmentStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAutomatedSyncEnvironmentStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the status of a sync event.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusResponse getSyncEventStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetSyncEventStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Request a manual usersync. Specifying multiple environments is supported
+     * for backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersResponse legacySyncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getLegacySyncUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the status of a LegacySyncUsers request. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse legacyGetSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getLegacyGetSyncUsersStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the state and last usersync Crn for an environment. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getLegacyGetEnvironmentUsersyncStateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Request a manual usersync. Specifying exactly one environment is required.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse syncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSyncUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the status of a SyncUsers request.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusResponse getSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetSyncUsersStatusMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service WorkloadIam.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

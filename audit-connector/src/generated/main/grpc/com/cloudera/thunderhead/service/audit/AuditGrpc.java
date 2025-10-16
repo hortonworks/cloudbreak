@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: audit.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class AuditGrpc {
 
@@ -282,6 +279,21 @@ public final class AuditGrpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static AuditBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<AuditBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuditBlockingV2Stub>() {
+        @java.lang.Override
+        public AuditBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuditBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return AuditBlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static AuditBlockingStub newBlockingStub(
@@ -528,6 +540,108 @@ public final class AuditGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service Audit.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class AuditBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<AuditBlockingV2Stub> {
+    private AuditBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected AuditBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new AuditBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a new standalone audit event.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse createAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAuditEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a new attempt audit event. This call is normally followed by a
+     * call to UpdateAttemptAuditEventWithResult.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse createAttemptAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAttemptAuditEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update an existing attempt audit event with result data.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse updateAttemptAuditEventWithResult(com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUpdateAttemptAuditEventWithResultMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List audit events.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse listEvents(com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListEventsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Configure the audit service for archiving audit logs.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getConfigureArchivingMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieve the current archiving configuration.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetArchivingConfigMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Archive audit events.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse archiveAuditEvents(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getArchiveAuditEventsMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service Audit.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.

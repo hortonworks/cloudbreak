@@ -8,9 +8,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * even if there is initially no content for these messages.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: meteringingestion.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MeteringIngestionGrpc {
 
@@ -93,6 +90,21 @@ public final class MeteringIngestionGrpc {
         }
       };
     return MeteringIngestionStub.newStub(factory, channel);
+  }
+
+  /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static MeteringIngestionBlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<MeteringIngestionBlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MeteringIngestionBlockingV2Stub>() {
+        @java.lang.Override
+        public MeteringIngestionBlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MeteringIngestionBlockingV2Stub(channel, callOptions);
+        }
+      };
+    return MeteringIngestionBlockingV2Stub.newStub(factory, channel);
   }
 
   /**
@@ -214,6 +226,47 @@ public final class MeteringIngestionGrpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service MeteringIngestion.
+   * <pre>
+   * For future compatibility, all RPCs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MeteringIngestionBlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<MeteringIngestionBlockingV2Stub> {
+    private MeteringIngestionBlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected MeteringIngestionBlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new MeteringIngestionBlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Submit a new metering event
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventResponse submitEvent(com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getSubmitEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service MeteringIngestion.
    * <pre>
    * For future compatibility, all RPCs must take a request and return a response
    * even if there is initially no content for these messages.

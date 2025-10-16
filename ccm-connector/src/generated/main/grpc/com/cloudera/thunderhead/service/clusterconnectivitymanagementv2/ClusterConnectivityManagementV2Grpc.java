@@ -7,9 +7,6 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
  * </pre>
  */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.64.0)",
-    comments = "Source: clusterconnectivitymanagementv2.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class ClusterConnectivityManagementV2Grpc {
 
@@ -343,6 +340,21 @@ public final class ClusterConnectivityManagementV2Grpc {
   }
 
   /**
+   * Creates a new blocking-style stub that supports all types of calls on the service
+   */
+  public static ClusterConnectivityManagementV2BlockingV2Stub newBlockingV2Stub(
+      io.grpc.Channel channel) {
+    io.grpc.stub.AbstractStub.StubFactory<ClusterConnectivityManagementV2BlockingV2Stub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<ClusterConnectivityManagementV2BlockingV2Stub>() {
+        @java.lang.Override
+        public ClusterConnectivityManagementV2BlockingV2Stub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new ClusterConnectivityManagementV2BlockingV2Stub(channel, callOptions);
+        }
+      };
+    return ClusterConnectivityManagementV2BlockingV2Stub.newStub(factory, channel);
+  }
+
+  /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
   public static ClusterConnectivityManagementV2BlockingStub newBlockingStub(
@@ -630,6 +642,128 @@ public final class ClusterConnectivityManagementV2Grpc {
 
   /**
    * A stub to allow clients to do synchronous rpc calls to service ClusterConnectivityManagementV2.
+   * <pre>
+   * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
+   * </pre>
+   */
+  public static final class ClusterConnectivityManagementV2BlockingV2Stub
+      extends io.grpc.stub.AbstractBlockingStub<ClusterConnectivityManagementV2BlockingV2Stub> {
+    private ClusterConnectivityManagementV2BlockingV2Stub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      super(channel, callOptions);
+    }
+
+    @java.lang.Override
+    protected ClusterConnectivityManagementV2BlockingV2Stub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+      return new ClusterConnectivityManagementV2BlockingV2Stub(channel, callOptions);
+    }
+
+    /**
+     * <pre>
+     * Get the service version.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * CreateOrGetInvertingProxy will create new deployment If it is not already present.
+     * It also polls for the status and updates the status accordingly.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse createOrGetInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateOrGetInvertingProxyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * RemoveInvertingProxy will remove inverting-proxy deployment.
+     * Mainly used for reaper process.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse removeInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRemoveInvertingProxyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * RegisterAgent for generating and registering agent key-cert pair.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse registerAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRegisterAgentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * UnregisterAgent for removing agent key-cert pair while environment deletion.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse unregisterAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getUnregisterAgentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists all registered agents matching a supplied query
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getListAgentsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * GetAllAgentsCertificates for getting certificates of all the agents for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGetAllAgentsCertificatesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * RotateAgentAccessKey for rotating workload machine user key pair
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getRotateAgentAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getDeactivateAgentAccessKeyPairMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getCreateAgentAccessKeyPairMethod(), getCallOptions(), request);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do limited synchronous rpc calls to service ClusterConnectivityManagementV2.
    * <pre>
    * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
    * </pre>
