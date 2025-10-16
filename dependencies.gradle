@@ -128,5 +128,5 @@ ext {
   javaxXmlBindJaxbApiVersion = '2.3.1' // because of SpringFox Swagger
 
   // TO REMOVE
-  hadoopVersion = '2.7.1'
+  hadoopVersion = '3.4.2'
 }
