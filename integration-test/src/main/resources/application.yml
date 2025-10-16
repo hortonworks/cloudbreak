@@ -245,7 +245,7 @@ integrationtest:
       subscriptionId:
       tenantId:
     instance:
-      type: Standard_DS13_v2
+      type: Standard_D16s_v3
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
