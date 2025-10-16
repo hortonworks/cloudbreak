@@ -17,6 +17,7 @@ public class PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter {
         response.setCloudPlatform("PRIVATE_CLOUD");
         response.setCreated(source.getCreated() == null ? new Date().getTime() : source.getCreated().toEpochSecond());
         response.setCrn(source.getCrn());
+        response.setEnvironmentCrn(source.getCrn());
         response.setPrivateControlPlaneName(privateControlPlane.getName());
         response.setName(source.getEnvironmentName());
         response.setRegion("PRIVATE_CLOUD");

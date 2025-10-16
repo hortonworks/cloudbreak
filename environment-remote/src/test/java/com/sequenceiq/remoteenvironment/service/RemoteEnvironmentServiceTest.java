@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -114,22 +113,60 @@ class RemoteEnvironmentServiceTest {
         when(remoteEnvironmentConnectorProvider.getForType(PRIVATE_CONTROL_PLANE)).thenReturn(connector1);
         when(connector1.list(anyString())).thenReturn(Set.of(env1, env2, env3));
         SimpleRemoteEnvironmentResponses actual = doAs(USER_CRN, () -> underTest.list(List.of()));
-        assertTrue(actual.getResponses().containsAll(List.of(env1, env2, env3)));
+        assertTrue(List.of(env1, env2, env3).containsAll(actual.getResponses()));
         assertEquals(3, actual.getResponses().size());
     }
 
-    @ParameterizedTest
-    @EnumSource(RemoteEnvironmentConnectorType.class)
-    void testListWithType(RemoteEnvironmentConnectorType connectorType) {
+    @Test
+    void testListWithPrivateControlPlaceType() {
         when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
+        when(remoteEnvironmentConnectorProvider.getForType(PRIVATE_CONTROL_PLANE)).thenReturn(connector1);
+        when(connector1.list(anyString())).thenReturn(Set.of(env1, env2, env3));
+        SimpleRemoteEnvironmentResponses actual = doAs(USER_CRN, () -> underTest.list(List.of(PRIVATE_CONTROL_PLANE.name())));
+        assertTrue(List.of(env1, env2, env3).containsAll(actual.getResponses()));
+        assertEquals(3, actual.getResponses().size());
+        verifyNoMoreInteractions(remoteEnvironmentConnectorProvider);
+    }
+
+    @Test
+    void testListWithClassicClusterType() {
+        RemoteEnvironmentConnectorType connectorType = CLASSIC_CLUSTER;
+        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
+        SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
+        env1.setEnvironmentCrn("crn:env1");
+        SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
+        env2.setEnvironmentCrn("crn:env2");
+        SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
         when(remoteEnvironmentConnectorProvider.getForType(connectorType)).thenReturn(connector1);
         when(connector1.list(anyString())).thenReturn(Set.of(env1, env2, env3));
+        when(remoteEnvironmentConnectorProvider.getForType(PRIVATE_CONTROL_PLANE)).thenReturn(connector2);
+        SimpleRemoteEnvironmentResponse pvcEnv1 = new SimpleRemoteEnvironmentResponse();
+        pvcEnv1.setEnvironmentCrn("crn:env2");
+        when(connector2.list(anyString())).thenReturn(Set.of(pvcEnv1));
         SimpleRemoteEnvironmentResponses actual = doAs(USER_CRN, () -> underTest.list(List.of(connectorType.name())));
-        assertTrue(actual.getResponses().containsAll(List.of(env1, env2, env3)));
-        assertEquals(3, actual.getResponses().size());
+        assertTrue(List.of(env2, env3).containsAll(actual.getResponses()));
+        assertEquals(2, actual.getResponses().size());
+    }
+
+    @Test
+    void testListWithBothTypes() {
+        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
+        SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
+        env1.setCrn("crn:env1");
+        SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
+        SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
+        when(remoteEnvironmentConnectorProvider.getForType(CLASSIC_CLUSTER)).thenReturn(connector1);
+        when(connector1.list(anyString())).thenReturn(Set.of(env1, env2, env3));
+        when(remoteEnvironmentConnectorProvider.getForType(PRIVATE_CONTROL_PLANE)).thenReturn(connector2);
+        SimpleRemoteEnvironmentResponse pvcEnv1 = new SimpleRemoteEnvironmentResponse();
+        pvcEnv1.setCrn("crn:env1");
+        when(connector2.list(anyString())).thenReturn(Set.of(pvcEnv1));
+        SimpleRemoteEnvironmentResponses actual = doAs(USER_CRN, () -> underTest.list(List.of(CLASSIC_CLUSTER.name(), PRIVATE_CONTROL_PLANE.name())));
+        assertTrue(List.of(env1, env2, env3, pvcEnv1).containsAll(actual.getResponses()));
+        assertEquals(4, actual.getResponses().size());
     }
 
     @Test

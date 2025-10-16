@@ -6,6 +6,8 @@ public class ModelDescriptions {
 
     public static final String CRN = "crn of the resource";
 
+    public static final String ENVIRONMENT_CRN = "environment crn of the resource from the private control plane";
+
     public static final String URL = "url of the resource";
 
     public static final String CREATED = "creation date of the resource";

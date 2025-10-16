@@ -14,6 +14,9 @@ public class RemoteEnvironmentBase {
     @Schema(description = ModelDescriptions.NAME)
     private String name;
 
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN)
+    private String environmentCrn;
+
     @Schema(description = ModelDescriptions.URL)
     private String url;
 
@@ -46,6 +49,14 @@ public class RemoteEnvironmentBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
     public String getUrl() {

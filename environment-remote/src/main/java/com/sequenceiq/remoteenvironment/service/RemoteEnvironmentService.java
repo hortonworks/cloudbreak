@@ -2,6 +2,8 @@ package com.sequenceiq.remoteenvironment.service;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +16,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
@@ -44,17 +47,60 @@ public class RemoteEnvironmentService {
     public SimpleRemoteEnvironmentResponses list(List<String> types) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (entitlementService.hybridCloudEnabled(accountId)) {
-            Set<SimpleRemoteEnvironmentResponse> responseList = getConnectorTypes(types).parallelStream()
-                    .flatMap(ct -> {
-                        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
-                        return remoteEnvironmentConnectorProvider.getForType(ct).list(accountId).stream();
-                    })
-                    .collect(Collectors.toSet());
-            return new SimpleRemoteEnvironmentResponses(responseList);
-        } else {
+        if (!entitlementService.hybridCloudEnabled(accountId)) {
             return new SimpleRemoteEnvironmentResponses();
         }
+
+        Collection<RemoteEnvironmentConnectorType> connectorTypes = getConnectorTypes(types);
+
+        boolean wantClassic = connectorTypes.contains(RemoteEnvironmentConnectorType.CLASSIC_CLUSTER);
+        boolean wantPrivate = connectorTypes.contains(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE);
+
+        Collection<SimpleRemoteEnvironmentResponse> result = new HashSet<>();
+
+        if (wantPrivate && !wantClassic) {
+            LOGGER.info("Only PRIVATE_CONTROL_PLANE or empty type: list private environments only");
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+            result.addAll(remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE)
+                    .list(accountId));
+        } else if (wantClassic && !wantPrivate) {
+            result.addAll(filterClassicClustersWithoutPrivateEnvironments(mdcContextMap, accountId));
+        } else {
+            LOGGER.info("Both: list all classic clusters and private environments, no filtering");
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+            result.addAll(remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.CLASSIC_CLUSTER)
+                    .list(accountId));
+            result.addAll(remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE)
+                    .list(accountId));
+        }
+
+        return new SimpleRemoteEnvironmentResponses(result);
+    }
+
+    private Collection<SimpleRemoteEnvironmentResponse> filterClassicClustersWithoutPrivateEnvironments(Map<String, String> mdcContextMap, String accountId) {
+        LOGGER.info("Only CLASSIC_CLUSTER: list classic clusters, filter out those with private envs");
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+        Collection<SimpleRemoteEnvironmentResponse> classicClusters =
+                remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.CLASSIC_CLUSTER)
+                        .list(accountId);
+        LOGGER.debug("Classic clusters found: {}", classicClusters);
+
+        Collection<String> privateEnvCrns = remoteEnvironmentConnectorProvider
+                .getForType(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE)
+                .list(accountId)
+                .stream()
+                .map(SimpleRemoteEnvironmentResponse::getEnvironmentCrn)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        LOGGER.debug("Private environment CRNs found: {}", privateEnvCrns);
+
+        Collection<SimpleRemoteEnvironmentResponse> result = classicClusters.stream()
+                .filter(cluster -> privateEnvCrns.contains(cluster.getEnvironmentCrn())
+                        || !StringUtils.hasText(cluster.getEnvironmentCrn()))
+                .collect(Collectors.toSet());
+        LOGGER.debug("Classic clusters after filtering: {}", result);
+        return result;
     }
 
     public DescribeEnvironmentResponse describeV1(DescribeRemoteEnvironment request) {

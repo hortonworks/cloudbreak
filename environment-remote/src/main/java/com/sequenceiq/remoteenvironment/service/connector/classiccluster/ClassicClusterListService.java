@@ -42,6 +42,7 @@ class ClassicClusterListService {
     private SimpleRemoteEnvironmentResponse convert(OnPremisesApiProto.Cluster cluster) {
         SimpleRemoteEnvironmentResponse response = new SimpleRemoteEnvironmentResponse();
         response.setCrn(cluster.getClusterCrn());
+        response.setEnvironmentCrn(cluster.getEnvironmentCrn());
         response.setName(cluster.getName());
         response.setCreated(cluster.getLastCreateTime());
         response.setUrl(cluster.getKnoxEnabled() && StringUtils.isNotBlank(cluster.getKnoxUrl()) ? cluster.getKnoxUrl() : cluster.getManagerUri());
