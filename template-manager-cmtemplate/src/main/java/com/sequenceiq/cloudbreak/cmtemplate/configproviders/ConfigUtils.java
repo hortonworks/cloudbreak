@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
-import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
