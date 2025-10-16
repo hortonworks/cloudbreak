@@ -28,6 +28,7 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowFinalizeAction;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
@@ -92,60 +93,64 @@ public class AbstractFlowConfigurationTest {
 
     @Test
     public void testHappyFlowConfiguration() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FINISHED.name(), null, null, null);
-        flow.sendEvent(Event.FINALIZED.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.CONTINUE.name()));
+        flow.sendEvent(flowParameters(Event.FINISHED.name()));
+        flow.sendEvent(flowParameters(Event.FINALIZED.name()));
     }
 
     @Test
     public void testUnhappyFlowConfigurationWithDefaultFailureHandler() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE.name(), null, null, null);
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.FAILURE.name()));
+        flow.sendEvent(flowParameters(Event.FAIL_HANDLED.name()));
     }
 
     @Test
     public void testUnhappyFlowConfigurationWithCustomFailureHandler() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE2.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.CONTINUE.name()));
+        flow.sendEvent(flowParameters(Event.FAILURE2.name()));
         assertEquals("Must be on the FAILED2 state", State.FAILED2, flow.getCurrentState());
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.FAIL_HANDLED.name()));
     }
 
     @Test
     public void testUnacceptedFlowConfiguration1() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FINISHED.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.FINISHED.name()));
 
         verify(stateMachineListener).eventNotAccepted(any());
     }
 
     @Test
     public void testUnacceptedFlowConfiguration2() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE2.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.FAILURE2.name()));
 
         verify(stateMachineListener).eventNotAccepted(any());
     }
 
     @Test
     public void testUnacceptedFlowConfiguration3() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.CONTINUE.name()));
+        flow.sendEvent(flowParameters(Event.FAIL_HANDLED.name()));
 
         verify(stateMachineListener).eventNotAccepted(any());
     }
 
     @Test
     public void testUnacceptedFlowConfiguration4() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE.name(), null, null, null);
+        flow.sendEvent(flowParameters(Event.START.name()));
+        flow.sendEvent(flowParameters(Event.CONTINUE.name()));
+        flow.sendEvent(flowParameters(Event.FAILURE.name()));
 
         verify(stateMachineListener).eventNotAccepted(any());
+    }
+
+    private FlowParameters flowParameters(String key) {
+        return new FlowParameters(null, null, null, null, key, null, null, null);
     }
 
     enum State implements FlowState {

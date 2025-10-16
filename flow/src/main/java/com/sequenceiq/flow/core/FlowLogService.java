@@ -15,12 +15,11 @@ import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 
 public interface FlowLogService {
-    FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
-            FlowState currentState);
+    FlowLog save(FlowParameters flowParameters, Class<?> flowType, FlowState currentState);
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
 
-    FlowLog finish(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason) throws TransactionExecutionException;
+    FlowLog finish(FlowParameters flowParameters, boolean failed, String reason) throws TransactionExecutionException;
 
     FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException;
 

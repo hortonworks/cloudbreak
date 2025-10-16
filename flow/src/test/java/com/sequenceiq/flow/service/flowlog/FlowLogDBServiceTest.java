@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.RestartAction;
@@ -69,6 +70,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -312,7 +314,8 @@ class FlowLogDBServiceTest {
     void testFinish() throws TransactionExecutionException {
         prepareFinalization();
         Map<Object, Object> params = Map.of("param1", StateStatus.SUCCESSFUL, "param2", 234L, "param3", "true");
-        underTest.finish(ID, FLOW_ID, false, params, REASON);
+        underTest.finish(new FlowParameters(FLOW_ID, null, null, null, null, null, params,
+                new BaseFlowEvent(null, ID, null)), false, REASON);
 
         verifyFinalization();
         FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
