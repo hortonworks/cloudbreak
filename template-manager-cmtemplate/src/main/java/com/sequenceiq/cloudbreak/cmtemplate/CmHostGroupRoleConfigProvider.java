@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 /**
@@ -20,6 +22,11 @@ public interface CmHostGroupRoleConfigProvider {
 
     default boolean sharedRoleType(String roleType) {
         return true;
+    }
+
+    default Map<String, String> getConfigAfterAddingVolumes(HostgroupView hostgroupView, TemplatePreparationObject source,
+        ServiceComponent serviceComponent) {
+        return Map.of();
     }
 
 }
