@@ -722,6 +722,14 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-API'] }}</url>
         {%- endfor %}
+        <param>
+            <name>httpclient.connectionTimeout</name>
+            <value>2m</value>
+        </param>
+        <param>
+            <name>httpclient.socketTimeout</name>
+            <value>2m</value>
+        </param>
     </service>
     {%- endif %}
     {%- endif %}
