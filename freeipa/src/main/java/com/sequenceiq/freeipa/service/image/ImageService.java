@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,9 @@ public class ImageService {
     @Inject
     private FreeipaPlatformStringTransformer platformStringTransformer;
 
+    @Inject
+    private PreferredOsService preferredOsService;
+
     public ImageEntity create(Stack stack, Pair<ImageWrapper, String> imageWrapperAndNamePair) {
         ImageEntity imageEntity = createImageEntity(stack, imageWrapperAndNamePair);
         return imageRepository.save(imageEntity);
@@ -111,8 +115,15 @@ public class ImageService {
     }
 
     public Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
-        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(imageRequest.getId(), imageRequest.getCatalog(), null,
-                imageRequest.getOs(), stack.getRegion(), platformStringTransformer.getPlatformString(stack), false, stack.getArchitecture());
+        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(
+                imageRequest.getId(),
+                imageRequest.getCatalog(),
+                null,
+                StringUtils.isNotBlank(imageRequest.getOs()) ? imageRequest.getOs() : preferredOsService.getPreferredOs(imageRequest.getOs()),
+                stack.getRegion(),
+                platformStringTransformer.getPlatformString(stack),
+                false,
+                stack.getArchitecture());
         return fetchImageWrapperAndName(imageFilterSettings);
     }
 

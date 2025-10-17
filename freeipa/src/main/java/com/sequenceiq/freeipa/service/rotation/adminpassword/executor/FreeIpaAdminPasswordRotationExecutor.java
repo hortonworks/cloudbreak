@@ -118,7 +118,7 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
 
     @Override
     public void preValidate(RotationContext rotationContext) {
-        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext);
+        freeIpaAdminPasswordRotationUtil.checkRedhat(rotationContext);
     }
 
     @Override

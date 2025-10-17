@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.image;
 
-import static com.sequenceiq.common.model.OsType.RHEL8;
-
 import java.util.Locale;
 import java.util.Optional;
 
@@ -15,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -77,7 +76,7 @@ public class ImageFallbackService {
     }
 
     public ImageWrapper getImageWrapper(ImageEntity currentImage, Stack stack) {
-        if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
+        if (!OsType.vhdIsSupported(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
             String message = String.format("Failed to start instances with image: %s. The current image is a Redhat 8 VHD image, " +
                             "please check if the source image is signed: %s.",
                     currentImage.getImageName(), currentImage.getSourceImage());

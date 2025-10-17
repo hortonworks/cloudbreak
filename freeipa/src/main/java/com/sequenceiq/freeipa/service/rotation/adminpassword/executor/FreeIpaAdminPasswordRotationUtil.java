@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.rotation.adminpassword.executor;
 
-import static com.sequenceiq.common.model.OsType.RHEL8;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -22,14 +21,14 @@ public class FreeIpaAdminPasswordRotationUtil {
     @Inject
     private StackService stackService;
 
-    public void checkRedhat8(RotationContext rotationContext) {
+    public void checkRedhat(RotationContext rotationContext) {
         String environmentCrnAsString = rotationContext.getResourceCrn();
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
         String osType = stack.getImage().getOsType();
-        if (!RHEL8.getOs().equalsIgnoreCase(osType)) {
-            LOGGER.info("OS type is not REDHAT 8: {}", osType);
-            throw new SecretRotationException("Freeipa admin password rotation is supported only on Redhat 8");
+        if (!OsType.freeipaAdminPasswordRotationIsSupported(osType)) {
+            LOGGER.info("OS type is not REDHAT: {}", osType);
+            throw new SecretRotationException("Freeipa admin password rotation is supported only on Redhat");
         }
     }
 

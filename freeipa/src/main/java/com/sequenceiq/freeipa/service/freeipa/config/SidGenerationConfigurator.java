@@ -15,7 +15,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.host.Rhel8ClientHelper;
+import com.sequenceiq.freeipa.service.freeipa.host.RhelClientHelper;
 
 @Component
 public class SidGenerationConfigurator {
@@ -23,7 +23,7 @@ public class SidGenerationConfigurator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SidGenerationConfigurator.class);
 
     @Inject
-    private Rhel8ClientHelper rhel8ClientHelper;
+    private RhelClientHelper rhelClientHelper;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -38,18 +38,18 @@ public class SidGenerationConfigurator {
         try {
             FreeIpa freeIpa = freeIpaService.findByStack(stack);
             if (!SidGeneration.ENABLED.equals(freeIpa.getSidGeneration())) {
-                boolean clientConnectedToRhel8 = rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient);
-                if (clientConnectedToRhel8) {
+                boolean clientConnectedToRhel = rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient);
+                if (clientConnectedToRhel) {
                     LOGGER.info("Enable and start SID generation");
                     retryService.invokeWithRetries(freeIpaClient::enableAndTriggerSidGeneration);
                     updateSidGenerationToEnabled(freeIpa);
                 } else {
-                    Optional<String> rhel8Instance = rhel8ClientHelper.findRhel8Instance(stack);
-                    if (rhel8Instance.isPresent()) {
-                        FreeIpaClient rhel8FreeIpaClient = retryService.invokeWithRetries(()
-                                -> freeIpaClientFactory.getFreeIpaClientForInstance(stack, rhel8Instance.get()));
-                        LOGGER.info("Enable and start SID generation on host: {}", rhel8Instance.get());
-                        retryService.invokeWithRetries(rhel8FreeIpaClient::enableAndTriggerSidGeneration);
+                    Optional<String> rhelInstance = rhelClientHelper.findRhelInstance(stack);
+                    if (rhelInstance.isPresent()) {
+                        FreeIpaClient rhelFreeIpaClient = retryService.invokeWithRetries(()
+                                -> freeIpaClientFactory.getFreeIpaClientForInstance(stack, rhelInstance.get()));
+                        LOGGER.info("Enable and start SID generation on host: {}", rhelInstance.get());
+                        retryService.invokeWithRetries(rhelFreeIpaClient::enableAndTriggerSidGeneration);
                         updateSidGenerationToEnabled(freeIpa);
                     } else {
                         LOGGER.warn("Couldn't found RHEL8 FreeIPA instance to enable and start SID generation");

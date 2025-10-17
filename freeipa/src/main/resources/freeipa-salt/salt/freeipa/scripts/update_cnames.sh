@@ -1,3 +1,5 @@
+{%- set os = salt['grains.get']('os') %}
+{%- set osMajorRelease = salt['grains.get']('osmajorrelease') | int %}
 #!/usr/bin/env bash
 
 set -e
@@ -138,7 +140,7 @@ addService "HTTP/kerberos.$DOMAIN"
 addHostToService "HTTP/kerberos.$DOMAIN" "$FQDN"
 
 
-{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+{%- if os == 'RedHat' and (osMajorRelease == 8 or osMajorRelease == 9) %}
 HTTP_CERT_REQUEST_ID=$(getCertRequestIdFromFile /var/lib/ipa/certs/httpd.crt)
 {%- else %}
 HTTP_CERT_REQUEST_ID=$(getCertRequestIdFromDir /etc/httpd/alias Server-Cert)

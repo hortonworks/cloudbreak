@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Config;
@@ -27,7 +28,7 @@ public class MaxHostnameLengthPolicyService {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Inject
-    private Rhel8ClientHelper rhel8ClientHelper;
+    private RhelClientHelper rhelClientHelper;
 
     public void updateMaxHostnameLength(Stack stack, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         Config ipaConfig = freeIpaClient.getConfig();
@@ -35,24 +36,27 @@ public class MaxHostnameLengthPolicyService {
         LOGGER.debug("The maximum hostname length that is required by the environment: '{}', the maximum that is configured for IPA: '{}'", maxHostNameLength,
                 ipaConfig.getIpamaxhostnamelength());
         if (ipaConfig.getIpamaxhostnamelength() != null && ipaConfig.getIpamaxhostnamelength() < maxHostNameLength) {
-            boolean clientConnectedToRhel8 = rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient);
-            if (clientConnectedToRhel8) {
+            boolean clientConnectedToRhel = rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient);
+            if (clientConnectedToRhel) {
                 LOGGER.info("Set maximum hostname length to '{}'", maxHostNameLength);
                 freeIpaClient.setMaxHostNameLength(maxHostNameLength);
             } else {
-                Optional<String> rhel8Instance = rhel8ClientHelper.findRhel8Instance(stack);
-                if (rhel8Instance.isPresent()) {
-                    FreeIpaClient rhel8FreeIpaClient = freeIpaClientFactory.getFreeIpaClientForInstance(stack, rhel8Instance.get());
-                    LOGGER.info("Set maximum hostname length to '{}' on host: {}", maxHostNameLength, rhel8Instance.get());
-                    rhel8FreeIpaClient.setMaxHostNameLength(maxHostNameLength);
+                Optional<String> rhelInstance = rhelClientHelper.findRhelInstance(stack);
+                if (rhelInstance.isPresent()) {
+                    FreeIpaClient rhelFreeIpaClient = freeIpaClientFactory.getFreeIpaClientForInstance(stack, rhelInstance.get());
+                    LOGGER.info("Set maximum hostname length to '{}' on host: {}", maxHostNameLength, rhelInstance.get());
+                    rhelFreeIpaClient.setMaxHostNameLength(maxHostNameLength);
                 } else {
-                    LOGGER.warn("Couldn't found RHEL8 FreeIPA instance to set maximum hostname length");
+                    LOGGER.warn("Couldn't found RHEL FreeIPA instance to set maximum hostname length");
                 }
             }
         }
     }
 
     private Integer calculateRquiredMaxHostnameLength(Stack stack) {
+        if (rhelClientHelper.isClientConnectedToSpecificOs(stack, OsType.RHEL9)) {
+            return MAX_NAME_LENGTH;
+        }
         int domainLength = stack.getPrimaryGateway().map(im -> im.getDomain().length()).orElse(MAX_NAME_LENGTH);
         return Math.min(domainLength + MAX_HOSTNAME_LENGTH_WITH_DELIMITER, MAX_NAME_LENGTH);
     }

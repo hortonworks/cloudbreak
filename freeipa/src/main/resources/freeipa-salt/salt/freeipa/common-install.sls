@@ -1,7 +1,8 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True else False %}
 {%- set kerberosConfigOriginalPath = '/etc' %}
 {%- set kerberosConfigPath = salt['pillar.get']('freeipa:kerberosSecretLocation') if secretEncryptionEnabled == True else kerberosConfigOriginalPath %}
-
+{%- set os = salt['grains.get']('os') %}
+{%- set osMajorRelease = salt['grains.get']('osmajorrelease') | int %}
 {% if salt['pillar.get']('freeipa:loadBalancer:enabled', False) %}
   {% set loadbalanced_endpoint = salt['pillar.get']('freeipa:loadBalancer:endpoint','ipa-ca') %}
 {% else %}
@@ -123,7 +124,7 @@ configure_httpd_log_filter:
     - repl: ErrorLog "|/etc/httpd/conf/httpd-log-filter.sh"
     - unless: grep "httpd-log-filter.sh" /etc/httpd/conf/httpd.conf
 
-{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+{% if os == 'RedHat' and (osMajorRelease == 8 or osMajorRelease == 9) %}
 configure_httpd_log_filter_ssl:
   file.replace:
     - name: /etc/httpd/conf.d/ssl.conf
@@ -158,8 +159,7 @@ restart_sssd_if_reconfigured:
     - watch:
       - file: /etc/sssd/sssd.conf
 
-{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
-  
+{%- if os == 'RedHat' and (osMajorRelease == 8 or osMajorRelease == 9) %}
 /etc/named/ipa-ext.conf:
   file.managed:
     - source: salt://freeipa/templates/ipa-ext.conf
@@ -174,7 +174,11 @@ restart_sssd_if_reconfigured:
 
 restart_named_if_reconfigured:
   service.running:
+{%- if osMajorRelease == 9 %}
+    - name: named
+{%- else %}
     - name: named-pkcs11
+{%- endif %}
     - failhard: True
     - watch:
         - file: /etc/named/ipa-options-ext.conf

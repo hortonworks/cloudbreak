@@ -33,7 +33,7 @@ class MaxHostnameLengthPolicyServiceTest {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Spy
-    private Rhel8ClientHelper rhel8ClientHelper;
+    private RhelClientHelper rhel8ClientHelper;
 
     @InjectMocks
     private MaxHostnameLengthPolicyService underTest;

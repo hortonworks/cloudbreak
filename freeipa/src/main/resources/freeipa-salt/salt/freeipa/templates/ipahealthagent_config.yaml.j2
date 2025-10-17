@@ -1,3 +1,32 @@
+{%- set os = salt['grains.get']('os') %}
+{%- set osMajorRelease = salt['grains.get']('osmajorrelease') | int %}
 realm: {{ salt['pillar.get']('freeipa:domain') }}
 hostname: {{ grains['fqdn'] }}
 timeout: 1000
+cluster_services: []
+max_retries: 2
+services:
+  - certmonger
+  - crond
+  - gssproxy
+  - httpd
+  - ipa-custodia
+  - ipa-dnskeysyncd
+  - kadmin
+  - krb5kdc
+{%- if os == 'RedHat' and osMajorRelease == 9 %}
+  - named
+{%- else %}
+  - named-pkcs11
+{%- endif %}
+  - nginx
+  - pki-tomcatd@pki-tomcat
+  - polkit
+  - salt-api
+  - salt-bootstrap
+  - salt-master
+  - salt-minion
+  - sshd
+  - sssd
+  - dirsrv
+

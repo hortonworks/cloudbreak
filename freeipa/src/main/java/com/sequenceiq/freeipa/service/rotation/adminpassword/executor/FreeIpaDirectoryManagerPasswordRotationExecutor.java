@@ -100,7 +100,7 @@ public class FreeIpaDirectoryManagerPasswordRotationExecutor extends AbstractRot
 
     @Override
     public void preValidate(RotationContext rotationContext) {
-        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext);
+        freeIpaAdminPasswordRotationUtil.checkRedhat(rotationContext);
     }
 
     @Override

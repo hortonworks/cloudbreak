@@ -578,7 +578,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #region, #availabilityZonesNeeded }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
             boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));

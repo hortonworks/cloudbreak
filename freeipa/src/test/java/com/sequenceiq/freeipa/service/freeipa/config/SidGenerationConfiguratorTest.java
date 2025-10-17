@@ -28,13 +28,13 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.host.Rhel8ClientHelper;
+import com.sequenceiq.freeipa.service.freeipa.host.RhelClientHelper;
 
 @ExtendWith(MockitoExtension.class)
 class SidGenerationConfiguratorTest {
 
     @Mock
-    private Rhel8ClientHelper rhel8ClientHelper;
+    private RhelClientHelper rhelClientHelper;
 
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -62,14 +62,14 @@ class SidGenerationConfiguratorTest {
     void testConnectedToRhel8() throws FreeIpaClientException {
         Stack stack = new Stack();
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(true);
+        when(rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient)).thenReturn(true);
         FreeIpa freeIpa = new FreeIpa();
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
 
         verify(freeIpaClient).enableAndTriggerSidGeneration();
-        verify(rhel8ClientHelper, never()).findRhel8Instance(stack);
+        verify(rhelClientHelper, never()).findRhelInstance(stack);
         verify(freeIpaService).save(freeIpa);
     }
 
@@ -77,8 +77,8 @@ class SidGenerationConfiguratorTest {
     void testConnectToRhel8() throws FreeIpaClientException {
         Stack stack = new Stack();
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(false);
-        when(rhel8ClientHelper.findRhel8Instance(stack)).thenReturn(Optional.of("rhel8ipa"));
+        when(rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient)).thenReturn(false);
+        when(rhelClientHelper.findRhelInstance(stack)).thenReturn(Optional.of("rhel8ipa"));
         FreeIpaClient rhel8FreeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, "rhel8ipa")).thenReturn(rhel8FreeIpaClient);
         FreeIpa freeIpa = new FreeIpa();
@@ -96,8 +96,8 @@ class SidGenerationConfiguratorTest {
     void testNoRhel8() {
         Stack stack = new Stack();
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(false);
-        when(rhel8ClientHelper.findRhel8Instance(stack)).thenReturn(Optional.empty());
+        when(rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient)).thenReturn(false);
+        when(rhelClientHelper.findRhelInstance(stack)).thenReturn(Optional.empty());
         when(freeIpaService.findByStack(stack)).thenReturn(new FreeIpa());
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
@@ -111,7 +111,7 @@ class SidGenerationConfiguratorTest {
     void testExceptionHandled() throws FreeIpaClientException {
         Stack stack = new Stack();
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(true);
+        when(rhelClientHelper.isClientConnectedToRhel(stack, freeIpaClient)).thenReturn(true);
         doThrow(new FreeIpaClientException("asdf")).when(freeIpaClient).enableAndTriggerSidGeneration();
         when(freeIpaService.findByStack(stack)).thenReturn(new FreeIpa());
 
@@ -131,7 +131,7 @@ class SidGenerationConfiguratorTest {
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
 
         verify(freeIpaClient, never()).enableAndTriggerSidGeneration();
-        verify(rhel8ClientHelper, never()).findRhel8Instance(stack);
+        verify(rhelClientHelper, never()).findRhelInstance(stack);
         verify(freeIpaService, never()).save(freeIpa);
     }
 }

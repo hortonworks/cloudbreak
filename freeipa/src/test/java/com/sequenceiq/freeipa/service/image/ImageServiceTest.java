@@ -109,6 +109,9 @@ class ImageServiceTest {
     @Mock
     private FreeipaPlatformStringTransformer platformStringTransformer;
 
+    @Mock
+    private PreferredOsService preferredOsService;
+
     @Captor
     private ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsCaptor;
 

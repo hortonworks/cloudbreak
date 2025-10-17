@@ -1,14 +1,18 @@
 package com.sequenceiq.common.model;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 public enum OsType {
 
-    CENTOS7("centos7", "redhat7", "CentOS 7", "CentOS 7", "el7"),
-    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8", "el8"),
-    RHEL9("redhat9", "redhat9", "Red Hat Enterprise Linux 9", "RHEL 9", "el9");
+    CENTOS7("centos7", "redhat7", "CentOS 7", "CentOS 7", "el7",
+            true, false),
+    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8", "el8",
+            false, true),
+    RHEL9("redhat9", "redhat9", "Red Hat Enterprise Linux 9", "RHEL 9", "el9",
+            false, true);
 
     private final String os;
 
@@ -20,12 +24,20 @@ public enum OsType {
 
     private final String parcelPostfix;
 
-    OsType(String os, String osType, String name, String shortName, String parcelPostfix) {
+    private final boolean vhdSupported;
+
+    private final boolean freeipaAdminPasswordRotationSupported;
+
+    @SuppressWarnings("checkstyle:ExecutableStatementCount")
+    OsType(String os, String osType, String name, String shortName, String parcelPostfix,
+            boolean vhdSupported, boolean freeipaAdminPasswordRotationSupported) {
         this.os = os;
         this.osType = osType;
         this.name = name;
         this.shortName = shortName;
         this.parcelPostfix = parcelPostfix;
+        this.vhdSupported = vhdSupported;
+        this.freeipaAdminPasswordRotationSupported = freeipaAdminPasswordRotationSupported;
     }
 
     public String getOs() {
@@ -77,6 +89,27 @@ public enum OsType {
         return Arrays.stream(values())
                 .filter(osType -> osType.os.equalsIgnoreCase(os))
                 .findFirst();
+    }
+
+    public static Optional<OsType> getByOsTypeOptional(String osType) {
+        return Arrays.stream(values())
+                .filter(os -> os.osType.equalsIgnoreCase(osType))
+                .findFirst();
+    }
+
+    public static boolean isRhel(String osType) {
+        Optional<OsType> osTypeOptional = getByOsTypeOptional(osType);
+        return osTypeOptional.isPresent() ? osTypeOptional.get().getOs().toLowerCase(Locale.ROOT).startsWith("redhat") : false;
+    }
+
+    public static boolean vhdIsSupported(String osType) {
+        Optional<OsType> osTypeOptional = getByOsTypeOptional(osType);
+        return osTypeOptional.isPresent() ? osTypeOptional.get().vhdSupported : false;
+    }
+
+    public static boolean freeipaAdminPasswordRotationIsSupported(String osType) {
+        Optional<OsType> osTypeOptional = getByOsTypeOptional(osType);
+        return osTypeOptional.isPresent() ? osTypeOptional.get().freeipaAdminPasswordRotationSupported : false;
     }
 
     public static OsType getByOs(String os) {
