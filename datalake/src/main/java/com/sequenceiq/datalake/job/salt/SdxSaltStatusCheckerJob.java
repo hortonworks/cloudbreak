@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -102,6 +103,8 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
                     } catch (WebApplicationException e) {
                         String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                         LOGGER.warn("Salt password rotation failed. {}", errorMessage);
+                    } catch (BadRequestException bre) {
+                        LOGGER.error("Cannot execute secret rotation flow for salt password, reason: ", bre);
                     }
                 } else {
                     LOGGER.debug("Salt password rotation is NOT needed for SDX {} based on response {}", sdxCluster.getCrn(), saltPasswordStatus);

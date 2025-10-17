@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.job.salt;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -103,6 +105,17 @@ class SdxSaltStatusCheckerJobTest {
         lenient().when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(endpoints);
         lenient().when(endpoints.stackV4Endpoint()).thenReturn(stackV4Endpoint);
         lenient().when(stackV4Endpoint.getSaltPasswordStatus(0L, CRN)).thenReturn(saltPasswordStatus);
+    }
+
+    @Test
+    void rotateFailsWithBadRequest() {
+        setStatus(DatalakeStatusEnum.RUNNING);
+        when(saltPasswordStatus.getStatus()).thenReturn(SaltPasswordStatus.EXPIRES);
+        when(saltService.rotateSaltPassword(any())).thenThrow(new BadRequestException("fail"));
+
+        underTest.executeJob(context);
+
+        verify(saltService).rotateSaltPassword(any());
     }
 
     @Test
