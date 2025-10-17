@@ -746,4 +746,15 @@ class StackOperationServiceTest {
 
         verify(flowManager).triggerZookeeperToKraftMigrationFinalization(STACK_ID);
     }
+
+    @Test
+    public void testTriggerZookeeperToKraftMigrationRollback() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+        underTest.triggerZookeeperToKraftMigrationRollback(nameOrCrn, "accountId");
+
+        verify(flowManager).triggerZookeeperToKraftMigrationRollback(STACK_ID);
+    }
 }

@@ -559,12 +559,20 @@ public class StackOperationService {
 
     public FlowIdentifier triggerZookeeperToKraftMigration(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerZookeeperToKraftMigration(stack.getId());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationFinalization(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerZookeeperToKraftMigrationFinalization(stack.getId());
+    }
+
+    public FlowIdentifier triggerZookeeperToKraftMigrationRollback(NameOrCrn name, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        return flowManager.triggerZookeeperToKraftMigrationRollback(stack.getId());
     }
 
     public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request,

@@ -72,6 +72,10 @@ public interface ClusterApi {
         clusterModificationService().finalizeZookeeperToKraftMigration(stackDtoDelegate);
     }
 
+    default void rollbackZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().rollbackZookeeperToKraftMigration(stackDtoDelegate);
+    }
+
     default List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
         return clusterModificationService().upscaleCluster(instanceMetaDatasByHostGroup);
     }

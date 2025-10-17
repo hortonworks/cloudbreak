@@ -41,6 +41,8 @@ public class ClouderaManagerKraftMigrationService {
 
     private static final String KRAFT_FINALIZE_MIGRATION_COMMAND_NAME = "KRaftFinalizeMigrationCommand";
 
+    private static final String KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME = "KRaftRollbackMigrationCommand";
+
     private static final String KRAFT_ROLE_TYPE = "KRAFT";
 
     private static final String KRAFT_PROPERTIES_ROLE_SAFETY_VALVE = "kraft.properties_role_safety_valve";
@@ -150,6 +152,36 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
+    public void rollbackZookeeperToKraftMigration(ApiClient client, StackDtoDelegate stackDtoDelegate) {
+        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
+        String clusterName = stackDtoDelegate.getCluster().getName();
+
+        try {
+            Collection<ApiService> apiServices = readServices(client, stackDtoDelegate);
+
+            Optional<ApiService> optionalApiService = apiServices.stream()
+                    .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
+                    .findFirst();
+
+            if (optionalApiService.isPresent()) {
+                ApiService service = optionalApiService.get();
+                LOGGER.info("Rolling back Zookeeper to KRaft migration. Calling /clusters/{}/services/{}/commands/{} CM endpoint",
+                        clusterName, service.getName(), KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME);
+
+                ApiCommand kraftMigrationCommand = api.serviceCommandByName(
+                        clusterName, KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME, service.getName());
+
+                pollRollbackZookeeperToKraftMigrationCommand(client, stackDtoDelegate, kraftMigrationCommand.getId());
+            } else {
+                LOGGER.error("Cannot rollback Zookeeper to KRaft migration. No {} service type found for cluster {}",
+                        KAFKA_SERVICE_TYPE, clusterName);
+            }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.error("Failed to rollback Zookeeper to KRaft migration", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
     private void pollKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
@@ -168,6 +200,20 @@ public class ClouderaManagerKraftMigrationService {
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingFinalizeZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
+
+        if (pollingResult.isExited()) {
+            throw new CancellationException(
+                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration");
+        } else if (pollingResult.isTimeout()) {
+            throw new CloudbreakException(
+                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration).");
+        }
+    }
+
+    private void pollRollbackZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
+            throws CloudbreakException {
+        ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
+                .startPollingRollbackZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
 
         if (pollingResult.isExited()) {
             throw new CancellationException(

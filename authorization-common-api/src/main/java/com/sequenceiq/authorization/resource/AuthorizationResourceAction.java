@@ -117,6 +117,7 @@ public enum AuthorizationResourceAction {
     DELETE_ENCRYPTION_PROFILE("environments/deleteEncryptionProfile", AuthorizationResourceType.ENCRYPTION_PROFILE),
     MIGRATE_ZOOKEEPER_TO_KRAFT("datahub/migrateZookeeperToKRaft", AuthorizationResourceType.DATAHUB),
     FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION("datahub/finalizeZookeeperToKRaftMigration", AuthorizationResourceType.DATAHUB),
+    ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION("datahub/rollbackZookeeperToKRaftMigration", AuthorizationResourceType.DATAHUB),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),

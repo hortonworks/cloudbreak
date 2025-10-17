@@ -1718,6 +1718,13 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
+    public void testRollbackZookeeperToKraftMigration() {
+        underTest.rollbackZookeeperToKraftMigration(stack);
+
+        verify(clouderaManagerKraftMigrationService).rollbackZookeeperToKraftMigration(eq(v31Client), eq(stack));
+    }
+
+    @Test
     public void testStopClouderaManagerServiceWhenServiceIsStarted() {
         List<ApiService> services = List.of(new ApiService().name("yarn").serviceState(ApiServiceState.STARTED));
         when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRA
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFinalizationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -222,6 +224,7 @@ class ReactorFlowManagerTest {
         underTest.triggerExternalDatabaseUserOperation(STACK_ID, "name", "crn", ExternalDatabaseUserOperation.CREATION, DatabaseType.HIVE, "user");
         underTest.triggerZookeeperToKraftMigration(STACK_ID);
         underTest.triggerZookeeperToKraftMigrationFinalization(STACK_ID);
+        underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -458,6 +461,16 @@ class ReactorFlowManagerTest {
         MigrateZookeeperToKraftFinalizationTriggerEvent event = captor.getValue();
         assertEquals(1L, captor.getValue().getResourceId());
         assertEquals(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), event.selector());
+    }
+
+    @Test
+    void testTriggerZookeeperToKraftMigrationRollback() {
+        underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
+        ArgumentCaptor<MigrateZookeeperToKraftRollbackTriggerEvent> captor = ArgumentCaptor.forClass(MigrateZookeeperToKraftRollbackTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event()), captor.capture());
+        MigrateZookeeperToKraftRollbackTriggerEvent event = captor.getValue();
+        assertEquals(1L, captor.getValue().getResourceId());
+        assertEquals(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), event.selector());
     }
 
     private static class TestAcceptable implements Acceptable {

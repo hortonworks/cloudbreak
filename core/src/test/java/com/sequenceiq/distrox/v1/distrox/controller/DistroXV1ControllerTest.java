@@ -371,4 +371,16 @@ class DistroXV1ControllerTest {
         });
         verify(stackOperationService).triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(CRN), "accountId");
     }
+
+    @Test
+    void testRollbackMigrationFromZookeeperToKraftByCrn() {
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.rollbackMigrationFromZookeeperToKraftByCrn(CRN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(stackOperationService).triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(CRN), "accountId");
+    }
 }
