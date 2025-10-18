@@ -244,7 +244,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
+            LOGGER.warn("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         } finally {
             saltConnectors.forEach(SaltConnector::close);
@@ -333,7 +333,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
             updateMountDataPillar(allNodesWithDiskData, exitModel, platformVariant, gatewayTargetIpAddresses, sc, xfsForEphemeralSupported);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
+            LOGGER.warn("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -371,7 +371,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     })
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
+            LOGGER.warn("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -462,7 +462,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during salt upscale", e);
+            LOGGER.warn("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         } finally {
             saltConnectors.forEach(SaltConnector::close);
@@ -486,7 +486,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 throw new CloudbreakOrchestratorFailedException(String.format("Failed to rebootstrap existing nodes %s", nodesWithErrors));
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during salt upscale", e);
+            LOGGER.warn("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         } finally {
             saltConnectors.forEach(SaltConnector::close);
@@ -557,7 +557,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             return saltStateService.getMemoryInfo(sc, gatewayConfig.getHostname());
         } catch (Exception e) {
-            LOGGER.info("Error occurred during requesting memory information", e);
+            LOGGER.warn("Error occurred during requesting memory information", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -567,7 +567,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             return saltStateService.getClouderaManagerMemory(sc, gatewayConfig);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during requesting memory information", e);
+            LOGGER.warn("Error occurred during requesting memory information", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -577,7 +577,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             saltStateService.setClouderaManagerMemory(sc, gatewayConfig, memory);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during setting cluster manager memory", e);
+            LOGGER.warn("Error occurred during setting cluster manager memory", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -587,7 +587,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             return saltStateService.setClouderaManagerOperationTimeout(sc, gatewayConfig);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during setting cluster manager memory", e);
+            LOGGER.warn("Error occurred during setting cluster manager memory", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -673,13 +673,13 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runNewService(sc, new HighStateRunner(saltStateService, allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
-            LOGGER.info("Error occurred during bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
         LOGGER.debug("Run services on nodes finished: {}", allNodes);
@@ -692,7 +692,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Map<String, JsonNode> roles = saltStateService.getGrains(sc, "roles");
             LOGGER.info("Roles before highstate: " + roles);
         } catch (RuntimeException e) {
-            LOGGER.info("Can't get roles before highstate", e);
+            LOGGER.warn("Can't get roles before highstate", e);
             throw new Retry.ActionFailedException("Can't get roles before highstate: " + e.getMessage());
         }
     }
@@ -1049,7 +1049,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, saltConnector);
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during salt minion tear down", e);
+            LOGGER.warn("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
         List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
@@ -1059,7 +1059,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 sc.wheel("key.delete", removeNodePrivateIPsByFQDN.keySet(), Object.class);
                 removeDeadSaltMinions(gatewayConfig);
             } catch (Exception e) {
-                LOGGER.info("Error occurred during salt minion tear down", e);
+                LOGGER.warn("Error occurred during salt minion tear down", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
             }
         }
@@ -1074,7 +1074,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     .stream()
                     .collect(Collectors.toMap(Entry::getKey, entry -> convertPackageInfoListToMap(entry.getValue())));
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
+            LOGGER.warn("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1085,7 +1085,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
+            LOGGER.warn("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1101,7 +1101,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.runCommand(retry, saltConnector, command);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during command execution: " + command, e);
+            LOGGER.warn("Error occurred during command execution: " + command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1111,7 +1111,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.runCommandWithFewRetry(retry, saltConnector, command);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during command execution: " + command, e);
+            LOGGER.warn("Error occurred during command execution: " + command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1135,7 +1135,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.getGrains(saltConnector, grain);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during get grain execution: " + grain, e);
+            LOGGER.warn("Error occurred during get grain execution: " + grain, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1151,7 +1151,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltConnector.wheel("key.delete", downNodes, Object.class);
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during dead salt minions removal on " + gateway.getHostname(), e);
+            LOGGER.warn("Error occurred during dead salt minions removal on " + gateway.getHostname(), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1184,7 +1184,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during recipe upload", e);
+            LOGGER.warn("Error occurred during recipe upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1208,7 +1208,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> runner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
             runner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during keytab upload", e);
+            LOGGER.warn("Error occurred during keytab upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1309,7 +1309,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
+            LOGGER.warn("Error occurred during executing highstate (for cluster manager agent stop).", e);
             throwExceptionIfNotForced(flags.isForced(), e);
         }
     }
@@ -1330,7 +1330,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(gatewayPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during gateway pillar upload", e);
+            LOGGER.warn("Error occurred during gateway pillar upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1356,7 +1356,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runNewService(sc, new HighStateAllRunner(saltStateService, allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during executing highstate (for recipes).", e);
+            LOGGER.warn("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1582,13 +1582,13 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runStateRunnerForRecipe(saltStateService, exitCriteriaModel, executedPhase, maxRetry, sc, targetHostnames);
             }
         } catch (CloudbreakOrchestratorTimeoutException e) {
-            LOGGER.info("Recipe execution timeout. {}", executedPhase, e);
+            LOGGER.warn("Recipe execution timeout. {}", executedPhase, e);
             throw e;
         } catch (CloudbreakOrchestratorFailedException e) {
-            LOGGER.info("Orchestration error occurred during execution of recipes.", e);
+            LOGGER.warn("Orchestration error occurred during execution of recipes.", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.info("Unknown error occurred during execution of recipes.", e);
+            LOGGER.warn("Unknown error occurred during execution of recipes.", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         } finally {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
@@ -1597,7 +1597,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes",
                         executedPhase.value()), exitCriteriaModel, exitCriteria);
             } catch (Exception e) {
-                LOGGER.info("Error occurred during removing recipe roles.", e);
+                LOGGER.warn("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
             }
         }
@@ -1627,7 +1627,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Target<String> gatewayTargets = new HostList(Set.of(gatewayConfig.getHostname()));
             return saltStateService.stateSlsExists(sc, gatewayTargets, stateSlsName);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during phase sls check (with timeout settings: connect timeout {} ms, read timeout {} ms)", connectTimeoutMs,
+            LOGGER.warn("Error occurred during phase sls check (with timeout settings: connect timeout {} ms, read timeout {} ms)", connectTimeoutMs,
                     readTimeout, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
@@ -1718,7 +1718,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
+            LOGGER.warn("Error occurred during file distribute to gateway nodes", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1730,7 +1730,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltUploadRunner = saltRunner.runnerWithConfiguredErrorCount(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
+            LOGGER.warn("Error occurred during file distribute to gateway nodes", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1764,7 +1764,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt state upload", e);
+            LOGGER.warn("Error occurred during the salt state upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
         LOGGER.debug("Upload state finished");
@@ -1800,7 +1800,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     .min(LocalDate::compareTo)
                     .orElseThrow(() -> new IllegalStateException("No password expiry date found for user " + user));
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt state upload", e);
+            LOGGER.warn("Error occurred during the salt state upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1831,7 +1831,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             ApplyResponse response = saltStateService.applyStateSync(sc, stateParams.getState(), gatewayHost);
             return (List<Map<String, JsonNode>>) response.getResult();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
+            LOGGER.warn("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1910,7 +1910,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltJobRunBootstrapRunner.call();
             return getFstabInformation(sc, allHosts, nodesWithDiskDataInTargetGroup);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt resize operation", e);
+            LOGGER.warn("Error occurred during the salt resize operation", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1989,7 +1989,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt enableSeLinuxOnNodes operation", e);
+            LOGGER.warn("Error occurred during the salt enableSeLinuxOnNodes operation", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

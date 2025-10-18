@@ -32,7 +32,7 @@ public class PollPermanentExternalDatabaseStateTask extends AbstractPollTask<Ext
 
     @Override
     protected ExternalDatabaseStatus doCall() {
-        LOGGER.debug("Checking '{}' RDB instance status is in permanent status group.", dbStack);
+        LOGGER.debug("Checking '{}' RDB instance status is in permanent status group.", dbStack.getDatabaseServer().getServerId());
         try {
             return resourceConnector.getDatabaseServerStatus(getAuthenticatedContext(), dbStack);
         } catch (Exception ex) {

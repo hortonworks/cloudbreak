@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
@@ -109,6 +110,7 @@ class StartDatabaseServerHandlerTest {
         lenient().when(cloudConnector.parameters()).thenReturn(platformParameters);
         lenient().when(platformParameters.specialParameters())
                 .thenReturn(new SpecialParameters(Map.of(PlatformParametersConsts.DELAY_DATABASE_START, Boolean.FALSE)));
+        when(dbStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId("serverId").build());
     }
 
     @Test

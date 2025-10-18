@@ -66,28 +66,30 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
-            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());
+            DatabaseStack dbStack = request.getDbStack();
+            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, dbStack);
+            String serverId = dbStack.getDatabaseServer().getServerId();
             if (status != null && status.isTransient()) {
-                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbStack(), status);
-                status = pollAndGetDatabaseStatus(ac, request.getDbStack());
+                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", serverId, status);
+                status = pollAndGetDatabaseStatus(ac, dbStack);
             }
 
             if (status != STARTED) {
-                LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.",
-                        request.getDbStack(), status, STARTED);
-                connector.resources().startDatabaseServer(ac, request.getDbStack());
+                LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.", serverId, status, STARTED);
+                connector.resources().startDatabaseServer(ac, dbStack);
                 if (connector.parameters().specialParameters().getSpecialParameters().get(PlatformParametersConsts.DELAY_DATABASE_START)
                         && delayedExecutorServiceProvider.isPresent()) {
                     status = delayedExecutorServiceProvider.get()
-                            .runWithDelay(() -> pollAndGetDatabaseStatus(ac, request.getDbStack()), 1L, TimeUnit.MINUTES);
+                            .runWithDelay(() -> pollAndGetDatabaseStatus(ac, dbStack), 1L, TimeUnit.MINUTES);
                 } else {
-                    status = pollAndGetDatabaseStatus(ac, request.getDbStack());
+                    status = pollAndGetDatabaseStatus(ac, dbStack);
                 }
             } else {
-                LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STARTED);
+                LOGGER.debug("Database server '{}' is already in '{}' status.", serverId, STARTED);
             }
 
             if (STARTED != status) {
+                LOGGER.debug("Database server '{}' is in '{}' status. Unable to start.", serverId, status);
                 throw new DatabaseStartFailedException("Unable to start database server!");
             }
             RedbeamsEvent success = new StartDatabaseServerSuccess(request.getResourceId());

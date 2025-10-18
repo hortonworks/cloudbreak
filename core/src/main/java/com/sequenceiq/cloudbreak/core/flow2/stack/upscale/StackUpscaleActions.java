@@ -590,6 +590,7 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.warn("Stack upscale failed", payload.getException());
                 Map<String, Set<String>> hostgroupWithHostnames = (Map<String, Set<String>>) variables.getOrDefault(HOST_GROUP_WITH_HOSTNAMES, new HashMap<>());
                 Map<String, Integer> hostGroupWithAdjustment = (Map<String, Integer>) variables.getOrDefault(HOST_GROUP_WITH_ADJUSTMENT, new HashMap<>());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStack(), payload.getException());

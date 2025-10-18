@@ -63,6 +63,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
             ClusterManagerCommand upgradeCommand = optionalUpgradeCommand.get();
 
             if (upgradeCommand.getActive() || !upgradeCommand.getSuccess() && upgradeCommand.getRetryable()) {
+                LOGGER.debug("Upgrade command found with id: {}", upgradeCommand.getId());
                 return validateIfExistingRuntimeMatchesTargetRuntime(stackDto.getStack(), connector, targetImage);
             } else {
                 LOGGER.debug("There is no retryable upgradeCDH command, validation passed successfully");

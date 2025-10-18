@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -96,6 +97,7 @@ class StopDatabaseServerHandlerTest {
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(dbStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId("serverId").build());
     }
 
     @Test

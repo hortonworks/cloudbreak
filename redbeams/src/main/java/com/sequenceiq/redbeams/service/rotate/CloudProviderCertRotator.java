@@ -107,11 +107,10 @@ public class CloudProviderCertRotator {
                     LOGGER.warn("SSL certificate entry not found");
                 }
             } else {
-                LOGGER.debug("Database server {} must be in started status.", dbStack);
+                LOGGER.debug("Database server {} must be in started status.", dbStack.getName());
             }
         } else {
-            LOGGER.info(
-                    "Unsupported cloud platform \"{}\": Skipping provider side SSL certificate rotation for database stack {}", cloudPlatform, cloudContext);
+            LOGGER.info("Unsupported cloud platform {}: Skipping provider side SSL certificate rotation for database stack {}", cloudPlatform, cloudContext);
         }
     }
 

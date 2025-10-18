@@ -12,7 +12,7 @@ public class SslCertRotateDatabaseRedbeamsContext extends RedbeamsContext {
     private final boolean onlyCertificateUpdate;
 
     public SslCertRotateDatabaseRedbeamsContext(FlowParameters flowParameters, CloudContext cloudContext, CloudCredential cloudCredential,
-        DatabaseStack databaseStack, DBStack dbStack, boolean onlyCertificateUpdate) {
+            DatabaseStack databaseStack, DBStack dbStack, boolean onlyCertificateUpdate) {
         super(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
         this.onlyCertificateUpdate = onlyCertificateUpdate;
     }
