@@ -24,6 +24,7 @@ import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterRemoteDataContextProviderTest {
@@ -94,7 +95,7 @@ class ClassicClusterRemoteDataContextProviderTest {
         doThrow(JsonProcessingException.class).when(underTest).convert(apiRemoteDataContext);
 
         assertThatThrownBy(() -> underTest.getRemoteDataContext(cluster))
-                .isInstanceOf(RemoteEnvironmentException.class)
+                .isInstanceOf(OnPremCMApiException.class)
                 .hasNoCause()
                 .hasMessage("Failed to process remote data context. Please contact Cloudera support to get this resolved.");
     }

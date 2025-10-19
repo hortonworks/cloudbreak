@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.exception.mapper;
+package com.sequenceiq.remoteenvironment.controller.mapper;
 
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.Provider;

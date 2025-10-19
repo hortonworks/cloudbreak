@@ -24,8 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
@@ -197,7 +197,7 @@ class RemoteEnvironmentServiceTest {
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
 
-        RemoteEnvironmentException exception = assertThrows(RemoteEnvironmentException.class, () -> doAs(USER_CRN, () -> underTest.describeV1(request)));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.describeV1(request)));
 
         assertEquals("Entitlement CDP_HYBRID_CLOUD is required for this operation", exception.getMessage());
     }
@@ -222,7 +222,7 @@ class RemoteEnvironmentServiceTest {
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
 
-        RemoteEnvironmentException exception = assertThrows(RemoteEnvironmentException.class, () -> doAs(USER_CRN, () -> underTest.describeV2(request)));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> doAs(USER_CRN, () -> underTest.describeV2(request)));
 
         assertEquals("Entitlement CDP_HYBRID_CLOUD is required for this operation", exception.getMessage());
     }

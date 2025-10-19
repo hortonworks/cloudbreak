@@ -28,6 +28,7 @@ import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterDatalakeServicesProviderTest {
@@ -133,7 +134,7 @@ class ClassicClusterDatalakeServicesProviderTest {
                 .thenReturn(new File("invalid-path"));
 
         assertThatThrownBy(() -> underTest.getDatalakeServices(cluster))
-                .isInstanceOf(RemoteEnvironmentException.class)
+                .isInstanceOf(OnPremCMApiException.class)
                 .hasNoCause()
                 .hasMessage("Failed to read HDFS client config zip downloaded from Cloudera Manager. Please contact Cloudera support to get this resolved.");
     }
@@ -144,7 +145,7 @@ class ClassicClusterDatalakeServicesProviderTest {
                 .thenReturn(new ClassPathResource("cmclientconfig/hdfs-invalid-site-xml.zip").getFile());
 
         assertThatThrownBy(() -> underTest.getDatalakeServices(cluster))
-                .isInstanceOf(RemoteEnvironmentException.class)
+                .isInstanceOf(OnPremCMApiException.class)
                 .hasNoCause()
                 .hasMessage("Failed to parse XML configuration received from Cloudera Manager. Please contact Cloudera support to get this resolved.");
     }

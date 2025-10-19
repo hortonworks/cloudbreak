@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @Component
 class ClassicClusterDescribeService {
@@ -265,11 +265,11 @@ class ClassicClusterDescribeService {
         } catch (ApiException e) {
             String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message, e);
+            throw new OnPremCMApiException(message + ": " + e.getMessage(), e);
         } catch (ExecutionException | InterruptedException e) {
             String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message);
+            throw new OnPremCMApiException(message);
         }
     }
 

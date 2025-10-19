@@ -15,7 +15,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @Component
 class ClassicClusterRootCertificateProvider {
@@ -39,11 +39,11 @@ class ClassicClusterRootCertificateProvider {
         } catch (ApiException e) {
             String message = "Failed to get truststore from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message, e);
+            throw new OnPremCMApiException(message + ": " + e.getMessage(), e);
         } catch (IOException e) {
             String message = "Failed to read truststore received from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message);
+            throw new OnPremCMApiException(message);
         }
     }
 

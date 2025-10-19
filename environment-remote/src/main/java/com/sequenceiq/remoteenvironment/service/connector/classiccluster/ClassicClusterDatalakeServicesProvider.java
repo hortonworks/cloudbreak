@@ -38,6 +38,7 @@ import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @Component
 class ClassicClusterDatalakeServicesProvider {
@@ -91,7 +92,7 @@ class ClassicClusterDatalakeServicesProvider {
         } catch (IOException e) {
             String message = "Failed to read HDFS client config zip downloaded from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message + ". Please contact Cloudera support to get this resolved.");
+            throw new OnPremCMApiException(message + ". Please contact Cloudera support to get this resolved.");
         }
     }
 
@@ -109,7 +110,7 @@ class ClassicClusterDatalakeServicesProvider {
         } catch (ApiException e) {
             String message = "Failed to get HDFS client config from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message, e);
+            throw new OnPremCMApiException(message, e);
         }
     }
 
@@ -156,7 +157,7 @@ class ClassicClusterDatalakeServicesProvider {
         } catch (Exception e) {
             String message = "Failed to parse XML configuration received from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message + ". Please contact Cloudera support to get this resolved.");
+            throw new OnPremCMApiException(message + ". Please contact Cloudera support to get this resolved.");
         }
     }
 

@@ -25,9 +25,9 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
@@ -144,7 +144,7 @@ public class RemoteEnvironmentService {
 
     private void throwExceptionIfNotEntitled(String accountId) {
         if (!entitlementService.hybridCloudEnabled(accountId)) {
-            throw new RemoteEnvironmentException(String.format("Entitlement %s is required for this operation", CDP_HYBRID_CLOUD));
+            throw new BadRequestException(String.format("Entitlement %s is required for this operation", CDP_HYBRID_CLOUD));
         }
     }
 

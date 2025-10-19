@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @Component
 class ClassicClusterClouderaManagerApiClientProvider {
@@ -33,7 +33,7 @@ class ClassicClusterClouderaManagerApiClientProvider {
         try {
             return clouderaManagerApiClientProvider.getClouderaManagerRootClient(getHttpClientConfig(cluster), null, null, null);
         } catch (ClouderaManagerClientInitException e) {
-            throw new RemoteEnvironmentException("Failed to initialize Cloudera Manager root client for " + cluster.getManagerUri(), e);
+            throw new OnPremCMApiException("Failed to initialize Cloudera Manager root client for " + cluster.getManagerUri(), e, 0);
         }
     }
 
@@ -41,7 +41,7 @@ class ClassicClusterClouderaManagerApiClientProvider {
         try {
             return clouderaManagerApiClientProvider.getClouderaManagerClient(getHttpClientConfig(cluster), null, null, null, API_V_51);
         } catch (ClouderaManagerClientInitException e) {
-            throw new RemoteEnvironmentException("Failed to initialize Cloudera Manager v51 client for " + cluster.getManagerUri(), e);
+            throw new OnPremCMApiException("Failed to initialize Cloudera Manager v51 client for " + cluster.getManagerUri(), e, 0);
         }
     }
 

@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterDescribeServiceTest {
@@ -266,7 +266,7 @@ class ClassicClusterDescribeServiceTest {
                 .build();
         when(parcelsResourceApi.readParcels(cluster.getName(), "SUMMARY")).thenThrow(new ApiException());
 
-        assertThrows(RemoteEnvironmentException.class, () -> underTest.describe(cluster));
+        assertThrows(OnPremCMApiException.class, () -> underTest.describe(cluster));
     }
 
     private ApiRemoteDataContext createRemoteDataContext() {

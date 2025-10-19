@@ -25,7 +25,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterRootCertificateProviderTest {
@@ -73,9 +73,9 @@ class ClassicClusterRootCertificateProviderTest {
         when(certManagerResourceApi.getTruststore("PEM")).thenThrow(cause);
 
         assertThatThrownBy(() -> underTest.getRootCertificate(cluster))
-                .isInstanceOf(RemoteEnvironmentException.class)
+                .isInstanceOf(OnPremCMApiException.class)
                 .hasCause(cause)
-                .hasMessage("Failed to get truststore from Cloudera Manager");
+                .hasMessage("Failed to get truststore from Cloudera Manager: 500");
     }
 
     @Test
@@ -86,7 +86,7 @@ class ClassicClusterRootCertificateProviderTest {
         doThrow(IOException.class).when(underTest).getRootCertificateFromFile(pem);
 
         assertThatThrownBy(() -> underTest.getRootCertificate(cluster))
-                .isInstanceOf(RemoteEnvironmentException.class)
+                .isInstanceOf(OnPremCMApiException.class)
                 .hasNoCause()
                 .hasMessage("Failed to read truststore received from Cloudera Manager");
     }

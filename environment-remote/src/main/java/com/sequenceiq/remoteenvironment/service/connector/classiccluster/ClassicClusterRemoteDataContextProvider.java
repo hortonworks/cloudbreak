@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
 @Component
 class ClassicClusterRemoteDataContextProvider {
@@ -47,10 +47,10 @@ class ClassicClusterRemoteDataContextProvider {
         } catch (ApiException e) {
             String message = "Failed to get remote data context from Cloudera Manager";
             LOGGER.error(message, e);
-            throw new RemoteEnvironmentException(message, e);
+            throw new OnPremCMApiException(message, e);
         } catch (JsonProcessingException e) {
             LOGGER.error("Json processing failed, thus we cannot query remote data context", e);
-            throw new RemoteEnvironmentException("Failed to process remote data context. Please contact Cloudera support to get this resolved.");
+            throw new OnPremCMApiException("Failed to process remote data context. Please contact Cloudera support to get this resolved.");
         }
     }
 
