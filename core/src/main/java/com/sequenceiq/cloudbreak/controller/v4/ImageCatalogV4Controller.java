@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.common.model.Architecture;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -291,9 +292,10 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime, boolean govCloud) throws Exception {
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime, boolean govCloud, String architecture)
+            throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type,
-                platformStringTransformer.getPlatformStringForImageCatalog(provider, govCloud), runtime);
+                platformStringTransformer.getPlatformStringForImageCatalog(provider, govCloud), runtime, Architecture.fromStringWithFallback(architecture));
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 

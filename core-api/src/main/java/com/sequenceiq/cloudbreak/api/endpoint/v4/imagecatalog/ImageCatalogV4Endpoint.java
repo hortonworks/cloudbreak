@@ -213,7 +213,8 @@ public interface ImageCatalogV4Endpoint {
             @PathParam("type") String type,
             @PathParam("provider") String provider,
             @PathParam("runtime") String runtime,
-            @PathParam("govCloud") boolean govCloud) throws Exception;
+            @PathParam("govCloud") boolean govCloud,
+            @QueryParam("architecture") String architecture) throws Exception;
 
     @GET
     @Path("image/type/{type}/provider/{provider}")

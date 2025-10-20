@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.common.api.type.ImageType;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class DefaultImageCatalogServiceTest {
@@ -84,22 +85,33 @@ public class DefaultImageCatalogServiceTest {
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNonFreeIpaImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws")));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws")));
+        assertEquals("Runtime is required in case of 'RUNTIME' image type", badRequestException.getMessage());
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNotSupportedImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws")));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws")));
+        assertEquals("Type 'UNKNOWN' is not supported.", badRequestException.getMessage());
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithRuntimeThrowsBadRequestInCaseOfFreeIpaImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), "7.2.10"));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), "7.2.10",
+                Architecture.X86_64));
+        assertEquals("Runtime is not supported in case of 'FREEIPA' image type", badRequestException.getMessage());
     }
 
     @Test
-    public void testGetImageFromDefaultCatalogWithRuntimeThrowsBadRequestInCaseOfNotSupportedImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws"), "7.2.10"));
+    public void testGetImageFromDefaultCatalogWithRuntimeThrowsBadRequestInCaseOfNotSupportedImageType()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws"), "7.2.10",
+                Architecture.X86_64));
+        assertEquals("Image type 'UNKNOWN' is not supported.", badRequestException.getMessage());
     }
 
     @Test
@@ -158,10 +170,10 @@ public class DefaultImageCatalogServiceTest {
         ArgumentCaptor<ImageFilter> imageFilterArgumentCaptor = ArgumentCaptor.forClass(ImageFilter.class);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterArgumentCaptor.capture())).thenReturn(mock(StatedImage.class));
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws"), "7.2.10");
-
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws"), "7.2.10", Architecture.ARM64);
         assertNotNull(actual);
-        assertEquals(imageFilterArgumentCaptor.getValue().getClusterVersion(), "7.2.10");
+        assertEquals("7.2.10", imageFilterArgumentCaptor.getValue().getClusterVersion());
+        assertEquals(Architecture.ARM64, imageFilterArgumentCaptor.getValue().getArchitecture());
         assertTrue(imageFilterArgumentCaptor.getValue().getPlatforms().stream().map(e -> e.nameToLowerCase()).collect(Collectors.toList())
                 .contains("aws"));
     }
