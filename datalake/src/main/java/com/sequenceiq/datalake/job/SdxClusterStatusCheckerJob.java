@@ -70,7 +70,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     private void syncSdxStatus(JobExecutionContext context) {
         getCluster().ifPresent(sdx -> {
             SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdx);
-            if (DatalakeStatusEnum.STACK_DELETED.equals(sdxStatus.getStatus())) {
+            if (DatalakeStatusEnum.STACK_DELETED.equals(sdxStatus.getStatus()) ||
+                    (DatalakeStatusEnum.DELETED.equals(sdxStatus.getStatus()) && sdx.getDeleted() != null)) {
                 LOGGER.info("Sdx status is {}. Unscheduling sdx sync job.", sdxStatus.getStatus());
                 unscheduleSync(sdx);
             } else {
