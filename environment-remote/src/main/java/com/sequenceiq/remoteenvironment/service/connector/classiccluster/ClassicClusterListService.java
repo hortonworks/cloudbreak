@@ -2,7 +2,6 @@ package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
@@ -23,13 +21,7 @@ class ClassicClusterListService {
 
     private static final String PRIVATE_CLOUD = "PRIVATE_CLOUD";
 
-    private static final String ENTITY_STATUS = "entityStatus";
-
-    private static final String GOOD_HEALTH = "GOOD_HEALTH";
-
     private static final String AVAILABLE = "AVAILABLE";
-
-    private static final String UNKNOWN = "UNKNOWN";
 
     @Inject
     private RemoteClusterServiceClient remoteClusterServiceClient;
@@ -54,18 +46,9 @@ class ClassicClusterListService {
     }
 
     private String getStatus(OnPremisesApiProto.Cluster cluster) {
-        Map<String, Object> clusterDataProperties = new Json(cluster.getData().getProperties()).getMap();
-        return convertStatus(clusterDataProperties.get(ENTITY_STATUS));
-    }
-
-    private String convertStatus(Object status) {
-        String convertedStatus;
-        if (status instanceof String statusStr) {
-            convertedStatus = GOOD_HEALTH.equals(statusStr) ? AVAILABLE : statusStr;
-        } else {
-            convertedStatus = UNKNOWN;
-        }
-        LOGGER.debug("Cluster status converted from {} to {}", status, convertedStatus);
+        OnPremisesApiProto.EntityStatus.Value entityStatus = cluster.getData().getClusterDetails().getEntityStatus();
+        String convertedStatus = OnPremisesApiProto.EntityStatus.Value.GOOD_HEALTH.equals(entityStatus) ? AVAILABLE : entityStatus.toString();
+        LOGGER.debug("Cluster status converted from {} to {}", entityStatus, convertedStatus);
         return convertedStatus;
     }
 }
