@@ -77,13 +77,9 @@ public class ClusterPublicEndpointManagementService {
 
     public void start(StackDtoDelegate stack) {
         if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(stack.getStack())) {
-            try {
-                LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
-                gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
-                dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
-            } catch (Exception ex) {
-                LOGGER.warn("Failed to update DNS entries of cluster in Public Endpoint Management service:", ex);
-            }
+            LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
+            gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
+            dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
         }
     }
 

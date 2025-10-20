@@ -34,6 +34,8 @@ public class ClusterStartFlowConfig extends StackStatusFinalizerAbstractFlowConf
 
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Builder<ClusterStartState, ClusterStartEvent>()
+                    .defaultFailureEvent(CLUSTER_START_FAILURE_EVENT)
+
                     .from(INIT_STATE).to(CLUSTER_DB_CERT_ROTATION_STATE)
                     .event(CLUSTER_START_EVENT)
                     .noFailureEvent()
@@ -48,7 +50,7 @@ public class ClusterStartFlowConfig extends StackStatusFinalizerAbstractFlowConf
 
                     .from(UPDATING_DNS_IN_PEM_STATE).to(CLUSTER_STARTING_STATE)
                     .event(DNS_UPDATE_FINISHED_EVENT)
-                    .noFailureEvent()
+                    .defaultFailureEvent()
 
                     .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_FINISHED_STATE)
                     .event(CLUSTER_START_FINISHED_EVENT)

@@ -128,16 +128,9 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         } catch (PemDnsEntryCreateOrUpdateException e) {
             String message = String.format("Failed to create DNS entry: '%s'", e.getMessage());
             LOGGER.warn(message, e);
-            rollBackDnsEntries(finishedIpsByHostnames, accountId, environment);
+            LOGGER.info("Previously created or updated DNS entries for Hostnames: '{}'", finishedIpsByHostnames);
             throw new CloudbreakServiceException(message, e);
         }
-    }
-
-    private void rollBackDnsEntries(Map<String, String> finishedIpsByHostnames, String accountId, DetailedEnvironmentResponse environment) {
-        LOGGER.info("Rolling back, de-registering previously created or updated DNS entries for Hostnames: '{}'",
-                String.join(",", finishedIpsByHostnames.keySet()));
-        finishedIpsByHostnames.forEach((key, value) -> getDnsManagementService().deleteDnsEntryWithIp(accountId, key, environment.getName(),
-                false, List.of(value)));
     }
 
     private Map<String, String> doDeregister(Map<String, String> ipsByHostname, String environmentCrn) {

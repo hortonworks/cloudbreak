@@ -164,7 +164,7 @@ class BaseDnsEntryServiceTest {
             Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
         });
 
-        verify(dnsManagementService, times(2)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
+        verify(dnsManagementService, times(0)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
     }
 
     @Test
@@ -216,7 +216,7 @@ class BaseDnsEntryServiceTest {
             Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
         });
 
-        verify(dnsManagementService, times(1)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
+        verify(dnsManagementService, times(0)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
     }
 
     @Test
