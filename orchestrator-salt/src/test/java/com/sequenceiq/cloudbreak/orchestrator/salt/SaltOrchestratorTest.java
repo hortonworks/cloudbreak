@@ -187,6 +187,8 @@ class SaltOrchestratorTest {
 
         lenient().when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyInt()))
+                .thenReturn(callable);
         lenient().when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
         lenient().when(saltRunner.runnerWithCalculatedErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class),
@@ -1088,7 +1090,7 @@ class SaltOrchestratorTest {
         // Then
         verify(saltService).createSaltConnector(gatewayConfig);
         verify(saltCommandRunner, times(3)).runModifyGrainCommand(eq(saltConnector), any(ModifyGrainBase.class), eq(exitCriteriaModel), eq(exitCriteria));
-        verify(saltRunner).runnerWithConfiguredErrorCount(any(SaltJobIdTracker.class), eq(exitCriteria), eq(exitCriteriaModel));
+        verify(saltRunner).runner(any(SaltJobIdTracker.class), eq(exitCriteria), eq(exitCriteriaModel), anyInt(), anyInt());
         verify(callable).call();
     }
 

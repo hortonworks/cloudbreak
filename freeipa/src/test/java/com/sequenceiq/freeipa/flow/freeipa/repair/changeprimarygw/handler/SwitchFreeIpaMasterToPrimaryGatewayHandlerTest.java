@@ -129,12 +129,9 @@ class SwitchFreeIpaMasterToPrimaryGatewayHandlerTest {
 
         Selectable result = underTest.doAccept(handlerEvent);
 
-        assertInstanceOf(ChangePrimaryGatewayFailureEvent.class, result);
-        ChangePrimaryGatewayFailureEvent failureEvent = (ChangePrimaryGatewayFailureEvent) result;
-        assertEquals(STACK_ID, failureEvent.getResourceId());
-        assertEquals("Switching FreeIPA master to Primary Gateway", failureEvent.getFailedPhase());
-        assertEquals(Set.of(), failureEvent.getSuccess());
-        assertEquals(Map.of(), failureEvent.getFailureDetails());
-        assertEquals(orchestratorException, failureEvent.getException());
+        assertInstanceOf(StackEvent.class, result);
+        StackEvent stackEvent = (StackEvent) result;
+        assertEquals(CHANGE_PRIMARY_GATEWAY_SWITCH_FREEIPA_MASTER_TO_PRIMARY_GATEWAY_FINISHED_EVENT.event(), stackEvent.selector());
+        assertEquals(STACK_ID, stackEvent.getResourceId());
     }
 }
