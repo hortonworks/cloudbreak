@@ -28,10 +28,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> {
+public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent>
+        implements RetryableFlowConfiguration<ChangePrimaryGatewayFlowEvent> {
     private static final List<Transition<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent>> TRANSITIONS =
             new Transition.Builder<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -100,5 +102,10 @@ public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstract
     @Override
     public String getDisplayName() {
         return "Change FreeIPA Primary Gateway";
+    }
+
+    @Override
+    public ChangePrimaryGatewayFlowEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }
