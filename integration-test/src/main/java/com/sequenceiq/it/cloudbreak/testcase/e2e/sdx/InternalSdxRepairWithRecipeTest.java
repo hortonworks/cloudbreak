@@ -47,6 +47,8 @@ import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
@@ -105,6 +107,9 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
         testContext
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
@@ -132,6 +137,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
+                .withDatabase(sdxDatabaseRequest)
                 .withAutoTls()
                 .withStackRequest(key(cluster), key(stack))
                 .withTelemetry(TELEMETRY)
