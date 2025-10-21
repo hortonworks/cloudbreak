@@ -376,4 +376,10 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn String databaseCrn) {
         return retryService.getRetryableFlows(databaseCrn);
     }
+
+    @Override
+    @InternalOnly
+    public void syncOutdatedSecrets(@ResourceCrn String databaseServerCrn) {
+        redbeamsRotationService.syncOutdatedSecrets(databaseServerCrn);
+    }
 }

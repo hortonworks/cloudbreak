@@ -828,6 +828,9 @@ existing-stack-patcher:
   intervalInHours: 24
   maxInitialStartDelayInHours: 12
   patch-configs:
+    update-outdated-vault-secrets:
+      intervalMinutes: 5
+      enabled: true
     unbound-restart:
       enabled: false
     logging-agent-auto-restart:

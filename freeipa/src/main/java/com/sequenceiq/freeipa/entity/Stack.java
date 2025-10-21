@@ -370,6 +370,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         return databusCredential.getRaw();
     }
 
+    @SecretGetter(marker = SecretMarker.DBUS_CREDENTIAL)
     public Secret getDatabusCredentialSecret() {
         return databusCredential;
     }
@@ -378,6 +379,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.databusCredential = new Secret(databusCredential);
     }
 
+    @SecretSetter(marker = SecretMarker.DBUS_CREDENTIAL)
     public void setDatabusCredentialSecret(Secret databusCredential) {
         this.databusCredential = databusCredential;
     }
