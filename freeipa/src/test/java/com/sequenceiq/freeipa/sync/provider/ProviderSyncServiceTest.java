@@ -2,8 +2,7 @@ package com.sequenceiq.freeipa.sync.provider;
 
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -121,8 +120,7 @@ class ProviderSyncServiceTest {
     void testSyncResourcesHandlesException() {
         when(resourceService.getAllCloudResource(anyLong())).thenThrow(new CloudbreakServiceException("Test Exception"));
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stack));
-        assertEquals("Test Exception", exception.getMessage());
+        assertDoesNotThrow(() -> underTest.syncResources(stack));
         verify(resourceNotifier, never()).notifyUpdates(any(), any());
     }
 

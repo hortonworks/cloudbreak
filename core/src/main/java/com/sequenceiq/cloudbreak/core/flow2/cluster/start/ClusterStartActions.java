@@ -129,7 +129,7 @@ public class ClusterStartActions {
                 meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STARTED);
                 meteringService.scheduleSync(context.getStackId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStackId());
-                providerSyncJobService.schedule(context.getStackId());
+                providerSyncJobService.schedule(context.getStack());
                 sendEvent(context);
             }
 

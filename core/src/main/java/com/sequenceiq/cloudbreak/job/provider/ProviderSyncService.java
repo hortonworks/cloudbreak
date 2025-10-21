@@ -63,25 +63,29 @@ public class ProviderSyncService {
     private StackUpdater stackUpdater;
 
     public void syncResources(StackDto stack) {
-        CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
-        CloudCredential cloudCredential = credentialClientService.getCloudCredential(stack.getEnvironmentCrn());
+        try {
+            CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
+            CloudCredential cloudCredential = credentialClientService.getCloudCredential(stack.getEnvironmentCrn());
 
-        List<CloudResource> cloudResources = getCloudResources(stack);
-        LOGGER.debug("Syncing resources for stack: {}", cloudResources.stream()
-                .map(CloudResource::getDetailedInfo)
-                .toList());
+            List<CloudResource> cloudResources = getCloudResources(stack);
+            LOGGER.debug("Syncing resources for stack: {}", cloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
 
-        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-        List<CloudResourceStatus> resourceStatusList = connector.resources().checkForSyncer(ac, cloudResources);
-        List<CloudResource> syncedCloudResources = resourceStatusList.stream()
-                .map(CloudResourceStatus::getCloudResource)
-                .toList();
-        LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
-                .map(CloudResource::getDetailedInfo)
-                .toList());
-        resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
-        setProviderSyncStatus(stack, syncedCloudResources, cloudResources);
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            List<CloudResourceStatus> resourceStatusList = connector.resources().checkForSyncer(ac, cloudResources);
+            List<CloudResource> syncedCloudResources = resourceStatusList.stream()
+                    .map(CloudResourceStatus::getCloudResource)
+                    .toList();
+            LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
+            resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
+            setProviderSyncStatus(stack, syncedCloudResources, cloudResources);
+        } catch (Exception e) {
+            LOGGER.error("Error during provider sync, skipping and logging it: ", e);
+        }
     }
 
     private void setProviderSyncStatus(StackDto stack, List<CloudResource> syncedCloudResources, List<CloudResource> cloudResources) {
