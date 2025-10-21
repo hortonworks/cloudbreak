@@ -449,6 +449,37 @@ public final class OnPremisesApiGrpc {
     return getExtractSetupScriptMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> getExtractCertificateRefreshScriptMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ExtractCertificateRefreshScript",
+      requestType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.class,
+      responseType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> getExtractCertificateRefreshScriptMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> getExtractCertificateRefreshScriptMethod;
+    if ((getExtractCertificateRefreshScriptMethod = OnPremisesApiGrpc.getExtractCertificateRefreshScriptMethod) == null) {
+      synchronized (OnPremisesApiGrpc.class) {
+        if ((getExtractCertificateRefreshScriptMethod = OnPremisesApiGrpc.getExtractCertificateRefreshScriptMethod) == null) {
+          OnPremisesApiGrpc.getExtractCertificateRefreshScriptMethod = getExtractCertificateRefreshScriptMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ExtractCertificateRefreshScript"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new OnPremisesApiMethodDescriptorSupplier("ExtractCertificateRefreshScript"))
+              .build();
+        }
+      }
+    }
+    return getExtractCertificateRefreshScriptMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterStateRequest,
       com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterStateResponse> getUpdateClusterStateMethod;
 
@@ -750,6 +781,16 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+     * </pre>
+     */
+    default void extractCertificateRefreshScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getExtractCertificateRefreshScriptMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
      * </pre>
      */
@@ -968,6 +1009,17 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+     * </pre>
+     */
+    public void extractCertificateRefreshScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getExtractCertificateRefreshScriptMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
      * </pre>
      */
@@ -1161,6 +1213,16 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse extractCertificateRefreshScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getExtractCertificateRefreshScriptMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
      * </pre>
      */
@@ -1347,6 +1409,16 @@ public final class OnPremisesApiGrpc {
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse extractSetupScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getExtractSetupScriptMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse extractCertificateRefreshScript(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getExtractCertificateRefreshScriptMethod(), getCallOptions(), request);
     }
 
     /**
@@ -1555,6 +1627,17 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse> extractCertificateRefreshScript(
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getExtractCertificateRefreshScriptMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
      * </pre>
      */
@@ -1601,9 +1684,10 @@ public final class OnPremisesApiGrpc {
   private static final int METHODID_DESCRIBE_PARTIALLY_REGISTERED_CLUSTER = 11;
   private static final int METHODID_REGISTER_AGENT = 12;
   private static final int METHODID_EXTRACT_SETUP_SCRIPT = 13;
-  private static final int METHODID_UPDATE_CLUSTER_STATE = 14;
-  private static final int METHODID_CHECK_CLUSTER_CONNECTIVITY = 15;
-  private static final int METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER = 16;
+  private static final int METHODID_EXTRACT_CERTIFICATE_REFRESH_SCRIPT = 14;
+  private static final int METHODID_UPDATE_CLUSTER_STATE = 15;
+  private static final int METHODID_CHECK_CLUSTER_CONNECTIVITY = 16;
+  private static final int METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER = 17;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1677,6 +1761,10 @@ public final class OnPremisesApiGrpc {
         case METHODID_EXTRACT_SETUP_SCRIPT:
           serviceImpl.extractSetupScript((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse>) responseObserver);
+          break;
+        case METHODID_EXTRACT_CERTIFICATE_REFRESH_SCRIPT:
+          serviceImpl.extractCertificateRefreshScript((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse>) responseObserver);
           break;
         case METHODID_UPDATE_CLUSTER_STATE:
           serviceImpl.updateClusterState((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.UpdateClusterStateRequest) request,
@@ -1807,6 +1895,13 @@ public final class OnPremisesApiGrpc {
               com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse>(
                 service, METHODID_EXTRACT_SETUP_SCRIPT)))
         .addMethod(
+          getExtractCertificateRefreshScriptMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest,
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse>(
+                service, METHODID_EXTRACT_CERTIFICATE_REFRESH_SCRIPT)))
+        .addMethod(
           getUpdateClusterStateMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
@@ -1889,6 +1984,7 @@ public final class OnPremisesApiGrpc {
               .addMethod(getDescribePartiallyRegisteredClusterMethod())
               .addMethod(getRegisterAgentMethod())
               .addMethod(getExtractSetupScriptMethod())
+              .addMethod(getExtractCertificateRefreshScriptMethod())
               .addMethod(getUpdateClusterStateMethod())
               .addMethod(getCheckClusterConnectivityMethod())
               .addMethod(getDeletePartiallyRegisteredClusterMethod())

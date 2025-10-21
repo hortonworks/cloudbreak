@@ -6992,6 +6992,16 @@ public final class OnPremisesApiProto {
      * @return The id.
      */
     long getId();
+
+    /**
+     * <pre>
+     * Whether to show On Premise environment details.
+     * </pre>
+     *
+     * <code>bool showOnPremiseEnvironmentDetails = 2;</code>
+     * @return The showOnPremiseEnvironmentDetails.
+     */
+    boolean getShowOnPremiseEnvironmentDetails();
   }
   /**
    * <pre>
@@ -7095,6 +7105,21 @@ public final class OnPremisesApiProto {
       return id_;
     }
 
+    public static final int SHOWONPREMISEENVIRONMENTDETAILS_FIELD_NUMBER = 2;
+    private boolean showOnPremiseEnvironmentDetails_ = false;
+    /**
+     * <pre>
+     * Whether to show On Premise environment details.
+     * </pre>
+     *
+     * <code>bool showOnPremiseEnvironmentDetails = 2;</code>
+     * @return The showOnPremiseEnvironmentDetails.
+     */
+    @java.lang.Override
+    public boolean getShowOnPremiseEnvironmentDetails() {
+      return showOnPremiseEnvironmentDetails_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7112,6 +7137,9 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
       }
+      if (showOnPremiseEnvironmentDetails_ != false) {
+        output.writeBool(2, showOnPremiseEnvironmentDetails_);
+      }
       if (id_ != 0L) {
         output.writeInt64(100, id_);
       }
@@ -7126,6 +7154,10 @@ public final class OnPremisesApiProto {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
+      }
+      if (showOnPremiseEnvironmentDetails_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, showOnPremiseEnvironmentDetails_);
       }
       if (id_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -7150,6 +7182,8 @@ public final class OnPremisesApiProto {
           .equals(other.getClusterCrn())) return false;
       if (getId()
           != other.getId()) return false;
+      if (getShowOnPremiseEnvironmentDetails()
+          != other.getShowOnPremiseEnvironmentDetails()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -7166,6 +7200,9 @@ public final class OnPremisesApiProto {
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getId());
+      hash = (37 * hash) + SHOWONPREMISEENVIRONMENTDETAILS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowOnPremiseEnvironmentDetails());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7303,6 +7340,7 @@ public final class OnPremisesApiProto {
         bitField0_ = 0;
         clusterCrn_ = "";
         id_ = 0L;
+        showOnPremiseEnvironmentDetails_ = false;
         return this;
       }
 
@@ -7341,6 +7379,9 @@ public final class OnPremisesApiProto {
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.showOnPremiseEnvironmentDetails_ = showOnPremiseEnvironmentDetails_;
         }
       }
 
@@ -7396,6 +7437,9 @@ public final class OnPremisesApiProto {
         if (other.getId() != 0L) {
           setId(other.getId());
         }
+        if (other.getShowOnPremiseEnvironmentDetails() != false) {
+          setShowOnPremiseEnvironmentDetails(other.getShowOnPremiseEnvironmentDetails());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -7427,6 +7471,11 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 16: {
+                showOnPremiseEnvironmentDetails_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 16
               case 800: {
                 id_ = input.readInt64();
                 bitField0_ |= 0x00000002;
@@ -7581,6 +7630,50 @@ public final class OnPremisesApiProto {
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000002);
         id_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean showOnPremiseEnvironmentDetails_ ;
+      /**
+       * <pre>
+       * Whether to show On Premise environment details.
+       * </pre>
+       *
+       * <code>bool showOnPremiseEnvironmentDetails = 2;</code>
+       * @return The showOnPremiseEnvironmentDetails.
+       */
+      @java.lang.Override
+      public boolean getShowOnPremiseEnvironmentDetails() {
+        return showOnPremiseEnvironmentDetails_;
+      }
+      /**
+       * <pre>
+       * Whether to show On Premise environment details.
+       * </pre>
+       *
+       * <code>bool showOnPremiseEnvironmentDetails = 2;</code>
+       * @param value The showOnPremiseEnvironmentDetails to set.
+       * @return This builder for chaining.
+       */
+      public Builder setShowOnPremiseEnvironmentDetails(boolean value) {
+
+        showOnPremiseEnvironmentDetails_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether to show On Premise environment details.
+       * </pre>
+       *
+       * <code>bool showOnPremiseEnvironmentDetails = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearShowOnPremiseEnvironmentDetails() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        showOnPremiseEnvironmentDetails_ = false;
         onChanged();
         return this;
       }
@@ -20178,6 +20271,1100 @@ public final class OnPremisesApiProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ExtractCertificateRefreshScriptRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ExtractCertificateRefreshScriptRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Request object for extract certificate refresh script
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ExtractCertificateRefreshScriptRequest}
+   */
+  public static final class ExtractCertificateRefreshScriptRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ExtractCertificateRefreshScriptRequest)
+      ExtractCertificateRefreshScriptRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ExtractCertificateRefreshScriptRequest.newBuilder() to construct.
+    private ExtractCertificateRefreshScriptRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ExtractCertificateRefreshScriptRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ExtractCertificateRefreshScriptRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for extract certificate refresh script
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ExtractCertificateRefreshScriptRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ExtractCertificateRefreshScriptRequest)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ExtractCertificateRefreshScriptRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ExtractCertificateRefreshScriptRequest)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ExtractCertificateRefreshScriptRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ExtractCertificateRefreshScriptRequest>() {
+      @java.lang.Override
+      public ExtractCertificateRefreshScriptRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ExtractCertificateRefreshScriptRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExtractCertificateRefreshScriptRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ExtractCertificateRefreshScriptResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ExtractCertificateRefreshScriptResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Raw zip file bytes containing the refresh script and certificate
+     * </pre>
+     *
+     * <code>bytes refreshPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The refreshPackage.
+     */
+    com.google.protobuf.ByteString getRefreshPackage();
+
+    /**
+     * <pre>
+     * Package filename
+     * </pre>
+     *
+     * <code>string filename = 2;</code>
+     * @return The filename.
+     */
+    java.lang.String getFilename();
+    /**
+     * <pre>
+     * Package filename
+     * </pre>
+     *
+     * <code>string filename = 2;</code>
+     * @return The bytes for filename.
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
+  }
+  /**
+   * <pre>
+   * Response object for extract certificate refresh script
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ExtractCertificateRefreshScriptResponse}
+   */
+  public static final class ExtractCertificateRefreshScriptResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ExtractCertificateRefreshScriptResponse)
+      ExtractCertificateRefreshScriptResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ExtractCertificateRefreshScriptResponse.newBuilder() to construct.
+    private ExtractCertificateRefreshScriptResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ExtractCertificateRefreshScriptResponse() {
+      refreshPackage_ = com.google.protobuf.ByteString.EMPTY;
+      filename_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ExtractCertificateRefreshScriptResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.Builder.class);
+    }
+
+    public static final int REFRESHPACKAGE_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString refreshPackage_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <pre>
+     * Raw zip file bytes containing the refresh script and certificate
+     * </pre>
+     *
+     * <code>bytes refreshPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The refreshPackage.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getRefreshPackage() {
+      return refreshPackage_;
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object filename_ = "";
+    /**
+     * <pre>
+     * Package filename
+     * </pre>
+     *
+     * <code>string filename = 2;</code>
+     * @return The filename.
+     */
+    @java.lang.Override
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Package filename
+     * </pre>
+     *
+     * <code>string filename = 2;</code>
+     * @return The bytes for filename.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!refreshPackage_.isEmpty()) {
+        output.writeBytes(1, refreshPackage_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filename_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filename_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!refreshPackage_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, refreshPackage_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filename_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filename_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse) obj;
+
+      if (!getRefreshPackage()
+          .equals(other.getRefreshPackage())) return false;
+      if (!getFilename()
+          .equals(other.getFilename())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + REFRESHPACKAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getRefreshPackage().hashCode();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for extract certificate refresh script
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ExtractCertificateRefreshScriptResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ExtractCertificateRefreshScriptResponse)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        refreshPackage_ = com.google.protobuf.ByteString.EMPTY;
+        filename_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.refreshPackage_ = refreshPackage_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.filename_ = filename_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse.getDefaultInstance()) return this;
+        if (other.getRefreshPackage() != com.google.protobuf.ByteString.EMPTY) {
+          setRefreshPackage(other.getRefreshPackage());
+        }
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                refreshPackage_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                filename_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString refreshPackage_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * Raw zip file bytes containing the refresh script and certificate
+       * </pre>
+       *
+       * <code>bytes refreshPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The refreshPackage.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getRefreshPackage() {
+        return refreshPackage_;
+      }
+      /**
+       * <pre>
+       * Raw zip file bytes containing the refresh script and certificate
+       * </pre>
+       *
+       * <code>bytes refreshPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The refreshPackage to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRefreshPackage(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        refreshPackage_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Raw zip file bytes containing the refresh script and certificate
+       * </pre>
+       *
+       * <code>bytes refreshPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRefreshPackage() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        refreshPackage_ = getDefaultInstance().getRefreshPackage();
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <pre>
+       * Package filename
+       * </pre>
+       *
+       * <code>string filename = 2;</code>
+       * @return The filename.
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Package filename
+       * </pre>
+       *
+       * <code>string filename = 2;</code>
+       * @return The bytes for filename.
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Package filename
+       * </pre>
+       *
+       * <code>string filename = 2;</code>
+       * @param value The filename to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        filename_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Package filename
+       * </pre>
+       *
+       * <code>string filename = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFilename() {
+        filename_ = getDefaultInstance().getFilename();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Package filename
+       * </pre>
+       *
+       * <code>string filename = 2;</code>
+       * @param value The bytes for filename to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        filename_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ExtractCertificateRefreshScriptResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ExtractCertificateRefreshScriptResponse)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ExtractCertificateRefreshScriptResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ExtractCertificateRefreshScriptResponse>() {
+      @java.lang.Override
+      public ExtractCertificateRefreshScriptResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ExtractCertificateRefreshScriptResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ExtractCertificateRefreshScriptResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractCertificateRefreshScriptResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -35794,6 +36981,36 @@ public final class OnPremisesApiProto {
      */
     com.google.protobuf.ByteString
         getPvcCrnBytes();
+
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     * @return Whether the onPremEnvironmentDetails field is set.
+     */
+    boolean hasOnPremEnvironmentDetails();
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     * @return The onPremEnvironmentDetails.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getOnPremEnvironmentDetails();
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder getOnPremEnvironmentDetailsOrBuilder();
   }
   /**
    * <pre>
@@ -36895,6 +38112,47 @@ public final class OnPremisesApiProto {
       }
     }
 
+    public static final int ONPREMENVIRONMENTDETAILS_FIELD_NUMBER = 34;
+    private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails onPremEnvironmentDetails_;
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     * @return Whether the onPremEnvironmentDetails field is set.
+     */
+    @java.lang.Override
+    public boolean hasOnPremEnvironmentDetails() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     * @return The onPremEnvironmentDetails.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getOnPremEnvironmentDetails() {
+      return onPremEnvironmentDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance() : onPremEnvironmentDetails_;
+    }
+    /**
+     * <pre>
+     * Cloudera on-premises environment details.
+     * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder getOnPremEnvironmentDetailsOrBuilder() {
+      return onPremEnvironmentDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance() : onPremEnvironmentDetails_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -36998,6 +38256,9 @@ public final class OnPremisesApiProto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 33, pvcCrn_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(34, getOnPremEnvironmentDetails());
       }
       getUnknownFields().writeTo(output);
     }
@@ -37112,6 +38373,10 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(33, pvcCrn_);
       }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(34, getOnPremEnvironmentDetails());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -37190,6 +38455,11 @@ public final class OnPremisesApiProto {
           .equals(other.getEnvironmentCrn())) return false;
       if (!getPvcCrn()
           .equals(other.getPvcCrn())) return false;
+      if (hasOnPremEnvironmentDetails() != other.hasOnPremEnvironmentDetails()) return false;
+      if (hasOnPremEnvironmentDetails()) {
+        if (!getOnPremEnvironmentDetails()
+            .equals(other.getOnPremEnvironmentDetails())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -37274,6 +38544,10 @@ public final class OnPremisesApiProto {
       hash = (53 * hash) + getEnvironmentCrn().hashCode();
       hash = (37 * hash) + PVCCRN_FIELD_NUMBER;
       hash = (53 * hash) + getPvcCrn().hashCode();
+      if (hasOnPremEnvironmentDetails()) {
+        hash = (37 * hash) + ONPREMENVIRONMENTDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getOnPremEnvironmentDetails().hashCode();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37410,6 +38684,7 @@ public final class OnPremisesApiProto {
                 .alwaysUseFieldBuilders) {
           getDataFieldBuilder();
           getLocationFieldBuilder();
+          getOnPremEnvironmentDetailsFieldBuilder();
         }
       }
       @java.lang.Override
@@ -37454,6 +38729,11 @@ public final class OnPremisesApiProto {
         cmClusterUuid_ = "";
         environmentCrn_ = "";
         pvcCrn_ = "";
+        onPremEnvironmentDetails_ = null;
+        if (onPremEnvironmentDetailsBuilder_ != null) {
+          onPremEnvironmentDetailsBuilder_.dispose();
+          onPremEnvironmentDetailsBuilder_ = null;
+        }
         return this;
       }
 
@@ -37583,6 +38863,12 @@ public final class OnPremisesApiProto {
         }
         if (((from_bitField0_ & 0x20000000) != 0)) {
           result.pvcCrn_ = pvcCrn_;
+        }
+        if (((from_bitField0_ & 0x40000000) != 0)) {
+          result.onPremEnvironmentDetails_ = onPremEnvironmentDetailsBuilder_ == null
+              ? onPremEnvironmentDetails_
+              : onPremEnvironmentDetailsBuilder_.build();
+          to_bitField0_ |= 0x00000004;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -37752,6 +39038,9 @@ public final class OnPremisesApiProto {
           pvcCrn_ = other.pvcCrn_;
           bitField0_ |= 0x20000000;
           onChanged();
+        }
+        if (other.hasOnPremEnvironmentDetails()) {
+          mergeOnPremEnvironmentDetails(other.getOnPremEnvironmentDetails());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -37933,6 +39222,13 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x20000000;
                 break;
               } // case 266
+              case 274: {
+                input.readMessage(
+                    getOnPremEnvironmentDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x40000000;
+                break;
+              } // case 274
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -40350,6 +41646,172 @@ public final class OnPremisesApiProto {
         onChanged();
         return this;
       }
+
+      private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails onPremEnvironmentDetails_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder> onPremEnvironmentDetailsBuilder_;
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       * @return Whether the onPremEnvironmentDetails field is set.
+       */
+      public boolean hasOnPremEnvironmentDetails() {
+        return ((bitField0_ & 0x40000000) != 0);
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       * @return The onPremEnvironmentDetails.
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getOnPremEnvironmentDetails() {
+        if (onPremEnvironmentDetailsBuilder_ == null) {
+          return onPremEnvironmentDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance() : onPremEnvironmentDetails_;
+        } else {
+          return onPremEnvironmentDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public Builder setOnPremEnvironmentDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails value) {
+        if (onPremEnvironmentDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          onPremEnvironmentDetails_ = value;
+        } else {
+          onPremEnvironmentDetailsBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x40000000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public Builder setOnPremEnvironmentDetails(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder builderForValue) {
+        if (onPremEnvironmentDetailsBuilder_ == null) {
+          onPremEnvironmentDetails_ = builderForValue.build();
+        } else {
+          onPremEnvironmentDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x40000000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public Builder mergeOnPremEnvironmentDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails value) {
+        if (onPremEnvironmentDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x40000000) != 0) &&
+            onPremEnvironmentDetails_ != null &&
+            onPremEnvironmentDetails_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance()) {
+            getOnPremEnvironmentDetailsBuilder().mergeFrom(value);
+          } else {
+            onPremEnvironmentDetails_ = value;
+          }
+        } else {
+          onPremEnvironmentDetailsBuilder_.mergeFrom(value);
+        }
+        if (onPremEnvironmentDetails_ != null) {
+          bitField0_ |= 0x40000000;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public Builder clearOnPremEnvironmentDetails() {
+        bitField0_ = (bitField0_ & ~0x40000000);
+        onPremEnvironmentDetails_ = null;
+        if (onPremEnvironmentDetailsBuilder_ != null) {
+          onPremEnvironmentDetailsBuilder_.dispose();
+          onPremEnvironmentDetailsBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder getOnPremEnvironmentDetailsBuilder() {
+        bitField0_ |= 0x40000000;
+        onChanged();
+        return getOnPremEnvironmentDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder getOnPremEnvironmentDetailsOrBuilder() {
+        if (onPremEnvironmentDetailsBuilder_ != null) {
+          return onPremEnvironmentDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return onPremEnvironmentDetails_ == null ?
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance() : onPremEnvironmentDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera on-premises environment details.
+       * Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder> 
+          getOnPremEnvironmentDetailsFieldBuilder() {
+        if (onPremEnvironmentDetailsBuilder_ == null) {
+          onPremEnvironmentDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder>(
+                  getOnPremEnvironmentDetails(),
+                  getParentForChildren(),
+                  isClean());
+          onPremEnvironmentDetails_ = null;
+        }
+        return onPremEnvironmentDetailsBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -40409,6 +41871,10127 @@ public final class OnPremisesApiProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Cluster getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface OnPremEnvironmentDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.OnPremEnvironmentDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Cloudera Manager Host.
+     * </pre>
+     *
+     * <code>string cmHost = 1;</code>
+     * @return The cmHost.
+     */
+    java.lang.String getCmHost();
+    /**
+     * <pre>
+     * Cloudera Manager Host.
+     * </pre>
+     *
+     * <code>string cmHost = 1;</code>
+     * @return The bytes for cmHost.
+     */
+    com.google.protobuf.ByteString
+        getCmHostBytes();
+
+    /**
+     * <pre>
+     * Knox gateway url in the base cluster.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 2;</code>
+     * @return The knoxGatewayUrl.
+     */
+    java.lang.String getKnoxGatewayUrl();
+    /**
+     * <pre>
+     * Knox gateway url in the base cluster.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 2;</code>
+     * @return The bytes for knoxGatewayUrl.
+     */
+    com.google.protobuf.ByteString
+        getKnoxGatewayUrlBytes();
+
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    int getApplicationsCount();
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    boolean containsApplications(
+        java.lang.String key);
+    /**
+     * Use {@link #getApplicationsMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+    getApplications();
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+    getApplicationsMap();
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrDefault(
+        java.lang.String key,
+        /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defaultValue);
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     * @return Whether the onPremDatalakeDetails field is set.
+     */
+    boolean hasOnPremDatalakeDetails();
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     * @return The onPremDatalakeDetails.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getOnPremDatalakeDetails();
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder getOnPremDatalakeDetailsOrBuilder();
+  }
+  /**
+   * <pre>
+   * Object containing the on-premises Environment details.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.OnPremEnvironmentDetails}
+   */
+  public static final class OnPremEnvironmentDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.OnPremEnvironmentDetails)
+      OnPremEnvironmentDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use OnPremEnvironmentDetails.newBuilder() to construct.
+    private OnPremEnvironmentDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private OnPremEnvironmentDetails() {
+      cmHost_ = "";
+      knoxGatewayUrl_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new OnPremEnvironmentDetails();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetApplications();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int CMHOST_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmHost_ = "";
+    /**
+     * <pre>
+     * Cloudera Manager Host.
+     * </pre>
+     *
+     * <code>string cmHost = 1;</code>
+     * @return The cmHost.
+     */
+    @java.lang.Override
+    public java.lang.String getCmHost() {
+      java.lang.Object ref = cmHost_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmHost_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Cloudera Manager Host.
+     * </pre>
+     *
+     * <code>string cmHost = 1;</code>
+     * @return The bytes for cmHost.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmHostBytes() {
+      java.lang.Object ref = cmHost_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmHost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KNOXGATEWAYURL_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object knoxGatewayUrl_ = "";
+    /**
+     * <pre>
+     * Knox gateway url in the base cluster.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 2;</code>
+     * @return The knoxGatewayUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getKnoxGatewayUrl() {
+      java.lang.Object ref = knoxGatewayUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        knoxGatewayUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Knox gateway url in the base cluster.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 2;</code>
+     * @return The bytes for knoxGatewayUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKnoxGatewayUrlBytes() {
+      java.lang.Object ref = knoxGatewayUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        knoxGatewayUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int APPLICATIONS_FIELD_NUMBER = 3;
+    private static final class ApplicationsDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>newDefaultInstance(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.getDefaultInstance());
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> applications_;
+    private com.google.protobuf.MapField<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+    internalGetApplications() {
+      if (applications_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ApplicationsDefaultEntryHolder.defaultEntry);
+      }
+      return applications_;
+    }
+    public int getApplicationsCount() {
+      return internalGetApplications().getMap().size();
+    }
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    @java.lang.Override
+    public boolean containsApplications(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetApplications().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getApplicationsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> getApplications() {
+      return getApplicationsMap();
+    }
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> getApplicationsMap() {
+      return internalGetApplications().getMap();
+    }
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrDefault(
+        java.lang.String key,
+        /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> map =
+          internalGetApplications().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * A map of applications that provide services for the Service Discovery.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> map =
+          internalGetApplications().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int ONPREMDATALAKEDETAILS_FIELD_NUMBER = 7;
+    private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails onPremDatalakeDetails_;
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     * @return Whether the onPremDatalakeDetails field is set.
+     */
+    @java.lang.Override
+    public boolean hasOnPremDatalakeDetails() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     * @return The onPremDatalakeDetails.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getOnPremDatalakeDetails() {
+      return onPremDatalakeDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance() : onPremDatalakeDetails_;
+    }
+    /**
+     * <pre>
+     * On-premises Data Lake details.
+     * </pre>
+     *
+     * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder getOnPremDatalakeDetailsOrBuilder() {
+      return onPremDatalakeDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance() : onPremDatalakeDetails_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmHost_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, cmHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, knoxGatewayUrl_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetApplications(),
+          ApplicationsDefaultEntryHolder.defaultEntry,
+          3);
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(7, getOnPremDatalakeDetails());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmHost_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, cmHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, knoxGatewayUrl_);
+      }
+      for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> entry
+           : internalGetApplications().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+        applications__ = ApplicationsDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, applications__);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, getOnPremDatalakeDetails());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails) obj;
+
+      if (!getCmHost()
+          .equals(other.getCmHost())) return false;
+      if (!getKnoxGatewayUrl()
+          .equals(other.getKnoxGatewayUrl())) return false;
+      if (!internalGetApplications().equals(
+          other.internalGetApplications())) return false;
+      if (hasOnPremDatalakeDetails() != other.hasOnPremDatalakeDetails()) return false;
+      if (hasOnPremDatalakeDetails()) {
+        if (!getOnPremDatalakeDetails()
+            .equals(other.getOnPremDatalakeDetails())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CMHOST_FIELD_NUMBER;
+      hash = (53 * hash) + getCmHost().hashCode();
+      hash = (37 * hash) + KNOXGATEWAYURL_FIELD_NUMBER;
+      hash = (53 * hash) + getKnoxGatewayUrl().hashCode();
+      if (!internalGetApplications().getMap().isEmpty()) {
+        hash = (37 * hash) + APPLICATIONS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetApplications().hashCode();
+      }
+      if (hasOnPremDatalakeDetails()) {
+        hash = (37 * hash) + ONPREMDATALAKEDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getOnPremDatalakeDetails().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing the on-premises Environment details.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.OnPremEnvironmentDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.OnPremEnvironmentDetails)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetApplications();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetMutableApplications();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getOnPremDatalakeDetailsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        cmHost_ = "";
+        knoxGatewayUrl_ = "";
+        internalGetMutableApplications().clear();
+        onPremDatalakeDetails_ = null;
+        if (onPremDatalakeDetailsBuilder_ != null) {
+          onPremDatalakeDetailsBuilder_.dispose();
+          onPremDatalakeDetailsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremEnvironmentDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.cmHost_ = cmHost_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.knoxGatewayUrl_ = knoxGatewayUrl_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.applications_ = internalGetApplications().build(ApplicationsDefaultEntryHolder.defaultEntry);
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.onPremDatalakeDetails_ = onPremDatalakeDetailsBuilder_ == null
+              ? onPremDatalakeDetails_
+              : onPremDatalakeDetailsBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance()) return this;
+        if (!other.getCmHost().isEmpty()) {
+          cmHost_ = other.cmHost_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getKnoxGatewayUrl().isEmpty()) {
+          knoxGatewayUrl_ = other.knoxGatewayUrl_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        internalGetMutableApplications().mergeFrom(
+            other.internalGetApplications());
+        bitField0_ |= 0x00000004;
+        if (other.hasOnPremDatalakeDetails()) {
+          mergeOnPremDatalakeDetails(other.getOnPremDatalakeDetails());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                cmHost_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                knoxGatewayUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+                applications__ = input.readMessage(
+                    ApplicationsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableApplications().ensureBuilderMap().put(
+                    applications__.getKey(), applications__.getValue());
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 58: {
+                input.readMessage(
+                    getOnPremDatalakeDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object cmHost_ = "";
+      /**
+       * <pre>
+       * Cloudera Manager Host.
+       * </pre>
+       *
+       * <code>string cmHost = 1;</code>
+       * @return The cmHost.
+       */
+      public java.lang.String getCmHost() {
+        java.lang.Object ref = cmHost_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmHost_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Host.
+       * </pre>
+       *
+       * <code>string cmHost = 1;</code>
+       * @return The bytes for cmHost.
+       */
+      public com.google.protobuf.ByteString
+          getCmHostBytes() {
+        java.lang.Object ref = cmHost_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmHost_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Host.
+       * </pre>
+       *
+       * <code>string cmHost = 1;</code>
+       * @param value The cmHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmHost(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmHost_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Host.
+       * </pre>
+       *
+       * <code>string cmHost = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmHost() {
+        cmHost_ = getDefaultInstance().getCmHost();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Host.
+       * </pre>
+       *
+       * <code>string cmHost = 1;</code>
+       * @param value The bytes for cmHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmHost_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object knoxGatewayUrl_ = "";
+      /**
+       * <pre>
+       * Knox gateway url in the base cluster.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 2;</code>
+       * @return The knoxGatewayUrl.
+       */
+      public java.lang.String getKnoxGatewayUrl() {
+        java.lang.Object ref = knoxGatewayUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          knoxGatewayUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Knox gateway url in the base cluster.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 2;</code>
+       * @return The bytes for knoxGatewayUrl.
+       */
+      public com.google.protobuf.ByteString
+          getKnoxGatewayUrlBytes() {
+        java.lang.Object ref = knoxGatewayUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          knoxGatewayUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Knox gateway url in the base cluster.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 2;</code>
+       * @param value The knoxGatewayUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxGatewayUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        knoxGatewayUrl_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Knox gateway url in the base cluster.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKnoxGatewayUrl() {
+        knoxGatewayUrl_ = getDefaultInstance().getKnoxGatewayUrl();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Knox gateway url in the base cluster.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 2;</code>
+       * @param value The bytes for knoxGatewayUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxGatewayUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        knoxGatewayUrl_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private static final class ApplicationsConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> {
+        @java.lang.Override
+        public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application build(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder val) {
+          if (val instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) { return (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) val; }
+          return ((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder) val).build();
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> defaultEntry() {
+          return ApplicationsDefaultEntryHolder.defaultEntry;
+        }
+      };
+      private static final ApplicationsConverter applicationsConverter = new ApplicationsConverter();
+
+      private com.google.protobuf.MapFieldBuilder<
+          java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder> applications_;
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder>
+          internalGetApplications() {
+        if (applications_ == null) {
+          return new com.google.protobuf.MapFieldBuilder<>(applicationsConverter);
+        }
+        return applications_;
+      }
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder>
+          internalGetMutableApplications() {
+        if (applications_ == null) {
+          applications_ = new com.google.protobuf.MapFieldBuilder<>(applicationsConverter);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return applications_;
+      }
+      public int getApplicationsCount() {
+        return internalGetApplications().ensureBuilderMap().size();
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      @java.lang.Override
+      public boolean containsApplications(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetApplications().ensureBuilderMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getApplicationsMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> getApplications() {
+        return getApplicationsMap();
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> getApplicationsMap() {
+        return internalGetApplications().getImmutableMap();
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrDefault(
+          java.lang.String key,
+          /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder> map = internalGetMutableApplications().ensureBuilderMap();
+        return map.containsKey(key) ? applicationsConverter.build(map.get(key)) : defaultValue;
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getApplicationsOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder> map = internalGetMutableApplications().ensureBuilderMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return applicationsConverter.build(map.get(key));
+      }
+      public Builder clearApplications() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        internalGetMutableApplications().clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      public Builder removeApplications(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableApplications().ensureBuilderMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application>
+          getMutableApplications() {
+        bitField0_ |= 0x00000004;
+        return internalGetMutableApplications().ensureMessageMap();
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      public Builder putApplications(
+          java.lang.String key,
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableApplications().ensureBuilderMap()
+            .put(key, value);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      public Builder putAllApplications(
+          java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> values) {
+        for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application> e : values.entrySet()) {
+          if (e.getKey() == null || e.getValue() == null) {
+            throw new NullPointerException();
+          }
+        }
+        internalGetMutableApplications().ensureBuilderMap()
+            .putAll(values);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * A map of applications that provide services for the Service Discovery.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Application&gt; applications = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder putApplicationsBuilderIfAbsent(
+          java.lang.String key) {
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder> builderMap = internalGetMutableApplications().ensureBuilderMap();
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder entry = builderMap.get(key);
+        if (entry == null) {
+          entry = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.newBuilder();
+          builderMap.put(key, entry);
+        }
+        if (entry instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) {
+          entry = ((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) entry).toBuilder();
+          builderMap.put(key, entry);
+        }
+        return (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder) entry;
+      }
+
+      private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails onPremDatalakeDetails_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder> onPremDatalakeDetailsBuilder_;
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       * @return Whether the onPremDatalakeDetails field is set.
+       */
+      public boolean hasOnPremDatalakeDetails() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       * @return The onPremDatalakeDetails.
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getOnPremDatalakeDetails() {
+        if (onPremDatalakeDetailsBuilder_ == null) {
+          return onPremDatalakeDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance() : onPremDatalakeDetails_;
+        } else {
+          return onPremDatalakeDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public Builder setOnPremDatalakeDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails value) {
+        if (onPremDatalakeDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          onPremDatalakeDetails_ = value;
+        } else {
+          onPremDatalakeDetailsBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public Builder setOnPremDatalakeDetails(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder builderForValue) {
+        if (onPremDatalakeDetailsBuilder_ == null) {
+          onPremDatalakeDetails_ = builderForValue.build();
+        } else {
+          onPremDatalakeDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public Builder mergeOnPremDatalakeDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails value) {
+        if (onPremDatalakeDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+            onPremDatalakeDetails_ != null &&
+            onPremDatalakeDetails_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance()) {
+            getOnPremDatalakeDetailsBuilder().mergeFrom(value);
+          } else {
+            onPremDatalakeDetails_ = value;
+          }
+        } else {
+          onPremDatalakeDetailsBuilder_.mergeFrom(value);
+        }
+        if (onPremDatalakeDetails_ != null) {
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public Builder clearOnPremDatalakeDetails() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onPremDatalakeDetails_ = null;
+        if (onPremDatalakeDetailsBuilder_ != null) {
+          onPremDatalakeDetailsBuilder_.dispose();
+          onPremDatalakeDetailsBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder getOnPremDatalakeDetailsBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getOnPremDatalakeDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder getOnPremDatalakeDetailsOrBuilder() {
+        if (onPremDatalakeDetailsBuilder_ != null) {
+          return onPremDatalakeDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return onPremDatalakeDetails_ == null ?
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance() : onPremDatalakeDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * On-premises Data Lake details.
+       * </pre>
+       *
+       * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder> 
+          getOnPremDatalakeDetailsFieldBuilder() {
+        if (onPremDatalakeDetailsBuilder_ == null) {
+          onPremDatalakeDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder>(
+                  getOnPremDatalakeDetails(),
+                  getParentForChildren(),
+                  isClean());
+          onPremDatalakeDetails_ = null;
+        }
+        return onPremDatalakeDetailsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.OnPremEnvironmentDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.OnPremEnvironmentDetails)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<OnPremEnvironmentDetails>
+        PARSER = new com.google.protobuf.AbstractParser<OnPremEnvironmentDetails>() {
+      @java.lang.Override
+      public OnPremEnvironmentDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<OnPremEnvironmentDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<OnPremEnvironmentDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ApplicationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.Application)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name of the application.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * Name of the application.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    int getServicesCount();
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    boolean containsServices(
+        java.lang.String key);
+    /**
+     * Use {@link #getServicesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+    getServices();
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+    getServicesMap();
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrDefault(
+        java.lang.String key,
+        /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service defaultValue);
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    int getConfigCount();
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    boolean containsConfig(
+        java.lang.String key);
+    /**
+     * Use {@link #getConfigMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfig();
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfigMap();
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    /* nullable */
+java.lang.String getConfigOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    java.lang.String getConfigOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Object containing the details of a service discovery application.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.Application}
+   */
+  public static final class Application extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.Application)
+      ApplicationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Application.newBuilder() to construct.
+    private Application(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Application() {
+      name_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Application();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetServices();
+        case 3:
+          return internalGetConfig();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * Name of the application.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the application.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SERVICES_FIELD_NUMBER = 2;
+    private static final class ServicesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>newDefaultInstance(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_ServicesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.getDefaultInstance());
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> services_;
+    private com.google.protobuf.MapField<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+    internalGetServices() {
+      if (services_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ServicesDefaultEntryHolder.defaultEntry);
+      }
+      return services_;
+    }
+    public int getServicesCount() {
+      return internalGetServices().getMap().size();
+    }
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    @java.lang.Override
+    public boolean containsServices(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetServices().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getServicesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> getServices() {
+      return getServicesMap();
+    }
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> getServicesMap() {
+      return internalGetServices().getMap();
+    }
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrDefault(
+        java.lang.String key,
+        /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> map =
+          internalGetServices().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * The services provided by the application.
+     * </pre>
+     *
+     * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> map =
+          internalGetServices().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int CONFIG_FIELD_NUMBER = 3;
+    private static final class ConfigDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_ConfigEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> config_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfig() {
+      if (config_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigDefaultEntryHolder.defaultEntry);
+      }
+      return config_;
+    }
+    public int getConfigCount() {
+      return internalGetConfig().getMap().size();
+    }
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public boolean containsConfig(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetConfig().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfig() {
+      return getConfigMap();
+    }
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getConfigMap() {
+      return internalGetConfig().getMap();
+    }
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getConfigOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfig().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Configuration key values for an application.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getConfigOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfig().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetServices(),
+          ServicesDefaultEntryHolder.defaultEntry,
+          2);
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetConfig(),
+          ConfigDefaultEntryHolder.defaultEntry,
+          3);
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> entry
+           : internalGetServices().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+        services__ = ServicesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, services__);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetConfig().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        config__ = ConfigDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, config__);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!internalGetServices().equals(
+          other.internalGetServices())) return false;
+      if (!internalGetConfig().equals(
+          other.internalGetConfig())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      if (!internalGetServices().getMap().isEmpty()) {
+        hash = (37 * hash) + SERVICES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetServices().hashCode();
+      }
+      if (!internalGetConfig().getMap().isEmpty()) {
+        hash = (37 * hash) + CONFIG_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetConfig().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing the details of a service discovery application.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.Application}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.Application)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ApplicationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 2:
+            return internalGetServices();
+          case 3:
+            return internalGetConfig();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 2:
+            return internalGetMutableServices();
+          case 3:
+            return internalGetMutableConfig();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        internalGetMutableServices().clear();
+        internalGetMutableConfig().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Application_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.services_ = internalGetServices().build(ServicesDefaultEntryHolder.defaultEntry);
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.config_ = internalGetConfig();
+          result.config_.makeImmutable();
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        internalGetMutableServices().mergeFrom(
+            other.internalGetServices());
+        bitField0_ |= 0x00000002;
+        internalGetMutableConfig().mergeFrom(
+            other.internalGetConfig());
+        bitField0_ |= 0x00000004;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+                services__ = input.readMessage(
+                    ServicesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableServices().ensureBuilderMap().put(
+                    services__.getKey(), services__.getValue());
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                config__ = input.readMessage(
+                    ConfigDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableConfig().getMutableMap().put(
+                    config__.getKey(), config__.getValue());
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * Name of the application.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the application.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the application.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the application.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the application.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private static final class ServicesConverter implements com.google.protobuf.MapFieldBuilder.Converter<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> {
+        @java.lang.Override
+        public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service build(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder val) {
+          if (val instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) { return (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) val; }
+          return ((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder) val).build();
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> defaultEntry() {
+          return ServicesDefaultEntryHolder.defaultEntry;
+        }
+      };
+      private static final ServicesConverter servicesConverter = new ServicesConverter();
+
+      private com.google.protobuf.MapFieldBuilder<
+          java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder> services_;
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder>
+          internalGetServices() {
+        if (services_ == null) {
+          return new com.google.protobuf.MapFieldBuilder<>(servicesConverter);
+        }
+        return services_;
+      }
+      private com.google.protobuf.MapFieldBuilder<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder>
+          internalGetMutableServices() {
+        if (services_ == null) {
+          services_ = new com.google.protobuf.MapFieldBuilder<>(servicesConverter);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return services_;
+      }
+      public int getServicesCount() {
+        return internalGetServices().ensureBuilderMap().size();
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      @java.lang.Override
+      public boolean containsServices(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetServices().ensureBuilderMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getServicesMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> getServices() {
+        return getServicesMap();
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> getServicesMap() {
+        return internalGetServices().getImmutableMap();
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrDefault(
+          java.lang.String key,
+          /* nullable */
+com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder> map = internalGetMutableServices().ensureBuilderMap();
+        return map.containsKey(key) ? servicesConverter.build(map.get(key)) : defaultValue;
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getServicesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder> map = internalGetMutableServices().ensureBuilderMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return servicesConverter.build(map.get(key));
+      }
+      public Builder clearServices() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        internalGetMutableServices().clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      public Builder removeServices(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableServices().ensureBuilderMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service>
+          getMutableServices() {
+        bitField0_ |= 0x00000002;
+        return internalGetMutableServices().ensureMessageMap();
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      public Builder putServices(
+          java.lang.String key,
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableServices().ensureBuilderMap()
+            .put(key, value);
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      public Builder putAllServices(
+          java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> values) {
+        for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service> e : values.entrySet()) {
+          if (e.getKey() == null || e.getValue() == null) {
+            throw new NullPointerException();
+          }
+        }
+        internalGetMutableServices().ensureBuilderMap()
+            .putAll(values);
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <pre>
+       * The services provided by the application.
+       * </pre>
+       *
+       * <code>map&lt;string, .onpremises.Service&gt; services = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder putServicesBuilderIfAbsent(
+          java.lang.String key) {
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder> builderMap = internalGetMutableServices().ensureBuilderMap();
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder entry = builderMap.get(key);
+        if (entry == null) {
+          entry = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.newBuilder();
+          builderMap.put(key, entry);
+        }
+        if (entry instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) {
+          entry = ((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) entry).toBuilder();
+          builderMap.put(key, entry);
+        }
+        return (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder) entry;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> config_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetConfig() {
+        if (config_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ConfigDefaultEntryHolder.defaultEntry);
+        }
+        return config_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableConfig() {
+        if (config_ == null) {
+          config_ = com.google.protobuf.MapField.newMapField(
+              ConfigDefaultEntryHolder.defaultEntry);
+        }
+        if (!config_.isMutable()) {
+          config_ = config_.copy();
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return config_;
+      }
+      public int getConfigCount() {
+        return internalGetConfig().getMap().size();
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public boolean containsConfig(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetConfig().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getConfigMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getConfig() {
+        return getConfigMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getConfigMap() {
+        return internalGetConfig().getMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getConfigOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfig().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getConfigOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfig().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearConfig() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        internalGetMutableConfig().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder removeConfig(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableConfig().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableConfig() {
+        bitField0_ |= 0x00000004;
+        return internalGetMutableConfig().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder putConfig(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableConfig().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration key values for an application.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder putAllConfig(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableConfig().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.Application)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.Application)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Application>
+        PARSER = new com.google.protobuf.AbstractParser<Application>() {
+      @java.lang.Override
+      public Application parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Application> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Application> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ServiceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.Service)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Type of service.
+     * </pre>
+     *
+     * <code>string type = 1;</code>
+     * @return The type.
+     */
+    java.lang.String getType();
+    /**
+     * <pre>
+     * Type of service.
+     * </pre>
+     *
+     * <code>string type = 1;</code>
+     * @return The bytes for type.
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
+
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> 
+        getEndpointsList();
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getEndpoints(int index);
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    int getEndpointsCount();
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder> 
+        getEndpointsOrBuilderList();
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder getEndpointsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    int getConfigCount();
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    boolean containsConfig(
+        java.lang.String key);
+    /**
+     * Use {@link #getConfigMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfig();
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfigMap();
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    /* nullable */
+java.lang.String getConfigOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    java.lang.String getConfigOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Object containing the details of a service discovery service.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.Service}
+   */
+  public static final class Service extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.Service)
+      ServiceOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Service.newBuilder() to construct.
+    private Service(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Service() {
+      type_ = "";
+      endpoints_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Service();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetConfig();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder.class);
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object type_ = "";
+    /**
+     * <pre>
+     * Type of service.
+     * </pre>
+     *
+     * <code>string type = 1;</code>
+     * @return The type.
+     */
+    @java.lang.Override
+    public java.lang.String getType() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        type_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Type of service.
+     * </pre>
+     *
+     * <code>string type = 1;</code>
+     * @return The bytes for type.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        type_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENDPOINTS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> endpoints_;
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> getEndpointsList() {
+      return endpoints_;
+    }
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder> 
+        getEndpointsOrBuilderList() {
+      return endpoints_;
+    }
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    @java.lang.Override
+    public int getEndpointsCount() {
+      return endpoints_.size();
+    }
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getEndpoints(int index) {
+      return endpoints_.get(index);
+    }
+    /**
+     * <pre>
+     * List of endpoints that the service presents.
+     * </pre>
+     *
+     * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder getEndpointsOrBuilder(
+        int index) {
+      return endpoints_.get(index);
+    }
+
+    public static final int CONFIG_FIELD_NUMBER = 3;
+    private static final class ConfigDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_ConfigEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> config_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfig() {
+      if (config_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigDefaultEntryHolder.defaultEntry);
+      }
+      return config_;
+    }
+    public int getConfigCount() {
+      return internalGetConfig().getMap().size();
+    }
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public boolean containsConfig(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetConfig().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfig() {
+      return getConfigMap();
+    }
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getConfigMap() {
+      return internalGetConfig().getMap();
+    }
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getConfigOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfig().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Configuration key values for a service.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; config = 3;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getConfigOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfig().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(type_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, type_);
+      }
+      for (int i = 0; i < endpoints_.size(); i++) {
+        output.writeMessage(2, endpoints_.get(i));
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetConfig(),
+          ConfigDefaultEntryHolder.defaultEntry,
+          3);
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(type_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, type_);
+      }
+      for (int i = 0; i < endpoints_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, endpoints_.get(i));
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetConfig().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        config__ = ConfigDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, config__);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) obj;
+
+      if (!getType()
+          .equals(other.getType())) return false;
+      if (!getEndpointsList()
+          .equals(other.getEndpointsList())) return false;
+      if (!internalGetConfig().equals(
+          other.internalGetConfig())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getType().hashCode();
+      if (getEndpointsCount() > 0) {
+        hash = (37 * hash) + ENDPOINTS_FIELD_NUMBER;
+        hash = (53 * hash) + getEndpointsList().hashCode();
+      }
+      if (!internalGetConfig().getMap().isEmpty()) {
+        hash = (37 * hash) + CONFIG_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetConfig().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing the details of a service discovery service.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.Service}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.Service)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetConfig();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetMutableConfig();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        type_ = "";
+        if (endpointsBuilder_ == null) {
+          endpoints_ = java.util.Collections.emptyList();
+        } else {
+          endpoints_ = null;
+          endpointsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        internalGetMutableConfig().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Service_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service result) {
+        if (endpointsBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            endpoints_ = java.util.Collections.unmodifiableList(endpoints_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.endpoints_ = endpoints_;
+        } else {
+          result.endpoints_ = endpointsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.type_ = type_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.config_ = internalGetConfig();
+          result.config_.makeImmutable();
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service.getDefaultInstance()) return this;
+        if (!other.getType().isEmpty()) {
+          type_ = other.type_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (endpointsBuilder_ == null) {
+          if (!other.endpoints_.isEmpty()) {
+            if (endpoints_.isEmpty()) {
+              endpoints_ = other.endpoints_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureEndpointsIsMutable();
+              endpoints_.addAll(other.endpoints_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.endpoints_.isEmpty()) {
+            if (endpointsBuilder_.isEmpty()) {
+              endpointsBuilder_.dispose();
+              endpointsBuilder_ = null;
+              endpoints_ = other.endpoints_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              endpointsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getEndpointsFieldBuilder() : null;
+            } else {
+              endpointsBuilder_.addAllMessages(other.endpoints_);
+            }
+          }
+        }
+        internalGetMutableConfig().mergeFrom(
+            other.internalGetConfig());
+        bitField0_ |= 0x00000004;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                type_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.parser(),
+                        extensionRegistry);
+                if (endpointsBuilder_ == null) {
+                  ensureEndpointsIsMutable();
+                  endpoints_.add(m);
+                } else {
+                  endpointsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                config__ = input.readMessage(
+                    ConfigDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableConfig().getMutableMap().put(
+                    config__.getKey(), config__.getValue());
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object type_ = "";
+      /**
+       * <pre>
+       * Type of service.
+       * </pre>
+       *
+       * <code>string type = 1;</code>
+       * @return The type.
+       */
+      public java.lang.String getType() {
+        java.lang.Object ref = type_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          type_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Type of service.
+       * </pre>
+       *
+       * <code>string type = 1;</code>
+       * @return The bytes for type.
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        java.lang.Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Type of service.
+       * </pre>
+       *
+       * <code>string type = 1;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        type_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Type of service.
+       * </pre>
+       *
+       * <code>string type = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        type_ = getDefaultInstance().getType();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Type of service.
+       * </pre>
+       *
+       * <code>string type = 1;</code>
+       * @param value The bytes for type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        type_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> endpoints_ =
+        java.util.Collections.emptyList();
+      private void ensureEndpointsIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          endpoints_ = new java.util.ArrayList<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint>(endpoints_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder> endpointsBuilder_;
+
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> getEndpointsList() {
+        if (endpointsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(endpoints_);
+        } else {
+          return endpointsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public int getEndpointsCount() {
+        if (endpointsBuilder_ == null) {
+          return endpoints_.size();
+        } else {
+          return endpointsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getEndpoints(int index) {
+        if (endpointsBuilder_ == null) {
+          return endpoints_.get(index);
+        } else {
+          return endpointsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder setEndpoints(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint value) {
+        if (endpointsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEndpointsIsMutable();
+          endpoints_.set(index, value);
+          onChanged();
+        } else {
+          endpointsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder setEndpoints(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder builderForValue) {
+        if (endpointsBuilder_ == null) {
+          ensureEndpointsIsMutable();
+          endpoints_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          endpointsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder addEndpoints(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint value) {
+        if (endpointsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEndpointsIsMutable();
+          endpoints_.add(value);
+          onChanged();
+        } else {
+          endpointsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder addEndpoints(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint value) {
+        if (endpointsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEndpointsIsMutable();
+          endpoints_.add(index, value);
+          onChanged();
+        } else {
+          endpointsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder addEndpoints(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder builderForValue) {
+        if (endpointsBuilder_ == null) {
+          ensureEndpointsIsMutable();
+          endpoints_.add(builderForValue.build());
+          onChanged();
+        } else {
+          endpointsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder addEndpoints(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder builderForValue) {
+        if (endpointsBuilder_ == null) {
+          ensureEndpointsIsMutable();
+          endpoints_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          endpointsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder addAllEndpoints(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint> values) {
+        if (endpointsBuilder_ == null) {
+          ensureEndpointsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, endpoints_);
+          onChanged();
+        } else {
+          endpointsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder clearEndpoints() {
+        if (endpointsBuilder_ == null) {
+          endpoints_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          endpointsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public Builder removeEndpoints(int index) {
+        if (endpointsBuilder_ == null) {
+          ensureEndpointsIsMutable();
+          endpoints_.remove(index);
+          onChanged();
+        } else {
+          endpointsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder getEndpointsBuilder(
+          int index) {
+        return getEndpointsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder getEndpointsOrBuilder(
+          int index) {
+        if (endpointsBuilder_ == null) {
+          return endpoints_.get(index);  } else {
+          return endpointsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder> 
+           getEndpointsOrBuilderList() {
+        if (endpointsBuilder_ != null) {
+          return endpointsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(endpoints_);
+        }
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder addEndpointsBuilder() {
+        return getEndpointsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder addEndpointsBuilder(
+          int index) {
+        return getEndpointsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * List of endpoints that the service presents.
+       * </pre>
+       *
+       * <code>repeated .onpremises.ServiceEndpoint endpoints = 2;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder> 
+           getEndpointsBuilderList() {
+        return getEndpointsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder> 
+          getEndpointsFieldBuilder() {
+        if (endpointsBuilder_ == null) {
+          endpointsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder>(
+                  endpoints_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          endpoints_ = null;
+        }
+        return endpointsBuilder_;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> config_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetConfig() {
+        if (config_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ConfigDefaultEntryHolder.defaultEntry);
+        }
+        return config_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableConfig() {
+        if (config_ == null) {
+          config_ = com.google.protobuf.MapField.newMapField(
+              ConfigDefaultEntryHolder.defaultEntry);
+        }
+        if (!config_.isMutable()) {
+          config_ = config_.copy();
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return config_;
+      }
+      public int getConfigCount() {
+        return internalGetConfig().getMap().size();
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public boolean containsConfig(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetConfig().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getConfigMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getConfig() {
+        return getConfigMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getConfigMap() {
+        return internalGetConfig().getMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getConfigOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfig().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getConfigOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfig().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearConfig() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        internalGetMutableConfig().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder removeConfig(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableConfig().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableConfig() {
+        bitField0_ |= 0x00000004;
+        return internalGetMutableConfig().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder putConfig(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableConfig().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration key values for a service.
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; config = 3;</code>
+       */
+      public Builder putAllConfig(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableConfig().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.Service)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.Service)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Service>
+        PARSER = new com.google.protobuf.AbstractParser<Service>() {
+      @java.lang.Override
+      public Service parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Service> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Service> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Service getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ServiceEndpointOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ServiceEndpoint)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Endpoint hostname or IP address.
+     * </pre>
+     *
+     * <code>string host = 1;</code>
+     * @return The host.
+     */
+    java.lang.String getHost();
+    /**
+     * <pre>
+     * Endpoint hostname or IP address.
+     * </pre>
+     *
+     * <code>string host = 1;</code>
+     * @return The bytes for host.
+     */
+    com.google.protobuf.ByteString
+        getHostBytes();
+
+    /**
+     * <pre>
+     * Endpoint port.
+     * </pre>
+     *
+     * <code>int32 port = 2;</code>
+     * @return The port.
+     */
+    int getPort();
+
+    /**
+     * <pre>
+     * Connection URI of the endpoint.
+     * </pre>
+     *
+     * <code>string uri = 3;</code>
+     * @return The uri.
+     */
+    java.lang.String getUri();
+    /**
+     * <pre>
+     * Connection URI of the endpoint.
+     * </pre>
+     *
+     * <code>string uri = 3;</code>
+     * @return The bytes for uri.
+     */
+    com.google.protobuf.ByteString
+        getUriBytes();
+  }
+  /**
+   * <pre>
+   * Object containing the details of endpoint of a Service Discovery Service.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ServiceEndpoint}
+   */
+  public static final class ServiceEndpoint extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ServiceEndpoint)
+      ServiceEndpointOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ServiceEndpoint.newBuilder() to construct.
+    private ServiceEndpoint(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ServiceEndpoint() {
+      host_ = "";
+      uri_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceEndpoint();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ServiceEndpoint_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ServiceEndpoint_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder.class);
+    }
+
+    public static final int HOST_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object host_ = "";
+    /**
+     * <pre>
+     * Endpoint hostname or IP address.
+     * </pre>
+     *
+     * <code>string host = 1;</code>
+     * @return The host.
+     */
+    @java.lang.Override
+    public java.lang.String getHost() {
+      java.lang.Object ref = host_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        host_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Endpoint hostname or IP address.
+     * </pre>
+     *
+     * <code>string host = 1;</code>
+     * @return The bytes for host.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getHostBytes() {
+      java.lang.Object ref = host_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        host_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PORT_FIELD_NUMBER = 2;
+    private int port_ = 0;
+    /**
+     * <pre>
+     * Endpoint port.
+     * </pre>
+     *
+     * <code>int32 port = 2;</code>
+     * @return The port.
+     */
+    @java.lang.Override
+    public int getPort() {
+      return port_;
+    }
+
+    public static final int URI_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object uri_ = "";
+    /**
+     * <pre>
+     * Connection URI of the endpoint.
+     * </pre>
+     *
+     * <code>string uri = 3;</code>
+     * @return The uri.
+     */
+    @java.lang.Override
+    public java.lang.String getUri() {
+      java.lang.Object ref = uri_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        uri_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Connection URI of the endpoint.
+     * </pre>
+     *
+     * <code>string uri = 3;</code>
+     * @return The bytes for uri.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getUriBytes() {
+      java.lang.Object ref = uri_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        uri_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, host_);
+      }
+      if (port_ != 0) {
+        output.writeInt32(2, port_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, uri_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, host_);
+      }
+      if (port_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, port_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uri_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, uri_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint) obj;
+
+      if (!getHost()
+          .equals(other.getHost())) return false;
+      if (getPort()
+          != other.getPort()) return false;
+      if (!getUri()
+          .equals(other.getUri())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + HOST_FIELD_NUMBER;
+      hash = (53 * hash) + getHost().hashCode();
+      hash = (37 * hash) + PORT_FIELD_NUMBER;
+      hash = (53 * hash) + getPort();
+      hash = (37 * hash) + URI_FIELD_NUMBER;
+      hash = (53 * hash) + getUri().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing the details of endpoint of a Service Discovery Service.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ServiceEndpoint}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ServiceEndpoint)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpointOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ServiceEndpoint_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ServiceEndpoint_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        host_ = "";
+        port_ = 0;
+        uri_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ServiceEndpoint_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.host_ = host_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.port_ = port_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.uri_ = uri_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint.getDefaultInstance()) return this;
+        if (!other.getHost().isEmpty()) {
+          host_ = other.host_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.getPort() != 0) {
+          setPort(other.getPort());
+        }
+        if (!other.getUri().isEmpty()) {
+          uri_ = other.uri_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                host_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                port_ = input.readInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                uri_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object host_ = "";
+      /**
+       * <pre>
+       * Endpoint hostname or IP address.
+       * </pre>
+       *
+       * <code>string host = 1;</code>
+       * @return The host.
+       */
+      public java.lang.String getHost() {
+        java.lang.Object ref = host_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          host_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Endpoint hostname or IP address.
+       * </pre>
+       *
+       * <code>string host = 1;</code>
+       * @return The bytes for host.
+       */
+      public com.google.protobuf.ByteString
+          getHostBytes() {
+        java.lang.Object ref = host_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          host_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Endpoint hostname or IP address.
+       * </pre>
+       *
+       * <code>string host = 1;</code>
+       * @param value The host to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHost(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        host_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Endpoint hostname or IP address.
+       * </pre>
+       *
+       * <code>string host = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHost() {
+        host_ = getDefaultInstance().getHost();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Endpoint hostname or IP address.
+       * </pre>
+       *
+       * <code>string host = 1;</code>
+       * @param value The bytes for host to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        host_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private int port_ ;
+      /**
+       * <pre>
+       * Endpoint port.
+       * </pre>
+       *
+       * <code>int32 port = 2;</code>
+       * @return The port.
+       */
+      @java.lang.Override
+      public int getPort() {
+        return port_;
+      }
+      /**
+       * <pre>
+       * Endpoint port.
+       * </pre>
+       *
+       * <code>int32 port = 2;</code>
+       * @param value The port to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPort(int value) {
+
+        port_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Endpoint port.
+       * </pre>
+       *
+       * <code>int32 port = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPort() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        port_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object uri_ = "";
+      /**
+       * <pre>
+       * Connection URI of the endpoint.
+       * </pre>
+       *
+       * <code>string uri = 3;</code>
+       * @return The uri.
+       */
+      public java.lang.String getUri() {
+        java.lang.Object ref = uri_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          uri_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Connection URI of the endpoint.
+       * </pre>
+       *
+       * <code>string uri = 3;</code>
+       * @return The bytes for uri.
+       */
+      public com.google.protobuf.ByteString
+          getUriBytes() {
+        java.lang.Object ref = uri_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          uri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Connection URI of the endpoint.
+       * </pre>
+       *
+       * <code>string uri = 3;</code>
+       * @param value The uri to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUri(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        uri_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Connection URI of the endpoint.
+       * </pre>
+       *
+       * <code>string uri = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUri() {
+        uri_ = getDefaultInstance().getUri();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Connection URI of the endpoint.
+       * </pre>
+       *
+       * <code>string uri = 3;</code>
+       * @param value The bytes for uri to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUriBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        uri_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ServiceEndpoint)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ServiceEndpoint)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ServiceEndpoint>
+        PARSER = new com.google.protobuf.AbstractParser<ServiceEndpoint>() {
+      @java.lang.Override
+      public ServiceEndpoint parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ServiceEndpoint> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ServiceEndpoint> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ServiceEndpoint getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface OnPremDatalakeDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.OnPremDatalakeDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name of the Data Lake.
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
+     */
+    java.lang.String getDatalakeName();
+    /**
+     * <pre>
+     * Name of the Data Lake.
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeNameBytes();
+
+    /**
+     * <pre>
+     * Inidicates whether Ranger RAZ is enabled for the Data Lake.
+     * </pre>
+     *
+     * <code>bool enableRangerRaz = 2;</code>
+     * @return The enableRangerRaz.
+     */
+    boolean getEnableRangerRaz();
+
+    /**
+     * <pre>
+     * The timestamp in Unix epoch when the Data Lake was created.
+     * </pre>
+     *
+     * <code>int64 creationTimeEpochMillis = 3;</code>
+     * @return The creationTimeEpochMillis.
+     */
+    long getCreationTimeEpochMillis();
+
+    /**
+     * <pre>
+     * The Cloudera Manager FQDN.
+     * </pre>
+     *
+     * <code>string cmFqdn = 4;</code>
+     * @return The cmFqdn.
+     */
+    java.lang.String getCmFqdn();
+    /**
+     * <pre>
+     * The Cloudera Manager FQDN.
+     * </pre>
+     *
+     * <code>string cmFqdn = 4;</code>
+     * @return The bytes for cmFqdn.
+     */
+    com.google.protobuf.ByteString
+        getCmFqdnBytes();
+
+    /**
+     * <pre>
+     * The Cloudera Manager IP.
+     * </pre>
+     *
+     * <code>string cmIp = 5;</code>
+     * @return The cmIp.
+     */
+    java.lang.String getCmIp();
+    /**
+     * <pre>
+     * The Cloudera Manager IP.
+     * </pre>
+     *
+     * <code>string cmIp = 5;</code>
+     * @return The bytes for cmIp.
+     */
+    com.google.protobuf.ByteString
+        getCmIpBytes();
+
+    /**
+     * <pre>
+     * The Cloudera Manager server ID.
+     * </pre>
+     *
+     * <code>string cmServerId = 6;</code>
+     * @return The cmServerId.
+     */
+    java.lang.String getCmServerId();
+    /**
+     * <pre>
+     * The Cloudera Manager server ID.
+     * </pre>
+     *
+     * <code>string cmServerId = 6;</code>
+     * @return The bytes for cmServerId.
+     */
+    com.google.protobuf.ByteString
+        getCmServerIdBytes();
+
+    /**
+     * <pre>
+     * Status of the Data Lake.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * Status of the Data Lake.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+     * @return The status.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value getStatus();
+
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> 
+        getInstancesList();
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getInstances(int index);
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    int getInstancesCount();
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder> 
+        getInstancesOrBuilderList();
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder getInstancesOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     * @return Whether the kerberosInfo field is set.
+     */
+    boolean hasKerberosInfo();
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     * @return The kerberosInfo.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getKerberosInfo();
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder getKerberosInfoOrBuilder();
+  }
+  /**
+   * <pre>
+   * Object containing on-premises Data Lake details.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.OnPremDatalakeDetails}
+   */
+  public static final class OnPremDatalakeDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.OnPremDatalakeDetails)
+      OnPremDatalakeDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use OnPremDatalakeDetails.newBuilder() to construct.
+    private OnPremDatalakeDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private OnPremDatalakeDetails() {
+      datalakeName_ = "";
+      cmFqdn_ = "";
+      cmIp_ = "";
+      cmServerId_ = "";
+      status_ = 0;
+      instances_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new OnPremDatalakeDetails();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremDatalakeDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremDatalakeDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATALAKENAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalakeName_ = "";
+    /**
+     * <pre>
+     * Name of the Data Lake.
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalakeName() {
+      java.lang.Object ref = datalakeName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalakeName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the Data Lake.
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeNameBytes() {
+      java.lang.Object ref = datalakeName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalakeName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENABLERANGERRAZ_FIELD_NUMBER = 2;
+    private boolean enableRangerRaz_ = false;
+    /**
+     * <pre>
+     * Inidicates whether Ranger RAZ is enabled for the Data Lake.
+     * </pre>
+     *
+     * <code>bool enableRangerRaz = 2;</code>
+     * @return The enableRangerRaz.
+     */
+    @java.lang.Override
+    public boolean getEnableRangerRaz() {
+      return enableRangerRaz_;
+    }
+
+    public static final int CREATIONTIMEEPOCHMILLIS_FIELD_NUMBER = 3;
+    private long creationTimeEpochMillis_ = 0L;
+    /**
+     * <pre>
+     * The timestamp in Unix epoch when the Data Lake was created.
+     * </pre>
+     *
+     * <code>int64 creationTimeEpochMillis = 3;</code>
+     * @return The creationTimeEpochMillis.
+     */
+    @java.lang.Override
+    public long getCreationTimeEpochMillis() {
+      return creationTimeEpochMillis_;
+    }
+
+    public static final int CMFQDN_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmFqdn_ = "";
+    /**
+     * <pre>
+     * The Cloudera Manager FQDN.
+     * </pre>
+     *
+     * <code>string cmFqdn = 4;</code>
+     * @return The cmFqdn.
+     */
+    @java.lang.Override
+    public java.lang.String getCmFqdn() {
+      java.lang.Object ref = cmFqdn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmFqdn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Cloudera Manager FQDN.
+     * </pre>
+     *
+     * <code>string cmFqdn = 4;</code>
+     * @return The bytes for cmFqdn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmFqdnBytes() {
+      java.lang.Object ref = cmFqdn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmFqdn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CMIP_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmIp_ = "";
+    /**
+     * <pre>
+     * The Cloudera Manager IP.
+     * </pre>
+     *
+     * <code>string cmIp = 5;</code>
+     * @return The cmIp.
+     */
+    @java.lang.Override
+    public java.lang.String getCmIp() {
+      java.lang.Object ref = cmIp_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmIp_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Cloudera Manager IP.
+     * </pre>
+     *
+     * <code>string cmIp = 5;</code>
+     * @return The bytes for cmIp.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmIpBytes() {
+      java.lang.Object ref = cmIp_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmIp_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CMSERVERID_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmServerId_ = "";
+    /**
+     * <pre>
+     * The Cloudera Manager server ID.
+     * </pre>
+     *
+     * <code>string cmServerId = 6;</code>
+     * @return The cmServerId.
+     */
+    @java.lang.Override
+    public java.lang.String getCmServerId() {
+      java.lang.Object ref = cmServerId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmServerId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Cloudera Manager server ID.
+     * </pre>
+     *
+     * <code>string cmServerId = 6;</code>
+     * @return The bytes for cmServerId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmServerIdBytes() {
+      java.lang.Object ref = cmServerId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmServerId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 7;
+    private int status_ = 0;
+    /**
+     * <pre>
+     * Status of the Data Lake.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    @java.lang.Override public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * Status of the Data Lake.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+     * @return The status.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value getStatus() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.forNumber(status_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int INSTANCES_FIELD_NUMBER = 8;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> instances_;
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> getInstancesList() {
+      return instances_;
+    }
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder> 
+        getInstancesOrBuilderList() {
+      return instances_;
+    }
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    @java.lang.Override
+    public int getInstancesCount() {
+      return instances_.size();
+    }
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getInstances(int index) {
+      return instances_.get(index);
+    }
+    /**
+     * <pre>
+     * The list of instances within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * <code>repeated .onpremises.Instance instances = 8;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder getInstancesOrBuilder(
+        int index) {
+      return instances_.get(index);
+    }
+
+    public static final int KERBEROSINFO_FIELD_NUMBER = 9;
+    private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo kerberosInfo_;
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     * @return Whether the kerberosInfo field is set.
+     */
+    @java.lang.Override
+    public boolean hasKerberosInfo() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     * @return The kerberosInfo.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getKerberosInfo() {
+      return kerberosInfo_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance() : kerberosInfo_;
+    }
+    /**
+     * <pre>
+     * Contains the kerberos related informations.
+     * </pre>
+     *
+     * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder getKerberosInfoOrBuilder() {
+      return kerberosInfo_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance() : kerberosInfo_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
+      }
+      if (enableRangerRaz_ != false) {
+        output.writeBool(2, enableRangerRaz_);
+      }
+      if (creationTimeEpochMillis_ != 0L) {
+        output.writeInt64(3, creationTimeEpochMillis_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmFqdn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cmFqdn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmIp_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cmIp_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmServerId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, cmServerId_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.UNSET.getNumber()) {
+        output.writeEnum(7, status_);
+      }
+      for (int i = 0; i < instances_.size(); i++) {
+        output.writeMessage(8, instances_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(9, getKerberosInfo());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
+      }
+      if (enableRangerRaz_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, enableRangerRaz_);
+      }
+      if (creationTimeEpochMillis_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, creationTimeEpochMillis_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmFqdn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cmFqdn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmIp_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cmIp_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmServerId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, cmServerId_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(7, status_);
+      }
+      for (int i = 0; i < instances_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, instances_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, getKerberosInfo());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails) obj;
+
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (getEnableRangerRaz()
+          != other.getEnableRangerRaz()) return false;
+      if (getCreationTimeEpochMillis()
+          != other.getCreationTimeEpochMillis()) return false;
+      if (!getCmFqdn()
+          .equals(other.getCmFqdn())) return false;
+      if (!getCmIp()
+          .equals(other.getCmIp())) return false;
+      if (!getCmServerId()
+          .equals(other.getCmServerId())) return false;
+      if (status_ != other.status_) return false;
+      if (!getInstancesList()
+          .equals(other.getInstancesList())) return false;
+      if (hasKerberosInfo() != other.hasKerberosInfo()) return false;
+      if (hasKerberosInfo()) {
+        if (!getKerberosInfo()
+            .equals(other.getKerberosInfo())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalakeName().hashCode();
+      hash = (37 * hash) + ENABLERANGERRAZ_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEnableRangerRaz());
+      hash = (37 * hash) + CREATIONTIMEEPOCHMILLIS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCreationTimeEpochMillis());
+      hash = (37 * hash) + CMFQDN_FIELD_NUMBER;
+      hash = (53 * hash) + getCmFqdn().hashCode();
+      hash = (37 * hash) + CMIP_FIELD_NUMBER;
+      hash = (53 * hash) + getCmIp().hashCode();
+      hash = (37 * hash) + CMSERVERID_FIELD_NUMBER;
+      hash = (53 * hash) + getCmServerId().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
+      if (getInstancesCount() > 0) {
+        hash = (37 * hash) + INSTANCES_FIELD_NUMBER;
+        hash = (53 * hash) + getInstancesList().hashCode();
+      }
+      if (hasKerberosInfo()) {
+        hash = (37 * hash) + KERBEROSINFO_FIELD_NUMBER;
+        hash = (53 * hash) + getKerberosInfo().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing on-premises Data Lake details.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.OnPremDatalakeDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.OnPremDatalakeDetails)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremDatalakeDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremDatalakeDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getInstancesFieldBuilder();
+          getKerberosInfoFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalakeName_ = "";
+        enableRangerRaz_ = false;
+        creationTimeEpochMillis_ = 0L;
+        cmFqdn_ = "";
+        cmIp_ = "";
+        cmServerId_ = "";
+        status_ = 0;
+        if (instancesBuilder_ == null) {
+          instances_ = java.util.Collections.emptyList();
+        } else {
+          instances_ = null;
+          instancesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
+        kerberosInfo_ = null;
+        if (kerberosInfoBuilder_ != null) {
+          kerberosInfoBuilder_.dispose();
+          kerberosInfoBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_OnPremDatalakeDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails result) {
+        if (instancesBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) != 0)) {
+            instances_ = java.util.Collections.unmodifiableList(instances_);
+            bitField0_ = (bitField0_ & ~0x00000080);
+          }
+          result.instances_ = instances_;
+        } else {
+          result.instances_ = instancesBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalakeName_ = datalakeName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.enableRangerRaz_ = enableRangerRaz_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.creationTimeEpochMillis_ = creationTimeEpochMillis_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.cmFqdn_ = cmFqdn_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.cmIp_ = cmIp_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.cmServerId_ = cmServerId_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.status_ = status_;
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.kerberosInfo_ = kerberosInfoBuilder_ == null
+              ? kerberosInfo_
+              : kerberosInfoBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance()) return this;
+        if (!other.getDatalakeName().isEmpty()) {
+          datalakeName_ = other.datalakeName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.getEnableRangerRaz() != false) {
+          setEnableRangerRaz(other.getEnableRangerRaz());
+        }
+        if (other.getCreationTimeEpochMillis() != 0L) {
+          setCreationTimeEpochMillis(other.getCreationTimeEpochMillis());
+        }
+        if (!other.getCmFqdn().isEmpty()) {
+          cmFqdn_ = other.cmFqdn_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getCmIp().isEmpty()) {
+          cmIp_ = other.cmIp_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getCmServerId().isEmpty()) {
+          cmServerId_ = other.cmServerId_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
+        }
+        if (instancesBuilder_ == null) {
+          if (!other.instances_.isEmpty()) {
+            if (instances_.isEmpty()) {
+              instances_ = other.instances_;
+              bitField0_ = (bitField0_ & ~0x00000080);
+            } else {
+              ensureInstancesIsMutable();
+              instances_.addAll(other.instances_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.instances_.isEmpty()) {
+            if (instancesBuilder_.isEmpty()) {
+              instancesBuilder_.dispose();
+              instancesBuilder_ = null;
+              instances_ = other.instances_;
+              bitField0_ = (bitField0_ & ~0x00000080);
+              instancesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getInstancesFieldBuilder() : null;
+            } else {
+              instancesBuilder_.addAllMessages(other.instances_);
+            }
+          }
+        }
+        if (other.hasKerberosInfo()) {
+          mergeKerberosInfo(other.getKerberosInfo());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                enableRangerRaz_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                creationTimeEpochMillis_ = input.readInt64();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                cmFqdn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                cmIp_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                cmServerId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 56: {
+                status_ = input.readEnum();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 66: {
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.parser(),
+                        extensionRegistry);
+                if (instancesBuilder_ == null) {
+                  ensureInstancesIsMutable();
+                  instances_.add(m);
+                } else {
+                  instancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 66
+              case 74: {
+                input.readMessage(
+                    getKerberosInfoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalakeName_ = "";
+      /**
+       * <pre>
+       * Name of the Data Lake.
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
+       */
+      public java.lang.String getDatalakeName() {
+        java.lang.Object ref = datalakeName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalakeName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Data Lake.
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeNameBytes() {
+        java.lang.Object ref = datalakeName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalakeName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Data Lake.
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalakeName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Data Lake.
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalakeName() {
+        datalakeName_ = getDefaultInstance().getDatalakeName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Data Lake.
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalakeName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private boolean enableRangerRaz_ ;
+      /**
+       * <pre>
+       * Inidicates whether Ranger RAZ is enabled for the Data Lake.
+       * </pre>
+       *
+       * <code>bool enableRangerRaz = 2;</code>
+       * @return The enableRangerRaz.
+       */
+      @java.lang.Override
+      public boolean getEnableRangerRaz() {
+        return enableRangerRaz_;
+      }
+      /**
+       * <pre>
+       * Inidicates whether Ranger RAZ is enabled for the Data Lake.
+       * </pre>
+       *
+       * <code>bool enableRangerRaz = 2;</code>
+       * @param value The enableRangerRaz to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnableRangerRaz(boolean value) {
+
+        enableRangerRaz_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Inidicates whether Ranger RAZ is enabled for the Data Lake.
+       * </pre>
+       *
+       * <code>bool enableRangerRaz = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnableRangerRaz() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        enableRangerRaz_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long creationTimeEpochMillis_ ;
+      /**
+       * <pre>
+       * The timestamp in Unix epoch when the Data Lake was created.
+       * </pre>
+       *
+       * <code>int64 creationTimeEpochMillis = 3;</code>
+       * @return The creationTimeEpochMillis.
+       */
+      @java.lang.Override
+      public long getCreationTimeEpochMillis() {
+        return creationTimeEpochMillis_;
+      }
+      /**
+       * <pre>
+       * The timestamp in Unix epoch when the Data Lake was created.
+       * </pre>
+       *
+       * <code>int64 creationTimeEpochMillis = 3;</code>
+       * @param value The creationTimeEpochMillis to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreationTimeEpochMillis(long value) {
+
+        creationTimeEpochMillis_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The timestamp in Unix epoch when the Data Lake was created.
+       * </pre>
+       *
+       * <code>int64 creationTimeEpochMillis = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreationTimeEpochMillis() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        creationTimeEpochMillis_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmFqdn_ = "";
+      /**
+       * <pre>
+       * The Cloudera Manager FQDN.
+       * </pre>
+       *
+       * <code>string cmFqdn = 4;</code>
+       * @return The cmFqdn.
+       */
+      public java.lang.String getCmFqdn() {
+        java.lang.Object ref = cmFqdn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmFqdn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager FQDN.
+       * </pre>
+       *
+       * <code>string cmFqdn = 4;</code>
+       * @return The bytes for cmFqdn.
+       */
+      public com.google.protobuf.ByteString
+          getCmFqdnBytes() {
+        java.lang.Object ref = cmFqdn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmFqdn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager FQDN.
+       * </pre>
+       *
+       * <code>string cmFqdn = 4;</code>
+       * @param value The cmFqdn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmFqdn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmFqdn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager FQDN.
+       * </pre>
+       *
+       * <code>string cmFqdn = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmFqdn() {
+        cmFqdn_ = getDefaultInstance().getCmFqdn();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager FQDN.
+       * </pre>
+       *
+       * <code>string cmFqdn = 4;</code>
+       * @param value The bytes for cmFqdn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmFqdnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmFqdn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmIp_ = "";
+      /**
+       * <pre>
+       * The Cloudera Manager IP.
+       * </pre>
+       *
+       * <code>string cmIp = 5;</code>
+       * @return The cmIp.
+       */
+      public java.lang.String getCmIp() {
+        java.lang.Object ref = cmIp_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmIp_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager IP.
+       * </pre>
+       *
+       * <code>string cmIp = 5;</code>
+       * @return The bytes for cmIp.
+       */
+      public com.google.protobuf.ByteString
+          getCmIpBytes() {
+        java.lang.Object ref = cmIp_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmIp_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager IP.
+       * </pre>
+       *
+       * <code>string cmIp = 5;</code>
+       * @param value The cmIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmIp(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmIp_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager IP.
+       * </pre>
+       *
+       * <code>string cmIp = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmIp() {
+        cmIp_ = getDefaultInstance().getCmIp();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager IP.
+       * </pre>
+       *
+       * <code>string cmIp = 5;</code>
+       * @param value The bytes for cmIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmIpBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmIp_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmServerId_ = "";
+      /**
+       * <pre>
+       * The Cloudera Manager server ID.
+       * </pre>
+       *
+       * <code>string cmServerId = 6;</code>
+       * @return The cmServerId.
+       */
+      public java.lang.String getCmServerId() {
+        java.lang.Object ref = cmServerId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmServerId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager server ID.
+       * </pre>
+       *
+       * <code>string cmServerId = 6;</code>
+       * @return The bytes for cmServerId.
+       */
+      public com.google.protobuf.ByteString
+          getCmServerIdBytes() {
+        java.lang.Object ref = cmServerId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmServerId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager server ID.
+       * </pre>
+       *
+       * <code>string cmServerId = 6;</code>
+       * @param value The cmServerId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmServerId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmServerId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager server ID.
+       * </pre>
+       *
+       * <code>string cmServerId = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmServerId() {
+        cmServerId_ = getDefaultInstance().getCmServerId();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager server ID.
+       * </pre>
+       *
+       * <code>string cmServerId = 6;</code>
+       * @param value The bytes for cmServerId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmServerIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmServerId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private int status_ = 0;
+      /**
+       * <pre>
+       * Status of the Data Lake.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+       * @return The enum numeric value on the wire for status.
+       */
+      @java.lang.Override public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * Status of the Data Lake.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusValue(int value) {
+        status_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Data Lake.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+       * @return The status.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value getStatus() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.forNumber(status_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Status of the Data Lake.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000040;
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Data Lake.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeStatus.Value status = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> instances_ =
+        java.util.Collections.emptyList();
+      private void ensureInstancesIsMutable() {
+        if (!((bitField0_ & 0x00000080) != 0)) {
+          instances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance>(instances_);
+          bitField0_ |= 0x00000080;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder> instancesBuilder_;
+
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> getInstancesList() {
+        if (instancesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(instances_);
+        } else {
+          return instancesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public int getInstancesCount() {
+        if (instancesBuilder_ == null) {
+          return instances_.size();
+        } else {
+          return instancesBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getInstances(int index) {
+        if (instancesBuilder_ == null) {
+          return instances_.get(index);
+        } else {
+          return instancesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder setInstances(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance value) {
+        if (instancesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstancesIsMutable();
+          instances_.set(index, value);
+          onChanged();
+        } else {
+          instancesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder setInstances(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder builderForValue) {
+        if (instancesBuilder_ == null) {
+          ensureInstancesIsMutable();
+          instances_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          instancesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder addInstances(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance value) {
+        if (instancesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstancesIsMutable();
+          instances_.add(value);
+          onChanged();
+        } else {
+          instancesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder addInstances(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance value) {
+        if (instancesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInstancesIsMutable();
+          instances_.add(index, value);
+          onChanged();
+        } else {
+          instancesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder addInstances(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder builderForValue) {
+        if (instancesBuilder_ == null) {
+          ensureInstancesIsMutable();
+          instances_.add(builderForValue.build());
+          onChanged();
+        } else {
+          instancesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder addInstances(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder builderForValue) {
+        if (instancesBuilder_ == null) {
+          ensureInstancesIsMutable();
+          instances_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          instancesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder addAllInstances(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance> values) {
+        if (instancesBuilder_ == null) {
+          ensureInstancesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, instances_);
+          onChanged();
+        } else {
+          instancesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder clearInstances() {
+        if (instancesBuilder_ == null) {
+          instances_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000080);
+          onChanged();
+        } else {
+          instancesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public Builder removeInstances(int index) {
+        if (instancesBuilder_ == null) {
+          ensureInstancesIsMutable();
+          instances_.remove(index);
+          onChanged();
+        } else {
+          instancesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder getInstancesBuilder(
+          int index) {
+        return getInstancesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder getInstancesOrBuilder(
+          int index) {
+        if (instancesBuilder_ == null) {
+          return instances_.get(index);  } else {
+          return instancesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder> 
+           getInstancesOrBuilderList() {
+        if (instancesBuilder_ != null) {
+          return instancesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(instances_);
+        }
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder addInstancesBuilder() {
+        return getInstancesFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder addInstancesBuilder(
+          int index) {
+        return getInstancesFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The list of instances within the on premises Data Lake cluster.
+       * </pre>
+       *
+       * <code>repeated .onpremises.Instance instances = 8;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder> 
+           getInstancesBuilderList() {
+        return getInstancesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder> 
+          getInstancesFieldBuilder() {
+        if (instancesBuilder_ == null) {
+          instancesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder>(
+                  instances_,
+                  ((bitField0_ & 0x00000080) != 0),
+                  getParentForChildren(),
+                  isClean());
+          instances_ = null;
+        }
+        return instancesBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo kerberosInfo_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder> kerberosInfoBuilder_;
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       * @return Whether the kerberosInfo field is set.
+       */
+      public boolean hasKerberosInfo() {
+        return ((bitField0_ & 0x00000100) != 0);
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       * @return The kerberosInfo.
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getKerberosInfo() {
+        if (kerberosInfoBuilder_ == null) {
+          return kerberosInfo_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance() : kerberosInfo_;
+        } else {
+          return kerberosInfoBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public Builder setKerberosInfo(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo value) {
+        if (kerberosInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          kerberosInfo_ = value;
+        } else {
+          kerberosInfoBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public Builder setKerberosInfo(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder builderForValue) {
+        if (kerberosInfoBuilder_ == null) {
+          kerberosInfo_ = builderForValue.build();
+        } else {
+          kerberosInfoBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public Builder mergeKerberosInfo(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo value) {
+        if (kerberosInfoBuilder_ == null) {
+          if (((bitField0_ & 0x00000100) != 0) &&
+            kerberosInfo_ != null &&
+            kerberosInfo_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance()) {
+            getKerberosInfoBuilder().mergeFrom(value);
+          } else {
+            kerberosInfo_ = value;
+          }
+        } else {
+          kerberosInfoBuilder_.mergeFrom(value);
+        }
+        if (kerberosInfo_ != null) {
+          bitField0_ |= 0x00000100;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public Builder clearKerberosInfo() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        kerberosInfo_ = null;
+        if (kerberosInfoBuilder_ != null) {
+          kerberosInfoBuilder_.dispose();
+          kerberosInfoBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder getKerberosInfoBuilder() {
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return getKerberosInfoFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder getKerberosInfoOrBuilder() {
+        if (kerberosInfoBuilder_ != null) {
+          return kerberosInfoBuilder_.getMessageOrBuilder();
+        } else {
+          return kerberosInfo_ == null ?
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance() : kerberosInfo_;
+        }
+      }
+      /**
+       * <pre>
+       * Contains the kerberos related informations.
+       * </pre>
+       *
+       * <code>.onpremises.KerberosInfo kerberosInfo = 9;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder> 
+          getKerberosInfoFieldBuilder() {
+        if (kerberosInfoBuilder_ == null) {
+          kerberosInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder>(
+                  getKerberosInfo(),
+                  getParentForChildren(),
+                  isClean());
+          kerberosInfo_ = null;
+        }
+        return kerberosInfoBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.OnPremDatalakeDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.OnPremDatalakeDetails)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<OnPremDatalakeDetails>
+        PARSER = new com.google.protobuf.AbstractParser<OnPremDatalakeDetails>() {
+      @java.lang.Override
+      public OnPremDatalakeDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<OnPremDatalakeDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<OnPremDatalakeDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface InstanceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.Instance)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The ID of the instance.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    java.lang.String getId();
+    /**
+     * <pre>
+     * The ID of the instance.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <pre>
+     * The fully qualified domain name of the instance in the cluster.
+     * </pre>
+     *
+     * <code>string fqdn = 2;</code>
+     * @return The fqdn.
+     */
+    java.lang.String getFqdn();
+    /**
+     * <pre>
+     * The fully qualified domain name of the instance in the cluster.
+     * </pre>
+     *
+     * <code>string fqdn = 2;</code>
+     * @return The bytes for fqdn.
+     */
+    com.google.protobuf.ByteString
+        getFqdnBytes();
+
+    /**
+     * <pre>
+     * The private IP of the instance.
+     * </pre>
+     *
+     * <code>string privateIp = 3;</code>
+     * @return The privateIp.
+     */
+    java.lang.String getPrivateIp();
+    /**
+     * <pre>
+     * The private IP of the instance.
+     * </pre>
+     *
+     * <code>string privateIp = 3;</code>
+     * @return The bytes for privateIp.
+     */
+    com.google.protobuf.ByteString
+        getPrivateIpBytes();
+  }
+  /**
+   * <pre>
+   * Information for instance within the on premises Data Lake cluster.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.Instance}
+   */
+  public static final class Instance extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.Instance)
+      InstanceOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Instance.newBuilder() to construct.
+    private Instance(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Instance() {
+      id_ = "";
+      fqdn_ = "";
+      privateIp_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Instance();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Instance_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Instance_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object id_ = "";
+    /**
+     * <pre>
+     * The ID of the instance.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The ID of the instance.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FQDN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fqdn_ = "";
+    /**
+     * <pre>
+     * The fully qualified domain name of the instance in the cluster.
+     * </pre>
+     *
+     * <code>string fqdn = 2;</code>
+     * @return The fqdn.
+     */
+    @java.lang.Override
+    public java.lang.String getFqdn() {
+      java.lang.Object ref = fqdn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fqdn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The fully qualified domain name of the instance in the cluster.
+     * </pre>
+     *
+     * <code>string fqdn = 2;</code>
+     * @return The bytes for fqdn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFqdnBytes() {
+      java.lang.Object ref = fqdn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fqdn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PRIVATEIP_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object privateIp_ = "";
+    /**
+     * <pre>
+     * The private IP of the instance.
+     * </pre>
+     *
+     * <code>string privateIp = 3;</code>
+     * @return The privateIp.
+     */
+    @java.lang.Override
+    public java.lang.String getPrivateIp() {
+      java.lang.Object ref = privateIp_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        privateIp_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The private IP of the instance.
+     * </pre>
+     *
+     * <code>string privateIp = 3;</code>
+     * @return The bytes for privateIp.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPrivateIpBytes() {
+      java.lang.Object ref = privateIp_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        privateIp_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fqdn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, fqdn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(privateIp_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, privateIp_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fqdn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, fqdn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(privateIp_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, privateIp_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance) obj;
+
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!getFqdn()
+          .equals(other.getFqdn())) return false;
+      if (!getPrivateIp()
+          .equals(other.getPrivateIp())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + FQDN_FIELD_NUMBER;
+      hash = (53 * hash) + getFqdn().hashCode();
+      hash = (37 * hash) + PRIVATEIP_FIELD_NUMBER;
+      hash = (53 * hash) + getPrivateIp().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Information for instance within the on premises Data Lake cluster.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.Instance}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.Instance)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.InstanceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Instance_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Instance_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = "";
+        fqdn_ = "";
+        privateIp_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_Instance_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.fqdn_ = fqdn_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.privateIp_ = privateIp_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getFqdn().isEmpty()) {
+          fqdn_ = other.fqdn_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getPrivateIp().isEmpty()) {
+          privateIp_ = other.privateIp_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                id_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                fqdn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                privateIp_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object id_ = "";
+      /**
+       * <pre>
+       * The ID of the instance.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The id.
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The ID of the instance.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The bytes for id.
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The ID of the instance.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The ID of the instance.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        id_ = getDefaultInstance().getId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The ID of the instance.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fqdn_ = "";
+      /**
+       * <pre>
+       * The fully qualified domain name of the instance in the cluster.
+       * </pre>
+       *
+       * <code>string fqdn = 2;</code>
+       * @return The fqdn.
+       */
+      public java.lang.String getFqdn() {
+        java.lang.Object ref = fqdn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fqdn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The fully qualified domain name of the instance in the cluster.
+       * </pre>
+       *
+       * <code>string fqdn = 2;</code>
+       * @return The bytes for fqdn.
+       */
+      public com.google.protobuf.ByteString
+          getFqdnBytes() {
+        java.lang.Object ref = fqdn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fqdn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The fully qualified domain name of the instance in the cluster.
+       * </pre>
+       *
+       * <code>string fqdn = 2;</code>
+       * @param value The fqdn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFqdn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        fqdn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The fully qualified domain name of the instance in the cluster.
+       * </pre>
+       *
+       * <code>string fqdn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFqdn() {
+        fqdn_ = getDefaultInstance().getFqdn();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The fully qualified domain name of the instance in the cluster.
+       * </pre>
+       *
+       * <code>string fqdn = 2;</code>
+       * @param value The bytes for fqdn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFqdnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        fqdn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object privateIp_ = "";
+      /**
+       * <pre>
+       * The private IP of the instance.
+       * </pre>
+       *
+       * <code>string privateIp = 3;</code>
+       * @return The privateIp.
+       */
+      public java.lang.String getPrivateIp() {
+        java.lang.Object ref = privateIp_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          privateIp_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The private IP of the instance.
+       * </pre>
+       *
+       * <code>string privateIp = 3;</code>
+       * @return The bytes for privateIp.
+       */
+      public com.google.protobuf.ByteString
+          getPrivateIpBytes() {
+        java.lang.Object ref = privateIp_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          privateIp_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The private IP of the instance.
+       * </pre>
+       *
+       * <code>string privateIp = 3;</code>
+       * @param value The privateIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrivateIp(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        privateIp_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The private IP of the instance.
+       * </pre>
+       *
+       * <code>string privateIp = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPrivateIp() {
+        privateIp_ = getDefaultInstance().getPrivateIp();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The private IP of the instance.
+       * </pre>
+       *
+       * <code>string privateIp = 3;</code>
+       * @param value The bytes for privateIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPrivateIpBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        privateIp_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.Instance)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.Instance)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Instance>
+        PARSER = new com.google.protobuf.AbstractParser<Instance>() {
+      @java.lang.Override
+      public Instance parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Instance> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Instance> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Instance getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface KerberosInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.KerberosInfo)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The type of Key Distribution Center.
+     * </pre>
+     *
+     * <code>string kdcType = 1;</code>
+     * @return The kdcType.
+     */
+    java.lang.String getKdcType();
+    /**
+     * <pre>
+     * The type of Key Distribution Center.
+     * </pre>
+     *
+     * <code>string kdcType = 1;</code>
+     * @return The bytes for kdcType.
+     */
+    com.google.protobuf.ByteString
+        getKdcTypeBytes();
+
+    /**
+     * <pre>
+     * Kerberos realm.
+     * </pre>
+     *
+     * <code>string kerberosRealm = 2;</code>
+     * @return The kerberosRealm.
+     */
+    java.lang.String getKerberosRealm();
+    /**
+     * <pre>
+     * Kerberos realm.
+     * </pre>
+     *
+     * <code>string kerberosRealm = 2;</code>
+     * @return The bytes for kerberosRealm.
+     */
+    com.google.protobuf.ByteString
+        getKerberosRealmBytes();
+
+    /**
+     * <pre>
+     * Key Distribution Center host.
+     * </pre>
+     *
+     * <code>string kdcHost = 3;</code>
+     * @return The kdcHost.
+     */
+    java.lang.String getKdcHost();
+    /**
+     * <pre>
+     * Key Distribution Center host.
+     * </pre>
+     *
+     * <code>string kdcHost = 3;</code>
+     * @return The bytes for kdcHost.
+     */
+    com.google.protobuf.ByteString
+        getKdcHostBytes();
+
+    /**
+     * <pre>
+     * Key Distribution Center host IP address.
+     * </pre>
+     *
+     * <code>string kdcHostIp = 4;</code>
+     * @return The kdcHostIp.
+     */
+    java.lang.String getKdcHostIp();
+    /**
+     * <pre>
+     * Key Distribution Center host IP address.
+     * </pre>
+     *
+     * <code>string kdcHostIp = 4;</code>
+     * @return The bytes for kdcHostIp.
+     */
+    com.google.protobuf.ByteString
+        getKdcHostIpBytes();
+
+    /**
+     * <pre>
+     * Denotes whether kerberized or not.
+     * </pre>
+     *
+     * <code>bool kerberized = 5;</code>
+     * @return The kerberized.
+     */
+    boolean getKerberized();
+  }
+  /**
+   * <pre>
+   * The kerberos information for on premises Data Lake cluster.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.KerberosInfo}
+   */
+  public static final class KerberosInfo extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.KerberosInfo)
+      KerberosInfoOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use KerberosInfo.newBuilder() to construct.
+    private KerberosInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private KerberosInfo() {
+      kdcType_ = "";
+      kerberosRealm_ = "";
+      kdcHost_ = "";
+      kdcHostIp_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new KerberosInfo();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_KerberosInfo_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_KerberosInfo_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder.class);
+    }
+
+    public static final int KDCTYPE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object kdcType_ = "";
+    /**
+     * <pre>
+     * The type of Key Distribution Center.
+     * </pre>
+     *
+     * <code>string kdcType = 1;</code>
+     * @return The kdcType.
+     */
+    @java.lang.Override
+    public java.lang.String getKdcType() {
+      java.lang.Object ref = kdcType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        kdcType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The type of Key Distribution Center.
+     * </pre>
+     *
+     * <code>string kdcType = 1;</code>
+     * @return The bytes for kdcType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKdcTypeBytes() {
+      java.lang.Object ref = kdcType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        kdcType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KERBEROSREALM_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object kerberosRealm_ = "";
+    /**
+     * <pre>
+     * Kerberos realm.
+     * </pre>
+     *
+     * <code>string kerberosRealm = 2;</code>
+     * @return The kerberosRealm.
+     */
+    @java.lang.Override
+    public java.lang.String getKerberosRealm() {
+      java.lang.Object ref = kerberosRealm_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        kerberosRealm_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Kerberos realm.
+     * </pre>
+     *
+     * <code>string kerberosRealm = 2;</code>
+     * @return The bytes for kerberosRealm.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKerberosRealmBytes() {
+      java.lang.Object ref = kerberosRealm_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        kerberosRealm_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KDCHOST_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object kdcHost_ = "";
+    /**
+     * <pre>
+     * Key Distribution Center host.
+     * </pre>
+     *
+     * <code>string kdcHost = 3;</code>
+     * @return The kdcHost.
+     */
+    @java.lang.Override
+    public java.lang.String getKdcHost() {
+      java.lang.Object ref = kdcHost_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        kdcHost_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Key Distribution Center host.
+     * </pre>
+     *
+     * <code>string kdcHost = 3;</code>
+     * @return The bytes for kdcHost.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKdcHostBytes() {
+      java.lang.Object ref = kdcHost_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        kdcHost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KDCHOSTIP_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object kdcHostIp_ = "";
+    /**
+     * <pre>
+     * Key Distribution Center host IP address.
+     * </pre>
+     *
+     * <code>string kdcHostIp = 4;</code>
+     * @return The kdcHostIp.
+     */
+    @java.lang.Override
+    public java.lang.String getKdcHostIp() {
+      java.lang.Object ref = kdcHostIp_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        kdcHostIp_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Key Distribution Center host IP address.
+     * </pre>
+     *
+     * <code>string kdcHostIp = 4;</code>
+     * @return The bytes for kdcHostIp.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKdcHostIpBytes() {
+      java.lang.Object ref = kdcHostIp_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        kdcHostIp_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KERBERIZED_FIELD_NUMBER = 5;
+    private boolean kerberized_ = false;
+    /**
+     * <pre>
+     * Denotes whether kerberized or not.
+     * </pre>
+     *
+     * <code>bool kerberized = 5;</code>
+     * @return The kerberized.
+     */
+    @java.lang.Override
+    public boolean getKerberized() {
+      return kerberized_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, kdcType_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosRealm_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, kerberosRealm_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcHost_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, kdcHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcHostIp_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, kdcHostIp_);
+      }
+      if (kerberized_ != false) {
+        output.writeBool(5, kerberized_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, kdcType_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosRealm_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, kerberosRealm_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcHost_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, kdcHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kdcHostIp_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, kdcHostIp_);
+      }
+      if (kerberized_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, kerberized_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo) obj;
+
+      if (!getKdcType()
+          .equals(other.getKdcType())) return false;
+      if (!getKerberosRealm()
+          .equals(other.getKerberosRealm())) return false;
+      if (!getKdcHost()
+          .equals(other.getKdcHost())) return false;
+      if (!getKdcHostIp()
+          .equals(other.getKdcHostIp())) return false;
+      if (getKerberized()
+          != other.getKerberized()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + KDCTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getKdcType().hashCode();
+      hash = (37 * hash) + KERBEROSREALM_FIELD_NUMBER;
+      hash = (53 * hash) + getKerberosRealm().hashCode();
+      hash = (37 * hash) + KDCHOST_FIELD_NUMBER;
+      hash = (53 * hash) + getKdcHost().hashCode();
+      hash = (37 * hash) + KDCHOSTIP_FIELD_NUMBER;
+      hash = (53 * hash) + getKdcHostIp().hashCode();
+      hash = (37 * hash) + KERBERIZED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getKerberized());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The kerberos information for on premises Data Lake cluster.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.KerberosInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.KerberosInfo)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfoOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_KerberosInfo_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_KerberosInfo_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        kdcType_ = "";
+        kerberosRealm_ = "";
+        kdcHost_ = "";
+        kdcHostIp_ = "";
+        kerberized_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_KerberosInfo_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.kdcType_ = kdcType_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.kerberosRealm_ = kerberosRealm_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.kdcHost_ = kdcHost_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.kdcHostIp_ = kdcHostIp_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.kerberized_ = kerberized_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo.getDefaultInstance()) return this;
+        if (!other.getKdcType().isEmpty()) {
+          kdcType_ = other.kdcType_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getKerberosRealm().isEmpty()) {
+          kerberosRealm_ = other.kerberosRealm_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getKdcHost().isEmpty()) {
+          kdcHost_ = other.kdcHost_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getKdcHostIp().isEmpty()) {
+          kdcHostIp_ = other.kdcHostIp_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.getKerberized() != false) {
+          setKerberized(other.getKerberized());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                kdcType_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                kerberosRealm_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                kdcHost_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                kdcHostIp_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                kerberized_ = input.readBool();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object kdcType_ = "";
+      /**
+       * <pre>
+       * The type of Key Distribution Center.
+       * </pre>
+       *
+       * <code>string kdcType = 1;</code>
+       * @return The kdcType.
+       */
+      public java.lang.String getKdcType() {
+        java.lang.Object ref = kdcType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          kdcType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The type of Key Distribution Center.
+       * </pre>
+       *
+       * <code>string kdcType = 1;</code>
+       * @return The bytes for kdcType.
+       */
+      public com.google.protobuf.ByteString
+          getKdcTypeBytes() {
+        java.lang.Object ref = kdcType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          kdcType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The type of Key Distribution Center.
+       * </pre>
+       *
+       * <code>string kdcType = 1;</code>
+       * @param value The kdcType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcType(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        kdcType_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of Key Distribution Center.
+       * </pre>
+       *
+       * <code>string kdcType = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKdcType() {
+        kdcType_ = getDefaultInstance().getKdcType();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of Key Distribution Center.
+       * </pre>
+       *
+       * <code>string kdcType = 1;</code>
+       * @param value The bytes for kdcType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        kdcType_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object kerberosRealm_ = "";
+      /**
+       * <pre>
+       * Kerberos realm.
+       * </pre>
+       *
+       * <code>string kerberosRealm = 2;</code>
+       * @return The kerberosRealm.
+       */
+      public java.lang.String getKerberosRealm() {
+        java.lang.Object ref = kerberosRealm_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          kerberosRealm_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Kerberos realm.
+       * </pre>
+       *
+       * <code>string kerberosRealm = 2;</code>
+       * @return The bytes for kerberosRealm.
+       */
+      public com.google.protobuf.ByteString
+          getKerberosRealmBytes() {
+        java.lang.Object ref = kerberosRealm_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          kerberosRealm_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Kerberos realm.
+       * </pre>
+       *
+       * <code>string kerberosRealm = 2;</code>
+       * @param value The kerberosRealm to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKerberosRealm(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        kerberosRealm_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Kerberos realm.
+       * </pre>
+       *
+       * <code>string kerberosRealm = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKerberosRealm() {
+        kerberosRealm_ = getDefaultInstance().getKerberosRealm();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Kerberos realm.
+       * </pre>
+       *
+       * <code>string kerberosRealm = 2;</code>
+       * @param value The bytes for kerberosRealm to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKerberosRealmBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        kerberosRealm_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object kdcHost_ = "";
+      /**
+       * <pre>
+       * Key Distribution Center host.
+       * </pre>
+       *
+       * <code>string kdcHost = 3;</code>
+       * @return The kdcHost.
+       */
+      public java.lang.String getKdcHost() {
+        java.lang.Object ref = kdcHost_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          kdcHost_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host.
+       * </pre>
+       *
+       * <code>string kdcHost = 3;</code>
+       * @return The bytes for kdcHost.
+       */
+      public com.google.protobuf.ByteString
+          getKdcHostBytes() {
+        java.lang.Object ref = kdcHost_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          kdcHost_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host.
+       * </pre>
+       *
+       * <code>string kdcHost = 3;</code>
+       * @param value The kdcHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcHost(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        kdcHost_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host.
+       * </pre>
+       *
+       * <code>string kdcHost = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKdcHost() {
+        kdcHost_ = getDefaultInstance().getKdcHost();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host.
+       * </pre>
+       *
+       * <code>string kdcHost = 3;</code>
+       * @param value The bytes for kdcHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        kdcHost_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object kdcHostIp_ = "";
+      /**
+       * <pre>
+       * Key Distribution Center host IP address.
+       * </pre>
+       *
+       * <code>string kdcHostIp = 4;</code>
+       * @return The kdcHostIp.
+       */
+      public java.lang.String getKdcHostIp() {
+        java.lang.Object ref = kdcHostIp_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          kdcHostIp_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host IP address.
+       * </pre>
+       *
+       * <code>string kdcHostIp = 4;</code>
+       * @return The bytes for kdcHostIp.
+       */
+      public com.google.protobuf.ByteString
+          getKdcHostIpBytes() {
+        java.lang.Object ref = kdcHostIp_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          kdcHostIp_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host IP address.
+       * </pre>
+       *
+       * <code>string kdcHostIp = 4;</code>
+       * @param value The kdcHostIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcHostIp(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        kdcHostIp_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host IP address.
+       * </pre>
+       *
+       * <code>string kdcHostIp = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKdcHostIp() {
+        kdcHostIp_ = getDefaultInstance().getKdcHostIp();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key Distribution Center host IP address.
+       * </pre>
+       *
+       * <code>string kdcHostIp = 4;</code>
+       * @param value The bytes for kdcHostIp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKdcHostIpBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        kdcHostIp_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private boolean kerberized_ ;
+      /**
+       * <pre>
+       * Denotes whether kerberized or not.
+       * </pre>
+       *
+       * <code>bool kerberized = 5;</code>
+       * @return The kerberized.
+       */
+      @java.lang.Override
+      public boolean getKerberized() {
+        return kerberized_;
+      }
+      /**
+       * <pre>
+       * Denotes whether kerberized or not.
+       * </pre>
+       *
+       * <code>bool kerberized = 5;</code>
+       * @param value The kerberized to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKerberized(boolean value) {
+
+        kerberized_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Denotes whether kerberized or not.
+       * </pre>
+       *
+       * <code>bool kerberized = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKerberized() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        kerberized_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.KerberosInfo)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.KerberosInfo)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<KerberosInfo>
+        PARSER = new com.google.protobuf.AbstractParser<KerberosInfo>() {
+      @java.lang.Override
+      public KerberosInfo parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<KerberosInfo> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KerberosInfo> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.KerberosInfo getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatalakeStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.DatalakeStatus)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Status of the on-premises Data Lake.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.DatalakeStatus}
+   */
+  public static final class DatalakeStatus extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.DatalakeStatus)
+      DatalakeStatusOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeStatus.newBuilder() to construct.
+    private DatalakeStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeStatus() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeStatus();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeStatus_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeStatus_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code onpremises.DatalakeStatus.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * Data Lake is available.
+       * </pre>
+       *
+       * <code>AVAILABLE = 1;</code>
+       */
+      AVAILABLE(1),
+      /**
+       * <pre>
+       * Data Lake is unavailable.
+       * </pre>
+       *
+       * <code>NOT_AVAILABLE = 2;</code>
+       */
+      NOT_AVAILABLE(2),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * Data Lake is available.
+       * </pre>
+       *
+       * <code>AVAILABLE = 1;</code>
+       */
+      public static final int AVAILABLE_VALUE = 1;
+      /**
+       * <pre>
+       * Data Lake is unavailable.
+       * </pre>
+       *
+       * <code>NOT_AVAILABLE = 2;</code>
+       */
+      public static final int NOT_AVAILABLE_VALUE = 2;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return AVAILABLE;
+          case 2: return NOT_AVAILABLE;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:onpremises.DatalakeStatus.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Status of the on-premises Data Lake.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.DatalakeStatus}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.DatalakeStatus)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeStatus_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeStatus_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeStatus_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.DatalakeStatus)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.DatalakeStatus)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeStatus>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeStatus>() {
+      @java.lang.Override
+      public DatalakeStatus parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeStatus> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeStatus> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeStatus getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -41514,23 +53097,30 @@ public final class OnPremisesApiProto {
 
     /**
      * <pre>
-     * The properties of the particular cluster as a JSON string.
+     * Cluster details.
      * </pre>
      *
-     * <code>string properties = 8;</code>
-     * @return The properties.
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     * @return Whether the clusterDetails field is set.
      */
-    java.lang.String getProperties();
+    boolean hasClusterDetails();
     /**
      * <pre>
-     * The properties of the particular cluster as a JSON string.
+     * Cluster details.
      * </pre>
      *
-     * <code>string properties = 8;</code>
-     * @return The bytes for properties.
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     * @return The clusterDetails.
      */
-    com.google.protobuf.ByteString
-        getPropertiesBytes();
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getClusterDetails();
+    /**
+     * <pre>
+     * Cluster details.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
 
     /**
      * <pre>
@@ -41575,7 +53165,6 @@ public final class OnPremisesApiProto {
       url_ = "";
       kerberosUser_ = "";
       kerberosTicketLocation_ = "";
-      properties_ = "";
       stats_ = "";
     }
 
@@ -41599,6 +53188,7 @@ public final class OnPremisesApiProto {
               com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterData.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterData.Builder.class);
     }
 
+    private int bitField0_;
     public static final int NAME_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private volatile java.lang.Object name_ = "";
@@ -41896,51 +53486,42 @@ public final class OnPremisesApiProto {
       }
     }
 
-    public static final int PROPERTIES_FIELD_NUMBER = 8;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object properties_ = "";
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 10;
+    private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails clusterDetails_;
     /**
      * <pre>
-     * The properties of the particular cluster as a JSON string.
+     * Cluster details.
      * </pre>
      *
-     * <code>string properties = 8;</code>
-     * @return The properties.
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     * @return Whether the clusterDetails field is set.
      */
     @java.lang.Override
-    public java.lang.String getProperties() {
-      java.lang.Object ref = properties_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        properties_ = s;
-        return s;
-      }
+    public boolean hasClusterDetails() {
+      return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <pre>
-     * The properties of the particular cluster as a JSON string.
+     * Cluster details.
      * </pre>
      *
-     * <code>string properties = 8;</code>
-     * @return The bytes for properties.
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     * @return The clusterDetails.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPropertiesBytes() {
-      java.lang.Object ref = properties_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        properties_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getClusterDetails() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+    }
+    /**
+     * <pre>
+     * Cluster details.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
 
     public static final int STATS_FIELD_NUMBER = 9;
@@ -42025,11 +53606,11 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosTicketLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, kerberosTicketLocation_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(properties_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, properties_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stats_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, stats_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(10, getClusterDetails());
       }
       getUnknownFields().writeTo(output);
     }
@@ -42062,11 +53643,12 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kerberosTicketLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, kerberosTicketLocation_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(properties_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, properties_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stats_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, stats_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, getClusterDetails());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -42097,8 +53679,11 @@ public final class OnPremisesApiProto {
           .equals(other.getKerberosUser())) return false;
       if (!getKerberosTicketLocation()
           .equals(other.getKerberosTicketLocation())) return false;
-      if (!getProperties()
-          .equals(other.getProperties())) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
+      if (hasClusterDetails()) {
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
+      }
       if (!getStats()
           .equals(other.getStats())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -42127,8 +53712,10 @@ public final class OnPremisesApiProto {
       hash = (53 * hash) + getKerberosUser().hashCode();
       hash = (37 * hash) + KERBEROSTICKETLOCATION_FIELD_NUMBER;
       hash = (53 * hash) + getKerberosTicketLocation().hashCode();
-      hash = (37 * hash) + PROPERTIES_FIELD_NUMBER;
-      hash = (53 * hash) + getProperties().hashCode();
+      if (hasClusterDetails()) {
+        hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getClusterDetails().hashCode();
+      }
       hash = (37 * hash) + STATS_FIELD_NUMBER;
       hash = (53 * hash) + getStats().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -42254,13 +53841,19 @@ public final class OnPremisesApiProto {
 
       // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterData.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getClusterDetailsFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
@@ -42273,7 +53866,11 @@ public final class OnPremisesApiProto {
         secured_ = false;
         kerberosUser_ = "";
         kerberosTicketLocation_ = "";
-        properties_ = "";
+        clusterDetails_ = null;
+        if (clusterDetailsBuilder_ != null) {
+          clusterDetailsBuilder_.dispose();
+          clusterDetailsBuilder_ = null;
+        }
         stats_ = "";
         return this;
       }
@@ -42329,12 +53926,17 @@ public final class OnPremisesApiProto {
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.kerberosTicketLocation_ = kerberosTicketLocation_;
         }
+        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.properties_ = properties_;
+          result.clusterDetails_ = clusterDetailsBuilder_ == null
+              ? clusterDetails_
+              : clusterDetailsBuilder_.build();
+          to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000100) != 0)) {
           result.stats_ = stats_;
         }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -42414,10 +54016,8 @@ public final class OnPremisesApiProto {
           bitField0_ |= 0x00000040;
           onChanged();
         }
-        if (!other.getProperties().isEmpty()) {
-          properties_ = other.properties_;
-          bitField0_ |= 0x00000080;
-          onChanged();
+        if (other.hasClusterDetails()) {
+          mergeClusterDetails(other.getClusterDetails());
         }
         if (!other.getStats().isEmpty()) {
           stats_ = other.stats_;
@@ -42485,16 +54085,18 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x00000040;
                 break;
               } // case 58
-              case 66: {
-                properties_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000080;
-                break;
-              } // case 66
               case 74: {
                 stats_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000100;
                 break;
               } // case 74
+              case 82: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 82
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -43108,96 +54710,161 @@ public final class OnPremisesApiProto {
         return this;
       }
 
-      private java.lang.Object properties_ = "";
+      private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails clusterDetails_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
        * <pre>
-       * The properties of the particular cluster as a JSON string.
+       * Cluster details.
        * </pre>
        *
-       * <code>string properties = 8;</code>
-       * @return The properties.
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       * @return Whether the clusterDetails field is set.
        */
-      public java.lang.String getProperties() {
-        java.lang.Object ref = properties_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          properties_ = s;
-          return s;
+      public boolean hasClusterDetails() {
+        return ((bitField0_ & 0x00000080) != 0);
+      }
+      /**
+       * <pre>
+       * Cluster details.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       * @return The clusterDetails.
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          return clusterDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
         } else {
-          return (java.lang.String) ref;
+          return clusterDetailsBuilder_.getMessage();
         }
       }
       /**
        * <pre>
-       * The properties of the particular cluster as a JSON string.
+       * Cluster details.
        * </pre>
        *
-       * <code>string properties = 8;</code>
-       * @return The bytes for properties.
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
        */
-      public com.google.protobuf.ByteString
-          getPropertiesBytes() {
-        java.lang.Object ref = properties_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          properties_ = b;
-          return b;
+      public Builder setClusterDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          clusterDetails_ = value;
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          clusterDetailsBuilder_.setMessage(value);
         }
-      }
-      /**
-       * <pre>
-       * The properties of the particular cluster as a JSON string.
-       * </pre>
-       *
-       * <code>string properties = 8;</code>
-       * @param value The properties to set.
-       * @return This builder for chaining.
-       */
-      public Builder setProperties(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        properties_ = value;
         bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The properties of the particular cluster as a JSON string.
+       * Cluster details.
        * </pre>
        *
-       * <code>string properties = 8;</code>
-       * @return This builder for chaining.
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
        */
-      public Builder clearProperties() {
-        properties_ = getDefaultInstance().getProperties();
+      public Builder setClusterDetails(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder builderForValue) {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = builderForValue.build();
+        } else {
+          clusterDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       */
+      public Builder mergeClusterDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) != 0) &&
+            clusterDetails_ != null &&
+            clusterDetails_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance()) {
+            getClusterDetailsBuilder().mergeFrom(value);
+          } else {
+            clusterDetails_ = value;
+          }
+        } else {
+          clusterDetailsBuilder_.mergeFrom(value);
+        }
+        if (clusterDetails_ != null) {
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       */
+      public Builder clearClusterDetails() {
         bitField0_ = (bitField0_ & ~0x00000080);
+        clusterDetails_ = null;
+        if (clusterDetailsBuilder_ != null) {
+          clusterDetailsBuilder_.dispose();
+          clusterDetailsBuilder_ = null;
+        }
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The properties of the particular cluster as a JSON string.
+       * Cluster details.
        * </pre>
        *
-       * <code>string properties = 8;</code>
-       * @param value The bytes for properties to set.
-       * @return This builder for chaining.
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
        */
-      public Builder setPropertiesBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        properties_ = value;
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder getClusterDetailsBuilder() {
         bitField0_ |= 0x00000080;
         onChanged();
-        return this;
+        return getClusterDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Cluster details.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+        if (clusterDetailsBuilder_ != null) {
+          return clusterDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return clusterDetails_ == null ?
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Cluster details.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterDetails clusterDetails = 10;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder> 
+          getClusterDetailsFieldBuilder() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder>(
+                  getClusterDetails(),
+                  getParentForChildren(),
+                  isClean());
+          clusterDetails_ = null;
+        }
+        return clusterDetailsBuilder_;
       }
 
       private java.lang.Object stats_ = "";
@@ -44959,6 +56626,2222 @@ public final class OnPremisesApiProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Location getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ClusterDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ClusterDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name of the cluster.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * Name of the cluster.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Display name of the cluster.
+     * </pre>
+     *
+     * <code>string displayName = 2;</code>
+     * @return The displayName.
+     */
+    java.lang.String getDisplayName();
+    /**
+     * <pre>
+     * Display name of the cluster.
+     * </pre>
+     *
+     * <code>string displayName = 2;</code>
+     * @return The bytes for displayName.
+     */
+    com.google.protobuf.ByteString
+        getDisplayNameBytes();
+
+    /**
+     * <pre>
+     * Cluster version.
+     * </pre>
+     *
+     * <code>string version = 3;</code>
+     * @return The version.
+     */
+    java.lang.String getVersion();
+    /**
+     * <pre>
+     * Cluster version.
+     * </pre>
+     *
+     * <code>string version = 3;</code>
+     * @return The bytes for version.
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <pre>
+     * Full version of the cluster.
+     * </pre>
+     *
+     * <code>string fullVersion = 4;</code>
+     * @return The fullVersion.
+     */
+    java.lang.String getFullVersion();
+    /**
+     * <pre>
+     * Full version of the cluster.
+     * </pre>
+     *
+     * <code>string fullVersion = 4;</code>
+     * @return The bytes for fullVersion.
+     */
+    com.google.protobuf.ByteString
+        getFullVersionBytes();
+
+    /**
+     * <pre>
+     * Whether the cluster is in Maintenance mode.
+     * </pre>
+     *
+     * <code>bool maintenanceMode = 5;</code>
+     * @return The maintenanceMode.
+     */
+    boolean getMaintenanceMode();
+
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @return A list containing the maintenanceOwners.
+     */
+    java.util.List<java.lang.String>
+        getMaintenanceOwnersList();
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @return The count of maintenanceOwners.
+     */
+    int getMaintenanceOwnersCount();
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @param index The index of the element to return.
+     * @return The maintenanceOwners at the given index.
+     */
+    java.lang.String getMaintenanceOwners(int index);
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the maintenanceOwners at the given index.
+     */
+    com.google.protobuf.ByteString
+        getMaintenanceOwnersBytes(int index);
+
+    /**
+     * <pre>
+     * URL of the cluster.
+     * </pre>
+     *
+     * <code>string clusterUrl = 7;</code>
+     * @return The clusterUrl.
+     */
+    java.lang.String getClusterUrl();
+    /**
+     * <pre>
+     * URL of the cluster.
+     * </pre>
+     *
+     * <code>string clusterUrl = 7;</code>
+     * @return The bytes for clusterUrl.
+     */
+    com.google.protobuf.ByteString
+        getClusterUrlBytes();
+
+    /**
+     * <pre>
+     * The URL to access hosts of this cluster.
+     * </pre>
+     *
+     * <code>string hostsUrl = 8;</code>
+     * @return The hostsUrl.
+     */
+    java.lang.String getHostsUrl();
+    /**
+     * <pre>
+     * The URL to access hosts of this cluster.
+     * </pre>
+     *
+     * <code>string hostsUrl = 8;</code>
+     * @return The bytes for hostsUrl.
+     */
+    com.google.protobuf.ByteString
+        getHostsUrlBytes();
+
+    /**
+     * <pre>
+     * The entity status for the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+     * @return The enum numeric value on the wire for entityStatus.
+     */
+    int getEntityStatusValue();
+    /**
+     * <pre>
+     * The entity status for the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+     * @return The entityStatus.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value getEntityStatus();
+
+    /**
+     * <pre>
+     * Uuid of the cluster.
+     * </pre>
+     *
+     * <code>string uuid = 10;</code>
+     * @return The uuid.
+     */
+    java.lang.String getUuid();
+    /**
+     * <pre>
+     * Uuid of the cluster.
+     * </pre>
+     *
+     * <code>string uuid = 10;</code>
+     * @return The bytes for uuid.
+     */
+    com.google.protobuf.ByteString
+        getUuidBytes();
+  }
+  /**
+   * <pre>
+   * Object containing cluster details.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ClusterDetails}
+   */
+  public static final class ClusterDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ClusterDetails)
+      ClusterDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ClusterDetails.newBuilder() to construct.
+    private ClusterDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ClusterDetails() {
+      name_ = "";
+      displayName_ = "";
+      version_ = "";
+      fullVersion_ = "";
+      maintenanceOwners_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      clusterUrl_ = "";
+      hostsUrl_ = "";
+      entityStatus_ = 0;
+      uuid_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ClusterDetails();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClusterDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClusterDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * Name of the cluster.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the cluster.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DISPLAYNAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object displayName_ = "";
+    /**
+     * <pre>
+     * Display name of the cluster.
+     * </pre>
+     *
+     * <code>string displayName = 2;</code>
+     * @return The displayName.
+     */
+    @java.lang.Override
+    public java.lang.String getDisplayName() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        displayName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Display name of the cluster.
+     * </pre>
+     *
+     * <code>string displayName = 2;</code>
+     * @return The bytes for displayName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDisplayNameBytes() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        displayName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object version_ = "";
+    /**
+     * <pre>
+     * Cluster version.
+     * </pre>
+     *
+     * <code>string version = 3;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Cluster version.
+     * </pre>
+     *
+     * <code>string version = 3;</code>
+     * @return The bytes for version.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FULLVERSION_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fullVersion_ = "";
+    /**
+     * <pre>
+     * Full version of the cluster.
+     * </pre>
+     *
+     * <code>string fullVersion = 4;</code>
+     * @return The fullVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getFullVersion() {
+      java.lang.Object ref = fullVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fullVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Full version of the cluster.
+     * </pre>
+     *
+     * <code>string fullVersion = 4;</code>
+     * @return The bytes for fullVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFullVersionBytes() {
+      java.lang.Object ref = fullVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fullVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MAINTENANCEMODE_FIELD_NUMBER = 5;
+    private boolean maintenanceMode_ = false;
+    /**
+     * <pre>
+     * Whether the cluster is in Maintenance mode.
+     * </pre>
+     *
+     * <code>bool maintenanceMode = 5;</code>
+     * @return The maintenanceMode.
+     */
+    @java.lang.Override
+    public boolean getMaintenanceMode() {
+      return maintenanceMode_;
+    }
+
+    public static final int MAINTENANCEOWNERS_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.LazyStringArrayList maintenanceOwners_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @return A list containing the maintenanceOwners.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getMaintenanceOwnersList() {
+      return maintenanceOwners_;
+    }
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @return The count of maintenanceOwners.
+     */
+    public int getMaintenanceOwnersCount() {
+      return maintenanceOwners_.size();
+    }
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @param index The index of the element to return.
+     * @return The maintenanceOwners at the given index.
+     */
+    public java.lang.String getMaintenanceOwners(int index) {
+      return maintenanceOwners_.get(index);
+    }
+    /**
+     * <pre>
+     * The list of maintenance owners of the cluster.
+     * </pre>
+     *
+     * <code>repeated string maintenanceOwners = 6;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the maintenanceOwners at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getMaintenanceOwnersBytes(int index) {
+      return maintenanceOwners_.getByteString(index);
+    }
+
+    public static final int CLUSTERURL_FIELD_NUMBER = 7;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clusterUrl_ = "";
+    /**
+     * <pre>
+     * URL of the cluster.
+     * </pre>
+     *
+     * <code>string clusterUrl = 7;</code>
+     * @return The clusterUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterUrl() {
+      java.lang.Object ref = clusterUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * URL of the cluster.
+     * </pre>
+     *
+     * <code>string clusterUrl = 7;</code>
+     * @return The bytes for clusterUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterUrlBytes() {
+      java.lang.Object ref = clusterUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int HOSTSURL_FIELD_NUMBER = 8;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object hostsUrl_ = "";
+    /**
+     * <pre>
+     * The URL to access hosts of this cluster.
+     * </pre>
+     *
+     * <code>string hostsUrl = 8;</code>
+     * @return The hostsUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getHostsUrl() {
+      java.lang.Object ref = hostsUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hostsUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The URL to access hosts of this cluster.
+     * </pre>
+     *
+     * <code>string hostsUrl = 8;</code>
+     * @return The bytes for hostsUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getHostsUrlBytes() {
+      java.lang.Object ref = hostsUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hostsUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENTITYSTATUS_FIELD_NUMBER = 9;
+    private int entityStatus_ = 0;
+    /**
+     * <pre>
+     * The entity status for the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+     * @return The enum numeric value on the wire for entityStatus.
+     */
+    @java.lang.Override public int getEntityStatusValue() {
+      return entityStatus_;
+    }
+    /**
+     * <pre>
+     * The entity status for the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+     * @return The entityStatus.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value getEntityStatus() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.forNumber(entityStatus_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int UUID_FIELD_NUMBER = 10;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object uuid_ = "";
+    /**
+     * <pre>
+     * Uuid of the cluster.
+     * </pre>
+     *
+     * <code>string uuid = 10;</code>
+     * @return The uuid.
+     */
+    @java.lang.Override
+    public java.lang.String getUuid() {
+      java.lang.Object ref = uuid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        uuid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Uuid of the cluster.
+     * </pre>
+     *
+     * <code>string uuid = 10;</code>
+     * @return The bytes for uuid.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getUuidBytes() {
+      java.lang.Object ref = uuid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        uuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, displayName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, version_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fullVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, fullVersion_);
+      }
+      if (maintenanceMode_ != false) {
+        output.writeBool(5, maintenanceMode_);
+      }
+      for (int i = 0; i < maintenanceOwners_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, maintenanceOwners_.getRaw(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, clusterUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostsUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, hostsUrl_);
+      }
+      if (entityStatus_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.UNKNOWN.getNumber()) {
+        output.writeEnum(9, entityStatus_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, uuid_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, displayName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, version_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fullVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, fullVersion_);
+      }
+      if (maintenanceMode_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, maintenanceMode_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < maintenanceOwners_.size(); i++) {
+          dataSize += computeStringSizeNoTag(maintenanceOwners_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getMaintenanceOwnersList().size();
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, clusterUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostsUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, hostsUrl_);
+      }
+      if (entityStatus_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(9, entityStatus_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, uuid_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getDisplayName()
+          .equals(other.getDisplayName())) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (!getFullVersion()
+          .equals(other.getFullVersion())) return false;
+      if (getMaintenanceMode()
+          != other.getMaintenanceMode()) return false;
+      if (!getMaintenanceOwnersList()
+          .equals(other.getMaintenanceOwnersList())) return false;
+      if (!getClusterUrl()
+          .equals(other.getClusterUrl())) return false;
+      if (!getHostsUrl()
+          .equals(other.getHostsUrl())) return false;
+      if (entityStatus_ != other.entityStatus_) return false;
+      if (!getUuid()
+          .equals(other.getUuid())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + DISPLAYNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDisplayName().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (37 * hash) + FULLVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getFullVersion().hashCode();
+      hash = (37 * hash) + MAINTENANCEMODE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMaintenanceMode());
+      if (getMaintenanceOwnersCount() > 0) {
+        hash = (37 * hash) + MAINTENANCEOWNERS_FIELD_NUMBER;
+        hash = (53 * hash) + getMaintenanceOwnersList().hashCode();
+      }
+      hash = (37 * hash) + CLUSTERURL_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterUrl().hashCode();
+      hash = (37 * hash) + HOSTSURL_FIELD_NUMBER;
+      hash = (53 * hash) + getHostsUrl().hashCode();
+      hash = (37 * hash) + ENTITYSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + entityStatus_;
+      hash = (37 * hash) + UUID_FIELD_NUMBER;
+      hash = (53 * hash) + getUuid().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Object containing cluster details.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ClusterDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ClusterDetails)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClusterDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClusterDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        displayName_ = "";
+        version_ = "";
+        fullVersion_ = "";
+        maintenanceMode_ = false;
+        maintenanceOwners_ =
+            com.google.protobuf.LazyStringArrayList.emptyList();
+        clusterUrl_ = "";
+        hostsUrl_ = "";
+        entityStatus_ = 0;
+        uuid_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClusterDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.displayName_ = displayName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.version_ = version_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.fullVersion_ = fullVersion_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.maintenanceMode_ = maintenanceMode_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          maintenanceOwners_.makeImmutable();
+          result.maintenanceOwners_ = maintenanceOwners_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.clusterUrl_ = clusterUrl_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.hostsUrl_ = hostsUrl_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.entityStatus_ = entityStatus_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.uuid_ = uuid_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getDisplayName().isEmpty()) {
+          displayName_ = other.displayName_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getFullVersion().isEmpty()) {
+          fullVersion_ = other.fullVersion_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.getMaintenanceMode() != false) {
+          setMaintenanceMode(other.getMaintenanceMode());
+        }
+        if (!other.maintenanceOwners_.isEmpty()) {
+          if (maintenanceOwners_.isEmpty()) {
+            maintenanceOwners_ = other.maintenanceOwners_;
+            bitField0_ |= 0x00000020;
+          } else {
+            ensureMaintenanceOwnersIsMutable();
+            maintenanceOwners_.addAll(other.maintenanceOwners_);
+          }
+          onChanged();
+        }
+        if (!other.getClusterUrl().isEmpty()) {
+          clusterUrl_ = other.clusterUrl_;
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        if (!other.getHostsUrl().isEmpty()) {
+          hostsUrl_ = other.hostsUrl_;
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        if (other.entityStatus_ != 0) {
+          setEntityStatusValue(other.getEntityStatusValue());
+        }
+        if (!other.getUuid().isEmpty()) {
+          uuid_ = other.uuid_;
+          bitField0_ |= 0x00000200;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                displayName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                version_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                fullVersion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                maintenanceMode_ = input.readBool();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 50: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureMaintenanceOwnersIsMutable();
+                maintenanceOwners_.add(s);
+                break;
+              } // case 50
+              case 58: {
+                clusterUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 66: {
+                hostsUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 72: {
+                entityStatus_ = input.readEnum();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 72
+              case 82: {
+                uuid_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 82
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * Name of the cluster.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the cluster.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the cluster.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the cluster.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the cluster.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object displayName_ = "";
+      /**
+       * <pre>
+       * Display name of the cluster.
+       * </pre>
+       *
+       * <code>string displayName = 2;</code>
+       * @return The displayName.
+       */
+      public java.lang.String getDisplayName() {
+        java.lang.Object ref = displayName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          displayName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Display name of the cluster.
+       * </pre>
+       *
+       * <code>string displayName = 2;</code>
+       * @return The bytes for displayName.
+       */
+      public com.google.protobuf.ByteString
+          getDisplayNameBytes() {
+        java.lang.Object ref = displayName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          displayName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Display name of the cluster.
+       * </pre>
+       *
+       * <code>string displayName = 2;</code>
+       * @param value The displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        displayName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Display name of the cluster.
+       * </pre>
+       *
+       * <code>string displayName = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDisplayName() {
+        displayName_ = getDefaultInstance().getDisplayName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Display name of the cluster.
+       * </pre>
+       *
+       * <code>string displayName = 2;</code>
+       * @param value The bytes for displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        displayName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <pre>
+       * Cluster version.
+       * </pre>
+       *
+       * <code>string version = 3;</code>
+       * @return The version.
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cluster version.
+       * </pre>
+       *
+       * <code>string version = 3;</code>
+       * @return The bytes for version.
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cluster version.
+       * </pre>
+       *
+       * <code>string version = 3;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        version_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster version.
+       * </pre>
+       *
+       * <code>string version = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        version_ = getDefaultInstance().getVersion();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster version.
+       * </pre>
+       *
+       * <code>string version = 3;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        version_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fullVersion_ = "";
+      /**
+       * <pre>
+       * Full version of the cluster.
+       * </pre>
+       *
+       * <code>string fullVersion = 4;</code>
+       * @return The fullVersion.
+       */
+      public java.lang.String getFullVersion() {
+        java.lang.Object ref = fullVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fullVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Full version of the cluster.
+       * </pre>
+       *
+       * <code>string fullVersion = 4;</code>
+       * @return The bytes for fullVersion.
+       */
+      public com.google.protobuf.ByteString
+          getFullVersionBytes() {
+        java.lang.Object ref = fullVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fullVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Full version of the cluster.
+       * </pre>
+       *
+       * <code>string fullVersion = 4;</code>
+       * @param value The fullVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFullVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        fullVersion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Full version of the cluster.
+       * </pre>
+       *
+       * <code>string fullVersion = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFullVersion() {
+        fullVersion_ = getDefaultInstance().getFullVersion();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Full version of the cluster.
+       * </pre>
+       *
+       * <code>string fullVersion = 4;</code>
+       * @param value The bytes for fullVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFullVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        fullVersion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private boolean maintenanceMode_ ;
+      /**
+       * <pre>
+       * Whether the cluster is in Maintenance mode.
+       * </pre>
+       *
+       * <code>bool maintenanceMode = 5;</code>
+       * @return The maintenanceMode.
+       */
+      @java.lang.Override
+      public boolean getMaintenanceMode() {
+        return maintenanceMode_;
+      }
+      /**
+       * <pre>
+       * Whether the cluster is in Maintenance mode.
+       * </pre>
+       *
+       * <code>bool maintenanceMode = 5;</code>
+       * @param value The maintenanceMode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaintenanceMode(boolean value) {
+
+        maintenanceMode_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether the cluster is in Maintenance mode.
+       * </pre>
+       *
+       * <code>bool maintenanceMode = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaintenanceMode() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        maintenanceMode_ = false;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringArrayList maintenanceOwners_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      private void ensureMaintenanceOwnersIsMutable() {
+        if (!maintenanceOwners_.isModifiable()) {
+          maintenanceOwners_ = new com.google.protobuf.LazyStringArrayList(maintenanceOwners_);
+        }
+        bitField0_ |= 0x00000020;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @return A list containing the maintenanceOwners.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getMaintenanceOwnersList() {
+        maintenanceOwners_.makeImmutable();
+        return maintenanceOwners_;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @return The count of maintenanceOwners.
+       */
+      public int getMaintenanceOwnersCount() {
+        return maintenanceOwners_.size();
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param index The index of the element to return.
+       * @return The maintenanceOwners at the given index.
+       */
+      public java.lang.String getMaintenanceOwners(int index) {
+        return maintenanceOwners_.get(index);
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the maintenanceOwners at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getMaintenanceOwnersBytes(int index) {
+        return maintenanceOwners_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param index The index to set the value at.
+       * @param value The maintenanceOwners to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaintenanceOwners(
+          int index, java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureMaintenanceOwnersIsMutable();
+        maintenanceOwners_.set(index, value);
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param value The maintenanceOwners to add.
+       * @return This builder for chaining.
+       */
+      public Builder addMaintenanceOwners(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureMaintenanceOwnersIsMutable();
+        maintenanceOwners_.add(value);
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param values The maintenanceOwners to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllMaintenanceOwners(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureMaintenanceOwnersIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, maintenanceOwners_);
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaintenanceOwners() {
+        maintenanceOwners_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The list of maintenance owners of the cluster.
+       * </pre>
+       *
+       * <code>repeated string maintenanceOwners = 6;</code>
+       * @param value The bytes of the maintenanceOwners to add.
+       * @return This builder for chaining.
+       */
+      public Builder addMaintenanceOwnersBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        ensureMaintenanceOwnersIsMutable();
+        maintenanceOwners_.add(value);
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterUrl_ = "";
+      /**
+       * <pre>
+       * URL of the cluster.
+       * </pre>
+       *
+       * <code>string clusterUrl = 7;</code>
+       * @return The clusterUrl.
+       */
+      public java.lang.String getClusterUrl() {
+        java.lang.Object ref = clusterUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * URL of the cluster.
+       * </pre>
+       *
+       * <code>string clusterUrl = 7;</code>
+       * @return The bytes for clusterUrl.
+       */
+      public com.google.protobuf.ByteString
+          getClusterUrlBytes() {
+        java.lang.Object ref = clusterUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * URL of the cluster.
+       * </pre>
+       *
+       * <code>string clusterUrl = 7;</code>
+       * @param value The clusterUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clusterUrl_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * URL of the cluster.
+       * </pre>
+       *
+       * <code>string clusterUrl = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterUrl() {
+        clusterUrl_ = getDefaultInstance().getClusterUrl();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * URL of the cluster.
+       * </pre>
+       *
+       * <code>string clusterUrl = 7;</code>
+       * @param value The bytes for clusterUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clusterUrl_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object hostsUrl_ = "";
+      /**
+       * <pre>
+       * The URL to access hosts of this cluster.
+       * </pre>
+       *
+       * <code>string hostsUrl = 8;</code>
+       * @return The hostsUrl.
+       */
+      public java.lang.String getHostsUrl() {
+        java.lang.Object ref = hostsUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hostsUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The URL to access hosts of this cluster.
+       * </pre>
+       *
+       * <code>string hostsUrl = 8;</code>
+       * @return The bytes for hostsUrl.
+       */
+      public com.google.protobuf.ByteString
+          getHostsUrlBytes() {
+        java.lang.Object ref = hostsUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hostsUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The URL to access hosts of this cluster.
+       * </pre>
+       *
+       * <code>string hostsUrl = 8;</code>
+       * @param value The hostsUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHostsUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        hostsUrl_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The URL to access hosts of this cluster.
+       * </pre>
+       *
+       * <code>string hostsUrl = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHostsUrl() {
+        hostsUrl_ = getDefaultInstance().getHostsUrl();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The URL to access hosts of this cluster.
+       * </pre>
+       *
+       * <code>string hostsUrl = 8;</code>
+       * @param value The bytes for hostsUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHostsUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        hostsUrl_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+
+      private int entityStatus_ = 0;
+      /**
+       * <pre>
+       * The entity status for the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+       * @return The enum numeric value on the wire for entityStatus.
+       */
+      @java.lang.Override public int getEntityStatusValue() {
+        return entityStatus_;
+      }
+      /**
+       * <pre>
+       * The entity status for the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+       * @param value The enum numeric value on the wire for entityStatus to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEntityStatusValue(int value) {
+        entityStatus_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The entity status for the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+       * @return The entityStatus.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value getEntityStatus() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.forNumber(entityStatus_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The entity status for the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+       * @param value The entityStatus to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEntityStatus(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000100;
+        entityStatus_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The entity status for the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.EntityStatus.Value entityStatus = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEntityStatus() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        entityStatus_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object uuid_ = "";
+      /**
+       * <pre>
+       * Uuid of the cluster.
+       * </pre>
+       *
+       * <code>string uuid = 10;</code>
+       * @return The uuid.
+       */
+      public java.lang.String getUuid() {
+        java.lang.Object ref = uuid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          uuid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Uuid of the cluster.
+       * </pre>
+       *
+       * <code>string uuid = 10;</code>
+       * @return The bytes for uuid.
+       */
+      public com.google.protobuf.ByteString
+          getUuidBytes() {
+        java.lang.Object ref = uuid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          uuid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Uuid of the cluster.
+       * </pre>
+       *
+       * <code>string uuid = 10;</code>
+       * @param value The uuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUuid(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        uuid_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Uuid of the cluster.
+       * </pre>
+       *
+       * <code>string uuid = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUuid() {
+        uuid_ = getDefaultInstance().getUuid();
+        bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Uuid of the cluster.
+       * </pre>
+       *
+       * <code>string uuid = 10;</code>
+       * @param value The bytes for uuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        uuid_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ClusterDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ClusterDetails)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ClusterDetails>
+        PARSER = new com.google.protobuf.AbstractParser<ClusterDetails>() {
+      @java.lang.Override
+      public ClusterDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ClusterDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ClusterDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterDetails getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -47797,6 +61680,705 @@ public final class OnPremisesApiProto {
 
   }
 
+  public interface EntityStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.EntityStatus)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * The single value used by the Cloudera Manager to represent the status of the entity.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.EntityStatus}
+   */
+  public static final class EntityStatus extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.EntityStatus)
+      EntityStatusOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use EntityStatus.newBuilder() to construct.
+    private EntityStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EntityStatus() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EntityStatus();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_EntityStatus_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_EntityStatus_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code onpremises.EntityStatus.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * Unknown.
+       * </pre>
+       *
+       * <code>UNKNOWN = 0;</code>
+       */
+      UNKNOWN(0),
+      /**
+       * <pre>
+       * None.
+       * </pre>
+       *
+       * <code>NONE = 1;</code>
+       */
+      NONE(1),
+      /**
+       * <pre>
+       * Stopped.
+       * </pre>
+       *
+       * <code>STOPPED = 2;</code>
+       */
+      STOPPED(2),
+      /**
+       * <pre>
+       * Down.
+       * </pre>
+       *
+       * <code>DOWN = 3;</code>
+       */
+      DOWN(3),
+      /**
+       * <pre>
+       * Unknown health.
+       * </pre>
+       *
+       * <code>UNKNOWN_HEALTH = 4;</code>
+       */
+      UNKNOWN_HEALTH(4),
+      /**
+       * <pre>
+       * Disabled health.
+       * </pre>
+       *
+       * <code>DISABLED_HEALTH = 5;</code>
+       */
+      DISABLED_HEALTH(5),
+      /**
+       * <pre>
+       * Concerning health.
+       * </pre>
+       *
+       * <code>CONCERNING_HEALTH = 6;</code>
+       */
+      CONCERNING_HEALTH(6),
+      /**
+       * <pre>
+       * Bad health.
+       * </pre>
+       *
+       * <code>BAD_HEALTH = 7;</code>
+       */
+      BAD_HEALTH(7),
+      /**
+       * <pre>
+       * Good health.
+       * </pre>
+       *
+       * <code>GOOD_HEALTH = 8;</code>
+       */
+      GOOD_HEALTH(8),
+      /**
+       * <pre>
+       * Starting.
+       * </pre>
+       *
+       * <code>STARTING = 9;</code>
+       */
+      STARTING(9),
+      /**
+       * <pre>
+       * Stopping.
+       * </pre>
+       *
+       * <code>STOPPING = 10;</code>
+       */
+      STOPPING(10),
+      /**
+       * <pre>
+       * History not available.
+       * </pre>
+       *
+       * <code>HISTORY_NOT_AVAILABLE = 11;</code>
+       */
+      HISTORY_NOT_AVAILABLE(11),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * Unknown.
+       * </pre>
+       *
+       * <code>UNKNOWN = 0;</code>
+       */
+      public static final int UNKNOWN_VALUE = 0;
+      /**
+       * <pre>
+       * None.
+       * </pre>
+       *
+       * <code>NONE = 1;</code>
+       */
+      public static final int NONE_VALUE = 1;
+      /**
+       * <pre>
+       * Stopped.
+       * </pre>
+       *
+       * <code>STOPPED = 2;</code>
+       */
+      public static final int STOPPED_VALUE = 2;
+      /**
+       * <pre>
+       * Down.
+       * </pre>
+       *
+       * <code>DOWN = 3;</code>
+       */
+      public static final int DOWN_VALUE = 3;
+      /**
+       * <pre>
+       * Unknown health.
+       * </pre>
+       *
+       * <code>UNKNOWN_HEALTH = 4;</code>
+       */
+      public static final int UNKNOWN_HEALTH_VALUE = 4;
+      /**
+       * <pre>
+       * Disabled health.
+       * </pre>
+       *
+       * <code>DISABLED_HEALTH = 5;</code>
+       */
+      public static final int DISABLED_HEALTH_VALUE = 5;
+      /**
+       * <pre>
+       * Concerning health.
+       * </pre>
+       *
+       * <code>CONCERNING_HEALTH = 6;</code>
+       */
+      public static final int CONCERNING_HEALTH_VALUE = 6;
+      /**
+       * <pre>
+       * Bad health.
+       * </pre>
+       *
+       * <code>BAD_HEALTH = 7;</code>
+       */
+      public static final int BAD_HEALTH_VALUE = 7;
+      /**
+       * <pre>
+       * Good health.
+       * </pre>
+       *
+       * <code>GOOD_HEALTH = 8;</code>
+       */
+      public static final int GOOD_HEALTH_VALUE = 8;
+      /**
+       * <pre>
+       * Starting.
+       * </pre>
+       *
+       * <code>STARTING = 9;</code>
+       */
+      public static final int STARTING_VALUE = 9;
+      /**
+       * <pre>
+       * Stopping.
+       * </pre>
+       *
+       * <code>STOPPING = 10;</code>
+       */
+      public static final int STOPPING_VALUE = 10;
+      /**
+       * <pre>
+       * History not available.
+       * </pre>
+       *
+       * <code>HISTORY_NOT_AVAILABLE = 11;</code>
+       */
+      public static final int HISTORY_NOT_AVAILABLE_VALUE = 11;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNKNOWN;
+          case 1: return NONE;
+          case 2: return STOPPED;
+          case 3: return DOWN;
+          case 4: return UNKNOWN_HEALTH;
+          case 5: return DISABLED_HEALTH;
+          case 6: return CONCERNING_HEALTH;
+          case 7: return BAD_HEALTH;
+          case 8: return GOOD_HEALTH;
+          case 9: return STARTING;
+          case 10: return STOPPING;
+          case 11: return HISTORY_NOT_AVAILABLE;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:onpremises.EntityStatus.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The single value used by the Cloudera Manager to represent the status of the entity.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.EntityStatus}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.EntityStatus)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_EntityStatus_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_EntityStatus_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_EntityStatus_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.EntityStatus)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.EntityStatus)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<EntityStatus>
+        PARSER = new com.google.protobuf.AbstractParser<EntityStatus>() {
+      @java.lang.Override
+      public EntityStatus parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<EntityStatus> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EntityStatus> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.EntityStatus getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ListClustersRequest_descriptor;
   private static final 
@@ -47908,6 +62490,16 @@ public final class OnPremisesApiProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_ExtractSetupScriptResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ExtractCertificateRefreshScriptRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ExtractCertificateRefreshScriptResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_UpdateClusterStateRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -47983,6 +62575,66 @@ public final class OnPremisesApiProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_Cluster_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_OnPremEnvironmentDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Application_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Application_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Application_ServicesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Application_ServicesEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Application_ConfigEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Application_ConfigEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Service_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Service_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Service_ConfigEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Service_ConfigEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ServiceEndpoint_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ServiceEndpoint_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_OnPremDatalakeDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_OnPremDatalakeDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_Instance_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_Instance_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_KerberosInfo_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_KerberosInfo_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_DatalakeStatus_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_DatalakeStatus_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ClusterService_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -47997,6 +62649,11 @@ public final class OnPremisesApiProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_Location_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ClusterDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ClusterDetails_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ClusterDiscovered_descriptor;
   private static final 
@@ -48022,6 +62679,11 @@ public final class OnPremisesApiProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_ClusterQueryOperator_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_EntityStatus_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_EntityStatus_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -48054,212 +62716,275 @@ public final class OnPremisesApiProto {
       "\n\010password\030g \001(\tB\004\200\265\030\001\022\022\n\nlocationId\030h \001" +
       "(\003\022\014\n\004tags\030i \003(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
       "\"I\n\025UpdateClusterResponse\022\030\n\nclusterCrn\030" +
-      "\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"s\n\026D" +
-      "escribeClusterRequest\022\022\n\nclusterCrn\030\001 \001(" +
-      "\t\022-\n\002id\030d \001(\003B!\270\265\030\001\302\265\030\025FOR_CLOUDERA_USE_" +
-      "ONLY\370\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n\027Desc" +
-      "ribeClusterResponse\022$\n\007cluster\030\001 \001(\0132\023.o" +
-      "npremises.Cluster:\026\200\227\"\001\212\227\"\016IN_DEVELOPMEN" +
-      "T\"\241\001\n\032ListClusterServicesRequest\022\030\n\nclus" +
-      "terCrn\030\001 \001(\tB\004\320\265\030\001\022\023\n\013clusterName\030\002 \001(\t\022" +
-      "\022\n\nmanagerUri\030\003 \001(\t\022\020\n\010username\030\004 \001(\t\022\026\n" +
-      "\010password\030\005 \001(\tB\004\200\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
-      "PMENT\"c\n\033ListClusterServicesResponse\022,\n\010" +
-      "services\030\001 \003(\0132\032.onpremises.ClusterServi" +
-      "ce:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\026ExtractCl" +
-      "ustersRequest\022\030\n\nmanagerUri\030e \001(\tB\004\320\265\030\001\022" +
-      "\026\n\010username\030f \001(\tB\004\320\265\030\001\022\032\n\010password\030g \001(" +
-      "\tB\010\200\265\030\001\320\265\030\001\022\022\n\nclusterCrn\030h \001(\t:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"b\n\027ExtractClustersRespon" +
-      "se\022/\n\010clusters\030\001 \003(\0132\035.onpremises.Cluste" +
-      "rDiscovered:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"v\n\024L" +
-      "istLocationsRequest\022\036\n\010pageSize\030\001 \001(\005B\014\220" +
-      "\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\022\r\n\005" +
-      "query\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"w\n\025L" +
-      "istLocationsResponse\022\027\n\tpageToken\030\001 \001(\tB" +
-      "\004\250\265\030\001\022-\n\tlocations\030\002 \003(\0132\024.onpremises.Lo" +
-      "cationB\004\240\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"I\n\027" +
-      "SyncClusterDataResponse\022\026\n\016syncSuccessfu" +
-      "l\030\001 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\026SyncC" +
-      "lusterDataRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026\200" +
-      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"L\n\024DeleteClusterRe" +
-      "quest\022\014\n\004name\030\001 \001(\t\022\016\n\006dcName\030\002 \001(\t:\026\200\227\"" +
-      "\001\212\227\"\016IN_DEVELOPMENT\"/\n\025DeleteClusterResp" +
-      "onse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"y\n&ListPart" +
-      "iallyRegisteredClustersRequest\022\036\n\010pageSi" +
-      "ze\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(" +
-      "\tB\004\230\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\001\n\'List" +
-      "PartiallyRegisteredClustersResponse\022X\n\036p" +
-      "artiallyRegisteredClusterData\030\001 \003(\0132*.on" +
-      "premises.PartiallyRegisteredClusterDataB" +
-      "\004\240\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001:\026\200\227\"\001" +
-      "\212\227\"\016IN_DEVELOPMENT\"3\n\031ExtractSetupScript" +
-      "Request:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\251\001\n\032Extr" +
-      "actSetupScriptResponse\022\027\n\017installerScrip" +
-      "t\030\001 \001(\t\022\035\n\025olderAgentRpmLocation\030\002 \001(\t\022\036" +
-      "\n\026latestAgentRpmLocation\030\003 \001(\t\022\033\n\023agentD" +
-      "ebianLocation\030\004 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPM" +
-      "ENT\"M\n\031UpdateClusterStateRequest\022\030\n\nclus" +
-      "terCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
-      "NT\"D\n\032UpdateClusterStateResponse\022\016\n\006stat" +
-      "us\030\001 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\037Chec" +
-      "kClusterConnectivityRequest\022\022\n\nclusterCr" +
-      "n\030\001 \001(\t\022\023\n\013serviceName\030\002 \001(\t:\026\200\227\"\001\212\227\"\016IN" +
-      "_DEVELOPMENT\":\n CheckClusterConnectivity" +
-      "Response:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"U\n\'Dele" +
-      "tePartiallyRegisteredClusterRequest\022\022\n\nc" +
-      "lusterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"" +
-      "B\n(DeletePartiallyRegisteredClusterRespo" +
-      "nse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\250\003\n\036Partiall" +
-      "yRegisteredClusterData\022\n\n\002id\030\001 \001(\003\022\022\n\ncl" +
-      "usterCrn\030\002 \001(\t\022\026\n\016datacenterName\030\003 \001(\t\022\021" +
-      "\n\tipAddress\030\004 \001(\t\022\014\n\004port\030\005 \001(\005\022\023\n\013servi" +
-      "ceName\030\006 \001(\t\022\023\n\013clusterType\030\007 \001(\t\022\020\n\010isS" +
-      "ecure\030\010 \001(\010\022 \n\030clusterConnectivityState\030" +
-      "\t \001(\t\022\021\n\tcreatedBy\030\013 \001(\t\022\027\n\tcreatedAt\030\014 " +
-      "\001(\003B\004\260\265\030\001\022\027\n\tupdatedAt\030\r \001(\003B\004\260\265\030\001\022\017\n\007pr" +
-      "imary\030\016 \001(\010\022\022\n\nccmVersion\030\017 \001(\t\022\032\n\022regis" +
-      "trationStatus\030\020 \001(\t\022\020\n\010agentCrn\030\021 \001(\t\022\016\n" +
-      "\006pvcCrn\030\022 \001(\t\022\017\n\007knoxUrl\030\023 \001(\t:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT\"\352\002\n\037SetupClusterConnectiv" +
-      "ityRequest\022\027\n\tipAddress\030\001 \001(\tB\004\370\265\030\001\022\022\n\004p" +
-      "ort\030\002 \001(\005B\004\370\265\030\001\022\026\n\016datacenterName\030\003 \001(\t\022" +
-      "\026\n\010isSecure\030\004 \001(\010B\004\370\265\030\001\0222\n\013clusterType\030\005" +
-      " \001(\0162\035.onpremises.ClusterType.Value\022\023\n\013s" +
-      "erviceName\030\006 \001(\t\022\033\n\rknoxIpAddress\030\007 \001(\tB" +
-      "\004\370\265\030\001\022\026\n\010knoxPort\030\010 \001(\tB\004\370\265\030\001\022\025\n\007knoxUrl" +
-      "\030\t \001(\tB\004\370\265\030\001\022\027\n\tisUpgrade\030\n \001(\010B\004\370\265\030\001\022\025\n" +
-      "\007tlsType\030\013 \001(\tB\004\370\265\030\001\022\r\n\005cmUrl\030\014 \001(\t:\026\200\227\"" +
-      "\001\212\227\"\016IN_DEVELOPMENT\"\270\001\n SetupClusterConn" +
-      "ectivityResponse\022\r\n\005keyId\030\001 \001(\t\022\016\n\006statu" +
-      "s\030\002 \001(\t\022\036\n\026invertingProxyHostName\030\003 \001(\t\022" +
-      "\026\n\016causeOfFailure\030\004 \001(\t\022\023\n\013certificate\030\005" +
-      " \001(\t\022\020\n\010agentCrn\030\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVEL" +
-      "OPMENT\"W\n)DescribePartiallyRegisteredClu" +
-      "sterRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"\230\001\n*DescribePartiallyReg" +
-      "isteredClusterResponse\022R\n\036partiallyRegis" +
-      "teredClusterData\030\001 \001(\0132*.onpremises.Part" +
-      "iallyRegisteredClusterData:\026\200\227\"\001\212\227\"\016IN_D" +
-      "EVELOPMENT\"B\n\024RegisterAgentRequest\022\022\n\ncl" +
-      "usterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\255" +
-      "\001\n\025RegisterAgentResponse\022\022\n\nclusterCrn\030\001" +
-      " \001(\t\022\016\n\006status\030\002 \001(\t\022\023\n\013certificate\030\003 \001(" +
-      "\t\022\023\n\013cdpEndpoint\030\004 \001(\t\022.\n\014agentDetails\030\005" +
-      " \001(\0132\030.onpremises.AgentDetails:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT\"\261\001\n\014AgentDetails\022\020\n\010agent" +
-      "Crn\030\001 \001(\t\022\023\n\013certificate\030\002 \001(\t\022\022\n\ncluste" +
-      "rCrn\030\003 \001(\t\022\023\n\013accessKeyId\030\004 \001(\t\022\033\n\023encip" +
-      "heredAccessKey\030\005 \001(\t\022\034\n\024encipheredPrivat" +
-      "eKey\030\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\254\006\n\007C" +
-      "luster\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t" +
-      "\022\026\n\016datacenterName\030\003 \001(\t\022\n\n\002id\030\004 \001(\003\022\021\n\t" +
-      "ipAddress\030\006 \001(\t\0222\n\013clusterType\030\007 \001(\0162\035.o" +
-      "npremises.ClusterType.Value\022-\n\005state\030\010 \001" +
-      "(\0162\036.onpremises.ClusterState.Value\022\023\n\013de" +
-      "scription\030\013 \001(\t\022\022\n\nlocationId\030\014 \001(\003\022\034\n\016l" +
-      "astCreateTime\030\r \001(\003B\004\260\265\030\001\022\035\n\017lastUpdated" +
-      "Time\030\016 \001(\003B\004\260\265\030\001\022\030\n\nupdatedUtc\030\017 \001(\003B\004\260\265" +
-      "\030\001\022%\n\004data\030\020 \001(\0132\027.onpremises.ClusterDat" +
-      "a\022\023\n\013knoxEnabled\030\021 \001(\010\022\017\n\007knoxUrl\030\022 \001(\t\022" +
-      "\020\n\010username\030\023 \001(\t\022\026\n\010password\030\024 \001(\tB\004\200\265\030" +
-      "\001\022\026\n\016allowUntrusted\030\025 \001(\010\022\025\n\rbehindGatew" +
-      "ay\030\026 \001(\010\0229\n\013managerType\030\027 \001(\0162$.onpremis" +
-      "es.ClusterManagerType.Value\022\022\n\nmanagerUr" +
-      "i\030\030 \001(\t\022\021\n\tcreatedBy\030\031 \001(\t\022\033\n\023connectivi" +
-      "tyVersion\030\032 \001(\t\022\033\n\023isUpgradeInProgress\030\033" +
-      " \001(\010\022\020\n\010newKeyId\030\034 \001(\t\022&\n\010location\030\035 \001(\013" +
-      "2\024.onpremises.Location\022\022\n\nproperties\030\036 \001" +
-      "(\t\022\025\n\rcmClusterUuid\030\037 \001(\t\022\026\n\016environment" +
-      "Crn\030  \001(\t\022\016\n\006pvcCrn\030! \001(\t:\026\200\227\"\001\212\227\"\016IN_DE" +
-      "VELOPMENT\"V\n\016ClusterService\022\014\n\004name\030\001 \001(" +
-      "\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state\030\003 \001(\t:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT\"\320\001\n\013ClusterData\022\014\n\004nam" +
-      "e\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n\013displayName\030" +
-      "\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secured\030\005 \001(\010\022\024\n\014k" +
-      "erberosUser\030\006 \001(\t\022\036\n\026kerberosTicketLocat" +
-      "ion\030\007 \001(\t\022\022\n\nproperties\030\010 \001(\t\022\r\n\005stats\030\t" +
-      " \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Locatio" +
-      "n\022\n\n\002id\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010province\030" +
-      "\003 \001(\t\022\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010" +
-      "latitude\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT\"9\n\021ClusterDiscovered\022\014" +
-      "\n\004name\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n" +
-      "\014ClusterState\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO" +
-      "_SYNC\020\001\022\024\n\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020" +
-      "\003\022\016\n\nSYNC_ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_V" +
-      "ERIFIED\020\005\022\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020\006" +
-      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\022ClusterManag" +
-      "erType\"4\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024" +
-      "\n\020CLOUDERA_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOP" +
-      "MENT\"V\n\013ClusterType\"/\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\007\n\003HDP\020\001\022\007\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN" +
-      "_DEVELOPMENT\"S\n\024ClusterQueryOperator\"#\n\005" +
-      "Value\022\t\n\005UNSET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT2\342\022\n\rOnPremisesApi\022u\n\014L" +
-      "istClusters\022\037.onpremises.ListClustersReq" +
-      "uest\032 .onpremises.ListClustersResponse\"\"" +
-      "\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017Re" +
-      "gisterCluster\022\".onpremises.RegisterClust" +
-      "erRequest\032#.onpremises.RegisterClusterRe" +
-      "sponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017De" +
-      "scribeCluster\022\".onpremises.DescribeClust" +
-      "erRequest\032#.onpremises.DescribeClusterRe" +
-      "sponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUp" +
-      "dateCluster\022 .onpremises.UpdateClusterRe" +
-      "quest\032!.onpremises.UpdateClusterResponse" +
-      "\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractC" +
-      "lusters\022\".onpremises.ExtractClustersRequ" +
-      "est\032#.onpremises.ExtractClustersResponse" +
-      "\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListClu" +
-      "sterServices\022&.onpremises.ListClusterSer" +
-      "vicesRequest\032\'.onpremises.ListClusterSer" +
-      "vicesResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035" +
-      "\000\022x\n\rListLocations\022 .onpremises.ListLoca" +
-      "tionsRequest\032!.onpremises.ListLocationsR" +
-      "esponse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310" +
-      "\246\035\000\022v\n\017SyncClusterData\022\".onpremises.Sync" +
-      "ClusterDataRequest\032#.onpremises.SyncClus" +
-      "terDataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310" +
-      "\246\035\001\022p\n\rDeleteCluster\022 .onpremises.Delete" +
-      "ClusterRequest\032!.onpremises.DeleteCluste" +
-      "rResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001" +
-      "\n\037ListPartiallyRegisteredClusters\0222.onpr" +
-      "emises.ListPartiallyRegisteredClustersRe" +
-      "quest\0323.onpremises.ListPartiallyRegister" +
-      "edClustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_D" +
-      "EVELOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupCluste" +
-      "rConnectivity\022+.onpremises.SetupClusterC" +
-      "onnectivityRequest\032,.onpremises.SetupClu" +
-      "sterConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEV" +
-      "ELOPMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribeParti" +
-      "allyRegisteredCluster\0225.onpremises.Descr" +
-      "ibePartiallyRegisteredClusterRequest\0326.o" +
-      "npremises.DescribePartiallyRegisteredClu" +
-      "sterResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
-      "\332\246\035\006public\022z\n\rRegisterAgent\022 .onpremises" +
-      ".RegisterAgentRequest\032!.onpremises.Regis" +
-      "terAgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
-      "\310\246\035\001\332\246\035\006public\022\211\001\n\022ExtractSetupScript\022%." +
-      "onpremises.ExtractSetupScriptRequest\032&.o" +
-      "npremises.ExtractSetupScriptResponse\"$\240\246" +
-      "\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\211\001\n\022U" +
-      "pdateClusterState\022%.onpremises.UpdateClu" +
-      "sterStateRequest\032&.onpremises.UpdateClus" +
-      "terStateResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
-      "\310\246\035\001\332\246\035\006public\022\221\001\n\030CheckClusterConnectiv" +
-      "ity\022+.onpremises.CheckClusterConnectivit" +
-      "yRequest\032,.onpremises.CheckClusterConnec" +
-      "tivityResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246" +
-      "\035\000\022\251\001\n DeletePartiallyRegisteredCluster\022" +
-      "3.onpremises.DeletePartiallyRegisteredCl" +
-      "usterRequest\0324.onpremises.DeletePartiall" +
-      "yRegisteredClusterResponse\"\032\240\246\035\001\252\246\035\016IN_D" +
-      "EVELOPMENT\310\246\035\001\032.\212\304\023\030\n\nonpremises\022\nOnPrem" +
-      "ises\242\304\023\016private,publicB`\n+com.cloudera.t" +
-      "hunderhead.service.onpremisesB\022OnPremise" +
-      "sApiProtoZ\031com/cloudera/cdp/protobuf\200\210\'\001" +
-      "b\006proto3"
+      "\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\234\001\n\026" +
+      "DescribeClusterRequest\022\022\n\nclusterCrn\030\001 \001" +
+      "(\t\022-\n\002id\030d \001(\003B!\270\265\030\001\302\265\030\025FOR_CLOUDERA_USE" +
+      "_ONLY\370\265\030\001\022\'\n\037showOnPremiseEnvironmentDet" +
+      "ails\030\002 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n\027De" +
+      "scribeClusterResponse\022$\n\007cluster\030\001 \001(\0132\023" +
+      ".onpremises.Cluster:\026\200\227\"\001\212\227\"\016IN_DEVELOPM" +
+      "ENT\"\241\001\n\032ListClusterServicesRequest\022\030\n\ncl" +
+      "usterCrn\030\001 \001(\tB\004\320\265\030\001\022\023\n\013clusterName\030\002 \001(" +
+      "\t\022\022\n\nmanagerUri\030\003 \001(\t\022\020\n\010username\030\004 \001(\t\022" +
+      "\026\n\010password\030\005 \001(\tB\004\200\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVE" +
+      "LOPMENT\"c\n\033ListClusterServicesResponse\022," +
+      "\n\010services\030\001 \003(\0132\032.onpremises.ClusterSer" +
+      "vice:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\026Extract" +
+      "ClustersRequest\022\030\n\nmanagerUri\030e \001(\tB\004\320\265\030" +
+      "\001\022\026\n\010username\030f \001(\tB\004\320\265\030\001\022\032\n\010password\030g " +
+      "\001(\tB\010\200\265\030\001\320\265\030\001\022\022\n\nclusterCrn\030h \001(\t:\026\200\227\"\001\212" +
+      "\227\"\016IN_DEVELOPMENT\"b\n\027ExtractClustersResp" +
+      "onse\022/\n\010clusters\030\001 \003(\0132\035.onpremises.Clus" +
+      "terDiscovered:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"v\n" +
+      "\024ListLocationsRequest\022\036\n\010pageSize\030\001 \001(\005B" +
+      "\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\022\r" +
+      "\n\005query\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"w\n" +
+      "\025ListLocationsResponse\022\027\n\tpageToken\030\001 \001(" +
+      "\tB\004\250\265\030\001\022-\n\tlocations\030\002 \003(\0132\024.onpremises." +
+      "LocationB\004\240\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"I" +
+      "\n\027SyncClusterDataResponse\022\026\n\016syncSuccess" +
+      "ful\030\001 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\026Syn" +
+      "cClusterDataRequest\022\022\n\nclusterCrn\030\001 \001(\t:" +
+      "\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"L\n\024DeleteCluster" +
+      "Request\022\014\n\004name\030\001 \001(\t\022\016\n\006dcName\030\002 \001(\t:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"/\n\025DeleteClusterRe" +
+      "sponse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"y\n&ListPa" +
+      "rtiallyRegisteredClustersRequest\022\036\n\010page" +
+      "Size\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 " +
+      "\001(\tB\004\230\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\001\n\'Li" +
+      "stPartiallyRegisteredClustersResponse\022X\n" +
+      "\036partiallyRegisteredClusterData\030\001 \003(\0132*." +
+      "onpremises.PartiallyRegisteredClusterDat" +
+      "aB\004\240\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001:\026\200\227" +
+      "\"\001\212\227\"\016IN_DEVELOPMENT\"3\n\031ExtractSetupScri" +
+      "ptRequest:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\251\001\n\032Ex" +
+      "tractSetupScriptResponse\022\027\n\017installerScr" +
+      "ipt\030\001 \001(\t\022\035\n\025olderAgentRpmLocation\030\002 \001(\t" +
+      "\022\036\n\026latestAgentRpmLocation\030\003 \001(\t\022\033\n\023agen" +
+      "tDebianLocation\030\004 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
+      "PMENT\"@\n&ExtractCertificateRefreshScript" +
+      "Request:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"q\n\'Extra" +
+      "ctCertificateRefreshScriptResponse\022\034\n\016re" +
+      "freshPackage\030\001 \001(\014B\004\210\265\030\001\022\020\n\010filename\030\002 \001" +
+      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"M\n\031UpdateClus" +
+      "terStateRequest\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030" +
+      "\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\032UpdateClust" +
+      "erStateResponse\022\016\n\006status\030\001 \001(\010:\026\200\227\"\001\212\227\"" +
+      "\016IN_DEVELOPMENT\"b\n\037CheckClusterConnectiv" +
+      "ityRequest\022\022\n\nclusterCrn\030\001 \001(\t\022\023\n\013servic" +
+      "eName\030\002 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\":\n C" +
+      "heckClusterConnectivityResponse:\026\200\227\"\001\212\227\"" +
+      "\016IN_DEVELOPMENT\"U\n\'DeletePartiallyRegist" +
+      "eredClusterRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n(DeletePartiall" +
+      "yRegisteredClusterResponse:\026\200\227\"\001\212\227\"\016IN_D" +
+      "EVELOPMENT\"\250\003\n\036PartiallyRegisteredCluste" +
+      "rData\022\n\n\002id\030\001 \001(\003\022\022\n\nclusterCrn\030\002 \001(\t\022\026\n" +
+      "\016datacenterName\030\003 \001(\t\022\021\n\tipAddress\030\004 \001(\t" +
+      "\022\014\n\004port\030\005 \001(\005\022\023\n\013serviceName\030\006 \001(\t\022\023\n\013c" +
+      "lusterType\030\007 \001(\t\022\020\n\010isSecure\030\010 \001(\010\022 \n\030cl" +
+      "usterConnectivityState\030\t \001(\t\022\021\n\tcreatedB" +
+      "y\030\013 \001(\t\022\027\n\tcreatedAt\030\014 \001(\003B\004\260\265\030\001\022\027\n\tupda" +
+      "tedAt\030\r \001(\003B\004\260\265\030\001\022\017\n\007primary\030\016 \001(\010\022\022\n\ncc" +
+      "mVersion\030\017 \001(\t\022\032\n\022registrationStatus\030\020 \001" +
+      "(\t\022\020\n\010agentCrn\030\021 \001(\t\022\016\n\006pvcCrn\030\022 \001(\t\022\017\n\007" +
+      "knoxUrl\030\023 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\352\002" +
+      "\n\037SetupClusterConnectivityRequest\022\027\n\tipA" +
+      "ddress\030\001 \001(\tB\004\370\265\030\001\022\022\n\004port\030\002 \001(\005B\004\370\265\030\001\022\026" +
+      "\n\016datacenterName\030\003 \001(\t\022\026\n\010isSecure\030\004 \001(\010" +
+      "B\004\370\265\030\001\0222\n\013clusterType\030\005 \001(\0162\035.onpremises" +
+      ".ClusterType.Value\022\023\n\013serviceName\030\006 \001(\t\022" +
+      "\033\n\rknoxIpAddress\030\007 \001(\tB\004\370\265\030\001\022\026\n\010knoxPort" +
+      "\030\010 \001(\tB\004\370\265\030\001\022\025\n\007knoxUrl\030\t \001(\tB\004\370\265\030\001\022\027\n\ti" +
+      "sUpgrade\030\n \001(\010B\004\370\265\030\001\022\025\n\007tlsType\030\013 \001(\tB\004\370" +
+      "\265\030\001\022\r\n\005cmUrl\030\014 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
+      "NT\"\270\001\n SetupClusterConnectivityResponse\022" +
+      "\r\n\005keyId\030\001 \001(\t\022\016\n\006status\030\002 \001(\t\022\036\n\026invert" +
+      "ingProxyHostName\030\003 \001(\t\022\026\n\016causeOfFailure" +
+      "\030\004 \001(\t\022\023\n\013certificate\030\005 \001(\t\022\020\n\010agentCrn\030" +
+      "\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n)Describ" +
+      "ePartiallyRegisteredClusterRequest\022\022\n\ncl" +
+      "usterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\230" +
+      "\001\n*DescribePartiallyRegisteredClusterRes" +
+      "ponse\022R\n\036partiallyRegisteredClusterData\030" +
+      "\001 \001(\0132*.onpremises.PartiallyRegisteredCl" +
+      "usterData:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n\024Reg" +
+      "isterAgentRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"\255\001\n\025RegisterAgentR" +
+      "esponse\022\022\n\nclusterCrn\030\001 \001(\t\022\016\n\006status\030\002 " +
+      "\001(\t\022\023\n\013certificate\030\003 \001(\t\022\023\n\013cdpEndpoint\030" +
+      "\004 \001(\t\022.\n\014agentDetails\030\005 \001(\0132\030.onpremises" +
+      ".AgentDetails:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\261\001" +
+      "\n\014AgentDetails\022\020\n\010agentCrn\030\001 \001(\t\022\023\n\013cert" +
+      "ificate\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\023\n\013acc" +
+      "essKeyId\030\004 \001(\t\022\033\n\023encipheredAccessKey\030\005 " +
+      "\001(\t\022\034\n\024encipheredPrivateKey\030\006 \001(\t:\026\200\227\"\001\212" +
+      "\227\"\016IN_DEVELOPMENT\"\364\006\n\007Cluster\022\022\n\ncluster" +
+      "Crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n\016datacenterNam" +
+      "e\030\003 \001(\t\022\n\n\002id\030\004 \001(\003\022\021\n\tipAddress\030\006 \001(\t\0222" +
+      "\n\013clusterType\030\007 \001(\0162\035.onpremises.Cluster" +
+      "Type.Value\022-\n\005state\030\010 \001(\0162\036.onpremises.C" +
+      "lusterState.Value\022\023\n\013description\030\013 \001(\t\022\022" +
+      "\n\nlocationId\030\014 \001(\003\022\034\n\016lastCreateTime\030\r \001" +
+      "(\003B\004\260\265\030\001\022\035\n\017lastUpdatedTime\030\016 \001(\003B\004\260\265\030\001\022" +
+      "\030\n\nupdatedUtc\030\017 \001(\003B\004\260\265\030\001\022%\n\004data\030\020 \001(\0132" +
+      "\027.onpremises.ClusterData\022\023\n\013knoxEnabled\030" +
+      "\021 \001(\010\022\017\n\007knoxUrl\030\022 \001(\t\022\020\n\010username\030\023 \001(\t" +
+      "\022\026\n\010password\030\024 \001(\tB\004\200\265\030\001\022\026\n\016allowUntrust" +
+      "ed\030\025 \001(\010\022\025\n\rbehindGateway\030\026 \001(\010\0229\n\013manag" +
+      "erType\030\027 \001(\0162$.onpremises.ClusterManager" +
+      "Type.Value\022\022\n\nmanagerUri\030\030 \001(\t\022\021\n\tcreate" +
+      "dBy\030\031 \001(\t\022\033\n\023connectivityVersion\030\032 \001(\t\022\033" +
+      "\n\023isUpgradeInProgress\030\033 \001(\010\022\020\n\010newKeyId\030" +
+      "\034 \001(\t\022&\n\010location\030\035 \001(\0132\024.onpremises.Loc" +
+      "ation\022\022\n\nproperties\030\036 \001(\t\022\025\n\rcmClusterUu" +
+      "id\030\037 \001(\t\022\026\n\016environmentCrn\030  \001(\t\022\016\n\006pvcC" +
+      "rn\030! \001(\t\022F\n\030onPremEnvironmentDetails\030\" \001" +
+      "(\0132$.onpremises.OnPremEnvironmentDetails" +
+      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\002\n\030OnPremEnvir" +
+      "onmentDetails\022\016\n\006cmHost\030\001 \001(\t\022\026\n\016knoxGat" +
+      "ewayUrl\030\002 \001(\t\022L\n\014applications\030\003 \003(\01326.on" +
+      "premises.OnPremEnvironmentDetails.Applic" +
+      "ationsEntry\022@\n\025onPremDatalakeDetails\030\007 \001" +
+      "(\0132!.onpremises.OnPremDatalakeDetails\032L\n" +
+      "\021ApplicationsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value" +
+      "\030\002 \001(\0132\027.onpremises.Application:\0028\001:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"\226\002\n\013Application\022\014\n\004n" +
+      "ame\030\001 \001(\t\0227\n\010services\030\002 \003(\0132%.onpremises" +
+      ".Application.ServicesEntry\0223\n\006config\030\003 \003" +
+      "(\0132#.onpremises.Application.ConfigEntry\032" +
+      "D\n\rServicesEntry\022\013\n\003key\030\001 \001(\t\022\"\n\005value\030\002" +
+      " \001(\0132\023.onpremises.Service:\0028\001\032-\n\013ConfigE" +
+      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001:\026\200\227" +
+      "\"\001\212\227\"\016IN_DEVELOPMENT\"\277\001\n\007Service\022\014\n\004type" +
+      "\030\001 \001(\t\022.\n\tendpoints\030\002 \003(\0132\033.onpremises.S" +
+      "erviceEndpoint\022/\n\006config\030\003 \003(\0132\037.onpremi" +
+      "ses.Service.ConfigEntry\032-\n\013ConfigEntry\022\013" +
+      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001:\026\200\227\"\001\212\227\"\016" +
+      "IN_DEVELOPMENT\"R\n\017ServiceEndpoint\022\014\n\004hos" +
+      "t\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\013\n\003uri\030\003 \001(\t:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"\274\002\n\025OnPremDatalakeDet" +
+      "ails\022\024\n\014datalakeName\030\001 \001(\t\022\027\n\017enableRang" +
+      "erRaz\030\002 \001(\010\022\037\n\027creationTimeEpochMillis\030\003" +
+      " \001(\003\022\016\n\006cmFqdn\030\004 \001(\t\022\014\n\004cmIp\030\005 \001(\t\022\022\n\ncm" +
+      "ServerId\030\006 \001(\t\0220\n\006status\030\007 \001(\0162 .onpremi" +
+      "ses.DatalakeStatus.Value\022\'\n\tinstances\030\010 " +
+      "\003(\0132\024.onpremises.Instance\022.\n\014kerberosInf" +
+      "o\030\t \001(\0132\030.onpremises.KerberosInfo:\026\200\227\"\001\212" +
+      "\227\"\016IN_DEVELOPMENT\"O\n\010Instance\022\n\n\002id\030\001 \001(" +
+      "\t\022\014\n\004fqdn\030\002 \001(\t\022\021\n\tprivateIp\030\003 \001(\t:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"\206\001\n\014KerberosInfo\022\017\n\007k" +
+      "dcType\030\001 \001(\t\022\025\n\rkerberosRealm\030\002 \001(\t\022\017\n\007k" +
+      "dcHost\030\003 \001(\t\022\021\n\tkdcHostIp\030\004 \001(\t\022\022\n\nkerbe" +
+      "rized\030\005 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"^\n\016D" +
+      "atalakeStatus\"4\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tAVA" +
+      "ILABLE\020\001\022\021\n\rNOT_AVAILABLE\020\002:\026\200\227\"\001\212\227\"\016IN_" +
+      "DEVELOPMENT\"V\n\016ClusterService\022\014\n\004name\030\001 " +
+      "\001(\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state\030\003 \001(\t:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"\360\001\n\013ClusterData\022\014\n\004n" +
+      "ame\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n\013displayNam" +
+      "e\030\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secured\030\005 \001(\010\022\024\n" +
+      "\014kerberosUser\030\006 \001(\t\022\036\n\026kerberosTicketLoc" +
+      "ation\030\007 \001(\t\0222\n\016clusterDetails\030\n \001(\0132\032.on" +
+      "premises.ClusterDetails\022\r\n\005stats\030\t \001(\t:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Location\022\n\n\002i" +
+      "d\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010province\030\003 \001(\t\022" +
+      "\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010latitu" +
+      "de\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026\200\227\"\001\212\227\"\016IN_" +
+      "DEVELOPMENT\"\217\002\n\016ClusterDetails\022\014\n\004name\030\001" +
+      " \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007version\030\003 \001" +
+      "(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017maintenanceMo" +
+      "de\030\005 \001(\010\022\031\n\021maintenanceOwners\030\006 \003(\t\022\022\n\nc" +
+      "lusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010 \001(\t\0224\n\014ent" +
+      "ityStatus\030\t \001(\0162\036.onpremises.EntityStatu" +
+      "s.Value\022\014\n\004uuid\030\n \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
+      "PMENT\"9\n\021ClusterDiscovered\022\014\n\004name\030\001 \001(\t" +
+      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n\014ClusterStat" +
+      "e\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SYNC\020\001\022\024\n\020S" +
+      "YNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016\n\nSYNC_ER" +
+      "ROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERIFIED\020\005\022\035\n" +
+      "\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200\227\"\001\212\227\"\016IN" +
+      "_DEVELOPMENT\"b\n\022ClusterManagerType\"4\n\005Va" +
+      "lue\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020CLOUDERA_M" +
+      "ANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\013Clus" +
+      "terType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003HDP\020\001\022\007\n\003" +
+      "CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
+      "\"S\n\024ClusterQueryOperator\"#\n\005Value\022\t\n\005UNS" +
+      "ET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
+      "PMENT\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013\n\007UNKN" +
+      "OWN\020\000\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DOWN\020\003\022\022" +
+      "\n\016UNKNOWN_HEALTH\020\004\022\023\n\017DISABLED_HEALTH\020\005\022" +
+      "\025\n\021CONCERNING_HEALTH\020\006\022\016\n\nBAD_HEALTH\020\007\022\017" +
+      "\n\013GOOD_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010STOPPIN" +
+      "G\020\n\022\031\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227\"\001\212\227\"\016" +
+      "IN_DEVELOPMENT2\225\024\n\rOnPremisesApi\022u\n\014List" +
+      "Clusters\022\037.onpremises.ListClustersReques" +
+      "t\032 .onpremises.ListClustersResponse\"\"\220\246\035" +
+      "\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017Regis" +
+      "terCluster\022\".onpremises.RegisterClusterR" +
+      "equest\032#.onpremises.RegisterClusterRespo" +
+      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017Descr" +
+      "ibeCluster\022\".onpremises.DescribeClusterR" +
+      "equest\032#.onpremises.DescribeClusterRespo" +
+      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUpdat" +
+      "eCluster\022 .onpremises.UpdateClusterReque" +
+      "st\032!.onpremises.UpdateClusterResponse\"\032\240" +
+      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractClus" +
+      "ters\022\".onpremises.ExtractClustersRequest" +
+      "\032#.onpremises.ExtractClustersResponse\"\032\240" +
+      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListCluste" +
+      "rServices\022&.onpremises.ListClusterServic" +
+      "esRequest\032\'.onpremises.ListClusterServic" +
+      "esResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022x" +
+      "\n\rListLocations\022 .onpremises.ListLocatio" +
+      "nsRequest\032!.onpremises.ListLocationsResp" +
+      "onse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
+      "\022v\n\017SyncClusterData\022\".onpremises.SyncClu" +
+      "sterDataRequest\032#.onpremises.SyncCluster" +
+      "DataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001" +
+      "\022p\n\rDeleteCluster\022 .onpremises.DeleteClu" +
+      "sterRequest\032!.onpremises.DeleteClusterRe" +
+      "sponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001\n\037L" +
+      "istPartiallyRegisteredClusters\0222.onpremi" +
+      "ses.ListPartiallyRegisteredClustersReque" +
+      "st\0323.onpremises.ListPartiallyRegisteredC" +
+      "lustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVE" +
+      "LOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClusterCo" +
+      "nnectivity\022+.onpremises.SetupClusterConn" +
+      "ectivityRequest\032,.onpremises.SetupCluste" +
+      "rConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEVELO" +
+      "PMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePartiall" +
+      "yRegisteredCluster\0225.onpremises.Describe" +
+      "PartiallyRegisteredClusterRequest\0326.onpr" +
+      "emises.DescribePartiallyRegisteredCluste" +
+      "rResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035" +
+      "\006public\022z\n\rRegisterAgent\022 .onpremises.Re" +
+      "gisterAgentRequest\032!.onpremises.Register" +
+      "AgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035" +
+      "\001\332\246\035\006public\022\211\001\n\022ExtractSetupScript\022%.onp" +
+      "remises.ExtractSetupScriptRequest\032&.onpr" +
+      "emises.ExtractSetupScriptResponse\"$\240\246\035\001\252" +
+      "\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001\n\037Extr" +
+      "actCertificateRefreshScript\0222.onpremises" +
+      ".ExtractCertificateRefreshScriptRequest\032" +
+      "3.onpremises.ExtractCertificateRefreshSc" +
+      "riptResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
+      "\332\246\035\006public\022\211\001\n\022UpdateClusterState\022%.onpr" +
+      "emises.UpdateClusterStateRequest\032&.onpre" +
+      "mises.UpdateClusterStateResponse\"$\240\246\035\001\252\246" +
+      "\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n\030Check" +
+      "ClusterConnectivity\022+.onpremises.CheckCl" +
+      "usterConnectivityRequest\032,.onpremises.Ch" +
+      "eckClusterConnectivityResponse\"\032\240\246\035\001\252\246\035\016" +
+      "IN_DEVELOPMENT\310\246\035\000\022\251\001\n DeletePartiallyRe" +
+      "gisteredCluster\0223.onpremises.DeleteParti" +
+      "allyRegisteredClusterRequest\0324.onpremise" +
+      "s.DeletePartiallyRegisteredClusterRespon" +
+      "se\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304\023\030\n\non" +
+      "premises\022\nOnPremises\242\304\023\016private,publicB`" +
+      "\n+com.cloudera.thunderhead.service.onpre" +
+      "misesB\022OnPremisesApiProtoZ\031com/cloudera/" +
+      "cdp/protobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -48307,7 +63032,7 @@ public final class OnPremisesApiProto {
     internal_static_onpremises_DescribeClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribeClusterRequest_descriptor,
-        new java.lang.String[] { "ClusterCrn", "Id", });
+        new java.lang.String[] { "ClusterCrn", "Id", "ShowOnPremiseEnvironmentDetails", });
     internal_static_onpremises_DescribeClusterResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_onpremises_DescribeClusterResponse_fieldAccessorTable = new
@@ -48398,143 +63123,239 @@ public final class OnPremisesApiProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractSetupScriptResponse_descriptor,
         new java.lang.String[] { "InstallerScript", "OlderAgentRpmLocation", "LatestAgentRpmLocation", "AgentDebianLocation", });
-    internal_static_onpremises_UpdateClusterStateRequest_descriptor =
+    internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor =
       getDescriptor().getMessageTypes().get(22);
+    internal_static_onpremises_ExtractCertificateRefreshScriptRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor =
+      getDescriptor().getMessageTypes().get(23);
+    internal_static_onpremises_ExtractCertificateRefreshScriptResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor,
+        new java.lang.String[] { "RefreshPackage", "Filename", });
+    internal_static_onpremises_UpdateClusterStateRequest_descriptor =
+      getDescriptor().getMessageTypes().get(24);
     internal_static_onpremises_UpdateClusterStateRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_UpdateClusterStateRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_UpdateClusterStateResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_onpremises_UpdateClusterStateResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_UpdateClusterStateResponse_descriptor,
         new java.lang.String[] { "Status", });
     internal_static_onpremises_CheckClusterConnectivityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_onpremises_CheckClusterConnectivityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_CheckClusterConnectivityRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", "ServiceName", });
     internal_static_onpremises_CheckClusterConnectivityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_onpremises_CheckClusterConnectivityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_CheckClusterConnectivityResponse_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_PartiallyRegisteredClusterData_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_onpremises_PartiallyRegisteredClusterData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_PartiallyRegisteredClusterData_descriptor,
         new java.lang.String[] { "Id", "ClusterCrn", "DatacenterName", "IpAddress", "Port", "ServiceName", "ClusterType", "IsSecure", "ClusterConnectivityState", "CreatedBy", "CreatedAt", "UpdatedAt", "Primary", "CcmVersion", "RegistrationStatus", "AgentCrn", "PvcCrn", "KnoxUrl", });
     internal_static_onpremises_SetupClusterConnectivityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_onpremises_SetupClusterConnectivityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SetupClusterConnectivityRequest_descriptor,
         new java.lang.String[] { "IpAddress", "Port", "DatacenterName", "IsSecure", "ClusterType", "ServiceName", "KnoxIpAddress", "KnoxPort", "KnoxUrl", "IsUpgrade", "TlsType", "CmUrl", });
     internal_static_onpremises_SetupClusterConnectivityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_onpremises_SetupClusterConnectivityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SetupClusterConnectivityResponse_descriptor,
         new java.lang.String[] { "KeyId", "Status", "InvertingProxyHostName", "CauseOfFailure", "Certificate", "AgentCrn", });
     internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_descriptor,
         new java.lang.String[] { "PartiallyRegisteredClusterData", });
     internal_static_onpremises_RegisterAgentRequest_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_onpremises_RegisterAgentRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_RegisterAgentRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_RegisterAgentResponse_descriptor =
-      getDescriptor().getMessageTypes().get(34);
+      getDescriptor().getMessageTypes().get(36);
     internal_static_onpremises_RegisterAgentResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_RegisterAgentResponse_descriptor,
         new java.lang.String[] { "ClusterCrn", "Status", "Certificate", "CdpEndpoint", "AgentDetails", });
     internal_static_onpremises_AgentDetails_descriptor =
-      getDescriptor().getMessageTypes().get(35);
+      getDescriptor().getMessageTypes().get(37);
     internal_static_onpremises_AgentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_AgentDetails_descriptor,
         new java.lang.String[] { "AgentCrn", "Certificate", "ClusterCrn", "AccessKeyId", "EncipheredAccessKey", "EncipheredPrivateKey", });
     internal_static_onpremises_Cluster_descriptor =
-      getDescriptor().getMessageTypes().get(36);
+      getDescriptor().getMessageTypes().get(38);
     internal_static_onpremises_Cluster_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Cluster_descriptor,
-        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", "EnvironmentCrn", "PvcCrn", });
+        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", "EnvironmentCrn", "PvcCrn", "OnPremEnvironmentDetails", });
+    internal_static_onpremises_OnPremEnvironmentDetails_descriptor =
+      getDescriptor().getMessageTypes().get(39);
+    internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_OnPremEnvironmentDetails_descriptor,
+        new java.lang.String[] { "CmHost", "KnoxGatewayUrl", "Applications", "OnPremDatalakeDetails", });
+    internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor =
+      internal_static_onpremises_OnPremEnvironmentDetails_descriptor.getNestedTypes().get(0);
+    internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_onpremises_Application_descriptor =
+      getDescriptor().getMessageTypes().get(40);
+    internal_static_onpremises_Application_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Application_descriptor,
+        new java.lang.String[] { "Name", "Services", "Config", });
+    internal_static_onpremises_Application_ServicesEntry_descriptor =
+      internal_static_onpremises_Application_descriptor.getNestedTypes().get(0);
+    internal_static_onpremises_Application_ServicesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Application_ServicesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_onpremises_Application_ConfigEntry_descriptor =
+      internal_static_onpremises_Application_descriptor.getNestedTypes().get(1);
+    internal_static_onpremises_Application_ConfigEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Application_ConfigEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_onpremises_Service_descriptor =
+      getDescriptor().getMessageTypes().get(41);
+    internal_static_onpremises_Service_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Service_descriptor,
+        new java.lang.String[] { "Type", "Endpoints", "Config", });
+    internal_static_onpremises_Service_ConfigEntry_descriptor =
+      internal_static_onpremises_Service_descriptor.getNestedTypes().get(0);
+    internal_static_onpremises_Service_ConfigEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Service_ConfigEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_onpremises_ServiceEndpoint_descriptor =
+      getDescriptor().getMessageTypes().get(42);
+    internal_static_onpremises_ServiceEndpoint_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ServiceEndpoint_descriptor,
+        new java.lang.String[] { "Host", "Port", "Uri", });
+    internal_static_onpremises_OnPremDatalakeDetails_descriptor =
+      getDescriptor().getMessageTypes().get(43);
+    internal_static_onpremises_OnPremDatalakeDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_OnPremDatalakeDetails_descriptor,
+        new java.lang.String[] { "DatalakeName", "EnableRangerRaz", "CreationTimeEpochMillis", "CmFqdn", "CmIp", "CmServerId", "Status", "Instances", "KerberosInfo", });
+    internal_static_onpremises_Instance_descriptor =
+      getDescriptor().getMessageTypes().get(44);
+    internal_static_onpremises_Instance_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_Instance_descriptor,
+        new java.lang.String[] { "Id", "Fqdn", "PrivateIp", });
+    internal_static_onpremises_KerberosInfo_descriptor =
+      getDescriptor().getMessageTypes().get(45);
+    internal_static_onpremises_KerberosInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_KerberosInfo_descriptor,
+        new java.lang.String[] { "KdcType", "KerberosRealm", "KdcHost", "KdcHostIp", "Kerberized", });
+    internal_static_onpremises_DatalakeStatus_descriptor =
+      getDescriptor().getMessageTypes().get(46);
+    internal_static_onpremises_DatalakeStatus_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_DatalakeStatus_descriptor,
+        new java.lang.String[] { });
     internal_static_onpremises_ClusterService_descriptor =
-      getDescriptor().getMessageTypes().get(37);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_onpremises_ClusterService_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterService_descriptor,
         new java.lang.String[] { "Name", "Version", "State", });
     internal_static_onpremises_ClusterData_descriptor =
-      getDescriptor().getMessageTypes().get(38);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_onpremises_ClusterData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterData_descriptor,
-        new java.lang.String[] { "Name", "Version", "DisplayName", "Url", "Secured", "KerberosUser", "KerberosTicketLocation", "Properties", "Stats", });
+        new java.lang.String[] { "Name", "Version", "DisplayName", "Url", "Secured", "KerberosUser", "KerberosTicketLocation", "ClusterDetails", "Stats", });
     internal_static_onpremises_Location_descriptor =
-      getDescriptor().getMessageTypes().get(39);
+      getDescriptor().getMessageTypes().get(49);
     internal_static_onpremises_Location_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Location_descriptor,
         new java.lang.String[] { "Id", "City", "Province", "Country", "Iso2", "Latitude", "Longitude", });
+    internal_static_onpremises_ClusterDetails_descriptor =
+      getDescriptor().getMessageTypes().get(50);
+    internal_static_onpremises_ClusterDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ClusterDetails_descriptor,
+        new java.lang.String[] { "Name", "DisplayName", "Version", "FullVersion", "MaintenanceMode", "MaintenanceOwners", "ClusterUrl", "HostsUrl", "EntityStatus", "Uuid", });
     internal_static_onpremises_ClusterDiscovered_descriptor =
-      getDescriptor().getMessageTypes().get(40);
+      getDescriptor().getMessageTypes().get(51);
     internal_static_onpremises_ClusterDiscovered_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterDiscovered_descriptor,
         new java.lang.String[] { "Name", });
     internal_static_onpremises_ClusterState_descriptor =
-      getDescriptor().getMessageTypes().get(41);
+      getDescriptor().getMessageTypes().get(52);
     internal_static_onpremises_ClusterState_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterState_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterManagerType_descriptor =
-      getDescriptor().getMessageTypes().get(42);
+      getDescriptor().getMessageTypes().get(53);
     internal_static_onpremises_ClusterManagerType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterManagerType_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterType_descriptor =
-      getDescriptor().getMessageTypes().get(43);
+      getDescriptor().getMessageTypes().get(54);
     internal_static_onpremises_ClusterType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterType_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterQueryOperator_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(55);
     internal_static_onpremises_ClusterQueryOperator_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterQueryOperator_descriptor,
+        new java.lang.String[] { });
+    internal_static_onpremises_EntityStatus_descriptor =
+      getDescriptor().getMessageTypes().get(56);
+    internal_static_onpremises_EntityStatus_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_EntityStatus_descriptor,
         new java.lang.String[] { });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
@@ -48550,6 +63371,7 @@ public final class OnPremisesApiProto {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingResult);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
