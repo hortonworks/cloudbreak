@@ -142,6 +142,16 @@ service OnPremisesApi {
     option (options.MethodExtension.mutating) = false;
   }
 
+  // Extract certificate refresh script package. :: Extract certificate refresh script to get updated certificate.
+  rpc ExtractCertificateRefreshScript (ExtractCertificateRefreshScriptRequest)
+      returns (ExtractCertificateRefreshScriptResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
+
+
   // Updates the status of partially registered cluster . :: Updates the status of partially registered cluster
   rpc UpdateClusterState (UpdateClusterStateRequest)
       returns (UpdateClusterStateResponse) {
@@ -287,6 +297,9 @@ message DescribeClusterRequest {
     (options.FieldExtension.hidden) = true,
     (options.FieldExtension.hiddenReason) = 'FOR_CLOUDERA_USE_ONLY'
   ];
+
+  // Whether to show On Premise environment details.
+  bool showOnPremiseEnvironmentDetails = 2;
 }
 
 // Response object for the DescribeCluster method.
@@ -463,6 +476,22 @@ message ExtractSetupScriptResponse {
   string latestAgentRpmLocation = 3;
   // Path in which the Debian package of the agent is available. This debian can be used on UBUNTU 20.
   string agentDebianLocation = 4;
+}
+
+// Request object for extract certificate refresh script
+message ExtractCertificateRefreshScriptRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+}
+
+// Response object for extract certificate refresh script
+message ExtractCertificateRefreshScriptResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Raw zip file bytes containing the refresh script and certificate
+  bytes refreshPackage = 1 [(options.FieldExtension.skipLogging) = true];
+  // Package filename
+  string filename = 2;
 }
 
 // Request object for updating the state of the cluster.
@@ -758,6 +787,124 @@ message Cluster {
   string environmentCrn = 32;
   // CRN of the Private Cloud Control plane.
   string pvcCrn = 33;
+  // Cloudera on-premises environment details.
+  // Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
+  OnPremEnvironmentDetails onPremEnvironmentDetails = 34;
+}
+
+// Object containing the on-premises Environment details.
+message OnPremEnvironmentDetails {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cloudera Manager Host.
+  string cmHost = 1;
+  // Knox gateway url in the base cluster.
+  string knoxGatewayUrl = 2;
+  // A map of applications that provide services for the Service Discovery.
+  map<string, Application> applications = 3;
+  // On-premises Data Lake details.
+  OnPremDatalakeDetails onPremDatalakeDetails = 7;
+}
+
+// Object containing the details of a service discovery application.
+message Application {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Name of the application.
+  string name = 1;
+  // The services provided by the application.
+  map<string, Service> services = 2;
+  // Configuration key values for an application.
+  map<string, string> config = 3;
+}
+
+// Object containing the details of a service discovery service.
+message Service {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Type of service.
+  string type = 1;
+  // List of endpoints that the service presents.
+  repeated ServiceEndpoint endpoints = 2;
+  // Configuration key values for a service.
+  map<string, string> config = 3;
+}
+
+// Object containing the details of endpoint of a Service Discovery Service.
+message ServiceEndpoint {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Endpoint hostname or IP address.
+  string host = 1;
+  // Endpoint port.
+  int32 port = 2;
+  // Connection URI of the endpoint.
+  string uri = 3;
+}
+
+// Object containing on-premises Data Lake details.
+message OnPremDatalakeDetails {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Name of the Data Lake.
+  string datalakeName = 1;
+  // Inidicates whether Ranger RAZ is enabled for the Data Lake.
+  bool enableRangerRaz = 2;
+  // The timestamp in Unix epoch when the Data Lake was created.
+  int64 creationTimeEpochMillis = 3;
+  // The Cloudera Manager FQDN.
+  string cmFqdn = 4;
+  // The Cloudera Manager IP.
+  string cmIp = 5;
+  // The Cloudera Manager server ID.
+  string cmServerId = 6;
+  // Status of the Data Lake.
+  DatalakeStatus.Value status = 7;
+  // The list of instances within the on premises Data Lake cluster.
+  repeated Instance instances = 8;
+  // Contains the kerberos related informations.
+  KerberosInfo kerberosInfo = 9;
+}
+
+// Information for instance within the on premises Data Lake cluster.
+message Instance {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The ID of the instance.
+  string id = 1;
+  // The fully qualified domain name of the instance in the cluster.
+  string fqdn = 2;
+  // The private IP of the instance.
+  string privateIp = 3;
+}
+
+// The kerberos information for on premises Data Lake cluster.
+message KerberosInfo {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The type of Key Distribution Center.
+  string kdcType = 1;
+  // Kerberos realm.
+  string kerberosRealm = 2;
+  // Key Distribution Center host.
+  string kdcHost = 3;
+  // Key Distribution Center host IP address.
+  string kdcHostIp = 4;
+  // Denotes whether kerberized or not.
+  bool kerberized = 5;
+}
+
+// Status of the on-premises Data Lake.
+message DatalakeStatus {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // Data Lake is available.
+    AVAILABLE = 1;
+    // Data Lake is unavailable.
+    NOT_AVAILABLE = 2;
+  }
 }
 
 // Object containing the service information.
@@ -790,8 +937,8 @@ message ClusterData {
   string kerberosUser = 6;
   // The Kerberos ticket location of the cluster.
   string kerberosTicketLocation = 7;
-  // The properties of the particular cluster as a JSON string.
-  string properties = 8;
+  // Cluster details.
+  ClusterDetails clusterDetails = 10;
   // The stats of the discovered cluster.
   string stats = 9;
 }
@@ -815,6 +962,33 @@ message Location {
   // Longitude of the location.
   string longitude = 7;
 }
+
+// Object containing cluster details.
+message ClusterDetails {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Name of the cluster.
+  string name = 1;
+  // Display name of the cluster.
+  string displayName = 2;
+  // Cluster version.
+  string version = 3;
+  // Full version of the cluster.
+  string fullVersion = 4;
+  // Whether the cluster is in Maintenance mode.
+  bool maintenanceMode = 5;
+  // The list of maintenance owners of the cluster.
+  repeated string maintenanceOwners = 6;
+  // URL of the cluster.
+  string clusterUrl = 7;
+  // The URL to access hosts of this cluster.
+  string hostsUrl = 8;
+  // The entity status for the cluster.
+  EntityStatus.Value entityStatus = 9;
+  // Uuid of the cluster.
+  string uuid = 10;
+}
+
 
 // Details of attached cluster.
 message ClusterDiscovered {
@@ -884,5 +1058,37 @@ message ClusterQueryOperator {
     AND = 1;
     // OR operator.
     OR = 2;
+  }
+}
+
+// The single value used by the Cloudera Manager to represent the status of the entity.
+message EntityStatus {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    // Unknown.
+    UNKNOWN = 0;
+    // None.
+    NONE = 1;
+    // Stopped.
+    STOPPED = 2;
+    // Down.
+    DOWN = 3;
+    // Unknown health.
+    UNKNOWN_HEALTH = 4;
+    // Disabled health.
+    DISABLED_HEALTH = 5;
+    // Concerning health.
+    CONCERNING_HEALTH = 6;
+    // Bad health.
+    BAD_HEALTH = 7;
+    // Good health.
+    GOOD_HEALTH = 8;
+    // Starting.
+    STARTING = 9;
+    // Stopping.
+    STOPPING = 10;
+    // History not available.
+    HISTORY_NOT_AVAILABLE = 11;
   }
 }

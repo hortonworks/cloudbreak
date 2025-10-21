@@ -164,6 +164,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
+    private static final int SWITCH_PGW_FREEIPA_ERROR_RETRY = 5;
+
     @Value("${cb.max.salt.new.service.retry}")
     private int maxRetry;
 
@@ -843,8 +845,8 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             selectNewMasterReplacement(sc, primaryGateway, Set.of(), Set.of(primaryGateway.getHostname()), allNodes, exitCriteriaModel, new HashSet<>(1));
-            executeSingleSaltState(Set.of(primaryGateway.getHostname()), exitCriteriaModel, Optional.empty(), Optional.empty(), sc,
-                    "freeipa.promote-replica-to-master");
+            executeSingleSaltState(Set.of(primaryGateway.getHostname()), exitCriteriaModel, Optional.of(maxRetry), Optional.of(SWITCH_PGW_FREEIPA_ERROR_RETRY),
+                    sc, "freeipa.promote-replica-to-master");
         } catch (Exception e) {
             LOGGER.warn("Error occurred during switching FreeIPA master to Primary Gateway", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);

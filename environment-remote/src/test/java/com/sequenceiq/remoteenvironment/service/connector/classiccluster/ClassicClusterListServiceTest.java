@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
@@ -34,6 +31,9 @@ class ClassicClusterListServiceTest {
 
     @Test
     void testList() {
+        OnPremisesApiProto.ClusterData.Builder clusterData = OnPremisesApiProto.ClusterData.newBuilder()
+                .setClusterDetails(OnPremisesApiProto.ClusterDetails.newBuilder()
+                        .setEntityStatus(OnPremisesApiProto.EntityStatus.Value.NONE));
         OnPremisesApiProto.Cluster cluster1 = OnPremisesApiProto.Cluster.newBuilder()
                 .setClusterCrn("clustercrn1")
                 .setName("cluster1")
@@ -41,7 +41,7 @@ class ClassicClusterListServiceTest {
                 .setKnoxEnabled(true)
                 .setKnoxUrl("knoxurl1")
                 .setDatacenterName("datacenter1")
-                .setData(OnPremisesApiProto.ClusterData.newBuilder().setProperties(JsonUtil.writeValueAsStringSilent(Map.of("entityStatus", "entityState1"))))
+                .setData(clusterData)
                 .build();
         OnPremisesApiProto.Cluster cluster2 = OnPremisesApiProto.Cluster.newBuilder()
                 .setClusterCrn("clustercrn2")
@@ -50,7 +50,7 @@ class ClassicClusterListServiceTest {
                 .setKnoxEnabled(true)
                 .setKnoxUrl("knoxurl2")
                 .setDatacenterName("datacenter2")
-                .setData(OnPremisesApiProto.ClusterData.newBuilder().setProperties(JsonUtil.writeValueAsStringSilent(Map.of("entityStatus", "entityState2"))))
+                .setData(clusterData)
                 .build();
         when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster1, cluster2));
         Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
@@ -91,6 +91,9 @@ class ClassicClusterListServiceTest {
 
     @Test
     void testListAvailableStatus() {
+        OnPremisesApiProto.ClusterData.Builder clusterData = OnPremisesApiProto.ClusterData.newBuilder()
+                .setClusterDetails(OnPremisesApiProto.ClusterDetails.newBuilder()
+                        .setEntityStatus(OnPremisesApiProto.EntityStatus.Value.GOOD_HEALTH));
         OnPremisesApiProto.Cluster cluster = OnPremisesApiProto.Cluster.newBuilder()
                 .setClusterCrn("clustercrn1")
                 .setName("cluster1")
@@ -98,7 +101,7 @@ class ClassicClusterListServiceTest {
                 .setKnoxEnabled(true)
                 .setManagerUri("manageruri")
                 .setDatacenterName("datacenter1")
-                .setData(OnPremisesApiProto.ClusterData.newBuilder().setProperties(JsonUtil.writeValueAsStringSilent(Map.of("entityStatus", "GOOD_HEALTH"))))
+                .setData(clusterData)
                 .build();
         when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
         Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
@@ -106,7 +109,10 @@ class ClassicClusterListServiceTest {
     }
 
     @Test
-    void testListUnknownStatus() {
+    void testListOtherStatus() {
+        OnPremisesApiProto.ClusterData.Builder clusterData = OnPremisesApiProto.ClusterData.newBuilder()
+                .setClusterDetails(OnPremisesApiProto.ClusterDetails.newBuilder()
+                        .setEntityStatus(OnPremisesApiProto.EntityStatus.Value.CONCERNING_HEALTH));
         OnPremisesApiProto.Cluster cluster = OnPremisesApiProto.Cluster.newBuilder()
                 .setClusterCrn("clustercrn1")
                 .setName("cluster1")
@@ -114,10 +120,11 @@ class ClassicClusterListServiceTest {
                 .setKnoxEnabled(true)
                 .setManagerUri("manageruri")
                 .setDatacenterName("datacenter1")
+                .setData(clusterData)
                 .build();
         when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
         Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
-        Assertions.assertEquals("UNKNOWN", actual.stream().findFirst().get().getStatus());
+        Assertions.assertEquals("CONCERNING_HEALTH", actual.stream().findFirst().get().getStatus());
     }
 
     private void assertEquals(OnPremisesApiProto.Cluster cluster, SimpleRemoteEnvironmentResponse envResponse) {
@@ -125,7 +132,7 @@ class ClassicClusterListServiceTest {
         Assertions.assertEquals(cluster.getName(), envResponse.getName());
         Assertions.assertEquals(cluster.getLastCreateTime(), envResponse.getCreated());
         Assertions.assertEquals(cluster.getKnoxUrl(), envResponse.getUrl());
-        Assertions.assertEquals(new Json(cluster.getData().getProperties()).getMap().get("entityStatus"), envResponse.getStatus());
+        Assertions.assertEquals(cluster.getData().getClusterDetails().getEntityStatus().toString(), envResponse.getStatus());
         Assertions.assertEquals("PRIVATE_CLOUD", envResponse.getCloudPlatform());
         Assertions.assertEquals("PRIVATE_CLOUD", envResponse.getRegion());
     }
