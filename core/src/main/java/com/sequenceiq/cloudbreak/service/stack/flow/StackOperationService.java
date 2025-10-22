@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -174,6 +175,9 @@ public class StackOperationService {
 
     @Inject
     private List<StaleAwareJobRescheduler> staleAwareJobReschedulers;
+
+    @Inject
+    private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -560,18 +564,21 @@ public class StackOperationService {
     public FlowIdentifier triggerZookeeperToKraftMigration(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigration(stack.getId());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationFinalization(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigrationFinalization(stack.getId());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationRollback(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigrationRollback(stack.getId());
     }
 
