@@ -110,7 +110,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         } else if (isStale(stack)) {
             return updateToStale(sdx, sdxStatus, stack.getStatusReason());
         } else {
-            LOGGER.debug("Sdx StatusChecker Job will ignore stack status {}. Current data lake state is {}.", stack, sdxStatus);
+            LOGGER.debug("Sdx StatusChecker Job will ignore stack status {}. Current data lake state is {}.", stack, sdxStatus.getStatus());
             return sdxStatus.getStatus();
         }
     }
