@@ -161,14 +161,14 @@ remove_local_backups() {
 }
 
 upload_aws_backup() {
-    echo "try to upload with default bucket encryption"
+    doLog "DEBUG try to upload with default bucket encryption"
     # shellcheck disable=SC2086
     /usr/bin/aws ${REGION_OPTION} s3 cp --debug --recursive --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" 2>&1 | /usr/local/bin/backup-log-filter.sh | tee -a "${LOGFILE}"
     ret_code=${PIPESTATUS[0]}
 
     if [[ "$ret_code" -ne "0" ]]
     then
-        echo "try to upload with aws:kms encryption"
+        doLog "DEBUG try to upload with aws:kms encryption"
         # shellcheck disable=SC2086
         /usr/bin/aws ${REGION_OPTION} s3 cp --debug --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" 2>&1 | /usr/local/bin/backup-log-filter.sh | tee -a "${LOGFILE}"
         ret_code=${PIPESTATUS[0]}
@@ -178,7 +178,7 @@ upload_aws_backup() {
     then
         error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     else
-        echo "Uploaded successfully"
+        doLog "INFO Uploaded successfully"
     fi
 }
 
