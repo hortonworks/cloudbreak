@@ -59,4 +59,6 @@ public interface FreeIpaClient {
     FreeIpaUpgradeV1Endpoint getFreeIpaUpgradeV1Endpoint();
 
     RecipeV1Endpoint getRecipeV1Endpoint();
+
+    TrustV1Endpoint getTrustV1Endpoint();
 }

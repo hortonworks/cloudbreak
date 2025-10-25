@@ -37,6 +37,8 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 public class SshJClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClient.class);
 
+    private static final int TIMEOUT = 120000;
+
     @Value("${integrationtest.defaultPrivateKeyFile}")
     private String defaultPrivateKeyFilePath;
 
@@ -70,8 +72,12 @@ public class SshJClient {
         SSHClient client = new SSHClient();
 
         client.addHostKeyVerifier(new PromiscuousVerifier());
+        client.setConnectTimeout(TIMEOUT);
+        client.setTimeout(TIMEOUT);
+        client.getConnection().setTimeoutMs(TIMEOUT);
+        client.getTransport().setTimeoutMs(TIMEOUT);
         client.connect(host, 22);
-        client.setConnectTimeout(120000);
+
         if (StringUtils.isBlank(user) && StringUtils.isBlank(privateKeyFilePath)) {
             LOGGER.info("Creating SSH client on '{}' host with 'cloudbreak' user and defaultPrivateKeyFile from application.yml.", host);
             client.authPublickey("cloudbreak", defaultPrivateKeyFilePath);
@@ -98,13 +104,13 @@ public class SshJClient {
 
     public void upload(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
         LOGGER.info("Waiting for [{}] file to be uploaded to [{}]...", sourceFilePath, destinationPath);
-        ssh.setTimeout(120000);
+        ssh.setTimeout(TIMEOUT);
         ssh.newSCPFileTransfer().upload(sourceFilePath, destinationPath);
     }
 
     public void download(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
         LOGGER.info("Waiting for [{}] file to be downloaded to [{}]...", sourceFilePath, destinationPath);
-        ssh.setTimeout(120000);
+        ssh.setTimeout(TIMEOUT);
         ssh.newSCPFileTransfer().download(sourceFilePath, destinationPath);
     }
 
@@ -118,16 +124,23 @@ public class SshJClient {
         }
     }
 
-    @Retryable(retryFor = IOException.class)
     public Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
+        return execute(ssh, command, 10L);
+    }
+
+    @Retryable(retryFor = IOException.class)
+    public Pair<Integer, String> execute(SSHClient ssh, String command, long timeoutInSec) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
             Command cmd = session.exec(command);
             OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
             Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]...", command,
                     ssh.getConnection().getTransport().getRemoteHost()));
-            cmd.join(10L, TimeUnit.SECONDS);
+            cmd.join(timeoutInSec, TimeUnit.SECONDS);
             return Pair.of(cmd.getExitStatus(), os.toString());
+        } catch (Exception ex) {
+            LOGGER.info("Exception during ssh command execution", ex);
+            throw ex;
         }
     }
 

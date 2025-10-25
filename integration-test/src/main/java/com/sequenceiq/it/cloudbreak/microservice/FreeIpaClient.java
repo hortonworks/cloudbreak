@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaHealthDetailsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
@@ -83,7 +84,7 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
         } else {
             EnvironmentAware environmentAware = (EnvironmentAware) entity;
             return new FreeIpaWaitObject(this, entity.getName(), environmentAware.getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
-                (Set<Status>) ignoredFailedStatuses);
+                    (Set<Status>) ignoredFailedStatuses);
         }
     }
 
@@ -93,7 +94,7 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
     }
 
     public FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         FreeIpaApiUserCrnClient freeIpaApiUserCrnClient = new FreeIpaApiUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
@@ -116,7 +117,8 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                 FreeIpaUpscaleTestDto.class.getSimpleName(),
                 FreeIpaRotationTestDto.class.getSimpleName(),
                 FreeIpaDownscaleTestDto.class.getSimpleName(),
-                FreeIpaHealthDetailsDto.class.getSimpleName());
+                FreeIpaHealthDetailsDto.class.getSimpleName(),
+                FreeIpaTrustCommandsDto.class.getSimpleName());
     }
 
     @Override

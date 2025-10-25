@@ -235,6 +235,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return network(network);
+    }
+
+    @Override
     public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
         return telemetry;
     }

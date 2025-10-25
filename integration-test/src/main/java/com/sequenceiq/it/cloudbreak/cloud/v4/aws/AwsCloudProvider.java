@@ -222,6 +222,12 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return network.withSubnetIDs(awsProperties.getTrust().getSubnetIds())
+                .withAws(environmentNetworkParameters());
+    }
+
+    @Override
     public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
         return telemetry;
     }

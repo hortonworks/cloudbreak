@@ -301,6 +301,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                 .disableAzurePrivateEndpoint();
     }
 
+    @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return network(network);
+    }
+
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
         Network network = azureProperties.getNetwork();

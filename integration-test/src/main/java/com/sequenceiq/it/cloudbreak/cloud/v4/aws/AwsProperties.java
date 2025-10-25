@@ -50,6 +50,8 @@ public class AwsProperties {
 
     private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
 
+    private TrustProperties trustProperties = new TrustProperties();
+
     public FreeIpaProperties getFreeipa() {
         return freeipa;
     }
@@ -176,6 +178,14 @@ public class AwsProperties {
 
     public void setVerticalScale(VerticalScaleProperties verticalScale) {
         this.verticalScale = verticalScale;
+    }
+
+    public TrustProperties getTrust() {
+        return trustProperties;
+    }
+
+    public void setTrust(TrustProperties trustProperties) {
+        this.trustProperties = trustProperties;
     }
 
     public static class Instance {
@@ -344,6 +354,18 @@ public class AwsProperties {
 
         public void setDatahubKey(String datahubKey) {
             this.datahubKey = datahubKey;
+        }
+    }
+
+    public static class TrustProperties {
+        private Set<String> subnetIds;
+
+        public Set<String> getSubnetIds() {
+            return subnetIds;
+        }
+
+        public void setSubnetIds(Set<String> subnetIds) {
+            this.subnetIds = subnetIds;
         }
     }
 }

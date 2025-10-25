@@ -7,6 +7,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.terms.endpoint.TermsEndpoint;
@@ -37,4 +38,6 @@ public interface EnvironmentClient {
     TermsEndpoint termsEndpoint();
 
     EncryptionProfileEndpoint encryptionProfileEndpoint();
+
+    EnvironmentHybridEndpoint hybridEndpoint();
 }

@@ -140,6 +140,14 @@ integrationtest:
   stackPatch:
     sleepMinutes: 2
 
+  trust:
+    remoteEnvironmentCrn: crn:altus:environments:us-west-1:ed0c7321-7c57-4704-9184-4c520df3a539:environment:transact/6beef733-1755-4a9d-a0f4-5a7e5b800c80
+    activeDirectory:
+      fqdn: ec2amaz-uvredmu.hybrid.cloudera.org
+      ip: 10.84.202.113
+      realm: hybrid.cloudera.org
+      user: administrator
+
   # aws parameters
   aws:
     govCloud: false
@@ -210,6 +218,10 @@ integrationtest:
       environmentKey:
       datahubKey:
     embeddedDbUpgradeSourceVersion: 11
+    trust:
+      subnetIds:
+        - subnet-0476e538519ac9570
+        - subnet-0cb6292385565e5da
 
   # azure parameters
   azure:

@@ -123,4 +123,8 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
         return getEndpoint(RecipeV1Endpoint.class);
     }
 
+    @Override
+    public TrustV1Endpoint getTrustV1Endpoint() {
+        return getEndpoint(TrustV1Endpoint.class);
+    }
 }

@@ -278,6 +278,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return getDelegate(network).trustSetupNetwork(network);
+    }
+
+    @Override
     public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
         return getDelegate(network).newNetwork(network);
     }

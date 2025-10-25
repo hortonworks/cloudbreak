@@ -378,6 +378,15 @@ public class EnvironmentTestDto
         return withNetwork(environmentNetwork.getRequest());
     }
 
+    public EnvironmentTestDto withTrustSetup() {
+        getRequest().setEnvironmentType("HYBRID");
+        EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().trustSetupNetwork(given(EnvironmentNetworkTestDto.class));
+        if (environmentNetwork == null) {
+            throw new IllegalArgumentException("Environment Network does not exist!");
+        }
+        return withNetwork(environmentNetwork.getRequest());
+    }
+
     public EnvironmentTestDto withNetwork(String key) {
         EnvironmentNetworkTestDto environmentNetwork = getTestContext().get(key);
         if (environmentNetwork == null) {

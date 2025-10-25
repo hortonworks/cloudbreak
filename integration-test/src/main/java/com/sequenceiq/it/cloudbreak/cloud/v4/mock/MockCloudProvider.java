@@ -324,6 +324,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return network(network);
+    }
+
+    @Override
     public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
         EnvironmentNetworkMockParams environmentNetworkMockParams = new EnvironmentNetworkMockParams();
         environmentNetworkMockParams.setInternetGatewayId(getInternetGatewayId());

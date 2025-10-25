@@ -19,3 +19,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.proxy.ModifyProxyConfigE2ETest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.trust.HybridTrustTests

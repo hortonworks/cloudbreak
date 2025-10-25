@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersInternalAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaTrustCleanupCommandsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaInstanceMetadataUpdateAction;
@@ -46,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaHealthDetailsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
@@ -189,5 +191,9 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> updateDisks(int size, String volumeType) {
         return new FreeIpaDiskUpdateAction(size, volumeType);
+    }
+
+    public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustCleanupCommands() {
+        return new FreeIpaTrustCleanupCommandsAction();
     }
 }

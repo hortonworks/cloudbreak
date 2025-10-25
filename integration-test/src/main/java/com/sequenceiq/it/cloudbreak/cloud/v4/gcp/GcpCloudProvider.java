@@ -294,6 +294,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
                 .withGcp(environmentNetworkParameters());
     }
 
+    @Override
+    public EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network) {
+        return network(network);
+    }
+
     private EnvironmentNetworkGcpParams environmentNetworkParameters() {
         EnvironmentNetworkGcpParams params = new EnvironmentNetworkGcpParams();
         params.setSharedProjectId(gcpProperties.getNetwork().getSharedProjectId());

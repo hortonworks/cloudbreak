@@ -107,6 +107,8 @@ public interface CloudProvider {
 
     EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network);
 
+    EnvironmentNetworkTestDto trustSetupNetwork(EnvironmentNetworkTestDto network);
+
     @Deprecated
     EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network);
 
