@@ -79,7 +79,11 @@ public enum Status {
             TRUST_SETUP_FINISH_REQUIRED,
             TRUST_SETUP_FINISH_FAILED);
 
-    public static final Collection<Status> FREEIPA_CROSS_REALM_SETUP_ENABLE_STATUSES = List.of(AVAILABLE, TRUST_SETUP_FAILED);
+    public static final Collection<Status> FREEIPA_CROSS_REALM_SETUP_ENABLE_STATUSES = List.of(
+            AVAILABLE,
+            TRUST_SETUP_FAILED,
+            CANCEL_TRUST_SETUP_SUCCESSFUL
+    );
 
     public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED, START_FAILED);
 
