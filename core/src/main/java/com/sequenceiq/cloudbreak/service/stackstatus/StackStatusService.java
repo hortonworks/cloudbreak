@@ -62,6 +62,6 @@ public class StackStatusService {
                 .skip(statusCleanupLimit)
                 .toList();
         LOGGER.debug("Removing stack statuses, count: {}.", removableStatuses.size());
-        repository.deleteAll(removableStatuses);
+        repository.deleteAllInBatch(removableStatuses);
     }
 }
