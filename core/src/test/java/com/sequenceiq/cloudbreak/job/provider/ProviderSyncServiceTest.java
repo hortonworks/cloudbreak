@@ -10,8 +10,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_PUBLIC_IP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_SUBNET;
 import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
 import static com.sequenceiq.common.model.ProviderSyncState.OUTBOUND_UPGRADE_NEEDED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
@@ -173,8 +172,7 @@ class ProviderSyncServiceTest {
     void testSyncResourcesHandlesException() {
         when(resourceService.getAllCloudResource(anyLong())).thenThrow(new CloudbreakServiceException(TEST_EXCEPTION_MESSAGE));
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stack));
-        assertEquals(TEST_EXCEPTION_MESSAGE, exception.getMessage());
+        assertDoesNotThrow(() -> underTest.syncResources(stack));
         verify(resourceNotifier, never()).notifyUpdates(any(), any());
     }
 

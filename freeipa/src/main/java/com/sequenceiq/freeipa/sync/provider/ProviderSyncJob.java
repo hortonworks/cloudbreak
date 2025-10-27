@@ -54,7 +54,7 @@ public class ProviderSyncJob extends StatusCheckerJob {
             LOGGER.info("ProviderSyncJob cannot run, because flow is running for FreeIPA.");
         } else if (status.isUnschedulableState()) {
             LOGGER.info("ProviderSyncJob job will be unscheduled for FreeIPA, stack state is {}", status);
-            jobService.unschedule(context.getJobDetail().getKey());
+            jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
             LOGGER.info("ProviderSyncJob will run...");
             ThreadBasedUserCrnProvider.doAsInternalActor(() -> providerSyncService.syncResources(stack), stack.getAccountId());

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.job.provider;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ProviderSyncJobService implements JobSchedulerService {
@@ -29,6 +31,8 @@ public class ProviderSyncJobService implements JobSchedulerService {
     private static final String JOB_GROUP = "provider-sync-jobs";
 
     private static final String TRIGGER_GROUP = "provider-sync-triggers";
+
+    private static final String UNKNOWN_PROVIDER_NAME = "UNKNOWN";
 
     @Inject
     private TransactionalScheduler scheduler;
@@ -52,44 +56,47 @@ public class ProviderSyncJobService implements JobSchedulerService {
         return scheduler;
     }
 
-    public void schedule(Long id) {
-        ProviderSyncJobAdapter resourceAdapter = new ProviderSyncJobAdapter(id, applicationContext);
-        JobDetail jobDetail = buildJobDetail(resourceAdapter);
-        Trigger trigger = buildJobTrigger(jobDetail);
-        schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
-    }
-
-    public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
-        if (properties.isProviderSyncEnabled()) {
-            try {
-                JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
-                if (scheduler.getJobDetail(jobKey) != null) {
-                    LOGGER.info("Unscheduling provider sync checker job for stack with key: '{}' and group: '{}'",
-                            jobKey.getName(), jobKey.getGroup());
-                    deregister(jobKey);
-                }
-                LOGGER.info("Scheduling provider sync checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-                scheduler.scheduleJob(jobDetail, trigger);
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling quartz job: {}", id, e);
-            }
+    public void schedule(StackView stack) {
+        if (shouldSync(stack)) {
+            scheduleJob(new ProviderSyncJobAdapter(stack.getId(), applicationContext));
         }
     }
 
     public void schedule(ProviderSyncJobAdapter resource) {
-        if (properties.isProviderSyncEnabled()) {
-            JobDetail jobDetail = buildJobDetail(resource);
+        if (shouldSync(resource.getJobResource().getProvider().orElse(UNKNOWN_PROVIDER_NAME))) {
+            scheduleJob(resource);
+        }
+    }
+
+    private boolean shouldSync(String provider) {
+        if (!properties.isProviderSyncEnabled()) {
+            return false;
+        }
+
+        Set<String> enabledProviders = properties.getEnabledProviders();
+        boolean shouldSync = enabledProviders.contains(provider);
+        LOGGER.debug("Should sync: {}, provider: {}, enabled providers: {}", shouldSync, provider, enabledProviders);
+        return shouldSync;
+    }
+
+    private boolean shouldSync(StackView stack) {
+        return shouldSync(stack.getCloudPlatform());
+    }
+
+    private void scheduleJob(ProviderSyncJobAdapter resource) {
+        JobDetail jobDetail = buildJobDetail(resource);
+        Trigger trigger = buildJobTrigger(jobDetail);
+        try {
             JobKey jobKey = jobDetail.getKey();
-            Trigger trigger = buildJobTrigger(jobDetail);
-            try {
-                if (scheduler.getJobDetail(jobKey) != null) {
-                    deregister(jobKey);
-                }
-                LOGGER.debug("Scheduling provider sync job for stack {}", resource.getJobResource().getRemoteResourceId());
-                scheduler.scheduleJob(jobDetail, trigger);
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling provider sync job: {}", jobDetail, e);
+            if (scheduler.getJobDetail(jobKey) != null) {
+                LOGGER.info("Unscheduling provider sync checker job for stack with key: '{}' and group: '{}'",
+                        jobKey.getName(), jobKey.getGroup());
+                deregister(jobKey);
             }
+            LOGGER.debug("Scheduling provider sync job for stack {}", resource.getJobResource().getRemoteResourceId());
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (Exception e) {
+            LOGGER.error("Error during scheduling provider sync job: {}", jobDetail, e);
         }
     }
 

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -13,7 +14,9 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
-import org.quartz.Trigger;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class ProviderSyncJobServiceTest {
@@ -54,10 +57,17 @@ class ProviderSyncJobServiceTest {
     @InjectMocks
     private ProviderSyncJobService underTest;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(providerSyncConfig.getEnabledProviders()).thenReturn(Set.of("AZURE", "AWS"));
+    }
+
     @Test
     void testSchedule() throws TransactionService.TransactionExecutionException {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getRemoteResourceId()).thenReturn("1");
+        when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
         when(providerSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
@@ -83,21 +93,22 @@ class ProviderSyncJobServiceTest {
     @Test
     void testScheduleWithId() throws TransactionService.TransactionExecutionException {
         configureJobResource();
+        StackView stack = mock(StackView.class);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(stack.getId()).thenReturn(1L);
         when(providerSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
-        underTest.schedule(1L);
+        underTest.schedule(stack);
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
 
     @Test
     void testScheduleWithIdWhenProviderSyncIsDisabled() throws TransactionService.TransactionExecutionException {
-        configureJobResource();
+        StackView stackView = mock(StackView.class);
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.FALSE);
-        when(providerSyncConfig.getIntervalInMinutes()).thenReturn(10);
-        when(clock.getCurrentInstant()).thenReturn(Instant.now());
 
-        underTest.schedule(1L);
+        underTest.schedule(stackView);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
@@ -105,6 +116,7 @@ class ProviderSyncJobServiceTest {
     void testScheduleWithResource() throws TransactionService.TransactionExecutionException {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
         when(providerSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
@@ -119,24 +131,6 @@ class ProviderSyncJobServiceTest {
         JobResource jobResource = mock(JobResource.class);
         ProviderSyncJobAdapter resource = new ProviderSyncJobAdapter(jobResource);
         underTest.schedule(resource);
-        verify(scheduler, never()).scheduleJob(any(), any());
-    }
-
-    @Test
-    void testScheduleWithJobDetailAndTrigger() throws TransactionService.TransactionExecutionException {
-        JobDetail jobDetail = mock(JobDetail.class);
-        Trigger trigger = mock(Trigger.class);
-        when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.TRUE);
-        underTest.schedule(LOCAL_ID, jobDetail, trigger);
-        verify(scheduler, times(1)).scheduleJob(eq(jobDetail), eq(trigger));
-    }
-
-    @Test
-    void testScheduleWithJobDetailAndTriggerWhenProviderSyncIsDisabled() throws TransactionService.TransactionExecutionException {
-        when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(Boolean.FALSE);
-        JobDetail jobDetail = mock(JobDetail.class);
-        Trigger trigger = mock(Trigger.class);
-        underTest.schedule(LOCAL_ID, jobDetail, trigger);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
@@ -173,5 +167,6 @@ class ProviderSyncJobServiceTest {
         when(applicationContext.getBean(StackRepository.class)).thenReturn(jobResourceRepository);
         when(jobResourceRepository.getJobResource(1L)).thenReturn(Optional.of(jobResource));
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
     }
 }
