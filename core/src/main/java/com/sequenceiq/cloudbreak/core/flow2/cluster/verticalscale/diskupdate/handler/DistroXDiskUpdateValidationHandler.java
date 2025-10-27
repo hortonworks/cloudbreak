@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -79,13 +81,14 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
         DistroXDiskUpdateEvent payload = distroXDiskUpdateEvent.getData();
         try {
             StackDto stackDto = stackDtoService.getById(payload.getResourceId());
-            DiskTypes diskTypes = diskUpdateService.getDiskTypes(stackDto);
+            DiskTypes cloudPlatformDiskTypes = diskUpdateService.getDiskTypes(stackDto);
             List<VolumeSetAttributes.Volume> attachedVolumes = getAttachedVolumesList(
                     stackDto,
                     payload.getGroup(),
                     payload.getSize(),
                     payload.getVolumeType(),
-                    diskTypes
+                    payload.getDiskType(),
+                    cloudPlatformDiskTypes
             );
             boolean requestedSizeGreaterThanAvailable = attachedVolumes.size() > 0;
             String cloudPlatform = stackDto.getCloudPlatform();
@@ -95,7 +98,7 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
                         cloudPlatform) : String.format("Requested disk size for %s group is less than current size", payload.getGroup());
                 throw new CloudbreakException("Validation Failed: " + exceptionMessage);
             } else {
-                List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes, diskTypes);
+                List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes, cloudPlatformDiskTypes);
                 ValidationResult validationResult = verticalScalingValidatorService.validateAddVolumesRequest(
                         stackService.getByIdWithLists(payload.getResourceId()),
                         volumesToBeUpdated,
@@ -143,7 +146,8 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             String group,
             int size,
             String volumeType,
-            DiskTypes diskTypes) throws IOException {
+            String diskType,
+            DiskTypes cloudPlatformDiskTypes) throws IOException {
         List<Resource> resources = stack.getResources().stream()
                 .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(group)
                         && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())
@@ -156,18 +160,23 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             attachedVolumes.addAll(
                     volumeSetAttributes.getVolumes()
                             .stream()
-                            .filter(getVolumePredicate(size, volumeType, diskTypes))
+                            .filter(getVolumePredicate(size, volumeType, diskType, cloudPlatformDiskTypes))
                             .toList()
             );
         }
         return attachedVolumes;
     }
 
-    private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, DiskTypes diskTypes) {
+    private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, String diskType, DiskTypes cloudPlatformDiskTypes) {
         return volume ->
-                volume.getSize() < size
-                    || isEphemeral(diskTypes, volume)
-                    || modificationNotRequired(volumeType, volume);
+                (isDataBaseDisk(diskType) && volume.getCloudVolumeUsageType().equals(CloudVolumeUsageType.DATABASE) && volume.getSize() < size)
+                || (!isDataBaseDisk(diskType) && (volume.getSize() < size
+                    || isEphemeral(cloudPlatformDiskTypes, volume)
+                    || modificationNotRequired(volumeType, volume)));
+    }
+
+    private boolean isDataBaseDisk(String diskType) {
+        return DiskType.DATABASE_DISK.name().equalsIgnoreCase(diskType);
     }
 
     private boolean modificationNotRequired(String volumeType, VolumeSetAttributes.Volume volume) {

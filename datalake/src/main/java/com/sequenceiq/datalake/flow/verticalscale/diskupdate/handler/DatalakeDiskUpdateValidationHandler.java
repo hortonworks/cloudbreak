@@ -41,8 +41,10 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
 
     private static final long WORKSPACE_ID = 0L;
 
-    private static final Map<CloudPlatform, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET,
-            CloudPlatform.AWS, ResourceType.AWS_VOLUMESET);
+    private static final Map<CloudPlatform, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(
+            CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET,
+            CloudPlatform.AWS, ResourceType.AWS_VOLUMESET
+    );
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -68,16 +70,17 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
                     () -> stackV4Endpoint.getWithResources(WORKSPACE_ID, payload.getClusterName(), Set.of(), payload.getAccountId()));
             DiskUpdateRequest diskUpdateRequest = payload.getDatalakeDiskUpdateRequest();
             List<ResourceV4Response> resources = stackV4Response.getResources().stream()
-                    .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
-                            && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform())
-                            && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform()).equals(res.getResourceType())
-                    ).toList();
+                    .filter(res -> filterOutNonDiskResources(res, diskUpdateRequest, stackV4Response))
+                    .toList();
             List<VolumeSetAttributes.Volume> attachedVolumes = new ArrayList<>();
             for (ResourceV4Response resource : resources) {
                 LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
                 VolumeSetAttributes volumeSetAttributes = new Json(resource.getAttributes()).get(VolumeSetAttributes.class);
-                attachedVolumes.addAll(volumeSetAttributes.getVolumes().stream()
-                        .filter(volume -> volume.getSize() < diskUpdateRequest.getSize()).toList());
+                attachedVolumes.addAll(
+                        volumeSetAttributes.getVolumes().stream()
+                        .filter(volume -> volume.getSize() < diskUpdateRequest.getSize())
+                        .toList()
+                );
             }
             boolean requestedSizeGreaterThanAvailable = attachedVolumes.size() > 0;
             boolean diskTypeChangeSupported = verticalScaleService.getDiskTypeChangeSupported(stackV4Response.getCloudPlatform().toString());
@@ -95,17 +98,10 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
                 List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes);
                 DatalakeDiskUpdateEvent diskUpdateEvent = DatalakeDiskUpdateEvent.builder()
                         .withAccepted(new Promise<>())
-                        .withResourceCrn(payload.getResourceCrn())
-                        .withResourceId(payload.getResourceId())
-                        .withResourceName(payload.getResourceName())
-                        .withDatalakeDiskUpdateRequest(payload.getDatalakeDiskUpdateRequest())
-                        .withStackCrn(payload.getStackCrn())
-                        .withClusterName(payload.getClusterName())
-                        .withAccountId(payload.getAccountId())
+                        .withDatalakeDiskUpdateEvent(payload)
+                        .withStackV4Response(stackV4Response)
                         .withSelector(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_EVENT.selector())
                         .withVolumesToBeUpdated(volumesToBeUpdated)
-                        .withCloudPlatform(stackV4Response.getCloudPlatform().toString())
-                        .withStackId(stackV4Response.getId())
                         .build();
                 eventSender().sendEvent(diskUpdateEvent, datalakeDiskUpdateEvent.getHeaders());
             }
@@ -118,6 +114,14 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
                     payload.getStackCrn(), e.getMessage());
             eventSender().sendEvent(failedEvent, datalakeDiskUpdateEvent.getHeaders());
         }
+    }
+
+    private boolean filterOutNonDiskResources(ResourceV4Response res, DiskUpdateRequest diskUpdateRequest, StackV4Response stackV4Response) {
+        return null != res.getInstanceId()
+                && null != res.getInstanceGroup()
+                && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
+                && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform())
+                && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform()).equals(res.getResourceType());
     }
 
     private List<Volume> convertVolumeSetAttributesVolumesToVolumes(List<VolumeSetAttributes.Volume> attachedVolumes) {

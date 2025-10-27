@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesV
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -278,11 +280,16 @@ public class VerticalScalingValidatorService {
 
             for (VolumeTemplate template : instanceGroup.getTemplate().getVolumeTemplates()) {
                 VolumeParameterType volumeParameterType = diskTypes.diskMapping().get(template.getVolumeType());
-                if (!EPHEMERAL.equals(volumeParameterType)) {
-                    if (StringUtils.isNotBlank(distroXDiskUpdateEvent.getVolumeType())) {
-                        template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
-                    }
+                if (distroXDiskUpdateEvent.getDiskType().equalsIgnoreCase(DiskType.DATABASE_DISK.name())
+                        && template.getUsageType() == VolumeUsageType.DATABASE) {
                     template.setVolumeSize(distroXDiskUpdateEvent.getSize());
+                } else if (!distroXDiskUpdateEvent.getDiskType().equalsIgnoreCase(DiskType.DATABASE_DISK.name())) {
+                    if (!EPHEMERAL.equals(volumeParameterType)) {
+                        if (StringUtils.isNotBlank(distroXDiskUpdateEvent.getVolumeType())) {
+                            template.setVolumeType(distroXDiskUpdateEvent.getVolumeType());
+                        }
+                        template.setVolumeSize(distroXDiskUpdateEvent.getSize());
+                    }
                 }
             }
 

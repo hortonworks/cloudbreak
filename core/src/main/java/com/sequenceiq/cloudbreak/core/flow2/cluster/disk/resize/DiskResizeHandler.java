@@ -32,8 +32,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -139,12 +137,12 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
                 Set<Node> allNodes = stackUtil.collectNodes(stack);
                 Cluster cluster = stack.getCluster();
                 InMemoryStateStore.putStack(stackId, PollGroup.POLLABLE);
-                Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
-                List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-                ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
                 LOGGER.debug("Calling host orchestrator for resizing and fetching fstab information for nodes - {}", allNodes);
-                Map<String, Map<String, String>> fstabInformation = hostOrchestrator.resizeDisksOnNodes(gatewayConfigs, nodesWithDiskData, allNodes,
-                        exitCriteriaModel);
+                Map<String, Map<String, String>> fstabInformation = hostOrchestrator.resizeDisksOnNodes(
+                        gatewayConfigService.getAllGatewayConfigs(stack),
+                        stackUtil.collectNodesWithDiskData(stack),
+                        allNodes,
+                        clusterDeletionBasedModel(stack.getId(), cluster.getId()));
 
                 parseFstabAndPersistDiskInformation(fstabInformation, stack);
 

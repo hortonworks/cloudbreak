@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -173,6 +174,23 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
 
         public DatalakeDiskUpdateEvent.Builder withStackId(Long stackId) {
             this.stackId = stackId;
+            return this;
+        }
+
+        public DatalakeDiskUpdateEvent.Builder withDatalakeDiskUpdateEvent(DatalakeDiskUpdateEvent event) {
+            this.resourceCrn = event.getResourceCrn();
+            this.resourceId = event.getResourceId();
+            this.resourceName = event.getResourceName();
+            this.datalakeDiskUpdateRequest = event.datalakeDiskUpdateRequest;
+            this.stackCrn = event.getStackCrn();
+            this.clusterName = event.getClusterName();
+            this.accountId = event.getAccountId();
+            return this;
+        }
+
+        public DatalakeDiskUpdateEvent.Builder withStackV4Response(StackV4Response stackV4Response) {
+            this.cloudPlatform = stackV4Response.getCloudPlatform().name();
+            this.stackId = stackV4Response.getId();
             return this;
         }
 

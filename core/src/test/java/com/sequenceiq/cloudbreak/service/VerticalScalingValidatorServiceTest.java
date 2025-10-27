@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
@@ -39,18 +41,24 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -59,6 +67,8 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,6 +111,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private InstanceGroupService instanceGroupService;
+
+    @Mock
+    private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
     @Test
     public void testRequestValidateInstanceTypeForDeleteVolumesSuccess() {
@@ -408,6 +421,135 @@ public class VerticalScalingValidatorServiceTest {
             underTest.validateEntitlementForAddVolumes(stack);
         });
         assertEquals("Adding Disk for Azure is not enabled for this account", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateAddVolumesRequestForDiskUpdate() {
+        String instanceGroupName = "compute";
+        String volumeType = "gp3";
+        int newSize = 200;
+
+        // Setup instance group with volume templates
+        Template template = new Template();
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType("gp2");
+        volumeTemplate.setVolumeSize(100);
+        volumeTemplate.setVolumeCount(2);
+        volumeTemplate.setUsageType(VolumeUsageType.GENERAL);
+        template.setVolumeTemplates(Set.of(volumeTemplate));
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupName, "m5.xlarge", template);
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+
+        Credential credential = credential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+
+        // Setup cloud connector and disk types
+        when(cloudPlatformConnectors.get(platform("AWS"), Variant.variant("AWS"))).thenReturn(cloudConnector);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+
+        DiskTypes diskTypes = new DiskTypes(
+                List.of(com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp2"), com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp3")),
+                com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("gp2"),
+                Map.of("gp2", VolumeParameterType.AUTO_ATTACHED, "gp3", VolumeParameterType.AUTO_ATTACHED),
+                Map.of()
+        );
+        when(platformParameters.diskTypes()).thenReturn(diskTypes);
+
+        // Create disk update event
+        DistroXDiskUpdateEvent diskUpdateEvent = DistroXDiskUpdateEvent.builder()
+                .withResourceId(1L)
+                .withGroup(instanceGroupName)
+                .withDiskType(DiskType.ADDITIONAL_DISK.name())
+                .withSize(newSize)
+                .withVolumeType(volumeType)
+                .build();
+
+        List<Volume> volumesToBeUpdated = List.of(
+                new Volume("/dev/xvdb", "gp2", 100, null)
+        );
+
+        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, diskUpdateEvent);
+
+        assertFalse(result.hasError());
+
+        verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
+        verify(templateValidatorAndUpdater, times(1)).validateGroupForVerticalScale(
+                any(Credential.class),
+                eq(instanceGroup),
+                eq(stack),
+                eq(CdpResourceType.DATAHUB),
+                any()
+        );
+    }
+
+    @Test
+    public void testValidateAddVolumesRequestForDatabaseDiskUpdate() {
+        String instanceGroupName = "master";
+        String volumeType = "Premium_LRS";
+        int newSize = 1000;
+
+        // Setup instance group with database volume template
+        Template template = new Template();
+        VolumeTemplate databaseVolumeTemplate = new VolumeTemplate();
+        databaseVolumeTemplate.setVolumeType("Standard_LRS");
+        databaseVolumeTemplate.setVolumeSize(500);
+        databaseVolumeTemplate.setVolumeCount(1);
+        databaseVolumeTemplate.setUsageType(VolumeUsageType.DATABASE);
+        template.setVolumeTemplates(Set.of(databaseVolumeTemplate));
+
+        InstanceGroup instanceGroup = instanceGroup(instanceGroupName, "Standard_D4s_v3", template);
+
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(stack.getPlatformVariant()).thenReturn("AZURE");
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+
+        Credential credential = credential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+
+        // Setup cloud connector and disk types
+        when(cloudPlatformConnectors.get(platform("AZURE"), Variant.variant("AZURE"))).thenReturn(cloudConnector);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+
+        DiskTypes diskTypes = new DiskTypes(
+                List.of(com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("Standard_LRS"),
+                        com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("Premium_LRS")),
+                com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType("Standard_LRS"),
+                Map.of("Standard_LRS", VolumeParameterType.AUTO_ATTACHED, "Premium_LRS", VolumeParameterType.AUTO_ATTACHED),
+                Map.of()
+        );
+        when(platformParameters.diskTypes()).thenReturn(diskTypes);
+
+        // Create disk update event for DATABASE_DISK
+        DistroXDiskUpdateEvent diskUpdateEvent = DistroXDiskUpdateEvent.builder()
+                .withResourceId(1L)
+                .withGroup(instanceGroupName)
+                .withDiskType(DiskType.DATABASE_DISK.name())
+                .withSize(newSize)
+                .withVolumeType(volumeType)
+                .build();
+
+        List<Volume> volumesToBeUpdated = List.of(
+                new Volume("/dev/sdc", "Standard_LRS", 500, null)
+        );
+
+        ValidationResult result = underTest.validateAddVolumesRequest(stack, volumesToBeUpdated, diskUpdateEvent);
+
+        assertFalse(result.hasError());
+
+        verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
+        verify(templateValidatorAndUpdater, times(1)).validateGroupForVerticalScale(
+                any(Credential.class),
+                eq(instanceGroup),
+                eq(stack),
+                eq(CdpResourceType.DATAHUB),
+                any()
+        );
     }
 
     private Credential credential() {
