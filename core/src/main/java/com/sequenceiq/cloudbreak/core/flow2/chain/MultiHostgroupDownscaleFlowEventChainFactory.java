@@ -56,7 +56,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
             CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(event.getResourceId());
             StackScaleTriggerEvent sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(),
-                    Collections.emptyMap(), event.getPrivateIdsByHostgroupMap(), Collections.emptyMap(), cloudPlatformVariant.getVariant().value());
+                    Collections.emptyMap(), event.getPrivateIdsByHostgroupMap(), Collections.emptyMap(), cloudPlatformVariant.getVariant().value(), false);
             flowEventChain.add(sste);
         }
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));

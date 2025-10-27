@@ -158,7 +158,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         Set<String> hostGroups = getHostGroups(event);
         if (!event.isRepair() && !hostGroups.isEmpty() && !event.isSkipDeletingZombieNodesEnabled()) {
             flowEventChain.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), Collections.emptyMap(),
-                    Collections.emptyMap(), Collections.emptyMap(), stackDto.getPlatformVariant()));
+                    Collections.emptyMap(), Collections.emptyMap(), stackDto.getPlatformVariant(), true));
         }
     }
 

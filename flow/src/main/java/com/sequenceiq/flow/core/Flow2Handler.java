@@ -114,7 +114,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (FLOW_CANCEL.equals(flowParameters.getKey())) {
                 cancelRunningFlows(flowParameters.getResourceId());
             } else if (FLOW_FINAL.equals(flowParameters.getKey())) {
-                finalizeFlow(flowParameters);
+                finalizeFlow(flowParameters, false, null);
             } else if (flowParameters.getFlowId() == null) {
                 AcceptResult result = handleNewFlowRequest(flowParameters);
                 if (isAcceptablePayload(flowParameters.getPayload())) {
@@ -125,10 +125,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             }
         } catch (FlowNotTriggerableException e) {
             LOGGER.error("Failed to handle flow event.", e);
-            if (e.isSkipException()) {
-                LOGGER.info("Skip throwing exception, return.");
-                return;
-            } else if (isAcceptablePayload(flowParameters.getPayload())) {
+            if (isAcceptablePayload(flowParameters.getPayload())) {
                 ((Acceptable) flowParameters.getPayload()).accepted().onError(e);
             } else {
                 throw e;
@@ -165,11 +162,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void finalizeFlow(FlowParameters flowParameters) throws TransactionExecutionException {
+    private void finalizeFlow(FlowParameters flowParameters, boolean failed, String reason) throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         String flowChainId = flowParameters.getFlowChainId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.finish(flowParameters, false, null);
+        flowLogService.finish(flowParameters, failed, reason);
         Flow flow = runningFlows.remove(flowId);
         if (flow != null) {
             Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
@@ -206,22 +203,13 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
         FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload);
         if (flowTriggerConditionResult.isFail()) {
-            if (flowChainId != null) {
-                LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition failed. Reason: {}",
-                        flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFinishedFlow(flowParameters, false,
-                        String.format("Trigger condition: fail, reason: %s", flowTriggerConditionResult.getErrorMessage()));
-            }
-            flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
+            LOGGER.info("Trigger condition result: FAIL. Key: {}, flowChainId: {}, reason: {}", key, flowChainId, flowTriggerConditionResult.getErrorMessage());
+            handleNotTriggerableFlow(flowParameters, false, String.format("Trigger condition: fail, reason: %s", flowTriggerConditionResult.getErrorMessage()));
             throw new FlowNotTriggerableException(flowTriggerConditionResult.getErrorMessage());
         } else if (flowTriggerConditionResult.isSkip()) {
-            if (flowChainId != null) {
-                LOGGER.info("Creating successful init flow log for '{}' flow chain because trigger condition result was: skip. Reason: {}",
-                        flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFinishedFlow(flowParameters, true, String.format("Trigger condition: skip, reason: %s", flowTriggerConditionResult.getErrorMessage()));
-            }
-            flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
-            throw new FlowNotTriggerableException("Trigger condition failed, skip flow.", true);
+            LOGGER.info("Trigger condition result: SKIP. Key: {}, flowChainId: {}, reason: {}", key, flowChainId, flowTriggerConditionResult.getErrorMessage());
+            handleNotTriggerableFlow(flowParameters, true, String.format("Trigger condition: skip, reason: %s", flowTriggerConditionResult.getErrorMessage()));
+            return getFlowAcceptResult(flowParameters);
         } else {
             Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningFlowsByResourceId(payload.getResourceId());
             if (hasRunningAndParallelNotAllowed(key, flowLogItems)) {
@@ -232,20 +220,32 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void createNewFinishedFlow(FlowParameters flowParameters, boolean success, String reason) throws TransactionExecutionException {
+    private void handleNotTriggerableFlow(FlowParameters flowParameters, boolean success, String reason) throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
-                String flowId = UUID.randomUUID().toString();
-                FlowConfiguration<?> flowConfig = getFlowConfiguration(flowParameters.getKey());
-                addFlowParameters(flowParameters, flowId, flowConfig);
-                flowLogService.save(flowParameters, flowConfig.getClass(), INIT_STATE);
-                flowLogService.finish(flowParameters, !success, reason);
-                flowChains.cleanFlowChain(flowParameters.getFlowChainId(), flowParameters.getFlowTriggerUserCrn());
-                flowChains.removeFullFlowChain(flowParameters.getFlowChainId(), success);
+                createNewFlowForClosure(flowParameters, success, reason);
+                if (flowParameters.getFlowChainId() != null) {
+                    flowChains.removeLastTriggerEvent(flowParameters.getFlowChainId(), flowParameters.getFlowTriggerUserCrn());
+                }
+                finalizeFlow(flowParameters, !success, reason);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
         });
+    }
+
+    private void createNewFlowForClosure(FlowParameters flowParameters, boolean success, String reason) {
+        String flowId = UUID.randomUUID().toString();
+        LOGGER.info("Create new flow and immediately finalize it, because flow is not triggerable, key: {}, payload: {}, flowId: {} success: {}",
+                flowParameters.getKey(), flowParameters.getPayload(), flowId, success);
+        FlowConfiguration<?> flowConfig = getFlowConfiguration(flowParameters.getKey());
+        addFlowParameters(flowParameters, flowId, flowConfig);
+        flowLogService.save(flowParameters, flowConfig.getClass(), INIT_STATE);
+        Flow flow = flowConfig.createFlow(flowId, flowParameters.getFlowChainId(), flowParameters.getResourceId(), flowParameters.getFlowChainType());
+        if (!success) {
+            flow.setFlowFailed(new FlowNotTriggerableException(reason));
+        }
+        runningFlows.put(flow, flowParameters.getFlowChainId());
     }
 
     private FlowConfiguration<?> getFlowConfiguration(String key) {

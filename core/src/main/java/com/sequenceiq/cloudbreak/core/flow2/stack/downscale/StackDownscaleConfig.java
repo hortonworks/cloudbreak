@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
@@ -70,5 +71,10 @@ public class StackDownscaleConfig extends StackStatusFinalizerAbstractFlowConfig
     @Override
     public FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return getApplicationContext().getBean(StackDownscaleFlowTriggerCondition.class);
     }
 }
