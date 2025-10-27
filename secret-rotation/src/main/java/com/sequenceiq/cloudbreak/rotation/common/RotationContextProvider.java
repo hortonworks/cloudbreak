@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.common;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,8 @@ public interface RotationContextProvider {
                     .map(entry -> MapUtils.emptyIfNull(entry.getValue()).keySet()
                             .stream()
                             .map(marker -> VaultRotationReflectionUtil.getVaultSecretJson(entry.getKey(), marker))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
                             .collect(Collectors.toSet()))
                     .flatMap(Set::stream)
                     .collect(Collectors.toSet());

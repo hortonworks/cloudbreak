@@ -740,7 +740,7 @@ public class ClusterCreationActions {
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
                 aimJobService.schedule(context.getStackId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStackId());
-                providerSyncJobService.schedule(context.getStackId());
+                providerSyncJobService.schedule(context.getStack());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
                     existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);
                 }

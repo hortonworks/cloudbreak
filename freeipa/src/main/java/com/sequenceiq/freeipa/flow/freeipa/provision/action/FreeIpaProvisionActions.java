@@ -213,7 +213,7 @@ public class FreeIpaProvisionActions {
                 structuredSynchronizerJobService.schedule(stackId, StructuredSynchronizerJobAdapter.class, false);
                 freeipaJobService.schedule(stackId);
                 dynamicEntitlementRefreshJobService.schedule(stackId);
-                providerSyncJobService.schedule(stackId);
+                providerSyncJobService.schedule(stack);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 synchronizeUsersViaWiam(stack);
                 sendEvent(context);

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -44,13 +43,10 @@ class ProviderSyncJobInitializerTest {
         JobResource jobResource3 = mock(JobResource.class);
         when(providerSyncConfig.getEnabledProviders()).thenReturn(Set.of("AWS", "AZURE"));
         when(stackService.getAllWhereStatusNotIn(anySet())).thenReturn(List.of(jobResource1, jobResource2, jobResource3));
-        when(jobResource1.getProvider()).thenReturn(Optional.of("AZURE"));
-        when(jobResource2.getProvider()).thenReturn(Optional.of("AWS"));
-        when(jobResource3.getProvider()).thenReturn(Optional.of("GCP"));
 
         underTest.initJobs();
 
-        verify(providerSyncJobService, times(2)).schedule((ProviderSyncJobAdapter) any());
+        verify(providerSyncJobService, times(3)).schedule((ProviderSyncJobAdapter) any());
     }
 
     @Test

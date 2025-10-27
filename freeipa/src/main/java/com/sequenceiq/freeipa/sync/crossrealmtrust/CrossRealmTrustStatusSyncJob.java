@@ -61,12 +61,12 @@ public class CrossRealmTrustStatusSyncJob extends StatusCheckerJob {
             LOGGER.info("CrossRealmTrustStatusSyncJob cannot run, because flow is running for FreeIPA.");
         } else if (status.isUnschedulableState()) {
             LOGGER.info("CrossRealmTrustStatusSyncJob job will be unscheduled for FreeIPA, stack state is {}", status);
-            jobService.unschedule(context.getJobDetail().getKey());
+            jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
             Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stackId);
             if (crossRealmTrust.isEmpty()) {
                 LOGGER.info("CrossRealmTrustStatusSyncJob will not run, because cross realm trust is not found.");
-                jobService.unschedule(context.getJobDetail().getKey());
+                jobService.deregister(context.getJobDetail().getKey());
             } else if (!TrustStatus.SYNC_ENABLED_STATUSES.contains(crossRealmTrust.get().getTrustStatus())) {
                 LOGGER.info("CrossRealmTrustStatusSyncJob will not run, because cross realm trust status is {}.", crossRealmTrust.get().getTrustStatus());
             } else {

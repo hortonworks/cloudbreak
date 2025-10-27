@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
@@ -21,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRot
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaSyncSecretVersionService;
 
 @Controller
 @AccountEntityType(Stack.class)
@@ -34,6 +36,9 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @Inject
     private SecretTypeListService<FreeipaSecretTypeResponse> listService;
 
+    @Inject
+    private FreeIpaSyncSecretVersionService freeIpaSyncSecretVersionService;
+
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public FlowIdentifier rotateSecretsByCrn(@ResourceCrn String environmentCrn, FreeIpaSecretRotationRequest request) {
@@ -45,5 +50,11 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(@ResourceCrn String environmentCrn) {
         return listService.listRotatableSecretType(environmentCrn, FreeipaSecretTypeResponse.converter());
+    }
+
+    @Override
+    @InternalOnly
+    public void syncOutdatedSecrets(@ResourceCrn String environmentCrn) {
+        freeIpaSyncSecretVersionService.syncOutdatedSecrets(environmentCrn);
     }
 }

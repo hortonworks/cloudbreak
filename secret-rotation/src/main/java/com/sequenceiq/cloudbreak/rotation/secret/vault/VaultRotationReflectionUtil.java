@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.secret.vault;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class VaultRotationReflectionUtil {
         repository.save(entity);
     }
 
-    public static String getVaultSecretJson(Object entity, SecretMarker secretMarker) {
+    public static Optional<String> getVaultSecretJson(Object entity, SecretMarker secretMarker) {
         try {
             Method getterMethod = MethodUtils.getMethodsListWithAnnotation(entity.getClass(), SecretGetter.class).stream()
                     .filter(method -> method.getAnnotation(SecretGetter.class).marker().equals(secretMarker))
@@ -45,16 +46,19 @@ public class VaultRotationReflectionUtil {
                     .orElseThrow(() ->
                             new SecretRotationException(String.format("Failed to look up for vault secret by secret marker %s", secretMarker)));
             Object result = getterMethod.invoke(entity);
-            if (result instanceof Secret) {
-                return ((Secret) result).getSecret();
-            } else if (result instanceof String) {
-                return (String) result;
-            } else {
-                throw new CloudbreakServiceException("Secret get method is not annotated correctly, cannot extract secret json.");
+            if (result != null) {
+                if (result instanceof Secret) {
+                    return Optional.ofNullable(((Secret) result).getSecret());
+                } else if (result instanceof String) {
+                    return Optional.of((String) result);
+                } else {
+                    throw new CloudbreakServiceException("Secret get method is not annotated correctly, cannot extract secret json.");
+                }
             }
         } catch (Exception e) {
             throw new SecretRotationException(e);
         }
+        return Optional.empty();
     }
 
     public static void setNewSecret(Object targetEntity, SecretMarker secretMarker, Secret newSecret) {

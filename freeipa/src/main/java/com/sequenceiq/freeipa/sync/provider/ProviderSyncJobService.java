@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
+import com.sequenceiq.freeipa.entity.Stack;
 
 @Service
 public class ProviderSyncJobService implements JobSchedulerService {
@@ -29,6 +30,8 @@ public class ProviderSyncJobService implements JobSchedulerService {
     private static final String JOB_GROUP = "provider-sync-jobs";
 
     private static final String TRIGGER_GROUP = "provider-sync-triggers";
+
+    private static final String UNKNOWN_PROVIDER_NAME = "UNKNOWN";
 
     @Inject
     private TransactionalScheduler scheduler;
@@ -52,61 +55,56 @@ public class ProviderSyncJobService implements JobSchedulerService {
         return scheduler;
     }
 
-    public void schedule(Long id) {
-        ProviderSyncJobAdapter resourceAdapter = new ProviderSyncJobAdapter(id, applicationContext);
-        JobDetail jobDetail = buildJobDetail(resourceAdapter);
-        Trigger trigger = buildJobTrigger(jobDetail);
-        schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
-    }
-
-    public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
-        if (properties.isProviderSyncEnabled()) {
-            try {
-                JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
-                if (scheduler.getJobDetail(jobKey) != null) {
-                    LOGGER.info("Unscheduling provider sync checker job for stack with key: '{}' and group: '{}'",
-                            jobKey.getName(), jobKey.getGroup());
-                    unschedule(jobKey);
-                }
-                LOGGER.info("Scheduling provider sync checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-                scheduler.scheduleJob(jobDetail, trigger);
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling quartz job: {}", id, e);
-            }
+    public void schedule(Stack stack) {
+        if (shouldSync(stack.getCloudPlatform())) {
+            scheduleJob(new ProviderSyncJobAdapter(stack.getId(), applicationContext));
         }
     }
 
     public void schedule(ProviderSyncJobAdapter resource) {
-        if (properties.isProviderSyncEnabled()) {
-            JobDetail jobDetail = buildJobDetail(resource);
-            JobKey jobKey = jobDetail.getKey();
-            Trigger trigger = buildJobTrigger(jobDetail);
-            try {
-                if (scheduler.getJobDetail(jobKey) != null) {
-                    unschedule(jobKey);
-                }
-                LOGGER.debug("Scheduling provider sync job for stack {}", resource.getJobResource().getRemoteResourceId());
-                scheduler.scheduleJob(jobDetail, trigger);
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling provider sync job: {}", jobDetail, e);
-            }
+        String provider = resource.getJobResource().getProvider().orElse(UNKNOWN_PROVIDER_NAME);
+        if (shouldSync(provider)) {
+            scheduleJob(resource);
         }
     }
 
-    public void unschedule(JobKey jobKey) {
+    private boolean shouldSync(String provider) {
+        if (!properties.isProviderSyncEnabled()) {
+            return false;
+        }
+        boolean shouldSync = properties.getEnabledProviders().contains(provider);
+        LOGGER.debug("Should sync: {}, provider: {}, enabled providers: {}", shouldSync, provider, properties.getEnabledProviders());
+        return shouldSync;
+    }
+
+    private void scheduleJob(ProviderSyncJobAdapter resource) {
+        try {
+            JobDetail jobDetail = buildJobDetail(resource);
+            JobKey jobKey = jobDetail.getKey();
+            if (scheduler.getJobDetail(jobKey) != null) {
+                deregister(jobKey);
+            }
+            scheduler.scheduleJob(jobDetail, buildJobTrigger(jobDetail));
+            LOGGER.debug("Scheduled FreeIPA provider sync job for stack {}", resource.getJobResource().getRemoteResourceId());
+        } catch (Exception e) {
+            LOGGER.error("Error scheduling FreeIPA provider sync job", e);
+        }
+    }
+
+    public void deregister(JobKey jobKey) {
         try {
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }
         } catch (Exception e) {
-            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
+            LOGGER.error("Error unscheduling quartz job: {}", jobKey, e);
         }
     }
 
     private JobDetail buildJobDetail(ProviderSyncJobAdapter resource) {
         return JobBuilder.newJob(resource.getJobClassForResource())
                 .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
-                .withDescription("Provider sync: " + resource.getJobResource().getRemoteResourceId())
+                .withDescription("FreeIPA provider sync: " + resource.getJobResource().getRemoteResourceId())
                 .usingJobData(resource.toJobDataMap())
                 .storeDurably()
                 .build();
@@ -117,7 +115,7 @@ public class ProviderSyncJobService implements JobSchedulerService {
                 .forJob(jobDetail)
                 .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
-                .withDescription("Trigger provider sync.")
+                .withDescription("Trigger FreeIPA provider sync.")
                 .startAt(delayedFirstStart())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInMinutes(properties.getIntervalInMinutes())

@@ -69,7 +69,7 @@ class ProviderSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verify(providerSyncService, never()).syncResources(any());
-        verify(providerSyncJobService, never()).unschedule(any());
+        verify(providerSyncJobService, never()).deregister(any());
     }
 
     @Test
@@ -80,7 +80,7 @@ class ProviderSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verify(providerSyncService, never()).syncResources(any());
-        verify(providerSyncJobService, never()).unschedule(any());
+        verify(providerSyncJobService, never()).deregister(any());
     }
 
     @Test
@@ -94,7 +94,7 @@ class ProviderSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verify(providerSyncService, never()).syncResources(any());
-        verify(providerSyncJobService, times(1)).unschedule(any());
+        verify(providerSyncJobService, times(1)).deregister(any());
     }
 
     @Test
@@ -110,7 +110,7 @@ class ProviderSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verify(providerSyncService, times(1)).syncResources(eq(stack));
-        verify(providerSyncJobService, never()).unschedule(any());
+        verify(providerSyncJobService, never()).deregister(any());
     }
 
     @Test
@@ -122,6 +122,6 @@ class ProviderSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verify(providerSyncService, never()).syncResources(any());
-        verify(providerSyncJobService, never()).unschedule(any());
+        verify(providerSyncJobService, never()).deregister(any());
     }
 }
