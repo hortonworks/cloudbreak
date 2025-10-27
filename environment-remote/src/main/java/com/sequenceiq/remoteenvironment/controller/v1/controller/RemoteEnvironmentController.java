@@ -12,6 +12,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
@@ -31,25 +32,25 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     }
 
     @Override
-    public DescribeEnvironmentResponse getByCrn(DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentResponse getByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService.describeV1(request);
     }
 
     @Override
-    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService.getRdcByCrn(request);
     }
 
     @Override
-    public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
+    public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@RequestObject DescribeDatalakeServicesRequest request) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService.getDatalakeServicesByCrn(request);
     }
 
     @Override
-    public GetRootCertificateResponse getRootCertificateByCrn(String environmentCrn) {
+    public GetRootCertificateResponse getRootCertificateByCrn(@RequestObject String environmentCrn) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService.getRootCertificateByCrn(environmentCrn);
     }

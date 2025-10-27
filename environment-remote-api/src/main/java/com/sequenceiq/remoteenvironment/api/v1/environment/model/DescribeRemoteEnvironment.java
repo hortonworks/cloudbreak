@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.remoteenvironment.api.v1.environment.ModelDescriptions;
 
@@ -16,6 +17,7 @@ public class DescribeRemoteEnvironment {
 
     @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.CLASSIC_CLUSTER})
     @Schema(description = ModelDescriptions.CRN)
+    @ResourceCrn
     private String crn;
 
     public String getCrn() {
