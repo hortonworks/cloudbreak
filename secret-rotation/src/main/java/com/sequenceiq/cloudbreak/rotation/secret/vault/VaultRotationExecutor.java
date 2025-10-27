@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationRefle
 import static com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil.setNewSecret;
 
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -101,8 +102,8 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
             TriConsumer<SecretMarker, String, String> consumer) {
         markerMap.forEach((marker, newValue) -> {
             try {
-                String vaultSecretJson = getVaultSecretJson(entity, marker);
-                consumer.accept(marker, newValue, vaultSecretJson);
+                Optional<String> vaultSecretJson = getVaultSecretJson(entity, marker);
+                vaultSecretJson.ifPresent(secretJson -> consumer.accept(marker, newValue, secretJson));
             } catch (Exception e) {
                 throw new SecretRotationException(e);
             }

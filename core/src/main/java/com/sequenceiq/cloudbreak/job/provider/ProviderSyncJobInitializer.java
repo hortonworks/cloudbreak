@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.job.AbstractStackJobInitializer;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class ProviderSyncJobInitializer extends AbstractStackJobInitializer implements StaleAwareJobRescheduler {
@@ -24,13 +25,15 @@ public class ProviderSyncJobInitializer extends AbstractStackJobInitializer impl
     @Inject
     private ProviderSyncJobService jobService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public void initJobs() {
         if (config.isProviderSyncEnabled()) {
             Set<String> enabledProviders = config.getEnabledProviders();
             LOGGER.info("Scheduling provider sync jobs on {}.", enabledProviders);
             List<JobResource> aliveJobResources = getAliveJobResources().stream()
-                    .filter(jr -> enabledProviders.contains(jr.getProvider().orElse("")))
                     .toList();
             aliveJobResources
                     .forEach(s -> jobService.schedule(new ProviderSyncJobAdapter(s)));
@@ -42,6 +45,7 @@ public class ProviderSyncJobInitializer extends AbstractStackJobInitializer impl
 
     @Override
     public void rescheduleForStaleCluster(Long id) {
-        jobService.schedule(id);
+        JobResource jobResource = stackService.getJobResource(id);
+        jobService.schedule(new ProviderSyncJobAdapter(jobResource));
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.saltsecurityconf;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +17,10 @@ public class SaltSecurityConfigService {
 
     public SaltSecurityConfig save(SaltSecurityConfig saltSecurityConfig) {
         return repository.save(saltSecurityConfig);
+    }
+
+    public Optional<SaltSecurityConfig> getById(Long id) {
+        return repository.findById(id);
     }
 
 }

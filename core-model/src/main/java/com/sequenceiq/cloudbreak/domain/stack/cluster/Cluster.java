@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
 import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.CLUSTER_MANAGER_MONITORING_PWD;
 import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.CLUSTER_MANAGER_MONITORING_USER;
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.DBUS_CREDENTIAL;
 import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.NODE_STATUS_MONITOR_PWD;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -433,6 +434,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.databusCredential = new Secret(databusCredential);
     }
 
+    @SecretSetter(marker = DBUS_CREDENTIAL)
     public void setDatabusCredentialSecret(Secret databusCredential) {
         this.databusCredential = databusCredential;
     }
@@ -526,6 +528,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     @Override
+    @SecretGetter(marker = DBUS_CREDENTIAL)
     public Secret getDatabusCredentialSecret() {
         return databusCredential;
     }

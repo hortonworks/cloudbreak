@@ -100,7 +100,7 @@ class CrossRealmTrustStatusSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(crossRealmTrustStatusSyncService);
-        verify(jobService).unschedule(any());
+        verify(jobService).deregister(any());
     }
 
     @Test
@@ -110,7 +110,7 @@ class CrossRealmTrustStatusSyncJobTest {
         underTest.executeJob(jobExecutionContext);
 
         verifyNoInteractions(crossRealmTrustStatusSyncService);
-        verify(jobService).unschedule(any());
+        verify(jobService).deregister(any());
     }
 
     @Test

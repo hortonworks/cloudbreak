@@ -1,6 +1,8 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATABASE_SERVER;
 import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
+import static com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseParamDescriptions.CRN;
 
 import java.util.List;
 import java.util.Set;
@@ -83,7 +85,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "getDatabaseServerByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response getByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -171,7 +173,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "releaseManagedDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response release(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -191,7 +193,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "deleteDatabaseServerByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
@@ -215,7 +217,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "deleteMultipleDatabaseServersByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerV4Responses deleteMultiple(
-            @Parameter(description = DatabaseServerParamDescriptions.CRNS) @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) Set<String> crns,
+            @Parameter(description = DatabaseServerParamDescriptions.CRNS) @ValidCrn(resource = DATABASE_SERVER) Set<String> crns,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
@@ -245,7 +247,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "startDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void start(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -257,7 +259,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "migrateDatabaseToSslByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
@@ -267,7 +269,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "enforceSslOnDatabaseByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void enforceSslOnDatabaseByCrnInternal(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
@@ -277,7 +279,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "rotateDatabaseServerSSLCert",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSslCert(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -287,7 +289,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "updateDatabaseServerSSLCert",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateToLatestSslCert(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -297,7 +299,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "stopDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void stop(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
 
@@ -308,7 +310,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "upgradeDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeDatabaseServerV4Response upgrade(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn,
             @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
 
@@ -328,7 +330,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "validateUpgradeDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeDatabaseServerV4Response validateUpgrade(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn,
             @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST)
             UpgradeDatabaseServerV4Request request);
@@ -340,7 +342,7 @@ public interface DatabaseServerV4Endpoint {
             operationId = "validateUpgradeDatabaseServerCleanup",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     UpgradeDatabaseServerV4Response validateUpgradeCleanup(
-            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn);
 
     @PUT
@@ -351,6 +353,13 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecret(@Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
             RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/sync_outdated_secrets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Sync outdated vault secrets for DB Server", operationId = "syncOutdatedSecrets",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void syncOutdatedSecrets(@ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = CRN) @QueryParam("crn") String crn);
 
     @POST
     @Path("get_certificate_status")
@@ -382,7 +391,7 @@ public interface DatabaseServerV4Endpoint {
     @Operation(summary = DatabaseServerNotes.RETRY, description = DatabaseServerNotes.RETRY, operationId = "retryV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier retry(
-            @QueryParam("database") @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn);
+            @QueryParam("database") @ValidCrn(resource = DATABASE_SERVER) @NotNull String databaseCrn);
 
     @GET
     @Path("retry")
@@ -390,5 +399,5 @@ public interface DatabaseServerV4Endpoint {
     @Operation(summary = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, description = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, operationId = "listRetryableFlowsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(
-            @QueryParam("database") @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn);
+            @QueryParam("database") @ValidCrn(resource = DATABASE_SERVER) @NotNull String databaseCrn);
 }
