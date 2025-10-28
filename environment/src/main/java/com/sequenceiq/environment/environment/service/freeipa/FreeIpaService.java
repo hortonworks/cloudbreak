@@ -261,8 +261,9 @@ public class FreeIpaService {
     public PrepareCrossRealmTrustResponse crossRealmPrepare(String environmentCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
         try {
             LOGGER.debug("Calling FreeIPA cross realm trust prepare for environment {}", environmentCrn);
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> trustV1Endpoint.setup(prepareCrossRealmTrustRequest));
+                    () -> trustV1Endpoint.setup(prepareCrossRealmTrustRequest, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to prepare cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);

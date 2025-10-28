@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -40,7 +41,7 @@ public class TrustV1Controller implements TrustV1Endpoint {
 
     @Override
     @InternalOnly
-    public PrepareCrossRealmTrustResponse setup(@RequestObject PrepareCrossRealmTrustRequest request) {
+    public PrepareCrossRealmTrustResponse setup(@RequestObject PrepareCrossRealmTrustRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return trustSetupService.setupTrust(accountId, request);
     }
