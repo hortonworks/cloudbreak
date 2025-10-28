@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -98,9 +99,12 @@ public class OutdatedVaultSecretUpdaterPatchService extends ExistingStackPatchSe
     }
 
     private void updateOutdatedSecretsForSaltSecurityConfig(Stack stack) {
-        Optional<SaltSecurityConfig> saltSecurityConfig = saltSecurityConfigService.getById(stack.getSecurityConfig().getSaltSecurityConfig().getId());
-        saltSecurityConfig.ifPresent(ssc -> syncSecretVersionService.updateEntityIfNeeded(stack.getResourceCrn(), ssc,
-                        Set.of(SALT_PASSWORD, SALT_MASTER_PRIVATE_KEY, SALT_SIGN_PRIVATE_KEY, SALT_BOOT_PASSWORD)));
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        if (securityConfig != null && securityConfig.getSaltSecurityConfig() != null) {
+            Optional<SaltSecurityConfig> saltSecurityConfig = saltSecurityConfigService.getById(securityConfig.getSaltSecurityConfig().getId());
+            saltSecurityConfig.ifPresent(ssc -> syncSecretVersionService.updateEntityIfNeeded(stack.getResourceCrn(), ssc,
+                    Set.of(SALT_PASSWORD, SALT_MASTER_PRIVATE_KEY, SALT_SIGN_PRIVATE_KEY, SALT_BOOT_PASSWORD)));
+        }
     }
 
     private void updateOutdatedSecretsForRdsConfigs(Stack stack) {

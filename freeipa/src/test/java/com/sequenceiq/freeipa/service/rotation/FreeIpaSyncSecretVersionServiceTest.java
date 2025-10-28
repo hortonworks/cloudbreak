@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.SyncSecretVersionService;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
@@ -46,5 +48,14 @@ public class FreeIpaSyncSecretVersionServiceTest {
         underTest.syncOutdatedSecrets(ENV_CRN);
 
         verify(syncSecretVersionService, times(2)).updateEntityIfNeeded(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateWhenNotFound() {
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenThrow(new NotFoundException("ntfound"));
+
+        underTest.syncOutdatedSecrets(ENV_CRN);
+
+        verifyNoInteractions(syncSecretVersionService);
     }
 }
