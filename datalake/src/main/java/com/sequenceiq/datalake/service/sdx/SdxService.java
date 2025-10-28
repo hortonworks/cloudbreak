@@ -1467,10 +1467,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return EnumSet.of(Crn.ResourceType.DATALAKE);
     }
 
-    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
-        return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
-    }
-
     public void updateDatabaseEngineVersion(SdxCluster sdxCluster, String databaseEngineVersion) {
         updateDatabaseEngineVersion(sdxCluster.getCrn(), databaseEngineVersion);
         sdxCluster.getSdxDatabase().setDatabaseEngineVersion(databaseEngineVersion);

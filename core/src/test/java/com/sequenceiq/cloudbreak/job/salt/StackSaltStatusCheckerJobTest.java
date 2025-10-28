@@ -21,13 +21,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -39,6 +39,9 @@ import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 
 @ExtendWith(MockitoExtension.class)
 class StackSaltStatusCheckerJobTest {
@@ -75,17 +78,23 @@ class StackSaltStatusCheckerJobTest {
     @Mock
     private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
+    @Mock
+    private FlowLogService flowLogService;
+
+    @Mock
+    private SdxFlowEndpoint sdxFlowEndpoint;
+
     private JobKey jobKey;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         underTest.setLocalId(STACK_ID.toString());
 
         lenient().when(context.getJobDetail()).thenReturn(jobDetail);
         jobKey = new JobKey("key");
         lenient().when(jobDetail.getKey()).thenReturn(jobKey);
 
+        lenient().when(flowLogService.isOtherFlowRunning(any())).thenReturn(Boolean.FALSE);
         lenient().when(stackDtoService.getByIdOpt(STACK_ID)).thenReturn(Optional.of(stackDto));
         lenient().when(stackDto.getStatus()).thenReturn(Status.AVAILABLE);
         lenient().when(rotateSaltPasswordValidator.isChangeSaltuserPasswordSupported(any())).thenReturn(Boolean.TRUE);
@@ -126,6 +135,17 @@ class StackSaltStatusCheckerJobTest {
     }
 
     @Test
+    void executeJobWithOtherFlowRunning() throws JobExecutionException {
+        when(flowLogService.isOtherFlowRunning(any())).thenReturn(Boolean.TRUE);
+
+        underTest.executeJob(context);
+
+        verifyNoInteractions(jobService);
+        verifyNoInteractions(rotateSaltPasswordService);
+        verify(flowLogService).isOtherFlowRunning(any());
+    }
+
+    @Test
     void executeJobWithStackInUnschedulableStatus() throws JobExecutionException {
         when(stackDto.getStatus()).thenReturn(Status.DELETE_COMPLETED);
 
@@ -153,6 +173,20 @@ class StackSaltStatusCheckerJobTest {
 
         verifyNoInteractions(jobService);
         verifyNoInteractions(rotateSaltPasswordService);
+    }
+
+    @Test
+    void executeJobWithDatalakeHavingAnotherFlow() throws JobExecutionException {
+        when(stackDto.getType()).thenReturn(StackType.DATALAKE);
+        FlowLogResponse flowLogResponse = new FlowLogResponse();
+        flowLogResponse.setFinalized(Boolean.FALSE);
+        when(sdxFlowEndpoint.getLastFlowByResourceCrn(any())).thenReturn(flowLogResponse);
+
+        underTest.executeJob(context);
+
+        verifyNoInteractions(jobService);
+        verifyNoInteractions(rotateSaltPasswordService);
+        verify(sdxFlowEndpoint).getLastFlowByResourceCrn(any());
     }
 
     @Nested

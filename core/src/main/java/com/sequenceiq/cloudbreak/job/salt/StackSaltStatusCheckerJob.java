@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 
 @DisallowConcurrentExecution
 @Component
@@ -95,6 +98,12 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
 
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private SdxFlowEndpoint sdxFlowEndpoint;
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return stackDtoService.getStackViewByIdOpt(getStackId()).map(MdcContextInfoProvider.class::cast);
@@ -104,24 +113,17 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     protected void executeJob(JobExecutionContext context) throws JobExecutionException {
         try {
             measure(() -> {
+                if (flowLogService.isOtherFlowRunning(getStackId())) {
+                    LOGGER.debug("StackSaltStatusCheckerJob cannot run, because flow is running for stack: {}", getLocalId());
+                    return;
+                }
                 Optional<StackDto> stackOptional = stackDtoService.getByIdOpt(getStackId());
                 if (stackOptional.isEmpty()) {
                     LOGGER.debug("Stack salt sync will be unscheduled, stack with id {} is not found", getStackId());
                     jobService.unschedule(context.getJobDetail().getKey());
                 } else {
                     StackDto stack = stackOptional.get();
-                    Status stackStatus = stack.getStatus();
-                    if (Status.getUnschedulableStatuses().contains(stackStatus)) {
-                        LOGGER.debug("Stack salt sync will be unscheduled, stack state is {}", stackStatus);
-                        jobService.unschedule(context.getJobDetail().getKey());
-                    } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
-                        LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
-                    } else if (SYNCABLE_STATES.contains(stackStatus)) {
-                        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
-                        rotateSaltPasswordIfNeeded(stack, context);
-                    } else {
-                        LOGGER.warn("Unhandled stack status, {}", stackStatus);
-                    }
+                    executeJobForStack(context, stack);
                 }
             }, LOGGER, "Check salt status took {} ms for stack {}.", getStackId());
         } catch (BadRequestException e) {
@@ -129,6 +131,24 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
             jobService.unschedule(context.getJobDetail().getKey());
         } catch (Exception e) {
             LOGGER.info("Exception during stack salt status check.", e);
+        }
+    }
+
+    private void executeJobForStack(JobExecutionContext context, StackDto stack) {
+        Status stackStatus = stack.getStatus();
+        if (Status.getUnschedulableStatuses().contains(stackStatus)) {
+            LOGGER.debug("Stack salt sync will be unscheduled, stack state is {}", stackStatus);
+            jobService.unschedule(context.getJobDetail().getKey());
+        } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
+            LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
+        } else if (StackType.DATALAKE.equals(stack.getType()) &&
+                !sdxFlowEndpoint.getLastFlowByResourceCrn(stack.getResourceCrn()).getFinalized()) {
+            LOGGER.debug("Other flow is running for datalake {}", stack.getResourceCrn());
+        } else if (SYNCABLE_STATES.contains(stackStatus)) {
+            rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
+            rotateSaltPasswordIfNeeded(stack, context);
+        } else {
+            LOGGER.warn("Unhandled stack status, {}", stackStatus);
         }
     }
 
