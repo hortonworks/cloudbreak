@@ -79,8 +79,8 @@ class TrustStatusValidationServiceTest {
 
         ValidationResult result = underTest.validateTrustStatus(stack, crossRealmTrust);
 
-        assertThat(result.hasError()).isTrue();
-        assertThat(result.getFormattedErrors()).isEqualTo(message);
+        assertThat(result.hasWarning()).isTrue();
+        assertThat(result.getFormattedWarnings()).isEqualTo(message);
     }
 
 }
