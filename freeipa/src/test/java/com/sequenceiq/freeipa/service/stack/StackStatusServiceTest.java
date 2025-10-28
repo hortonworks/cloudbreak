@@ -81,7 +81,7 @@ class StackStatusServiceTest {
         underTest.cleanupByStackId(1L);
 
         ArgumentCaptor<List<StackStatus>> captor = ArgumentCaptor.forClass(List.class);
-        verify(stackStatusRepository).deleteAll(captor.capture());
+        verify(stackStatusRepository).deleteAllInBatch(captor.capture());
         assertEquals(400, captor.getValue().size());
     }
 }

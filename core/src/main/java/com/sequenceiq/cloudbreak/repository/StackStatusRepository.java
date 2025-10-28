@@ -8,9 +8,9 @@ import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -21,7 +21,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @EntityType(entityClass = StackStatus.class)
 @Transactional(TxType.REQUIRED)
-public interface StackStatusRepository extends CrudRepository<StackStatus, Long>, PagingAndSortingRepository<StackStatus, Long> {
+public interface StackStatusRepository extends JpaRepository<StackStatus, Long> {
 
     Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId);
 
@@ -43,6 +43,8 @@ public interface StackStatusRepository extends CrudRepository<StackStatus, Long>
             "GROUP BY (st.status)")
     List<StackCountByStatusView> countStacksByStatusAndTunnel(@Param("tunnel") Tunnel tunnel);
 
+    @Modifying
+    @Query("DELETE FROM StackStatus ss WHERE ss.stack.id = :stackId AND ss.status != :status")
     void deleteAllByStackIdAndStatusNot(long stackId, Status status);
 
     Page<StackStatus> findAllByCreatedLessThan(long timestampBefore, Pageable pageable);

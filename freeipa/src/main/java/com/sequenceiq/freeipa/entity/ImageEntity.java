@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.entity;
 
+import static com.sequenceiq.cloudbreak.service.secret.SecretMarker.CCMV2_JUMPGATE_AGENT_ACCESS_KEY;
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import java.util.Objects;
@@ -19,6 +20,8 @@ import org.hibernate.envers.Audited;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretGetter;
+import com.sequenceiq.cloudbreak.service.secret.SecretSetter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -182,12 +185,14 @@ public class ImageEntity implements AccountIdAwareResource {
         }
     }
 
+    @SecretSetter(marker = CCMV2_JUMPGATE_AGENT_ACCESS_KEY)
     public void setGatewayUserdataSecret(Secret gatewayUserdata) {
         if (gatewayUserdata != null) {
             this.gatewayUserdata = gatewayUserdata;
         }
     }
 
+    @SecretGetter(marker = CCMV2_JUMPGATE_AGENT_ACCESS_KEY)
     public Secret getGatewayUserdataSecret() {
         return gatewayUserdata;
     }

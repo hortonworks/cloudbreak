@@ -53,34 +53,38 @@ public class ProviderSyncService {
     private ResourceNotifier resourceNotifier;
 
     public void syncResources(Stack stack) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
-                .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformvariant())
-                .withLocation(location)
-                .withUserName(stack.getOwner())
-                .withAccountId(stack.getAccountId())
-                .build();
+        try {
+            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+            CloudContext cloudContext = CloudContext.Builder.builder()
+                    .withId(stack.getId())
+                    .withName(stack.getName())
+                    .withCrn(stack.getResourceCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withVariant(stack.getPlatformvariant())
+                    .withLocation(location)
+                    .withUserName(stack.getOwner())
+                    .withAccountId(stack.getAccountId())
+                    .build();
 
-        List<CloudResource> cloudResources = getCloudResources(stack);
-        LOGGER.debug("Syncing resources for stack: {}", cloudResources.stream()
-                .map(CloudResource::getDetailedInfo)
-                .toList());
+            List<CloudResource> cloudResources = getCloudResources(stack);
+            LOGGER.debug("Syncing resources for stack: {}", cloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
 
-        CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
-        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-        List<CloudResourceStatus> resourceStatusList = connector.resources().checkForSyncer(ac, cloudResources);
-        List<CloudResource> syncedCloudResources = resourceStatusList.stream()
-                .map(CloudResourceStatus::getCloudResource)
-                .toList();
-        LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
-                .map(CloudResource::getDetailedInfo)
-                .toList());
-        resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
+            CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            List<CloudResourceStatus> resourceStatusList = connector.resources().checkForSyncer(ac, cloudResources);
+            List<CloudResource> syncedCloudResources = resourceStatusList.stream()
+                    .map(CloudResourceStatus::getCloudResource)
+                    .toList();
+            LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
+            resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
+        } catch (Exception e) {
+            LOGGER.error("Error during provider sync, skipping and logging it: ", e);
+        }
     }
 
     private List<CloudResource> getCloudResources(Stack stack) {

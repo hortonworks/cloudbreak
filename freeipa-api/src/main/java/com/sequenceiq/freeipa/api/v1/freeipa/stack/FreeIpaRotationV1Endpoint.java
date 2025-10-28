@@ -49,4 +49,12 @@ public interface FreeIpaRotationV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @PUT
+    @Path("sync_outdated_secrets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Sync outdated vault secrets for FreeIPA", operationId = "syncOutdatedSecrets",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void syncOutdatedSecrets(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -32,14 +33,14 @@ public class VaultRotationReflectionUtilTest {
 
     @Test
     void testGetVaultJsonByStringField() {
-        String result = VaultRotationReflectionUtil.getVaultSecretJson(new Sample(), DP_CLUSTER_MANAGER_USER);
-        assertEquals("secret", result);
+        Optional<String> result = VaultRotationReflectionUtil.getVaultSecretJson(new Sample(), DP_CLUSTER_MANAGER_USER);
+        assertEquals("secret", result.get());
     }
 
     @Test
     void testGetVaultJsonBySecretField() {
-        String result = VaultRotationReflectionUtil.getVaultSecretJson(new Sample(), DP_CLUSTER_MANAGER_PASSWORD);
-        assertEquals("secret", result);
+        Optional<String> result = VaultRotationReflectionUtil.getVaultSecretJson(new Sample(), DP_CLUSTER_MANAGER_PASSWORD);
+        assertEquals("secret", result.get());
     }
 
     @Test
