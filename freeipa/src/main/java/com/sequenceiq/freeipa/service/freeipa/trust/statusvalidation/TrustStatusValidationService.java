@@ -59,8 +59,8 @@ public class TrustStatusValidationService {
                     REALM, crossRealmTrust.getRealm().toUpperCase(Locale.ROOT)))));
             hostOrchestrator.runOrchestratorState(stateParams);
         } catch (Exception ex) {
-            LOGGER.error("Trust status validation failed for AD: {}", crossRealmTrust.getFqdn(), ex);
-            validationResultBuilder.error(ex.getMessage());
+            LOGGER.warn("Trust status validation failed for AD: {}", crossRealmTrust.getFqdn());
+            validationResultBuilder.warning(ex.getMessage());
         }
     }
 }
