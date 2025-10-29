@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -20,8 +19,7 @@ public class FreeIpaUpscaleAction extends AbstractFreeIpaAction<FreeIpaUpscaleTe
     public FreeIpaUpscaleTestDto freeIpaAction(TestContext testContext, FreeIpaUpscaleTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA upscale request:%n"), testDto.getRequest());
         UpscaleRequest upscaleRequest = new UpscaleRequest();
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        upscaleRequest.setEnvironmentCrn(environmentCrn);
+        upscaleRequest.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         upscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
         testDto.setResponse(client.getDefaultClient()
                 .getFreeIpaV1Endpoint()

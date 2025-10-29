@@ -2,31 +2,11 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 
 public class FreeIpaProperties {
 
-    private String instanceType;
-
-    private String arm64InstanceType;
-
     private Upgrade upgrade = new Upgrade();
 
     private Marketplace marketplace = new Marketplace();
 
     private Rebuild rebuild = new Rebuild();
-
-    public String getInstanceType() {
-        return instanceType;
-    }
-
-    public void setInstanceType(String instanceType) {
-        this.instanceType = instanceType;
-    }
-
-    public String getArm64InstanceType() {
-        return arm64InstanceType;
-    }
-
-    public void setArm64InstanceType(String arm64InstanceType) {
-        this.arm64InstanceType = arm64InstanceType;
-    }
 
     public Upgrade getUpgrade() {
         return upgrade;

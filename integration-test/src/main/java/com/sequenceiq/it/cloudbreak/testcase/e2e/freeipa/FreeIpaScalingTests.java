@@ -52,6 +52,9 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
 
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
+                    .withTelemetry("telemetry")
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
                     primaryGatewayInstanceId.add(getPrimaryGatewayId(instanceMetaDataResponses));

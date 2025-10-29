@@ -10,7 +10,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSetti
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -35,8 +34,7 @@ public class FreeIpaUpgradeAction extends AbstractFreeIpaAction<FreeIpaTestDto> 
 
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        request.setEnvironmentCrn(environmentCrn);
+        request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         request.setAllowMajorOsUpgrade(Boolean.TRUE);
         if (Strings.isNotNullAndNotEmpty(imageCatalogUrl) && Strings.isNotNullAndNotEmpty(imageId)) {
             ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();

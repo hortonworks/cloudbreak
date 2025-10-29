@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,7 +13,7 @@ import jakarta.inject.Inject;
 import org.springframework.util.CollectionUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -29,11 +31,6 @@ public class AzureMultiAzFreeIpaTest extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -41,13 +38,16 @@ public class AzureMultiAzFreeIpaTest extends AbstractE2ETest {
             when = "create an Environment with MultiAz FreeIPA",
             then = "FreeIpa should be deployed across multiple Availability Zones")
     public void testCreateNewEnvironmentWithMultiAzFreeIpa(TestContext testContext) {
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
-                .withEnableMultiAzFreeIpa()
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
+
+        String freeIpa = resourcePropertyProvider().getName();
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withEnableMultiAz(true)
+                .withFreeIpaHa(1, 3)
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(Status.AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc);
+                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc);
                     return testDto;
                 })
                 .validate();

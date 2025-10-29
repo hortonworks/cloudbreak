@@ -523,8 +523,4 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(distroXTestClient.get())
                 .validate();
     }
-
-    public FreeIpaTestClient getFreeIpaTestClient() {
-        return freeIpaTestClient;
-    }
 }

@@ -49,6 +49,10 @@ public class PreconditionGovTest extends AbstractE2ETest {
         return sdxTestClient;
     }
 
+    protected FreeIpaTestClient getFreeIpaTestClient() {
+        return freeIpaTestClient;
+    }
+
     protected DistroXTestClient getDistroXTestClient() {
         return distroXTestClient;
     }

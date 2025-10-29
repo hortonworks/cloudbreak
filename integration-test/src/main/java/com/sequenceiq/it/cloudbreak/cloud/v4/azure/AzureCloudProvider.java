@@ -617,9 +617,4 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public String getFreeIpaRebuildDataBackup() {
         return azureProperties.getFreeipa().getRebuild().getDatabackup();
     }
-
-    @Override
-    public String getFreeIpaInstanceType() {
-        return azureProperties.getFreeipa().getInstanceType();
-    }
 }

@@ -1,12 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -23,11 +23,6 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
@@ -36,20 +31,24 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
                     "AND the stack is rebuilt",
             then = "the stack should be available AND deletable")
     public void testRebuildFreeIpaWithTwoInstances(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
         int instanceCountByGroup = 2;
 
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withTelemetry("telemetry")
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.delete())
                 .await(FREEIPA_DELETE_COMPLETED)
                 .when(freeIpaTestClient.rebuild())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .given(FreeIpaTestDto.class)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
                 .validate();
@@ -63,20 +62,25 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
                     "AND the stack is rebuilt",
             then = "the stack should be available AND deletable")
     public void testRebuildFreeIpaWithTwoInstancesAwsNative(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
         int instanceCountByGroup = 2;
 
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withVariant("AWS_NATIVE")
+                .withTelemetry("telemetry")
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.delete())
                 .await(FREEIPA_DELETE_COMPLETED)
                 .when(freeIpaTestClient.rebuild())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .given(FreeIpaTestDto.class)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
                 .validate();

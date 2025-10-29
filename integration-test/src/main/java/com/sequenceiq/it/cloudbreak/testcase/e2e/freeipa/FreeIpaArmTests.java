@@ -39,11 +39,6 @@ public class FreeIpaArmTests extends AbstractE2ETest {
     @Inject
     private FreeIpaImageUtil freeIpaImageUtil;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak with arm64 freeipa",
@@ -53,16 +48,20 @@ public class FreeIpaArmTests extends AbstractE2ETest {
     public void testSingleArmFreeIpaInstanceUpgrade(TestContext testContext) {
         Pair<Image, Image> armImages = getLastTwoArmImages(testContext);
 
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
-                .withFreeIpaArchitecture(Architecture.ARM64)
-                .withFreeIpaImage(commonCloudProperties().getFreeipaImageCatalogUrl(), armImages.getLeft().getUuid())
-                .when(getEnvironmentTestClient().create())
+        testContext
+                .given(FreeIpaTestDto.class)
+                .withArchitecture(Architecture.ARM64.getName())
+                .withTelemetry("telemetry")
+                .withImage(commonCloudProperties().getFreeipaImageCatalogUrl(), armImages.getLeft().getUuid())
+                .withInstanceType(testContext.getCloudProvider().getDefaultInstanceType(Architecture.ARM64))
+                .when(freeIpaTestClient.create())
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIpaTestClient.describe())
                 .given(SdxTestDto.class)
                 .withCloudStorage()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.upgrade(commonCloudProperties().getFreeipaImageCatalogUrl(), armImages.getRight().getUuid()))
                 .await(Status.UPDATE_IN_PROGRESS, doNotWaitForFlow())
                 .given(FreeIpaOperationStatusTestDto.class)

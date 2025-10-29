@@ -14,7 +14,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -30,11 +29,10 @@ public class FreeIpaRepairAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
     }
 
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
-        request.setEnvironmentCrn(environmentCrn);
+        request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         List<String> instanceIds = testDto.getResponse().getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)
                 .flatMap(Collection::stream)

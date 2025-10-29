@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import java.util.HashMap;
@@ -15,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -41,11 +41,6 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
@@ -53,17 +48,19 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                     "AND the MultiAz stack is repaired",
             then = "the MultiAz stack should be available AND deletable")
     public void testHAFreeIpaMultiAzRepair(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
 
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
-                .withEnableMultiAzFreeIpa()
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withTelemetry("telemetry")
+                .withFreeIpaHa(1, 3)
+                .withEnableMultiAz(true)
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(FREEIPA_AVAILABLE)
-                .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
-                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc);
+                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
@@ -76,7 +73,7 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
         if (!freeIpaResponse.isEnableMultiAz()) {
             throw new TestFailException(String.format("MultiAz is not enabled for %s after repair", freeIpaResponse.getName()));
         }
-        for (InstanceGroupResponse instanceGroup : freeIpaResponse.getInstanceGroups()) {
+        for (InstanceGroupResponse instanceGroup: freeIpaResponse.getInstanceGroups()) {
             if (!CollectionUtils.isEmpty(instanceGroup.getMetaData())) {
                 Map<String, String> instanceZoneMap = instanceGroup.getMetaData().stream()
                         .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId, InstanceMetaDataResponse::getAvailabilityZone));

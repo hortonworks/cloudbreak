@@ -40,7 +40,7 @@ public class SecretEncryptionTests extends PreconditionGovTest {
             then = "the stack should be available AND deletable"
     )
     public void testCreateStopStartUpscaleDownscaleFreeIpaWithSecretEncryption(TestContext testContext) {
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
 
         testContext
                 .given(FreeIpaTestDto.class)
@@ -80,7 +80,7 @@ public class SecretEncryptionTests extends PreconditionGovTest {
             then = "the rotations should be successful and each stack should be in a healthy state"
     )
     public void testSecretRotationWithSecretEncryption(TestContext testContext) {
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         testContext
                 .given(FreeIpaTestDto.class)
                 .then(secretEncryptionAssertions::validate)

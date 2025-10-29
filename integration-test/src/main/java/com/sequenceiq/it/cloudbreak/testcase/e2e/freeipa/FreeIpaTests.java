@@ -12,7 +12,6 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.model.SeLinux;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -55,11 +54,6 @@ public class FreeIpaTests extends AbstractE2ETest {
     @Inject
     private SELinuxAssertions selinuxAssertions;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
@@ -69,6 +63,7 @@ public class FreeIpaTests extends AbstractE2ETest {
                     "AND the stack is repaired one node at a time",
             then = "the stack should be available AND deletable")
     public void testCreateStopStartRepairFreeIpaWithTwoInstances(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
         String recipeName = resourcePropertyProvider().getName();
         String preTerminationRecipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-service-deployment";
@@ -88,14 +83,14 @@ public class FreeIpaTests extends AbstractE2ETest {
                     .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
                     .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), key("preDeployment"))
-                .validate();
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
-                    .withFreeIpaSeLinux(SeLinux.ENFORCING)
-                    .withFreeIpaRecipe(Set.of(recipeName, preTerminationRecipeName))
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+                .given(freeIpa, FreeIpaTestDto.class)
+                    .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                    .withSeLinuxSecurity(SeLinux.ENFORCING.name())
+                    .withTelemetry("telemetry")
+                    .withRecipes(Set.of(recipeName, preTerminationRecipeName))
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(Status.UPDATE_IN_PROGRESS)
+                .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
                 .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, false))
@@ -122,7 +117,7 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
-                .given(FreeIpaTestDto.class)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)

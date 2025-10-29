@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
@@ -36,7 +34,7 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
-        initializeTest(testContext);
+        super.setupTest(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -46,16 +44,10 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
             then = "FreeIpa is started on spot instances, or fails with insufficient spot capacity"
     )
     public void testFreeIpaOnSpotInstances(TestContext testContext) {
-        AwsFreeIpaSpotParameters awsFreeIpaSpotParameters = new AwsFreeIpaSpotParameters();
-        awsFreeIpaSpotParameters.setPercentage(100);
-
-        AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();
-        awsFreeIpaParameters.setSpot(awsFreeIpaSpotParameters);
-
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
-                .withFreeIpaAws(awsFreeIpaParameters)
-                .when(getEnvironmentTestClient().create())
+        testContext
                 .given(FreeIpaTestDto.class)
+                    .withSpotPercentage(100)
+                .when(freeIpaTestClient.create())
                 .then((tc, testDto, client) -> {
                     testDto.await(Status.UPDATE_IN_PROGRESS);
                     Map<String, Exception> exceptionMap = testContext.getExceptionMap();

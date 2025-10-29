@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Response;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -21,10 +20,9 @@ public class FreeIpaRebuildv2Action extends AbstractFreeIpaAction<FreeIpaTestDto
     }
 
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
         RebuildV2Request request = new RebuildV2Request();
-        request.setEnvironmentCrn(environmentCrn);
+        request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         request.setResourceCrn(testDto.getCrn());
         request.setInstanceToRestoreFqdn("ipaserver1.ipatest.local");
         request.setFullBackupStorageLocation(testContext.getCloudProvider().getFreeIpaRebuildFullBackup());

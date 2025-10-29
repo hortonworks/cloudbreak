@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.constant.ImdsConstants;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -24,22 +23,21 @@ public class FreeipaInstanceMetadataUpdateAction extends AbstractFreeIpaAction<F
 
     @Override
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        Log.whenJson(LOGGER, format(" FreeIPA instance metadata update request for environment %n"), environmentCrn);
+        Log.whenJson(LOGGER, format(" FreeIPA instance metadata update request for environment %n"), testDto.getEnvironmentCrn());
         String currentImdsVersion = testDto.getResponse().getSupportedImdsVersion();
         InstanceMetadataUpdateType targetUpdateType = StringUtils.equals(currentImdsVersion, ImdsConstants.AWS_IMDS_VERSION_V2) ?
                 IMDS_HTTP_TOKEN_OPTIONAL : IMDS_HTTP_TOKEN_REQUIRED;
         String imageImdsVersion = testDto.getResponse().getImage().getImdsVersion();
         if (IMDS_HTTP_TOKEN_REQUIRED.equals(targetUpdateType) && !StringUtils.equals(imageImdsVersion, ImdsConstants.AWS_IMDS_VERSION_V2)) {
-            Log.whenJson(LOGGER, format(" FreeIPA image is not compatible regarding environment: %n"), environmentCrn);
+            Log.whenJson(LOGGER, format(" FreeIPA image is not compatible regarding environment: %n"), testDto.getEnvironmentCrn());
             return testDto;
         }
         InstanceMetadataUpdateRequest request = new InstanceMetadataUpdateRequest();
-        request.setEnvironmentCrn(environmentCrn);
+        request.setEnvironmentCrn(testDto.getEnvironmentCrn());
         request.setUpdateType(targetUpdateType);
         FlowIdentifier flowIdentifier = client.getDefaultClient().getFreeIpaV1Endpoint().instanceMetadataUpdate(request);
         testDto.setFlow("FreeIPA instance metadata update",  flowIdentifier);
-        Log.whenJson(LOGGER, format(" FreeIPA instance metadata update: %n"), environmentCrn);
+        Log.whenJson(LOGGER, format(" FreeIPA instance metadata update: %n"), testDto.getEnvironmentCrn());
         return testDto;
     }
 }

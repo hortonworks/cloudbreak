@@ -200,8 +200,6 @@ integrationtest:
       fileSystemType: S3
     hybridCloudSecurityGroupID: sg-02bf7840fc64073fa
     freeipa:
-      instanceType: m5.large
-      arm64InstanceType: r7gd.large
       upgrade:
         imageId: ee52a28a-7551-4f56-8b08-a23f155316ba
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
@@ -283,8 +281,6 @@ integrationtest:
         catalog:
           url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-freeipa-image-catalog.json
     freeipa:
-      instanceType: Standard_D8s_v3
-      arm64InstanceType:
       upgrade:
         imageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
@@ -358,8 +354,6 @@ integrationtest:
       gcs:
         serviceAccountEmail:
     freeipa:
-      instanceType: e2-standard-2
-      arm64InstanceType:
       upgrade:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json

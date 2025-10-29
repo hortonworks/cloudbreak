@@ -91,7 +91,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         testContext.as(L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createRecipeAndApplyOnFreeIpaAndMasterNodes(testContext);
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         createDatalakeWithoutDatabase(testContext);
     }
 

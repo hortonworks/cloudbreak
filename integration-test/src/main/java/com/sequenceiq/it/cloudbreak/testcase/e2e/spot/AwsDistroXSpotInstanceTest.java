@@ -37,7 +37,7 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         createDatalakeWithoutDatabase(testContext);
     }
 

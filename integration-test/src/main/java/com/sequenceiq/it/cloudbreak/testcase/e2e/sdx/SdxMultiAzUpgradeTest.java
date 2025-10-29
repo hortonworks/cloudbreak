@@ -66,7 +66,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
     )
     public void testSDXMultiAzUpgrade(TestContext testContext) {
         Pair<String, String> osUpgradePair = testUpgradeCandidateProvider.getOsUpgradeSourceAndCandidate(testContext);
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         String sdx = resourcePropertyProvider().getName();
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();

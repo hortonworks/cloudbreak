@@ -304,7 +304,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     private InstanceTemplateRequest mapInstanceTemplateRequest(InstanceGroupV4Request request) {
         InstanceTemplateRequest template = new InstanceTemplateRequest();
-        template.setInstanceType(getCloudProvider().getFreeIpaInstanceType());
+        template.setInstanceType(request.getTemplate().getInstanceType());
         template.setAttachedVolumes(request.getTemplate().getAttachedVolumes()
                 .stream()
                 .map(volreq -> {

@@ -564,9 +564,4 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public String getFreeIpaRebuildDataBackup() {
         return awsProperties.getFreeipa().getRebuild().getDatabackup();
     }
-
-    @Override
-    public String getFreeIpaInstanceType() {
-        return awsProperties.getFreeipa().getInstanceType();
-    }
 }

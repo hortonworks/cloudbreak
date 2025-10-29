@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -14,9 +13,6 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
@@ -32,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -62,17 +59,14 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        initializeTest(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak, and freeipa with cloudformation",
             when = "upgrade ",
             then = "migration happens into native")
     public void testSDXUpgradeToMigrate(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+        String subnet = awsCloudProvider.getSubnetId();
         String sdx = resourcePropertyProvider().getName();
 
         List<String> actualVolumeIds = new ArrayList<>();
@@ -82,24 +76,22 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .getCurrentRuntimeVersion(testContext.getCloudProvider().getGovCloud());
         String blueprintName = commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion);
 
-
-        EnvironmentNetworkRequest network = new EnvironmentNetworkRequest();
-        EnvironmentNetworkAwsParams params = new EnvironmentNetworkAwsParams();
-        network.setAws(params);
-        params.setVpcId(awsCloudProvider.getVpcId());
-        String subnet = awsCloudProvider.getSubnetId();
-        network.setSubnetIds(Set.of(subnet));
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
-                .withNetwork(network)
-                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs();
+        FreeIpaTestDto freeipa = testContext.given(freeIpa, FreeIpaTestDto.class)
+                .withNetwork(getNetworkRequest())
+                .withTelemetry("telemetry")
+                .withVariant(AWS)
+                .withUpgradeCatalogAndImage();
+        modifyFreeipaDtoToSingleSubnet(subnet, freeipa);
+        freeipa.when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .given(ClusterTestDto.class)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE);
-        SdxInternalTestDto sdxDto = testContext.given(sdx, SdxInternalTestDto.class)
+        SdxInternalTestDto sdxDto = freeipa.given(sdx, SdxInternalTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(runtimeVersion)
                 .withVariant(AWS)
