@@ -249,7 +249,7 @@ class SdxControllerTest {
     @Test
     void getTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(anyString(), anyString())).thenReturn(sdxCluster);
 
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
@@ -270,7 +270,7 @@ class SdxControllerTest {
     @Test
     void changeImageCatalogTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(any(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(any(), anyString())).thenReturn(sdxCluster);
 
         SdxChangeImageCatalogRequest request = new SdxChangeImageCatalogRequest();
         request.setImageCatalog("image-catalog");
@@ -303,7 +303,7 @@ class SdxControllerTest {
     @Test
     void enableRangerRazByNameTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(anyString(), anyString())).thenReturn(sdxCluster);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableRangerRazByName(sdxCluster.getName()));
 
@@ -336,11 +336,11 @@ class SdxControllerTest {
         SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME,
                 BackupOperationType.ANY);
         when(storageValidationService.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null)).thenReturn(validationResult);
-        when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
 
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
 
-        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
+        verify(sdxService, times(1)).getByNameInAccountAllowDetached(USER_CRN, SDX_CLUSTER_NAME);
         verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         assertEquals(ValidationResult.State.VALID, result.getState());
     }
@@ -355,11 +355,11 @@ class SdxControllerTest {
         SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME,
                 BackupOperationType.ANY, BACKUP_LOCATION);
         when(storageValidationService.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION)).thenReturn(validationResult);
-        when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
 
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
 
-        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
+        verify(sdxService, times(1)).getByNameInAccountAllowDetached(USER_CRN, SDX_CLUSTER_NAME);
         verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         assertEquals(ValidationResult.State.VALID, result.getState());
     }
@@ -386,13 +386,13 @@ class SdxControllerTest {
         diskUpdateRequest.setVolumeType("gp2");
 
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, "TEST")).thenReturn(sdxCluster);
         when(verticalScaleService.updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.diskUpdateByName("TEST", diskUpdateRequest));
 
-        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(sdxService, times(1)).getByNameInAccountAllowDetached(USER_CRN, "TEST");
         verify(verticalScaleService, times(1)).updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
@@ -428,14 +428,14 @@ class SdxControllerTest {
         stackAddVolumesRequest.setNumberOfDisks(2L);
 
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, "TEST")).thenReturn(sdxCluster);
         when(verticalScaleService.addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.addVolumesByStackName("TEST",
                 stackAddVolumesRequest));
 
-        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(sdxService, times(1)).getByNameInAccountAllowDetached(USER_CRN, "TEST");
         verify(verticalScaleService, times(1)).addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
@@ -498,14 +498,14 @@ class SdxControllerTest {
         diskUpdateRequest.setDiskType(DiskType.ROOT_DISK);
 
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, "TEST")).thenReturn(sdxCluster);
         when(verticalScaleService.updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> sdxController.updateRootVolumeByDatalakeName("TEST", diskUpdateRequest));
 
-        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(sdxService, times(1)).getByNameInAccountAllowDetached(USER_CRN, "TEST");
         verify(verticalScaleService, times(1)).updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
@@ -550,7 +550,7 @@ class SdxControllerTest {
         sdxCluster.setAccountId("accountId");
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxService", sdxService);
-        when(sdxService.getByNameInAccount(any(), eq("TEST"))).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(any(), eq("TEST"))).thenReturn(sdxCluster);
         StackV4Response stackV4Response = mock(StackV4Response.class);
         Set<String> entries = Set.of();
         when(stackService.getDetailWithResources("TEST", entries, "accountId")).thenReturn(stackV4Response);
@@ -602,11 +602,11 @@ class SdxControllerTest {
     @Test
     void testEnableSeLinuxByName() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, "TEST")).thenReturn(sdxCluster);
         when(seLinuxService.modifySeLinuxOnDatalake(sdxCluster, USER_CRN, SeLinux.ENFORCING))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.modifySeLinuxByName("TEST", SeLinux.ENFORCING));
-        verify(sdxService).getByNameInAccount(USER_CRN, "TEST");
+        verify(sdxService).getByNameInAccountAllowDetached(USER_CRN, "TEST");
         verify(seLinuxService).modifySeLinuxOnDatalake(sdxCluster, USER_CRN, SeLinux.ENFORCING);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());

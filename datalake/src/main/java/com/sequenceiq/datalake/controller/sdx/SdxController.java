@@ -684,7 +684,7 @@ public class SdxController implements SdxEndpoint {
 
     private SdxCluster getSdxClusterByName(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(userCrn, name);
         MDCBuilder.buildMdcContext(sdxCluster);
         return sdxCluster;
     }
