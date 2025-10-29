@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper.ZooKeeperRoles;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -44,12 +47,13 @@ public class KafkaKraftConfigProviderTest {
     }
 
     @Test
-    public void testKraftConfigDefaultWithoutKRaft() {
+    public void testKraftConfigOverridesToZookeeperWithoutKRaft() {
         cdpMainVersionIs("7.2.17");
+        List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "Zookeeper"));
         List<ApiClusterTemplateConfig> actualConfig =
-                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithoutKraft(StackType.WORKLOAD));
+                kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithZookeeper(StackType.WORKLOAD));
 
-        assertEquals(List.of(), actualConfig);
+        assertEquals(expectedConfig, actualConfig);
     }
 
     @Test
@@ -70,6 +74,43 @@ public class KafkaKraftConfigProviderTest {
         assertEquals(List.of(), actualConfig);
     }
 
+    @Test
+    public void testExceptionWhenKraftAndZookeeperIsMissing() {
+        cdpMainVersionIs("7.3.2");
+
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
+
+        when(source.getBlueprintView()).thenReturn(blueprintView);
+        Mockito.lenient().when(source.getStackType()).thenReturn(StackType.WORKLOAD);
+
+        assertThrows(CloudbreakRuntimeException.class, () -> {
+            kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, source);
+        });
+    }
+
+    @Test
+    public void testOverridesConfigToZookeeperOnWorkloadWhenKraftIsNotPresent() {
+        cdpMainVersionIs("7.3.2");
+        HostgroupView kraft = new HostgroupView("kraft", 1, InstanceGroupType.CORE, 3);
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
+
+        List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "Zookeeper"));
+        List<ApiClusterTemplateConfig> actualConfig =
+            kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithZookeeper(StackType.WORKLOAD));
+
+        assertEquals(expectedConfig, actualConfig);
+    }
+
+    @Test
+    public void testOverridesConfigToZookeeperOnDatalakeWhenKraftIsNotPresent() {
+        cdpMainVersionIs("7.3.2");
+        List<ApiClusterTemplateConfig> expectedConfig = List.of(config(KafkaConfigs.METADATA_STORE, "Zookeeper"));
+        List<ApiClusterTemplateConfig> actualConfig =
+            kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, sourceWithZookeeper(StackType.DATALAKE));
+
+        assertEquals(expectedConfig, actualConfig);
+    }
+
     private void cdpMainVersionIs(String version) {
         when(blueprintView.getProcessor()).thenReturn(processor);
         when(processor.getStackVersion()).thenReturn(version);
@@ -86,12 +127,14 @@ public class KafkaKraftConfigProviderTest {
         return source;
     }
 
-    private TemplatePreparationObject sourceWithoutKraft(StackType stackType) {
+    private TemplatePreparationObject sourceWithZookeeper(StackType stackType) {
+        HostgroupView zookeeper = new HostgroupView("zookeeper", 1, InstanceGroupType.CORE, 3);
         HostgroupView kafka = new HostgroupView("kafka", 1, InstanceGroupType.CORE, 3);
         TemplatePreparationObject source = mock(TemplatePreparationObject.class);
 
         when(source.getBlueprintView()).thenReturn(blueprintView);
         Mockito.lenient().when(source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER)).thenReturn(Stream.of(kafka));
+        Mockito.lenient().when(source.getHostGroupsWithComponent(ZooKeeperRoles.ZOOKEEPER_SERVER)).thenReturn(Stream.of(zookeeper));
         Mockito.lenient().when(source.getStackType()).thenReturn(stackType);
 
         return source;
