@@ -14,7 +14,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
-import com.sequenceiq.it.cloudbreak.mock.MockCdlRestCallExecutor;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public abstract class AbstractMockTest extends AbstractIntegrationTest {
@@ -23,9 +22,6 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     @Inject
     private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
-
-    @Inject
-    private MockCdlRestCallExecutor mockCdlRestCallExecutor;
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
@@ -59,10 +55,6 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {
         return executeQueryToMockInfrastructure;
-    }
-
-    public MockCdlRestCallExecutor getMockCdlRestCallExecutor() {
-        return mockCdlRestCallExecutor;
     }
 
     public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {

@@ -77,7 +77,6 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -611,7 +610,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result.getCustomConfigurationsView()).isPresent();
         assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
-        assertEquals(result.getDatalakeView().get().getTargetPlatform(), TargetPlatform.CDL);
         assertEquals(result.getDatalakeView().get().isRazEnabled(), false);
         assertEquals(result.getDatalakeView().get().getDatabaseType(), DatabaseType.EXTERNAL_DATABASE);
         verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);

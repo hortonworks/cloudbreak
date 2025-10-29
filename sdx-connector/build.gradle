@@ -5,7 +5,6 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
   }
 }
 
@@ -13,10 +12,7 @@ plugins {
   id "java-library"
 }
 
-apply plugin: 'com.google.protobuf'
-
 dependencies {
-  api project(':grpc-common')
   implementation     project(":datalake-api")
   implementation     project(":flow-api")
   implementation     project(":auth-connector")
@@ -54,24 +50,4 @@ dependencies {
 
 checkstyle {
   checkstyleMain.exclude '**/generated/**'
-}
-
-protobuf {
-  protoc {
-    // The version of protoc must match protobuf-java. If you don't depend on
-    // protobuf-java directly, you will be transitively depending on the
-    // protobuf-java version that grpc depends on.
-    artifact = "com.google.protobuf:protoc:$protobufVersion"
-  }
-  plugins {
-    grpc {
-      artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
-    }
-  }
-  generateProtoTasks {
-    all()*.plugins {
-      grpc { option '@generated=omit' }
-    }
-  }
-  generatedFilesBaseDir = "$projectDir/src/generated"
 }

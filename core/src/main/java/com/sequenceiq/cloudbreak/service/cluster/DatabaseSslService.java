@@ -142,22 +142,11 @@ public class DatabaseSslService {
             if (sdxBasicViewOptional.isPresent()) {
                 return switch (sdxBasicViewOptional.get().platform()) {
                     case PAAS -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
-                    case CDL -> isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicViewOptional.get());
                     case PDL -> false;
                 };
             }
         } else {
             LOGGER.debug("Stack is not a datahub cluster");
-        }
-        return false;
-    }
-
-    private boolean isSslEnforcementForCDLEmbeddedDbEnabled(SdxBasicView sdxBasicView) {
-        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(sdxBasicView.dbServerCrn())) {
-            LOGGER.info("CDL has remote database");
-        } else {
-            // see SharedServiceConfigProvider, HMS DB has always SSL disabled currently
-            LOGGER.info("SSL enforcement for embedded database of CDL is not yet supported.");
         }
         return false;
     }

@@ -106,7 +106,6 @@ class ClusterStartHandlerServiceTest {
     public static Stream<Arguments> startBasedOnSdxTargetPlatform() {
         return Stream.of(
                 Arguments.of(TargetPlatform.PAAS, true),
-                Arguments.of(TargetPlatform.CDL, false),
                 Arguments.of(TargetPlatform.PDL, true)
         );
     }

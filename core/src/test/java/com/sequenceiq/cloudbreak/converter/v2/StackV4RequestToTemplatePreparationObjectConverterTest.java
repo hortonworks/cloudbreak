@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -466,7 +465,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(source);
 
         DatalakeView datalakeView = result.getDatalakeView().get();
-        assertEquals(datalakeView.getTargetPlatform(), TargetPlatform.CDL);
         assertEquals(datalakeView.isRazEnabled(), true);
         assertEquals(datalakeView.getDatabaseType(), com.sequenceiq.cloudbreak.template.views.DatabaseType.EXTERNAL_DATABASE);
     }

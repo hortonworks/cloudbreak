@@ -89,7 +89,6 @@ public class TestClients {
             SdxClient sdxClient = createSdxClient(cloudbreakUser);
             ExternalizedComputeClusterClient externalizedComputeClusterClient = createExternalizedComputeClusterClient(cloudbreakUser);
             UmsClient umsClient = createUmsClient();
-            CdlClient cdlClient = createCdlClient();
             AuthDistributorClient authDistributorClient = createAuthDistributorClient();
             RedbeamsClient redbeamsClient = createRedbeamsClient(cloudbreakUser);
             PeriscopeClient periscopeClient = createPeriscopeClient(cloudbreakUser);
@@ -102,7 +101,6 @@ public class TestClients {
             clientMap.put(RedbeamsClient.class, redbeamsClient);
             clientMap.put(ExternalizedComputeClusterClient.class, externalizedComputeClusterClient);
             clientMap.put(UmsClient.class, umsClient);
-            clientMap.put(CdlClient.class, cdlClient);
             clientMap.put(AuthDistributorClient.class, authDistributorClient);
             clientMap.put(PeriscopeClient.class, periscopeClient);
             clientMap.put(RemoteEnvironmentClient.class, remoteEnvironmentClient);
@@ -152,10 +150,6 @@ public class TestClients {
 
     private UmsClient createUmsClient() {
         return new UmsClient(serverProperties.getUmsHost(), serverProperties.getUmsPort(), regionAwareInternalCrnGeneratorFactory);
-    }
-
-    private CdlClient createCdlClient() {
-        return new CdlClient(serverProperties.getCdlHost(), serverProperties.getCdlPort(), regionAwareInternalCrnGeneratorFactory);
     }
 
     private synchronized AuthDistributorClient createAuthDistributorClient() {

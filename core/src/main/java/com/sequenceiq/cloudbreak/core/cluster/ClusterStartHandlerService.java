@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
-import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.CDL;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,7 +59,7 @@ public class ClusterStartHandlerService {
 
     public void startCluster(Stack stack, CmTemplateProcessor blueprintProcessor, boolean datahubRefreshNeeded) throws Exception {
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
-        if (sdxBasicView.isPresent() && !CDL.equals(sdxBasicView.get().platform())) {
+        if (sdxBasicView.isPresent()) {
             // let's update config only in case of non-CDL form factor for now
             if (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()) || datahubRefreshNeeded) {
                 // refresh DH after DL resize

@@ -108,7 +108,7 @@ public class PlatformAwareSdxConnector {
         LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
         Set<String> paasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
         if (CollectionUtils.isEmpty(paasSdxCrns)) {
-            for (TargetPlatform targetPlatform : List.of(TargetPlatform.CDL, TargetPlatform.PDL)) {
+            for (TargetPlatform targetPlatform : List.of(TargetPlatform.PDL)) {
                 Set<String> sdxCrns =  platformDependentSdxDescribeServices.get(targetPlatform).listSdxCrns(environmentCrn);
                 if (!CollectionUtils.isEmpty(sdxCrns)) {
                     return sdxCrns;
