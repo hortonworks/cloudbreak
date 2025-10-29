@@ -283,6 +283,18 @@ public class TelemetryApiConverterTest {
         assertNotNull(telemetry.getWorkloadAnalytics());
     }
 
+    @Test
+    void testConvertEditWhenEnvironmentTelemetryWasNull() {
+        TelemetryRequest request = new TelemetryRequest();
+        WorkloadAnalyticsRequest workloadAnalytics = new WorkloadAnalyticsRequest();
+        workloadAnalytics.setAttributes(Map.of());
+        request.setWorkloadAnalytics(workloadAnalytics);
+
+        EnvironmentTelemetry telemetry = underTest.convertForEdit(null, request, null, null);
+
+        assertNotNull(telemetry.getWorkloadAnalytics());
+    }
+
     private AccountTelemetry getAccountTelemetry() {
         AccountTelemetry accountTelemetry = new AccountTelemetry();
         accountTelemetry.setFeatures(new Features());

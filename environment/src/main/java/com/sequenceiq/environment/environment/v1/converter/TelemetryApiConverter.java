@@ -69,6 +69,9 @@ public class TelemetryApiConverter {
     }
 
     public EnvironmentTelemetry convertForEdit(EnvironmentTelemetry telemetry, TelemetryRequest request, AccountTelemetry accountTelemetry, String accountId) {
+        if (telemetry == null) {
+            telemetry = new EnvironmentTelemetry();
+        }
         if (request != null) {
             executeTelemetryEditForFieldIfNeeded(request.getLogging(),
                     loggingRequest -> createLoggingFromRequest(loggingRequest, accountTelemetry.getEnabledSensitiveStorageLogs()), telemetry::setLogging);
