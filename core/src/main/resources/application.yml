@@ -860,6 +860,8 @@ existing-stack-patcher:
       enabled: false
     user-data-ccmv2-setup:
       enabled: true
+    embedded-db-certificate-rotation:
+      enabled: true
 
 dynamic-entitlement:
   entitlements:
