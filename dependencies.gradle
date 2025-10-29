@@ -76,7 +76,7 @@ ext {
   nimbusJoseJwt = '10.1'
   jacksonVersion = '2.19.2'
   jsonSmartVersion = '2.4.9'
-  snakeYamlVersion = '2.4'
+  snakeYamlVersion = '2.5'
   xerces = '2.12.2'
   jacksonDatabindNullable = "0.2.8"
 
