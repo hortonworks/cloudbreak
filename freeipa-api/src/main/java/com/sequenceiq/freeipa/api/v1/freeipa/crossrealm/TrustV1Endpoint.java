@@ -47,7 +47,7 @@ public interface TrustV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.SETUP_FINISH_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "finishCrossRealmTrustV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
-    FinishSetupCrossRealmTrustResponse finishSetup(@Valid FinishSetupCrossRealmTrustRequest request);
+    FinishSetupCrossRealmTrustResponse finishSetup(@Valid FinishSetupCrossRealmTrustRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("/trust_setup_commands")

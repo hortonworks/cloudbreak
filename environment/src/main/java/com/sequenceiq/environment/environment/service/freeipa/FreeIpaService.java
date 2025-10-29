@@ -291,7 +291,7 @@ public class FreeIpaService {
         try {
             LOGGER.debug("Calling FreeIPA cross realm trust finish for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> trustV1Endpoint.finishSetup(finishCrossRealmTrustRequest));
+                    initiatorUserCrn -> trustV1Endpoint.finishSetup(finishCrossRealmTrustRequest, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to finish cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
