@@ -117,6 +117,54 @@ class MeteringV2ConfigProviderTest {
     }
 
     @Test
+    void getAdditionalServicesForDatalakeHMSScaleOutGroup() {
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
+
+        // Setup TemplatePreparationObject to be a datalake with the right CM/CDH Version
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        ClouderaManagerRepo cm = new ClouderaManagerRepo();
+        cm.setVersion(CLOUDERAMANAGER_VERSION_7_13_1_300.getVersion());
+        ProductDetailsView productDetailsView = new ProductDetailsView(cm, null);
+        when(templatePreparationObject.getProductDetailsView()).thenReturn(productDetailsView);
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(CLOUDERA_STACK_VERSION_7_3_1.getVersion()));
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+
+        // Setting group type to CORE to make sure that the hostgroup name is evaluated.
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("hms_scale_out", 0, InstanceGroupType.CORE, 1)));
+        Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
+
+        assertFalse(additionalServices.isEmpty());
+    }
+
+    @Test
+    void getAdditionalServicesForDatalakeNonHMSScaleOutGroup() {
+        ApiClusterTemplateService apiClusterTemplateService = mock(ApiClusterTemplateService.class);
+        when(altusDatabusConfiguration.getAltusDatabusEndpoint()).thenReturn("endpoint");
+
+        // Setup TemplatePreparationObject to be a datalake with the right CM/CDH Version
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        ClouderaManagerRepo cm = new ClouderaManagerRepo();
+        cm.setVersion(CLOUDERAMANAGER_VERSION_7_13_1_300.getVersion());
+        ProductDetailsView productDetailsView = new ProductDetailsView(cm, null);
+        when(templatePreparationObject.getProductDetailsView()).thenReturn(productDetailsView);
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(CLOUDERA_STACK_VERSION_7_3_1.getVersion()));
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getProcessor()).thenReturn(blueprintTextProcessor);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+
+        // Create a raz scale out group.
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("raz_scale_out", 0, InstanceGroupType.CORE, 1)));
+        Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
+
+        assertTrue(additionalServices.isEmpty());
+    }
+
+    @Test
     void testDbusHostName() {
         String expectedHost = "dbusapi.sigma-dev.cloudera.com";
 

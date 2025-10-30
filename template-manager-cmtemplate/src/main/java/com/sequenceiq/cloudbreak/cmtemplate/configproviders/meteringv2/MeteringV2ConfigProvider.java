@@ -38,11 +38,14 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(MeteringV2ConfigProvider.class);
+
+    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of(InstanceGroupName.HMS_SCALE_OUT.getName());
 
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
@@ -106,7 +109,8 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
             ApiClusterTemplateService meteringv2Settings = stubMeteringV2Settings();
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
-                    .filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
+                    .filter(hg ->
+                            (InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()) || ADDITIONAL_SERVICE_HOSTGROUPS.contains(hg.getName().toLowerCase())))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> meteringv2Settings));
         }
         return Map.of();
