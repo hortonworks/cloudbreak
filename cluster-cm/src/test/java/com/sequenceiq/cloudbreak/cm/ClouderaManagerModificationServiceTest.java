@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.FLINK;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_1_500;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
@@ -181,6 +182,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ServicesResourceApi servicesResourceApi;
+
+    @Mock
+    private HostsResourceApi hostsResourceApi;
 
     @Mock
     private ParcelResourceApi parcelResourceApi;
@@ -794,6 +798,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
         BigDecimal apiCommandId = new BigDecimal(200);
+        when(stack.getJavaVersion()).thenReturn(17);
 
         // Mgmt Service restart
         ApiCommandList apiCommandList = new ApiCommandList();
@@ -824,7 +829,6 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
         Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
 
         underTest.upgradeClusterRuntime(products, true, Optional.empty(), false);
@@ -872,6 +876,7 @@ class ClouderaManagerModificationServiceTest {
         when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
         when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+        when(stack.getJavaVersion()).thenReturn(17);
 
         // Start services if they are not running
         ApiServiceList serviceList = new ApiServiceList();
@@ -933,6 +938,7 @@ class ClouderaManagerModificationServiceTest {
         verify(hostResourceApi, times(1)).addTags(eq(HOSTNAME), entityTagListCaptor.capture());
         assertEquals("_cldr_cm_host_template_name", entityTagListCaptor.getValue().get(0).getName());
         assertEquals(GROUP_NAME, entityTagListCaptor.getValue().get(0).getValue());
+        verify(hostsResourceApi, times(0)).reallocateMemory(any());
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService,
                 clustersResourceApi, clouderaManagerUpgradeService, clouderaManagerApiClientProvider, clouderaManagerRestartService);
@@ -960,7 +966,12 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
+        ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname(HOSTNAME)));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenReturn(clusterHostsRef);
+        setUpReadHosts(false);
         BigDecimal apiCommandId = new BigDecimal(200);
+        when(stack.getJavaVersion()).thenReturn(17);
 
         // Mgmt Service restart
         ApiCommandList apiCommandList = new ApiCommandList();
@@ -982,13 +993,13 @@ class ClouderaManagerModificationServiceTest {
         // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_13_1_500.getVersion());
 
         // Restart services
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_13_1_500.getVersion());
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
         Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
@@ -1010,6 +1021,10 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerUpgradeService, times(1)).callPostRuntimeUpgradeCommand(clustersResourceApi, stack, v31Client);
         verify(clustersResourceApi, times(0)).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
+
+        ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        verify(hostsResourceApi, times(1)).reallocateMemory(apiHostNameListArgumentCaptor.capture());
+        assertEquals("original", apiHostNameListArgumentCaptor.getValue().getItems().getFirst());
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
                 clouderaManagerApiClientProvider, clouderaManagerUpgradeService);
@@ -1033,6 +1048,10 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
+        ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname(HOSTNAME)));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenReturn(clusterHostsRef);
+        setUpReadHosts(false);
 
         BigDecimal apiCommandId = new BigDecimal(200);
         // Mgmt Service restart
@@ -1041,6 +1060,7 @@ class ClouderaManagerModificationServiceTest {
         when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
         when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+        when(stack.getJavaVersion()).thenReturn(17);
 
         ApiService apiService = new ApiService()
                 .name("SERVICE")
@@ -1063,7 +1083,7 @@ class ClouderaManagerModificationServiceTest {
                 .thenReturn(success);
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_13_1_500.getVersion());
         Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
         Set<ClouderaManagerProduct> nonCdhProduct = Set.of(TestUtil.nonCdhProduct());
         when(clouderaManagerProductsProvider.getNonCdhProducts(products)).thenReturn(nonCdhProduct);

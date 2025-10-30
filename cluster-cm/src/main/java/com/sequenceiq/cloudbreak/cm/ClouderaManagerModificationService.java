@@ -121,6 +121,8 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 @Scope("prototype")
 public class ClouderaManagerModificationService implements ClusterModificationService {
 
+    public static final Integer JAVA_17 = 17;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerModificationService.class);
 
     private static final Boolean START_ROLES_ON_UPSCALED_NODES = Boolean.TRUE;
@@ -357,6 +359,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             disableKnoxAutorestart(rollingUpgradeEnabled);
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
             updateParcelSettings(products);
+            if (JAVA_17.equals(stack.getStack().getJavaVersion())) {
+                reallocateMemory();
+            }
             restartMgmtServices();
             addFlinkServiceConfigurationIfNecessary(products);
             downloadParcels(products, parcelResourceApi, parcelsResourceApi);
@@ -630,7 +635,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void reallocateMemory() throws Exception {
+    public void reallocateMemory() {
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
         if (CMRepositoryVersionUtil.isMemoryRelocationSupported(clouderaManagerRepoDetails.getVersion())) {
             try {

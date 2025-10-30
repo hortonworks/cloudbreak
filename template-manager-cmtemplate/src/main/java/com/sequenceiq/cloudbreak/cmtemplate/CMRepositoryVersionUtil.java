@@ -82,7 +82,7 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1_300 = () -> "7.13.1.300";
 
-    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1_600 = () -> "7.13.1.600";
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_13_1_500 = () -> "7.13.1.500";
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_13_2_0 = () -> "7.13.2.0";
 
@@ -283,7 +283,7 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isMemoryRelocationSupported(String cmVersion) {
-        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1_600);
+        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_1_500);
     }
 
     public static boolean isDataSharingConfigurationSupported(String cmVersion, String cdhVersion) {
