@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
@@ -100,6 +101,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
@@ -179,6 +181,9 @@ class StackOperationServiceTest {
 
     @Mock
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
+
+    @Mock
+    private KraftMigrationService kraftMigrationService;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -803,5 +808,17 @@ class StackOperationServiceTest {
         assertThrows(BadRequestException.class, () -> underTest.triggerZookeeperToKraftMigrationRollback(nameOrCrn, "accountId"));
 
         verifyNoInteractions(flowManager);
+    }
+
+    @Test
+    public void testGetKraftMigrationStatus() {
+        StackDto stack = mock(StackDto.class);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        FlowLogResponse flowLogResponse = mock(FlowLogResponse.class);
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+
+        underTest.getKraftMigrationStatus(nameOrCrn, "accountId", List.of(flowLogResponse));
+
+        verify(kraftMigrationService).getKraftMigrationStatus(stack, List.of(flowLogResponse));
     }
 }

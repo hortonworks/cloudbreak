@@ -302,6 +302,11 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
+    public List<FlowLog> findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(Long id, List<ClassValue> flowTypes) {
+        return flowLogRepository.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(id, flowTypes);
+    }
+
+    @Override
     public Optional<FlowLog> getLastFlowLog(Long resourceId) {
         return flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(resourceId);
     }
@@ -376,6 +381,11 @@ public class FlowLogDBService implements FlowLogService {
     public List<FlowLog> getAllFlowLogsByResourceCrnOrName(String resource) {
         Long resourceId = getResourceIdByCrnOrName(resource);
         return findAllByResourceIdOrderByCreatedDesc(resourceId);
+    }
+
+    public List<FlowLog> getAllFlowLogsByResourceCrnOrNameAndFlowTypes(String resource, List<ClassValue> flowTypes) {
+        Long resourceId = getResourceIdByCrnOrName(resource);
+        return findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(resourceId, flowTypes);
     }
 
     public Set<String> getFlowIdsByChainIds(Set<String> flowChainIds) {

@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
@@ -40,6 +41,8 @@ public interface FlowLogService {
     Optional<FlowLogWithoutPayload> getLastFlowLog(String flowId);
 
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
+
+    List<FlowLog> findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(Long id, List<ClassValue> flowTypes);
 
     void cancelTooOldTerminationFlowForResource(Long resourceId, long olderThan);
 

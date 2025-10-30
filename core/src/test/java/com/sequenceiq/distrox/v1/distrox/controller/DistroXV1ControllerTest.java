@@ -347,40 +347,4 @@ class DistroXV1ControllerTest {
         });
         verify(stackOperationService).triggerModifySELinux(NameOrCrn.ofCrn(CRN), "accountId", SeLinux.ENFORCING);
     }
-
-    @Test
-    void testMigrateZookeeperToKraftByCrn() {
-        doAs(TEST_USER_CRN, () -> {
-            try {
-                distroXV1Controller.migrateFromZookeeperToKraftByCrn(CRN);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        verify(stackOperationService).triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(CRN), "accountId");
-    }
-
-    @Test
-    void testFinalizeMigrationFromZookeeperToKraftByCrn() {
-        doAs(TEST_USER_CRN, () -> {
-            try {
-                distroXV1Controller.finalizeMigrationFromZookeeperToKraftByCrn(CRN);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        verify(stackOperationService).triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(CRN), "accountId");
-    }
-
-    @Test
-    void testRollbackMigrationFromZookeeperToKraftByCrn() {
-        doAs(TEST_USER_CRN, () -> {
-            try {
-                distroXV1Controller.rollbackMigrationFromZookeeperToKraftByCrn(CRN);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        verify(stackOperationService).triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(CRN), "accountId");
-    }
 }

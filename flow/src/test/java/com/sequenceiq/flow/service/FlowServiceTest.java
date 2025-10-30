@@ -4,6 +4,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -235,6 +236,16 @@ public class FlowServiceTest {
         underTest.getFlowLogsByResourceCrn(Crn.fromString(STACK_CRN).toString());
 
         verify(flowLogDBService).getFlowLogsByResourceCrnOrName(anyString());
+        verify(flowLogConverter).convert(any());
+    }
+
+    @Test
+    void testGetAllFlowLogsByResourceCrnAndFlowTypes() {
+        when(flowLogDBService.getAllFlowLogsByResourceCrnOrNameAndFlowTypes(anyString(), anyList())).thenReturn(List.of(new FlowLog()));
+
+        underTest.getAllFlowLogsByResourceCrnAndFlowTypes(Crn.fromString(STACK_CRN).toString(), Collections.emptyList());
+
+        verify(flowLogDBService).getAllFlowLogsByResourceCrnOrNameAndFlowTypes(anyString(), anyList());
         verify(flowLogConverter).convert(any());
     }
 

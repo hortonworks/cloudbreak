@@ -214,6 +214,8 @@ public interface ClusterApi {
 
     ClusterStatusService clusterStatusService();
 
+    ClusterKraftMigrationStatusService clusterKraftMigrationStatusService();
+
     ClusterDecomissionService clusterDecomissionService();
 
     ClusterCommissionService clusterCommissionService();

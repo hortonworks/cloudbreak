@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
@@ -93,8 +94,10 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
@@ -182,6 +185,9 @@ public class StackOperationService {
 
     @Inject
     private UpdatePublicDnsEntriesInPemValidator updatePublicDnsEntriesInPemValidator;
+
+    @Inject
+    private KraftMigrationService kraftMigrationService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -583,6 +589,11 @@ public class StackOperationService {
         MDCBuilder.buildMdcContext(stack);
         zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigrationRollback(stack.getId());
+    }
+
+    public KraftMigrationStatusResponse getKraftMigrationStatus(NameOrCrn name, String accountId, List<FlowLogResponse> flowLogResponseList) {
+        StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
+        return kraftMigrationService.getKraftMigrationStatus(stack, flowLogResponseList);
     }
 
     public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request,

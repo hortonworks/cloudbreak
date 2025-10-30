@@ -55,6 +55,7 @@ import com.sequenceiq.distrox.v1.distrox.controller.DistroXCO2V1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXCostV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXDatabaseServerV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXKraftMigrationV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1EventController;
@@ -91,6 +92,7 @@ public class EndpointConfig extends ResourceConfig {
             CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class,
             DistroXV1RotationController.class,
+            DistroXKraftMigrationV1Controller.class,
             DistroXInternalV1Controller.class,
             DatalakeV4Controller.class,
             DiskUpdateController.class,

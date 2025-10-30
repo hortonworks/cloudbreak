@@ -49,6 +49,14 @@ public class ZookeeperToKraftMigrationValidator {
         }
     }
 
+    public boolean isMigrationFromZookeeperToKraftSupported(StackDto stack, String accountId) {
+        boolean clusterAvailable = stack.getStatus().isAvailable();
+        boolean kraftMigrationEntitlementEnabled = entitlementService.isZookeeperToKRaftMigrationEnabled(accountId);
+
+        return clusterAvailable && hasStreamsMessagingTemplateType(stack) && isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())
+                && kraftMigrationEntitlementEnabled;
+    }
+
     private boolean isZookeeperToKRaftMigrationSupportedForStackVersion(String version) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION) >= 0;

@@ -130,6 +130,14 @@ public class FlowService {
         return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
+    public List<FlowLogResponse> getAllFlowLogsByResourceCrnAndFlowTypes(String resourceCrn, List<ClassValue> flowTypes) {
+        checkState(Crn.isCrn(resourceCrn));
+        List<String> flowTypeNames = flowTypes.stream().map(ClassValue::getSimpleName).toList();
+        LOGGER.info("Getting all flow logs by resource crn {} and flow types: {}", resourceCrn, String.join(", ", flowTypeNames));
+        List<FlowLog> flowLogs = flowLogDBService.getAllFlowLogsByResourceCrnOrNameAndFlowTypes(resourceCrn, flowTypes);
+        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
+    }
+
     public List<FlowLogResponse> getFlowLogsByResourceName(String resourceName) {
         checkState(!Crn.isCrn(resourceName));
         LOGGER.info("Getting flow logs by resource name {}", resourceName);

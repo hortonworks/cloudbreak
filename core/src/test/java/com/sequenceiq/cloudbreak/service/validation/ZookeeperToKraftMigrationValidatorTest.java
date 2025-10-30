@@ -5,16 +5,21 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +42,8 @@ class ZookeeperToKraftMigrationValidatorTest {
     private static final String HIGHER_VERSION = "7.4.0";
 
     private static final String LOWER_VERSION = "7.3.1";
+
+    private static final String INVALID_TEMPLATE = "Streaming Light Duty";
 
     private static final String STREAMS_MESSAGING_LIGHT_DUTY = "Streams Messaging Light Duty";
 
@@ -113,8 +120,6 @@ class ZookeeperToKraftMigrationValidatorTest {
         assertThat(message, containsString("Streams Messaging High Availability"));
         assertThat(message, containsString("Streams Messaging Light Duty"));
         assertThat(message, containsString("Streams Messaging Heavy Duty"));
-
-
     }
 
     @Test
@@ -155,6 +160,39 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
         assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+    }
+
+    @Test
+    void testIsMigrationFromZookeeperToKraftSupported() {
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getName()).thenReturn(STREAMS_MESSAGING_HIGH_AVAILABILITY);
+        when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        assertTrue(underTest.isMigrationFromZookeeperToKraftSupported(stack, ACCOUNT_ID));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testIsMigrationFromZookeeperToKraftNotSupportedParameters")
+    void testIsMigrationFromZookeeperToKraftNotSupported() {
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getName()).thenReturn(STREAMS_MESSAGING_HIGH_AVAILABILITY);
+        when(stack.getStackVersion()).thenReturn(VALID_VERSION);
+        when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        assertFalse(underTest.isMigrationFromZookeeperToKraftSupported(stack, ACCOUNT_ID));
+    }
+
+    private static Stream<Arguments> testIsMigrationFromZookeeperToKraftNotSupportedParameters() {
+        return Stream.of(
+                Arguments.of(false, INVALID_TEMPLATE, LOWER_VERSION, false),
+                Arguments.of(true, STREAMS_MESSAGING_LIGHT_DUTY, VALID_VERSION, false),
+                Arguments.of(true, STREAMS_MESSAGING_LIGHT_DUTY, LOWER_VERSION, true),
+                Arguments.of(true, INVALID_TEMPLATE, VALID_VERSION, true),
+                Arguments.of(false, STREAMS_MESSAGING_LIGHT_DUTY, VALID_VERSION, true)
+        );
     }
 
     private void initGlobalPrivateFields() {

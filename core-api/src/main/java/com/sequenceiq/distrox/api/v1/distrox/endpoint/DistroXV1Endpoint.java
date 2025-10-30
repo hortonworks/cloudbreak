@@ -871,27 +871,6 @@ public interface DistroXV1Endpoint {
             @QueryParam("force") @DefaultValue("false") boolean force);
 
     @PUT
-    @Path("crn/{crn}/migrate_from_zookeeper_to_kraft")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Initiate the migration from Zookeeper to KRaft broker in Kafka.", operationId = "migrateFromZookeeperToKraftByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier migrateFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
-
-    @PUT
-    @Path("crn/{crn}/finalize_zookeeper_to_kraft_migration")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Finalize the migration from Zookeeper to KRaft broker in Kafka.", operationId = "finalizeMigrationFromZookeeperToKraftByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
-
-    @PUT
-    @Path("crn/{crn}/rollback_zookeeper_to_kraft_migration")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Rollback the migration from Zookeeper to KRaft broker in Kafka.", operationId = "rollbackMigrationFromZookeeperToKraftByCrn",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
-
-    @PUT
     @Path("name/{name}/update_dns_entries")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update the public DNS entries of the cluster by name",

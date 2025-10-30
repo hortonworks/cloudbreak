@@ -7,10 +7,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.MIGRATE_ZOOKEEPER_TO_KRAFT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.RECOVER_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
@@ -931,24 +928,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public FlowIdentifier triggerSkuMigrationByCrn(@ResourceCrn String crn, boolean force) {
         return stackOperationService.triggerSkuMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), force);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT)
-    public FlowIdentifier migrateFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
-        return stackOperationService.triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION)
-    public FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
-        return stackOperationService.triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION)
-    public FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
-        return stackOperationService.triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
