@@ -145,7 +145,7 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
             return Pair.of(user.getSecret(), password.getSecret());
         } else if (!user.isRotation() && !password.isRotation()) {
             String newUser = getDefaultUserName(rdsConfig) + new SimpleDateFormat("ddMMyyHHmmss").format(new Date());
-            String newPassword = PasswordUtil.generateCmAndPostgresConformPassword();
+            String newPassword = PasswordUtil.generatePassword();
             return Pair.of(newUser, newPassword);
         } else {
             throw new CloudbreakServiceException("Only one of secret is under rotation from user and password, which is unexpected.");
