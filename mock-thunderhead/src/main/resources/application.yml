@@ -112,6 +112,7 @@ auth:
     rhel9.enabled: true
     rhel9.preferred: false
     verticalscale.ha.enabled: false
+    cloudprivatelinks.enabled: true
 crn:
   partition: cdp
   region: us-west-1

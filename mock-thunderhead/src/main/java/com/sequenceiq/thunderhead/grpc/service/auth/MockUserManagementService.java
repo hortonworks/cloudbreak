@@ -71,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PREFER_RHEL9_IMAGES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PRIVATELINKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
@@ -606,6 +607,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datalake.upgrade.recovery.enabled}")
     private boolean datalakeUpgradeRecoveryEnabled;
 
+    @Value("${auth.mock.cloudprivatelinks.enabled}")
+    private boolean cloudprivatelinksEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1134,6 +1138,11 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (datalakeUpgradeRecoveryEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_UPGRADE_RECOVERY));
         }
+
+        if (cloudprivatelinksEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_PRIVATELINKS));
+        }
+
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
