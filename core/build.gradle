@@ -135,7 +135,7 @@ dependencyManagement {
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
-    dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '2.0.1'
+    dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '2.0.2'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: springRetryVersion
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
@@ -198,7 +198,7 @@ dependencies {
 
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonVersion
-  implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '2.0.1'
+  implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '2.0.2'
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.40.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
 
