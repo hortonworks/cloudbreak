@@ -366,7 +366,6 @@ public class StackOperationService {
         }
 
         StackView stack = stackDto.getStack();
-        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
                 updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
