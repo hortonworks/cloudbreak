@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
+import com.sequenceiq.freeipa.service.image.ImageCatalogException;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -50,7 +51,7 @@ public class AvailabilityChecker {
                 LOGGER.warn("Image not found");
                 return false;
             }
-        } catch (ImageNotFoundException e) {
+        } catch (ImageNotFoundException | ImageCatalogException e) {
             LOGGER.warn("Image not found", e);
             return false;
         }
