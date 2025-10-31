@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import static com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer.isRemoteDatabaseRequested;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -133,7 +135,7 @@ public abstract class AbstractRdsConfigProvider {
 
     private void addRemoteDbToConfigIfNeeded(StackDto stackDto, Map<String, Object> postgres) {
         String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
-        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
+        if (isRemoteDatabaseRequested(databaseServerCrn)) {
             DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
             postgres.put("remote_db_url", dbServerResponse.getHost());
             postgres.put("remote_db_port", dbServerResponse.getPort());
@@ -160,7 +162,7 @@ public abstract class AbstractRdsConfigProvider {
         if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
-            if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            if (isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {
@@ -188,7 +190,7 @@ public abstract class AbstractRdsConfigProvider {
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             StackView stack = stackDto.getStack();
-            if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            if (isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {

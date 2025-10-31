@@ -25,6 +25,7 @@ public enum DatabaseType {
     PROFILER_AGENT,
     PROFILER_METRIC,
     NIFIREGISTRY,
+    DATAVIZ,
     EFM,
     KNOX_GATEWAY,
     SQL_STREAM_BUILDER_ADMIN,
