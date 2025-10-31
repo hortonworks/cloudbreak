@@ -23,6 +23,7 @@ import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVEN
 import static com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationFlowEvent.DATALAKE_SKU_MIGRATION_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
+import static com.sequenceiq.datalake.flow.update.publicdns.DatalakeUpdatePublicDnsEntriesFlowEvent.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
@@ -89,6 +90,7 @@ import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateTriggerEvent;
 import com.sequenceiq.datalake.flow.sku.DataLakeSkuMigrationTriggerEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
+import com.sequenceiq.datalake.flow.update.publicdns.DatalakeUpdatePublicDnsEntriesTriggerEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
@@ -473,5 +475,13 @@ public class SdxReactorFlowManager {
         DataLakeSkuMigrationTriggerEvent dataLakeSkuMigrationTriggerEvent =
                 new DataLakeSkuMigrationTriggerEvent(DATALAKE_SKU_MIGRATION_EVENT.event(), cluster.getId(), initiatorUserCrn, force);
         return notify(dataLakeSkuMigrationTriggerEvent.selector(), dataLakeSkuMigrationTriggerEvent, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerUpdatePublicDnsEntries(SdxCluster cluster) {
+        LOGGER.info("Trigger update of public DNS entries on Datalake for: {}", cluster);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        DatalakeUpdatePublicDnsEntriesTriggerEvent datalakeUpdatePublicDnsEntriesTriggerEvent =
+                new DatalakeUpdatePublicDnsEntriesTriggerEvent(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_EVENT.event(), cluster.getId(), initiatorUserCrn);
+        return notify(datalakeUpdatePublicDnsEntriesTriggerEvent.selector(), datalakeUpdatePublicDnsEntriesTriggerEvent, cluster.getClusterName());
     }
 }

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -208,4 +209,29 @@ public class CloudbreakStackServiceTest {
                 .hasMessage("Could not launch instance metadata update in core, reason: " + ERROR_MSG);
     }
 
+    @Test
+    void testUpdatePublicDnsEntriesSuccess() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "1");
+        when(stackV4Endpoint.updatePublicDnsEntriesByCrn(any(), any(), any())).thenReturn(flowIdentifier);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updatePublicDnsEntries(sdxCluster));
+
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+    }
+
+    @Test
+    void testUpdatePublicDnsEntriesFailure() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        when(stackV4Endpoint.updatePublicDnsEntriesByCrn(any(), any(), any())).thenThrow(new WebApplicationException(ERROR_MSG));
+        when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updatePublicDnsEntries(sdxCluster)))
+                .isInstanceOf(CloudbreakServiceException.class)
+                .hasCauseInstanceOf(WebApplicationException.class)
+                .hasRootCauseMessage(ERROR_MSG)
+                .hasMessage("Could not update public DNS entries in core, reason: " + ERROR_MSG);
+
+        verifyNoInteractions(cloudbreakFlowService);
+    }
 }

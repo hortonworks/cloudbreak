@@ -612,5 +612,21 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier triggerSkuMigrationByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
             @QueryParam("force") @DefaultValue("false") boolean force);
+
+    @PUT
+    @Path("name/{name}/update_dns_entries")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the public DNS entries of the Data Lake by name",
+            operationId = "updateDataLakePublicDnsEntriesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updatePublicDnsEntriesByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/update_dns_entries")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the public DNS entries of the Data Lake by CRN",
+            operationId = "updateDataLakePublicDnsEntriesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updatePublicDnsEntriesByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 }
 

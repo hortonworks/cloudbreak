@@ -768,4 +768,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier modifySeLinuxByCrn(Long workspaceId, @ResourceCrn String crn, SeLinux selinuxMode) {
         return stackOperationService.triggerModifySELinux(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), selinuxMode);
     }
+
+    @InternalOnly
+    @Override
+    public FlowIdentifier updatePublicDnsEntriesByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        Crn userCrn = Crn.ofUser(initiatorUserCrn);
+        return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofCrn(crn), userCrn.getAccountId());
+    }
 }

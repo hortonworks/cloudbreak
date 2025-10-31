@@ -43,20 +43,20 @@ class ClusterPublicEndpointManagementServiceTest {
     private ClusterPublicEndpointManagementService underTest;
 
     @Test
-    void testStartWhenPemIsDisabled() {
+    void testRefreshDnsEntriesWhenPemIsDisabled() {
         when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(false);
 
-        underTest.start(stack);
+        underTest.refreshDnsEntries(stack);
 
         verify(gatewayPublicEndpointManagementService, never()).updateDnsEntry(stack, null);
         verifyNoInteractions(dnsEntryServices);
     }
 
     @Test
-    void testStartWhenPemIsEnabled() {
+    void testRefreshDnsEntriesWhenPemIsEnabled() {
         when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(true);
 
-        underTest.start(stack);
+        underTest.refreshDnsEntries(stack);
 
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntry(stack, null);
         verify(dnsEntryServices, times(1)).forEach(any());

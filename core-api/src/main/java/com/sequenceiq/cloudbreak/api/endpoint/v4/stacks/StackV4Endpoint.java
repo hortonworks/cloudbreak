@@ -1006,4 +1006,15 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifySeLinuxByCrn(@PathParam("workspaceId") Long workspaceId,
         @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
+
+    @PUT
+    @Path("internal/crn/{crn}/update_dns_entries")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the public DNS entries of the cluster",
+            operationId = "updatePublicDnsEntriesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updatePublicDnsEntriesByCrn(
+            @PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

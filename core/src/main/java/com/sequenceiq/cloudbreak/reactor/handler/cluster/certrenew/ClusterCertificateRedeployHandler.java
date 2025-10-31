@@ -15,10 +15,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCert
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCertificateRedeploySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCertificateRenewFailed;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class ClusterCertificateRedeployHandler implements EventHandler<ClusterCertificateRedeployRequest> {
+public class ClusterCertificateRedeployHandler extends ExceptionCatcherEventHandler<ClusterCertificateRedeployRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCertificateRedeployHandler.class);
 
@@ -34,7 +35,12 @@ public class ClusterCertificateRedeployHandler implements EventHandler<ClusterCe
     }
 
     @Override
-    public void accept(Event<ClusterCertificateRedeployRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterCertificateRedeployRequest> event) {
+        return new ClusterCertificateRenewFailed(resourceId, e);
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent<ClusterCertificateRedeployRequest> event) {
         ClusterCertificateRedeployRequest data = event.getData();
         Long stackId = data.getResourceId();
         LOGGER.debug("Redeploy certificate for stack 'id:{}'", stackId);
@@ -48,6 +54,6 @@ public class ClusterCertificateRedeployHandler implements EventHandler<ClusterCe
             LOGGER.warn(msg, ex);
             response = new ClusterCertificateRenewFailed(stackId, new CloudbreakOrchestratorFailedException(msg + ex.getMessage(), ex));
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        return response;
     }
 }

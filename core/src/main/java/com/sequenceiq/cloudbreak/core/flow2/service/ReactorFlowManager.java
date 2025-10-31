@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModi
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.update.publicdns.UpdatePublicDnsEntriesFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
@@ -641,5 +642,10 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerZookeeperToKraftMigrationRollback(Long stackId) {
         String selector = START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new MigrateZookeeperToKraftRollbackTriggerEvent(stackId, new Promise<>()));
+    }
+
+    public FlowIdentifier triggerUpdatePublicDnsEntriesInPem(Long stackId) {
+        String selector = UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_TRIGGER_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 }

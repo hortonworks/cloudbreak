@@ -92,11 +92,14 @@ sdx:
       sleeptime-sec: 10
       duration-min: 120
     set-default-java-version:
-        sleeptime-sec: 10
-        duration-min: 30
+      sleeptime-sec: 10
+      duration-min: 30
     migratesku:
-        sleeptime-sec: 10
-        duration-min: 30
+      sleeptime-sec: 10
+      duration-min: 30
+    update-public-dns-entries:
+      sleeptime-sec: 10
+      duration-min: 20
   gateway:
     topology:
       name: cdp-proxy

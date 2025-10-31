@@ -34,7 +34,7 @@ public class ClusterPublicEndpointPatchService extends ExistingStackPatchService
 
     @Override
     boolean doApply(Stack stack) {
-        clusterPublicEndpointManagementService.start(stack);
+        clusterPublicEndpointManagementService.refreshDnsEntries(stack);
         return true;
     }
 }

@@ -635,6 +635,10 @@ public enum ResourceEvent {
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FINISHED("cluster.set.default.java.version.finished"),
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED("cluster.set.default.java.version.failed"),
 
+    CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES("cluster.update.public.dns.entries"),
+    CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES_FINISHED("cluster.update.public.dns.entries.finished"),
+    CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES_FAILED("cluster.update.public.dns.entries.failed"),
+
     CHECK_LOAD_BALANCERS_SKU("check.load.balancers.sku"),
     LOAD_BALANCER_SKU_IS_STANDARD("load.balancers.sku.is.standard"),
     DETACH_PUBLIC_IPS("detach.public.ips"),
@@ -771,6 +775,8 @@ public enum ResourceEvent {
     DATALAKE_IMAGE_VALIDATION_WARNING("datalake.image.validation.warning"),
     DATALAKE_SKU_MIGRATION_CHANGE_IN_PROGRESS("datalake.sku.migration.in.progress"),
     DATALAKE_SKU_MIGRATION_CHANGE_FAILED("datalake.sku.migration.failed"),
+    DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS("datalake.update.public.dns.entries.in.progress"),
+    DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED("datalake.update.public.dns.entries.failed"),
 
     ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES("cluster.externaldatabase.certificate.rotation.prerequisites"),
     ROTATE_RDS_CERTIFICATE_GET_LATEST("cluster.externaldatabase.certificate.rotation.getlatest"),

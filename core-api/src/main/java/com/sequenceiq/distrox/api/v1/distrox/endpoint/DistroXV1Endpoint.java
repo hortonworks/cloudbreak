@@ -890,4 +890,20 @@ public interface DistroXV1Endpoint {
     @Operation(summary = "Rollback the migration from Zookeeper to KRaft broker in Kafka.", operationId = "rollbackMigrationFromZookeeperToKraftByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/update_dns_entries")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the public DNS entries of the cluster by name",
+            operationId = "updateDataHubPublicDnsEntriesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updatelicDnsEntriesByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/update_dns_entries")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the public DNS entries of the cluster by CRN",
+            operationId = "updateDataHubPublicDnsEntriesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updatePublicDnsEntriesByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 }

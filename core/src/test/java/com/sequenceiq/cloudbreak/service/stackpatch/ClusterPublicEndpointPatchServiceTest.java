@@ -64,6 +64,6 @@ class ClusterPublicEndpointPatchServiceTest {
         Stack stack = TestUtil.stack();
         boolean result = underTest.doApply(stack);
         assertTrue(result);
-        verify(clusterPublicEndpointManagementService, times(1)).start(eq(stack));
+        verify(clusterPublicEndpointManagementService, times(1)).refreshDnsEntries(eq(stack));
     }
 }

@@ -140,4 +140,17 @@ public class CloudbreakStackService {
             throw new CloudbreakServiceException(message, e);
         }
     }
+
+    public void updatePublicDnsEntries(SdxCluster sdxCluster) {
+        try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.updatePublicDnsEntriesByCrn(WORKSPACE_ID, sdxCluster.getStackCrn(), initiatorUserCrn));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not update public DNS entries in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 }

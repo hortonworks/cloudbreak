@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.service.validation.UpdatePublicDnsEntriesInPemValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
@@ -178,6 +179,9 @@ public class StackOperationService {
 
     @Inject
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
+
+    @Inject
+    private UpdatePublicDnsEntriesInPemValidator updatePublicDnsEntriesInPemValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -656,6 +660,14 @@ public class StackOperationService {
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         defaultJavaVersionUpdateValidator.validate(stack, request);
+    }
+
+    public FlowIdentifier triggerUpdatePublicDnsEntries(NameOrCrn nameOrCrn, String accountId) {
+        LOGGER.info("Triggering update of public DNS entries on stack ('{}')", nameOrCrn);
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        updatePublicDnsEntriesInPemValidator.validate(stack);
+        return flowManager.triggerUpdatePublicDnsEntriesInPem(stack.getId());
     }
 
     private boolean calculateIfRdsRestartIsRequired(StackDto stack) {

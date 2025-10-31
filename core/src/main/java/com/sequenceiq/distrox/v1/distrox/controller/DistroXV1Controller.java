@@ -950,4 +950,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier updatelicDnsEntriesByName(@ResourceName String name) {
+        return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier updatePublicDnsEntriesByCrn(@ResourceCrn String crn) {
+        return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
 }

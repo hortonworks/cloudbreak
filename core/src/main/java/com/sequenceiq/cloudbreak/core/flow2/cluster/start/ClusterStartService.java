@@ -53,7 +53,7 @@ public class ClusterStartService {
             String updatingDnsMsg = "Updating the cluster's DNS entries in Public Endpoint Management Service.";
             LOGGER.info(updatingDnsMsg);
             String clusterManagerIp = stackUtil.extractClusterManagerIp(stack);
-            clusterPublicEndpointManagementService.start(stack);
+            clusterPublicEndpointManagementService.refreshDnsEntries(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, String.format(updatingDnsMsg + " Cluster manager ip: %s",
                     clusterManagerIp));
             flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_DNS_ENTRY_UPDATE_FINISHED, clusterManagerIp);

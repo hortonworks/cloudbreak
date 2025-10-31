@@ -753,4 +753,18 @@ public class SdxController implements SdxEndpoint {
         sdxService.validateSkuMigration(sdxCluster);
         return sdxReactorFlowManager.triggerSkuMigration(sdxCluster, force);
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier updatePublicDnsEntriesByName(@ResourceName String name) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return sdxReactorFlowManager.triggerUpdatePublicDnsEntries(sdxCluster);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier updatePublicDnsEntriesByCrn(@ResourceCrn String crn) {
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return sdxReactorFlowManager.triggerUpdatePublicDnsEntries(sdxCluster);
+    }
 }
