@@ -3,7 +3,6 @@ tests:
   - name: "aws_gov_tests"
     excludedGroups: [ azure_singlerg ]
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
         excludedMethods:
           - testRebuildFreeIpaWithTwoInstancesAwsNative

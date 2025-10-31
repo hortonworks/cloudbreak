@@ -16,11 +16,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -41,6 +43,9 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Inject
+    private SELinuxAssertions selinuxAssertions;
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
@@ -54,9 +59,12 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                 .given(freeIpa, FreeIpaTestDto.class)
                 .withTelemetry("telemetry")
                 .withFreeIpaHa(1, 3)
+                .withSeLinuxSecurity(SeLinux.ENFORCING.name())
                 .withEnableMultiAz(true)
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, false))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {

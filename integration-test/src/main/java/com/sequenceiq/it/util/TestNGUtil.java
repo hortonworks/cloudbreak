@@ -88,10 +88,19 @@ public class TestNGUtil {
         xmlSuite.setThreadCount(threadCount);
         xmlSuite.setTimeOut(timeOut);
         xmlSuite.setVerbose(2);
-        xmlSuite.setListeners(Arrays.asList(TestNgListener.class.getName(), ThreadLocalTestListener.class.getName(),
-                ReportListener.class.getName(), TestInvocationListener.class.getName(), CustomHTMLReporter.class.getName(),
-                CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName(), PassedTestsReporter.class.getName(),
-                GatekeeperBehaviour.class.getName()));
+        xmlSuite.setListeners(
+                Arrays.asList(
+                    TestNgListener.class.getName(),
+                    ThreadLocalTestListener.class.getName(),
+                    ReportListener.class.getName(),
+                    TestInvocationListener.class.getName(),
+                    CustomHTMLReporter.class.getName(),
+                    CustomJUnitXMLReporter.class.getName(),
+                    TestCaseTimeoutListener.class.getName(),
+                    PassedTestsReporter.class.getName(),
+                    GatekeeperBehaviour.class.getName()
+                )
+        );
     }
 
     public List<XmlSuite> loadSuites(Iterable<String> suitePaths) throws IOException {
@@ -119,7 +128,10 @@ public class TestNGUtil {
             XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
             decorate(xmlSuite);
             LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}",
-                    parallel.toUpperCase(Locale.ROOT), threadCount, timeOut);
+                    parallel.toUpperCase(Locale.ROOT),
+                    threadCount,
+                    timeOut
+            );
             return xmlSuite;
         }
     }

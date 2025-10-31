@@ -9,6 +9,7 @@ import org.testng.IRetryAnalyzer;
 import org.testng.ITestListener;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
+import org.testng.Reporter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -40,6 +41,22 @@ public class SpotRetryOnceTestListener implements ITestListener {
         if (spotUtil.shouldUseSpotInstancesForTest(testNGMethod.getConstructorOrMethod().getMethod())) {
             testNGMethod.setRetryAnalyzerClass(SpotRetryOnce.class);
         }
+    }
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+        if (result.getThrowable() instanceof org.testng.internal.thread.ThreadTimeoutException) {
+            addToReport(result);
+        }
+    }
+
+    @Override
+    public void onTestFailedWithTimeout(ITestResult result) {
+        addToReport(result);
+    }
+
+    private void addToReport(ITestResult result) {
+        Reporter.log(String.format("%s test timed out with method: %s ", result.getName(), result.getMethod()));
     }
 
     public static class SpotRetryOnce implements IRetryAnalyzer {
