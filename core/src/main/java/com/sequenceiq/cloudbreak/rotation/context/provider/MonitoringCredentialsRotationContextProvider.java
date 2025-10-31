@@ -49,8 +49,8 @@ public class MonitoringCredentialsRotationContextProvider implements RotationCon
         VaultRotationContext vaultRotationContext = VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withNewSecretMap(Map.of(cluster, Map.of(
-                        SecretMarker.NODE_STATUS_MONITOR_PWD, PasswordUtil.generateCmAndPostgresConformPassword(),
-                        SecretMarker.CLUSTER_MANAGER_MONITORING_PWD, PasswordUtil.generateCmAndPostgresConformPassword(),
+                        SecretMarker.NODE_STATUS_MONITOR_PWD, PasswordUtil.generatePassword(),
+                        SecretMarker.CLUSTER_MANAGER_MONITORING_PWD, PasswordUtil.generatePassword(),
                         SecretMarker.CLUSTER_MANAGER_MONITORING_USER, rotationService.getCmMonitoringUser()
                 )))
                 .build();
