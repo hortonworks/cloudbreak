@@ -90,14 +90,16 @@ public class HybridTrustTests extends AbstractE2ETest {
                     .withTrustSetup()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.TRUST_SETUP_REQUIRED)
+                .awaitForFlow()
+                .when(environmentTestClient.describe())
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .given(EnvironmentTrustSetupDto.class)
                 .when(environmentTestClient.setupTrust())
                 .await(EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustCleanupCommands())
-                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, tc, client, false))
+                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, false))
                 .given(FreeIpaTestDto.class)
                 .then((tc, dto, client) -> setupActiveDirectory(dto, tc, client))
                 .given(EnvironmentTestDto.class)
@@ -106,7 +108,7 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .when(environmentTestClient.delete())
                 .await(EnvironmentStatus.ARCHIVED)
                 .given(FreeIpaTrustCommandsDto.class)
-                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, tc, client, true))
+                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, true))
                 .validate();
     }
 
@@ -117,8 +119,7 @@ public class HybridTrustTests extends AbstractE2ETest {
         return freeipaTestDto;
     }
 
-    private FreeIpaTrustCommandsDto cleanUpActiveDirectory(FreeIpaTrustCommandsDto freeipaTestDto, TestContext testContext, FreeIpaClient freeipaClient,
-            boolean validateError) {
+    private FreeIpaTrustCommandsDto cleanUpActiveDirectory(FreeIpaTrustCommandsDto freeipaTestDto, boolean validateError) {
         executeCommands(freeipaTestDto.getFreeIpaName() + "-cleanup", freeipaTestDto.getResponse().getActiveDirectoryCommands().getCommands(), validateError);
         return freeipaTestDto;
     }
