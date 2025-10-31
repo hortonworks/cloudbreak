@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -31,6 +32,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.Tru
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2KdcServerRequest;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -110,16 +113,7 @@ public class TrustSetupService {
 
         createOrUpdateCrossRealmConfigs(request, stack);
 
-        Operation operation = operationService.startOperation(accountId, OperationType.TRUST_SETUP, Set.of(environmentCrn), Set.of());
-        FreeIpaTrustSetupEvent freeIPATrustSetupEvent = new FreeIpaTrustSetupEvent(stack.getId(), operation.getOperationId());
-        FlowIdentifier flowIdentifier = flowManager.notify(freeIPATrustSetupEvent.selector(), freeIPATrustSetupEvent);
-
-        PrepareCrossRealmTrustResponse response = new PrepareCrossRealmTrustResponse();
-        response.setFlowIdentifier(flowIdentifier);
-        response.setOperationStatus(operationConverter.convert(operation));
-        BeanUtils.copyProperties(request, response);
-
-        return response;
+        return triggerSetupTrust(stack);
     }
 
     private void createOrUpdateCrossRealmConfigs(PrepareCrossRealmTrustRequest request, Stack stack) {
@@ -128,9 +122,11 @@ public class TrustSetupService {
         crossRealmTrust.setStack(stack);
         crossRealmTrust.setEnvironmentCrn(request.getEnvironmentCrn());
         crossRealmTrust.setRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
-        crossRealmTrust.setFqdn(request.getFqdn());
-        crossRealmTrust.setIp(request.getIp());
-        crossRealmTrust.setRealm(request.getRealm());
+        crossRealmTrust.setKdcFqdn(request.getFqdn());
+        crossRealmTrust.setKdcIp(request.getIp());
+        crossRealmTrust.setKdcRealm(request.getRealm());
+        crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
+        crossRealmTrust.setDnsIp(request.getIp());
         if (StringUtils.isBlank(request.getTrustSecret())) {
             LOGGER.debug("Cross realm trust secret is not provided, generating a new one.");
             crossRealmTrust.setTrustSecret(PasswordUtil.generatePassword());
@@ -138,6 +134,65 @@ public class TrustSetupService {
             crossRealmTrust.setTrustSecret(request.getTrustSecret());
         }
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
+        crossRealmTrust = crossRealmTrustService.save(crossRealmTrust);
+        LOGGER.debug("Saved cross-realm trust configuration: {}", crossRealmTrust);
+    }
+
+    private PrepareCrossRealmTrustResponse triggerSetupTrust(Stack stack) {
+        String environmentCrn = stack.getEnvironmentCrn();
+        String accountId = stack.getAccountId();
+        Operation operation = operationService.startOperation(accountId, OperationType.TRUST_SETUP, Set.of(environmentCrn), Set.of());
+        FreeIpaTrustSetupEvent freeIPATrustSetupEvent = new FreeIpaTrustSetupEvent(stack.getId(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(freeIPATrustSetupEvent.selector(), freeIPATrustSetupEvent);
+
+        PrepareCrossRealmTrustResponse response = new PrepareCrossRealmTrustResponse();
+        response.setFlowIdentifier(flowIdentifier);
+        response.setOperationStatus(operationConverter.convert(operation));
+        response.setEnvironmentCrn(environmentCrn);
+        return response;
+    }
+
+    public PrepareCrossRealmTrustResponse setupTrust(String accountId, PrepareCrossRealmTrustV2Request request) {
+        String environmentCrn = request.getEnvironmentCrn();
+        Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
+
+        createOrUpdateCrossRealmConfigs(request, stack);
+
+        return triggerSetupTrust(stack);
+    }
+
+    private void createOrUpdateCrossRealmConfigs(PrepareCrossRealmTrustV2Request request, Stack stack) {
+        CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stack.getId())
+                .orElse(new CrossRealmTrust());
+        crossRealmTrust.setStack(stack);
+        crossRealmTrust.setEnvironmentCrn(request.getEnvironmentCrn());
+        crossRealmTrust.setRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
+        if (StringUtils.isBlank(request.getTrustSecret())) {
+            LOGGER.debug("Cross realm trust secret is not provided, generating a new one.");
+            crossRealmTrust.setTrustSecret(PasswordUtil.generatePassword());
+        } else {
+            crossRealmTrust.setTrustSecret(request.getTrustSecret());
+        }
+        crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
+        if (request.getAd() != null) {
+            LOGGER.info("Setting up cross realm trust with Active Directory");
+            PrepareCrossRealmTrustV2KdcServerRequest kdc = request.getAd().getServers().getFirst();
+            crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
+            crossRealmTrust.setKdcFqdn(kdc.getFqdn());
+            crossRealmTrust.setKdcIp(kdc.getIp());
+            crossRealmTrust.setKdcRealm(request.getAd().getRealm());
+            crossRealmTrust.setDnsIp(request.getDnsServerIps().isEmpty() ? kdc.getIp() : request.getDnsServerIps().getFirst());
+        } else if (request.getMit() != null) {
+            LOGGER.info("Setting up cross realm trust with MIT KDC");
+            PrepareCrossRealmTrustV2KdcServerRequest kdc = request.getMit().getServers().getFirst();
+            crossRealmTrust.setKdcType(KdcType.MIT);
+            crossRealmTrust.setKdcFqdn(kdc.getFqdn());
+            crossRealmTrust.setKdcIp(kdc.getIp());
+            crossRealmTrust.setKdcRealm(request.getMit().getRealm());
+            crossRealmTrust.setDnsIp(request.getDnsServerIps().isEmpty() ? kdc.getIp() : request.getDnsServerIps().getFirst());
+        } else {
+            throw new BadRequestException("Missing required KDC parameters for cross realm trust.");
+        }
         crossRealmTrust = crossRealmTrustService.save(crossRealmTrust);
         LOGGER.debug("Saved cross-realm trust configuration: {}", crossRealmTrust);
     }

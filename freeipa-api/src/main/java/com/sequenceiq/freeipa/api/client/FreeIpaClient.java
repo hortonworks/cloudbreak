@@ -19,12 +19,15 @@ import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
 
 public interface FreeIpaClient {
 
     FreeIpaV1Endpoint getFreeIpaV1Endpoint();
 
     TrustV1Endpoint getCrossRealmV1Endpoint();
+
+    TrustV2Endpoint getCrossRealmV2Endpoint();
 
     FreeIpaV2Endpoint getFreeIpaV2Endpoint();
 

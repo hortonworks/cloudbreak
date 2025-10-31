@@ -52,8 +52,8 @@ class TrustStatusValidationServiceTest {
     @BeforeEach
     void setUp()  {
         crossRealmTrust = new CrossRealmTrust();
-        crossRealmTrust.setFqdn("ad.hybrid.cloudera.org");
-        crossRealmTrust.setRealm("hybrid.cloudera.org");
+        crossRealmTrust.setKdcFqdn("ad.hybrid.cloudera.org");
+        crossRealmTrust.setKdcRealm("hybrid.cloudera.org");
         stateParams = new OrchestratorStateParams();
         lenient().when(saltStateParamsService.createStateParams(stack, TRUST_STATUS_VALIDATION_STATE, true, MAX_RETRY, MAX_RETRY_ON_ERROR))
                 .thenReturn(stateParams);

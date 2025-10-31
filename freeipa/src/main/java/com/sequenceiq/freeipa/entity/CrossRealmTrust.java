@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.entity;
 
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +14,7 @@ import jakarta.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -34,11 +36,19 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     private String remoteEnvironmentCrn;
 
-    private String fqdn;
+    @Convert(converter = KdcType.Converter.class)
+    private KdcType kdcType;
 
-    private String ip;
+    @Column(name = "fqdn")
+    private String kdcFqdn;
 
-    private String realm;
+    @Column(name = "ip")
+    private String kdcIp;
+
+    @Column(name = "realm")
+    private String kdcRealm;
+
+    private String dnsIp;
 
     @Convert(converter = TrustStatusConverter.class)
     private TrustStatus trustStatus;
@@ -81,28 +91,44 @@ public class CrossRealmTrust implements AccountIdAwareResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public String getFqdn() {
-        return fqdn;
+    public KdcType getKdcType() {
+        return kdcType;
     }
 
-    public void setFqdn(String fqdn) {
-        this.fqdn = fqdn;
+    public void setKdcType(KdcType kdcType) {
+        this.kdcType = kdcType;
     }
 
-    public String getIp() {
-        return ip;
+    public String getKdcFqdn() {
+        return kdcFqdn;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setKdcFqdn(String kdcFqdn) {
+        this.kdcFqdn = kdcFqdn;
     }
 
-    public String getRealm() {
-        return realm;
+    public String getKdcIp() {
+        return kdcIp;
     }
 
-    public void setRealm(String realm) {
-        this.realm = realm;
+    public void setKdcIp(String kdcIp) {
+        this.kdcIp = kdcIp;
+    }
+
+    public String getKdcRealm() {
+        return kdcRealm;
+    }
+
+    public void setKdcRealm(String kdcRealm) {
+        this.kdcRealm = kdcRealm;
+    }
+
+    public String getDnsIp() {
+        return dnsIp;
+    }
+
+    public void setDnsIp(String dnsIp) {
+        this.dnsIp = dnsIp;
     }
 
     public String getTrustSecret() {
@@ -147,9 +173,12 @@ public class CrossRealmTrust implements AccountIdAwareResource {
         return "CrossRealmTrust{" +
                 "id=" + id +
                 ", environmentCrn='" + environmentCrn + '\'' +
-                ", fqdn='" + fqdn + '\'' +
-                ", ip='" + ip + '\'' +
-                ", realm='" + realm + '\'' +
+                ", remoteEnvironmentCrn='" + remoteEnvironmentCrn + '\'' +
+                ", kdcType=" + kdcType +
+                ", kdcFqdn='" + kdcFqdn + '\'' +
+                ", kdcIp='" + kdcIp + '\'' +
+                ", kdcRealm='" + kdcRealm + '\'' +
+                ", dnsIp='" + dnsIp + '\'' +
                 ", trustStatus=" + trustStatus +
                 ", operationId='" + operationId + '\'' +
                 '}';

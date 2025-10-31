@@ -36,9 +36,12 @@ public interface EnvironmentHybridEndpoint {
     @POST
     @Path("/cross_realm_trust/name/{name}/setup")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
-            operationId = "setupCrossRealmTrustV1ByName", responses = @ApiResponse(responseCode = "200", description = "successful operation",
-            useReturnTypeSchema = true))
+    @Operation(
+            summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST,
+            description = ENVIRONMENT_NOTES,
+            operationId = "setupCrossRealmTrustV1ByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true),
+            deprecated = true)
     SetupCrossRealmTrustResponse setupByName(
             @PathParam("name") String environmentName,
             @Valid SetupCrossRealmTrustRequest request);
@@ -46,9 +49,12 @@ public interface EnvironmentHybridEndpoint {
     @POST
     @Path("/cross_realm_trust/crn/{crn}/setup")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST, description = ENVIRONMENT_NOTES,
-            operationId = "setupCrossRealmTrustV1ByCrn", responses = @ApiResponse(responseCode = "200", description = "successful operation",
-            useReturnTypeSchema = true))
+    @Operation(
+            summary = FreeIpaOperationDescriptions.SETUP_CROSS_REALM_TRUST,
+            description = ENVIRONMENT_NOTES,
+            operationId = "setupCrossRealmTrustV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true),
+            deprecated = true)
     SetupCrossRealmTrustResponse setupByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @Valid SetupCrossRealmTrustRequest request);

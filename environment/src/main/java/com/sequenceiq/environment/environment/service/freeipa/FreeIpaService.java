@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -45,6 +44,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 @Service
 public class FreeIpaService {
@@ -54,6 +55,8 @@ public class FreeIpaService {
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     private final TrustV1Endpoint trustV1Endpoint;
+
+    private final TrustV2Endpoint trustV2Endpoint;
 
     private final OperationV1Endpoint operationV1Endpoint;
 
@@ -68,6 +71,7 @@ public class FreeIpaService {
     public FreeIpaService(
             FreeIpaV1Endpoint freeIpaV1Endpoint,
             TrustV1Endpoint trustV1Endpoint,
+            TrustV2Endpoint trustV2Endpoint,
             OperationV1Endpoint operationV1Endpoint,
             FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
@@ -77,6 +81,7 @@ public class FreeIpaService {
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.trustV1Endpoint = trustV1Endpoint;
+        this.trustV2Endpoint = trustV2Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.eventService = eventService;
         this.flowEndpoint = flowEndpoint;
@@ -258,12 +263,12 @@ public class FreeIpaService {
         }
     }
 
-    public PrepareCrossRealmTrustResponse crossRealmPrepare(String environmentCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
+    public PrepareCrossRealmTrustResponse crossRealmPrepare(String environmentCrn, PrepareCrossRealmTrustV2Request prepareCrossRealmTrustRequest) {
         try {
             LOGGER.debug("Calling FreeIPA cross realm trust prepare for environment {}", environmentCrn);
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> trustV1Endpoint.setup(prepareCrossRealmTrustRequest, initiatorUserCrn));
+                    () -> trustV2Endpoint.setup(prepareCrossRealmTrustRequest, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to prepare cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);

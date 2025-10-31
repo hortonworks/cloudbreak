@@ -12,7 +12,7 @@ import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrepareCrossRealmTrustV1Request")
+@Schema(name = "PrepareCrossRealmTrustV1Request", deprecated = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrepareCrossRealmTrustRequest extends PrepareCrossRealmTrustBase {

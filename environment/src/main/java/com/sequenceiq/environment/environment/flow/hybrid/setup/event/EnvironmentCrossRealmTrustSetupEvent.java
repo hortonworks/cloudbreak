@@ -3,17 +3,22 @@ package com.sequenceiq.environment.environment.flow.hybrid.setup.event;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 @JsonDeserialize(builder = EnvironmentCrossRealmTrustSetupEvent.Builder.class)
 public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
 
-    private final String fqdn;
+    private final KdcType kdcType;
 
-    private final String ip;
+    private final String kdcFqdn;
 
-    private final String realm;
+    private final String kdcIp;
+
+    private final String kdcRealm;
+
+    private final String dnsIp;
 
     private final String remoteEnvironmentCrn;
 
@@ -28,30 +33,42 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
             Promise<AcceptResult> accepted,
             String resourceName,
             String resourceCrn,
-            String fqdn,
-            String ip,
-            String realm,
+            KdcType kdcType,
+            String kdcFqdn,
+            String kdcIp,
+            String kdcRealm,
+            String dnsIp,
             String remoteEnvironmentCrn,
             String trustSecret) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
-        this.fqdn = fqdn;
-        this.ip = ip;
-        this.realm = realm;
+        this.kdcType = kdcType;
+        this.kdcFqdn = kdcFqdn;
+        this.kdcIp = kdcIp;
+        this.kdcRealm = kdcRealm;
+        this.dnsIp = dnsIp;
         this.accountId = accountId;
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
         this.trustSecret = trustSecret;
     }
 
-    public String getFqdn() {
-        return fqdn;
+    public KdcType getKdcType() {
+        return kdcType;
     }
 
-    public String getIp() {
-        return ip;
+    public String getKdcFqdn() {
+        return kdcFqdn;
     }
 
-    public String getRealm() {
-        return realm;
+    public String getKdcIp() {
+        return kdcIp;
+    }
+
+    public String getKdcRealm() {
+        return kdcRealm;
+    }
+
+    public String getDnsIp() {
+        return dnsIp;
     }
 
     public String getRemoteEnvironmentCrn() {
@@ -64,6 +81,23 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public Builder toBuilder() {
+        return EnvironmentCrossRealmTrustSetupEvent.builder()
+                .withSelector(selector())
+                .withResourceId(getResourceId())
+                .withAccountId(getAccountId())
+                .withAccepted(accepted())
+                .withResourceName(getResourceName())
+                .withResourceCrn(getResourceCrn())
+                .withKdcType(kdcType)
+                .withKdcFqdn(kdcFqdn)
+                .withKdcIp(kdcIp)
+                .withKdcRealm(kdcRealm)
+                .withDnsIp(dnsIp)
+                .withRemoteEnvironmentCrn(remoteEnvironmentCrn)
+                .withTrustSecret(trustSecret);
     }
 
     public static Builder builder() {
@@ -82,11 +116,15 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private String fqdn;
+        private KdcType kdcType;
 
-        private String ip;
+        private String kdcFqdn;
 
-        private String realm;
+        private String kdcIp;
+
+        private String kdcRealm;
+
+        private String dnsIp;
 
         private String remoteEnvironmentCrn;
 
@@ -122,8 +160,13 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public Builder withFqdn(String fqdn) {
-            this.fqdn = fqdn;
+        public Builder withKdcType(KdcType kdcType) {
+            this.kdcType = kdcType;
+            return this;
+        }
+
+        public Builder withKdcFqdn(String fqdn) {
+            this.kdcFqdn = fqdn;
             return this;
         }
 
@@ -132,13 +175,18 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public Builder withIp(String ip) {
-            this.ip = ip;
+        public Builder withKdcIp(String ip) {
+            this.kdcIp = ip;
             return this;
         }
 
-        public Builder withRealm(String realm) {
-            this.realm = realm;
+        public Builder withKdcRealm(String realm) {
+            this.kdcRealm = realm;
+            return this;
+        }
+
+        public Builder withDnsIp(String ip) {
+            this.dnsIp = ip;
             return this;
         }
 
@@ -160,9 +208,11 @@ public class EnvironmentCrossRealmTrustSetupEvent extends BaseNamedFlowEvent {
                     accepted,
                     resourceName,
                     resourceCrn,
-                    fqdn,
-                    ip,
-                    realm,
+                    kdcType,
+                    kdcFqdn,
+                    kdcIp,
+                    kdcRealm,
+                    dnsIp,
                     remoteEnvironmentCrn,
                     trustSecret);
         }

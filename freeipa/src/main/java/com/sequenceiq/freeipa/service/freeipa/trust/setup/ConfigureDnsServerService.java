@@ -77,23 +77,23 @@ public class ConfigureDnsServerService {
     private void addDnsForwardZone(Stack stack, CrossRealmTrust crossRealmTrust) throws Exception {
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack);
 
-        String realm = crossRealmTrust.getRealm();
+        String realm = crossRealmTrust.getKdcRealm();
         LOGGER.info("Add forward DNS zone [{}] ", realm);
         Optional<DnsZone> dnsZone = ignoreNotFoundExceptionWithValue(() -> freeIpaClient.showForwardDnsZone(realm), null);
         if (dnsZone.isEmpty()) {
             LOGGER.debug("Forward DNS zone does not exists [{}], add it now", realm);
-            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getIp(), FORWARD_POLICY), null);
+            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getKdcIp(), FORWARD_POLICY), null);
             LOGGER.debug("Forward DNS zone [{}] added", realm);
         }
-        ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone("in-addr.arpa.", crossRealmTrust.getIp(), FORWARD_POLICY), null);
+        ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone("in-addr.arpa.", crossRealmTrust.getKdcIp(), FORWARD_POLICY), null);
     }
 
     private OrchestratorStateParams createOrchestratorStateParams(Stack stack, CrossRealmTrust crossRealmTrust) {
         OrchestratorStateParams stateParameters = saltStateParamsService.createStateParams(
                 stack, TRUSTSETUP_DNS_STATE, true, maxRetryCount, maxRetryCountOnError);
         stateParameters.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                AD_DOMAIN, crossRealmTrust.getFqdn(),
-                REALM, StringUtils.capitalize(crossRealmTrust.getRealm())))));
+                AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                REALM, StringUtils.capitalize(crossRealmTrust.getKdcRealm())))));
         LOGGER.debug("Created OrchestratorStateParams for running cross-realm trust DNS set up: {}", stateParameters);
         return stateParameters;
     }

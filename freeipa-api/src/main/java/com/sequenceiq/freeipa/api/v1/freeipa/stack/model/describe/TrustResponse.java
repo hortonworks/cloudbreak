@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrustResponse {
-    @Schema(description = CrossRealmTrustModelDescriptions.FQDN, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.KDC_FQDN, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String fqdn;
 
     @Schema(description = CrossRealmTrustModelDescriptions.TRUST_STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
@@ -19,10 +19,10 @@ public class TrustResponse {
     @Schema(description = CrossRealmTrustModelDescriptions.OPERATION_ID, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String operationId;
 
-    @Schema(description = CrossRealmTrustModelDescriptions.REALM, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.KDC_REALM, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String realm;
 
-    @Schema(description = CrossRealmTrustModelDescriptions.IP, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = CrossRealmTrustModelDescriptions.KDC_IP, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String ip;
 
     public String getFqdn() {

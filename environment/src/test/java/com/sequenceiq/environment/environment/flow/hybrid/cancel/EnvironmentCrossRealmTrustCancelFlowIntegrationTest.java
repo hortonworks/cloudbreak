@@ -76,6 +76,7 @@ import com.sequenceiq.environment.environment.flow.hybrid.cancel.action.Environm
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.config.EnvironmentCrossRealmTrustCancelFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentCrossRealmTrustCancelHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentValidateCrossRealmTrustCancelHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
@@ -166,6 +167,9 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
 
     @MockBean
     private StackService stackService;
+
+    @MockBean
+    private SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter crossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 
     @MockBean
     private Environment environment;

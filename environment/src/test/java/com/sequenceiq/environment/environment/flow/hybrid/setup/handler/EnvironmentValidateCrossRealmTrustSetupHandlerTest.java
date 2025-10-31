@@ -41,9 +41,9 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
                 .withResourceCrn("crn:env:100")
                 .withRemoteEnvironmentCrn("crn:remote:200")
                 .withResourceName("env-name")
-                .withRealm("REALM")
-                .withFqdn("env.example.com")
-                .withIp("1.2.3.4")
+                .withKdcRealm("REALM")
+                .withKdcFqdn("env.example.com")
+                .withKdcIp("1.2.3.4")
                 .withTrustSecret("secret")
                 .build();
 
@@ -61,7 +61,7 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
         assertThat(newEvent.selector()).isEqualTo(TRUST_SETUP_EVENT.selector());
         assertThat(newEvent.getResourceCrn()).isEqualTo(eventData.getResourceCrn());
         assertThat(newEvent.getResourceId()).isEqualTo(eventData.getResourceId());
-        assertThat(newEvent.getRealm()).isEqualTo(eventData.getRealm());
+        assertThat(newEvent.getKdcRealm()).isEqualTo(eventData.getKdcRealm());
     }
 
     @Test
@@ -69,7 +69,7 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
         EnvironmentCrossRealmTrustSetupEvent environmentCrossRealmTrustSetupEvent
                 = mock(EnvironmentCrossRealmTrustSetupEvent.class);
 
-        when(environmentCrossRealmTrustSetupEvent.getRealm()).thenThrow(new RuntimeException("forced failure"));
+        when(environmentCrossRealmTrustSetupEvent.toBuilder()).thenThrow(new RuntimeException("forced failure"));
         when(handlerEvent.getData()).thenReturn(environmentCrossRealmTrustSetupEvent);
 
         Selectable result = handler.doAccept(handlerEvent);

@@ -40,7 +40,7 @@ public class ActiveDirectoryCommandsBuilder {
     public String buildCommands(TrustCommandType trustCommandType, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
         Map<String, Object> model = new HashMap<>();
         model.put("trustCommandType", trustCommandType);
-        model.put("adDomain", crossRealmTrust.getRealm().toLowerCase());
+        model.put("adDomain", crossRealmTrust.getKdcRealm().toLowerCase());
         model.put("ipaDomain", freeIpa.getDomain());
         if (trustCommandType == TrustCommandType.SETUP) {
             model.put("ipaIpAdresses", getServerIps(stack));

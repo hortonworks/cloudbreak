@@ -32,7 +32,7 @@ public class BaseClusterKrb5ConfBuilder {
         Map<String, Object> model = new HashMap<>();
         model.put("comment", getComment(trustCommandType));
         model.put("trustCommandType", trustCommandType);
-        model.put("adDomain", crossRealmTrust.getRealm());
+        model.put("adDomain", crossRealmTrust.getKdcRealm());
         model.put("ipaDomain", freeIpa.getDomain());
         return build(model);
     }

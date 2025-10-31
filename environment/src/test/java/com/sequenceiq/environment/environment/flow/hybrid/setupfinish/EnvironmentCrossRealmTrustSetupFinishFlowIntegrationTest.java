@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalSch
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.action.EnvironmentCrossRealmTrustSetupFinishActions;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.config.EnvironmentCrossRealmTrustSetupFinishFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler.EnvironmentCrossRealmTrustSetupFinishHandler;
@@ -288,7 +289,8 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
             EnvironmentMetricService.class,
             Clock.class,
             EventSender.class,
-            EntitlementService.class
+            EntitlementService.class,
+            SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

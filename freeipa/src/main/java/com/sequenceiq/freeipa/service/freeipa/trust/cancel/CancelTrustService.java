@@ -36,7 +36,7 @@ public class CancelTrustService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stackId);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        String realm = crossRealmTrust.getRealm().toUpperCase(Locale.ROOT);
+        String realm = crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT);
         ignoreNotFoundException(() -> client.deleteTrust(realm),
                 "Deleting trust for [{}] but it was not found", realm);
         LOGGER.debug("Deleting trust for crossRealm [{}]", crossRealmTrust);

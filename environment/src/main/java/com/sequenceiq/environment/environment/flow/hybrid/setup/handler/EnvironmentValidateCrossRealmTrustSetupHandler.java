@@ -35,18 +35,8 @@ public class EnvironmentValidateCrossRealmTrustSetupHandler extends ExceptionCat
         LOGGER.debug("In EnvironmentValidateCrossRealmTrustSetupHandler.accept");
         try {
             LOGGER.debug("TRUST_SETUP_EVENT event sent");
-            EnvironmentCrossRealmTrustSetupEvent data = environmentCrossRealmTrustSetupEvent.getData();
-            return EnvironmentCrossRealmTrustSetupEvent.builder()
+            return environmentCrossRealmTrustSetupEvent.getData().toBuilder()
                     .withSelector(TRUST_SETUP_EVENT.selector())
-                    .withResourceCrn(data.getResourceCrn())
-                    .withResourceId(data.getResourceId())
-                    .withResourceName(data.getResourceName())
-                    .withAccountId(data.getAccountId())
-                    .withFqdn(data.getFqdn())
-                    .withRealm(data.getRealm())
-                    .withRemoteEnvironmentCrn(data.getRemoteEnvironmentCrn())
-                    .withIp(data.getIp())
-                    .withTrustSecret(data.getTrustSecret())
                     .build();
         } catch (Exception e) {
             LOGGER.debug("TRUST_SETUP_FAILED event sent");

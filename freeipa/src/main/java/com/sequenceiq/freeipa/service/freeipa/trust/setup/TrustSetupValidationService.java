@@ -124,16 +124,16 @@ public class TrustSetupValidationService {
             OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, stateName, true,
                     MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                    AD_DOMAIN, crossRealmTrust.getFqdn(),
-                    AD_IP, crossRealmTrust.getIp()))));
+                    AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                    AD_IP, crossRealmTrust.getKdcIp()))));
             hostOrchestrator.runOrchestratorState(stateParams);
             return new TaskResult(TaskResultType.INFO, "Successful " + messagePrefix, Map.of());
         } catch (CloudbreakOrchestratorException orchestratorException) {
-            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getFqdn(), orchestratorException);
+            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), orchestratorException);
             Map<String, String> params = OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException);
             return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed: " + orchestratorException.getMessage(), params);
         } catch (Exception ex) {
-            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getFqdn(), ex);
+            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), ex);
             return new TaskResult(TaskResultType.ERROR, ex.getMessage(), Map.of());
         }
     }

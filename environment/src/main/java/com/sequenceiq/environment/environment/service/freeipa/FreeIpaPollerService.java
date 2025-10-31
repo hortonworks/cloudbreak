@@ -21,7 +21,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.CancelCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossRealmTrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -30,6 +29,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResp
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 @Service
 public class FreeIpaPollerService {
@@ -133,7 +133,7 @@ public class FreeIpaPollerService {
         }
     }
 
-    public void waitForCrossRealmTrustSetup(Long envId, String envCrn, PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest) {
+    public void waitForCrossRealmTrustSetup(Long envId, String envCrn, PrepareCrossRealmTrustV2Request prepareCrossRealmTrustRequest) {
         PrepareCrossRealmTrustResponse response = freeIpaService.crossRealmPrepare(envCrn, prepareCrossRealmTrustRequest);
         pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "setup");
     }

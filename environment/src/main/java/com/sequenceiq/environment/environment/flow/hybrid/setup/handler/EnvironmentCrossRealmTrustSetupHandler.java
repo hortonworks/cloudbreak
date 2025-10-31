@@ -4,8 +4,10 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINISH_TRUST_SETUP_EVENT;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,8 +22,11 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2ActiveDirectoryRequest;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2KdcServerRequest;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2MitRequest;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 @Component
 public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupEvent> {
@@ -81,16 +86,8 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
                 }
             }
             LOGGER.debug("FINISH_TRUST_SETUP_EVENT event sent");
-            return EnvironmentCrossRealmTrustSetupEvent.builder()
+            return data.toBuilder()
                     .withSelector(FINISH_TRUST_SETUP_EVENT.selector())
-                    .withResourceCrn(data.getResourceCrn())
-                    .withResourceId(data.getResourceId())
-                    .withResourceName(data.getResourceName())
-                    .withFqdn(data.getFqdn())
-                    .withRealm(data.getRealm())
-                    .withRemoteEnvironmentCrn(data.getRemoteEnvironmentCrn())
-                    .withIp(data.getIp())
-                    .withTrustSecret(data.getTrustSecret())
                     .build();
         } catch (Exception e) {
             LOGGER.debug("TRUST_SETUP_FAILED event sent");
@@ -98,11 +95,30 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
         }
     }
 
-    private PrepareCrossRealmTrustRequest getPrepareCrossRealmTrustRequest(EnvironmentCrossRealmTrustSetupEvent data) {
-        PrepareCrossRealmTrustRequest prepareCrossRealmTrustRequest = new PrepareCrossRealmTrustRequest();
-        prepareCrossRealmTrustRequest.setRealm(data.getRealm());
-        prepareCrossRealmTrustRequest.setFqdn(data.getFqdn());
-        prepareCrossRealmTrustRequest.setIp(data.getIp());
+    private PrepareCrossRealmTrustV2Request getPrepareCrossRealmTrustRequest(EnvironmentCrossRealmTrustSetupEvent data) {
+        PrepareCrossRealmTrustV2Request prepareCrossRealmTrustRequest = new PrepareCrossRealmTrustV2Request();
+        switch (data.getKdcType()) {
+            case ACTIVE_DIRECTORY -> {
+                PrepareCrossRealmTrustV2ActiveDirectoryRequest ad = new PrepareCrossRealmTrustV2ActiveDirectoryRequest();
+                ad.setRealm(data.getKdcRealm());
+                PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
+                server.setFqdn(data.getKdcFqdn());
+                server.setIp(data.getKdcIp());
+                ad.setServers(List.of(server));
+                prepareCrossRealmTrustRequest.setAd(ad);
+            }
+            case MIT -> {
+                PrepareCrossRealmTrustV2MitRequest mit = new PrepareCrossRealmTrustV2MitRequest();
+                mit.setRealm(data.getKdcRealm());
+                PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
+                server.setFqdn(data.getKdcFqdn());
+                server.setIp(data.getKdcIp());
+                mit.setServers(List.of(server));
+                prepareCrossRealmTrustRequest.setMit(mit);
+            }
+            default -> throw new NotImplementedException(String.format("Unknown KDC type: %s.", data.getKdcType()));
+        }
+        prepareCrossRealmTrustRequest.setDnsServerIps(List.of(data.getDnsIp()));
         prepareCrossRealmTrustRequest.setTrustSecret(data.getTrustSecret());
         prepareCrossRealmTrustRequest.setEnvironmentCrn(data.getResourceCrn());
         prepareCrossRealmTrustRequest.setRemoteEnvironmentCrn(data.getRemoteEnvironmentCrn());

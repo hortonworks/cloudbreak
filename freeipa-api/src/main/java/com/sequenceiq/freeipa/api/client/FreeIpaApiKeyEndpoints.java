@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
 
 public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements FreeIpaClient {
 
@@ -37,6 +38,11 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public TrustV1Endpoint getCrossRealmV1Endpoint() {
         return getEndpoint(TrustV1Endpoint.class);
+    }
+
+    @Override
+    public TrustV2Endpoint getCrossRealmV2Endpoint() {
+        return getEndpoint(TrustV2Endpoint.class);
     }
 
     @Override

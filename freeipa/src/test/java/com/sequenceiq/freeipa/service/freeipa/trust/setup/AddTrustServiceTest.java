@@ -69,7 +69,7 @@ class AddTrustServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setTrustSecret("secret");
-        crossRealmTrust.setRealm("hybrid.cloudera.org");
+        crossRealmTrust.setKdcRealm("hybrid.cloudera.org");
         when(crossRealmTrustService.getByStackId(STACK_ID)).thenReturn(crossRealmTrust);
         lenient().doReturn(client).when(freeIpaClientFactory).getFreeIpaClientForStack(stack);
         when(trustStatusValidationService.validateTrustStatus(stack, crossRealmTrust)).thenReturn(validationResult);

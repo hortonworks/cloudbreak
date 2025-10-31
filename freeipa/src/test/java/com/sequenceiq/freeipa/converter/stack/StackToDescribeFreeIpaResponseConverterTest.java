@@ -174,8 +174,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
-        crossRealmTrust.setFqdn("fqdn");
-        crossRealmTrust.setIp("10.0.0.16");
+        crossRealmTrust.setKdcFqdn("fqdn");
+        crossRealmTrust.setKdcIp("10.0.0.16");
         crossRealmTrust.setOperationId("operationid");
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
         ImageEntity image = new ImageEntity();

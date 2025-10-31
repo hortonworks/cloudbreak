@@ -25,7 +25,7 @@ public class TrustCommandsGeneratorService {
 
     public TrustSetupCommandsResponse getTrustCommands(
             TrustCommandType trustCommandType, String environmentCrn, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust) {
-        LOGGER.info("Retrieving {} commands for cross-realm trust setup for active directory: {}", trustCommandType.name(), crossRealmTrust.getFqdn());
+        LOGGER.info("Retrieving {} commands for cross-realm trust setup for active directory: {}", trustCommandType.name(), crossRealmTrust.getKdcFqdn());
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
         response.setEnvironmentCrn(environmentCrn);
         ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();

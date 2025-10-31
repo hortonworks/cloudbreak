@@ -60,7 +60,7 @@ public class AddTrustService {
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stackId);
         if (isActiveDirectoryTrust(crossRealmTrust)) {
             FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            Trust trust = client.addTrust(crossRealmTrust.getTrustSecret(), "ad", true, crossRealmTrust.getRealm().toUpperCase(Locale.ROOT));
+            Trust trust = client.addTrust(crossRealmTrust.getTrustSecret(), "ad", true, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT));
             LOGGER.debug("Added Active Directory trust [{}] for crossRealm [{}], start validation", trust, crossRealmTrust);
         }
         ValidationResult validationResult = trustStatusValidationService.validateTrustStatus(stack, crossRealmTrust);

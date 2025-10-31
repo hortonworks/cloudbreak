@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,11 +70,15 @@ import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2ActiveDirectoryRequest;
+import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2KdcServerRequest;
+import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2Request;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.action.EnvironmentCrossRealmTrustSetupActions;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.config.EnvironmentCrossRealmTrustSetupFlowConfig;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentCrossRealmTrustSetupHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.handler.EnvironmentValidateCrossRealmTrustSetupHandler;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -179,8 +184,36 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
     }
 
     @Test
-    void testPrepareCrossRealmTrustWhenSuccessful() {
-        testFlow();
+    void testPrepareCrossRealmTrustV1WhenSuccessful() {
+        testFlowV1();
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_VALIDATION_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED),
+                eq(TRUST_SETUP_VALIDATION_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_STARTED),
+                eq(TRUST_SETUP_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_FINISH_REQUIRED),
+                eq(ENVIRONMENT_SETUP_TRUST_FINISHED),
+                eq(TRUST_SETUP_FINISHED_STATE)
+        );
+    }
+
+    @Test
+    void testPrepareCrossRealmTrustV2WhenSuccessful() {
+        testFlowV2();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
@@ -211,7 +244,7 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         doThrow(new CloudbreakServiceException("Freeipa not exist on provider side"))
                 .when(freeIpaService)
                 .describe(anyString());
-        testFlow();
+        testFlowV1();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
@@ -237,8 +270,15 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         );
     }
 
-    private void testFlow() {
-        FlowIdentifier flowIdentifier = triggerFlow();
+    private void testFlowV1() {
+        FlowIdentifier flowIdentifier = triggerFlowV1();
+        letItFlow(flowIdentifier);
+
+        flowFinishedSuccessfully();
+    }
+
+    private void testFlowV2() {
+        FlowIdentifier flowIdentifier = triggerFlowV2();
         letItFlow(flowIdentifier);
 
         flowFinishedSuccessfully();
@@ -250,12 +290,37 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
     }
 
-    private FlowIdentifier triggerFlow() {
+    private FlowIdentifier triggerFlowV1() {
         SetupCrossRealmTrustRequest setupCrossRealmTrustRequest = new SetupCrossRealmTrustRequest();
         setupCrossRealmTrustRequest.setRealm("realm");
         setupCrossRealmTrustRequest.setTrustSecret("trust-secret");
         setupCrossRealmTrustRequest.setFqdn("fqdn");
         setupCrossRealmTrustRequest.setIp("10.0.0.1");
+        setupCrossRealmTrustRequest.setRemoteEnvironmentCrn("remoteenvcrn");
+        return ThreadBasedUserCrnProvider.doAs(
+                USER_CRN,
+                () -> environmentReactorFlowManager.triggerSetupCrossRealmTrust(
+                        ENVIRONMENT_ID,
+                        ACCOUNT_ID,
+                        ENVIRONMENT_NAME,
+                        USER_CRN,
+                        ENVIRONMENT_CRN,
+                        setupCrossRealmTrustRequest
+                )
+        );
+    }
+
+    private FlowIdentifier triggerFlowV2() {
+        SetupCrossRealmTrustV2Request setupCrossRealmTrustRequest = new SetupCrossRealmTrustV2Request();
+        SetupCrossRealmTrustV2ActiveDirectoryRequest ad = new SetupCrossRealmTrustV2ActiveDirectoryRequest();
+        ad.setRealm("realm");
+        SetupCrossRealmTrustV2KdcServerRequest server = new SetupCrossRealmTrustV2KdcServerRequest();
+        server.setFqdn("fqdn");
+        server.setIp("10.0.0.1");
+        ad.setServers(List.of(server));
+        setupCrossRealmTrustRequest.setAd(ad);
+        setupCrossRealmTrustRequest.setDnsServerIps(List.of("8.8.8.8"));
+        setupCrossRealmTrustRequest.setTrustSecret("trust-secret");
         setupCrossRealmTrustRequest.setRemoteEnvironmentCrn("remoteenvcrn");
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
@@ -297,7 +362,8 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
             Clock.class,
             EventSender.class,
             EntitlementService.class,
-            EnvironmentService.class
+            EnvironmentService.class,
+            SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

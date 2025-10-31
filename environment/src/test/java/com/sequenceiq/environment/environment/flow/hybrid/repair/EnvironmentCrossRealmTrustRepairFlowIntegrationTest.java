@@ -76,6 +76,7 @@ import com.sequenceiq.environment.environment.flow.hybrid.repair.action.Environm
 import com.sequenceiq.environment.environment.flow.hybrid.repair.config.EnvironmentCrossRealmTrustRepairFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.repair.handler.EnvironmentCrossRealmTrustRepairHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.repair.handler.EnvironmentValidateCrossRealmTrustRepairHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
@@ -166,6 +167,9 @@ class EnvironmentCrossRealmTrustRepairFlowIntegrationTest {
 
     @MockBean
     private StackService stackService;
+
+    @MockBean
+    private SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter crossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 
     @MockBean
     private Environment environment;

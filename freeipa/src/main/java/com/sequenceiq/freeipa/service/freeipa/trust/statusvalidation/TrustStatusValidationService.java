@@ -55,11 +55,11 @@ public class TrustStatusValidationService {
             OrchestratorStateParams stateParams =
                     saltStateParamsService.createStateParams(stack, TRUST_STATUS_VALIDATION_STATE, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                    AD_DOMAIN, crossRealmTrust.getFqdn(),
-                    REALM, crossRealmTrust.getRealm().toUpperCase(Locale.ROOT)))));
+                    AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                    REALM, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT)))));
             hostOrchestrator.runOrchestratorState(stateParams);
         } catch (Exception ex) {
-            LOGGER.warn("Trust status validation failed for AD: {}", crossRealmTrust.getFqdn());
+            LOGGER.warn("Trust status validation failed for AD: {}", crossRealmTrust.getKdcFqdn());
             validationResultBuilder.warning(ex.getMessage());
         }
     }

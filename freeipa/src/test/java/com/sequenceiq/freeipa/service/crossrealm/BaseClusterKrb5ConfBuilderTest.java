@@ -53,8 +53,8 @@ class BaseClusterKrb5ConfBuilderTest {
         freeIpa.setDomain("freeipa.org");
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setTrustSecret("trustSecret");
-        crossRealmTrust.setRealm("ad.org");
-        crossRealmTrust.setFqdn("adHostName.ad.org");
+        crossRealmTrust.setKdcRealm("ad.org");
+        crossRealmTrust.setKdcFqdn("adHostName.ad.org");
         // WHEN
         String result = underTest.buildCommands(trustCommandType, freeIpa, crossRealmTrust);
         // THEN

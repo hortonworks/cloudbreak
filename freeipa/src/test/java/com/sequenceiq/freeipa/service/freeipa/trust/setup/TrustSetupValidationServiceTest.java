@@ -163,8 +163,8 @@ class TrustSetupValidationServiceTest {
     void testValidateWhenNoRemoteEnvironment() {
         setup();
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
-        crossRealmTrust.setFqdn("fqdn");
-        crossRealmTrust.setIp("ip");
+        crossRealmTrust.setKdcFqdn("fqdn");
+        crossRealmTrust.setKdcIp("ip");
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
 
@@ -180,8 +180,8 @@ class TrustSetupValidationServiceTest {
 
     private void setup(boolean kerberized) {
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
-        crossRealmTrust.setFqdn("fqdn");
-        crossRealmTrust.setIp("ip");
+        crossRealmTrust.setKdcFqdn("fqdn");
+        crossRealmTrust.setKdcIp("ip");
         crossRealmTrust.setRemoteEnvironmentCrn("remoteenvcrn");
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(stackService.getByIdWithListsInTransaction(4L)).thenReturn(mock(Stack.class));

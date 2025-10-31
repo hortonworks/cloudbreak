@@ -197,10 +197,10 @@ public class StackToDescribeFreeIpaResponseConverter {
         if (crossRealmTrust.isPresent()) {
             CrossRealmTrust trust = crossRealmTrust.get();
             trustResponse.setTrustStatus(trust.getTrustStatus().name());
-            trustResponse.setFqdn(trust.getFqdn());
+            trustResponse.setFqdn(trust.getKdcFqdn());
             trustResponse.setOperationId(trust.getOperationId());
-            trustResponse.setRealm(trust.getRealm());
-            trustResponse.setIp(trust.getIp());
+            trustResponse.setRealm(trust.getKdcRealm());
+            trustResponse.setIp(trust.getKdcIp());
         } else {
             trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
         }

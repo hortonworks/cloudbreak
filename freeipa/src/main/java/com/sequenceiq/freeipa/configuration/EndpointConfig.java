@@ -38,6 +38,7 @@ import com.sequenceiq.freeipa.controller.OperationV1Controller;
 import com.sequenceiq.freeipa.controller.ProgressV1Controller;
 import com.sequenceiq.freeipa.controller.RecipeV1Controller;
 import com.sequenceiq.freeipa.controller.TrustV1Controller;
+import com.sequenceiq.freeipa.controller.TrustV2Controller;
 import com.sequenceiq.freeipa.controller.UserV1Controller;
 import com.sequenceiq.freeipa.controller.UtilV1Controller;
 import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
@@ -77,7 +78,8 @@ public class EndpointConfig extends ResourceConfig {
             AuthorizationUtilController.class,
             OpenApiController.class,
             EncryptionV1Controller.class,
-            TrustV1Controller.class);
+            TrustV1Controller.class,
+            TrustV2Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
