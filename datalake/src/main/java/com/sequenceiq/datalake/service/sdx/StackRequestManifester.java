@@ -317,7 +317,7 @@ public class StackRequestManifester {
         }
         if (cluster != null && cluster.getPassword() == null) {
             // default password needed for ranger
-            cluster.setPassword(PasswordUtil.generateCmAndPostgresConformPassword());
+            cluster.setPassword(PasswordUtil.generatePassword());
         }
     }
 

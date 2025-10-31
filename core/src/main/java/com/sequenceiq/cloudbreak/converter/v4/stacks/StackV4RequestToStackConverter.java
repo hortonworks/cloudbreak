@@ -429,16 +429,16 @@ public class StackV4RequestToStackConverter {
             cluster.setUserName(source.getCluster().getUserName());
             cluster.setPassword(source.getCluster().getPassword());
             cluster.setCloudbreakClusterManagerUser(cmAdminUserName);
-            cluster.setCloudbreakClusterManagerPassword(PasswordUtil.generateCmAndPostgresConformPassword());
+            cluster.setCloudbreakClusterManagerPassword(PasswordUtil.generatePassword());
             if (monitoringConfiguration.getClouderaManagerExporter() != null) {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
-                cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generateCmAndPostgresConformPassword());
+                cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             }
-            cluster.setCdpNodeStatusMonitorPassword(PasswordUtil.generateCmAndPostgresConformPassword());
+            cluster.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
             cluster.setDpClusterManagerUser(cmMgmtUsername);
-            cluster.setDpClusterManagerPassword(PasswordUtil.generateCmAndPostgresConformPassword());
-            cluster.setKeyStorePwd(PasswordUtil.generateCmAndPostgresConformPassword());
-            cluster.setTrustStorePwd(PasswordUtil.generateCmAndPostgresConformPassword());
+            cluster.setDpClusterManagerPassword(PasswordUtil.generatePassword());
+            cluster.setKeyStorePwd(PasswordUtil.generatePassword());
+            cluster.setTrustStorePwd(PasswordUtil.generatePassword());
         }
     }
 

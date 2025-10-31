@@ -24,7 +24,7 @@ public class IdBrokerConverterUtil {
         idBroker.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
         idBroker.setSignPub(PkiUtil.convertPemPublicKey(identityKey.getPublic()));
         idBroker.setSignCert(PkiUtil.convert(cert));
-        idBroker.setMasterSecret(PasswordUtil.generateCmAndPostgresConformPassword());
+        idBroker.setMasterSecret(PasswordUtil.generatePassword());
 
         Cluster cluster = new Cluster();
         cluster.setId(clusterId);
