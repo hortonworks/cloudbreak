@@ -76,6 +76,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Schema(description = ModelDescriptions.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
 
+    @Schema(description = ModelDescriptions.ENCRYPTION_PROFILE_NAME)
+    private String encryptionProfileName;
+
     public String getEnvironment() {
         return environment;
     }
@@ -228,6 +231,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.security = security;
     }
 
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
+    }
+
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -244,6 +255,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setImage(image);
         toInstance.setDisableDbSslEnforcement(disableDbSslEnforcement);
         toInstance.setSecurity(security);
+        toInstance.setEncryptionProfileName(encryptionProfileName);
     }
 
     @Override
@@ -262,6 +274,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", image=" + image +
                 ", security=" + security +
                 ", disableDbSslEnforcement=" + disableDbSslEnforcement +
+                ", encryptionProfileName=" + encryptionProfileName +
                 '}';
     }
 }

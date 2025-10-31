@@ -320,8 +320,6 @@ public class ClusterV4RequestToClusterConverterTest {
     @Test
     public void testConvertClusterV4RequestToCluster() {
         blueprint.setStackType("CDH");
-        when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(any(), any())).thenReturn(blueprint);
-        when(rdsConfigService.findByNamesInWorkspace(any(), any())).thenReturn(Set.of(new RDSConfig()));
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setName("test-name");
         clusterV4Request.setUserName("username");
@@ -333,7 +331,6 @@ public class ClusterV4RequestToClusterConverterTest {
         cloudStorageRequest.setAws(new AwsStorageParameters());
         clusterV4Request.setCloudStorage(cloudStorageRequest);
         ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
-
         ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
         repository.setBaseUrl("base.url");
         repository.setVersion("1.0");
@@ -348,13 +345,18 @@ public class ClusterV4RequestToClusterConverterTest {
         clusterV4Request.setBlueprintName("bp-name");
         clusterV4Request.setRangerRazEnabled(true);
         clusterV4Request.setRangerRmsEnabled(true);
+        clusterV4Request.setEncryptionProfileName("epName");
+
+        when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(any(), any())).thenReturn(blueprint);
+        when(rdsConfigService.findByNamesInWorkspace(any(), any())).thenReturn(Set.of(new RDSConfig()));
 
         Cluster convert = underTest.convert(clusterV4Request);
 
-        assertEquals(convert.getName(), clusterV4Request.getName());
-        assertEquals(convert.getDatabaseServerCrn(), clusterV4Request.getDatabaseServerCrn());
-        assertEquals(convert.getProxyConfigCrn(), clusterV4Request.getProxyConfigCrn());
-        assertEquals(convert.isRangerRazEnabled(), clusterV4Request.isRangerRazEnabled());
-        assertEquals(convert.isRangerRmsEnabled(), clusterV4Request.isRangerRmsEnabled());
+        assertEquals(clusterV4Request.getName(), convert.getName());
+        assertEquals(clusterV4Request.getDatabaseServerCrn(), convert.getDatabaseServerCrn());
+        assertEquals(clusterV4Request.getProxyConfigCrn(), convert.getProxyConfigCrn());
+        assertEquals(clusterV4Request.isRangerRazEnabled(), convert.isRangerRazEnabled());
+        assertEquals(clusterV4Request.isRangerRmsEnabled(), convert.isRangerRmsEnabled());
+        assertEquals(clusterV4Request.getEncryptionProfileName(), convert.getEncryptionProfileName());
     }
 }

@@ -108,7 +108,10 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         source.setDbSslRootCertBundle("bundle");
         source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
         source.setCertExpirationDetails(CERT_EXPIRATION_DETAILS);
+        source.setEncryptionProfileName("epName");
         Blueprint blueprint = source.getBlueprint();
+
+        // WHEN
         when(stackDtoDelegate.getBlueprint()).thenReturn(blueprint);
         when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
         when(stackUtil.extractClusterManagerIp(any(StackDtoDelegate.class))).thenReturn("10.0.0.1");
@@ -123,14 +126,15 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
         when(stackDtoDelegate.getWorkspace()).thenReturn(source.getWorkspace());
         when(stackDtoDelegate.getCluster()).thenReturn(source);
-        // WHEN
+
         ClusterV4Response result = underTest.convert(stackDtoDelegate);
+
         // THEN
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
         assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
         assertEquals(CERT_EXPIRATION_DETAILS, result.getCertExpirationDetails());
-
+        assertEquals("epName", result.getEncryptionProfileName());
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway", "customConfigurationsName",
                 "customConfigurationsCrn");
         assertAllFieldsNotNull(result, skippedFields);

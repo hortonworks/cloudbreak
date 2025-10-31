@@ -33,6 +33,7 @@ import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionRespo
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
 @Service
 public class EncryptionProfileService implements CompositeAuthResourcePropertyProvider {
@@ -57,13 +58,16 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private final DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
 
+    private final ClusterService clusterService;
+
     public EncryptionProfileService(
             EncryptionProfileRepository repository,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
             OwnerAssignmentService ownerAssignmentService,
             TransactionService transactionService,
             EncryptionProfileProvider encryptionProfileProvider,
-            DefaultEncryptionProfileProvider defaultEncryptionProfileProvider
+            DefaultEncryptionProfileProvider defaultEncryptionProfileProvider,
+            ClusterService clusterService
     ) {
         this.repository = repository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
@@ -71,6 +75,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         this.transactionService = transactionService;
         this.encryptionProfileProvider = encryptionProfileProvider;
         this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
+        this.clusterService = clusterService;
     }
 
     public EncryptionProfile create(EncryptionProfile encryptionProfile, String accountId, String creator) {
@@ -215,10 +220,25 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             throw new BadRequestException("The default encryption profile cannot be deleted.");
         }
 
-        List<String> names = repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(encryptionProfile.getName(), accountId);
+        List<String> envNames = repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(encryptionProfile.getName(), accountId);
+        List<String> clusterNames = clusterService.getClustersNamesByEncrytionProfile(encryptionProfile.getName());
 
-        if (!names.isEmpty()) {
-            throw new BadRequestException("Encryption Profile cannot be deleted. It is still used by the environment(s): " + String.join(",", names));
+        StringBuilder message = new StringBuilder();
+
+        if (!envNames.isEmpty()) {
+            message.append(" It is still used by the environment(s): ")
+                    .append(String.join(",", envNames))
+                    .append('.');
+        }
+        if (!clusterNames.isEmpty()) {
+            message.append(" It is still used by the cluster(s): ")
+                    .append(String.join(",", clusterNames))
+                    .append('.');
+
+        }
+
+        if (message.length() > 0) {
+            throw new BadRequestException(String.format("Encryption Profile cannot be deleted.%s", message));
         }
     }
 

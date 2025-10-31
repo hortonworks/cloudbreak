@@ -1017,4 +1017,14 @@ public interface StackV4Endpoint {
             @PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
+    @Path("internal/get_clusters_names_by_encryption_profile/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get clusters name using given encryption profile",
+            operationId = "getClustersNamesByEncrytionProfile",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<String> getClustersNamesByEncrytionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String encryptionProfileName,
+            @QueryParam("accountId") String accountId);
 }

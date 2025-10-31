@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -133,6 +134,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ClusterService clusterService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -774,5 +778,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier updatePublicDnsEntriesByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         Crn userCrn = Crn.ofUser(initiatorUserCrn);
         return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofCrn(crn), userCrn.getAccountId());
+    }
+
+    @InternalOnly
+    @Override
+    public List<String> getClustersNamesByEncrytionProfile(Long workspaceId, String encryptionProfileName, @AccountId String accountId) {
+        return clusterService.getAllClusterNamesUsingEncrytionProfile(encryptionProfileName, accountId);
     }
 }

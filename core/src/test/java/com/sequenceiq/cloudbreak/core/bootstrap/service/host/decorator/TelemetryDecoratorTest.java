@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
@@ -98,6 +99,9 @@ public class TelemetryDecoratorTest {
     @Mock
     private EnvironmentService environmentService;
 
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
+
     @Spy
     private Monitoring monitoring = new Monitoring();
 
@@ -114,7 +118,8 @@ public class TelemetryDecoratorTest {
                 clusterComponentConfigProvider,
                 encryptionProfileProvider,
                 "1.0.0",
-                environmentService);
+                environmentService,
+                encryptionProfileService);
     }
 
     @Test
@@ -219,7 +224,6 @@ public class TelemetryDecoratorTest {
                 "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
             )
         );
-        detailedEnvironmentResponse.setEncryptionProfileName("epName");
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
@@ -230,7 +234,7 @@ public class TelemetryDecoratorTest {
         telemetry.setMonitoring(monitoring);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
-        given(environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName()))
+        given(encryptionProfileService.getEncryptionProfileByNameOrDefault(any(), any()))
                 .willReturn(encryptionProfileResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());

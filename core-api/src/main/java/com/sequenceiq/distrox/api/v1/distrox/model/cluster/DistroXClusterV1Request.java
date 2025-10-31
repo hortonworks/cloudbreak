@@ -68,6 +68,9 @@ public class DistroXClusterV1Request implements Serializable {
     @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
     private String customConfigurationsName;
 
+    @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_NAME)
+    private String encryptionProfileName;
+
     public String getUserName() {
         return userName;
     }
@@ -146,5 +149,13 @@ public class DistroXClusterV1Request implements Serializable {
 
     public void setCustomConfigurationsName(String customConfigurationsName) {
         this.customConfigurationsName = customConfigurationsName;
+    }
+
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
+    }
+
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
     }
 }

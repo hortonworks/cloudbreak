@@ -18,5 +18,6 @@
     "name": "teszt",
     "type": "WASB",
     "defaultFs": true
-  }
+  },
+  "encryptionProfileName": "epName"
 }

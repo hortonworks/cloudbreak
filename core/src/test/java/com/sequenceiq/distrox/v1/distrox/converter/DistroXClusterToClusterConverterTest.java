@@ -450,6 +450,26 @@ class DistroXClusterToClusterConverterTest {
         verify(cmConverter, times(1)).convert(clusterV4RequestInput.getCm());
     }
 
+    @Test
+    public void testConvertToClusterV4RequestWhenEncryptionProfileIsNotNull() {
+        DistroXClusterV1Request distroXClusterV1Request = new DistroXClusterV1Request();
+        distroXClusterV1Request.setEncryptionProfileName("epName");
+        distroXV1RequestInput.setCluster(distroXClusterV1Request);
+
+        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+
+        assertEquals(distroXClusterV1Request.getEncryptionProfileName(), result.getEncryptionProfileName());
+    }
+
+    @Test
+    public void testConvertToDistroXClusterV1RequestWhenEncryptionProfileIsNotNull() {
+        clusterV4RequestInput.setEncryptionProfileName("epName");
+
+        DistroXClusterV1Request result = underTest.convert(clusterV4RequestInput);
+
+        assertEquals(clusterV4RequestInput.getEncryptionProfileName(), result.getEncryptionProfileName());
+    }
+
     private DistroXV1Request createDistroXV1Request() {
         DistroXV1Request r = new DistroXV1Request();
         r.setCluster(createDistroXClusterV1Request());

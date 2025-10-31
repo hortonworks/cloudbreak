@@ -53,7 +53,9 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "af as additionalFileSystem, " +
             "c.autoTlsEnabled as autoTlsEnabled, " +
             "c.dbSslRootCertBundle as dbSslRootCertBundle, " +
-            "c.dbSslEnabled as dbSslEnabled " +
+            "c.dbSslEnabled as dbSslEnabled, " +
+
+            "c.encryptionProfileName as encryptionProfileName " +
             "FROM Cluster c " +
             "LEFT JOIN c.stack s " +
             "LEFT JOIN c.fileSystem f " +

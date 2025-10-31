@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
@@ -90,6 +91,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final EncryptionProfileProvider encryptionProfileProvider;
 
+    private final EncryptionProfileService encryptionProfileService;
+
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
@@ -99,7 +102,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             ClusterComponentConfigProvider clusterComponentConfigProvider,
             EncryptionProfileProvider encryptionProfileProvider,
             @Value("${info.app.version:}") String version,
-            EnvironmentService environmentService) {
+            EnvironmentService environmentService,
+            EncryptionProfileService encryptionProfileService) {
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
         this.entitlementService = entitlementService;
@@ -110,6 +114,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.version = version;
         this.environmentService = environmentService;
         this.encryptionProfileProvider = encryptionProfileProvider;
+        this.encryptionProfileService = encryptionProfileService;
     }
 
     @Override
@@ -128,8 +133,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setTelemetry(telemetry);
         DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
 
-        EncryptionProfileResponse encryptionProfileResponse = environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(
-                environmentResponse.getEncryptionProfileName());
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByNameOrDefault(environmentResponse, stackDto);
         Map<String, List<String>> userCipherSuits =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getCipherSuites)

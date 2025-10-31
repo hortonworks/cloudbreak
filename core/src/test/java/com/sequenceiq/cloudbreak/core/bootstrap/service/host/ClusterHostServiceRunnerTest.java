@@ -113,6 +113,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
@@ -141,6 +142,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -328,6 +330,9 @@ class ClusterHostServiceRunnerTest {
 
     @Spy
     private KerberosPillarConfigGenerator kerberosPillarConfigGenerator;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
 
     @BeforeEach
     void setUp() {
@@ -1173,6 +1178,36 @@ class ClusterHostServiceRunnerTest {
         verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
         verifyEncryptionProfile(saltConfig.getValue());
         verifyAlternativeUserfacingCertAndKey(saltConfig.getValue(), true, "cert", "key");
+    }
+
+    @Test
+    void testCustomEncryptionProfile() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices("7.13.2.0");
+        GatewayView clusterGateway = mock(GatewayView.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+        Set<String> tlsVersions = Set.of("TLSv1.2", "TLSv1.3");
+        Map<String, List<String>> cipherSuites = Map.of("TLSv1.2",
+                List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
+                "TLSv1.3",
+                List.of("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"));
+
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(encryptionProfileService.getEncryptionProfileByNameOrDefault(any(), any())).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(tlsVersions);
+        when(encryptionProfileResponse.getCipherSuites()).thenReturn(cipherSuites);
+        when(encryptionProfileProvider.getTlsVersions(eq(tlsVersions), any())).thenReturn("TLSv1.2,TLSv1.3");
+        when(encryptionProfileProvider.getTlsCipherSuites(eq(cipherSuites), any(), any(), anyBoolean()))
+                .thenReturn("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
+        verifyEncryptionProfile(saltConfig.getValue());
     }
 
     private void setupMocksForRunClusterServices() {

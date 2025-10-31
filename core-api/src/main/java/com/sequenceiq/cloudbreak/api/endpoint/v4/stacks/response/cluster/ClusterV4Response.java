@@ -142,6 +142,9 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
     private String certExpirationDetails;
 
+    @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_NAME)
+    private String encryptionProfileName;
+
     public Long getId() {
         return id;
     }
@@ -428,5 +431,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setCertExpirationDetails(String certExpirationDetails) {
         this.certExpirationDetails = certExpirationDetails;
+    }
+
+    public String getEncryptionProfileName() {
+        return encryptionProfileName;
+    }
+
+    public void setEncryptionProfileName(String encryptionProfileName) {
+        this.encryptionProfileName = encryptionProfileName;
     }
 }

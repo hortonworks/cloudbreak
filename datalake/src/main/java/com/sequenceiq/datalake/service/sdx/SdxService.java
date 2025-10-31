@@ -474,7 +474,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (sdxClusterRequest.getVariant() != null) {
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }
-        setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
+        setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms(),
+                sdxClusterRequest.getEncryptionProfileName());
 
         sdxIntanceService.overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
                 Collections.emptyList(), sdxClusterRequest.getClusterShape());
@@ -625,7 +626,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null,
                 Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64));
-        setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled());
+        setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
+                stackV4Response.getCluster().getEncryptionProfileName());
         setSecurityRequest(sdxCluster, stackRequest);
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
@@ -723,7 +725,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return response;
     }
 
-    private void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled) {
+    private void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled,
+            String encryptionProfileName) {
         if (javaVersion != null) {
             stackV4Request.setJavaVersion(javaVersion);
         }
@@ -732,6 +735,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         // this, we will set the raz enablement here. See CB-7474 for more details
         stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
         stackV4Request.getCluster().setRangerRmsEnabled(rmsEnabled);
+        stackV4Request.getCluster().setEncryptionProfileName(encryptionProfileName);
     }
 
     private SdxCluster validateAndCreateNewSdxClusterForResize(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
@@ -1232,8 +1236,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             }
         }
 
-        if (isNotEmpty(environment.getEncryptionProfileName()) &&
-                !environment.getEncryptionProfileName().startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME) &&
+        if ((checkIfEncryptionProfileNameIsNeitherNullOrDefault(environment.getEncryptionProfileName()) ||
+                checkIfEncryptionProfileNameIsNeitherNullOrDefault(clusterRequest.getEncryptionProfileName())) &&
                 !sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())) {
             validationBuilder.error(String.format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above",
                     clusterRequest.getRuntime()));
@@ -1244,6 +1248,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
 
+    }
+
+    private boolean checkIfEncryptionProfileNameIsNeitherNullOrDefault(String name) {
+        return isNotEmpty(name) && !name.startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME);
     }
 
     private void validateImage(SdxClusterRequest clusterRequest, ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response,

@@ -48,6 +48,7 @@ import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstan
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
 @ExtendWith(MockitoExtension.class)
 public class EncryptionProfileServiceTest {
@@ -68,6 +69,9 @@ public class EncryptionProfileServiceTest {
 
     @Mock
     private DefaultEncryptionProfileProvider defaultEncryptionProfileProvider;
+
+    @Mock
+    private ClusterService clusterService;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -368,13 +372,41 @@ public class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testDeleteByNameWhenProfileStillInUse() {
+    void testDeleteByNameWhenProfileStillInUseByEnv() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
         when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of("env1", "env2"));
 
         assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Encryption Profile cannot be deleted. It is still used by the environment(s): env1,env2");
+                .hasMessage("Encryption Profile cannot be deleted. It is still used by the environment(s): env1,env2.");
+
+        verify(repository, never()).delete(any());
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
+    }
+
+    @Test
+    void testDeleteByNameWhenProfileStillInUseByCluster() {
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(clusterService.getClustersNamesByEncrytionProfile(NAME)).thenReturn(List.of("cluster1", "cluster2"));
+
+        assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Encryption Profile cannot be deleted. It is still used by the cluster(s): cluster1,cluster2.");
+
+        verify(repository, never()).delete(any());
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
+    }
+
+    @Test
+    void testDeleteByNameWhenProfileStillInUseByEnvAndCluster() {
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of("env1", "env2"));
+        when(clusterService.getClustersNamesByEncrytionProfile(NAME)).thenReturn(List.of("cluster1", "cluster2"));
+
+        assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Encryption Profile cannot be deleted. It is still used by the environment(s): env1,env2. " +
+                        "It is still used by the cluster(s): cluster1,cluster2.");
 
         verify(repository, never()).delete(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());

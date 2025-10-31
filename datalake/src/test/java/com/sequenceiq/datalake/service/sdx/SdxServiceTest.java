@@ -2409,6 +2409,22 @@ class SdxServiceTest {
     }
 
     @Test
+    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsNotSupportedByRuntimeInDatalakeRequest() {
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setRuntime("7.3.1");
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        clusterRequest.setEncryptionProfileName("custom-ep");
+
+        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(false);
+
+        BadRequestException exception =
+                assertThrows(BadRequestException.class, () -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
+
+        assertEquals("Encryption Profile is not supported in 7.3.1 runtime. Please use 7.3.2 or above", exception.getMessage());
+    }
+
+    @Test
     void testFindDetachedSdxClusterByOriginalCrnNoDetached() {
         when(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(any(), eq(DATALAKE_CRN))).thenReturn(Collections.emptyList());
         Optional<SdxCluster> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findDetachedSdxClusterByOriginalCrn(DATALAKE_CRN));

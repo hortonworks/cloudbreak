@@ -103,7 +103,8 @@ public class RestUrlParserTest {
             "/singleimage/internal",
             "/imd_update",
             "internal/get_database_certificate_status",
-            "internal/manage_db_user"
+            "internal/manage_db_user",
+            "internal/get_clusters_names_by_encryption_profile"
     };
 
     @Mock

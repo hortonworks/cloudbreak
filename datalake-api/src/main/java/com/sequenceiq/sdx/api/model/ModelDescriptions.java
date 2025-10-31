@@ -256,6 +256,8 @@ public class ModelDescriptions {
 
     public static final String PROVIDER_SYNC_STATES = "Contains information about provider issues. No issues found if empty or 'VALID'.";
 
+    public static final String ENCRYPTION_PROFILE_NAME = "Name of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
+
     private ModelDescriptions() {
     }
 

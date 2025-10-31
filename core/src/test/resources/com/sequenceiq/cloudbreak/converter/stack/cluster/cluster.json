@@ -12,5 +12,6 @@
   "gateway": {
     "enableGateway": true,
     "topologyName": "cb"
-  }
+  },
+  "encryptionProfileName": "epName"
 }

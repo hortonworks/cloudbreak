@@ -8,5 +8,6 @@
     "password" : "pass"
   },
   "emailTo": "admin@example.com",
-  "validateBlueprint" : true
+  "validateBlueprint" : true,
+  "encryptionProfileName": "epName"
 }

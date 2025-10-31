@@ -96,6 +96,8 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Boolean getDbSslEnabled();
 
+    String getEncryptionProfileName();
+
     default String getPassword() {
         return getIfNotNull(getPasswordSecret(), Secret::getRaw);
     }

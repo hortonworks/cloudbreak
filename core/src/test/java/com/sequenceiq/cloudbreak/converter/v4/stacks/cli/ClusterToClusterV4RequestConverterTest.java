@@ -160,4 +160,15 @@ public class ClusterToClusterV4RequestConverterTest {
 
         assertEquals(1L, result.getDatabases().size());
     }
+
+    @Test
+    public void testConvertWhenEncryptionProfileIsNotNull() {
+        String expected = "epName";
+
+        when(cluster.getEncryptionProfileName()).thenReturn(expected);
+
+        ClusterV4Request result = underTest.convert(cluster);
+
+        assertEquals(expected, result.getEncryptionProfileName());
+    }
 }

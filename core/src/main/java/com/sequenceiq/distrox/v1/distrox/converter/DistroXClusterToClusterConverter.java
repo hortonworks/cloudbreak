@@ -61,6 +61,8 @@ public class DistroXClusterToClusterConverter {
         response.setValidateBlueprint(source.getValidateBlueprint());
         response.setCustomContainer(null);
         response.setCustomQueue(null);
+        response.setEncryptionProfileName(source.getEncryptionProfileName());
+
         return response;
     }
 
@@ -74,6 +76,7 @@ public class DistroXClusterToClusterConverter {
         request.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
         request.setCloudStorage(source.getCloudStorage());
         request.setProxy(source.getProxyConfigCrn());
+        request.setEncryptionProfileName(source.getEncryptionProfileName());
         return request;
     }
 

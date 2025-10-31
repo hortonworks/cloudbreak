@@ -119,6 +119,15 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
             @Param("dbSslRootCertBundle") String dbSslRootCertBundle,
             @Param("dbSslEnabled") Boolean dbSslEnabled);
 
+    @Query("SELECT c.name as name " +
+            "FROM Cluster c " +
+            "JOIN Stack s ON s.environmentCrn =  c.environmentCrn " +
+            "JOIN Userdata u ON u.stack.id =  s.id " +
+            "WHERE c.encryptionProfileName = :name " +
+            "AND u.accountId = :accountId " +
+            "AND s.terminated IS NUll ")
+    List<String> findAllClusterNamesByEncrytionProfileNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
     @Override
     default Class<Cluster> getEntityClass() {
         return Cluster.class;

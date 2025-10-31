@@ -123,6 +123,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
@@ -316,6 +317,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private EncryptionProfileProvider encryptionProfileProvider;
+
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -606,8 +610,8 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        EncryptionProfileResponse encryptionProfileResponse =  environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(
-                detailedEnvironmentResponse.getEncryptionProfileName());
+        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByNameOrDefault(
+                detailedEnvironmentResponse, stackDto);
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getTlsVersions)
@@ -893,8 +897,8 @@ public class ClusterHostServiceRunner {
             gateway.put("address_is_ip", addressIsIp);
         }
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
-        EncryptionProfileResponse encryptionProfileResponse = environmentService
-                .getEncryptionProfileByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName());
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByNameOrDefault(
+                detailedEnvironmentResponse, stackDto);
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
                         .map(EncryptionProfileResponse::getTlsVersions)
