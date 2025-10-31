@@ -102,6 +102,16 @@
       ]
     },
     {
+      "Sid": "PrivateLink",
+      "Action": [
+        "vpce:AllowMultiRegion"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
+    },
+    {
       "Sid": "CertificateManagerFull",
       "Action": [
         "acm:AddTagsToCertificate",
