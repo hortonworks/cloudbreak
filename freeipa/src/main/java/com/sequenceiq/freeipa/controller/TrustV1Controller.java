@@ -48,7 +48,7 @@ public class TrustV1Controller implements TrustV1Endpoint {
 
     @Override
     @InternalOnly
-    public FinishSetupCrossRealmTrustResponse finishSetup(@RequestObject FinishSetupCrossRealmTrustRequest request) {
+    public FinishSetupCrossRealmTrustResponse finishSetup(@RequestObject FinishSetupCrossRealmTrustRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return trustSetupService.finishTrustSetup(accountId, request);
     }
