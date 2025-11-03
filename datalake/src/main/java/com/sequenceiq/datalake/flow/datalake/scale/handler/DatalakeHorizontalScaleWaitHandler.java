@@ -59,7 +59,7 @@ public class DatalakeHorizontalScaleWaitHandler extends EventSenderAwareHandler<
         try {
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
-            cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
+            cloudbreakPoller.pollUpdateUntilAvailable("Datalake horizontal scaling",
                     sdxCluster, pollingConfig);
             DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(data)

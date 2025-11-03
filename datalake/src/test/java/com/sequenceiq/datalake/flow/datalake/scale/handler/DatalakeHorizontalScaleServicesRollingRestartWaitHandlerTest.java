@@ -65,7 +65,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandlerTest {
         DatalakeHorizontalScaleFlowEvent result = (DatalakeHorizontalScaleFlowEvent) underTest.doAccept(new HandlerEvent<>(
                 new Event<>(datalakeHorizontalScaleFlowEvent)));
 
-        verify(cloudbreakPoller).pollFlowStateBySdxClusterUntilComplete(eq("Datalake horizontal scaling"), eq(sdxCluster), any(PollingConfig.class));
+        verify(cloudbreakPoller).pollUpdateUntilAvailable(eq("Datalake horizontal scaling"), eq(sdxCluster), any(PollingConfig.class));
         assertEquals(sdxId, result.getResourceId());
         assertEquals(userId, result.getUserId());
     }
@@ -81,7 +81,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandlerTest {
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxService.getById(sdxId)).thenReturn(sdxCluster);
         doThrow(new UserBreakException()).
-                when(cloudbreakPoller).pollFlowStateBySdxClusterUntilComplete(eq("Datalake horizontal scaling"),
+                when(cloudbreakPoller).pollUpdateUntilAvailable(eq("Datalake horizontal scaling"),
                         eq(sdxCluster), any(PollingConfig.class));
 
         DatalakeHorizontalScaleFlowEvent result =
@@ -104,7 +104,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandlerTest {
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxService.getById(sdxId)).thenReturn(sdxCluster);
         doThrow(new PollerStoppedException()).
-                when(cloudbreakPoller).pollFlowStateBySdxClusterUntilComplete(eq("Datalake horizontal scaling"), eq(sdxCluster),
+                when(cloudbreakPoller).pollUpdateUntilAvailable(eq("Datalake horizontal scaling"), eq(sdxCluster),
                         any(PollingConfig.class));
 
         DatalakeHorizontalScaleFlowEvent result =

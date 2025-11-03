@@ -65,9 +65,10 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
             LOGGER.debug("Start CM polling for services rolling restart process with id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
-            cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
+            cloudbreakPoller.pollUpdateUntilAvailable("Datalake horizontal scaling",
                     sdxCluster, pollingConfig);
             LOGGER.debug("Services Rolling restart finsihed");
+            sdxService.refreshDataHub(sdxCluster.getClusterName(), null);
             response = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(event.getData())
                     .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector())
