@@ -3,7 +3,7 @@ FROM docker-private.infra.cloudera.com/cloudera_base/hardened/cloudera-openjdk:j
 MAINTAINER info@cloudera.com
 
 # REPO URL to download jar
-ARG REPO_URL=https://nexus-private.hortonworks.com/nexus/content/groups/public
+ARG REPO_URL=https://nexus-private.eng.cloudera.com/nexus/content/groups/public
 ARG VERSION=''
 ARG TARGETARCH=''
 ARG FIPS_MODE_ENABLED=false
