@@ -71,6 +71,7 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc);
                     return testDto;
                 })
+                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, true))
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .validate();
