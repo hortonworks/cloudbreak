@@ -3,7 +3,7 @@
 set -ex
 
 LATEST_JACOCO_VERSION=$(curl -s https://search.maven.org/solrsearch/select?q=g:org.jacoco+AND+a:org.jacoco.cli | jq -r '.response.docs[0].latestVersion')
-curl -sS https://nexus-private.hortonworks.com/nexus/repository/public/org/jacoco/org.jacoco.cli/${LATEST_JACOCO_VERSION}/org.jacoco.cli-${LATEST_JACOCO_VERSION}-nodeps.jar > jacococli.jar
+curl -sS https://nexus-private.eng.cloudera.com/nexus/content/groups/public/org/jacoco/org.jacoco.cli/${LATEST_JACOCO_VERSION}/org.jacoco.cli-${LATEST_JACOCO_VERSION}-nodeps.jar > jacococli.jar
 
 java -jar jacococli.jar report ./integcb/jacoco-reports/cbreak_cloudbreak_1_jacoco.exec \
   --classfiles ../core/build/classes/java/main \
