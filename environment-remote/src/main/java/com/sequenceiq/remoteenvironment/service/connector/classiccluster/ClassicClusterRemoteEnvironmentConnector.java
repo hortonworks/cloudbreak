@@ -1,6 +1,8 @@
 package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -14,6 +16,8 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
@@ -25,6 +29,10 @@ import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.Pr
 public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironmentConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassicClusterRemoteEnvironmentConnector.class);
+
+    // also accept UNSET for older registrations
+    private static final Set<OnPremisesApiProto.ClouderaManagerClusterType.Value> BASE_CLUSTER_TYPES =
+            Set.of(OnPremisesApiProto.ClouderaManagerClusterType.Value.UNSET, OnPremisesApiProto.ClouderaManagerClusterType.Value.BASE_CLUSTER);
 
     @Inject
     private RemoteClusterServiceClient remoteClusterServiceClient;
@@ -54,7 +62,10 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     @Override
     public Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
-        return listService.list();
+        List<OnPremisesApiProto.Cluster> clusters = remoteClusterServiceClient.listClassicClusters().stream()
+                .filter(this::isBaseCluster)
+                .toList();
+        return listService.list(clusters);
     }
 
     @Override
@@ -115,6 +126,15 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     private OnPremisesApiProto.Cluster getCluster(String crn) {
-        return remoteClusterServiceClient.describeClassicCluster(crn);
+        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(crn);
+        if (!isBaseCluster(cluster)) {
+            throw new BadRequestException("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
+        }
+        return cluster;
+    }
+
+    @VisibleForTesting
+    boolean isBaseCluster(OnPremisesApiProto.Cluster cluster) {
+        return BASE_CLUSTER_TYPES.contains(cluster.getData().getClusterDetails().getClouderaManagerClusterType());
     }
 }

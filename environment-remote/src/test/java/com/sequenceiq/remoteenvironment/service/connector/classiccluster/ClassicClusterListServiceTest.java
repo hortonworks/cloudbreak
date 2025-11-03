@@ -1,7 +1,5 @@
 package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
-import static org.mockito.Mockito.when;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -10,21 +8,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterListServiceTest {
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private RemoteClusterServiceClient remoteClusterServiceClient;
 
     @InjectMocks
     private ClassicClusterListService underTest;
@@ -52,8 +42,7 @@ class ClassicClusterListServiceTest {
                 .setDatacenterName("datacenter2")
                 .setData(clusterData)
                 .build();
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster1, cluster2));
-        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
+        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list(List.of(cluster1, cluster2));
         assertEquals(cluster1, actual.stream().filter(resp -> resp.getName().equals(cluster1.getName())).findFirst().get());
         assertEquals(cluster2, actual.stream().filter(resp -> resp.getName().equals(cluster2.getName())).findFirst().get());
     }
@@ -69,8 +58,7 @@ class ClassicClusterListServiceTest {
                 .setManagerUri("manageruri")
                 .setDatacenterName("datacenter1")
                 .build();
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
-        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
+        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list(List.of(cluster));
         Assertions.assertEquals(cluster.getManagerUri(), actual.stream().findFirst().get().getUrl());
     }
 
@@ -84,8 +72,7 @@ class ClassicClusterListServiceTest {
                 .setManagerUri("manageruri")
                 .setDatacenterName("datacenter1")
                 .build();
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
-        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
+        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list(List.of(cluster));
         Assertions.assertEquals(cluster.getManagerUri(), actual.stream().findFirst().get().getUrl());
     }
 
@@ -103,8 +90,7 @@ class ClassicClusterListServiceTest {
                 .setDatacenterName("datacenter1")
                 .setData(clusterData)
                 .build();
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
-        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
+        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list(List.of(cluster));
         Assertions.assertEquals("AVAILABLE", actual.stream().findFirst().get().getStatus());
     }
 
@@ -122,8 +108,7 @@ class ClassicClusterListServiceTest {
                 .setDatacenterName("datacenter1")
                 .setData(clusterData)
                 .build();
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster));
-        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list();
+        Collection<SimpleRemoteEnvironmentResponse> actual = underTest.list(List.of(cluster));
         Assertions.assertEquals("CONCERNING_HEALTH", actual.stream().findFirst().get().getStatus());
     }
 

@@ -2,11 +2,16 @@ package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +25,10 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +45,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @Mock
     private PrivateControlPlaneRemoteEnvironmentConnector privateControlPlaneRemoteEnvironmentConnector;
+
+    @Mock
+    private ClassicClusterListService listService;
 
     @Mock
     private ClassicClusterDescribeService describeService;
@@ -60,6 +70,19 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     @BeforeEach
     void setUp() {
         lenient().when(remoteClusterServiceClient.describeClassicCluster(CLUSTER_CRN)).thenReturn(cluster);
+        underTest = spy(underTest);
+        lenient().doReturn(true).when(underTest).isBaseCluster(cluster);
+    }
+
+    @Test
+    void list() {
+        OnPremisesApiProto.Cluster computeCluster = mock();
+        doReturn(false).when(underTest).isBaseCluster(computeCluster);
+        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster, computeCluster));
+
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list(ACCOUNT_ID);
+
+        verify(listService).list(List.of(cluster));
     }
 
     @Test
@@ -74,6 +97,15 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         assertThat(result).isEqualTo(mockV1);
         verify(describeService).describe(cluster);
         verifyNoInteractions(privateControlPlaneRemoteEnvironmentConnector);
+    }
+
+    @Test
+    void describeV1ComputeCluster() {
+        doReturn(false).when(underTest).isBaseCluster(cluster);
+
+        assertThatThrownBy(() -> underTest.describeV1(ACCOUNT_ID, CLUSTER_CRN))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
     }
 
     @Test

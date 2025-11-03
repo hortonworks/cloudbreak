@@ -56844,6 +56844,25 @@ java.lang.String defaultValue) {
      */
     com.google.protobuf.ByteString
         getUuidBytes();
+
+    /**
+     * <pre>
+     * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+     * </pre>
+     *
+     * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+     * @return The enum numeric value on the wire for clouderaManagerClusterType.
+     */
+    int getClouderaManagerClusterTypeValue();
+    /**
+     * <pre>
+     * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+     * </pre>
+     *
+     * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+     * @return The clouderaManagerClusterType.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value getClouderaManagerClusterType();
   }
   /**
    * <pre>
@@ -56872,6 +56891,7 @@ java.lang.String defaultValue) {
       hostsUrl_ = "";
       entityStatus_ = 0;
       uuid_ = "";
+      clouderaManagerClusterType_ = 0;
     }
 
     @java.lang.Override
@@ -57317,6 +57337,32 @@ java.lang.String defaultValue) {
       }
     }
 
+    public static final int CLOUDERAMANAGERCLUSTERTYPE_FIELD_NUMBER = 11;
+    private int clouderaManagerClusterType_ = 0;
+    /**
+     * <pre>
+     * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+     * </pre>
+     *
+     * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+     * @return The enum numeric value on the wire for clouderaManagerClusterType.
+     */
+    @java.lang.Override public int getClouderaManagerClusterTypeValue() {
+      return clouderaManagerClusterType_;
+    }
+    /**
+     * <pre>
+     * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+     * </pre>
+     *
+     * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+     * @return The clouderaManagerClusterType.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value getClouderaManagerClusterType() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.forNumber(clouderaManagerClusterType_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -57360,6 +57406,9 @@ java.lang.String defaultValue) {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, uuid_);
+      }
+      if (clouderaManagerClusterType_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.UNSET.getNumber()) {
+        output.writeEnum(11, clouderaManagerClusterType_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -57407,6 +57456,10 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, uuid_);
       }
+      if (clouderaManagerClusterType_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(11, clouderaManagerClusterType_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -57441,6 +57494,7 @@ java.lang.String defaultValue) {
       if (entityStatus_ != other.entityStatus_) return false;
       if (!getUuid()
           .equals(other.getUuid())) return false;
+      if (clouderaManagerClusterType_ != other.clouderaManagerClusterType_) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -57475,6 +57529,8 @@ java.lang.String defaultValue) {
       hash = (53 * hash) + entityStatus_;
       hash = (37 * hash) + UUID_FIELD_NUMBER;
       hash = (53 * hash) + getUuid().hashCode();
+      hash = (37 * hash) + CLOUDERAMANAGERCLUSTERTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + clouderaManagerClusterType_;
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -57621,6 +57677,7 @@ java.lang.String defaultValue) {
         hostsUrl_ = "";
         entityStatus_ = 0;
         uuid_ = "";
+        clouderaManagerClusterType_ = 0;
         return this;
       }
 
@@ -57684,6 +57741,9 @@ java.lang.String defaultValue) {
         }
         if (((from_bitField0_ & 0x00000200) != 0)) {
           result.uuid_ = uuid_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.clouderaManagerClusterType_ = clouderaManagerClusterType_;
         }
       }
 
@@ -57782,6 +57842,9 @@ java.lang.String defaultValue) {
           bitField0_ |= 0x00000200;
           onChanged();
         }
+        if (other.clouderaManagerClusterType_ != 0) {
+          setClouderaManagerClusterTypeValue(other.getClouderaManagerClusterTypeValue());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -57859,6 +57922,11 @@ java.lang.String defaultValue) {
                 bitField0_ |= 0x00000200;
                 break;
               } // case 82
+              case 88: {
+                clouderaManagerClusterType_ = input.readEnum();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 88
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -58780,6 +58848,79 @@ java.lang.String defaultValue) {
         checkByteStringIsUtf8(value);
         uuid_ = value;
         bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+
+      private int clouderaManagerClusterType_ = 0;
+      /**
+       * <pre>
+       * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+       * </pre>
+       *
+       * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+       * @return The enum numeric value on the wire for clouderaManagerClusterType.
+       */
+      @java.lang.Override public int getClouderaManagerClusterTypeValue() {
+        return clouderaManagerClusterType_;
+      }
+      /**
+       * <pre>
+       * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+       * </pre>
+       *
+       * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+       * @param value The enum numeric value on the wire for clouderaManagerClusterType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaManagerClusterTypeValue(int value) {
+        clouderaManagerClusterType_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+       * </pre>
+       *
+       * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+       * @return The clouderaManagerClusterType.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value getClouderaManagerClusterType() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.forNumber(clouderaManagerClusterType_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+       * </pre>
+       *
+       * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+       * @param value The clouderaManagerClusterType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaManagerClusterType(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000400;
+        clouderaManagerClusterType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+       * </pre>
+       *
+       * <code>.onpremises.ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClouderaManagerClusterType() {
+        bitField0_ = (bitField0_ & ~0x00000400);
+        clouderaManagerClusterType_ = 0;
         onChanged();
         return this;
       }
@@ -61142,6 +61283,544 @@ java.lang.String defaultValue) {
 
   }
 
+  public interface ClouderaManagerClusterTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ClouderaManagerClusterType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * The type of cluster. If unspecified, defaults to either BASE_CLUSTER (if no data contexts are provided) or COMPUTE_CLUSTER (if one or more data contexts are provided).
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ClouderaManagerClusterType}
+   */
+  public static final class ClouderaManagerClusterType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ClouderaManagerClusterType)
+      ClouderaManagerClusterTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ClouderaManagerClusterType.newBuilder() to construct.
+    private ClouderaManagerClusterType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ClouderaManagerClusterType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ClouderaManagerClusterType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClouderaManagerClusterType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClouderaManagerClusterType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code onpremises.ClouderaManagerClusterType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * CDP Base cluster being managed by Cloudera Manager.
+       * </pre>
+       *
+       * <code>BASE_CLUSTER = 1;</code>
+       */
+      BASE_CLUSTER(1),
+      /**
+       * <pre>
+       * OnPremises containerized compute cluster being managed by the Cloudera control plane.
+       * </pre>
+       *
+       * <code>COMPUTE_CLUSTER = 2;</code>
+       */
+      COMPUTE_CLUSTER(2),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * CDP Base cluster being managed by Cloudera Manager.
+       * </pre>
+       *
+       * <code>BASE_CLUSTER = 1;</code>
+       */
+      public static final int BASE_CLUSTER_VALUE = 1;
+      /**
+       * <pre>
+       * OnPremises containerized compute cluster being managed by the Cloudera control plane.
+       * </pre>
+       *
+       * <code>COMPUTE_CLUSTER = 2;</code>
+       */
+      public static final int COMPUTE_CLUSTER_VALUE = 2;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return BASE_CLUSTER;
+          case 2: return COMPUTE_CLUSTER;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:onpremises.ClouderaManagerClusterType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The type of cluster. If unspecified, defaults to either BASE_CLUSTER (if no data contexts are provided) or COMPUTE_CLUSTER (if one or more data contexts are provided).
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ClouderaManagerClusterType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ClouderaManagerClusterType)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClouderaManagerClusterType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClouderaManagerClusterType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ClouderaManagerClusterType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ClouderaManagerClusterType)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ClouderaManagerClusterType)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ClouderaManagerClusterType>
+        PARSER = new com.google.protobuf.AbstractParser<ClouderaManagerClusterType>() {
+      @java.lang.Override
+      public ClouderaManagerClusterType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ClouderaManagerClusterType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ClouderaManagerClusterType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClouderaManagerClusterType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ClusterQueryOperatorOrBuilder extends
       // @@protoc_insertion_point(interface_extends:onpremises.ClusterQueryOperator)
       com.google.protobuf.MessageOrBuilder {
@@ -62675,6 +63354,11 @@ java.lang.String defaultValue) {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_ClusterType_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ClouderaManagerClusterType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ClouderaManagerClusterType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ClusterQueryOperator_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -62891,100 +63575,105 @@ java.lang.String defaultValue) {
       "d\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010province\030\003 \001(\t\022" +
       "\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010latitu" +
       "de\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026\200\227\"\001\212\227\"\016IN_" +
-      "DEVELOPMENT\"\217\002\n\016ClusterDetails\022\014\n\004name\030\001" +
+      "DEVELOPMENT\"\341\002\n\016ClusterDetails\022\014\n\004name\030\001" +
       " \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007version\030\003 \001" +
       "(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017maintenanceMo" +
       "de\030\005 \001(\010\022\031\n\021maintenanceOwners\030\006 \003(\t\022\022\n\nc" +
       "lusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010 \001(\t\0224\n\014ent" +
       "ityStatus\030\t \001(\0162\036.onpremises.EntityStatu" +
-      "s.Value\022\014\n\004uuid\030\n \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
-      "PMENT\"9\n\021ClusterDiscovered\022\014\n\004name\030\001 \001(\t" +
-      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n\014ClusterStat" +
-      "e\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SYNC\020\001\022\024\n\020S" +
-      "YNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016\n\nSYNC_ER" +
-      "ROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERIFIED\020\005\022\035\n" +
-      "\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200\227\"\001\212\227\"\016IN" +
-      "_DEVELOPMENT\"b\n\022ClusterManagerType\"4\n\005Va" +
-      "lue\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020CLOUDERA_M" +
-      "ANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\013Clus" +
-      "terType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003HDP\020\001\022\007\n\003" +
-      "CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
-      "\"S\n\024ClusterQueryOperator\"#\n\005Value\022\t\n\005UNS" +
-      "ET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
-      "PMENT\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013\n\007UNKN" +
-      "OWN\020\000\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DOWN\020\003\022\022" +
-      "\n\016UNKNOWN_HEALTH\020\004\022\023\n\017DISABLED_HEALTH\020\005\022" +
-      "\025\n\021CONCERNING_HEALTH\020\006\022\016\n\nBAD_HEALTH\020\007\022\017" +
-      "\n\013GOOD_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010STOPPIN" +
-      "G\020\n\022\031\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT2\225\024\n\rOnPremisesApi\022u\n\014List" +
-      "Clusters\022\037.onpremises.ListClustersReques" +
-      "t\032 .onpremises.ListClustersResponse\"\"\220\246\035" +
-      "\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017Regis" +
-      "terCluster\022\".onpremises.RegisterClusterR" +
-      "equest\032#.onpremises.RegisterClusterRespo" +
-      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017Descr" +
-      "ibeCluster\022\".onpremises.DescribeClusterR" +
-      "equest\032#.onpremises.DescribeClusterRespo" +
-      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUpdat" +
-      "eCluster\022 .onpremises.UpdateClusterReque" +
-      "st\032!.onpremises.UpdateClusterResponse\"\032\240" +
-      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractClus" +
-      "ters\022\".onpremises.ExtractClustersRequest" +
-      "\032#.onpremises.ExtractClustersResponse\"\032\240" +
-      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListCluste" +
-      "rServices\022&.onpremises.ListClusterServic" +
-      "esRequest\032\'.onpremises.ListClusterServic" +
-      "esResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022x" +
-      "\n\rListLocations\022 .onpremises.ListLocatio" +
-      "nsRequest\032!.onpremises.ListLocationsResp" +
-      "onse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
-      "\022v\n\017SyncClusterData\022\".onpremises.SyncClu" +
-      "sterDataRequest\032#.onpremises.SyncCluster" +
-      "DataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001" +
-      "\022p\n\rDeleteCluster\022 .onpremises.DeleteClu" +
-      "sterRequest\032!.onpremises.DeleteClusterRe" +
-      "sponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001\n\037L" +
-      "istPartiallyRegisteredClusters\0222.onpremi" +
-      "ses.ListPartiallyRegisteredClustersReque" +
-      "st\0323.onpremises.ListPartiallyRegisteredC" +
-      "lustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVE" +
-      "LOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClusterCo" +
-      "nnectivity\022+.onpremises.SetupClusterConn" +
-      "ectivityRequest\032,.onpremises.SetupCluste" +
-      "rConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEVELO" +
-      "PMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePartiall" +
-      "yRegisteredCluster\0225.onpremises.Describe" +
-      "PartiallyRegisteredClusterRequest\0326.onpr" +
-      "emises.DescribePartiallyRegisteredCluste" +
-      "rResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035" +
-      "\006public\022z\n\rRegisterAgent\022 .onpremises.Re" +
-      "gisterAgentRequest\032!.onpremises.Register" +
-      "AgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035" +
-      "\001\332\246\035\006public\022\211\001\n\022ExtractSetupScript\022%.onp" +
-      "remises.ExtractSetupScriptRequest\032&.onpr" +
-      "emises.ExtractSetupScriptResponse\"$\240\246\035\001\252" +
-      "\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001\n\037Extr" +
-      "actCertificateRefreshScript\0222.onpremises" +
-      ".ExtractCertificateRefreshScriptRequest\032" +
-      "3.onpremises.ExtractCertificateRefreshSc" +
-      "riptResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
-      "\332\246\035\006public\022\211\001\n\022UpdateClusterState\022%.onpr" +
-      "emises.UpdateClusterStateRequest\032&.onpre" +
-      "mises.UpdateClusterStateResponse\"$\240\246\035\001\252\246" +
-      "\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n\030Check" +
-      "ClusterConnectivity\022+.onpremises.CheckCl" +
-      "usterConnectivityRequest\032,.onpremises.Ch" +
-      "eckClusterConnectivityResponse\"\032\240\246\035\001\252\246\035\016" +
-      "IN_DEVELOPMENT\310\246\035\000\022\251\001\n DeletePartiallyRe" +
-      "gisteredCluster\0223.onpremises.DeleteParti" +
-      "allyRegisteredClusterRequest\0324.onpremise" +
-      "s.DeletePartiallyRegisteredClusterRespon" +
-      "se\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304\023\030\n\non" +
-      "premises\022\nOnPremises\242\304\023\016private,publicB`" +
-      "\n+com.cloudera.thunderhead.service.onpre" +
-      "misesB\022OnPremisesApiProtoZ\031com/cloudera/" +
-      "cdp/protobuf\200\210\'\001b\006proto3"
+      "s.Value\022\014\n\004uuid\030\n \001(\t\022P\n\032clouderaManager" +
+      "ClusterType\030\013 \001(\0162,.onpremises.ClouderaM" +
+      "anagerClusterType.Value:\026\200\227\"\001\212\227\"\016IN_DEVE" +
+      "LOPMENT\"9\n\021ClusterDiscovered\022\014\n\004name\030\001 \001" +
+      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n\014ClusterSt" +
+      "ate\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SYNC\020\001\022\024\n" +
+      "\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016\n\nSYNC_" +
+      "ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERIFIED\020\005\022" +
+      "\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200\227\"\001\212\227\"\016" +
+      "IN_DEVELOPMENT\"b\n\022ClusterManagerType\"4\n\005" +
+      "Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020CLOUDERA" +
+      "_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\013Cl" +
+      "usterType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003HDP\020\001\022\007" +
+      "\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
+      "NT\"o\n\032ClouderaManagerClusterType\"9\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\020\n\014BASE_CLUSTER\020\001\022\023\n\017COMPUT" +
+      "E_CLUSTER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"S\n\024C" +
+      "lusterQueryOperator\"#\n\005Value\022\t\n\005UNSET\020\000\022" +
+      "\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
+      "\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013\n\007UNKNOWN\020\000" +
+      "\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DOWN\020\003\022\022\n\016UNK" +
+      "NOWN_HEALTH\020\004\022\023\n\017DISABLED_HEALTH\020\005\022\025\n\021CO" +
+      "NCERNING_HEALTH\020\006\022\016\n\nBAD_HEALTH\020\007\022\017\n\013GOO" +
+      "D_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010STOPPING\020\n\022\031" +
+      "\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "VELOPMENT2\225\024\n\rOnPremisesApi\022u\n\014ListClust" +
+      "ers\022\037.onpremises.ListClustersRequest\032 .o" +
+      "npremises.ListClustersResponse\"\"\220\246\035\001\230\246\035\024" +
+      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017RegisterCl" +
+      "uster\022\".onpremises.RegisterClusterReques" +
+      "t\032#.onpremises.RegisterClusterResponse\"\032" +
+      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017DescribeCl" +
+      "uster\022\".onpremises.DescribeClusterReques" +
+      "t\032#.onpremises.DescribeClusterResponse\"\032" +
+      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUpdateClus" +
+      "ter\022 .onpremises.UpdateClusterRequest\032!." +
+      "onpremises.UpdateClusterResponse\"\032\240\246\035\001\252\246" +
+      "\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractClusters\022" +
+      "\".onpremises.ExtractClustersRequest\032#.on" +
+      "premises.ExtractClustersResponse\"\032\240\246\035\001\252\246" +
+      "\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListClusterServ" +
+      "ices\022&.onpremises.ListClusterServicesReq" +
+      "uest\032\'.onpremises.ListClusterServicesRes" +
+      "ponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022x\n\rLis" +
+      "tLocations\022 .onpremises.ListLocationsReq" +
+      "uest\032!.onpremises.ListLocationsResponse\"" +
+      "\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017S" +
+      "yncClusterData\022\".onpremises.SyncClusterD" +
+      "ataRequest\032#.onpremises.SyncClusterDataR" +
+      "esponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022p\n\rD" +
+      "eleteCluster\022 .onpremises.DeleteClusterR" +
+      "equest\032!.onpremises.DeleteClusterRespons" +
+      "e\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001\n\037ListPa" +
+      "rtiallyRegisteredClusters\0222.onpremises.L" +
+      "istPartiallyRegisteredClustersRequest\0323." +
+      "onpremises.ListPartiallyRegisteredCluste" +
+      "rsResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPME" +
+      "NT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClusterConnect" +
+      "ivity\022+.onpremises.SetupClusterConnectiv" +
+      "ityRequest\032,.onpremises.SetupClusterConn" +
+      "ectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
+      "\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePartiallyRegi" +
+      "steredCluster\0225.onpremises.DescribeParti" +
+      "allyRegisteredClusterRequest\0326.onpremise" +
+      "s.DescribePartiallyRegisteredClusterResp" +
+      "onse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006publ" +
+      "ic\022z\n\rRegisterAgent\022 .onpremises.Registe" +
+      "rAgentRequest\032!.onpremises.RegisterAgent" +
+      "Response\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006" +
+      "public\022\211\001\n\022ExtractSetupScript\022%.onpremis" +
+      "es.ExtractSetupScriptRequest\032&.onpremise" +
+      "s.ExtractSetupScriptResponse\"$\240\246\035\001\252\246\035\016IN" +
+      "_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001\n\037ExtractCe" +
+      "rtificateRefreshScript\0222.onpremises.Extr" +
+      "actCertificateRefreshScriptRequest\0323.onp" +
+      "remises.ExtractCertificateRefreshScriptR" +
+      "esponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006p" +
+      "ublic\022\211\001\n\022UpdateClusterState\022%.onpremise" +
+      "s.UpdateClusterStateRequest\032&.onpremises" +
+      ".UpdateClusterStateResponse\"$\240\246\035\001\252\246\035\016IN_" +
+      "DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n\030CheckClust" +
+      "erConnectivity\022+.onpremises.CheckCluster" +
+      "ConnectivityRequest\032,.onpremises.CheckCl" +
+      "usterConnectivityResponse\"\032\240\246\035\001\252\246\035\016IN_DE" +
+      "VELOPMENT\310\246\035\000\022\251\001\n DeletePartiallyRegiste" +
+      "redCluster\0223.onpremises.DeletePartiallyR" +
+      "egisteredClusterRequest\0324.onpremises.Del" +
+      "etePartiallyRegisteredClusterResponse\"\032\240" +
+      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304\023\030\n\nonpremi" +
+      "ses\022\nOnPremises\242\304\023\016private,publicB`\n+com" +
+      ".cloudera.thunderhead.service.onpremises" +
+      "B\022OnPremisesApiProtoZ\031com/cloudera/cdp/p" +
+      "rotobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -63320,7 +64009,7 @@ java.lang.String defaultValue) {
     internal_static_onpremises_ClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterDetails_descriptor,
-        new java.lang.String[] { "Name", "DisplayName", "Version", "FullVersion", "MaintenanceMode", "MaintenanceOwners", "ClusterUrl", "HostsUrl", "EntityStatus", "Uuid", });
+        new java.lang.String[] { "Name", "DisplayName", "Version", "FullVersion", "MaintenanceMode", "MaintenanceOwners", "ClusterUrl", "HostsUrl", "EntityStatus", "Uuid", "ClouderaManagerClusterType", });
     internal_static_onpremises_ClusterDiscovered_descriptor =
       getDescriptor().getMessageTypes().get(51);
     internal_static_onpremises_ClusterDiscovered_fieldAccessorTable = new
@@ -63345,14 +64034,20 @@ java.lang.String defaultValue) {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterType_descriptor,
         new java.lang.String[] { });
-    internal_static_onpremises_ClusterQueryOperator_descriptor =
+    internal_static_onpremises_ClouderaManagerClusterType_descriptor =
       getDescriptor().getMessageTypes().get(55);
+    internal_static_onpremises_ClouderaManagerClusterType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ClouderaManagerClusterType_descriptor,
+        new java.lang.String[] { });
+    internal_static_onpremises_ClusterQueryOperator_descriptor =
+      getDescriptor().getMessageTypes().get(56);
     internal_static_onpremises_ClusterQueryOperator_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterQueryOperator_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_EntityStatus_descriptor =
-      getDescriptor().getMessageTypes().get(56);
+      getDescriptor().getMessageTypes().get(57);
     internal_static_onpremises_EntityStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_EntityStatus_descriptor,

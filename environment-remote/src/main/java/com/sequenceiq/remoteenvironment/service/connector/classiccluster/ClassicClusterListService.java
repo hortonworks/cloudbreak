@@ -4,15 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
-import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 
 @Component
@@ -23,12 +20,10 @@ class ClassicClusterListService {
 
     private static final String AVAILABLE = "AVAILABLE";
 
-    @Inject
-    private RemoteClusterServiceClient remoteClusterServiceClient;
-
-    Collection<SimpleRemoteEnvironmentResponse> list() {
-        List<OnPremisesApiProto.Cluster> clusters = remoteClusterServiceClient.listClassicClusters();
-        return clusters.stream().map(this::convert).collect(Collectors.toSet());
+    Collection<SimpleRemoteEnvironmentResponse> list(List<OnPremisesApiProto.Cluster> clusters) {
+        return clusters.stream()
+                .map(this::convert)
+                .collect(Collectors.toSet());
     }
 
     private SimpleRemoteEnvironmentResponse convert(OnPremisesApiProto.Cluster cluster) {

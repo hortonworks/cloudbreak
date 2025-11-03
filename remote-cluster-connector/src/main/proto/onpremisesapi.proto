@@ -987,6 +987,8 @@ message ClusterDetails {
   EntityStatus.Value entityStatus = 9;
   // Uuid of the cluster.
   string uuid = 10;
+  // The type of cluster. Possible values are BASE_CLUSTER or COMPUTE_CLUSTER.
+  ClouderaManagerClusterType.Value clouderaManagerClusterType = 11;
 }
 
 
@@ -1045,6 +1047,19 @@ message ClusterType {
     CDH = 2;
     // CDPDC Cluster.
     CDPDC = 3;
+  }
+}
+
+// The type of cluster. If unspecified, defaults to either BASE_CLUSTER (if no data contexts are provided) or COMPUTE_CLUSTER (if one or more data contexts are provided).
+message ClouderaManagerClusterType {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // CDP Base cluster being managed by Cloudera Manager.
+    BASE_CLUSTER = 1;
+    // OnPremises containerized compute cluster being managed by the Cloudera control plane.
+    COMPUTE_CLUSTER = 2;
   }
 }
 
