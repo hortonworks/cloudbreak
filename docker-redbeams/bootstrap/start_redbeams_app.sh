@@ -65,7 +65,7 @@ if [ "${JACOCO_AGENT_ENABLED:-false}" = true ]; then
     mkdir -p ${JACOCO_AGENT_DIR}
     : ${JACOCO_AGENT_VERSION:=0.8.13}
     : ${JACOCO_AGENT_PORT:=6300}
-    JACOCO_AGENT_JAR_URL="https://nexus-private.hortonworks.com/nexus/repository/public/org/jacoco/org.jacoco.agent/${JACOCO_AGENT_VERSION}/org.jacoco.agent-${JACOCO_AGENT_VERSION}-runtime.jar"
+    JACOCO_AGENT_JAR_URL="https://nexus-private.eng.cloudera.com/nexus/repository/public/org/jacoco/org.jacoco.agent/${JACOCO_AGENT_VERSION}/org.jacoco.agent-${JACOCO_AGENT_VERSION}-runtime.jar"
     curl -fsSL -o "${JACOCO_AGENT_DIR}/jacocoagent.jar" "${JACOCO_AGENT_JAR_URL}"
     if [ ! -f "${JACOCO_AGENT_DIR}/jacocoagent.jar" ]; then
         echo "JACOCO agent not found. Please check the url: ${JACOCO_AGENT_JAR_URL} and path: ${JACOCO_AGENT_DIR}/jacocoagent.jar"
