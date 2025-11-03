@@ -26,3 +26,10 @@ check_databus_network_connectivity:
 {%- endif %}
 include:
   - telemetry.upgrade
+
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 8 %}
+remove_cdp_telemetry_libcrypto:
+    file.absent:
+        - name: /opt/cdp-telemetry/bin/libcrypto.so.1.1
+        - onlyif: test -f /lib64/libcrypto.so.1.1
+{%- endif %}
