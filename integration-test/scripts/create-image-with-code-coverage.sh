@@ -113,7 +113,7 @@ date
 echo -e "\n\033[1;96m--- Download latest JaCoCo agent\033[0m\n"
 mkdir -p ./integcb/jacoco
 LATEST_JACOCO_VERSION=$(curl -s https://search.maven.org/solrsearch/select?q=g:org.jacoco+AND+a:org.jacoco.agent | jq -r '.response.docs[0].latestVersion')
-curl -sS https://nexus-private.hortonworks.com/nexus/repository/public/org/jacoco/org.jacoco.agent/${LATEST_JACOCO_VERSION}/org.jacoco.agent-${LATEST_JACOCO_VERSION}-runtime.jar > ./integcb/jacoco/jacocoagent.jar
+curl -sS https://nexus-private.eng.cloudera.com/nexus/repository/public/org/jacoco/org.jacoco.agent/${LATEST_JACOCO_VERSION}/org.jacoco.agent-${LATEST_JACOCO_VERSION}-runtime.jar > ./integcb/jacoco/jacocoagent.jar
 
 date
 echo -e "\n\033[1;96m--- Copy JaCoCo agent JAR\033[0m\n"
