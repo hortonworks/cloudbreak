@@ -140,12 +140,14 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
-    public T getByNameForWorkspaceId(String name, Long workspaceId) {
+    public T getByNameForWorkspaceId(String name, Long workspaceId, boolean fillMdcContext) {
         Optional<T> object = repository().findByNameAndWorkspaceId(name, workspaceId);
         if (object.isEmpty()) {
             throw new NotFoundException(String.format("No resource found with name '%s'", name));
         }
-        MDCBuilder.buildMdcContext(object.get());
+        if (fillMdcContext) {
+            MDCBuilder.buildMdcContext(object.get());
+        }
         return object.get();
     }
 

@@ -475,7 +475,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog getImageCatalogByName(Long workspaceId, String name) {
-        return isEnvDefault(name) ? getDefaultCatalog(name) : getByNameForWorkspaceId(name, workspaceId);
+        return isEnvDefault(name) ? getDefaultCatalog(name) : getByNameForWorkspaceId(name, workspaceId, false);
     }
 
     public boolean isEnvDefault(String name) {

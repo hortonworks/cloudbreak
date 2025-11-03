@@ -20,7 +20,11 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T create(T resource, Workspace workspace, User user);
 
-    T getByNameForWorkspaceId(String name, Long workspaceId);
+    T getByNameForWorkspaceId(String name, Long workspaceId, boolean fillMdcContext);
+
+    default T getByNameForWorkspaceId(String name, Long workspaceId) {
+        return getByNameForWorkspaceId(name, workspaceId, true);
+    }
 
     Set<T> getByNamesForWorkspaceId(Set<String> name, Long workspaceId);
 
