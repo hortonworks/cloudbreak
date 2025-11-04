@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation;
 
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_DOMAIN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 import static com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatusValidationService.TRUST_STATUS_VALIDATION_STATE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,8 +67,8 @@ class TrustStatusValidationServiceTest {
 
         assertThat(result.hasError()).isFalse();
         assertThat(((Map<String, Map<String, String>>) stateParams.getStateParams().get(FREEIPA)).get(TRUST_SETUP_PILLAR))
-                .containsEntry(AD_DOMAIN, "ad.hybrid.cloudera.org")
-                .containsEntry(REALM, "HYBRID.CLOUDERA.ORG");
+                .containsEntry(KDC_DOMAIN, "ad.hybrid.cloudera.org")
+                .containsEntry(KDC_REALM, "HYBRID.CLOUDERA.ORG");
         verify(hostOrchestrator).runOrchestratorState(stateParams);
     }
 

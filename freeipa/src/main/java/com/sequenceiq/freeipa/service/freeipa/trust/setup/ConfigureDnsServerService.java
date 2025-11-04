@@ -2,9 +2,9 @@ package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_DOMAIN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.REALM;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 
 import java.util.Map;
@@ -82,18 +82,18 @@ public class ConfigureDnsServerService {
         Optional<DnsZone> dnsZone = ignoreNotFoundExceptionWithValue(() -> freeIpaClient.showForwardDnsZone(realm), null);
         if (dnsZone.isEmpty()) {
             LOGGER.debug("Forward DNS zone does not exists [{}], add it now", realm);
-            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getKdcIp(), FORWARD_POLICY), null);
+            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(realm, crossRealmTrust.getDnsIp(), FORWARD_POLICY), null);
             LOGGER.debug("Forward DNS zone [{}] added", realm);
         }
-        ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone("in-addr.arpa.", crossRealmTrust.getKdcIp(), FORWARD_POLICY), null);
+        ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone("in-addr.arpa.", crossRealmTrust.getDnsIp(), FORWARD_POLICY), null);
     }
 
     private OrchestratorStateParams createOrchestratorStateParams(Stack stack, CrossRealmTrust crossRealmTrust) {
         OrchestratorStateParams stateParameters = saltStateParamsService.createStateParams(
                 stack, TRUSTSETUP_DNS_STATE, true, maxRetryCount, maxRetryCountOnError);
         stateParameters.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
-                REALM, StringUtils.capitalize(crossRealmTrust.getKdcRealm())))));
+                KDC_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                KDC_REALM, StringUtils.capitalize(crossRealmTrust.getKdcRealm())))));
         LOGGER.debug("Created OrchestratorStateParams for running cross-realm trust DNS set up: {}", stateParameters);
         return stateParameters;
     }

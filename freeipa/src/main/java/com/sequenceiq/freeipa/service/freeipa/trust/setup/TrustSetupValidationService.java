@@ -1,8 +1,9 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_DOMAIN;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_IP;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.DNS_IP;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_IP;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
@@ -124,8 +125,9 @@ public class TrustSetupValidationService {
             OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, stateName, true,
                     MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                    AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
-                    AD_IP, crossRealmTrust.getKdcIp()))));
+                    KDC_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                    KDC_IP, crossRealmTrust.getKdcIp(),
+                    DNS_IP, crossRealmTrust.getDnsIp()))));
             hostOrchestrator.runOrchestratorState(stateParams);
             return new TaskResult(TaskResultType.INFO, "Successful " + messagePrefix, Map.of());
         } catch (CloudbreakOrchestratorException orchestratorException) {

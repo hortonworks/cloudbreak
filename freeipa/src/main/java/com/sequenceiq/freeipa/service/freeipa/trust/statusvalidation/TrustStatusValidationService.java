@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation;
 
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.AD_DOMAIN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 
 import java.util.Locale;
@@ -55,8 +55,8 @@ public class TrustStatusValidationService {
             OrchestratorStateParams stateParams =
                     saltStateParamsService.createStateParams(stack, TRUST_STATUS_VALIDATION_STATE, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                    AD_DOMAIN, crossRealmTrust.getKdcFqdn(),
-                    REALM, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT)))));
+                    KDC_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                    KDC_REALM, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT)))));
             hostOrchestrator.runOrchestratorState(stateParams);
         } catch (Exception ex) {
             LOGGER.warn("Trust status validation failed for AD: {}", crossRealmTrust.getKdcFqdn());

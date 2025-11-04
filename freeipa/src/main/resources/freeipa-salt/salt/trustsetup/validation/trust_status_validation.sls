@@ -12,8 +12,8 @@ run-trust-status-validation:
     - name: /opt/salt/scripts/trust_status_validation.sh
     - env:
       - ADMIN_PASSWORD: {{ salt['pillar.get']('freeipa:password') }}
-      - AD_FQDN: {{ salt['pillar.get']('freeipa:trust_setup:ad_domain', '') }}
-      - AD_REALM: {{ salt['pillar.get']('freeipa:trust_setup:realm', '') }}
+      - KDC_FQDN: {{ salt['pillar.get']('freeipa:trust_setup:kdc_domain', '') }}
+      - KDC_REALM: {{ salt['pillar.get']('freeipa:trust_setup:kdc_realm', '') }}
     - failhard: True
     - require:
       - file: /opt/salt/scripts/trust_status_validation.sh

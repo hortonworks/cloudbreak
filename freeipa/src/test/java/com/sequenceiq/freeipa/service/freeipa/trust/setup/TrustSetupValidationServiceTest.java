@@ -182,6 +182,7 @@ class TrustSetupValidationServiceTest {
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setKdcFqdn("fqdn");
         crossRealmTrust.setKdcIp("ip");
+        crossRealmTrust.setDnsIp("dnsip");
         crossRealmTrust.setRemoteEnvironmentCrn("remoteenvcrn");
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(stackService.getByIdWithListsInTransaction(4L)).thenReturn(mock(Stack.class));
