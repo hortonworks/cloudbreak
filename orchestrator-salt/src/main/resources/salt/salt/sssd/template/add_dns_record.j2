@@ -37,12 +37,28 @@ do
   else
     cat "${IPA_STDERR}" >&2
   fi
-  rm -f "${IPA_STDERR}"
   if [[ "$retVal" -eq 0 || ( "$retVal" -eq 1 && "$alreadyExists" -eq 1 ) ]]; then
+    rm -f "${IPA_STDERR}"
     break
   elif [[ "$attempt" -eq 3 ]]; then
-    errcho "Failed to set DNS A-record for ${HOSTNAME}"
-    false
+    errcho "Failed to update DNS A-record for ${HOSTNAME}"
+    if grep "DNS resource record not found" ${IPA_STDERR} &>/dev/null; then
+      echo "Try to add missing A record"
+      retVal=0
+      ipa dnsrecord-add {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} 2>"${IPA_STDERR}" || retVal=$?
+        if [[ "$retVal" -eq 0 ]]; then
+          echo "Successfully added DNS A record"
+          rm -f "${IPA_STDERR}"
+        else
+          errcho "Failed to add record [${retVal}]"
+          cat "${IPA_STDERR}" >&2
+          rm -f "${IPA_STDERR}"
+          false
+        fi
+    else
+      rm -f "${IPA_STDERR}"
+      false
+    fi
   fi
 done
 
@@ -54,6 +70,7 @@ do
         REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/\.$ZONE_NET$//g")
         # dnsrecord-add must either add the record or modify it
         if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+          echo "Adding reverse record ${REVERSE_RECORD_NAME} to ${zone} with PTR ${FQDN}."
           ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
         fi
         if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
