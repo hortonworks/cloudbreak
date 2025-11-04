@@ -106,7 +106,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
-            .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, true))
+            .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
             .given("dx", DistroXTestDto.class)
             .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
             .withSeLinuxSecurity(SeLinux.ENFORCING.name())
@@ -118,7 +118,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
             .when(distroXTestClient.create(), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
-            .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, true))
+            .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
             .given("dx", DistroXTestDto.class)
             .when(distroXTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform), TEST_INSTANCE_GROUP,
                             DiskType.ROOT_DISK), RunningParameter.key("dx"))
@@ -142,6 +142,7 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
                 validateDisks(testDto, tc, client, cloudPlatform);
                 return testDto;
             })
+            .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
             .validate();
     }
 

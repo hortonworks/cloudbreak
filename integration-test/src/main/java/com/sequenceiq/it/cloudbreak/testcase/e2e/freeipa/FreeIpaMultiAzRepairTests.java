@@ -64,14 +64,14 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, false))
+                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false, true))
+                .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .validate();

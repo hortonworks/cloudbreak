@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +32,10 @@ public class SELinuxAssertions {
     public static final String SELINUX_REPORT_DIRECTORY = "selinux-reports";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SELinuxAssertions.class);
+
+    private static final String REPORT_FILENAME_FORMAT = SELINUX_REPORT_DIRECTORY + "/%s/%s-%s.json";
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     private static final String CHECK_SELINUX_MODE_COMMAND = "getenforce | tr -d '[:space:]'";
 
@@ -67,25 +73,25 @@ public class SELinuxAssertions {
     @Inject
     private SshSudoCommandActions sshSudoCommandActions;
 
-    public void validateAllExisting(TestContext testContext, boolean throwIfAnyError, boolean generateDenyReports) {
+    public void validateAllExisting(TestContext testContext, boolean throwIfAnyError) {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
         if (freeIpaTestDto != null) {
             validateAll(validationBuilder, testContext, "FreeIpa",
-                    freeIpaTestDto.getAllInstanceIps(testContext), freeIpaTestDto.getSelinuxMode(), generateDenyReports);
+                    freeIpaTestDto.getAllInstanceIps(testContext), freeIpaTestDto.getSelinuxMode(), true);
         }
 
         SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
         if (sdxInternalTestDto != null) {
             validateAll(validationBuilder, testContext, "DataLake",
-                    sdxInternalTestDto.getAllInstanceIps(testContext), sdxInternalTestDto.getSelinuxMode(), generateDenyReports);
+                    sdxInternalTestDto.getAllInstanceIps(testContext), sdxInternalTestDto.getSelinuxMode(), true);
         }
 
         DistroXTestDto distroXTestDto = testContext.get(DistroXTestDto.class);
         if (distroXTestDto != null) {
             validateAll(validationBuilder, testContext, "DataHub",
-                    distroXTestDto.getAllInstanceIps(testContext), distroXTestDto.getSelinuxMode(), generateDenyReports);
+                    distroXTestDto.getAllInstanceIps(testContext), distroXTestDto.getSelinuxMode(), true);
         }
 
         ValidationResult validationResult = validationBuilder.build();
@@ -94,6 +100,10 @@ public class SELinuxAssertions {
         } else {
             LOGGER.error("The SELinux validation found the following errors: \n{}", validationResult.getFormattedErrors());
         }
+    }
+
+    public FreeIpaTestDto validateAll(TestContext testContext, FreeIpaTestDto testDto, boolean throwIfAnyError) {
+        return validateAll(testContext, testDto, throwIfAnyError, true);
     }
 
     public FreeIpaTestDto validateAll(TestContext testContext, FreeIpaTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
@@ -107,6 +117,10 @@ public class SELinuxAssertions {
         return testDto;
     }
 
+    public SdxInternalTestDto validateAll(TestContext testContext, SdxInternalTestDto testDto, boolean throwIfAnyError) {
+        return validateAll(testContext, testDto, throwIfAnyError, true);
+    }
+
     public SdxInternalTestDto validateAll(TestContext testContext, SdxInternalTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
         ValidationResult validationResult = validateAll("DataLake", testContext,
                 testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
@@ -116,6 +130,10 @@ public class SELinuxAssertions {
             LOGGER.error("The SELinux validation found the following errors on the DataLake instances: \n{}", validationResult.getFormattedErrors());
         }
         return testDto;
+    }
+
+    public DistroXTestDto validateAll(TestContext testContext, DistroXTestDto testDto, boolean throwIfAnyError) {
+        return validateAll(testContext, testDto, throwIfAnyError, true);
     }
 
     public DistroXTestDto validateAll(TestContext testContext, DistroXTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
@@ -188,7 +206,8 @@ public class SELinuxAssertions {
 
     private void generateReportFromDenies(TestContext testContext, String stackType, Map<String, String> instancesWithAuditedDenies) {
         if (!instancesWithAuditedDenies.isEmpty()) {
-            String filename = SELINUX_REPORT_DIRECTORY + "/" + testContext.getTestMethodName().orElse("unknown") + "/" + stackType + ".json";
+            String timestamp = DATE_TIME_FORMATTER.format(Instant.now());
+            String filename = String.format(REPORT_FILENAME_FORMAT, testContext.getTestMethodName().orElse("unknown"), stackType, timestamp);
             Path path = Paths.get(filename);
             try {
                 Files.createDirectories(path.getParent());
