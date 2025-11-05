@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.controller.sdx.SdxClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Service
 public class SdxNotificationService {
@@ -23,7 +23,7 @@ public class SdxNotificationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxNotificationService.class);
 
     @Inject
-    private NotificationService notificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Inject
     private SdxClusterConverter sdxClusterConverter;
@@ -41,7 +41,7 @@ public class SdxNotificationService {
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx, String userCrn) {
-        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn, null);
+        webSocketNotificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn, null);
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
     }
 

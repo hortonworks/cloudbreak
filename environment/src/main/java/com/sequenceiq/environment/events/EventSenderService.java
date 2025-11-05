@@ -26,14 +26,14 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Service
 public class EventSenderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSenderService.class);
 
-    private final NotificationService notificationService;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     private final EnvironmentResponseConverter environmentResponseConverter;
 
@@ -45,10 +45,10 @@ public class EventSenderService {
 
     private final CloudbreakMessagesService cloudbreakMessagesService;
 
-    public EventSenderService(NotificationService notificationService, EnvironmentResponseConverter environmentResponseConverter,
+    public EventSenderService(WebSocketNotificationService webSocketNotificationService, EnvironmentResponseConverter environmentResponseConverter,
             CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient, NodeConfig nodeConfig, @Value("${info.app.version:}") String serviceVersion,
             CloudbreakMessagesService cloudbreakMessagesService) {
-        this.notificationService = notificationService;
+        this.webSocketNotificationService = webSocketNotificationService;
         this.environmentResponseConverter = environmentResponseConverter;
         this.cdpDefaultStructuredEventClient = cdpDefaultStructuredEventClient;
         this.nodeConfig = nodeConfig;
@@ -74,13 +74,13 @@ public class EventSenderService {
             Collection<?> messageArgs) {
         CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
-        notificationService.send(resourceEvent, messageArgs, payload, userCrn, null);
+        webSocketNotificationService.send(resourceEvent, messageArgs, payload, userCrn, null);
     }
 
     public void sendEventAndNotificationForMissingEnv(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
         CDPStructuredNotificationEvent cdpStructuredEvent = createStructureEventForMissingEnvironment(payload, resourceEvent, userCrn);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
-        notificationService.send(resourceEvent, payload, userCrn);
+        webSocketNotificationService.send(resourceEvent, payload, userCrn);
     }
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,

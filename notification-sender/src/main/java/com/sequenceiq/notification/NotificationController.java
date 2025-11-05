@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 public abstract class NotificationController {
 
     @Inject
-    private NotificationService notificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     protected final void notify(ResourceEvent resourceEvent) {
         notify(resourceEvent, Collections.emptySet(), null);
@@ -21,6 +21,6 @@ public abstract class NotificationController {
     }
 
     protected final void notify(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
-        notificationService.send(resourceEvent, messageArgs, payload);
+        webSocketNotificationService.send(resourceEvent, messageArgs, payload);
     }
 }

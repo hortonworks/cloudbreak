@@ -99,7 +99,7 @@ import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -315,7 +315,7 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
         private OwnerAssignmentService ownerAssignmentService;
 
         @MockBean
-        private NotificationService notificationService;
+        private WebSocketNotificationService webSocketNotificationService;
 
         @MockBean
         private Client client;

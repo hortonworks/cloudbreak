@@ -101,7 +101,7 @@ import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -291,7 +291,7 @@ class RotateRdsCertificateFlowIntegrationTest {
         private OwnerAssignmentService ownerAssignmentService;
 
         @MockBean
-        private NotificationService notificationService;
+        private WebSocketNotificationService webSocketNotificationService;
 
         @MockBean
         private Client client;

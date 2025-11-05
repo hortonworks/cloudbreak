@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 
 @Component
-public class NotificationService {
+public class WebSocketNotificationService {
 
     @Inject
     private NotificationSender notificationSender;

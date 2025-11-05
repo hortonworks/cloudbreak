@@ -31,7 +31,7 @@ import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Profile("integration-test")
 @TestConfiguration
@@ -60,7 +60,7 @@ public class FlowIntegrationTestConfig {
     private OwnerAssignmentService ownerAssignmentService;
 
     @MockBean
-    private NotificationService notificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @MockBean
     private Client client;

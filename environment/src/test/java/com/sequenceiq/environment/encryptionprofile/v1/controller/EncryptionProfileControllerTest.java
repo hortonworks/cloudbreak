@@ -47,7 +47,7 @@ import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileRequestToEncryptionProfileConverter;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @ExtendWith(MockitoExtension.class)
 public class EncryptionProfileControllerTest {
@@ -56,7 +56,7 @@ public class EncryptionProfileControllerTest {
     private EncryptionProfileService encryptionProfileService;
 
     @Mock
-    private NotificationService notificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Mock
     private EntitlementService entitlementService;
@@ -84,9 +84,9 @@ public class EncryptionProfileControllerTest {
                 encryptionProfileFiltering,
                 entitlementService);
         // Inject mock NotificationService into the superclass via reflection
-        Field field = controller.getClass().getSuperclass().getDeclaredField("notificationService");
+        Field field = controller.getClass().getSuperclass().getDeclaredField("webSocketNotificationService");
         field.setAccessible(true);
-        field.set(controller, notificationService);
+        field.set(controller, webSocketNotificationService);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class EncryptionProfileControllerTest {
         verify(requestConverter).convert(request);
         verify(encryptionProfileService).create(eq(profile), anyString(), anyString());
         verify(responseConverter).convert(profile);
-        verify(notificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_CREATED), any(), Optional.ofNullable(any()));
+        verify(webSocketNotificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_CREATED), any(), Optional.ofNullable(any()));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class EncryptionProfileControllerTest {
 
         verify(encryptionProfileService).deleteByNameAndAccountId(eq(NAME), eq(ACCOUNT_ID));
         verify(responseConverter).convert(profile);
-        verify(notificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
+        verify(webSocketNotificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class EncryptionProfileControllerTest {
 
         verify(encryptionProfileService).deleteByResourceCrn(eq(ENCRYPTION_PROFILE_CRN));
         verify(responseConverter).convert(profile);
-        verify(notificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
+        verify(webSocketNotificationService).send(eq(ResourceEvent.ENCRYPTION_PROFILE_DELETED), any(), Optional.ofNullable(any()));
     }
 
     @Test

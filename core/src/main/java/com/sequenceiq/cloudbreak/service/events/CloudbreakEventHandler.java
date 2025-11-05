@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Service
 public class CloudbreakEventHandler implements Consumer<Event<CloudbreakCompositeEvent>> {
@@ -24,7 +24,7 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
     private LegacyDefaultStructuredEventClient legacyStructuredEventAsyncNotifier;
 
     @Inject
-    private NotificationService notificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Override
     public void accept(Event<CloudbreakCompositeEvent> cloudbreakEvent) {
@@ -41,7 +41,7 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
             try {
                 String notificationType = getNotificationType(cloudbreakCompositeEvent.getStructuredNotificationEvent());
                 Collection<String> resourceEventMessageArgs = cloudbreakCompositeEvent.getResourceEventMessageArgs();
-                notificationService.send(cloudbreakCompositeEvent.getResourceEvent(), resourceEventMessageArgs, stackResponse, owner, notificationType);
+                webSocketNotificationService.send(cloudbreakCompositeEvent.getResourceEvent(), resourceEventMessageArgs, stackResponse, owner, notificationType);
             } catch (Exception e) {
                 String msg = String.format("Failed to send notification from structured event, stack('%s')", stackResponse.getId());
                 LOGGER.warn(msg, e);
