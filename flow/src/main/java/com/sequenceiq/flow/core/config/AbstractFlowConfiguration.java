@@ -129,6 +129,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             AbstractAction<S, E, ?, ?> action = getAction(transition.source);
             if (action != null) {
                 stateConfigurer.state(transition.source, action, null);
+                action.setFlowEdgeConfig(flowEdgeConfig);
             }
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (action != null && transition.getFailureEvent() != null && !Objects.equals(transition.target, flowEdgeConfig.defaultFailureState)) {

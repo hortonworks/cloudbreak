@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.statemachine.state.State;
+import org.springframework.statemachine.transition.Transition;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -64,6 +68,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     private E failureEvent;
 
+    private FlowEdgeConfig<S, E> flowEdgeConfig;
+
     protected AbstractAction(Class<P> payloadClass) {
         this.payloadClass = payloadClass;
     }
@@ -95,23 +101,40 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                         sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
                     } catch (Exception sendEventException) {
                         LOGGER.error("Failed event propagation failed", sendEventException);
-                        closeFlowOnError(ex, flowId);
+                        closeFlowOnError(flowId, ex);
                         throw new CloudbreakServiceException("Failed event propagation failed", sendEventException);
                     }
                 } else {
-                    LOGGER.error("Missing error handling for {}", getClass().getName());
-                    closeFlowOnError(ex, flowId);
-                    throw new CloudbreakServiceException("Missing error handling for " + getClass().getName());
+                    Optional<String> tragetStateId = Optional.of(context).map(StateContext::getTransition)
+                            .map(Transition::getTarget).map(State::getId).map(Objects::toString);
+                    if (tragetStateId.isPresent()) {
+                        if (flowEdgeConfig != null && flowEdgeConfig.getDefaultFailureState() != null &&
+                                flowEdgeConfig.getDefaultFailureState().name().equals(tragetStateId.get())) {
+                            closeFlowOnError(flowId, String.format("Error handler failed in %s state. Message: %s", tragetStateId.get(), ex.getMessage()));
+                            throw new CloudbreakServiceException(String.format("Error handler failed in %s state.", tragetStateId.get()), ex);
+                        } else {
+                            closeFlowOnError(flowId, String.format("Operation failed in %s state without error handler. Message: %s", tragetStateId.get(),
+                                    ex.getMessage()));
+                            throw new CloudbreakServiceException(String.format("Operation failed in %s state without error handler.", tragetStateId.get()), ex);
+                        }
+                    } else {
+                        closeFlowOnError(flowId, ex);
+                        throw new CloudbreakServiceException("Missing error handling for " + getClass().getName(), ex);
+                    }
                 }
             }
         });
     }
 
-    private void closeFlowOnError(Exception ex, String flowId) {
+    private void closeFlowOnError(String flowId, Exception ex) {
+        closeFlowOnError(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
+                ex.getClass().getName(), ex.getMessage()));
+    }
+
+    private void closeFlowOnError(String flowId, String message) {
         if (flowId != null) {
             LOGGER.error("Closing flow with id {}", flowId);
-            flowLogDBService.closeFlowOnError(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
-                    ex.getClass().getName(), ex.getMessage()));
+            flowLogDBService.closeFlowOnError(flowId, message);
         }
     }
 
@@ -138,6 +161,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             throw new UnsupportedOperationException("Failure event already configured. Actions reusable not allowed!");
         }
         this.failureEvent = failureEvent;
+    }
+
+    public void setFlowEdgeConfig(FlowEdgeConfig<S, E> flowEdgeConfig) {
+        this.flowEdgeConfig = flowEdgeConfig;
     }
 
     public MetricService getMetricService() {

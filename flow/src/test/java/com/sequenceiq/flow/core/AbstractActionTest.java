@@ -33,7 +33,9 @@ import org.springframework.statemachine.config.model.DefaultStateMachineModel;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -59,6 +61,12 @@ public class AbstractActionTest {
     private FlowRegister runningFlows;
 
     @Mock
+    private MetricService metricService;
+
+    @Mock
+    private MetricService commonMetricsService;
+
+    @Mock
     private Flow flow;
 
     @Mock
@@ -80,10 +88,11 @@ public class AbstractActionTest {
         configurationBuilder.setTaskExecutor(new SyncTaskExecutor());
         StateMachineStateBuilder<State, Event> stateBuilder =
                 new StateMachineStateBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
-        stateBuilder.withStates().initial(State.INIT).state(State.DOING, underTest, null);
+        stateBuilder.withStates().initial(State.INIT).state(State.DOING, underTest, null).state(State.FAILED_STATE, underTest, null);
         StateMachineTransitionBuilder<State, Event> transitionBuilder =
                 new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
         transitionBuilder.withExternal().source(State.INIT).target(State.DOING).event(Event.DOIT);
+        transitionBuilder.withExternal().source(State.DOING).target(State.FAILED_STATE).event(Event.FAILURE);
         ConfigurationData<State, Event> configurationData = configurationBuilder.build();
         transitionBuilder.setSharedObject(ConfigurationData.class, configurationData);
         stateMachine = new ObjectStateMachineFactory<>(
@@ -119,11 +128,22 @@ public class AbstractActionTest {
     @Test
     public void testFailedExecuteWithoutFailureEvent() {
         underTest.setFailureEvent(null);
+        underTest.setFlowEdgeConfig(new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED_STATE, null));
         RuntimeException exception = new IllegalStateException("something went wrong");
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
-        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
-                "java.lang.IllegalStateException, message: something went wrong");
+        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Operation failed in DOING state without error handler. Message: something went wrong");
+    }
+
+    @Test
+    public void testFailHandlerExecutionFailure() {
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        underTest.setFailureEvent(null);
+        underTest.setFlowEdgeConfig(new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED_STATE, null));
+        RuntimeException exception = new IllegalStateException("something went wrong");
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
+        stateMachine.sendEvent(new GenericMessage<>(Event.FAILURE, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Error handler failed in FAILED_STATE state. Message: something went wrong");
     }
 
     @Test
@@ -138,7 +158,7 @@ public class AbstractActionTest {
     }
 
     enum State implements FlowState {
-        INIT, DOING;
+        INIT, DOING, FAILED_STATE, FINAL;
 
         @Override
         public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
