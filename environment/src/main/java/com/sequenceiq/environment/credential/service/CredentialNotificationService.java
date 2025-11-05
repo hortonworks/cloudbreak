@@ -11,19 +11,19 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.notification.Notification;
-import com.sequenceiq.notification.NotificationSender;
+import com.sequenceiq.notification.WebSocketNotificationSender;
 
 @Service
 public class CredentialNotificationService {
 
     protected static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
 
-    private final NotificationSender notificationSender;
+    private final WebSocketNotificationSender webSocketNotificationSender;
 
     private final CloudbreakMessagesService messagesService;
 
-    public CredentialNotificationService(NotificationSender notificationSender, CloudbreakMessagesService messagesService) {
-        this.notificationSender = notificationSender;
+    public CredentialNotificationService(WebSocketNotificationSender webSocketNotificationSender, CloudbreakMessagesService messagesService) {
+        this.webSocketNotificationSender = webSocketNotificationSender;
         this.messagesService = messagesService;
     }
 
@@ -33,6 +33,6 @@ public class CredentialNotificationService {
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.getCloudPlatform());
-        notificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
+        webSocketNotificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
     }
 }

@@ -101,7 +101,7 @@ import com.sequenceiq.flow.repository.FlowCancelRepository;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.notification.HttpNotificationSenderService;
+import com.sequenceiq.notification.HttpWebSocketNotificationSenderService;
 import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -309,7 +309,7 @@ public class CredentialExperienceTest {
             TransactionService.class,
             TransactionMetricsService.class,
             Clock.class,
-            HttpNotificationSenderService.class,
+            HttpWebSocketNotificationSenderService.class,
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

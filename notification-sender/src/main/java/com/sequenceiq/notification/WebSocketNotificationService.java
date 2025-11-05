@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 public class WebSocketNotificationService {
 
     @Inject
-    private NotificationSender notificationSender;
+    private WebSocketNotificationSender webSocketNotificationSender;
 
     @Inject
     private NotificationAssemblingService notificationAssemblingService;
@@ -29,7 +29,7 @@ public class WebSocketNotificationService {
     private String notificationUrls;
 
     public void send(Notification<CloudbreakNotification> notification) {
-        notificationSender.send(notification, getNotificationUrls(), RestClientUtil.get());
+        webSocketNotificationSender.send(notification, getNotificationUrls(), RestClientUtil.get());
     }
 
     public void send(ResourceEvent resourceEvent) {
@@ -45,14 +45,14 @@ public class WebSocketNotificationService {
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
-        notificationSender.send(
+        webSocketNotificationSender.send(
                 notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, null),
                 getNotificationUrls(),
                 RestClientUtil.get());
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId, String notificationType) {
-        notificationSender.send(
+        webSocketNotificationSender.send(
                 notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, userId, notificationType),
                 getNotificationUrls(),
                 RestClientUtil.get());

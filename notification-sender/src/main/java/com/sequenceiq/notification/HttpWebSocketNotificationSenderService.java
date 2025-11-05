@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 
 @Service
-public class HttpNotificationSenderService implements NotificationSender {
+public class HttpWebSocketNotificationSenderService implements WebSocketNotificationSender {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSenderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpWebSocketNotificationSenderService.class);
 
     private static final String NOTIFICATION_SIZE_EXCEEDED = "notification.size.exceeded";
 
