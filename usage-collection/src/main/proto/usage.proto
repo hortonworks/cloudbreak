@@ -391,6 +391,8 @@ message Event {
     CDPDFDeployedFlowKpiDeleted cdpDFDeployedFlowKpiDeleted = 191;
     // A CDP Provider sync state change.
     CDPProviderSyncStateChange cdpProviderSyncStateChange = 192;
+    // A notification event was sent out
+    CDPNotificationSentEvent cdpNotificationSentEvent = 193;
   }
 }
 
@@ -7751,4 +7753,92 @@ message CDPCMLAiStudioDeploymentEvent {
   string eventType = 3;
   // Additional details about the deployment event
   string eventDetails = 4;
+}
+
+//notification severity
+message NotificationSeverity {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // severity is set to debug.
+    DEBUG = 1;
+    // severity is set to info.
+    INFO = 2;
+    // severity is set to warning.
+    WARNING = 3;
+    // severity is set to error.
+    ERROR = 4;
+    // severity is set to critical.
+    CRITICAL = 5;
+  }
+}
+
+//notification form factor
+message NotificationFormFactor {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // notification form factor is set to subscription.
+    SUBSCRIPTION = 1;
+    // notification form factor is set to distribution list.
+    DISTRIBUTION_LIST = 2;
+    // notification form factor is set to system managed distribution list.
+    SYSTEM_MANAGED_DISTRIBUTION_LIST = 3;
+  }
+}
+
+//notification channel type
+message ChannelType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Channel type is set to email.
+    EMAIL = 1;
+    // Channel type is set to in app.
+    IN_APP = 2;
+    // Channel type is set to console.
+    CONSOLE = 3;
+    // Channel type is set to slack.
+    SLACK = 4;
+  }
+}
+
+//notification type
+message NotificationType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Notification type is set to azure default outbound.
+    AZURE_DEFAULT_OUTBOUND = 1;
+  }
+}
+
+// A CDP notification sent event
+message CDPNotificationSentEvent {
+  // notification id
+  int64 id = 1;
+  // notification severity
+  NotificationSeverity.Value notificationSeverity = 2;
+  // notification type
+  NotificationType.Value notificationType = 3;
+  // notification channel type
+  ChannelType.Value channelType = 4;
+  // resource name
+  string resourceName = 5;
+  // resource crn
+  string resourceCrn = 6;
+  // notification name
+  string name = 7;
+  // account id
+  string accountId = 8;
+  // notification message
+  string message = 9;
+  // time when notification was created
+  uint64 createdAt = 10;
+  // time when notification was sent
+  uint64 sentAt = 11;
+  // boolean to check if notification was sent or not
+  bool sent = 12;
+  // notification form factor
+  NotificationFormFactor.Value notificationFormFactor = 13;
 }

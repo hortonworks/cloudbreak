@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -45,6 +46,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Servi
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
+import com.sequenceiq.cloudbreak.auth.altus.model.UserWithResourceRole;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -289,5 +291,68 @@ public class GrpcUmsClientTest {
         verify(umsClient, times(1)).assignMachineUserRole(eq("accountId"), eq("machineUserCrn"), eq("roleCrn2"));
         verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
                 eq("resourceCrn"));
+    }
+
+    @Test
+    void testListUsersWithResourceRolesEmpty() {
+        String resourceCrn = CrnTestUtil.getEnvironmentCrnBuilder().setAccountId("acc").setResource("res-empty").build().toString();
+        doReturn(List.of()).when(underTest).listResourceAssignees(resourceCrn);
+
+        List<UserWithResourceRole> result = underTest.listUsersWithResourceRoles(Set.of("someRole"), resourceCrn);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testListUsersWithResourceRolesAllBranches() {
+        String resourceCrn = CrnTestUtil.getEnvironmentCrnBuilder().setAccountId("acc").setResource("res-full").build().toString();
+        String targetRole = "crn:cdp:iam:us-west-1:acc:resourceRole:role1";
+        String otherRole = "crn:cdp:iam:us-west-1:acc:resourceRole:other";
+
+        String user1Crn = CrnTestUtil.getUserCrnBuilder().setAccountId("acc").setResource("user1").build().toString();
+        String machineUserCrn = CrnTestUtil.getMachineUserCrnBuilder().setAccountId("acc").setResource("mach1").build().toString();
+        String userUnmatchedCrn = CrnTestUtil.getUserCrnBuilder().setAccountId("acc").setResource("user2").build().toString();
+        String invalidCrn = "not-a-crn";
+        String userFailCrn = CrnTestUtil.getUserCrnBuilder().setAccountId("acc").setResource("userFail").build().toString();
+
+        UserManagementProto.ResourceAssignee raUser1 = UserManagementProto.ResourceAssignee.newBuilder()
+                .setAssigneeCrn(user1Crn)
+                .setResourceRoleCrn(targetRole)
+                .build();
+        UserManagementProto.ResourceAssignee raMachine = UserManagementProto.ResourceAssignee.newBuilder()
+                .setAssigneeCrn(machineUserCrn)
+                .setResourceRoleCrn(targetRole)
+                .build();
+        UserManagementProto.ResourceAssignee raUnmatched = UserManagementProto.ResourceAssignee.newBuilder()
+                .setAssigneeCrn(userUnmatchedCrn)
+                .setResourceRoleCrn(otherRole)
+                .build();
+        UserManagementProto.ResourceAssignee raInvalid = UserManagementProto.ResourceAssignee.newBuilder()
+                .setAssigneeCrn(invalidCrn)
+                .setResourceRoleCrn(targetRole)
+                .build();
+        UserManagementProto.ResourceAssignee raFailUser = UserManagementProto.ResourceAssignee.newBuilder()
+                .setAssigneeCrn(userFailCrn)
+                .setResourceRoleCrn(targetRole)
+                .build();
+
+        doReturn(List.of(raUser1, raMachine, raUnmatched, raInvalid, raFailUser)).when(underTest).listResourceAssignees(resourceCrn);
+
+        List<UserWithResourceRole> result = underTest.listUsersWithResourceRoles(Set.of(targetRole), resourceCrn);
+
+        assertEquals(2, result.size());
+        UserWithResourceRole user1Entry = result.stream()
+                .filter(u -> u.userCrn().equals(user1Crn))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(user1Crn, user1Entry.userCrn());
+        assertEquals(targetRole, user1Entry.resourceRoleCrn());
+
+        UserWithResourceRole userFailEntry = result.stream()
+                .filter(u -> u.userCrn().equals(userFailCrn))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(userFailCrn, userFailEntry.userCrn());
+        assertEquals(targetRole, userFailEntry.resourceRoleCrn());
     }
 }

@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.auth.altus.exception.UmsErrorException;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.UserWithResourceRole;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
@@ -819,6 +820,13 @@ public class GrpcUmsClient {
         return resourceRoleAssignments;
     }
 
+    public List<UserManagementProto.ResourceAssignee> listResourceAssignees(String resourceCrn) {
+        LOGGER.info("Listing all assignees for resource {}", resourceCrn);
+        List<UserManagementProto.ResourceAssignee> resourceAssignees = makeClient().listResourceAssignees(resourceCrn);
+        LOGGER.info("{} assignees found for resource {}", resourceAssignees.size(), resourceCrn);
+        return resourceAssignees;
+    }
+
     public void assignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn) {
         LOGGER.info("Assigning '{}' role at resource '{}' to assignee '{}'...", resourceRoleCrn, resourceCrn, assigneeCrn);
         makeClient().assignResourceRole(assigneeCrn, resourceCrn, resourceRoleCrn);
@@ -913,5 +921,46 @@ public class GrpcUmsClient {
 
     public void revokeEntitlement(String accountId, String entitlementName) {
         makeClient().revokeEntitlement(accountId, entitlementName);
+    }
+
+    /**
+     * Lists users assigned to a resource with specific resource roles.
+     *
+     * @param resourceRoleCrns list of resource role CRNs to filter by
+     * @param resourceCrn the CRN of the resource to check
+     * @return list of users with their assigned resource roles that match the specified resource role CRNs
+     */
+    public List<UserWithResourceRole> listUsersWithResourceRoles(Set<String> resourceRoleCrns, String resourceCrn) {
+        LOGGER.info("Listing users with resource roles {} for resource {}", resourceRoleCrns, resourceCrn);
+
+        List<UserManagementProto.ResourceAssignee> resourceAssignees = listResourceAssignees(resourceCrn);
+        List<UserWithResourceRole> usersWithRoles = new ArrayList<>();
+
+        for (UserManagementProto.ResourceAssignee assignee : resourceAssignees) {
+            String assigneeCrn = assignee.getAssigneeCrn();
+            String resourceRoleCrn = assignee.getResourceRoleCrn();
+
+            // Check if this assignee has one of the target resource roles
+            if (resourceRoleCrns.contains(resourceRoleCrn)) {
+                try {
+                    // Parse the CRN to check if it's a user
+                    Crn crn = Crn.safeFromString(assigneeCrn);
+                    if (Crn.ResourceType.USER.equals(crn.getResourceType())) {
+                        usersWithRoles.add(new UserWithResourceRole(assigneeCrn, resourceRoleCrn));
+                        LOGGER.debug("Found user {} with resource role {} for resource {}",
+                                assigneeCrn, resourceRoleCrn, resourceCrn);
+                    } else {
+                        LOGGER.debug("Skipping non-user assignee {} (type: {}) for resource {}",
+                                assigneeCrn, crn.getResourceType(), resourceCrn);
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to process assignee {} for resource {}: {}",
+                            assigneeCrn, resourceCrn, e.getMessage());
+                }
+            }
+        }
+
+        LOGGER.info("Found {} users with matching resource roles for resource {}", usersWithRoles.size(), resourceCrn);
+        return usersWithRoles;
     }
 }

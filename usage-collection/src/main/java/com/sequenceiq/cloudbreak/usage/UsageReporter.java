@@ -224,4 +224,11 @@ public interface UsageReporter {
      * @param details the event details
      */
     void cdpProviderSyncStateChange(UsageProto.CDPProviderSyncStateChange details);
+
+    /**
+     * Reports that a notification is sent out from a resource.
+     * @param details the event details
+     */
+    void cdpNotificationSentEvent(
+            UsageProto.CDPNotificationSentEvent details);
 }

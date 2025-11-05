@@ -26,6 +26,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_NOTIFICATION_SENDING_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
@@ -494,6 +495,10 @@ public class EntitlementService {
 
     public boolean isTlsv13Enabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_TLS_1_3);
+    }
+
+    public boolean isCdpCbNotificationSendingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_NOTIFICATION_SENDING_ENABLED);
     }
 
     public boolean isExpressOnboardingEnabled(String accountId) {

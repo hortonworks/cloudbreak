@@ -206,6 +206,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_UPGRADE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isUpgradeRecoveryEnabled, false},
                 {"CDP_CB_UPGRADE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isUpgradeRecoveryEnabled, true},
+
+                {"CDP_CB_NOTIFICATION_SENDING_ENABLED", (EntitlementCheckFunction) EntitlementService::isCdpCbNotificationSendingEnabled, false},
+                {"CDP_CB_NOTIFICATION_SENDING_ENABLED", (EntitlementCheckFunction) EntitlementService::isCdpCbNotificationSendingEnabled, true},
         };
     }
 

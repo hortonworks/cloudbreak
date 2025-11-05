@@ -8,6 +8,16 @@ public final class Options {
   private Options() {}
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.rateLimitGroupDefinition);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.apiServiceName);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.release);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.admin);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.version);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.tagGroup);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.additionalBackend);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.auditEntitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingPageSize);
@@ -24,6 +34,10 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.minimumLength);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximumLength);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.noParamfile);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.default_);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pluralName);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.right);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.entitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.paginates);
@@ -32,10 +46,22 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hiddenRetention);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.rateLimitGroup);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.mutating);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.skipAuditing);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.extension);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.tag);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.altName);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenRetention);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hidden);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hiddenReason);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hiddenRetention);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.deprecated);
   }
 
   public static void registerAllExtensions(
@@ -43,6 +69,3613 @@ public final class Options {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  public interface ServiceExtensionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.ServiceExtension)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code options.ServiceExtension}
+   */
+  public static final class ServiceExtension extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.ServiceExtension)
+      ServiceExtensionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ServiceExtension.newBuilder() to construct.
+    private ServiceExtension(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ServiceExtension() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceExtension();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ServiceExtension_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ServiceExtension_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.class, com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.ServiceExtension)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.ServiceExtension other = (com.cloudera.thunderhead.service.common.options.Options.ServiceExtension) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code options.ServiceExtension}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.ServiceExtension)
+        com.cloudera.thunderhead.service.common.options.Options.ServiceExtensionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ServiceExtension_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ServiceExtension_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.class, com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ServiceExtension_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ServiceExtension getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ServiceExtension build() {
+        com.cloudera.thunderhead.service.common.options.Options.ServiceExtension result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ServiceExtension buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.ServiceExtension result = new com.cloudera.thunderhead.service.common.options.Options.ServiceExtension(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.ServiceExtension) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.ServiceExtension)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.ServiceExtension)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.ServiceExtension)
+    private static final com.cloudera.thunderhead.service.common.options.Options.ServiceExtension DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.ServiceExtension();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ServiceExtension getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ServiceExtension>
+        PARSER = new com.google.protobuf.AbstractParser<ServiceExtension>() {
+      @java.lang.Override
+      public ServiceExtension parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ServiceExtension> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ServiceExtension> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.ServiceExtension getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+    public static final int RATELIMITGROUPDEFINITION_FIELD_NUMBER = 40000;
+    /**
+     * <pre>
+     * At least one method in this service is rate limited by the specified
+     * rate limit group. Use of this option causes the generated API controller
+     * to include rate limiting for methods that have the rateLimitGroup option.
+     * (Currently, only one group may be defined.) Most services do not require
+     * rate limiting; contact the CDPCP core infra team for guidance.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition> rateLimitGroupDefinition = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          0,
+          com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.class,
+          com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.getDefaultInstance());
+    public static final int APISERVICENAME_FIELD_NUMBER = 40001;
+    /**
+     * <pre>
+     * The API service name, in various casings.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        com.cloudera.thunderhead.service.common.options.Options.ApiServiceName> apiServiceName = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          1,
+          com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.class,
+          com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.getDefaultInstance());
+    public static final int RELEASE_FIELD_NUMBER = 40002;
+    /**
+     * <pre>
+     * The releases that the service belongs in, i.e., PUBLIC.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<java.lang.String>> release = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          2,
+          java.lang.String.class,
+          null);
+    public static final int ADMIN_FIELD_NUMBER = 40003;
+    /**
+     * <pre>
+     * Whether this service is an administrative service. These services are put
+     * on a special, internal only ingress and may only be called by members of
+     * the CDP administration account.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.lang.Boolean> admin = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          3,
+          java.lang.Boolean.class,
+          null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 40004;
+    /**
+     * <pre>
+     * The form factor(s) that the service is part of, e.g., public, private.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          4,
+          java.lang.String.class,
+          null);
+    public static final int VERSION_FIELD_NUMBER = 40005;
+    /**
+     * <pre>
+     * The version of the service definition.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.lang.String> version = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          5,
+          java.lang.String.class,
+          null);
+    public static final int TAGGROUP_FIELD_NUMBER = 40006;
+    /**
+     * <pre>
+     * The Tag Groups for the Service
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<com.cloudera.thunderhead.service.common.options.Options.TagGroup>> tagGroup = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          6,
+          com.cloudera.thunderhead.service.common.options.Options.TagGroup.class,
+          com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance());
+    public static final int ADDITIONALBACKEND_FIELD_NUMBER = 40007;
+    /**
+     * <pre>
+     * Backend
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<java.lang.String>> additionalBackend = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          7,
+          java.lang.String.class,
+          null);
+  }
+
+  public interface TagGroupOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.TagGroup)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The description.
+     */
+    java.lang.String getDescription();
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The bytes for description.
+     */
+    com.google.protobuf.ByteString
+        getDescriptionBytes();
+
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The externalDocs.
+     */
+    java.lang.String getExternalDocs();
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The bytes for externalDocs.
+     */
+    com.google.protobuf.ByteString
+        getExternalDocsBytes();
+  }
+  /**
+   * <pre>
+   * The Swagger Tag Group
+   * </pre>
+   *
+   * Protobuf type {@code options.TagGroup}
+   */
+  public static final class TagGroup extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.TagGroup)
+      TagGroupOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TagGroup.newBuilder() to construct.
+    private TagGroup(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TagGroup() {
+      name_ = "";
+      description_ = "";
+      externalDocs_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TagGroup();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.TagGroup.class, com.cloudera.thunderhead.service.common.options.Options.TagGroup.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DESCRIPTION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object description_ = "";
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The description.
+     */
+    @java.lang.Override
+    public java.lang.String getDescription() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        description_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The bytes for description.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDescriptionBytes() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        description_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EXTERNALDOCS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object externalDocs_ = "";
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The externalDocs.
+     */
+    @java.lang.Override
+    public java.lang.String getExternalDocs() {
+      java.lang.Object ref = externalDocs_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        externalDocs_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The bytes for externalDocs.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getExternalDocsBytes() {
+      java.lang.Object ref = externalDocs_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        externalDocs_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(externalDocs_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, externalDocs_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(externalDocs_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, externalDocs_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.TagGroup)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.TagGroup other = (com.cloudera.thunderhead.service.common.options.Options.TagGroup) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getDescription()
+          .equals(other.getDescription())) return false;
+      if (!getExternalDocs()
+          .equals(other.getExternalDocs())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getDescription().hashCode();
+      hash = (37 * hash) + EXTERNALDOCS_FIELD_NUMBER;
+      hash = (53 * hash) + getExternalDocs().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.TagGroup prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The Swagger Tag Group
+     * </pre>
+     *
+     * Protobuf type {@code options.TagGroup}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.TagGroup)
+        com.cloudera.thunderhead.service.common.options.Options.TagGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.TagGroup.class, com.cloudera.thunderhead.service.common.options.Options.TagGroup.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.TagGroup.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        description_ = "";
+        externalDocs_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup build() {
+        com.cloudera.thunderhead.service.common.options.Options.TagGroup result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.TagGroup result = new com.cloudera.thunderhead.service.common.options.Options.TagGroup(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.common.options.Options.TagGroup result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.description_ = description_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.externalDocs_ = externalDocs_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.TagGroup) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.TagGroup)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.TagGroup other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getDescription().isEmpty()) {
+          description_ = other.description_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getExternalDocs().isEmpty()) {
+          externalDocs_ = other.externalDocs_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                description_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                externalDocs_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object description_ = "";
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return The description.
+       */
+      public java.lang.String getDescription() {
+        java.lang.Object ref = description_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          description_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return The bytes for description.
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
+        java.lang.Object ref = description_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          description_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescription(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        description_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDescription() {
+        description_ = getDefaultInstance().getDescription();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescriptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        description_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object externalDocs_ = "";
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return The externalDocs.
+       */
+      public java.lang.String getExternalDocs() {
+        java.lang.Object ref = externalDocs_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          externalDocs_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return The bytes for externalDocs.
+       */
+      public com.google.protobuf.ByteString
+          getExternalDocsBytes() {
+        java.lang.Object ref = externalDocs_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          externalDocs_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @param value The externalDocs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalDocs(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        externalDocs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearExternalDocs() {
+        externalDocs_ = getDefaultInstance().getExternalDocs();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @param value The bytes for externalDocs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalDocsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        externalDocs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.TagGroup)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.TagGroup)
+    private static final com.cloudera.thunderhead.service.common.options.Options.TagGroup DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.TagGroup();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TagGroup>
+        PARSER = new com.google.protobuf.AbstractParser<TagGroup>() {
+      @java.lang.Override
+      public TagGroup parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<TagGroup> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TagGroup> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RateLimitGroupDefinitionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.RateLimitGroupDefinition)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the group. This must be one of the values of the
+     * ApiRateLimitGroup enum.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the group. This must be one of the values of the
+     * ApiRateLimitGroup enum.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The limit (calls per second) by remote address for calls controlled by
+     * this group.
+     * </pre>
+     *
+     * <code>int32 byRemoteAddress = 2;</code>
+     * @return The byRemoteAddress.
+     */
+    int getByRemoteAddress();
+
+    /**
+     * <pre>
+     * The limit (calls per second) by access key ID for calls controlled by this
+     * group. (Not yet supported.)
+     * </pre>
+     *
+     * <code>int32 byAccessKeyId = 3;</code>
+     * @return The byAccessKeyId.
+     */
+    int getByAccessKeyId();
+
+    /**
+     * <pre>
+     * The limit (calls per second) by account for calls controlled by this group.
+     * </pre>
+     *
+     * <code>int32 byAccount = 4;</code>
+     * @return The byAccount.
+     */
+    int getByAccount();
+  }
+  /**
+   * <pre>
+   * The definition of an API rate limit group. See the Java classes
+   * ApiRateLimiter and ApiRateLimiterProvider for context.
+   * </pre>
+   *
+   * Protobuf type {@code options.RateLimitGroupDefinition}
+   */
+  public static final class RateLimitGroupDefinition extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.RateLimitGroupDefinition)
+      RateLimitGroupDefinitionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RateLimitGroupDefinition.newBuilder() to construct.
+    private RateLimitGroupDefinition(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RateLimitGroupDefinition() {
+      name_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RateLimitGroupDefinition();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_RateLimitGroupDefinition_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_RateLimitGroupDefinition_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.class, com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the group. This must be one of the values of the
+     * ApiRateLimitGroup enum.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the group. This must be one of the values of the
+     * ApiRateLimitGroup enum.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int BYREMOTEADDRESS_FIELD_NUMBER = 2;
+    private int byRemoteAddress_ = 0;
+    /**
+     * <pre>
+     * The limit (calls per second) by remote address for calls controlled by
+     * this group.
+     * </pre>
+     *
+     * <code>int32 byRemoteAddress = 2;</code>
+     * @return The byRemoteAddress.
+     */
+    @java.lang.Override
+    public int getByRemoteAddress() {
+      return byRemoteAddress_;
+    }
+
+    public static final int BYACCESSKEYID_FIELD_NUMBER = 3;
+    private int byAccessKeyId_ = 0;
+    /**
+     * <pre>
+     * The limit (calls per second) by access key ID for calls controlled by this
+     * group. (Not yet supported.)
+     * </pre>
+     *
+     * <code>int32 byAccessKeyId = 3;</code>
+     * @return The byAccessKeyId.
+     */
+    @java.lang.Override
+    public int getByAccessKeyId() {
+      return byAccessKeyId_;
+    }
+
+    public static final int BYACCOUNT_FIELD_NUMBER = 4;
+    private int byAccount_ = 0;
+    /**
+     * <pre>
+     * The limit (calls per second) by account for calls controlled by this group.
+     * </pre>
+     *
+     * <code>int32 byAccount = 4;</code>
+     * @return The byAccount.
+     */
+    @java.lang.Override
+    public int getByAccount() {
+      return byAccount_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (byRemoteAddress_ != 0) {
+        output.writeInt32(2, byRemoteAddress_);
+      }
+      if (byAccessKeyId_ != 0) {
+        output.writeInt32(3, byAccessKeyId_);
+      }
+      if (byAccount_ != 0) {
+        output.writeInt32(4, byAccount_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (byRemoteAddress_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, byRemoteAddress_);
+      }
+      if (byAccessKeyId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, byAccessKeyId_);
+      }
+      if (byAccount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, byAccount_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition other = (com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (getByRemoteAddress()
+          != other.getByRemoteAddress()) return false;
+      if (getByAccessKeyId()
+          != other.getByAccessKeyId()) return false;
+      if (getByAccount()
+          != other.getByAccount()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + BYREMOTEADDRESS_FIELD_NUMBER;
+      hash = (53 * hash) + getByRemoteAddress();
+      hash = (37 * hash) + BYACCESSKEYID_FIELD_NUMBER;
+      hash = (53 * hash) + getByAccessKeyId();
+      hash = (37 * hash) + BYACCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getByAccount();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The definition of an API rate limit group. See the Java classes
+     * ApiRateLimiter and ApiRateLimiterProvider for context.
+     * </pre>
+     *
+     * Protobuf type {@code options.RateLimitGroupDefinition}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.RateLimitGroupDefinition)
+        com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinitionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_RateLimitGroupDefinition_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_RateLimitGroupDefinition_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.class, com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        byRemoteAddress_ = 0;
+        byAccessKeyId_ = 0;
+        byAccount_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_RateLimitGroupDefinition_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition build() {
+        com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition result = new com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.byRemoteAddress_ = byRemoteAddress_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.byAccessKeyId_ = byAccessKeyId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.byAccount_ = byAccount_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.getByRemoteAddress() != 0) {
+          setByRemoteAddress(other.getByRemoteAddress());
+        }
+        if (other.getByAccessKeyId() != 0) {
+          setByAccessKeyId(other.getByAccessKeyId());
+        }
+        if (other.getByAccount() != 0) {
+          setByAccount(other.getByAccount());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                byRemoteAddress_ = input.readInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                byAccessKeyId_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                byAccount_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the group. This must be one of the values of the
+       * ApiRateLimitGroup enum.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the group. This must be one of the values of the
+       * ApiRateLimitGroup enum.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the group. This must be one of the values of the
+       * ApiRateLimitGroup enum.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the group. This must be one of the values of the
+       * ApiRateLimitGroup enum.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the group. This must be one of the values of the
+       * ApiRateLimitGroup enum.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private int byRemoteAddress_ ;
+      /**
+       * <pre>
+       * The limit (calls per second) by remote address for calls controlled by
+       * this group.
+       * </pre>
+       *
+       * <code>int32 byRemoteAddress = 2;</code>
+       * @return The byRemoteAddress.
+       */
+      @java.lang.Override
+      public int getByRemoteAddress() {
+        return byRemoteAddress_;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by remote address for calls controlled by
+       * this group.
+       * </pre>
+       *
+       * <code>int32 byRemoteAddress = 2;</code>
+       * @param value The byRemoteAddress to set.
+       * @return This builder for chaining.
+       */
+      public Builder setByRemoteAddress(int value) {
+
+        byRemoteAddress_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by remote address for calls controlled by
+       * this group.
+       * </pre>
+       *
+       * <code>int32 byRemoteAddress = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearByRemoteAddress() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        byRemoteAddress_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int byAccessKeyId_ ;
+      /**
+       * <pre>
+       * The limit (calls per second) by access key ID for calls controlled by this
+       * group. (Not yet supported.)
+       * </pre>
+       *
+       * <code>int32 byAccessKeyId = 3;</code>
+       * @return The byAccessKeyId.
+       */
+      @java.lang.Override
+      public int getByAccessKeyId() {
+        return byAccessKeyId_;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by access key ID for calls controlled by this
+       * group. (Not yet supported.)
+       * </pre>
+       *
+       * <code>int32 byAccessKeyId = 3;</code>
+       * @param value The byAccessKeyId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setByAccessKeyId(int value) {
+
+        byAccessKeyId_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by access key ID for calls controlled by this
+       * group. (Not yet supported.)
+       * </pre>
+       *
+       * <code>int32 byAccessKeyId = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearByAccessKeyId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        byAccessKeyId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int byAccount_ ;
+      /**
+       * <pre>
+       * The limit (calls per second) by account for calls controlled by this group.
+       * </pre>
+       *
+       * <code>int32 byAccount = 4;</code>
+       * @return The byAccount.
+       */
+      @java.lang.Override
+      public int getByAccount() {
+        return byAccount_;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by account for calls controlled by this group.
+       * </pre>
+       *
+       * <code>int32 byAccount = 4;</code>
+       * @param value The byAccount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setByAccount(int value) {
+
+        byAccount_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The limit (calls per second) by account for calls controlled by this group.
+       * </pre>
+       *
+       * <code>int32 byAccount = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearByAccount() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        byAccount_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.RateLimitGroupDefinition)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.RateLimitGroupDefinition)
+    private static final com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RateLimitGroupDefinition>
+        PARSER = new com.google.protobuf.AbstractParser<RateLimitGroupDefinition>() {
+      @java.lang.Override
+      public RateLimitGroupDefinition parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RateLimitGroupDefinition> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RateLimitGroupDefinition> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.RateLimitGroupDefinition getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ApiServiceNameOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.ApiServiceName)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The lowercased service name.
+     * </pre>
+     *
+     * <code>string lowercase = 1;</code>
+     * @return The lowercase.
+     */
+    java.lang.String getLowercase();
+    /**
+     * <pre>
+     * The lowercased service name.
+     * </pre>
+     *
+     * <code>string lowercase = 1;</code>
+     * @return The bytes for lowercase.
+     */
+    com.google.protobuf.ByteString
+        getLowercaseBytes();
+
+    /**
+     * <pre>
+     * The camel-cased service name.
+     * </pre>
+     *
+     * <code>string camelcase = 2;</code>
+     * @return The camelcase.
+     */
+    java.lang.String getCamelcase();
+    /**
+     * <pre>
+     * The camel-cased service name.
+     * </pre>
+     *
+     * <code>string camelcase = 2;</code>
+     * @return The bytes for camelcase.
+     */
+    com.google.protobuf.ByteString
+        getCamelcaseBytes();
+  }
+  /**
+   * <pre>
+   * The API service name, in various casings.
+   * </pre>
+   *
+   * Protobuf type {@code options.ApiServiceName}
+   */
+  public static final class ApiServiceName extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.ApiServiceName)
+      ApiServiceNameOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ApiServiceName.newBuilder() to construct.
+    private ApiServiceName(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ApiServiceName() {
+      lowercase_ = "";
+      camelcase_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ApiServiceName();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ApiServiceName_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ApiServiceName_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.class, com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.Builder.class);
+    }
+
+    public static final int LOWERCASE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object lowercase_ = "";
+    /**
+     * <pre>
+     * The lowercased service name.
+     * </pre>
+     *
+     * <code>string lowercase = 1;</code>
+     * @return The lowercase.
+     */
+    @java.lang.Override
+    public java.lang.String getLowercase() {
+      java.lang.Object ref = lowercase_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        lowercase_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The lowercased service name.
+     * </pre>
+     *
+     * <code>string lowercase = 1;</code>
+     * @return The bytes for lowercase.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getLowercaseBytes() {
+      java.lang.Object ref = lowercase_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        lowercase_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CAMELCASE_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object camelcase_ = "";
+    /**
+     * <pre>
+     * The camel-cased service name.
+     * </pre>
+     *
+     * <code>string camelcase = 2;</code>
+     * @return The camelcase.
+     */
+    @java.lang.Override
+    public java.lang.String getCamelcase() {
+      java.lang.Object ref = camelcase_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        camelcase_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The camel-cased service name.
+     * </pre>
+     *
+     * <code>string camelcase = 2;</code>
+     * @return The bytes for camelcase.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCamelcaseBytes() {
+      java.lang.Object ref = camelcase_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        camelcase_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lowercase_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, lowercase_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(camelcase_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, camelcase_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lowercase_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, lowercase_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(camelcase_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, camelcase_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.ApiServiceName)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.ApiServiceName other = (com.cloudera.thunderhead.service.common.options.Options.ApiServiceName) obj;
+
+      if (!getLowercase()
+          .equals(other.getLowercase())) return false;
+      if (!getCamelcase()
+          .equals(other.getCamelcase())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + LOWERCASE_FIELD_NUMBER;
+      hash = (53 * hash) + getLowercase().hashCode();
+      hash = (37 * hash) + CAMELCASE_FIELD_NUMBER;
+      hash = (53 * hash) + getCamelcase().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.ApiServiceName prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The API service name, in various casings.
+     * </pre>
+     *
+     * Protobuf type {@code options.ApiServiceName}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.ApiServiceName)
+        com.cloudera.thunderhead.service.common.options.Options.ApiServiceNameOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ApiServiceName_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ApiServiceName_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.class, com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        lowercase_ = "";
+        camelcase_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_ApiServiceName_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ApiServiceName getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ApiServiceName build() {
+        com.cloudera.thunderhead.service.common.options.Options.ApiServiceName result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.ApiServiceName buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.ApiServiceName result = new com.cloudera.thunderhead.service.common.options.Options.ApiServiceName(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.common.options.Options.ApiServiceName result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.lowercase_ = lowercase_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.camelcase_ = camelcase_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.ApiServiceName) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.ApiServiceName)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.ApiServiceName other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.ApiServiceName.getDefaultInstance()) return this;
+        if (!other.getLowercase().isEmpty()) {
+          lowercase_ = other.lowercase_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getCamelcase().isEmpty()) {
+          camelcase_ = other.camelcase_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                lowercase_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                camelcase_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object lowercase_ = "";
+      /**
+       * <pre>
+       * The lowercased service name.
+       * </pre>
+       *
+       * <code>string lowercase = 1;</code>
+       * @return The lowercase.
+       */
+      public java.lang.String getLowercase() {
+        java.lang.Object ref = lowercase_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          lowercase_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The lowercased service name.
+       * </pre>
+       *
+       * <code>string lowercase = 1;</code>
+       * @return The bytes for lowercase.
+       */
+      public com.google.protobuf.ByteString
+          getLowercaseBytes() {
+        java.lang.Object ref = lowercase_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          lowercase_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The lowercased service name.
+       * </pre>
+       *
+       * <code>string lowercase = 1;</code>
+       * @param value The lowercase to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLowercase(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        lowercase_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The lowercased service name.
+       * </pre>
+       *
+       * <code>string lowercase = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLowercase() {
+        lowercase_ = getDefaultInstance().getLowercase();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The lowercased service name.
+       * </pre>
+       *
+       * <code>string lowercase = 1;</code>
+       * @param value The bytes for lowercase to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLowercaseBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        lowercase_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object camelcase_ = "";
+      /**
+       * <pre>
+       * The camel-cased service name.
+       * </pre>
+       *
+       * <code>string camelcase = 2;</code>
+       * @return The camelcase.
+       */
+      public java.lang.String getCamelcase() {
+        java.lang.Object ref = camelcase_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          camelcase_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camel-cased service name.
+       * </pre>
+       *
+       * <code>string camelcase = 2;</code>
+       * @return The bytes for camelcase.
+       */
+      public com.google.protobuf.ByteString
+          getCamelcaseBytes() {
+        java.lang.Object ref = camelcase_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          camelcase_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The camel-cased service name.
+       * </pre>
+       *
+       * <code>string camelcase = 2;</code>
+       * @param value The camelcase to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCamelcase(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        camelcase_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camel-cased service name.
+       * </pre>
+       *
+       * <code>string camelcase = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCamelcase() {
+        camelcase_ = getDefaultInstance().getCamelcase();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The camel-cased service name.
+       * </pre>
+       *
+       * <code>string camelcase = 2;</code>
+       * @param value The bytes for camelcase to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCamelcaseBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        camelcase_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.ApiServiceName)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.ApiServiceName)
+    private static final com.cloudera.thunderhead.service.common.options.Options.ApiServiceName DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.ApiServiceName();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.ApiServiceName getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ApiServiceName>
+        PARSER = new com.google.protobuf.AbstractParser<ApiServiceName>() {
+      @java.lang.Override
+      public ApiServiceName parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ApiServiceName> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ApiServiceName> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.ApiServiceName getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileExtensionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.FileExtension)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code options.FileExtension}
+   */
+  public static final class FileExtension extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.FileExtension)
+      FileExtensionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileExtension.newBuilder() to construct.
+    private FileExtension(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileExtension() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileExtension();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_FileExtension_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_FileExtension_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.FileExtension.class, com.cloudera.thunderhead.service.common.options.Options.FileExtension.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.FileExtension)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.FileExtension other = (com.cloudera.thunderhead.service.common.options.Options.FileExtension) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.FileExtension prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code options.FileExtension}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.FileExtension)
+        com.cloudera.thunderhead.service.common.options.Options.FileExtensionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_FileExtension_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_FileExtension_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.FileExtension.class, com.cloudera.thunderhead.service.common.options.Options.FileExtension.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.FileExtension.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_FileExtension_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.FileExtension getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.FileExtension.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.FileExtension build() {
+        com.cloudera.thunderhead.service.common.options.Options.FileExtension result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.FileExtension buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.FileExtension result = new com.cloudera.thunderhead.service.common.options.Options.FileExtension(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.FileExtension) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.FileExtension)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.FileExtension other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.FileExtension.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.FileExtension)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.FileExtension)
+    private static final com.cloudera.thunderhead.service.common.options.Options.FileExtension DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.FileExtension();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.FileExtension getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileExtension>
+        PARSER = new com.google.protobuf.AbstractParser<FileExtension>() {
+      @java.lang.Override
+      public FileExtension parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileExtension> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileExtension> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.FileExtension getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+    public static final int AUDIT_FIELD_NUMBER = 80000;
+    /**
+     * <pre>
+     * This field is used to enable auditing for the service.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FileOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FileOptions,
+        java.lang.Boolean> audit = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FileExtension.getDefaultInstance(),
+          0,
+          java.lang.Boolean.class,
+          null);
+    public static final int AUDITENTITLEMENT_FIELD_NUMBER = 80001;
+    /**
+     * <pre>
+     * The name of the entitlement to use to enable submitting auditing records.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FileOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FileOptions,
+        java.lang.String> auditEntitlement = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FileExtension.getDefaultInstance(),
+          1,
+          java.lang.String.class,
+          null);
+  }
+
   public interface FieldExtensionOrBuilder extends
       // @@protoc_insertion_point(interface_extends:options.FieldExtension)
       com.google.protobuf.MessageOrBuilder {
@@ -712,6 +4345,76 @@ public final class Options {
           15,
           java.lang.Boolean.class,
           null);
+    public static final int NOPARAMFILE_FIELD_NUMBER = 50016;
+    /**
+     * <pre>
+     * This field doesn't reference a parameter file.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Boolean> noParamfile = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          16,
+          java.lang.Boolean.class,
+          null);
+    public static final int DEFAULT_FIELD_NUMBER = 50017;
+    /**
+     * <pre>
+     * Default value for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.String> default_ = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          17,
+          java.lang.String.class,
+          null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 50018;
+    /**
+     * <pre>
+     * The form factor(s) that the field is part of, e.g., public, private.
+     * By default, a parameter is part of every form factor of its operation or service.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          18,
+          java.lang.String.class,
+          null);
+    public static final int PLURALNAME_FIELD_NUMBER = 50019;
+    /**
+     * <pre>
+     * The plural name of the field, which will be used in yaml definition
+     * for repeated field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.String> pluralName = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          19,
+          java.lang.String.class,
+          null);
   }
 
   public interface MethodExtensionOrBuilder extends
@@ -1146,7 +4849,7 @@ public final class Options {
     public static final int PAGINATES_FIELD_NUMBER = 60002;
     /**
      * <pre>
-     * This method returnes paginated results.
+     * This method returns paginated results.
      * </pre>
      *
      * <code>extend .google.protobuf.MethodOptions { ... }</code>
@@ -1244,6 +4947,128 @@ public final class Options {
           com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
           7,
           java.lang.Boolean.class,
+          null);
+    public static final int RATELIMITGROUP_FIELD_NUMBER = 60008;
+    /**
+     * <pre>
+     * This method is rate limited with the specified group. This name must
+     * match the name of a rate limit group declared for the service itself.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.String> rateLimitGroup = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          8,
+          java.lang.String.class,
+          null);
+    public static final int MUTATING_FIELD_NUMBER = 60009;
+    /**
+     * <pre>
+     * This method is a mutating call.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.Boolean> mutating = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          9,
+          java.lang.Boolean.class,
+          null);
+    public static final int SKIPAUDITING_FIELD_NUMBER = 60010;
+    /**
+     * <pre>
+     * This method should not be audited.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.Boolean> skipAuditing = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          10,
+          java.lang.Boolean.class,
+          null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 60011;
+    /**
+     * <pre>
+     * The form factor(s) that the operation is part of, e.g., public, private.
+     * By default, an operation is part of every form factor of its service.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          11,
+          java.lang.String.class,
+          null);
+    public static final int EXTENSION_FIELD_NUMBER = 60012;
+    /**
+     * <pre>
+     * This method has extensions
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.util.List<java.lang.String>> extension = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          12,
+          java.lang.String.class,
+          null);
+    public static final int TAG_FIELD_NUMBER = 60013;
+    /**
+     * <pre>
+     * The grouping tag for this method
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.String> tag = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          13,
+          java.lang.String.class,
+          null);
+    public static final int ALTNAME_FIELD_NUMBER = 60014;
+    /**
+     * <pre>
+     * The alternate name for this method, which is usually the previous name after
+     * a refactoring to keep the backward compatibility and should be deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.String> altName = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          14,
+          java.lang.String.class,
           null);
   }
 
@@ -1710,8 +5535,515 @@ public final class Options {
           3,
           java.lang.Boolean.class,
           null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 70004;
+    /**
+     * <pre>
+     * The form factor(s) for the message.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MessageOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MessageOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MessageExtension.getDefaultInstance(),
+          4,
+          java.lang.String.class,
+          null);
   }
 
+  public interface EnumValueExtensionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.EnumValueExtension)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code options.EnumValueExtension}
+   */
+  public static final class EnumValueExtension extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.EnumValueExtension)
+      EnumValueExtensionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use EnumValueExtension.newBuilder() to construct.
+    private EnumValueExtension(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EnumValueExtension() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EnumValueExtension();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_EnumValueExtension_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_EnumValueExtension_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.class, com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension other = (com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code options.EnumValueExtension}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.EnumValueExtension)
+        com.cloudera.thunderhead.service.common.options.Options.EnumValueExtensionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_EnumValueExtension_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_EnumValueExtension_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.class, com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_EnumValueExtension_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension build() {
+        com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension result = new com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.EnumValueExtension)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.EnumValueExtension)
+    private static final com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<EnumValueExtension>
+        PARSER = new com.google.protobuf.AbstractParser<EnumValueExtension>() {
+      @java.lang.Override
+      public EnumValueExtension parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<EnumValueExtension> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EnumValueExtension> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+    public static final int HIDDEN_FIELD_NUMBER = 90000;
+    /**
+     * <pre>
+     * This value is hidden.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.EnumValueOptions,
+        java.lang.Boolean> hidden = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance(),
+          0,
+          java.lang.Boolean.class,
+          null);
+    public static final int HIDDENREASON_FIELD_NUMBER = 90001;
+    /**
+     * <pre>
+     * The reason this value is hidden.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.EnumValueOptions,
+        java.lang.String> hiddenReason = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance(),
+          1,
+          java.lang.String.class,
+          null);
+    public static final int HIDDENRETENTION_FIELD_NUMBER = 90002;
+    /**
+     * <pre>
+     * This conditions under this hidden value is made visible.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.EnumValueOptions,
+        java.lang.String> hiddenRetention = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance(),
+          2,
+          java.lang.String.class,
+          null);
+    public static final int DEPRECATED_FIELD_NUMBER = 90003;
+    /**
+     * <pre>
+     * this value is deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.EnumValueOptions,
+        java.lang.Boolean> deprecated = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance(),
+          3,
+          java.lang.Boolean.class,
+          null);
+  }
+
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_ServiceExtension_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_ServiceExtension_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_TagGroup_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_TagGroup_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_RateLimitGroupDefinition_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_RateLimitGroupDefinition_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_ApiServiceName_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_ApiServiceName_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_FileExtension_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_FileExtension_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_options_FieldExtension_descriptor;
   private static final 
@@ -1727,6 +6059,11 @@ public final class Options {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_options_MessageExtension_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_EnumValueExtension_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_EnumValueExtension_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1737,72 +6074,153 @@ public final class Options {
   static {
     java.lang.String[] descriptorData = {
       "\n\roptions.proto\022\007options\032 google/protobu" +
-      "f/descriptor.proto\"\362\006\n\016FieldExtension22\n" +
-      "\tsensitive\022\035.google.protobuf.FieldOption" +
-      "s\030\320\206\003 \001(\01024\n\013skipLogging\022\035.google.protob" +
-      "uf.FieldOptions\030\321\206\003 \001(\01027\n\016pagingPageSiz" +
-      "e\022\035.google.protobuf.FieldOptions\030\322\206\003 \001(\010" +
-      "29\n\020pagingInputToken\022\035.google.protobuf.F" +
-      "ieldOptions\030\323\206\003 \001(\01025\n\014pagingResult\022\035.go" +
-      "ogle.protobuf.FieldOptions\030\324\206\003 \001(\0102:\n\021pa" +
-      "gingOutputToken\022\035.google.protobuf.FieldO" +
-      "ptions\030\325\206\003 \001(\01021\n\010datetime\022\035.google.prot" +
-      "obuf.FieldOptions\030\326\206\003 \001(\0102/\n\006hidden\022\035.go" +
-      "ogle.protobuf.FieldOptions\030\327\206\003 \001(\01025\n\014hi" +
-      "ddenReason\022\035.google.protobuf.FieldOption" +
-      "s\030\330\206\003 \001(\t28\n\017hiddenRetention\022\035.google.pr" +
-      "otobuf.FieldOptions\030\331\206\003 \001(\t21\n\010required\022" +
-      "\035.google.protobuf.FieldOptions\030\332\206\003 \001(\01020" +
-      "\n\007minimum\022\035.google.protobuf.FieldOptions" +
-      "\030\333\206\003 \001(\00520\n\007maximum\022\035.google.protobuf.Fi" +
-      "eldOptions\030\334\206\003 \001(\00526\n\rminimumLength\022\035.go" +
-      "ogle.protobuf.FieldOptions\030\335\206\003 \001(\00526\n\rma" +
-      "ximumLength\022\035.google.protobuf.FieldOptio" +
-      "ns\030\336\206\003 \001(\00523\n\ndeprecated\022\035.google.protob" +
-      "uf.FieldOptions\030\337\206\003 \001(\010\"\312\003\n\017MethodExtens" +
-      "ion2/\n\005right\022\036.google.protobuf.MethodOpt" +
-      "ions\030\340\324\003 \001(\t25\n\013entitlement\022\036.google.pro" +
-      "tobuf.MethodOptions\030\341\324\003 \001(\t23\n\tpaginates" +
-      "\022\036.google.protobuf.MethodOptions\030\342\324\003 \001(\010" +
-      "2?\n\025pagingDefaultMaxItems\022\036.google.proto" +
-      "buf.MethodOptions\030\343\324\003 \001(\00520\n\006hidden\022\036.go" +
-      "ogle.protobuf.MethodOptions\030\344\324\003 \001(\01026\n\014h" +
-      "iddenReason\022\036.google.protobuf.MethodOpti" +
-      "ons\030\345\324\003 \001(\t29\n\017hiddenRetention\022\036.google." +
-      "protobuf.MethodOptions\030\346\324\003 \001(\t24\n\ndeprec" +
-      "ated\022\036.google.protobuf.MethodOptions\030\347\324\003" +
-      " \001(\010\"\361\001\n\020MessageExtension21\n\006hidden\022\037.go" +
-      "ogle.protobuf.MessageOptions\030\360\242\004 \001(\01027\n\014" +
-      "hiddenReason\022\037.google.protobuf.MessageOp" +
-      "tions\030\361\242\004 \001(\t2:\n\017hiddenRetention\022\037.googl" +
-      "e.protobuf.MessageOptions\030\362\242\004 \001(\t25\n\ndep" +
-      "recated\022\037.google.protobuf.MessageOptions" +
-      "\030\363\242\004 \001(\010BU\n/com.cloudera.thunderhead.ser" +
-      "vice.common.optionsB\007OptionsZ\031com/cloude" +
-      "ra/cdp/protobufb\006proto3"
+      "f/descriptor.proto\"\245\004\n\020ServiceExtension2" +
+      "f\n\030rateLimitGroupDefinition\022\037.google.pro" +
+      "tobuf.ServiceOptions\030\300\270\002 \001(\0132!.options.R" +
+      "ateLimitGroupDefinition2R\n\016apiServiceNam" +
+      "e\022\037.google.protobuf.ServiceOptions\030\301\270\002 \001" +
+      "(\0132\027.options.ApiServiceName22\n\007release\022\037" +
+      ".google.protobuf.ServiceOptions\030\302\270\002 \003(\t2" +
+      "0\n\005admin\022\037.google.protobuf.ServiceOption" +
+      "s\030\303\270\002 \001(\01025\n\nformFactor\022\037.google.protobu" +
+      "f.ServiceOptions\030\304\270\002 \003(\t22\n\007version\022\037.go" +
+      "ogle.protobuf.ServiceOptions\030\305\270\002 \001(\t2F\n\010" +
+      "tagGroup\022\037.google.protobuf.ServiceOption" +
+      "s\030\306\270\002 \003(\0132\021.options.TagGroup2<\n\021addition" +
+      "alBackend\022\037.google.protobuf.ServiceOptio" +
+      "ns\030\307\270\002 \003(\t\"C\n\010TagGroup\022\014\n\004name\030\001 \001(\t\022\023\n\013" +
+      "description\030\002 \001(\t\022\024\n\014externalDocs\030\003 \001(\t\"" +
+      "k\n\030RateLimitGroupDefinition\022\014\n\004name\030\001 \001(" +
+      "\t\022\027\n\017byRemoteAddress\030\002 \001(\005\022\025\n\rbyAccessKe" +
+      "yId\030\003 \001(\005\022\021\n\tbyAccount\030\004 \001(\005\"6\n\016ApiServi" +
+      "ceName\022\021\n\tlowercase\030\001 \001(\t\022\021\n\tcamelcase\030\002" +
+      " \001(\t\"\202\001\n\rFileExtension2-\n\005audit\022\034.google" +
+      ".protobuf.FileOptions\030\200\361\004 \001(\01028\n\020auditEn" +
+      "titlement\022\034.google.protobuf.FileOptions\030" +
+      "\201\361\004 \001(\tJ\010\010\202\361\004\020\203\361\004\"\304\010\n\016FieldExtension22\n\t" +
+      "sensitive\022\035.google.protobuf.FieldOptions" +
+      "\030\320\206\003 \001(\01024\n\013skipLogging\022\035.google.protobu" +
+      "f.FieldOptions\030\321\206\003 \001(\01027\n\016pagingPageSize" +
+      "\022\035.google.protobuf.FieldOptions\030\322\206\003 \001(\0102" +
+      "9\n\020pagingInputToken\022\035.google.protobuf.Fi" +
+      "eldOptions\030\323\206\003 \001(\01025\n\014pagingResult\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\324\206\003 \001(\0102:\n\021pag" +
+      "ingOutputToken\022\035.google.protobuf.FieldOp" +
+      "tions\030\325\206\003 \001(\01021\n\010datetime\022\035.google.proto" +
+      "buf.FieldOptions\030\326\206\003 \001(\0102/\n\006hidden\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\327\206\003 \001(\01025\n\014hid" +
+      "denReason\022\035.google.protobuf.FieldOptions" +
+      "\030\330\206\003 \001(\t28\n\017hiddenRetention\022\035.google.pro" +
+      "tobuf.FieldOptions\030\331\206\003 \001(\t21\n\010required\022\035" +
+      ".google.protobuf.FieldOptions\030\332\206\003 \001(\01020\n" +
+      "\007minimum\022\035.google.protobuf.FieldOptions\030" +
+      "\333\206\003 \001(\00520\n\007maximum\022\035.google.protobuf.Fie" +
+      "ldOptions\030\334\206\003 \001(\00526\n\rminimumLength\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\335\206\003 \001(\00526\n\rmax" +
+      "imumLength\022\035.google.protobuf.FieldOption" +
+      "s\030\336\206\003 \001(\00523\n\ndeprecated\022\035.google.protobu" +
+      "f.FieldOptions\030\337\206\003 \001(\01024\n\013noParamfile\022\035." +
+      "google.protobuf.FieldOptions\030\340\206\003 \001(\01020\n\007" +
+      "default\022\035.google.protobuf.FieldOptions\030\341" +
+      "\206\003 \001(\t23\n\nformFactor\022\035.google.protobuf.F" +
+      "ieldOptions\030\342\206\003 \003(\t23\n\npluralName\022\035.goog" +
+      "le.protobuf.FieldOptions\030\343\206\003 \001(\t\"\275\006\n\017Met" +
+      "hodExtension2/\n\005right\022\036.google.protobuf." +
+      "MethodOptions\030\340\324\003 \001(\t25\n\013entitlement\022\036.g" +
+      "oogle.protobuf.MethodOptions\030\341\324\003 \001(\t23\n\t" +
+      "paginates\022\036.google.protobuf.MethodOption" +
+      "s\030\342\324\003 \001(\0102?\n\025pagingDefaultMaxItems\022\036.goo" +
+      "gle.protobuf.MethodOptions\030\343\324\003 \001(\00520\n\006hi" +
+      "dden\022\036.google.protobuf.MethodOptions\030\344\324\003" +
+      " \001(\01026\n\014hiddenReason\022\036.google.protobuf.M" +
+      "ethodOptions\030\345\324\003 \001(\t29\n\017hiddenRetention\022" +
+      "\036.google.protobuf.MethodOptions\030\346\324\003 \001(\t2" +
+      "4\n\ndeprecated\022\036.google.protobuf.MethodOp" +
+      "tions\030\347\324\003 \001(\01028\n\016rateLimitGroup\022\036.google" +
+      ".protobuf.MethodOptions\030\350\324\003 \001(\t22\n\010mutat" +
+      "ing\022\036.google.protobuf.MethodOptions\030\351\324\003 " +
+      "\001(\01026\n\014skipAuditing\022\036.google.protobuf.Me" +
+      "thodOptions\030\352\324\003 \001(\01024\n\nformFactor\022\036.goog" +
+      "le.protobuf.MethodOptions\030\353\324\003 \003(\t23\n\text" +
+      "ension\022\036.google.protobuf.MethodOptions\030\354" +
+      "\324\003 \003(\t2-\n\003tag\022\036.google.protobuf.MethodOp" +
+      "tions\030\355\324\003 \001(\t21\n\007altName\022\036.google.protob" +
+      "uf.MethodOptions\030\356\324\003 \001(\t\"\250\002\n\020MessageExte" +
+      "nsion21\n\006hidden\022\037.google.protobuf.Messag" +
+      "eOptions\030\360\242\004 \001(\01027\n\014hiddenReason\022\037.googl" +
+      "e.protobuf.MessageOptions\030\361\242\004 \001(\t2:\n\017hid" +
+      "denRetention\022\037.google.protobuf.MessageOp" +
+      "tions\030\362\242\004 \001(\t25\n\ndeprecated\022\037.google.pro" +
+      "tobuf.MessageOptions\030\363\242\004 \001(\01025\n\nformFact" +
+      "or\022\037.google.protobuf.MessageOptions\030\364\242\004 " +
+      "\003(\t\"\373\001\n\022EnumValueExtension23\n\006hidden\022!.g" +
+      "oogle.protobuf.EnumValueOptions\030\220\277\005 \001(\0102" +
+      "9\n\014hiddenReason\022!.google.protobuf.EnumVa" +
+      "lueOptions\030\221\277\005 \001(\t2<\n\017hiddenRetention\022!." +
+      "google.protobuf.EnumValueOptions\030\222\277\005 \001(\t" +
+      "27\n\ndeprecated\022!.google.protobuf.EnumVal" +
+      "ueOptions\030\223\277\005 \001(\010BU\n/com.cloudera.thunde" +
+      "rhead.service.common.optionsB\007OptionsZ\031c" +
+      "om/cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.google.protobuf.DescriptorProtos.getDescriptor(),
         });
-    internal_static_options_FieldExtension_descriptor =
+    internal_static_options_ServiceExtension_descriptor =
       getDescriptor().getMessageTypes().get(0);
+    internal_static_options_ServiceExtension_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_ServiceExtension_descriptor,
+        new java.lang.String[] { });
+    internal_static_options_TagGroup_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_options_TagGroup_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_TagGroup_descriptor,
+        new java.lang.String[] { "Name", "Description", "ExternalDocs", });
+    internal_static_options_RateLimitGroupDefinition_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_options_RateLimitGroupDefinition_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_RateLimitGroupDefinition_descriptor,
+        new java.lang.String[] { "Name", "ByRemoteAddress", "ByAccessKeyId", "ByAccount", });
+    internal_static_options_ApiServiceName_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_options_ApiServiceName_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_ApiServiceName_descriptor,
+        new java.lang.String[] { "Lowercase", "Camelcase", });
+    internal_static_options_FileExtension_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_options_FileExtension_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_FileExtension_descriptor,
+        new java.lang.String[] { });
+    internal_static_options_FieldExtension_descriptor =
+      getDescriptor().getMessageTypes().get(5);
     internal_static_options_FieldExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_FieldExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_MethodExtension_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_options_MethodExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_MethodExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_MessageExtension_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_options_MessageExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_MessageExtension_descriptor,
+        new java.lang.String[] { });
+    internal_static_options_EnumValueExtension_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_options_EnumValueExtension_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_EnumValueExtension_descriptor,
         new java.lang.String[] { });
     com.google.protobuf.DescriptorProtos.getDescriptor();
   }

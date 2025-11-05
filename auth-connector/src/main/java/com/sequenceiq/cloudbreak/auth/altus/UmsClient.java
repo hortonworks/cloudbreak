@@ -538,14 +538,12 @@ public class UmsClient {
                 .setAccountId(accountId)
                 .setEnvironmentCrn(environmentCrn)
                 .setPageSize(umsClientConfig.getListServicePrincipalCloudIdentitiesPageSize());
-        if (pageToken.isPresent()) {
-            requestBuilder.setPageToken(pageToken.get());
-        }
+        pageToken.ifPresent(requestBuilder::setPageToken);
         return newStub().listServicePrincipalCloudIdentities(requestBuilder.build());
     }
 
     private <T> void checkSingleUserResponse(List<T> users, String userCrn) {
-        if (users.size() < 1) {
+        if (users.isEmpty()) {
             throw new UmsAuthenticationException(String.format("No user found in UMS system: %s", userCrn));
         } else if (users.size() > 1) {
             throw new UmsAuthenticationException(String.format("Multiple users found in UMS system: %s", userCrn));
@@ -556,6 +554,25 @@ public class UmsClient {
         return newStub().listAssignedResourceRoles(UserManagementProto.ListAssignedResourceRolesRequest.newBuilder()
                 .setAssignee(getAssignee(assigneeCrn))
                 .build());
+    }
+
+    /**
+     * Lists all assignees (users, machine users, groups) for a specific resource.
+     *
+     * @param resourceCrn the CRN of the resource
+     * @return list of assignee CRNs that have resource role assignments on the specified resource
+     */
+    public List<UserManagementProto.ResourceAssignee> listResourceAssignees(String resourceCrn) {
+        UserManagementProto.ListResourceAssigneesResponse response;
+        List<UserManagementProto.ResourceAssignee> resourceAssignees = new ArrayList<>();
+        do {
+            response = newStub().listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest.newBuilder()
+                .setAccountId(Crn.fromString(resourceCrn).getAccountId())
+                .setResourceCrn(resourceCrn)
+                .build());
+            resourceAssignees.addAll(response.getResourceAssigneeList());
+        } while (response.hasNextPageToken());
+        return resourceAssignees;
     }
 
     /**
@@ -851,7 +868,7 @@ public class UmsClient {
                                         return accessKeyObject.getCrn();
                                     }
                                 })
-                                .collect(Collectors.toList()));
+                                .toList());
                 if (!listAccessKeysResponse.hasNextPageToken()) {
                     break;
                 }
