@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -129,7 +129,7 @@ public class TrustSetupService {
         crossRealmTrust.setDnsIp(request.getIp());
         if (StringUtils.isBlank(request.getTrustSecret())) {
             LOGGER.debug("Cross realm trust secret is not provided, generating a new one.");
-            crossRealmTrust.setTrustSecret(PasswordUtil.generatePassword());
+            crossRealmTrust.setTrustSecret(FreeIpaPasswordUtil.generatePassword());
         } else {
             crossRealmTrust.setTrustSecret(request.getTrustSecret());
         }
@@ -169,7 +169,7 @@ public class TrustSetupService {
         crossRealmTrust.setRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
         if (StringUtils.isBlank(request.getTrustSecret())) {
             LOGGER.debug("Cross realm trust secret is not provided, generating a new one.");
-            crossRealmTrust.setTrustSecret(PasswordUtil.generatePassword());
+            crossRealmTrust.setTrustSecret(FreeIpaPasswordUtil.generatePassword());
         } else {
             crossRealmTrust.setTrustSecret(request.getTrustSecret());
         }
