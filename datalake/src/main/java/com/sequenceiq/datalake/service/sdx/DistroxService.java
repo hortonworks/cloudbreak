@@ -23,11 +23,16 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.core.AttemptState;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 
 @Service
 public class DistroxService {
@@ -42,6 +47,12 @@ public class DistroxService {
 
     @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
+
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private AccountIdService accountIdService;
 
     public Collection<StackViewV4Response> getAttachedDistroXClusters(String environmentCrn) {
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environmentCrn);
@@ -110,6 +121,22 @@ public class DistroxService {
                     .run(checkDistroxStatus(pollingCrn, Type.START, this::stackAndClusterStarted));
 
         }
+    }
+
+    public SdxRefreshDatahubResponse refreshDataHub(String clusterName, String datahubName) {
+        SdxRefreshDatahubResponse response = new SdxRefreshDatahubResponse();
+        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(ThreadBasedUserCrnProvider.getUserCrn());
+        SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(clusterName, accountIdFromCrn);
+        if (Strings.isNullOrEmpty(datahubName)) {
+            restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
+            getAttachedDistroXClusters(sdxCluster.getEnvCrn())
+                    .forEach(response::addStack);
+            return response;
+        }
+        StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
+        restartDistroxServicesByCrns(List.of(stackV4Response.getCrn()));
+        response.addStack(stackV4Response);
+        return response;
     }
 
     private AttemptMaker<Void> checkDistroxStatus(ArrayList<String> pollingCrn, Type type, Function<StackV4Response, Boolean> statusChecker) {

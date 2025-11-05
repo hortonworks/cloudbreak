@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -69,6 +70,9 @@ public class SdxCcmUpgradeService {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private AccountIdService accountIdService;
+
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
         checkEnvironment(environmentCrn);
         Optional<SdxCluster> sdxClusterOpt = getSdxCluster(environmentCrn);
@@ -76,7 +80,7 @@ public class SdxCcmUpgradeService {
             return noDatalakeAnswer(environmentCrn);
         }
         SdxCluster sdxCluster = sdxClusterOpt.get();
-        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(environmentCrn));
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromUserCrn(environmentCrn));
 
         if (Tunnel.getUpgradables().contains(stack.getTunnel())) {
             return checkPrerequisitesAndTrigger(sdxCluster, stack);

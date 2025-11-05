@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterView;
@@ -231,5 +232,27 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
         return environmentResponse.getCredential() != null &&
                 environmentResponse.getCredential().getGovCloud() != null &&
                 environmentResponse.getCredential().getGovCloud().booleanValue();
+    }
+
+    public DetailedEnvironmentResponse validateAndGetEnvironment(String environmentName) {
+        DetailedEnvironmentResponse environmentResponse = getByName(environmentName);
+        validateEnv(environmentResponse);
+        return environmentResponse;
+    }
+
+    private void validateEnv(DetailedEnvironmentResponse environment) {
+        if (environment.getEnvironmentStatus().isDeleteInProgress()) {
+            throw new BadRequestException("The environment is in delete in progress phase. Please create a new environment first!");
+        } else if (environment.getEnvironmentStatus().isStopInProgressOrStopped()) {
+            throw new BadRequestException("The environment is stopped. Please start the environment first!");
+        } else if (environment.getEnvironmentStatus().isStartInProgress()) {
+            throw new BadRequestException("The environment is starting. Please wait until finished!");
+        } else if (environment.getEnvironmentStatus().isFailed()) {
+            throw new BadRequestException("The environment is in failed phase. Please fix the environment or create a new one first!");
+        }
+
+        if (!entitlementService.internalTenant(environment.getAccountId()) && EnvironmentType.HYBRID_BASE.toString().equals(environment.getEnvironmentType())) {
+            throw new BadRequestException("Creating or Resizing datalake is not supported for Hybrid Environment");
+        }
     }
 }

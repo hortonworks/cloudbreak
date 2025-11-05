@@ -60,6 +60,7 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
 import com.sequenceiq.datalake.service.rotation.certificate.SdxDatabaseCertificateRotationService;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.RangerRazService;
 import com.sequenceiq.datalake.service.sdx.SELinuxService;
 import com.sequenceiq.datalake.service.sdx.SaltService;
@@ -68,6 +69,7 @@ import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxInstanceService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
+import com.sequenceiq.datalake.service.sdx.SdxResizeService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StackService;
@@ -191,6 +193,12 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private SaltService saltService;
 
+    @Inject
+    private SdxResizeService sdxResizeService;
+
+    @Inject
+    private DistroxService distroxService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(String name, SdxClusterRequest createSdxClusterRequest) {
@@ -217,7 +225,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterResponse resize(@ResourceName String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         validateSdxClusterShape(resizeSdxClusterRequest.getClusterShape());
-        Pair<SdxCluster, FlowIdentifier> result = sdxService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
+        Pair<SdxCluster, FlowIdentifier> result = sdxResizeService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
         SdxCluster sdxCluster = result.getLeft();
         metricService.incrementMetricCounter(MetricType.EXTERNAL_SDX_REQUESTED, sdxCluster);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -229,7 +237,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESIZE_DATALAKE)
     public SdxRefreshDatahubResponse refreshDataHubs(@ResourceName String name, String datahubName) {
-        return sdxService.refreshDataHub(name, datahubName);
+        return distroxService.refreshDataHub(name, datahubName);
     }
 
     @Override

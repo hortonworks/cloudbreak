@@ -23,7 +23,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
 @ExtendWith(MockitoExtension.class)
-class SdxInstanceTest {
+class SdxInstanceServiceTest {
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
 

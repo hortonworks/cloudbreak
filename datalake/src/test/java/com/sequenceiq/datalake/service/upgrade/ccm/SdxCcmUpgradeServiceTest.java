@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -81,6 +82,9 @@ class SdxCcmUpgradeServiceTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private AccountIdService accountIdService;
+
     @InjectMocks
     private SdxCcmUpgradeService underTest;
 
@@ -122,10 +126,12 @@ class SdxCcmUpgradeServiceTest {
     void testNotUpgradable(Tunnel tunnel) {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
-        when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(tunnel, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("not upgradeable");
+        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
+
         assertThat(response.getReason()).isEqualTo("not upgradeable");
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
     }
@@ -134,10 +140,12 @@ class SdxCcmUpgradeServiceTest {
     void testLatestSkipUpgrade() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
-        when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCMV2_JUMPGATE, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("latest");
+        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
+
         assertThat(response.getReason()).isEqualTo("latest");
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
     }
@@ -146,10 +154,12 @@ class SdxCcmUpgradeServiceTest {
     void testNotAvailableError() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
-        when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.STOPPED));
         when(messagesService.getMessage(any())).thenReturn("unavailable");
+        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
+
         assertThat(response.getReason()).isEqualTo("unavailable");
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
     }
@@ -159,12 +169,14 @@ class SdxCcmUpgradeServiceTest {
     void testTriggerUpgrade(Status status) {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
-        when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.AVAILABLE));
         when(messagesService.getMessage(any(), any())).thenReturn("success");
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flowId");
         when(sdxReactorFlowManager.triggerCcmUpgradeFlow(sdxCluster)).thenReturn(flowId);
+        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
+
         assertThat(response.getReason()).isEqualTo("success");
         assertThat(response.getFlowIdentifier()).isEqualTo(flowId);
     }

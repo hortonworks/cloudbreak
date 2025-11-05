@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -64,6 +65,9 @@ class SdxDatabaseCertificateRotationServiceTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private AccountIdService accountIdService;
+
     @InjectMocks
     private SdxDatabaseCertificateRotationService underTest;
 
@@ -99,11 +103,12 @@ class SdxDatabaseCertificateRotationServiceTest {
     @Test
     void testRotateCertificateStackNotFoundOnCoreSide() {
         SdxCluster sdxCluster = mock(SdxCluster.class);
+        String stackCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
         when(sdxCluster.getClusterName()).thenReturn("clusterName");
-        when(sdxService.getByCrn(eq(USER_CRN), eq("stackCrn"))).thenReturn(sdxCluster);
+        when(sdxService.getByCrn(eq(USER_CRN), eq(stackCrn))).thenReturn(sdxCluster);
         when(stackService.getDetail(anyString(), any(), any())).thenReturn(null);
 
-        SdxRotateRdsCertificateV1Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateCertificate("stackCrn"));
+        SdxRotateRdsCertificateV1Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateCertificate(stackCrn));
 
         assertNotNull(response);
         assertEquals(SdxRotateRdsCertResponseType.ERROR, response.getResponseType());
@@ -111,7 +116,7 @@ class SdxDatabaseCertificateRotationServiceTest {
 
     @Test
     void testRotateCertificateStackNotAvailable() {
-        String dlCrn = "dummyCrn";
+        String dlCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxCluster.getClusterName()).thenReturn("clusterName");
         when(sdxService.getByCrn(any(), eq(dlCrn))).thenReturn(sdxCluster);

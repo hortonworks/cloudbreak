@@ -22,6 +22,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent.DatalakeHorizontalScaleFlowEventBuilder;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -43,6 +44,9 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private DistroxService distroxService;
 
     @Override
     public String selector() {
@@ -68,7 +72,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ex
             cloudbreakPoller.pollUpdateUntilAvailable("Datalake horizontal scaling",
                     sdxCluster, pollingConfig);
             LOGGER.debug("Services Rolling restart finsihed");
-            sdxService.refreshDataHub(sdxCluster.getClusterName(), null);
+            distroxService.refreshDataHub(sdxCluster.getClusterName(), null);
             response = DatalakeHorizontalScaleFlowEvent
                     .datalakeHorizontalScaleFlowEventBuilderFactory(event.getData())
                     .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector())

@@ -56,12 +56,12 @@ import com.sequenceiq.datalake.service.sdx.RangerRazService;
 import com.sequenceiq.datalake.service.sdx.SELinuxService;
 import com.sequenceiq.datalake.service.sdx.SaltService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.SdxResizeService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StackService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
@@ -107,9 +107,6 @@ class SdxControllerTest {
     private DistroxService distroxService;
 
     @Mock
-    private DistroXV1Endpoint distroXV1Endpoint;
-
-    @Mock
     private EntitlementService entitlementService;
 
     @Mock
@@ -132,6 +129,9 @@ class SdxControllerTest {
 
     @Mock
     private SaltService saltService;
+
+    @Mock
+    private SdxResizeService sdxResizeService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -323,7 +323,7 @@ class SdxControllerTest {
     @Test
     void refreshDatahubs() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.refreshDataHubs(SDX_CLUSTER_NAME, null));
-        verify(sdxService, times(1)).refreshDataHub(SDX_CLUSTER_NAME, null);
+        verify(distroxService, times(1)).refreshDataHub(SDX_CLUSTER_NAME, null);
     }
 
     @Test

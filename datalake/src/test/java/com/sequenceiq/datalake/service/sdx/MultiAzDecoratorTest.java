@@ -4,10 +4,16 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.api.type.DeploymentRestriction.DATALAKE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,27 +21,35 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
+@ExtendWith(MockitoExtension.class)
 class MultiAzDecoratorTest {
 
     private static final String PREFERRED_SUBNET_ID = "aPreferredSubnetId";
@@ -52,12 +66,14 @@ class MultiAzDecoratorTest {
 
     private static final String PLATFORM_GCP = CloudPlatform.GCP.name();
 
-    private MultiAzDecorator underTest;
+    @Mock
+    private PlatformConfig platformConfig;
 
-    @BeforeEach
-    void setUp() {
-        underTest = new MultiAzDecorator();
-    }
+    @Mock
+    private EntitlementService entitlementService;
+
+    @InjectMocks
+    private MultiAzDecorator underTest;
 
     @Test
     void decorateStackRequestWithAwsNativeTest() {
@@ -115,15 +131,15 @@ class MultiAzDecoratorTest {
 
     static Stream<Arguments> testDecorateStackWithMultiWhenSubnetShouldBeGotFromEnvProvider() {
         return Stream.of(
-                arguments(SdxClusterShape.MEDIUM_DUTY_HA, Tunnel.DIRECT, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
+                arguments(MEDIUM_DUTY_HA, Tunnel.DIRECT, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
                 arguments(SdxClusterShape.ENTERPRISE, Tunnel.DIRECT, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
-                arguments(SdxClusterShape.MEDIUM_DUTY_HA, Tunnel.CLUSTER_PROXY, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
+                arguments(MEDIUM_DUTY_HA, Tunnel.CLUSTER_PROXY, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
                 arguments(SdxClusterShape.ENTERPRISE, Tunnel.CLUSTER_PROXY, Set.of(PREFERRED_SUBNET_ID, SUBNET_ID2)),
-                arguments(SdxClusterShape.MEDIUM_DUTY_HA, Tunnel.CCM, Set.of(SUBNET_ID3, SUBNET_ID4)),
+                arguments(MEDIUM_DUTY_HA, Tunnel.CCM, Set.of(SUBNET_ID3, SUBNET_ID4)),
                 arguments(SdxClusterShape.ENTERPRISE, Tunnel.CCM, Set.of(SUBNET_ID3, SUBNET_ID4)),
-                arguments(SdxClusterShape.MEDIUM_DUTY_HA, Tunnel.CCMV2, Set.of(SUBNET_ID3, SUBNET_ID4)),
+                arguments(MEDIUM_DUTY_HA, Tunnel.CCMV2, Set.of(SUBNET_ID3, SUBNET_ID4)),
                 arguments(SdxClusterShape.ENTERPRISE, Tunnel.CCMV2, Set.of(SUBNET_ID3, SUBNET_ID4)),
-                arguments(SdxClusterShape.MEDIUM_DUTY_HA, Tunnel.CCMV2_JUMPGATE, Set.of(SUBNET_ID3, SUBNET_ID4)),
+                arguments(MEDIUM_DUTY_HA, Tunnel.CCMV2_JUMPGATE, Set.of(SUBNET_ID3, SUBNET_ID4)),
                 arguments(SdxClusterShape.ENTERPRISE, Tunnel.CCMV2_JUMPGATE, Set.of(SUBNET_ID3, SUBNET_ID4))
         );
     }
@@ -407,6 +423,106 @@ class MultiAzDecoratorTest {
                 .allMatch(ig -> ig.getNetwork().getGcp().getAvailabilityZones().containsAll(Set.of("1", "2", "3"))));
 
         assertThat(stackV4Request.isEnableMultiAz()).isTrue();
+    }
+
+    @Test
+    void testValidateMultiAzThrowsExceptionIfSubnetsAreNotInMultipleAZ() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
+        network.setSubnetMetas(Map.of(
+                "subnet1", new CloudSubnet(new CloudSubnet.Builder().availabilityZone("az1")),
+                "subnet2", new CloudSubnet(new CloudSubnet.Builder().availabilityZone("az1"))
+        ));
+        detailedEnvironmentResponse.setNetwork(network);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                underTest.validateMultiAz(true, detailedEnvironmentResponse, MEDIUM_DUTY_HA, true));
+
+        assertEquals("Multi AZ cluster requires subnets in multiple availability zones but the cluster uses subnest only from az1 availability zone.",
+                badRequestException.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE", "GCP"})
+    void testValidateMultiAzNotSupportedCloudProviders(CloudPlatform cloudPlatform) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateMultiAz(true, detailedEnvironmentResponse, ENTERPRISE, false));
+
+        assertThat(ex).hasMessage("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: AWS,AZURE,GCP.");
+    }
+
+    @Test
+    void testValidateMultiAzThrowsExceptionWhenAzureEntitlementIsNotEnabled() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(AZURE.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AZURE));
+        when(entitlementService.isAzureMultiAzEnabled(any())).thenReturn(Boolean.FALSE);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                underTest.validateMultiAz(true, detailedEnvironmentResponse, MEDIUM_DUTY_HA, true));
+
+        assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster on Azure requires entitlement CDP_CB_AZURE_MULTIAZ.");
+
+    }
+
+    @Test
+    void testValidateMultiAzThrowsExceptionWhenGcpEntitlementIsNotEnabled() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(GCP.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(GCP));
+        when(entitlementService.isGcpMultiAzEnabled(any())).thenReturn(Boolean.FALSE);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                underTest.validateMultiAz(true, detailedEnvironmentResponse, MEDIUM_DUTY_HA, true));
+
+        assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster on GCP requires entitlement CDP_CB_GCP_MULTIAZ.");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void testValidateMultiAzThrowsExceptionWhenClusterShapeIsNotSupported(SdxClusterShape clusterShape) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateMultiAz(true, detailedEnvironmentResponse, clusterShape, false));
+
+        assertThat(ex).hasMessage(String.format("Provisioning a multi AZ cluster on AWS is not supported for cluster shape %s.", clusterShape.name()));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void testValidateMultiAzNotThrowExceptionWhenClusterShapeIsSupported(SdxClusterShape clusterShape) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
+
+        assertDoesNotThrow(() -> underTest.validateMultiAz(true, detailedEnvironmentResponse, clusterShape, false));
     }
 
     private InstanceGroupV4Request getInstanceGroupV4Request(InstanceGroupType instanceGroupType) {

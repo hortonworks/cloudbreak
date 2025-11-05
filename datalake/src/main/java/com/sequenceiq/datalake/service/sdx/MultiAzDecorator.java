@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,12 +31,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -44,6 +51,12 @@ public class MultiAzDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzDecorator.class);
 
     private static final Set<Tunnel> PUBLIC_SUBNET_SUPPORTED_TUNNEL = Set.of(Tunnel.DIRECT, Tunnel.CLUSTER_PROXY);
+
+    @Inject
+    private PlatformConfig platformConfig;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void decorateStackRequestWithAwsNative(StackV4Request stackV4Request) {
         stackV4Request.setVariant("AWS_NATIVE");
@@ -328,5 +341,62 @@ public class MultiAzDecorator {
                             return existingSet;
                         }
                 ));
+    }
+
+    public void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape, boolean resize) {
+        ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
+        if (enableMultiAz) {
+            if (!clusterShape.isMultiAzEnabledByDefault()) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster on %s is not supported for cluster shape %s.",
+                        environmentResponse.getCloudPlatform(), clusterShape.name()));
+            }
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+            Set<CloudPlatform> multiAzSupportedPlatforms = platformConfig.getMultiAzSupportedPlatforms();
+            if (!multiAzSupportedPlatforms.contains(cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: %s.",
+                        multiAzSupportedPlatforms.stream().map(CloudPlatform::name).sorted().collect(Collectors.joining(","))));
+            }
+            if (AZURE.equals(cloudPlatform) && !entitlementService.isAzureMultiAzEnabled(environmentResponse.getAccountId())) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
+                        Entitlement.CDP_CB_AZURE_MULTIAZ.name()));
+            }
+            if (GCP.equals(cloudPlatform)) {
+                validateMultiAzForGcp(environmentResponse.getAccountId(), clusterShape, validationBuilder);
+            }
+            if (resize) {
+                validateSubnetsInMultiAZIfNeeded(environmentResponse, validationBuilder);
+            }
+        }
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateSubnetsInMultiAZIfNeeded(DetailedEnvironmentResponse environmentResponse, ValidationResult.ValidationResultBuilder validationBuilder) {
+        if (environmentResponse.getNetwork() != null) {
+            Set<String> availabilityZones;
+            if (AWS.equalsIgnoreCase(environmentResponse.getCloudPlatform())) {
+                availabilityZones = environmentResponse.getNetwork()
+                        .getSubnetMetas()
+                        .values()
+                        .stream()
+                        .map(CloudSubnet::getAvailabilityZone)
+                        .collect(Collectors.toSet());
+            } else {
+                availabilityZones = environmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.fromName(environmentResponse.getCloudPlatform()));
+            }
+            if (availabilityZones.size() == 1) {
+                validationBuilder.error(String.format("Multi AZ cluster requires subnets in multiple availability zones but the cluster " +
+                        "uses subnest only from %s availability zone.", availabilityZones.stream().findFirst().get()));
+            }
+        }
+    }
+
+    private void validateMultiAzForGcp(String accountId, SdxClusterShape clusterShape, ValidationResult.ValidationResultBuilder validationBuilder) {
+        if (!entitlementService.isGcpMultiAzEnabled(accountId)) {
+            validationBuilder.error(String.format("Provisioning a multi AZ cluster on GCP requires entitlement %s.",
+                    Entitlement.CDP_CB_GCP_MULTIAZ.name()));
+        }
     }
 }

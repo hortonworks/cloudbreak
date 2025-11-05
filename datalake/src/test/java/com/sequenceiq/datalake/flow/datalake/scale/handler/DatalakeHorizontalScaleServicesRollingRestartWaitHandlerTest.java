@@ -23,6 +23,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent.DatalakeHorizontalScaleFlowEventBuilder;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -41,6 +42,9 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandlerTest {
 
     @Mock
     private SdxService sdxService;
+
+    @Mock
+    private DistroxService distroxService;
 
     @InjectMocks
     private DatalakeHorizontalScaleServicesRollingRestartWaitHandler underTest;

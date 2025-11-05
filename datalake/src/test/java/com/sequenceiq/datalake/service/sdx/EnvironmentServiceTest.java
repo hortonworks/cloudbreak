@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -21,13 +23,18 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterView;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -55,8 +62,44 @@ class EnvironmentServiceTest {
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private EnvironmentService underTest;
+
+    static Object[][] failedParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.CREATE_FAILED},
+                {EnvironmentStatus.DELETE_FAILED},
+                {EnvironmentStatus.UPDATE_FAILED},
+                {EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE}
+        };
+    }
+
+    static Object[][] startParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.ENV_STOPPED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.STOP_FREEIPA_STARTED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.START_FREEIPA_STARTED, "The environment is starting. Please wait until finished!"}
+        };
+    }
+
+    static Object[][] deleteInProgressParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.DELETE_INITIATED},
+                {EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.CLUSTER_DEFINITION_CLEANUP_PROGRESS},
+                {EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS}
+        };
+    }
 
     @Test
     void testWaitEnvironmentNetworkCreationFinished() {
@@ -180,6 +223,73 @@ class EnvironmentServiceTest {
         assertEquals(1, nameMap.entrySet().size());
         assertTrue(nameMap.values().stream().map(Optional::get).collect(Collectors.toSet()).contains("envName2"));
         assertFalse(nameMap.values().stream().map(Optional::get).collect(Collectors.toSet()).contains("whatever"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("failedParamProvider")
+    void testValidateAndGetEnvironmentButEnvInFailedPhase(EnvironmentStatus environmentStatus) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        detailedEnvironmentResponse.setName("envName");
+
+        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetEnvironment("envName"),
+                "BadRequestException should thrown");
+
+        assertEquals("The environment is in failed phase. Please fix the environment or create a new one first!", badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("startParamProvider")
+    void testValidateAndGetEnvironmentButEnvInStoppedStatus(EnvironmentStatus environmentStatus, String exceptionMessage) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        detailedEnvironmentResponse.setName("envName");
+
+        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetEnvironment("envName"), "BadRequestException should thrown");
+
+        assertEquals(exceptionMessage, badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("deleteInProgressParamProvider")
+    void testValidateAndGetEnvironmentButEnvInDeleteInProgressPhase(EnvironmentStatus environmentStatus) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        detailedEnvironmentResponse.setName("envName");
+
+        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetEnvironment("envName"), "BadRequestException should thrown");
+
+        assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
+    }
+
+    @Test
+    void testValidateAndGetEnvironmentForHybridEnvironment() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setName("envName");
+        detailedEnvironmentResponse.setAccountId("123");
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        detailedEnvironmentResponse.setEnvironmentType(EnvironmentType.HYBRID_BASE.toString());
+
+        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(entitlementService.internalTenant(detailedEnvironmentResponse.getAccountId())).thenReturn(false);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateAndGetEnvironment("envName"), "BadRequestException should thrown");
+
+        assertEquals("Creating or Resizing datalake is not supported for Hybrid Environment", badRequestException.getMessage());
     }
 
     private SdxClusterView getClusterView(String envCrn, String envName) {

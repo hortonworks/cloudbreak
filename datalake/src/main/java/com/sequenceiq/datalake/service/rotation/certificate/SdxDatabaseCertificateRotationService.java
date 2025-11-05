@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -74,13 +75,16 @@ public class SdxDatabaseCertificateRotationService {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private AccountIdService accountIdService;
+
     public SdxRotateRdsCertificateV1Response rotateCertificate(String dlCrn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(dlCrn);
         if (sdxCluster == null) {
             return noDatalakeAnswer(dlCrn);
         }
         stackService.validateRdsSslCertRotation(dlCrn);
-        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(dlCrn));
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromUserCrn(dlCrn));
         return checkPrerequisitesAndTrigger(sdxCluster, stack);
     }
 
