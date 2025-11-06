@@ -608,10 +608,12 @@ public interface StackV4Endpoint {
     @Operation(summary = "Validates outbound type for all the stacks in an environment CRN",
             operationId = "validateStackDefaultOutboundInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackOutboundTypeValidationV4Response validateStackOutboundTypes(@PathParam("workspaceId") Long workspaceId,
+    StackOutboundTypeValidationV4Response validateStackOutboundTypes(
+            @PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+    );
 
     @PUT
     @Path("{name}/salt_update")
@@ -646,9 +648,11 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     @SuppressWarnings("ParameterNumber")
     BackupV4Response backupDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
+            @QueryParam("backupLocation") String backupLocation,
+            @QueryParam("backupId") String backupId,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
-            @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("accountId") String accountId,
+            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
     @SuppressWarnings("ParameterNumber")
@@ -660,7 +664,8 @@ public interface StackV4Endpoint {
     BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
             @QueryParam("closeConnections") boolean closeConnections,
-            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames, @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
             @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
@@ -671,8 +676,10 @@ public interface StackV4Endpoint {
     @Operation(summary = DATABASE_RESTORE, operationId = "databaseRestore",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RestoreV4Response restoreDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("backupLocation") String backupLocation,
+            @QueryParam("backupId") String backupId,
+            @QueryParam("accountId") String accountId,
+            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
     @SuppressWarnings("ParameterNumber")
@@ -682,8 +689,10 @@ public interface StackV4Endpoint {
     @Operation(summary = DATABASE_RESTORE_INTERNAL, operationId = "databaseRestoreInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("backupLocation") String backupLocation,
+            @QueryParam("backupId") String backupId,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
             @QueryParam("dryRun") boolean dryRun);
 
     @POST
