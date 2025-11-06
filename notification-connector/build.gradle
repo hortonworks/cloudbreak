@@ -1,0 +1,66 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
+  }
+}
+
+apply plugin: 'com.google.protobuf'
+apply plugin: 'com.diffplug.spotless'
+
+dependencies {
+  implementation project(':common')
+  implementation project(':grpc-common')
+
+  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
+  implementation group: 'javax.annotation',             name: 'javax.annotation-api', version: javaxAnnotationApiVersion
+
+  implementation ("io.grpc:grpc-all:$grpcVersion") {
+    exclude group: 'org.mockito'
+  }
+  testImplementation group: 'org.mockito',              name: 'mockito-core', version: mockitoVersion
+  testImplementation group: 'org.hamcrest',             name: 'hamcrest',     version: hamcrestVersion
+}
+
+checkstyle {
+  checkstyleMain.exclude '**/generated/**'
+}
+
+tasks.named("build").configure {
+  dependsOn("spotlessApply")
+}
+
+tasks.named("spotlessApply").configure {
+  dependsOn("generateProto")
+}
+
+protobuf {
+  protoc {
+    // The version of protoc must match protobuf-java. If you don't depend on
+    // protobuf-java directly, you will be transitively depending on the
+    // protobuf-java version that grpc depends on.
+    artifact = "com.google.protobuf:protoc:$protobufVersion"
+  }
+  plugins {
+    grpc {
+      artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+    }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {}
+    }
+  }
+  generatedFilesBaseDir = "$projectDir/src/generated"
+}
+
+spotless {
+  java {
+    target 'src/generated/*/java/**/*.java'
+    indentWithSpaces(2)
+  }
+}

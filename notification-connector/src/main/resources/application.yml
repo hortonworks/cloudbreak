@@ -1,0 +1,18 @@
+# Notification Service Configuration
+thunderheadnotification:
+  service:
+    # The host of the notification service
+    # Leave empty to disable the notification service
+    host: localhost
+    # The port of the notification service
+    port: 8888
+    grpc:
+      # Timeout for gRPC calls in seconds
+      timeout:
+        sec: 120
+
+# Altus UMS configuration
+altus:
+  ums:
+    # The name of the service making the call
+    caller: cloudbreak

@@ -1,0 +1,701 @@
+syntax = "proto3";
+
+package notificationadmin;
+
+option java_package = "com.cloudera.thunderhead.service.notificationadmin";
+option java_outer_classname = "NotificationAdminProto";
+
+import "options.proto";
+
+option (options.FileExtension.audit) = true;
+
+// Notification Admin Service :: Notification Admin Service.
+service NotificationAdmin {
+
+  option (options.ServiceExtension.admin) = true;
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "notificationadmin",
+    camelcase: "NotificationAdmin"
+  };
+  option (options.ServiceExtension.formFactor) = "public";
+
+  // PublishBroadcastEvent :: Publish the Broadcast events to all CDP users (across all tenants).
+  rpc PublishBroadcastEvent (PublishBroadcastEventRequest)
+      returns (PublishBroadcastEventResponse) {
+    option (options.MethodExtension.right) = "notificationadmin/publishBroadcastEvent";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // PublishTargetedEvent :: Publish the targeted event to notification service when event occur.
+  rpc PublishTargetedEvent (PublishTargetedEventRequest)
+      returns (PublishTargetedEventResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notificationadmin/publishTargetedEvent";
+  }
+
+  // Lists all the types of broadcast events available in the catalog. :: Lists all the types of broadcast events available in the catalog.
+  rpc ListBroadcastEventCatalog (ListBroadcastEventCatalogRequest)
+      returns (ListBroadcastEventCatalogResponse) {
+    option (options.MethodExtension.mutating) = false;
+  }
+
+  // Lists all the broadcast messages. :: Lists all the broadcast messages.
+  rpc ListBroadcastNotifications (ListBroadcastNotificationsRequest)
+      returns (ListBroadcastNotificationsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 100;
+  }
+
+  // DeletePendingBroadcastEvent :: Deletes broadcast event that is waiting for delivery.
+  rpc DeletePendingBroadcastEvent (DeletePendingBroadcastEventRequest)
+      returns (DeletePendingBroadcastEventResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notificationadmin/deletePendingBroadcastEvent";
+  }
+
+  // ListPendingBroadcastEvents :: Lists all pending broadcast messages scheduled for publication.
+  rpc ListPendingBroadcastEvents (ListPendingBroadcastEventsRequest)
+      returns (ListPendingBroadcastEventsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notificationadmin/listPendingBroadcastEvents";
+    option (options.MethodExtension.pagingDefaultMaxItems) = 100;
+  }
+
+  // CreateOrUpdateAccountMetadata :: Creates or Updates Account metadata, such as allowed domains list for the Account.
+  rpc CreateOrUpdateAccountMetadata (CreateOrUpdateAccountMetadataRequest)
+      returns (CreateOrUpdateAccountMetadataResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notificationadmin/createOrUpdateAccountMetadata";
+  }
+
+  // GetAccountMetadata :: Fetches the Account metadata such as allowed email domains.
+  rpc GetAccountMetadata (GetAccountMetadataRequest)
+      returns (GetAccountMetadataResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notificationadmin/getAccountMetadata";
+  }
+
+  // CreateOrUpdateDistributionList :: Creates or updates a distribution list with the given preferences.
+  rpc CreateOrUpdateDistributionList (CreateOrUpdateDistributionListRequest)
+      returns (CreateOrUpdateDistributionListResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notificationadmin/createOrUpdateDistributionList";
+  }
+
+  // ListDistributionLists :: Lists all distribution lists.
+  rpc ListDistributionLists (ListDistributionListsRequest)
+      returns (ListDistributionListsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notificationadmin/listDistributionLists";
+  }
+
+  // GetDistributionList :: Fetches an existing distribution list with events and channel preferences.
+  rpc GetDistributionList (GetDistributionListRequest)
+      returns (GetDistributionListResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notification/getDistributionList";
+  }
+
+  // DeleteDistributionList :: Deletes a distribution list.
+  rpc DeleteDistributionList (DeleteDistributionListRequest)
+      returns (DeleteDistributionListResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notification/deleteDistributionList";
+  }
+
+  // DeleteDistributionListsForResource :: Deletes distribution lists for the resource CRN.
+  rpc DeleteDistributionListsForResource (DeleteDistributionListsForResourceRequest)
+      returns (DeleteDistributionListsForResourceResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notification/deleteDistributionListsForResource";
+  }
+
+  // ListResourceSubscriptions :: Lists all resource subscriptions for a resource or an account ID.
+  rpc ListResourceSubscriptions (ListResourceSubscriptionsRequest)
+      returns (ListResourceSubscriptionsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notificationadmin/listResourceSubscriptions";
+  }
+
+  // Lists all the published broadcast messages. :: Lists all the published broadcast messages.
+  rpc ListPublishedBroadcastNotifications (ListPublishedBroadcastNotificationsRequest)
+      returns (ListPublishedBroadcastNotificationsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 100;
+  }
+
+  // Lists all the draft broadcast events. :: Lists all the draft broadcast events.
+  rpc ListDraftBroadcastEvents (ListDraftBroadcastEventsRequest)
+      returns (ListDraftBroadcastEventsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 100;
+    option (options.MethodExtension.right) = "notificationadmin/listDraftBroadcastEvents";
+  }
+
+  // Publish targeted email based on email address. :: Publish targeted email based on email address.
+  rpc PublishEmailTargetedEvent (PublishEmailTargetedEventRequest)
+      returns (PublishEmailTargetedEventResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.right) = "notificationadmin/publishEmailTargetedEvent";
+  }
+
+  // API endpoint to get PublishedEventStatus :: Fetches the published event delivery status.
+  rpc GetPublishedEventStatus (GetPublishedEventStatusRequest)
+      returns (GetPublishedEventStatusResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "notificationadmin/getPublishedEventStatus";
+  }
+}
+
+// Represents the type of notification messages.
+message MessageType {
+  enum Value {
+    // This message type represents unknown Message type.
+    UNKNOWN = 0;
+    // Notification message in the plain text format.
+    PLAIN_TEXT = 1;
+    // Notification message in the rich text format.
+    RICH_TEXT = 2;
+  }
+}
+
+// EventMessage holds the fields representation the event message details.
+message EventMessage {
+  // The message type for the event.
+  MessageType.Value messageType = 1;
+  // Title to be shown for an event.
+  string title = 2;
+  // Description about an event.
+  string description = 3 [(options.FieldExtension.skipLogging) = true];
+}
+
+// EventMessage holds the fields representation the event message details.
+message BroadcastEventMessage {
+  // The message type for the event.
+  MessageType.Value messageType = 1;
+  // Title to be shown for an event.
+  string title = 2;
+  // Description about an event.
+  string description = 3;
+}
+
+// Event represents that change in the infrastructure or service which client-service wants to send notification for.
+message Event {
+  // Identifier of an event.
+  string eventId = 1;
+  // Identifier that publisher service has received as part of event registration response.
+  string eventTypeId = 2;
+  reserved 3;
+  // Messages for the event to be published.
+  repeated EventMessage eventMessages = 6;
+  reserved 4;
+  // Time when event was occurred. The eventTime is in ms from the epoch of 1970-01-01T00:00:00Z.
+  int64 eventTime = 5;
+  // Resource on which event took place.
+  string resourceCrn = 7;
+  // Severity type for an event.
+  SeverityType.Value eventSeverity = 8;
+  // List of email addresses to which the notification should be sent.
+  repeated string emailAddresses = 9 [(options.FieldExtension.skipLogging) = true];
+}
+
+// BroadcastEvent represents the event that we want to broadcast.
+message BroadcastEvent {
+  reserved 1;
+  // Messages about the event to be registered.
+  repeated EventMessage eventMessages = 2;
+  // The event timestamp in ms from the epoch of 1970-01-01T00:00:00Z. Note that epoch time is in UTC.
+  int64 eventTime = 3;
+  // Time to live in ISO 8601 duration format (PnDTnHnMnS) for the broadcast event.
+  string ttl = 4;
+  // List of account IDs to which the notification should be broadcasted. If the list is empty, the notification will be broadcasted to all the account IDs.
+  repeated string accountIds = 5;
+  // Id received from the broadcast call as a part of broadcast event registration response.
+  string eventTypeId = 6;
+  // Flag to indicate whether the event should be saved as draft or not.
+  bool saveAsDraft = 7;
+}
+
+// PublishBroadcastEventRequest holds the required fields to broadcast the event.
+message PublishBroadcastEventRequest {
+  // Event which should be broadcast.
+  BroadcastEvent event = 1;
+}
+
+// PublishBroadcastEventResponse is response for event broadcast action.
+message PublishBroadcastEventResponse {
+  // Id of an event that is broadcast.
+  string eventUUID = 1;
+}
+
+// PublishTargetedEventRequest holds the fields required to publish new event.
+message PublishTargetedEventRequest {
+  // List of events to be published.
+  Event event = 1;
+}
+
+// PublishTargetedEventResponse is response for event publish action.
+message PublishTargetedEventResponse {
+  // ID of an event that is published.
+  string eventId = 1;
+}
+
+
+// The request object to list all the types of broadcast events available in the catalog.
+message ListBroadcastEventCatalogRequest {
+}
+
+// The response object to list all the types of broadcast events available in the catalog.
+message ListBroadcastEventCatalogResponse {
+  // List of broadcast events that the user can potentially subscribe to.
+  repeated EventCatalog broadcastEvents = 2;
+}
+
+// The details of the events present in the event catalog.
+message EventCatalog {
+  // ID of the event in the catalog.
+  string eventTypeId = 1;
+  // Name of the event in the catalog.
+  string eventName = 2;
+  // Description of the event in the catalog.
+  string eventDescription = 3;
+}
+
+// Request object to list the broadcast notifications.
+message ListBroadcastNotificationsRequest {
+  // The page size.
+  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100];
+  // The page token.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing broadcast notifications.
+message ListBroadcastNotificationsResponse {
+  // List of broadcast messages.
+  repeated BroadcastMessage broadcastMessage = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+  // This field represents the total number of broadcast notifications.
+  int32 totalNotifications = 3;
+}
+
+// Details of broadcast message.
+message BroadcastMessage {
+  reserved 1;
+  reserved 2;
+  // Type of the broadcast event.
+  string eventType = 3;
+  // Title of an event.
+  string title = 4;
+  // Description of an event.
+  string description = 5;
+  // Time when the associated event occurred.
+  int64 createdAt = 6;
+  // Account ID for which event has occurred.
+  string accountId = 7;
+  // ID of the broadcast event associated with this broadcast message.
+  string broadcastEventId = 8;
+}
+
+// Details of a pending broadcast message.
+message PendingBroadcastMessage {
+  // ID of the broadcast event associated with this broadcast message.
+  string broadcastEventId = 1;
+  // Type of the broadcast event.
+  string eventType = 2;
+  // Messages about the broadcast event.
+  repeated BroadcastEventMessage eventMessages = 3;
+  // Time when the associated event occurred.
+  int64 createdAt = 4;
+  // The actor CRN of the publisher.
+  string publisherCRN= 5;
+  // Account IDs for which event has occurred.
+  repeated string accountIds = 6;
+}
+
+// Details of a published broadcast message.
+message PublishedBroadcastMessage {
+  // ID of the published broadcast event associated with this broadcast message.
+  string broadcastEventId = 1;
+  // Type of the broadcast event.
+  string eventType = 2;
+  // Messages about the broadcast event.
+  repeated BroadcastEventMessage eventMessages = 3;
+  // Epoch time when the associated event occurred.
+  int64 createdAt = 4;
+  // The actor CRN of the publisher.
+  string publisherCRN= 5;
+  // Account IDs for which the broadcast event is published.
+  repeated string accountIds = 6;
+}
+
+// Request object to delete broadcast event that are pending delivery.
+message DeletePendingBroadcastEventRequest {
+  //  The ID of the broadcast event to be deleted.
+  string pendingBroadcastEventId = 1 [(options.FieldExtension.required) = true];
+}
+
+// The response object for deleteBroadcastEventRequest.
+message DeletePendingBroadcastEventResponse {
+}
+
+// Request object for listing pending broadcast events scheduled for publication.
+message ListPendingBroadcastEventsRequest {
+  // The page size.
+  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100];
+  // The page token.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing pending broadcast events.
+message ListPendingBroadcastEventsResponse {
+  // List of pending broadcast messages.
+  repeated PendingBroadcastMessage pendingBroadcastMessages = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+  // The total number of pending broadcast events scheduled for publication.
+  int32 totalEventsToBePublished = 3;
+}
+
+// Contains details regarding Severity Type.
+message SeverityType {
+  enum Value {
+    //default
+    DEFAULT = 0;
+    INFO = 1;
+    DEBUG = 2;
+    WARNING = 3;
+    ERROR = 4;
+    CRITICAL = 5;
+  }
+}
+
+// Request object for the CreateOrUpdateAccountMetadata.
+message CreateOrUpdateAccountMetadataRequest {
+  // Account ID for which the account metadata to be updated.
+  string accountId = 1 [(options.FieldExtension.required) = true];
+  // The list of allowed domains for the Account.
+  repeated string allowedDomains = 2  [(options.FieldExtension.required) = true];
+}
+
+// Response object for the CreateOrUpdateAccountMetadata.
+message CreateOrUpdateAccountMetadataResponse {
+}
+
+// Request object for fetching the Account metadata.
+message GetAccountMetadataRequest {
+  // Account ID for which the account metadata to be fetched.
+  string accountId = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the GetAccountMetadata.
+message GetAccountMetadataResponse {
+  // Get allowed domains for the Account.
+  repeated string allowedDomains = 1;
+}
+
+// Request object to create or update a distribution list.
+message CreateOrUpdateDistributionListRequest {
+  // Account ID for which the distribution list has to be created.
+  string accountId = 1 [(options.FieldExtension.required) = true];
+  // CRN of resource to create a topic for.
+  string resourceCrn = 2 [(options.FieldExtension.required) = true];
+  reserved 8;
+  // The name of the resource to be subscribed.
+  string resourceName = 9 [(options.FieldExtension.required) = true];
+  // SYSTEM_MANAGED: Created by internal actors, modifiable only by internal users. USER_MANAGED: Created by non-internal actors, modifiable by internal or external users
+  string distributionListManagementType = 10 [(options.FieldExtension.required) = true];
+  // Channel preference for an individual events to be subscribed to, does not require notification type.
+  repeated EventChannelPreference eventChannelPreferences = 3;
+  // List of recipient email addresses.
+  repeated string emailAddresses = 4;
+  // Optional identifier of an existing distribution list, if specified, is used for an update.
+  string distributionListId = 5;
+  // Parent resource CRN for which the resource authorization has to be done.
+  string parentResourceCrn = 6;
+  // List of recipient Slack channel identifiers.
+  repeated string slackChannelIds = 7;
+}
+
+// Details regarding the channel preference for an event.
+message EventChannelPreference {
+  // The unique ID which represents the preference of a channel.
+  string eventTypeId = 1;
+  // The channel preference for the event where the event notification has to be delivered.
+  // e.g.: IN_APP, EMAIL
+  repeated ChannelType.Value channel = 2;
+  // The chosen severity list for the particular event.
+  repeated string eventSeverityList = 3;
+}
+
+// Response object for creating or updating the distribution list.
+message CreateOrUpdateDistributionListResponse {
+  // Contains details of the distribution lists created or updated.
+  repeated DistributionListDetails distributionListDetails = 1;
+}
+
+// The request object for listing the distribution lists.
+message ListDistributionListsRequest {
+  // Account ID for which the distribution list has to be fetched.
+  string accountId = 1;
+  // The optional resource CRN, if specified, only distribution lists related to this resource will be returned.
+  string resourceCrn = 2;
+}
+
+// The response object for listing the distribution lists.
+message ListDistributionListsResponse {
+  // List of distribution lists.
+  repeated DistributionList distributionLists = 1;
+  // This field represents the total number of resource subscriptions.
+  int32 totalSubscriptions = 2;
+}
+
+// Request object for fetching a distribution list.
+message GetDistributionListRequest {
+  // The identifier for which the distribution list is requested.
+  string distributionListId = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the GetDistributionList.
+message GetDistributionListResponse {
+  // Contains details of the distribution list fetched.
+  DistributionList distributionList = 1;
+}
+
+// Request object for the deletion of Distribution Lists by resource CRN.
+message DeleteDistributionListsForResourceRequest {
+  // The CRN of resource for which the Distribution Lists has to be deleted.
+  string resourceCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the deletion of Distribution Lists by resource CRN.
+message DeleteDistributionListsForResourceResponse {
+  // Response string which describes the number of records deleted.
+  string recordsDeleted = 1;
+}
+
+// The request object for deleting a distribution list.
+message DeleteDistributionListRequest {
+  // The identifier of the distribution list to be deleted.
+  string distributionListId = 1 [(options.FieldExtension.required) = true];
+}
+
+// The response object for deleting a distribution list.
+message DeleteDistributionListResponse {
+}
+
+
+// Details of a distribution list which is either created or updated.
+message DistributionListDetails {
+  // Identifier of the distribution list.
+  string distributionListId = 1;
+  // CRN of a resource that a group is subscribed to.
+  string resourceCrn = 2;
+}
+
+// Represents the complete configuration and metadata of a distribution list.
+message DistributionList {
+  // CRN of a resource that a group is subscribed to.
+  string resourceCrn = 1;
+  // Type of resource. This should be service name as represented in a CRN.
+  string resourceType = 2;
+  // The list of email addresses if configured.
+  repeated string emailAddresses = 3;
+  // List of all events subscribed under the given resource.
+  repeated SubscribedEvents subscribedEvents = 4;
+  // The distribution list identifier.
+  string distributionListId = 5;
+  // CRN of the parent resource of the Distribution List's resource.
+  string parentResourceCrn = 6;
+  // The list of Slack channel identifiers configured.
+  repeated string slackChannelIds = 7;
+  // The name of the resource to be subscribed.
+  string resourceName = 8;
+  // Management type of the distribution list.
+  DistributionListManagementType.Value distributionListManagementType = 9;
+}
+
+// Details related to a subscribed event.
+message SubscribedEvents {
+  // Name of an event.
+  string eventName = 1;
+  // Description of the event.
+  string description = 2;
+  // Subscribed channel preferences of the event.
+  repeated ChannelType.Value channels = 3;
+  // ID of an event.
+  string eventTypeId = 4;
+  // The list of severity for the event.
+  repeated string eventSeverityList = 5;
+}
+
+// Represents the types of channels.
+message ChannelType {
+  enum Value {
+    UNKNOWN = 0;
+    EMAIL = 1;
+    IN_APP = 2;
+    SLACK = 3;
+  }
+}
+
+// Represents the management types of distribution list.
+message DistributionListManagementType {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNKNOWN = 0;
+    USER_MANAGED = 1;
+    SYSTEM_MANAGED = 2;
+  }
+}
+
+// The request object for listing the resource subscriptions.
+message ListResourceSubscriptionsRequest {
+  // Account ID for which the subscription has to be fetched.
+  string accountId = 1 [(options.FieldExtension.required) = true];
+  // The optional resource CRN, if specified, only subscriptions related to this resource will be returned.
+  string resourceCrn = 2;
+}
+
+// The response object for listing the resource subscriptions.
+message ListResourceSubscriptionsResponse {
+  // List of resource subscriptions for the user.
+  repeated ResourceSubscription resourceSubscriptions = 1;
+  // This field represents the total number of resource subscriptions.
+  int32 totalSubscriptions = 2;
+}
+
+// ResourceSubscription holds a list of subscribed events and delivery details for a particular resource.
+message ResourceSubscription {
+  // CRN of resource for which the event is subscribed.
+  string resourceCrn = 1;
+  // Name of the service for which the event is scoped to. This should be service name as represented in a CRN.
+  string serviceName = 2;
+  // Name of the resource for which the event is scoped to. This should be resource name as represented in a CRN.
+  string resourceName = 3;
+  // List of all events subscribed under the given resource.
+  repeated SubscribedEvents subscribedEvents = 4;
+  // The Subscription identifier.
+  string subscriptionId = 5;
+  // CRN of the parent resource of the resource for which the notification event is subscribed.
+  string parentResourceCrn = 6;
+  // The userCrn of the subscription.
+  string userCrn = 7;
+}
+
+// Request object to list all the published broadcast notifications.
+message ListPublishedBroadcastNotificationsRequest {
+  // The page size.
+  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100];
+  // The page token.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing all the published broadcast notifications.
+message ListPublishedBroadcastNotificationsResponse {
+  // List of all the published broadcast messages by the publisher.
+  repeated PublishedBroadcastMessage publishedBroadcastMessages = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+  // This field represents the total number of published broadcast notifications.
+  int32 totalNotificationsPublished = 3;
+}
+
+// Request object to list all the broadcast events that were saved as draft.
+message ListDraftBroadcastEventsRequest {
+  // The page size.
+  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100];
+  // The page token.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing all the broadcast events that were saved as draft.
+message ListDraftBroadcastEventsResponse {
+  // List of all the draft broadcast events.
+  repeated PendingBroadcastMessage draftBroadcastEvents = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+  // This field represents the total number of draft broadcast events.
+  int32 totalDraftBroadcastEvents = 3;
+}
+
+// Request object to send targeted email based on email address.
+message PublishEmailTargetedEventRequest {
+  // Event to be published.
+  Event event = 1;
+}
+
+// Response object for sending targeted email.
+message PublishEmailTargetedEventResponse {
+  // ID of an event that is published.
+  string eventId = 1;
+}
+
+// Represents the types of event status.
+message EventStatus {
+  enum Value {
+    UNPROCESSED = 0;
+    PROCESSED = 1;
+  }
+}
+
+// Object representing the published event status for a specific channel.
+message ChannelEventStatus {
+  // Type of channel.
+  ChannelType.Value channelType = 1;
+  // Status of the published event for the channel.
+  EventStatus.Value eventStatus = 2;
+}
+
+// Nested message to hold event registration and resource CRN.
+message PublishedEventTypeDetails {
+  // Event catalog ID associated with the published event.
+  string eventTypeId = 1 [(options.FieldExtension.required) = true];
+  // CRN of resource for which the published event's status is required.
+  string resourceCrn = 2 [(options.FieldExtension.required) = true];
+}
+
+// Object containing the published event status details.
+message PublishedEventStatus {
+  // Identifier of the published event.
+  string publishedEventId = 1;
+  // Event catalog ID associated with the published event.
+  string eventTypeId = 2;
+  // Title of the published event.
+  string title = 3;
+  // Description of the published event.
+  string description = 4;
+  // Creation timestamp of the published event.
+  int64 createdAt = 5 [(options.FieldExtension.datetime) = true];
+  // Resource CRN associated with the published event.
+  string resourceCrn = 6;
+  // Type of published targeted event.
+  string targetedEventType = 7;
+  // List of published event statuses for various channels.
+  repeated ChannelEventStatus status = 8;
+}
+
+// Request object to for GetPublishedEventStatus.
+message GetPublishedEventStatusRequest {
+  oneof published_event_details_oneof {
+    // Identifier of the published event.
+    string publishedEventId = 1;
+    // Grouping for the published event_catalog and resource CRN.
+    PublishedEventTypeDetails publishedEventTypeDetails = 2;
+  }
+}
+
+// Response object for GetPublishedEventStatus.
+message GetPublishedEventStatusResponse {
+  // Object containing published event status details.
+  PublishedEventStatus publishedEventStatus = 1;
+}
