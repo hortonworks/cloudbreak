@@ -2,7 +2,7 @@
   "name": "7.3.1 - Real-time Data Mart - Spark3 (ARM) for AWS",
   "description": "",
   "type": "DATAMART",
-  "featureState": "INTERNAL",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
