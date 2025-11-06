@@ -9,6 +9,7 @@ import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
@@ -33,6 +34,11 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public FreeIpaV1Endpoint getFreeIpaV1Endpoint() {
         return getEndpoint(FreeIpaV1Endpoint.class);
+    }
+
+    @Override
+    public FreeIpaInternalV1Endpoint getFreeIpaInternalV1Endpoint() {
+        return getEndpoint(FreeIpaInternalV1Endpoint.class);
     }
 
     @Override

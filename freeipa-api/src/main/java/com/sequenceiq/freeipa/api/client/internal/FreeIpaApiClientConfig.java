@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.EncryptionV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
@@ -65,6 +66,12 @@ public class FreeIpaApiClientConfig {
     @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     FreeIpaV1Endpoint freeIpaV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "freeIpaInternalApiClientWebTarget")
+    FreeIpaInternalV1Endpoint freeIpaInternalV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaInternalV1Endpoint.class);
     }
 
     @Bean
