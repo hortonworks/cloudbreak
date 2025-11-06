@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.notification.Notification;
+import com.sequenceiq.notification.WebSocketNotification;
 import com.sequenceiq.notification.WebSocketNotificationSender;
 
 @Service
@@ -33,6 +33,6 @@ public class CredentialNotificationService {
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.getCloudPlatform());
-        webSocketNotificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
+        webSocketNotificationSender.send(new WebSocketNotification<>(notification), Collections.emptyList(), RestClientUtil.get());
     }
 }

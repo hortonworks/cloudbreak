@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
-class MixedPackageNotificationServiceTest {
+class MixedPackageWebSocketNotificationServiceTest {
 
     private static final long STACK_ID = 1L;
 

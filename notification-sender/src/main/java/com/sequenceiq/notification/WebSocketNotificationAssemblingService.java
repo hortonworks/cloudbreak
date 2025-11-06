@@ -18,19 +18,19 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 
 @Component
-public class NotificationAssemblingService {
+public class WebSocketNotificationAssemblingService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
     @Inject
     private EntitlementService entitlementsService;
 
-    public Notification<CloudbreakNotification> createNotification(CloudbreakNotification notification) {
-        return new Notification<>(notification);
+    public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(CloudbreakNotification notification) {
+        return new WebSocketNotification<>(notification);
     }
 
-    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload,
-            String notificationType) {
+    public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(
+            ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String notificationType) {
         CloudbreakNotification notification = new CloudbreakNotification();
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventType(resourceEvent.name());
@@ -48,12 +48,12 @@ public class NotificationAssemblingService {
             notification.setPayload(JsonUtil.convertToTree(payload));
             notification.setPayloadType(payload.getClass().getSimpleName());
         }
-        return new Notification<>(notification);
+        return new WebSocketNotification<>(notification);
     }
 
-    public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId,
-            String notificationType) {
-        Notification<CloudbreakNotification> n = createNotification(resourceEvent, messageArgs, payload, notificationType);
+    public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(
+            ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId, String notificationType) {
+        WebSocketNotification<CloudbreakNotification> n = createWebSocketNotification(resourceEvent, messageArgs, payload, notificationType);
         n.getNotification().setTenantName(getTenantName(userId));
         n.getNotification().setUserId(userId);
         String accountId = getTenantName(userId);

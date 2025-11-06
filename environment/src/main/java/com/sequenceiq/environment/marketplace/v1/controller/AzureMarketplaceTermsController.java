@@ -19,11 +19,11 @@ import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTe
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsRequest;
 import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTermsResponse;
 import com.sequenceiq.environment.terms.service.TermsService;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class AzureMarketplaceTermsController extends NotificationController implements AzureMarketplaceTermsEndpoint {
+public class AzureMarketplaceTermsController extends WebSocketNotificationController implements AzureMarketplaceTermsEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMarketplaceTermsController.class);
 

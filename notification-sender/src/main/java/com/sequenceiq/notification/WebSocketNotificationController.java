@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
-public abstract class NotificationController {
+public abstract class WebSocketNotificationController {
 
     @Inject
     private WebSocketNotificationService webSocketNotificationService;

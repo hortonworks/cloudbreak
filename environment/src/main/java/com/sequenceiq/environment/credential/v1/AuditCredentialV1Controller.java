@@ -28,10 +28,10 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.EditCredentialRequestToCredentialConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
-public class AuditCredentialV1Controller extends NotificationController implements AuditCredentialEndpoint {
+public class AuditCredentialV1Controller extends WebSocketNotificationController implements AuditCredentialEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditCredentialV1Controller.class);
 

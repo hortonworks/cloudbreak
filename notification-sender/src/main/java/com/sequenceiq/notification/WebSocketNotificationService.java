@@ -23,13 +23,13 @@ public class WebSocketNotificationService {
     private WebSocketNotificationSender webSocketNotificationSender;
 
     @Inject
-    private NotificationAssemblingService notificationAssemblingService;
+    private WebSocketNotificationAssemblingService webSocketNotificationAssemblingService;
 
     @Value("${notification.urls:}")
     private String notificationUrls;
 
-    public void send(Notification<CloudbreakNotification> notification) {
-        webSocketNotificationSender.send(notification, getNotificationUrls(), RestClientUtil.get());
+    public void send(WebSocketNotification<CloudbreakNotification> webSocketNotification) {
+        webSocketNotificationSender.send(webSocketNotification, getNotificationUrls(), RestClientUtil.get());
     }
 
     public void send(ResourceEvent resourceEvent) {
@@ -46,14 +46,14 @@ public class WebSocketNotificationService {
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
         webSocketNotificationSender.send(
-                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, null),
+                webSocketNotificationAssemblingService.createWebSocketNotification(resourceEvent, messageArgs, payload, null),
                 getNotificationUrls(),
                 RestClientUtil.get());
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId, String notificationType) {
         webSocketNotificationSender.send(
-                notificationAssemblingService.createNotification(resourceEvent, messageArgs, payload, userId, notificationType),
+                webSocketNotificationAssemblingService.createWebSocketNotification(resourceEvent, messageArgs, payload, userId, notificationType),
                 getNotificationUrls(),
                 RestClientUtil.get());
     }

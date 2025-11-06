@@ -20,11 +20,11 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosCon
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.util.CrnService;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class KerberosConfigV1Controller extends NotificationController implements KerberosConfigV1Endpoint {
+public class KerberosConfigV1Controller extends WebSocketNotificationController implements KerberosConfigV1Endpoint {
     @Inject
     private KerberosConfigV1Service kerberosConfigV1Service;
 

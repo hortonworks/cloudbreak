@@ -42,10 +42,10 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.EditCredentialRequestToCredentialConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
-public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
+public class CredentialV1Controller extends WebSocketNotificationController implements CredentialEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV1Controller.class);
 

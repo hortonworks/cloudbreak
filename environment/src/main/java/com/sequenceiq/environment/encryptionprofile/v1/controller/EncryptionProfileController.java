@@ -33,10 +33,10 @@ import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileRequestToEncryptionProfileConverter;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
-public class EncryptionProfileController extends NotificationController implements EncryptionProfileEndpoint {
+public class EncryptionProfileController extends WebSocketNotificationController implements EncryptionProfileEndpoint {
     private final EncryptionProfileService encryptionProfileService;
 
     private final EncryptionProfileRequestToEncryptionProfileConverter encryptionProfileConverter;

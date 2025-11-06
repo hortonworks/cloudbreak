@@ -11,10 +11,10 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialInternalE
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
-public class CredentialInternalV1Controller extends NotificationController implements CredentialInternalEndpoint {
+public class CredentialInternalV1Controller extends WebSocketNotificationController implements CredentialInternalEndpoint {
 
     private final CredentialService credentialService;
 

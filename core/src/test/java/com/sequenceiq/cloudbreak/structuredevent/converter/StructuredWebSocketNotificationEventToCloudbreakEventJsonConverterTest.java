@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 
 @RunWith(Parameterized.class)
-public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
+public class StructuredWebSocketNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
 
     private static final String MESSAGE = "someMessage";
 
@@ -36,7 +36,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private StructuredNotificationEventToCloudbreakEventV4ResponseConverter underTest;
 
-    public StructuredNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
+    public StructuredWebSocketNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
         skippedFields = Lists.newArrayList("availabilityZone");
         skippedFields.addAll(additionalElementsToSkip);
         this.source = source;

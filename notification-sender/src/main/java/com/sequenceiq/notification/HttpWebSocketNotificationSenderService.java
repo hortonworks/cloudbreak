@@ -36,9 +36,9 @@ public class HttpWebSocketNotificationSenderService implements WebSocketNotifica
     private MetricService metricService;
 
     @Override
-    public <T> void send(Notification<T> notification, List<String> endpoints, Client restClient) {
+    public <T> void send(WebSocketNotification<T> webSocketNotification, List<String> endpoints, Client restClient) {
         try {
-            String notificationAsString = objectMapper.writeValueAsString(notification.getNotification());
+            String notificationAsString = objectMapper.writeValueAsString(webSocketNotification.getNotification());
             if (notificationAsString.getBytes().length > maxNotificationSize) {
                 metricService.incrementMetricCounter(NOTIFICATION_SIZE_EXCEEDED);
                 LOGGER.warn("Notification size exceeded the limit: {}. Notification: {}", maxNotificationSize, notificationAsString);
@@ -55,7 +55,7 @@ public class HttpWebSocketNotificationSenderService implements WebSocketNotifica
                 }
             }
         } catch (JsonProcessingException e) {
-            LOGGER.error("Could not serialize notification: {}", notification.getNotification());
+            LOGGER.error("Could not serialize notification: {}", webSocketNotification.getNotification());
         }
     }
 

@@ -33,11 +33,11 @@ import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagRequestsConverter;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagsRequestToAccountTagConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class AccountTagController extends NotificationController implements AccountTagEndpoint {
+public class AccountTagController extends WebSocketNotificationController implements AccountTagEndpoint {
 
     private final AccountTagService accountTagService;
 

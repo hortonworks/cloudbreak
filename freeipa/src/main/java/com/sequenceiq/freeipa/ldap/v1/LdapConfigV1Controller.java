@@ -26,11 +26,11 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.util.CrnService;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class LdapConfigV1Controller extends NotificationController implements LdapConfigV1Endpoint {
+public class LdapConfigV1Controller extends WebSocketNotificationController implements LdapConfigV1Endpoint {
     @Inject
     private LdapConfigV1Service ldapConfigV1Service;
 

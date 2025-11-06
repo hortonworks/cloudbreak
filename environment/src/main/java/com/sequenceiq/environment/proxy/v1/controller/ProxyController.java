@@ -32,11 +32,11 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class ProxyController extends NotificationController implements ProxyEndpoint {
+public class ProxyController extends WebSocketNotificationController implements ProxyEndpoint {
 
     private final ProxyConfigService proxyConfigService;
 

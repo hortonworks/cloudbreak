@@ -23,11 +23,11 @@ import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizat
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 import com.sequenceiq.environment.telemetry.v1.converter.AccountTelemetryConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-public class AccountTelemetryController extends NotificationController implements AccountTelemetryEndpoint {
+public class AccountTelemetryController extends WebSocketNotificationController implements AccountTelemetryEndpoint {
 
     private final AccountTelemetryService accountTelemetryService;
 

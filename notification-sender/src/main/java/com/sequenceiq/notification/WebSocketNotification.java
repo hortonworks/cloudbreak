@@ -1,9 +1,9 @@
 package com.sequenceiq.notification;
 
-public class Notification<T> {
+public class WebSocketNotification<T> {
     private final T notification;
 
-    public Notification(T notification) {
+    public WebSocketNotification(T notification) {
         this.notification = notification;
     }
 

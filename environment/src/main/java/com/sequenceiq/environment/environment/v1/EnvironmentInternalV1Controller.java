@@ -16,10 +16,10 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
-import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
-public class EnvironmentInternalV1Controller extends NotificationController implements EnvironmentInternalEndpoint {
+public class EnvironmentInternalV1Controller extends WebSocketNotificationController implements EnvironmentInternalEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentInternalV1Controller.class);
 
