@@ -11,7 +11,7 @@ public interface Flow {
 
     void stop();
 
-    boolean sendEvent(FlowParameters flowParameters);
+    boolean sendEvent(String key, String flowTriggerUserCrn, Object object, String operationType);
 
     FlowState getCurrentState();
 
@@ -19,9 +19,9 @@ public interface Flow {
 
     String getFlowId();
 
-    boolean isFlowFailed();
-
     void setFlowFailed(Exception exception);
+
+    boolean isFlowFailed();
 
     Class<? extends FlowConfiguration<?>> getFlowConfigClass();
 }

@@ -81,13 +81,13 @@ public class FlowLogDBService implements FlowLogService {
     private Clock clock;
 
     @Override
-    public FlowLog save(FlowParameters flowParameters, Class<?> flowType, FlowState currentState) {
-        Payload payload = flowParameters.getPayload();
+    public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
+            FlowState currentState) {
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
-        String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(flowParameters.getContextParams());
+        String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
 
-        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowParameters.getFlowChainId(),
-                flowParameters.getFlowTriggerUserCrn(), flowParameters.getKey(), payloadJackson, ClassValue.of(payload.getClass()), variablesJackson,
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChainId, flowParameters.getFlowTriggerUserCrn(), key,
+                payloadJackson, ClassValue.of(payload.getClass()), variablesJackson,
                 ClassValue.of(flowType), currentState.toString());
         flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
                 ? OperationType.valueOf(flowParameters.getFlowOperationType())
@@ -105,10 +105,9 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog finish(FlowParameters flowParameters, boolean failed, String reason)
+    public FlowLog finish(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason)
             throws TransactionExecutionException {
-        return finalize(flowParameters.getResourceId(), flowParameters.getFlowId(), FlowConstants.FINISHED_STATE, failed,
-                flowParameters.getContextParams(), reason);
+        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed, contextParams, reason);
     }
 
     @Override
