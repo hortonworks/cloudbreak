@@ -43,7 +43,7 @@ mount_remaining() {
         not_mounted_volume_names=$(lsblk_command | grep -v / | grep ^[a-z] | cut -f1 -d' ')
       fi
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
-      root_disk=$(get_root_disk)
+      root_disk=$(get_root_disk $LOG_FILE)
       for volume in $not_mounted_volume_names; do
           uuid=$(get_disk_uuid "/dev/$volume")
           if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
@@ -190,9 +190,9 @@ create_directories() {
 }
 
 grow_mount_partition() {
-    if growpart -N $(get_root_disk) $(get_root_disk_partition_number) ; then
+    if growpart -N $(get_root_disk $LOG_FILE) $(get_root_disk_partition_number) ; then
         log $LOG_FILE Before growing: $(df -h)
-        growpart $(get_root_disk) $(get_root_disk_partition_number)
+        growpart $(get_root_disk $LOG_FILE) $(get_root_disk_partition_number)
         if [ ! $? -eq 0 ]; then
           log $LOG_FILE error growing partition
           return 1
@@ -201,7 +201,7 @@ grow_mount_partition() {
             xfs_growfs /
             return_value=$?
         elif [[ "$(get_root_disk_type)" =~ "ext" ]]; then
-            resize2fs  $(get_root_disk)$(get_root_disk_partition_number)
+            resize2fs  $(get_root_disk $LOG_FILE)$(get_root_disk_partition_number)
             return_value=$?
         fi
         log $LOG_FILE After growing: $(df -h)

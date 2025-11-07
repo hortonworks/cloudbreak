@@ -85,11 +85,25 @@ get_disk_uuid() {
 }
 
 get_root_disk() {
-    root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
-    if [[ $root_partition =~ "nvme" ]]; then
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
+    # Find the device mounted at / using lsblk's JSON output for reliability
+    local root_part_info=$(lsblk -o NAME,TYPE,MOUNTPOINT -J | jq -r '.. | objects | select(.mountpoint=="/") | "\(.name) \(.type)"')
+
+    if [[ -z "$root_part_info" ]]; then
+        local log_file=$1
+        log $log_file root parition cannot be determined.
+        echo
+        return 0
+    fi
+
+    local root_partition_name=$(echo "$root_part_info" | awk '{print $1}')
+    local root_partition_type=$(echo "$root_part_info" | awk '{print $2}')
+
+    if [[ "$root_partition_type" == "lvm" ]]; then
+        # For LVM, the device is typically under /dev/mapper/
+        echo "/dev/mapper/$root_partition_name"
     else
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
+        # For regular partitions, the device is under /dev/
+        echo "/dev/$root_partition_name"
     fi
 }
 

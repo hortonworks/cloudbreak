@@ -96,7 +96,7 @@ mount_all_attached_disks_aws() {
       unmount_instance_storage
       not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
-      root_disk=$(get_root_disk)
+      root_disk=$(get_root_disk $LOG_FILE)
       for volume in $not_mounted_volume_names; do
           uuid=$(get_disk_uuid "/dev/$volume")
           if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
