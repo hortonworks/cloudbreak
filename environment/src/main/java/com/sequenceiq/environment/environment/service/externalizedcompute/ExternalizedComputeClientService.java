@@ -47,9 +47,9 @@ public class ExternalizedComputeClientService {
                 initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, initiatorUserCrn, name, force), "Failed to delete compute cluster"));
     }
 
-    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region) {
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String environmentCrn, String credentialName, String region) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> handleException(() -> endpoint.validateCredential(credentialName, region, initiatorUserCrn),
+                initiatorUserCrn -> handleException(() -> endpoint.validateCredential(environmentCrn, credentialName, region, initiatorUserCrn),
                         "Failed to validate credential"));
     }
 

@@ -80,7 +80,13 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     @Override
     public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region,
             @InitiatorUserCrn String initiatorUserCrn) {
-        return externalizedComputeClusterService.validateCredential(credentialName, region, initiatorUserCrn);
+        throw new UnsupportedOperationException("Invalid request, please use the `{environmentCrn}/validate_credential/{credentialName}` endpoint");
+    }
+
+    @Override
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String environmentCrn, String credentialName, String region,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return externalizedComputeClusterService.validateCredential(environmentCrn, credentialName, region, initiatorUserCrn);
     }
 
     private ExternalizedComputeCluster getExternalizedComputeCluster(String environmentCrn, String name) {

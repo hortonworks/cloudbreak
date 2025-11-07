@@ -40,11 +40,12 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 10);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETED").build());
 
         ExternalizedComputeClusterDeleteWaitSuccessResponse response = (ExternalizedComputeClusterDeleteWaitSuccessResponse)
@@ -59,18 +60,19 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 10);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETE_IN_PROGRESS").build())
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETED").build());
 
         ExternalizedComputeClusterDeleteWaitSuccessResponse response = (ExternalizedComputeClusterDeleteWaitSuccessResponse)
                 externalizedComputeClusterDeleteWaitHandler.doAccept(handlerEvent);
 
-        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "actorCrn");
+        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "envCrn", "actorCrn");
         assertEquals(2L, response.getResourceId());
     }
 
@@ -80,18 +82,19 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 10);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETE_IN_PROGRESS").build())
                 .thenReturn(DescribeClusterResponse.newBuilder().setMessage("failMessage").setStatus("DELETE_FAILED").build());
 
         ExternalizedComputeClusterDeleteFailedEvent response = (ExternalizedComputeClusterDeleteFailedEvent)
                 externalizedComputeClusterDeleteWaitHandler.doAccept(handlerEvent);
 
-        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "actorCrn");
+        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "envCrn", "actorCrn");
         assertEquals(2L, response.getResourceId());
         assertEquals("Cluster deletion failed. Status: DELETE_FAILED. Message: failMessage", response.getException().getMessage());
     }
@@ -102,18 +105,19 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 2);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETE_IN_PROGRESS").build())
                 .thenReturn(DescribeClusterResponse.newBuilder().setMessage("failMessage").setStatus("DELETE_FAILED").build());
 
         ExternalizedComputeClusterDeleteWaitSuccessResponse response = (ExternalizedComputeClusterDeleteWaitSuccessResponse)
                 externalizedComputeClusterDeleteWaitHandler.doAccept(handlerEvent);
 
-        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "actorCrn");
+        verify(liftieGrpcClient, times(2)).describeCluster("liftieCrn", "envCrn", "actorCrn");
         assertEquals(2L, response.getResourceId());
         assertTrue(response.isForce());
     }
@@ -124,17 +128,18 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 2);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETE_IN_PROGRESS").build());
 
         ExternalizedComputeClusterDeleteWaitSuccessResponse response = (ExternalizedComputeClusterDeleteWaitSuccessResponse)
                 externalizedComputeClusterDeleteWaitHandler.doAccept(handlerEvent);
 
-        verify(liftieGrpcClient, atLeastOnce()).describeCluster("liftieCrn", "actorCrn");
+        verify(liftieGrpcClient, atLeastOnce()).describeCluster("liftieCrn", "envCrn", "actorCrn");
         assertEquals(2L, response.getResourceId());
         assertTrue(response.isForce());
     }
@@ -145,17 +150,18 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
                 new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
+        when(externalizedComputeCluster.getEnvironmentCrn()).thenReturn("envCrn");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
         when(externalizedComputeClusterService.getExternalizedComputeCluster(2L)).thenReturn(externalizedComputeCluster);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "sleepTime", 50);
         ReflectionTestUtils.setField(externalizedComputeClusterDeleteWaitHandler, "timeLimit", 2);
-        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "actorCrn"))
+        when(liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), "envCrn", "actorCrn"))
                 .thenReturn(DescribeClusterResponse.newBuilder().setStatus("DELETE_IN_PROGRESS").setMessage("Deleting").build());
 
         ExternalizedComputeClusterDeleteFailedEvent failedEvent = (ExternalizedComputeClusterDeleteFailedEvent)
                 externalizedComputeClusterDeleteWaitHandler.doAccept(handlerEvent);
 
-        verify(liftieGrpcClient, atLeastOnce()).describeCluster("liftieCrn", "actorCrn");
+        verify(liftieGrpcClient, atLeastOnce()).describeCluster("liftieCrn", "envCrn", "actorCrn");
         assertEquals(2L, failedEvent.getResourceId());
         assertEquals(RuntimeException.class, failedEvent.getException().getClass());
         assertEquals("Compute cluster deletion timed out. The last known status is:DELETE_IN_PROGRESS. Message: Deleting",

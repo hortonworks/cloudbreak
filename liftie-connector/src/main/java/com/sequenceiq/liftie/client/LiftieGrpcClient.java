@@ -35,9 +35,9 @@ public class LiftieGrpcClient {
     private LiftieGrpcConfig liftieGrpcConfig;
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public DescribeClusterResponse describeCluster(String liftieCrn, String actorCrn) {
+    public DescribeClusterResponse describeCluster(String liftieCrn, String envCrn, String actorCrn) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
-        return liftieServiceClient.describeCluster(DescribeClusterRequest.newBuilder().setClusterCrn(liftieCrn).build());
+        return liftieServiceClient.describeCluster(DescribeClusterRequest.newBuilder().setClusterCrn(liftieCrn).build(), envCrn);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
@@ -63,9 +63,9 @@ public class LiftieGrpcClient {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest, String actorCrn) {
+    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest, String envCrn, String actorCrn) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
-        return liftieServiceClient.validateCredential(validateCredentialRequest);
+        return liftieServiceClient.validateCredential(validateCredentialRequest, envCrn);
     }
 
     private LiftieServiceClient makeClient(ManagedChannel channel, String actorCrn) {

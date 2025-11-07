@@ -12,7 +12,6 @@ import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClust
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClustersResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
-import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,24 +32,24 @@ public class LiftieServiceClient {
         this.liftieGrpcConfig = liftieGrpcConfig;
     }
 
-    public DescribeClusterResponse describeCluster(DescribeClusterRequest describeClusterRequest) {
-        return newStub().describeCluster(describeClusterRequest);
+    public DescribeClusterResponse describeCluster(DescribeClusterRequest describeClusterRequest, String envCrn) {
+        return newStubWithEnvCrnHeader(envCrn).describeCluster(describeClusterRequest);
     }
 
     public ListClustersResponse listClusters(ListClustersRequest listClustersRequest) {
-        return newStub().listClusters(listClustersRequest);
+        return newStubWithEnvCrnHeader(listClustersRequest.getEnvNameOrCrn()).listClusters(listClustersRequest);
     }
 
     public CreateClusterResponse createCluster(CreateClusterRequest createClusterRequest) {
-        return newStub().createCluster(createClusterRequest);
+        return newStubWithEnvCrnHeader(createClusterRequest.getEnvironment()).createCluster(createClusterRequest);
     }
 
     public DeleteClusterResponse deleteCluster(DeleteClusterRequest deleteClusterRequest, String envCrn) {
         return newStubWithEnvCrnHeader(envCrn).deleteCluster(deleteClusterRequest);
     }
 
-    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest) {
-        return newStub().validateCredential(validateCredentialRequest);
+    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest, String envCrn) {
+        return newStubWithEnvCrnHeader(envCrn).validateCredential(validateCredentialRequest);
     }
 
     private LiftiePublicBlockingStub newStubWithEnvCrnHeader(String envCrn) {
@@ -58,14 +57,6 @@ public class LiftieServiceClient {
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(liftieGrpcConfig.getGrpcTimeoutSec()),
                         new EnvCrnMetadataInterceptor(MDCBuilder.getOrGenerateRequestId(), actorCrn, envCrn),
-                        new CallingServiceNameInterceptor(liftieGrpcConfig.getCallingServiceName()));
-    }
-
-    private LiftiePublicBlockingStub newStub() {
-        return LiftiePublicGrpc.newBlockingStub(channel)
-                .withInterceptors(
-                        GrpcUtil.getTimeoutInterceptor(liftieGrpcConfig.getGrpcTimeoutSec()),
-                        new AltusMetadataInterceptor(MDCBuilder.getOrGenerateRequestId(), actorCrn),
                         new CallingServiceNameInterceptor(liftieGrpcConfig.getCallingServiceName()));
     }
 }

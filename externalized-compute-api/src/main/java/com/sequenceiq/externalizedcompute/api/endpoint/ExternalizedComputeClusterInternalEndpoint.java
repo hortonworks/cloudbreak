@@ -84,9 +84,19 @@ public interface ExternalizedComputeClusterInternalEndpoint {
     List<ExternalizedComputeClusterResponse> list(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn);
 
+    @Deprecated
     @GET
     @Path("validate_credential/{credentialName}")
     @Produces(MediaType.APPLICATION_JSON)
     ExternalizedComputeClusterCredentialValidationResponse validateCredential(@NotEmpty @PathParam("credentialName") String credentialName,
             @NotEmpty @QueryParam("region") String region, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
+    @Path("{environmentCrn}/validate_credential/{credentialName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    ExternalizedComputeClusterCredentialValidationResponse validateCredential(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
+            @NotEmpty @PathParam("credentialName") String credentialName,
+            @NotEmpty @QueryParam("region") String region,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

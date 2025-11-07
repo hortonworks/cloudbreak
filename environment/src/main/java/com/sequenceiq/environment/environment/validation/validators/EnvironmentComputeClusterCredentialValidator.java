@@ -25,7 +25,7 @@ public class EnvironmentComputeClusterCredentialValidator {
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         if (environmentDto.isEnableComputeCluster()) {
             ExternalizedComputeClusterCredentialValidationResponse validateCredentialResponse = externalizedComputeService.validateCredential(
-                    environmentDto.getCredential().getName(), environmentDto.getLocation().getName());
+                    environmentDto.getResourceCrn(), environmentDto.getCredential().getName(), environmentDto.getLocation().getName());
             if (!validateCredentialResponse.isSuccessful()) {
                 LOGGER.debug("Credential validation failed: {}", validateCredentialResponse);
                 for (String validationResult : validateCredentialResponse.getValidationResults()) {

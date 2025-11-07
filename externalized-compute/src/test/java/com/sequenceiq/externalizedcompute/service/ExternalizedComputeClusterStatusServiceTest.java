@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,11 +102,12 @@ class ExternalizedComputeClusterStatusServiceTest {
 
     @Test
     void setStatusForClusterButItIsDeleted() throws Exception {
-        when(clusterRepository.findById(eq(2L))).thenReturn(Optional.of(cluster));
         oldStatus.setStatus(ExternalizedComputeClusterStatusEnum.DELETED);
         ExternalizedComputeClusterStatusEnum status = ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS;
-        statusService.setStatus(cluster, status, "creation in progress");
-        verify(clusterRepository).findById(eq(2L));
+        ExternalizedComputeClusterStatusUpdateException exception = assertThrows(ExternalizedComputeClusterStatusUpdateException.class,
+                () -> statusService.setStatus(cluster, status, "creation in progress"));
+        assertEquals("Can't update Externalized Compute Cluster status from DELETED to CREATE_IN_PROGRESS", exception.getMessage());
+        verify(clusterRepository, never()).findById(eq(2L));
         verify(statusRepository).findFirstByExternalizedComputeClusterIsOrderByIdDesc(cluster);
         verify(statusRepository, times(0)).save(any(ExternalizedComputeClusterStatus.class));
     }
@@ -118,7 +120,7 @@ class ExternalizedComputeClusterStatusServiceTest {
         ExternalizedComputeClusterStatusUpdateException exception = assertThrows(ExternalizedComputeClusterStatusUpdateException.class,
                 () ->  statusService.setStatus(cluster, status, "creation in progress"));
 
-        verify(statusRepository, times(2)).findFirstByExternalizedComputeClusterIsOrderByIdDesc(cluster);
+        verify(statusRepository, times(1)).findFirstByExternalizedComputeClusterIsOrderByIdDesc(cluster);
         verify(statusRepository, times(0)).save(any(ExternalizedComputeClusterStatus.class));
         assertEquals("Can't update Externalized Compute Cluster status from DELETE_IN_PROGRESS to CREATE_IN_PROGRESS",
                 exception.getMessage());
@@ -126,11 +128,12 @@ class ExternalizedComputeClusterStatusServiceTest {
 
     @Test
     void setFailedStatusForClusterButItIsDeleted() {
-        when(clusterRepository.findById(eq(2L))).thenReturn(Optional.of(cluster));
         oldStatus.setStatus(ExternalizedComputeClusterStatusEnum.DELETED);
         ExternalizedComputeClusterStatusEnum status = ExternalizedComputeClusterStatusEnum.CREATE_FAILED;
-        statusService.setStatus(cluster, status, "creation in progress");
-        verify(clusterRepository).findById(eq(2L));
+        ExternalizedComputeClusterStatusUpdateException exception = assertThrows(ExternalizedComputeClusterStatusUpdateException.class,
+                () -> statusService.setStatus(cluster, status, "creation in progress"));
+        assertEquals("Can't update Externalized Compute Cluster status from DELETED to CREATE_FAILED", exception.getMessage());
+        verify(clusterRepository, never()).findById(eq(2L));
         verify(statusRepository).findFirstByExternalizedComputeClusterIsOrderByIdDesc(cluster);
         verify(statusRepository, times(0)).save(any(ExternalizedComputeClusterStatus.class));
     }

@@ -318,9 +318,9 @@ class ExternalizedComputeServiceTest {
     public void testCredentialValidation() {
         String region = "region";
         String credential = "credential";
-        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResponse = underTest.validateCredential(credential, region);
-        verify(externalizedComputeClientService, times(1)).validateCredential(
-                credential, region);
+        String envCrn = "envCrn";
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResponse = underTest.validateCredential(envCrn, credential, region);
+        verify(externalizedComputeClientService, times(1)).validateCredential(envCrn, credential, region);
     }
 
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.externalizedcompute.service;
 
+import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS;
+import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.DELETED;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -12,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.DescribeClusterResponse;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ListClusterItem;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialRequest;
 import com.cloudera.thunderhead.service.liftieshared.LiftieSharedProto.ValidateCredentialResponse;
@@ -141,8 +144,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
             ExternalizedComputeCluster initiatedExternalizedComputeCluster = transactionService.required(() -> {
                 ExternalizedComputeCluster savedExternalizedComputeCluster = externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 MDCBuilder.buildMdcContext(savedExternalizedComputeCluster);
-                externalizedComputeClusterStatusService.setStatus(savedExternalizedComputeCluster, ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS,
-                        "Cluster provision initiated");
+                externalizedComputeClusterStatusService.setStatus(savedExternalizedComputeCluster, CREATE_IN_PROGRESS, "Cluster provision initiated");
                 return savedExternalizedComputeCluster;
             });
             LOGGER.info("Saved ExternalizedComputeCluster entity: {}", initiatedExternalizedComputeCluster);
@@ -181,14 +183,13 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
             String liftieClusterCrn = getLiftieClusterCrn(externalizedComputeCluster);
             String internalCrn = regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
             try {
-                DeleteClusterResponse deleteClusterResponse =
-                        liftieGrpcClient.deleteCluster(liftieClusterCrn,
-                                internalCrn,
-                                externalizedComputeCluster.getEnvironmentCrn(), force);
+                DeleteClusterResponse deleteClusterResponse = liftieGrpcClient.deleteCluster(liftieClusterCrn, internalCrn,
+                        externalizedComputeCluster.getEnvironmentCrn(), force);
                 LOGGER.info("Liftie delete response: {}", deleteClusterResponse);
             } catch (Exception e) {
                 if (e.getMessage().contains("existing operation 'Delete'")) {
-                    LiftieSharedProto.DescribeClusterResponse describeClusterResponse = liftieGrpcClient.describeCluster(liftieClusterCrn, internalCrn);
+                    DescribeClusterResponse describeClusterResponse = liftieGrpcClient.describeCluster(liftieClusterCrn,
+                            externalizedComputeCluster.getEnvironmentCrn(), internalCrn);
                     if (!DELETING_LIFTIE_STATUS.equals(describeClusterResponse.getStatus())) {
                         LOGGER.error("Liftie cluster delete failed, there is a delete operation, but not in "
                                 + DELETING_LIFTIE_STATUS + "status: {}", describeClusterResponse);
@@ -223,8 +224,8 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     public void deleteExternalizedComputeCluster(Long id) {
         try {
             transactionService.required(() -> {
-                externalizedComputeClusterStatusService.setStatus(id, ExternalizedComputeClusterStatusEnum.DELETED, "Successfully deleted");
                 externalizedComputeClusterRepository.findById(id).ifPresent(externalizedComputeCluster -> {
+                    externalizedComputeClusterStatusService.setStatus(externalizedComputeCluster, DELETED, "Successfully deleted");
                     externalizedComputeCluster.setDeleted(clock.getCurrentTimeMillis());
                     externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 });
@@ -258,9 +259,10 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                 externalizedComputeCluster.getLiftieName(), externalizedComputeCluster.getAccountId());
     }
 
-    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region, String actorCrn) {
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String environmentCrn, String credentialName,
+            String region, String actorCrn) {
         ValidateCredentialResponse validateCredentialResponse = liftieGrpcClient.validateCredential(
-                ValidateCredentialRequest.newBuilder().setCredential(credentialName).setRegion(region).build(), actorCrn);
+                ValidateCredentialRequest.newBuilder().setCredential(credentialName).setRegion(region).build(), environmentCrn, actorCrn);
         List<String> validationResults = validateCredentialResponse.getValidationsList().stream().map(ValidationResult::getDetailedMessage).toList();
         boolean successful = "PASSED".equals(validateCredentialResponse.getResult());
         return new ExternalizedComputeClusterCredentialValidationResponse(successful, validateCredentialResponse.getMessage(), validationResults);

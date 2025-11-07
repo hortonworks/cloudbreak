@@ -69,7 +69,8 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
                     .run(() -> {
                         try {
                             DescribeClusterResponse cluster = liftieGrpcClient.describeCluster(
-                                    externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                                    externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster),
+                                    externalizedComputeCluster.getEnvironmentCrn(), actorCrn);
                             LOGGER.debug("Cluster status: {}", cluster.getStatus());
                             switch (cluster.getStatus()) {
                                 case DELETED_STATUS -> {
@@ -110,7 +111,8 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
                 return new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force, preserveCluster);
             } else {
                 DescribeClusterResponse cluster =
-                        liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                        liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster),
+                                externalizedComputeCluster.getEnvironmentCrn(), actorCrn);
                 LOGGER.warn("Liftie cluster deletion timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster, e);
                 return new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
                         "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));

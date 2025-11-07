@@ -122,8 +122,8 @@ class ExternalizedComputeClientServiceTest {
     @Test
     void validateCredential() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            underTest.validateCredential("credential", "region");
+            underTest.validateCredential(ENVIRONMENT_CRN, "credential", "region");
         });
-        verify(endpoint, times(1)).validateCredential("credential", "region", USER_CRN);
+        verify(endpoint, times(1)).validateCredential(ENVIRONMENT_CRN, "credential", "region", USER_CRN);
     }
 }

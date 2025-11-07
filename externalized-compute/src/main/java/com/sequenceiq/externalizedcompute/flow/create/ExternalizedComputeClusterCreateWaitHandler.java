@@ -64,7 +64,8 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
                     .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                     .run(() -> {
                         DescribeClusterResponse cluster =
-                                liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                                liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster),
+                                        externalizedComputeCluster.getEnvironmentCrn(), actorCrn);
                         LOGGER.debug("Cluster response: {}", cluster);
                         switch (cluster.getStatus()) {
                             case RUNNING_STATUS:
@@ -85,7 +86,8 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
                     });
         } catch (PollerStoppedException e) {
             DescribeClusterResponse cluster =
-                    liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                    liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster),
+                            externalizedComputeCluster.getEnvironmentCrn(), actorCrn);
             LOGGER.warn("Liftie cluster creation timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster,  e);
             return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster creation timed out. " +
                     "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));

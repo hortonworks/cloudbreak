@@ -2,6 +2,7 @@ package com.sequenceiq.externalizedcompute.flow.delete;
 
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_INITIATED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINISHED_EVENT;
@@ -31,7 +32,7 @@ public class ExternalizedComputeClusterDeleteFlowConfig
 
     private static final List<Transition<ExternalizedComputeClusterDeleteState, ExternalizedComputeClusterDeleteFlowEvent>> TRANSITIONS =
             new Transition.Builder<ExternalizedComputeClusterDeleteState, ExternalizedComputeClusterDeleteFlowEvent>()
-                    .defaultFailureEvent(ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_EVENT)
+                    .defaultFailureEvent(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_EVENT)
                     .from(INIT_STATE)
                     .to(EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_STATE)
                     .event(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_INITIATED_EVENT).defaultFailureEvent()

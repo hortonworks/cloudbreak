@@ -190,7 +190,7 @@ class ExternalizedComputeClusterServiceTest {
                 .thenThrow(new RuntimeException(existingOperationMessage));
         LiftieSharedProto.DescribeClusterResponse describeClusterResponse = mock(LiftieSharedProto.DescribeClusterResponse.class);
         when(describeClusterResponse.getStatus()).thenReturn("RUNNING");
-        when(liftieGrpcClient.describeCluster(liftieCrn, internalCrn)).thenReturn(describeClusterResponse);
+        when(liftieGrpcClient.describeCluster(liftieCrn, envCrn, internalCrn)).thenReturn(describeClusterResponse);
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> clusterService.initiateDelete(1L, false));
         assertEquals(existingOperationMessage, runtimeException.getMessage());
 
@@ -220,7 +220,7 @@ class ExternalizedComputeClusterServiceTest {
                 .thenThrow(new RuntimeException(existingOperationMessage));
         LiftieSharedProto.DescribeClusterResponse describeClusterResponse = mock(LiftieSharedProto.DescribeClusterResponse.class);
         when(describeClusterResponse.getStatus()).thenReturn("DELETING");
-        when(liftieGrpcClient.describeCluster(liftieCrn, internalCrn)).thenReturn(describeClusterResponse);
+        when(liftieGrpcClient.describeCluster(liftieCrn, envCrn, internalCrn)).thenReturn(describeClusterResponse);
         clusterService.initiateDelete(1L, false);
 
         verify(liftieGrpcClient).deleteCluster(liftieCrn, internalCrn, envCrn, false);
@@ -405,14 +405,14 @@ class ExternalizedComputeClusterServiceTest {
         String actorCrn = "actorCrn";
         String credential = "credential";
         String region = "region";
-        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(ENV_CRN), eq(actorCrn))).thenReturn(
                 ValidateCredentialResponse.newBuilder().setResult("PASSED").build());
         ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
-                clusterService.validateCredential(credential, region, actorCrn);
+                clusterService.validateCredential(ENV_CRN, credential, region, actorCrn);
         ArgumentCaptor<ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
                 ValidateCredentialRequest.class);
         verify(liftieGrpcClient, times(1))
-                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
+                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(ENV_CRN), eq(actorCrn));
         ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
         assertEquals(credential, capturedRequest.getCredential());
         assertEquals(region, capturedRequest.getRegion());
@@ -424,7 +424,7 @@ class ExternalizedComputeClusterServiceTest {
         String actorCrn = "actorCrn";
         String credential = "credential";
         String region = "region";
-        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+        when(liftieGrpcClient.validateCredential(any(ValidateCredentialRequest.class), eq(ENV_CRN), eq(actorCrn))).thenReturn(
                 ValidateCredentialResponse.newBuilder().setResult("FAILED")
                         .addValidations(ValidationResult.newBuilder().setStatus("FAILED")
                                 .setName("IAM Policy Permissions Check")
@@ -437,11 +437,11 @@ class ExternalizedComputeClusterServiceTest {
                                         "Documentation:  https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html.").build())
                         .build());
         ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
-                clusterService.validateCredential(credential, region, actorCrn);
+                clusterService.validateCredential(ENV_CRN, credential, region, actorCrn);
         ArgumentCaptor<ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
                 ValidateCredentialRequest.class);
         verify(liftieGrpcClient, times(1))
-                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
+                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(ENV_CRN), eq(actorCrn));
         ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
         assertEquals(credential, capturedRequest.getCredential());
         assertEquals(region, capturedRequest.getRegion());

@@ -86,7 +86,7 @@ class ExternalizedComputeClusterDeleteActionsTest {
         when(reactorEventFactory.createEvent(anyMap(), eq(deleteEvent))).thenReturn(event);
         new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, deleteEvent, Map.of());
 
-        verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, REINITIALIZE_IN_PROGRESS, "Cluster delete initiated");
+        verify(externalizedComputeClusterStatusService, times(1)).setStatus(1L, REINITIALIZE_IN_PROGRESS, "Cluster delete initiated for reinitalization");
         verify(externalizedComputeClusterService, times(1)).initiateDelete(1L, false);
         verify(eventBus).notify(eq(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.selector()), eq(event));
     }

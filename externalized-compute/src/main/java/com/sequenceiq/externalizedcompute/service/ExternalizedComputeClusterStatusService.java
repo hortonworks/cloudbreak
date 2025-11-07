@@ -1,6 +1,5 @@
 package com.sequenceiq.externalizedcompute.service;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.DELETED;
 
 import java.util.Collection;
@@ -52,6 +51,8 @@ public class ExternalizedComputeClusterStatusService {
         try {
             transactionService.required(() -> {
                 ExternalizedComputeClusterStatus previous = getActualStatus(externalizedComputeCluster);
+                LOGGER.info("Trying to set externalized compute cluster {} status from: {} to {} reason {}", externalizedComputeCluster.getName(),
+                        getStatusText(previous), newStatus, statusReason);
                 if (statusChangeIsValid(previous, newStatus)) {
                     ExternalizedComputeClusterStatus statusEntity = createStatusEntity(newStatus, statusReason, externalizedComputeCluster);
                     if (DELETED.equals(newStatus)) {
@@ -60,15 +61,13 @@ public class ExternalizedComputeClusterStatusService {
                     externalizedComputeClusterStatusRepository.save(statusEntity);
                     updateInMemoryStateStore(externalizedComputeCluster);
                     LOGGER.info("Updated status of externalized compute cluster with name: {} from {} to {} with statusReason {}",
-                            externalizedComputeCluster.getName(), getPreviousStatusText(previous), statusEntity, statusReason);
-                } else if (DELETED.equals(previous.getStatus())) {
+                            externalizedComputeCluster.getName(), getStatusText(previous), getStatusText(statusEntity), statusReason);
+                } else if (previous != null && DELETED.equals(previous.getStatus()) && DELETED.equals(newStatus)) {
                     if (externalizedComputeCluster.getDeleted() == null) {
                         setDeletedTime(externalizedComputeCluster);
-                    } else {
-                        throw notFoundException("Externalized cluster", externalizedComputeCluster.getName());
                     }
                 } else {
-                    throw new ExternalizedComputeClusterStatusUpdateException(getActualStatus(externalizedComputeCluster).getStatus(), newStatus);
+                    throw new ExternalizedComputeClusterStatusUpdateException(getStatusText(previous), newStatus);
                 }
             });
         } catch (TransactionService.TransactionExecutionException e) {
@@ -128,7 +127,7 @@ public class ExternalizedComputeClusterStatusService {
         });
     }
 
-    private String getPreviousStatusText(ExternalizedComputeClusterStatus previous) {
+    private String getStatusText(ExternalizedComputeClusterStatus previous) {
         return previous == null ? "null" : previous.getStatus().name();
     }
 

@@ -245,8 +245,8 @@ public class ExternalizedComputeService {
         }
     }
 
-    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region) {
-        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult = externalizedComputeClientService.validateCredential(
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String environmentCrn, String credentialName, String region) {
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult = externalizedComputeClientService.validateCredential(environmentCrn,
                 credentialName, region);
         LOGGER.debug("Validate credential result: {}", validateCredentialResult);
         return validateCredentialResult;
