@@ -50,7 +50,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
             StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
             StackScaleTriggerEvent sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(),
                     event.getHostGroupsWithAdjustment(), event.getHostGroupsWithPrivateIds(), event.getHostGroupsWithHostNames(),
-                    stackView.getPlatformVariant(), false);
+                    stackView.getPlatformVariant());
             if (event.getDetails() != null && event.getDetails().isRepair()) {
                 sste.setRepair();
             }

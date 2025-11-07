@@ -461,7 +461,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         } else {
             LOGGER.info("Stack downscale for the following: {}", groupsWithHostNames);
             return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupsWithAdjustment, groupsWithPrivateIds,
-                    groupsWithHostNames, event.getTriggeredStackVariant(), false, event.accepted()).setRepair();
+                    groupsWithHostNames, event.getTriggeredStackVariant(), event.accepted()).setRepair();
         }
     }
 

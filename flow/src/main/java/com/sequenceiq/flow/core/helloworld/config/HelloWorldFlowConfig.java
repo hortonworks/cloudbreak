@@ -19,7 +19,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -85,10 +84,5 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     @Override
     public FlowEdgeConfig<HelloWorldState, HelloWorldEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return super.getFinalizerCallBack();
     }
 }

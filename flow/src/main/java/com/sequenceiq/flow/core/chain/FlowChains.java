@@ -37,10 +37,6 @@ import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 public class FlowChains {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowChains.class);
 
-    private final Map<String, FlowTriggerEventQueue> flowChainMap = new ConcurrentHashMap<>();
-
-    private final Set<String> notSavedFlowChains = new ConcurrentSkipListSet<>();
-
     @Inject
     private EventBus eventBus;
 
@@ -56,6 +52,10 @@ public class FlowChains {
     @Lazy
     @Inject
     private FlowStatCache flowStatCache;
+
+    private final Map<String, FlowTriggerEventQueue> flowChainMap = new ConcurrentHashMap<>();
+
+    private final Set<String> notSavedFlowChains = new ConcurrentSkipListSet<>();
 
     public void addNotSavedFlowChainLog(String flowChainId) {
         notSavedFlowChains.add(flowChainId);
@@ -127,6 +127,20 @@ public class FlowChains {
             if (queue != null) {
                 Selectable selectable = queue.poll();
                 if (selectable != null) {
+                    flowLogService.saveChain(flowChainId, getParentFlowChainId(flowChainId), flowTriggerEventQueue, flowTriggerUserCrn);
+                }
+            }
+        }
+    }
+
+    public void cleanFlowChain(String flowChainId, String flowTriggerUserCrn) {
+        FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
+        LOGGER.debug("Cleaning FlowChain [{}] with EventQueue: {}", flowChainId, flowTriggerEventQueue);
+        if (flowTriggerEventQueue != null) {
+            Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+            if (queue != null) {
+                if (!queue.isEmpty()) {
+                    queue.clear();
                     flowLogService.saveChain(flowChainId, getParentFlowChainId(flowChainId), flowTriggerEventQueue, flowTriggerUserCrn);
                 }
             }
