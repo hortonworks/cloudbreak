@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class SELinuxAssertions {
 
     private static final String REPORT_FILENAME_FORMAT = SELINUX_REPORT_DIRECTORY + "/%s/%s-%s.json";
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").withZone(ZoneOffset.UTC);
 
     private static final String CHECK_SELINUX_MODE_COMMAND = "getenforce | tr -d '[:space:]'";
 
