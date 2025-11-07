@@ -68,7 +68,7 @@ public class CDPConfigService {
 
     private static final String RUNTIME_SUPPORTIG_RHEL8_AND_RHEL9 = "7.3.2";
 
-    private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.2";
+    private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.1";
 
     // Defines what is the default runtime version (UI / API)
     @Value("${datalake.runtimes.default}")
