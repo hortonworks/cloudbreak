@@ -55,28 +55,45 @@ public class DistroxEnabledInstanceTypes {
             "r7i.xlarge,r7i.2xlarge,r7i.4xlarge,r7i.8xlarge,r7i.12xlarge,r7i.16xlarge,r7i.24xlarge,r7i.48xlarge," +
             "r7iz.xlarge,r7iz.2xlarge,r7iz.4xlarge,r7iz.8xlarge,r7iz.12xlarge,r7iz.16xlarge,r7iz.32xlarge," +
             "c7i.xlarge,c7i.2xlarge,c7i.4xlarge,c7i.8xlarge,c7i.12xlarge,c7i.16xlarge,c7i.24xlarge,c7i.48xlarge," +
-            "c7a.xlarge,c7a.2xlarge,c7a.4xlarge,c7a.8xlarge,c7a.12xlarge,c7a.16xlarge,c7a.24xlarge,c7a.32xlarge,c7a.48xlarge,";
+            "c7a.xlarge,c7a.2xlarge,c7a.4xlarge,c7a.8xlarge,c7a.12xlarge,c7a.16xlarge,c7a.24xlarge,c7a.32xlarge,c7a.48xlarge," +
 
-    private static final String ENABLED_ARM64_TYPES = "i4g.xlarge,i4g.2xlarge,i4g.4xlarge,i4g.8xlarge,i4g.16xlarge," +
-            "i8g.xlarge,i8g.2xlarge,i8g.4xlarge,i8g.8xlarge,i8g.16xlarge,i8g.24xlarge," +
+            "m8a.xlarge,m8a.2xlarge,m8a.4xlarge,m8a.8xlarge,m8a.12xlarge,m8a.16xlarge,m8a.24xlarge,m8a.48xlarge," +
+            "m8i.xlarge,m8i.2xlarge,m8i.4xlarge,m8i.8xlarge,m8i.12xlarge,m8i.16xlarge,m8i.24xlarge,m8i.32xlarge,m8i.48xlarge," +
+            "r8i.xlarge,r8i.2xlarge,r8i.4xlarge,r8i.8xlarge,r8i.12xlarge,r8i.16xlarge,r8i.24xlarge,r8i.32xlarge,r8i.48xlarge," +
+            "c8i.2xlarge,c8i.4xlarge,c8i.8xlarge,c8i.12xlarge,c8i.16xlarge,c8i.24xlarge,c8i.32xlarge,c8i.48xlarge," +
+            "i7i.xlarge,i7i.2xlarge,i7i.4xlarge,i7i.8xlarge,i7i.12xlarge,i7i.16xlarge,i7i.24xlarge,i7i.48xlarge";
+
+    private static final String ENABLED_ARM64_TYPES =
+            "i4g.xlarge,i4g.2xlarge,i4g.4xlarge,i4g.8xlarge,i4g.16xlarge," +
             "im4gn.xlarge,im4gn.2xlarge,im4gn.4xlarge,im4gn.8xlarge,im4gn.16xlarge," +
             "is4gen.xlarge,is4gen.2xlarge,is4gen.4xlarge,is4gen.8xlarge," +
+
             "m6g.xlarge,m6g.2xlarge,m6g.4xlarge,m6g.8xlarge,m6g.12xlarge,m6g.16xlarge," +
             "m6gd.xlarge,m6gd.2xlarge,m6gd.4xlarge,m6gd.8xlarge,m6gd.12xlarge,m6gd.16xlarge," +
-            "m7g.xlarge,m7g.2xlarge,m7g.4xlarge,m7g.8xlarge,m7g.12xlarge,m7g.16xlarge," +
-            "m8g.xlarge,m8g.2xlarge,m8g.4xlarge,m8g.8xlarge,m8g.12xlarge,m8g.16xlarge,m8g.24xlarge," +
             "r6g.xlarge,r6g.2xlarge,r6g.4xlarge,r6g.8xlarge,r6g.12xlarge,r6g.16xlarge," +
             "r6gd.xlarge,r6gd.2xlarge,r6gd.4xlarge,r6gd.8xlarge,r6gd.12xlarge,r6gd.16xlarge," +
-            "r7g.xlarge,r7g.2xlarge,r7g.4xlarge,r7g.8xlarge,r7g.12xlarge,r7g.16xlarge," +
-            "r7gd.xlarge,r7gd.2xlarge,r7gd.4xlarge,r7gd.8xlarge,r7gd.12xlarge,r7gd.16xlarge," +
-            "r8g.xlarge,r8g.2xlarge,r8g.4xlarge,r8g.8xlarge,r8g.12xlarge,r8g.16xlarge,r8g.24xlarge," +
             "c6g.xlarge,c6g.2xlarge,c6g.4xlarge,c6g.8xlarge,c6g.12xlarge,c6g.16xlarge," +
             "c6gn.xlarge,c6gn.2xlarge,c6gn.4xlarge,c6gn.8xlarge,c6gn.12xlarge,c6gn.16xlarge," +
             "c6gd.xlarge,c6gd.2xlarge,c6gd.4xlarge,c6gd.8xlarge,c6gd.12xlarge,c6gd.16xlarge," +
+
+            "m7g.xlarge,m7g.2xlarge,m7g.4xlarge,m7g.8xlarge,m7g.12xlarge,m7g.16xlarge," +
+            "r7g.xlarge,r7g.2xlarge,r7g.4xlarge,r7g.8xlarge,r7g.12xlarge,r7g.16xlarge," +
+            "r7gd.xlarge,r7gd.2xlarge,r7gd.4xlarge,r7gd.8xlarge,r7gd.12xlarge,r7gd.16xlarge," +
             "c7g.xlarge,c7g.2xlarge,c7g.4xlarge,c7g.8xlarge,c7g.12xlarge,c7g.16xlarge," +
             "c7gn.xlarge,c7gn.2xlarge,c7gn.4xlarge,c7gn.8xlarge,c7gn.12xlarge,c7gn.16xlarge," +
             "c7gd.xlarge,c7gd.2xlarge,c7gd.4xlarge,c7gd.8xlarge,c7gd.12xlarge,c7gd.16xlarge," +
-            "c8g.xlarge,c8g.2xlarge,c8g.4xlarge,c8g.8xlarge,c8g.12xlarge,c8g.16xlarge,c8g.24xlarge";
+
+            "m8g.xlarge,m8g.2xlarge,m8g.4xlarge,m8g.8xlarge,m8g.12xlarge,m8g.16xlarge,m8g.24xlarge," +
+            "r8g.xlarge,r8g.2xlarge,r8g.4xlarge,r8g.8xlarge,r8g.12xlarge,r8g.16xlarge,r8g.24xlarge," +
+            "i8g.xlarge,i8g.2xlarge,i8g.4xlarge,i8g.8xlarge,i8g.16xlarge,i8g.24xlarge," +
+            "c8g.xlarge,c8g.2xlarge,c8g.4xlarge,c8g.8xlarge,c8g.12xlarge,c8g.16xlarge,c8g.24xlarge," +
+            "m8gd.xlarge,m8gd.2xlarge,m8gd.4xlarge,m8gd.8xlarge,m8gd.12xlarge,m8gd.16xlarge,m8gd.24xlarge,m8gd.48xlarge," +
+            "c8gd.xlarge,c8gd.2xlarge,c8gd.4xlarge,c8gd.8xlarge,c8gd.12xlarge,c8gd.16xlarge,c8gd.24xlarge,c8gd.48xlarge," +
+            "c8gn.2xlarge,c8gn.4xlarge,c8gn.8xlarge,c8gn.12xlarge,c8gn.16xlarge,c8gn.24xlarge,c8gn.48xlarge," +
+            "r8gb.xlarge,r8gb.2xlarge,r8gb.4xlarge,r8gb.8xlarge,r8gb.12xlarge,r8gb.16xlarge,r8gb.24xlarge,r8gd.xlarge," +
+            "r8gd.2xlarge,r8gd.4xlarge,r8gd.8xlarge,r8gd.12xlarge,r8gd.16xlarge,r8gd.24xlarge,r8gd.48xlarge," +
+            "r8gn.xlarge,r8gn.2xlarge,r8gn.4xlarge,r8gn.8xlarge,r8gn.12xlarge,r8gn.16xlarge,r8gn.24xlarge,r8gn.48xlarge," +
+            "i8ge.xlarge,i8ge.2xlarge,i8ge.3xlarge,i8ge.6xlarge,i8ge.12xlarge,i8ge.18xlarge,i8ge.24xlarge,i8ge.48xlarge";
 
     public static final Set<String> AWS_ENABLED_X86_TYPES_LIST = splitInstanceList(ENABLED_X86_TYPES);
 
