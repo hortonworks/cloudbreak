@@ -25,12 +25,10 @@ public class WebSocketNotificationAssemblingService {
     @Inject
     private EntitlementService entitlementsService;
 
-    public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(CloudbreakNotification notification) {
-        return new WebSocketNotification<>(notification);
-    }
-
     public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(
-            ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String notificationType) {
+            ResourceEvent resourceEvent, Collection<?> messageArgs,
+            Object payload,
+            String notificationType) {
         CloudbreakNotification notification = new CloudbreakNotification();
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventType(resourceEvent.name());
@@ -38,7 +36,7 @@ public class WebSocketNotificationAssemblingService {
         String accountId = getAccountId();
         if (accountId != null) {
             notification.setSubscriptionRequired(
-                entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
+                    entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
             );
         }
         notification.setTenantName(getAccountId());
@@ -52,7 +50,10 @@ public class WebSocketNotificationAssemblingService {
     }
 
     public WebSocketNotification<CloudbreakNotification> createWebSocketNotification(
-            ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId, String notificationType) {
+            ResourceEvent resourceEvent, Collection<?> messageArgs,
+            Object payload,
+            String userId,
+            String notificationType) {
         WebSocketNotification<CloudbreakNotification> n = createWebSocketNotification(resourceEvent, messageArgs, payload, notificationType);
         n.getNotification().setTenantName(getTenantName(userId));
         n.getNotification().setUserId(userId);

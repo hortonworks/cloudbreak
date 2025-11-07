@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.notification.client;
 import static com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.ListDistributionListsResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.notification.client.converter.GetPublishedEvent
 import com.sequenceiq.cloudbreak.notification.client.converter.ListDistributionListsResponseConverter;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateAccountMetadataDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListDto;
+import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.DeleteDistributionListRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsRequestDto;
@@ -82,15 +84,29 @@ public class GrpcNotificationClient {
      * @param request the request containing all parameters for creating or updating a distribution list
      * @return the create or update distribution list response
      */
-    public CreateOrUpdateDistributionListResponseDto createOrUpdateDistributionList(CreateOrUpdateDistributionListDto request) {
+    public CreateOrUpdateDistributionListResponseDto createOrUpdateDistributionList(CreateOrUpdateDistributionListRequestDto request) {
 
         NotificationServiceClient serviceClient = makeClient(channelWrapper.getChannel());
 
-        LOGGER.debug("Creating or updating distribution list for resource [{}]", request.resourceCrn());
-        CreateOrUpdateDistributionListResponse response = serviceClient.createOrUpdateDistributionList(request);
+        LOGGER.debug("Creating or updating distribution list for resource [{}]", request.getResourceCrn());
+
+        CreateOrUpdateDistributionListDto dto = new CreateOrUpdateDistributionListDto(
+                request.getResourceCrn(),
+                request.getResourceName(),
+                request.getEventChannelPreferences().stream()
+                        .map(e -> eventChannelPreferenceDtoConverter.convertToProto(e))
+                        .collect(Collectors.toList()),
+                request.getEmailAddresses(),
+                request.getDistributionListId(),
+                request.getParentResourceCrn(),
+                request.getSlackChannelIds(),
+                request.getDistributionListManagementType()
+        );
+
+        CreateOrUpdateDistributionListResponse response = serviceClient.createOrUpdateDistributionList(dto);
 
         LOGGER.debug("Created or updated distribution list for resource [{}] with ID [{}]",
-                request.resourceCrn(), response);
+                request.getResourceCrn(), response);
 
         return createOrUpdateConverter.convert(response);
     }

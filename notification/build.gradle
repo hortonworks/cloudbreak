@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+  maven { url = "$repoUrl" }
+  maven { url = "$springRepoUrl" }
+  mavenCentral()
+}
+
+dependencies {
+  implementation project(":common")
+  implementation project(":notification-connector")
+  implementation project(':authorization-common-api')
+  implementation project(':auth-connector')
+  implementation project(':usage-collection')
+
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.springframework',           name: 'spring-context',                 version: springFrameworkVersion
+  implementation group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
+
+  testImplementation group: 'org.springframework',       name: 'spring-test',                    version: springFrameworkVersion
+  testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+}

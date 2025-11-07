@@ -31,6 +31,7 @@ dependencies {
   api group: 'org.apache.commons',                          name: 'commons-collections4',           version: commonsCollections4Version
   api group: 'com.google.guava',                            name: 'guava',                          version: guavaVersion
   api group: 'com.google.code.gson',                        name: 'gson',                           version: gsonVersion
+  implementation group: 'org.freemarker',                   name: 'freemarker',                     version: freemarkerVersion
   implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: mybatisMigrationVersion
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion

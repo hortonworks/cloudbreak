@@ -133,7 +133,7 @@ public class NotificationServiceClient {
     }
 
     public CreateOrUpdateDistributionListResponse
-            createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
+    createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
         LOGGER.info("Creating or updating distribution list for resource: {}", dto.resourceCrn());
 
         CreateOrUpdateDistributionListRequest.Builder requestBuilder =
@@ -178,7 +178,7 @@ public class NotificationServiceClient {
      * @return the delete distribution list response
      */
     public DeleteDistributionListResponse
-            deleteDistributionList(String name) {
+    deleteDistributionList(String name) {
 
         DeleteDistributionListRequest request =
                 DeleteDistributionListRequest.newBuilder()

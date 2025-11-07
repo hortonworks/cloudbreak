@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeUtil {
 
+    public static final int ONE_HOUR_IN_MINUTES = 60;
+
     private static final long THIRTY_DAYS = 30L;
 
     private static final int MILLISEC_MULTIPLIER = 1000;

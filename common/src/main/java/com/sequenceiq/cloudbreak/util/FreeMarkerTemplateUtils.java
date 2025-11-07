@@ -7,9 +7,9 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
@@ -39,17 +39,10 @@ public class FreeMarkerTemplateUtils {
         return result.toString();
     }
 
-    public JsonNode convertStringTemplateToJson(String armTemplate) {
-        return jsonHelper.createJsonFromString(armTemplate);
-    }
-
-    public String getFieldValue(String armTemplate, String fieldName) {
-        JsonNode node = convertStringTemplateToJson(armTemplate);
-        JsonNode foundNode = node.findValue(fieldName);
-        if (foundNode.isValueNode()) {
-            return foundNode.asText();
-        }
-        return null;
+    public Template template(Configuration freemarkerConfiguration, String template, String name) throws IOException {
+        return new Template(name,
+                freemarkerConfiguration.getTemplate(template, "UTF-8").toString(),
+                freemarkerConfiguration);
     }
 
 }

@@ -57,7 +57,7 @@ class EventChannelPreferenceDtoConverterTest {
 
     @Test
     void testConvertToProtoWithNullOptionalFields() {
-        EventChannelPreferenceDto dto = new EventChannelPreferenceDto();
+        EventChannelPreferenceDto dto = new EventChannelPreferenceDto(null, Set.of(), Set.of());
         // All fields default null
         NotificationAdminProto.EventChannelPreference proto = underTest.convertToProto(dto);
         assertNotNull(proto);

@@ -42,7 +42,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
     implementation group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
-    implementation group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion
     implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
     implementation group: 'org.apache.httpcomponents.client5',     name: 'httpclient5',                    version: httpClientVersion
     implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
