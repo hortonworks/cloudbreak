@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -201,6 +202,8 @@ public class StackToDescribeFreeIpaResponseConverter {
             trustResponse.setOperationId(trust.getOperationId());
             trustResponse.setRealm(trust.getKdcRealm());
             trustResponse.setIp(trust.getKdcIp());
+            trustResponse.setDnsIp(trust.getDnsIp());
+            trustResponse.setKdcType(trust.getKdcType() != null ? trust.getKdcType().name() : KdcType.UNKNOWN.name());
         } else {
             trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
         }

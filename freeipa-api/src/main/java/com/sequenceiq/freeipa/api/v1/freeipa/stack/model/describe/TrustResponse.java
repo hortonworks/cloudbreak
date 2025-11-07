@@ -25,6 +25,12 @@ public class TrustResponse {
     @Schema(description = CrossRealmTrustModelDescriptions.KDC_IP, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String ip;
 
+    @Schema(description = CrossRealmTrustModelDescriptions.DNS_IP, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String dnsIp;
+
+    @Schema(description = CrossRealmTrustModelDescriptions.KDC_TYPE, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String kdcType;
+
     public String getFqdn() {
         return fqdn;
     }
@@ -65,6 +71,22 @@ public class TrustResponse {
         this.ip = ip;
     }
 
+    public String getDnsIp() {
+        return dnsIp;
+    }
+
+    public void setDnsIp(String dnsIp) {
+        this.dnsIp = dnsIp;
+    }
+
+    public String getKdcType() {
+        return kdcType;
+    }
+
+    public void setKdcType(String kdcType) {
+        this.kdcType = kdcType;
+    }
+
     @Override
     public String toString() {
         return "TrustResponse{" +
@@ -73,6 +95,8 @@ public class TrustResponse {
                 ", operationId='" + operationId + '\'' +
                 ", realm='" + realm + '\'' +
                 ", ip='" + ip + '\'' +
+                ", dnsIp='" + dnsIp + '\'' +
+                ", kdcType='" + kdcType + '\'' +
                 '}';
     }
 }

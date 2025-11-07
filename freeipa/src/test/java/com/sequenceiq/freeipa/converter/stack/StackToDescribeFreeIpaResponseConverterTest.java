@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -178,6 +179,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
         crossRealmTrust.setKdcIp("10.0.0.16");
         crossRealmTrust.setOperationId("operationid");
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
+        crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
+        crossRealmTrust.setDnsIp("8.8.8.8");
         ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -234,7 +237,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(TrustStatus.TRUST_ACTIVE.name(), TrustResponse::getTrustStatus)
                 .returns("operationid", TrustResponse::getOperationId)
                 .returns("fqdn", TrustResponse::getFqdn)
-                .returns("10.0.0.16", TrustResponse::getIp);
+                .returns("10.0.0.16", TrustResponse::getIp)
+                .returns("8.8.8.8", TrustResponse::getDnsIp)
+                .returns(KdcType.ACTIVE_DIRECTORY.name(), TrustResponse::getKdcType);
     }
 
     private void setupLoadBalancerMock(Long id) {
