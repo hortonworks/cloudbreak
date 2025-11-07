@@ -85,12 +85,7 @@ get_disk_uuid() {
 }
 
 get_root_disk() {
-    root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
-    if [[ $root_partition =~ "nvme" ]]; then
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
-    else
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
-    fi
+    echo $(findmnt -n -o SOURCE / 2>/dev/null)
 }
 
 get_root_disk_partition_number() {
