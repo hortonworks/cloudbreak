@@ -1,0 +1,3 @@
+The following DNS Forward Zone must be added to your DNS server:
+
+Zone: [ipa.domain] -> Forwarders: [ipaIp1, ipaIp2, ipaIp3]

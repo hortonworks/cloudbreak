@@ -134,6 +134,7 @@ public class FreeIpaModelDescriptions {
         public static final String FQDN = "Fully qualified domain name of the Active Directory server.";
         public static final String IP = "IP address of the Active Directory server.";
         public static final String REALM = "Realm of the Active Directory server.";
+        public static final String KDC_TYPE = "The type of the KDC, currently Active directory and MIT Kerberos is supported.";
         public static final String KDC_SERVER = "KDC server details.";
         public static final String KDC_FQDN = "Fully qualified domain name of the KDC server.";
         public static final String KDC_IP = "IP address of the KDC server.";
@@ -141,8 +142,10 @@ public class FreeIpaModelDescriptions {
         public static final String TRUST_SECRET = "The trust shared secret is a password-like key entered during trust configuration that is shared between " +
                 "the IDM and AD domains to secure and validate the trust relationship.";
         public static final String DNS_IPS = "IP addresses of the DNS servers.";
-        public static final String AD_TRUST_SETUP_COMMANDS = "Active directory commands to be executed for cross-realm trust setup.";
+        public static final String AD_TRUST_SETUP_COMMANDS = "Active Directory commands to be executed for cross-realm trust setup.";
+        public static final String MIT_TRUST_SETUP_COMMANDS = "MIT Kerberos commands to be executed for cross-realm trust setup.";
         public static final String BASE_CLUSTER_KRB5_CONF = "krb5.conf content to be used on base cluster for cross-realm trust setup.";
+        public static final String DNS_SETUP_INSTRUCTIONS = "DNS setup instructions for cross-realm trust setup.";
         public static final String TRUST_DETAILS = "Cross realm trust details.";
         public static final String TRUST_STATUS = "The cross realm trust status.";
         public static final String OPERATION_ID = "The id of the last cross realm trust setup related operation.";
