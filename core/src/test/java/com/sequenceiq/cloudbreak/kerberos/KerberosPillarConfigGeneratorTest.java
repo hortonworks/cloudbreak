@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.common.api.type.EnvironmentType;
@@ -52,6 +54,9 @@ public class KerberosPillarConfigGeneratorTest {
 
     @Mock
     private FreeipaClientService freeipaClient;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private KerberosPillarConfigGenerator underTest;
@@ -196,6 +201,8 @@ public class KerberosPillarConfigGeneratorTest {
         when(kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig)).thenReturn(false);
         when(kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, TEST_URL)).thenReturn(TEST_ADMIN_URL);
         when(freeipaClient.findByEnvironmentCrn(TEST_CRN)).thenReturn(Optional.of(freeIpaResponse));
+        Set<String> domains = Set.of("domain1", "domain2");
+        when(platformAwareSdxConnector.getSdxDomains(TEST_CRN)).thenReturn(domains);
 
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.createKerberosPillar(kerberosConfig, environmentResponse);
@@ -219,6 +226,7 @@ public class KerberosPillarConfigGeneratorTest {
         assertNotNull(trustProperties);
         assertEquals(TEST_REALM.toUpperCase(Locale.ROOT), trustProperties.get("realm"));
         assertEquals(TEST_REALM.toLowerCase(Locale.ROOT), trustProperties.get("domain"));
+        assertEquals(domains, trustProperties.get("sdxDomains"));
     }
 
     @Test

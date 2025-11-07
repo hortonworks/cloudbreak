@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -17,7 +20,9 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Instance;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
+import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
@@ -120,5 +125,25 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
         String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
         GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(pvcCrn);
         return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
+    }
+
+    @Override
+    public Set<String> getSdxDomains(String environmentCrn) {
+        Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
+        return Optional.ofNullable(environment.getPvcEnvironmentDetails())
+                .map(PvcEnvironmentDetails::getPrivateDatalakeDetails)
+                .stream()
+                .map(PrivateDatalakeDetails::getInstances)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .map(Instance::getDiscoveryFQDN)
+                .filter(Objects::nonNull)
+                .map(this::getDomainFromFqdn)
+                .collect(Collectors.toSet());
+    }
+
+    private String getDomainFromFqdn(String instanceFqdn) {
+        int firstDot = instanceFqdn.indexOf('.');
+        return instanceFqdn.substring(firstDot + 1);
     }
 }
