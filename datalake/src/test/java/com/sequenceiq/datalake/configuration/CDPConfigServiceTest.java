@@ -345,9 +345,10 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(
-                rt(RUNTIME_732, false, Architecture.X86_64),
+                rt(RUNTIME_732, false, Architecture.ARM64),
                 rt(RUNTIME_732, false, Architecture.X86_64),
                 rt(RUNTIME_731, true, Architecture.ARM64),
+                rt(RUNTIME_731, true, Architecture.X86_64),
                 rt(RUNTIME_7218, false, Architecture.X86_64),
                 rt(RUNTIME_7217, false, Architecture.X86_64)
         );

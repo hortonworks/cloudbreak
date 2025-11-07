@@ -27,7 +27,7 @@ public class CachedEncryptionProfileClientService {
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
 
-    @Cacheable(cacheNames = FREEIPA_ENCRYPTION_PROFILE_CACHE, key = "#encryptionProfileName")
+    @Cacheable(cacheNames = FREEIPA_ENCRYPTION_PROFILE_CACHE, key = "#encryptionProfileName != null ? #encryptionProfileName : 'cdp_default_fips_v1'")
     public EncryptionProfileResponse getByNameOrDefaultIfEmpty(String encryptionProfileName) {
         LOGGER.debug("Retrieving encryption profile named {}", encryptionProfileName);
         try {
