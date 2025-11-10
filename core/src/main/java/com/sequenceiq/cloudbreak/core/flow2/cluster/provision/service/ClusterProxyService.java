@@ -46,10 +46,7 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class ClusterProxyService {
@@ -77,9 +74,6 @@ public class ClusterProxyService {
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
-
-    @Inject
-    private EnvironmentEndpoint environmentEndpoint;
 
     public ReadConfigResponse readConfig(StackView stack) {
         return clusterProxyRegistrationClient.readConfig(stack.getResourceCrn());
@@ -147,12 +141,7 @@ public class ClusterProxyService {
         } else if (stack.getTunnel().useCcmV2()) {
             requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(stack.getEnvironmentCrn());
-            if (stack.isDatahub() && EnvironmentType.HYBRID.name().equals(environment.getEnvironmentType())) {
-                requestBuilder.withEnvironmentCrn(environment.getRemoteEnvironmentCrn()).withUseCcmV2(true);
-            } else {
-                requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
-            }
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
@@ -169,16 +158,9 @@ public class ClusterProxyService {
             requestBuilder.withCcmV2Entries(ccmV2Configs(stack))
                     .withKnoxUrl(knoxUrlForCcmV2(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(stack.getEnvironmentCrn());
-            if (stack.isDatahub() && EnvironmentType.HYBRID.name().equals(environment.getEnvironmentType())) {
-                requestBuilder.withEnvironmentCrn(environment.getRemoteEnvironmentCrn())
-                        .withUseCcmV2(true)
-                        .withKnoxUrl(knoxUrlForCcmV2(stack));
-            } else {
-                requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn())
-                        .withUseCcmV2(true)
-                        .withKnoxUrl(knoxUrlForCcmV2(stack));
-            }
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn())
+                    .withUseCcmV2(true)
+                    .withKnoxUrl(knoxUrlForCcmV2(stack));
         }
         return requestBuilder.build();
     }
