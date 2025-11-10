@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SlsExistsSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.MinionUtil;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.RetryType;
 
 @Service
 public class SaltStateService {
@@ -456,6 +457,10 @@ public class SaltStateService {
         return retry.testWith1SecDelayMax3Times(() -> runCommand(sc, command));
     }
 
+    public Map<String, String> runCommandWithoutRetry(SaltConnector sc, String command) {
+        return runCommand(sc, command);
+    }
+
     private Map<String, String> runCommand(SaltConnector sc, String command) {
         try {
             CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
@@ -484,12 +489,16 @@ public class SaltStateService {
     }
 
     public Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
-        return retry.testWith2SecDelayMax15Times(() -> {
+        return runCommandOnHosts(retry, sc, target, command, RetryType.WITH_2_SEC_DELAY_MAX_15_TIMES);
+    }
+
+    public Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command, RetryType retryType) {
+        return retryType.execute(retry, () -> {
             try {
                 CommandExecutionResponse resp = measure(() -> sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
                         "Command run took {}ms for command: [{}]", command);
                 List<Map<String, String>> result = resp.getResult();
-                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.getFirst();
             } catch (RuntimeException e) {
                 LOGGER.error("Salt run command on hosts failed", e);
                 throw new Retry.ActionFailedException("Salt run command on hosts failed", e);

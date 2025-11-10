@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.RetryType;
 
 public interface HostOrchestrator extends HostRecipeExecutor {
 
@@ -93,6 +94,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
 
     Map<String, String> runCommandOnAllHostsWithFewRetry(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
+
+    Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command, RetryType retryType)
+            throws CloudbreakOrchestratorFailedException;
 
     Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
             throws CloudbreakOrchestratorFailedException;

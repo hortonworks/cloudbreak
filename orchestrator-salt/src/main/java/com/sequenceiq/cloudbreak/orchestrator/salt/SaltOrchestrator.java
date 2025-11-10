@@ -77,7 +77,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
@@ -108,6 +107,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.RetryType;
 import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
@@ -147,12 +147,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final String CM_AGENT_CERTDIR_PERMISSION = "cloudera.agent.agent-cert-permission";
 
     private static final String CREATE_USER_HOME_CRON = "cloudera.createuserhome";
-
-    private static final String DISK_FORMAT = "find-device-and-format.sh";
-
-    private static final String DISK_MOUNT = "mount-disks.sh";
-
-    private static final String SRV_SALT_DISK = "/srv/salt/disk";
 
     private static final String PERMISSION = "0600";
 
@@ -409,32 +403,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         OrchestratorBootstrap hostSave = PillarSave.createHostsPillar(sc, gatewayTargetIpAddresses, stack.getAllNotDeletedNodes());
         Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(hostSave, exitCriteria, exitModel);
         saltPillarRunner.call();
-    }
-
-    private Map<String, String> mountDisks(String platformVariant, SaltConnector sc, Glob hostname, String uuidList, String fstab) {
-        String mountCommandParams = "CLOUD_PLATFORM='" + platformVariant + "' ATTACHED_VOLUME_UUID_LIST='" + uuidList + "' ";
-
-        if (StringUtils.isNotEmpty(fstab)) {
-            mountCommandParams += "PREVIOUS_FSTAB='" + fstab + "' ";
-        }
-        saltStateService.runCommandOnHosts(retry, sc, hostname, "(cd " + SRV_SALT_DISK + ';' + mountCommandParams + " ./" + DISK_MOUNT + ')');
-        return StringUtils.isEmpty(uuidList) ? Map.of() : saltStateService.runCommandOnHosts(retry, sc, hostname, "cat /etc/fstab");
-    }
-
-    private String formatDisks(String platformVariant, SaltConnector sc, Node node, Glob hostname) {
-        NodeVolumes nodeVolumes = node.getNodeVolumes();
-        if (StringUtils.isNotEmpty(nodeVolumes.getFstab())) {
-            return nodeVolumes.getUuids();
-        }
-
-        String dataVolumes = String.join(" ", nodeVolumes.getDataVolumes());
-        String serialIds = String.join(" ", nodeVolumes.getSerialIds());
-        String formatCommandParams = "CLOUD_PLATFORM='" + platformVariant
-                + "' ATTACHED_VOLUME_NAME_LIST='" + dataVolumes
-                + "' ATTACHED_VOLUME_SERIAL_LIST='" + serialIds + "' ";
-        String command = "(cd " + SRV_SALT_DISK + ';' + formatCommandParams + "./" + DISK_FORMAT + ')';
-        Map<String, String> formatResponse = saltStateService.runCommandOnHosts(retry, sc, hostname, command);
-        return formatResponse.getOrDefault(node.getHostname(), "");
     }
 
     @Override
@@ -1111,7 +1079,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.runCommandWithFewRetry(retry, saltConnector, command);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during command execution: " + command, e);
+            LOGGER.warn("Error occurred during command execution: {}", command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1119,13 +1087,19 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
             throws CloudbreakOrchestratorFailedException {
+        return runCommandOnHosts(allGatewayConfigs, targetFqdns, command, RetryType.WITH_2_SEC_DELAY_MAX_5_TIMES);
+    }
+
+    @Override
+    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command, RetryType retryType)
+            throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Target<String> hosts = new HostList(targetFqdns);
         LOGGER.debug("Execute command: {}, on hosts: {}", command, hosts);
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
-            return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command);
+            return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command, retryType);
         } catch (RuntimeException e) {
-            LOGGER.warn("Error occurred during command execution: " + command, e);
+            LOGGER.warn("Error occurred during command execution: {}", command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1793,7 +1767,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 user, primaryGateway.getPrivateAddress(), gatewayTargets);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
-            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command);
+            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command,
+                    RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
             return passwordExpiryDatesOnHosts.values().stream()
                     .map(String::trim)
                     .map(SaltOrchestrator::parseDateString)

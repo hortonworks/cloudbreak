@@ -57,4 +57,9 @@ public class RetryService implements Retry {
     public <T> T testWith1SecDelayMax3Times(Supplier<T> action) throws ActionFailedException {
         return action.get();
     }
+
+    @Override
+    public <T> T testWithoutRetry(Supplier<T> action) throws ActionFailedException {
+        return action.get();
+    }
 }

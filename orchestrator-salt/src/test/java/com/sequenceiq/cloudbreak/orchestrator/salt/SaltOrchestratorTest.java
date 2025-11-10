@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import static com.sequenceiq.cloudbreak.service.RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES;
+import static com.sequenceiq.cloudbreak.service.RetryType.WITH_2_SEC_DELAY_MAX_5_TIMES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -830,11 +832,11 @@ class SaltOrchestratorTest {
         Map<String, String> response = new HashMap<>();
         response.put("host1", "sample");
         String command = "echo sample";
-        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command))).thenReturn(response);
+        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command), eq(WITH_2_SEC_DELAY_MAX_5_TIMES))).thenReturn(response);
         Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs,
                 targets.stream().map(Node::getHostname).collect(Collectors.toSet()), command);
         assertEquals("sample", result.get("host1"));
-        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command));
+        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command), eq(WITH_2_SEC_DELAY_MAX_5_TIMES));
         Target<String> target = targetCaptor.getValue();
         assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
     }
@@ -862,7 +864,7 @@ class SaltOrchestratorTest {
     void testGetPasswordExpiryDate() throws Exception {
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
         String user = "saltuser";
-        when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString())).thenReturn(Map.of(
+        when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString(), any())).thenReturn(Map.of(
                 "host1", " Jan 01, 2022",
                 "host2", " Mar 10, 2022",
                 "host3", " never"
@@ -871,7 +873,8 @@ class SaltOrchestratorTest {
         LocalDate result = saltOrchestrator.getPasswordExpiryDate(allGatewayConfigs, user);
 
         ArgumentCaptor<HostList> hostListCaptor = ArgumentCaptor.forClass(HostList.class);
-        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), hostListCaptor.capture(), startsWith("chage -l saltuser"));
+        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), hostListCaptor.capture(), startsWith("chage -l saltuser"),
+                eq(WITH_1_SEC_DELAY_MAX_3_TIMES));
         assertEquals(gatewayConfig.getHostname(), hostListCaptor.getValue().getTarget());
         assertEquals(2022, result.getYear());
         assertEquals(Month.JANUARY, result.getMonth());

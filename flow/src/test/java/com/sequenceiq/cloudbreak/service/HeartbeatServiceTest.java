@@ -477,6 +477,11 @@ public class HeartbeatServiceTest {
             public <T> T testWith1SecDelayMax3Times(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
+
+            @Override
+            public <T> T testWithoutRetry(Supplier<T> action) throws ActionFailedException {
+                return null;
+            }
         }
 
         Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
@@ -529,6 +534,11 @@ public class HeartbeatServiceTest {
 
             @Override
             public <T> T testWith1SecDelayMax3Times(Supplier<T> action) throws ActionFailedException {
+                return null;
+            }
+
+            @Override
+            public <T> T testWithoutRetry(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
         }
