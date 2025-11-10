@@ -27,4 +27,8 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
     default Optional<String> getCACertsForEnvironment(String environmentCrn) {
         return Optional.empty();
     }
+
+    default Set<String> getSdxDomains(String environmentCrn) {
+        return Set.of();
+    }
 }
