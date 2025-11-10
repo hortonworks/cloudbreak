@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrustSetupCommandsResponse extends TrustSetupCommandsBase {
-    @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.AD_TRUST_SETUP_COMMANDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.AD_TRUST_SETUP_COMMANDS, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ActiveDirectoryTrustSetupCommands activeDirectoryCommands;
 
     @Schema(description = FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions.BASE_CLUSTER_KRB5_CONF, requiredMode = Schema.RequiredMode.REQUIRED)
