@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Instance;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -263,6 +265,21 @@ public class PdlSdxDescribeServiceTest {
         Optional<String> result = underTest.getCACertsForEnvironment(ENV_CRN);
 
         assertEquals("certecske", result.get());
+    }
+
+    @Test
+    void testGetSdxDomains() {
+        Instance i1 = new Instance();
+        i1.setDiscoveryFQDN("i1.custom.domain.com");
+        Instance i2 = new Instance();
+        i2.setDiscoveryFQDN("i2.custom.domain.com");
+        Instance i3 = new Instance();
+        i3.setDiscoveryFQDN("i3.other.custom.domain.com");
+        when(privateDatalakeDetails.getInstances()).thenReturn(List.of(i1, i2, i3));
+
+        Set<String> result = underTest.getSdxDomains(ENV_CRN);
+
+        assertEquals(Set.of("custom.domain.com", "other.custom.domain.com"), result);
     }
 
 }

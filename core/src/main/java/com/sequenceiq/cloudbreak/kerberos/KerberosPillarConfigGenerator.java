@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.common.api.type.EnvironmentType;
@@ -43,6 +45,9 @@ public class KerberosPillarConfigGenerator {
 
     @Inject
     private FreeipaClientService freeipaClient;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     public Map<String, SaltPillarProperties> createKerberosPillar(KerberosConfig kerberosConfig, DetailedEnvironmentResponse detailedEnvironmentResponse)
             throws IOException {
@@ -79,9 +84,12 @@ public class KerberosPillarConfigGenerator {
                     .map(DescribeFreeIpaResponse::getTrust)
                     .orElse(null);
             if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
+                Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(detailedEnvironmentResponse.getCrn());
                 LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}", trustResponse.getRealm());
-                return Map.of("realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),
-                                "domain", trustResponse.getRealm().toLowerCase(Locale.ROOT));
+                return Map.of(
+                        "realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),
+                        "domain", trustResponse.getRealm().toLowerCase(Locale.ROOT),
+                        "sdxDomains", sdxDomains);
             } else {
                 LOGGER.warn("Could not find trust realm for crn: {}", detailedEnvironmentResponse.getCrn());
                 return Map.of();

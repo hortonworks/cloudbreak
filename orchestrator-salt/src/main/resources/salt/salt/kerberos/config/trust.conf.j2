@@ -1,9 +1,16 @@
 {%- set trust_realm = salt['pillar.get']('trust:realm') %}
 {%- set trust_domain = salt['pillar.get']('trust:domain') %}
+{%- set sdx_domains = salt['pillar.get']('trust:sdxDomains') %}
 {%- set kerberos_realm = salt['pillar.get']('kerberos:realm')|upper %}
 [domain_realm]
 .{{ trust_domain }} = {{ trust_realm }}
 {{ trust_domain }} = {{ trust_realm }}
+{% for sdx_domain in sdx_domains %}
+{% if sdx_domain != trust_domain %}
+.{{ sdx_domain }} = {{ trust_realm }}
+{{ sdx_domain }} = {{ trust_realm }}
+{% endif %}
+{% endfor %}
 
 [capaths]
 {{ trust_realm }} = {

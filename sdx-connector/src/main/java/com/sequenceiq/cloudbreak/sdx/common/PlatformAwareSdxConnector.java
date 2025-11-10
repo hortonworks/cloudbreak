@@ -134,6 +134,10 @@ public class PlatformAwareSdxConnector {
         return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getCACertsForEnvironment(environmentCrn);
     }
 
+    public Set<String> getSdxDomains(String environmentCrn) {
+        return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxDomains(environmentCrn);
+    }
+
     public void validateIfOtherPlatformsHasSdx(String environmentCrn, TargetPlatform currentPlatform) {
         Set<TargetPlatform> platforms = platformDependentSdxDescribeServices.entrySet().stream()
                 .filter(entry -> !currentPlatform.equals(entry.getKey()))
