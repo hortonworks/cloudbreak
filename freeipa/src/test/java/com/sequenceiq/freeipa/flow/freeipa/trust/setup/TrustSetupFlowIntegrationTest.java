@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -76,8 +75,7 @@ import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultType;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.ConfigureDnsServerService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.PrepareIpaServerService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -152,10 +150,7 @@ class TrustSetupFlowIntegrationTest {
     private TrustSetupValidationService validationService;
 
     @MockBean
-    private PrepareIpaServerService prepareIpaServerService;
-
-    @MockBean
-    private ConfigureDnsServerService configureDnsServerService;
+    private ActiveDirectoryTrustService activeDirectoryTrustService;
 
     @MockBean
     private CrossRealmTrustService crossRealmTrustService;
@@ -190,6 +185,7 @@ class TrustSetupFlowIntegrationTest {
     void testPrepareCrossRealmTrustWhenSuccessful() {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults()
                 .addTaskResult(new TaskResult(TaskResultType.INFO, "Success", Map.of())));
+        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -257,9 +253,10 @@ class TrustSetupFlowIntegrationTest {
     }
 
     @Test
-    public void testPrepareIpaServerFails() throws CloudbreakOrchestratorFailedException {
+    public void testPrepareIpaServerFails() throws Exception {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
-        doThrow(new CloudbreakServiceException("Prepare IPA server failed")).when(prepareIpaServerService).prepareIpaServer(STACK_ID);
+        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        doThrow(new CloudbreakServiceException("Prepare IPA server failed")).when(activeDirectoryTrustService).prepare(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -283,7 +280,8 @@ class TrustSetupFlowIntegrationTest {
     @Test
     public void testConfigureDnsServerFails() throws Exception {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
-        doThrow(new CloudbreakServiceException("Configure DNS server failed")).when(configureDnsServerService).configureDnsServer(STACK_ID);
+        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        doThrow(new CloudbreakServiceException("Configure DNS server failed")).when(activeDirectoryTrustService).configureDns(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 

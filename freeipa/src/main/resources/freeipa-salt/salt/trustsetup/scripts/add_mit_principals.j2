@@ -1,0 +1,22 @@
+{%- set freeipa_realm = salt['pillar.get']('freeipa:trust_setup:freeipa_realm') %}
+{%- set kdc_realm = salt['pillar.get']('freeipa:trust_setup:kdc_realm') %}
+{%- set trust_secret = salt['pillar.get']('freeipa:trust_setup:trust_secret') %}
+#!/bin/bash
+
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
+echo $FPW | kinit {{ salt['pillar.get']('sssd-ipa:principal') }}
+
+kadmin.local -x ipa-setup-override-restrictions -q "add_principal -requires_preauth -e aes256-cts,aes128-cts -pw \"{{ trust_secret }}\" krbtgt/{{ freeipa_realm | upper }}@{{ kdc_realm | upper }}" 2>&1 | tee -a /var/log/prepare-mit-kdc.log
+
+rc1=${PIPESTATUS[0]}
+
+kadmin.local -x ipa-setup-override-restrictions -q "add_principal -requires_preauth -e aes256-cts,aes128-cts -pw \"{{ trust_secret }}\" krbtgt/{{ kdc_realm | upper }}@{{ freeipa_realm | upper }}" 2>&1 | tee -a /var/log/prepare-mit-kdc.log
+
+rc2=${PIPESTATUS[0]}
+
+exit $(( rc1 != 0 ? rc1 : rc2 ))

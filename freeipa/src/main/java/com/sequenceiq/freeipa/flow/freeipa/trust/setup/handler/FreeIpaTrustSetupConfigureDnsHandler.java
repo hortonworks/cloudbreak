@@ -14,7 +14,8 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupConfigureDnsFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupConfigureDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupConfigureDnsSuccess;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.ConfigureDnsServerService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
 
 @Component
 public class FreeIpaTrustSetupConfigureDnsHandler extends ExceptionCatcherEventHandler<FreeIpaTrustSetupConfigureDnsRequest> {
@@ -22,7 +23,7 @@ public class FreeIpaTrustSetupConfigureDnsHandler extends ExceptionCatcherEventH
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaTrustSetupConfigureDnsHandler.class);
 
     @Inject
-    private ConfigureDnsServerService configureDnsServerService;
+    private CrossRealmTrustService crossRealmTrustService;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustSetupConfigureDnsRequest> event) {
@@ -33,7 +34,8 @@ public class FreeIpaTrustSetupConfigureDnsHandler extends ExceptionCatcherEventH
     protected Selectable doAccept(HandlerEvent<FreeIpaTrustSetupConfigureDnsRequest> event) {
         FreeIpaTrustSetupConfigureDnsRequest request = event.getData();
         try {
-            configureDnsServerService.configureDnsServer(request.getResourceId());
+            TrustSetupSteps trustSetupSteps = crossRealmTrustService.getTrustSetupSteps(request.getResourceId());
+            trustSetupSteps.configureDns(request.getResourceId());
             return new FreeIpaTrustSetupConfigureDnsSuccess(request.getResourceId());
         } catch (Exception e) {
             return new FreeIpaTrustSetupConfigureDnsFailed(request.getResourceId(), e);

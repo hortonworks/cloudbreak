@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation;
 
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_FQDN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
@@ -55,7 +55,7 @@ public class TrustStatusValidationService {
             OrchestratorStateParams stateParams =
                     saltStateParamsService.createStateParams(stack, TRUST_STATUS_VALIDATION_STATE, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
             stateParams.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
-                    KDC_DOMAIN, crossRealmTrust.getKdcFqdn(),
+                    KDC_FQDN, crossRealmTrust.getKdcFqdn(),
                     KDC_REALM, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT)))));
             hostOrchestrator.runOrchestratorState(stateParams);
         } catch (Exception ex) {

@@ -1,4 +1,4 @@
-{%- set kdc_domain = salt['pillar.get']('freeipa:trust_setup:kdc_domain', '') -%}
+{%- set kdc_fqdn = salt['pillar.get']('freeipa:trust_setup:kdc_fqdn', '') -%}
 {%- set kdc_ip = salt['pillar.get']('freeipa:trust_setup:kdc_ip', '') -%}
 {%- set dns_ip = salt['pillar.get']('freeipa:trust_setup:dns_ip', '') -%}
 /opt/salt/scripts/ad_reverse_dns_validation.sh:
@@ -12,7 +12,7 @@
 
 run-ad-reverse-dns-validation:
   cmd.run:
-    - name: /opt/salt/scripts/ad_reverse_dns_validation.sh {{ kdc_domain }} {{ dns_ip }} {{ kdc_ip }}
+    - name: /opt/salt/scripts/ad_reverse_dns_validation.sh {{ kdc_fqdn }} {{ dns_ip }} {{ kdc_ip }}
     - failhard: True
     - require:
       - file: /opt/salt/scripts/ad_reverse_dns_validation.sh

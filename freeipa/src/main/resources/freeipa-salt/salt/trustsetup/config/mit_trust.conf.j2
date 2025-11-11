@@ -1,0 +1,12 @@
+{%- set freeipa_realm = salt['pillar.get']('freeipa:trust_setup:freeipa_realm') %}
+{%- set kdc_fqdn = salt['pillar.get']('freeipa:trust_setup:kdc_fqdn') %}
+{%- set kdc_realm = salt['pillar.get']('freeipa:trust_setup:kdc_realm') %}
+[realms]
+ {{ kdc_realm | upper }} = {
+  kdc = {{ kdc_fqdn }}
+  admin_server = {{ kdc_fqdn }}
+ }
+
+[domain_realm]
+ .{{ kdc_realm }} = {{ kdc_realm | upper }}
+ {{ kdc_realm }} = {{ kdc_realm | upper }}

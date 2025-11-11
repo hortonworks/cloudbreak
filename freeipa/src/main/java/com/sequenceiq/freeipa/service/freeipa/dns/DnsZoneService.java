@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
+import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -38,6 +42,10 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class DnsZoneService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DnsZoneService.class);
+
+    private static final String FORWARD_POLICY = "only";
+
+    private static final String IPV4_REVERSE_LOOKUP_DOMAIN = "in-addr.arpa.";
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -177,6 +185,33 @@ public class DnsZoneService {
         LOGGER.info("Adding reverse zones: {}", reverseDnsZoneForCidrs);
         for (String reverseZone : reverseDnsZoneForCidrs) {
             FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException(() -> client.addDnsZone(reverseZone), null);
+        }
+    }
+
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public void addDnsForwardZone(FreeIpaClientFactory ipaClientFactory, Stack stack, CrossRealmTrust crossRealmTrust) throws Exception {
+        FreeIpaClient freeIpaClient = ipaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack);
+
+        String realm = crossRealmTrust.getKdcRealm();
+        LOGGER.info("Add forward DNS zone [{}]", realm);
+        addOrModifyDnsForwardZone(freeIpaClient, realm, crossRealmTrust.getDnsIp());
+        LOGGER.info("Add forward DNS zone [{}]", IPV4_REVERSE_LOOKUP_DOMAIN);
+        addOrModifyDnsForwardZone(freeIpaClient, IPV4_REVERSE_LOOKUP_DOMAIN, crossRealmTrust.getDnsIp());
+    }
+
+    private void addOrModifyDnsForwardZone(FreeIpaClient freeIpaClient, String forwardZone, String dnsIp) throws FreeIpaClientException {
+        Optional<DnsZone> dnsZone = ignoreNotFoundExceptionWithValue(() -> freeIpaClient.showForwardDnsZone(forwardZone), null);
+        if (dnsZone.isEmpty()) {
+            LOGGER.debug("Forward DNS zone does not exists [{}], add it now", forwardZone);
+            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.addForwardDnsZone(forwardZone, dnsIp, FORWARD_POLICY), null);
+            LOGGER.debug("Forward DNS zone [{}] added", forwardZone);
+        } else {
+            LOGGER.debug("Forward DNS zone [{}] already exists, modify it now", forwardZone);
+            ignoreEmptyModOrDuplicateException(() -> freeIpaClient.modForwardDnsZone(forwardZone, dnsIp, FORWARD_POLICY), null);
+            LOGGER.debug("Forward DNS zone [{}] modified", forwardZone);
         }
     }
 }

@@ -63,7 +63,8 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.AddTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.MitKdcTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -135,9 +136,6 @@ class FinishTrustSetupFlowIntegrationTest {
     private NodeValidator nodeValidator;
 
     @MockBean
-    private AddTrustService addTrustService;
-
-    @MockBean
     private CrossRealmTrustService crossRealmTrustService;
 
     @Inject
@@ -148,6 +146,12 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
+
+    @MockBean
+    private MitKdcTrustService mitKdcTrustService;
+
+    @MockBean
+    private ActiveDirectoryTrustService activeDirectoryTrustService;
 
     private Stack stack;
 
@@ -171,6 +175,7 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @Test
     void testFinishCrossRealmTrustWhenSuccessful() {
+        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -187,7 +192,8 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @Test
     public void testAddTrustFails() throws FreeIpaClientException {
-        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(addTrustService).addAndValidateTrust(STACK_ID);
+        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(activeDirectoryTrustService).addTrust(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 

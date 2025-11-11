@@ -523,6 +523,14 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnsforwardzone_add", flags, params, DnsZone.class).getResult();
     }
 
+    public DnsZone modForwardDnsZone(String forwardZone, String forwarderIp, String forwardPolicy) throws FreeIpaClientException {
+        List<Object> flags = List.of(forwardZone);
+        Map<String, Object> params = Map.of(
+                "idnsforwarders", forwarderIp,
+                "idnsforwardpolicy", forwardPolicy);
+        return (DnsZone) invoke("dnsforwardzone_mod", flags, params, DnsZone.class).getResult();
+    }
+
     public RPCResponse<Object> deleteForwardDnsZone(String forwardZone) throws FreeIpaClientException {
         List<Object> flags = List.of(forwardZone);
         Map<String, Object> params = Map.of();

@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation;
 
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
-import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_DOMAIN;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_FQDN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.MAX_RETRY_ON_ERROR;
@@ -67,7 +67,7 @@ class TrustStatusValidationServiceTest {
 
         assertThat(result.hasError()).isFalse();
         assertThat(((Map<String, Map<String, String>>) stateParams.getStateParams().get(FREEIPA)).get(TRUST_SETUP_PILLAR))
-                .containsEntry(KDC_DOMAIN, "ad.hybrid.cloudera.org")
+                .containsEntry(KDC_FQDN, "ad.hybrid.cloudera.org")
                 .containsEntry(KDC_REALM, "HYBRID.CLOUDERA.ORG");
         verify(hostOrchestrator).runOrchestratorState(stateParams);
     }

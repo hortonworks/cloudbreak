@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.service.crossrealm;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.repository.CrossRealmTrustRepository;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
 
 @Component
 public class CrossRealmTrustService {
@@ -19,6 +25,16 @@ public class CrossRealmTrustService {
 
     @Inject
     private CrossRealmTrustRepository crossRealmTrustRepository;
+
+    @Inject
+    private List<TrustSetupSteps> trustSetupStepsList;
+
+    private final Map<KdcType, TrustSetupSteps> trustSetupStepsMap = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        trustSetupStepsList.forEach(steps -> trustSetupStepsMap.put(steps.kdcType(), steps));
+    }
 
     public CrossRealmTrust getByStackId(Long stackId) {
         return crossRealmTrustRepository.findByStackId(stackId)
@@ -46,5 +62,12 @@ public class CrossRealmTrustService {
 
     public CrossRealmTrust save(CrossRealmTrust crossRealmTrust) {
         return crossRealmTrustRepository.save(crossRealmTrust);
+    }
+
+    public TrustSetupSteps getTrustSetupSteps(Long stackId) {
+        CrossRealmTrust crossRealmTrust = getByStackId(stackId);
+        return trustSetupStepsMap.computeIfAbsent(crossRealmTrust.getKdcType(), kdcType -> {
+            throw new IllegalArgumentException("Unsupported KDC type: " + kdcType);
+        });
     }
 }
