@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTrustCommandsDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -83,8 +84,11 @@ public class HybridTrustTests extends AbstractE2ETest {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withTelemetryDisabled()
+                    .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode()
                     .withTrustSetup()
@@ -142,7 +146,7 @@ public class HybridTrustTests extends AbstractE2ETest {
             validateCommandResult(deleteBatchCommand, deleteScriptResult, false);
         } catch (IOException ex) {
             String errorMessage = String.format("Exception during ssh to active directory %s", activeDirectoryIp);
-            LOGGER.error(errorMessage, activeDirectoryIp, ex);
+            LOGGER.error(errorMessage, ex);
             throw new TestFailException(errorMessage, ex);
         }
     }
