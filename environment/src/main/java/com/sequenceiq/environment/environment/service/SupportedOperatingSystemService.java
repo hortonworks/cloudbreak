@@ -45,11 +45,12 @@ public class SupportedOperatingSystemService {
             LOGGER.info("List of supported OS for gov cloud response: {}", response);
         } else {
             boolean rhel9Enabled = entitlementService.isEntitledToUseOS(accountId, RHEL9);
+            boolean preferRhel9Enabled = entitlementService.isRhel9ImagePreferred(accountId);
             List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values())
                     .filter(os -> !RHEL9.equals(os) || rhel9Enabled)
                     .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
-            response.setDefaultOs(RHEL8.getOs());
+            response.setDefaultOs(preferRhel9Enabled ? RHEL9.getOs() : RHEL8.getOs());
             LOGGER.info("List of supported OS. response: {}", response);
         }
 
