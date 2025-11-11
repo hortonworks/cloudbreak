@@ -102,7 +102,7 @@ public class ComputeResourceService {
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = Lists.reverse(resourceBuilders.compute(variant));
         int poolSize = context.getResourceBuilderPoolSize();
         LOGGER.info("Pool size: {} for delete resources", poolSize);
-        try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+        try (ExecutorService executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new MdcVirtualThreadFactory())) {
             for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
                 LOGGER.debug("Delete resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
@@ -111,9 +111,9 @@ public class ComputeResourceService {
                     ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(
                             new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
                     futures.add(executor.submit(deletionCallable));
-                    results.addAll(getDeletedResourcesOrFail(futures, hardFail));
                 }
                 // wait for builder type to finish before starting the next one
+                LOGGER.debug("Waiting for {} resources to be deleted with builder {}", futures.size(), builder.getClass().getSimpleName());
                 results.addAll(getDeletedResourcesOrFail(futures, hardFail));
             }
         }
@@ -163,7 +163,7 @@ public class ComputeResourceService {
         int poolSize = context.getResourceBuilderPoolSize();
         LOGGER.info("Pool size: {} for stop / start", poolSize);
 
-        try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+        try (ExecutorService executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new MdcVirtualThreadFactory())) {
             for (ComputeResourceBuilder<ResourceBuilderContext> builder : instanceBuilders) {
                 LOGGER.debug("Stop / start resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
@@ -280,7 +280,7 @@ public class ComputeResourceService {
                 Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
             int poolSize = ctx.getResourceBuilderPoolSize();
             LOGGER.info("Pool size: {} for resource creation", poolSize);
-            try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+            try (ExecutorService executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<>(), new MdcVirtualThreadFactory())) {
                 List<Future<List<CloudResourceStatus>>> futures = new ArrayList<>();
                 for (Group group : groups) {
@@ -349,7 +349,7 @@ public class ComputeResourceService {
             List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
             int poolSize = ctx.getResourceBuilderPoolSize();
             LOGGER.info("Pool size: {} for update resources", poolSize);
-            try (ExecutorService executor = new ThreadPoolExecutor(0, poolSize, 0L, TimeUnit.MILLISECONDS,
+            try (ExecutorService executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<>(), new MdcVirtualThreadFactory())) {
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : Lists.reverse(builders)) {
                     LOGGER.debug("Update resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
