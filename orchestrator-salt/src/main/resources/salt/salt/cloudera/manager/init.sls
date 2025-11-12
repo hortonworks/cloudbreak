@@ -43,9 +43,9 @@ setup_tls_chipher:
 {% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
 tls_advanced_control:
   file.append:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - text: setsettings TLS_ADVANCED_CONTROL {{ tlsAdvancedControl }}
-    - unless: grep "TLS_ADVANCED_CONTROL" /etc/cloudera-scm-server/cm.settings
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_FF_TLS_ADVANCED_CONTROL=true"
+    - unless: grep "export CMF_FF_TLS_ADVANCED_CONTROL=true" /etc/default/cloudera-scm-server
 
 setup_ciphers:
   file.append:
