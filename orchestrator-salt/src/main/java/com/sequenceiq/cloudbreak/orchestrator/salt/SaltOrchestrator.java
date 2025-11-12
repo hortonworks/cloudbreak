@@ -1767,7 +1767,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 user, primaryGateway.getPrivateAddress(), gatewayTargets);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
-            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command);
+            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command,
+                    RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
             return passwordExpiryDatesOnHosts.values().stream()
                     .map(String::trim)
                     .map(SaltOrchestrator::parseDateString)
