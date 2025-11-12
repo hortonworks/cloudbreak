@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -40,6 +44,8 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.delegate.ClusterViewDelegate;
 import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -81,6 +87,9 @@ class StackDtoServiceTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
     private StackParametersService stackParametersService;
@@ -215,5 +224,48 @@ class StackDtoServiceTest {
 
         verifyNoInteractions(resourceService);
         assertEquals("crn1", result.getFirst().getResourceCrn());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenEnabled() {
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, true));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
+        assertTrue(computeMonitoringEnabled.isPresent());
+        assertTrue(computeMonitoringEnabled.get());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenDisabled() {
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, false));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
+        assertTrue(computeMonitoringEnabled.isPresent());
+        assertFalse(computeMonitoringEnabled.get());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenTelemetryNull() {
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(false, false));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
+        assertFalse(computeMonitoringEnabled.isPresent());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenExceptionThrown() {
+        when(componentConfigProviderService.getTelemetry(any())).thenThrow(new InternalServerErrorException("something"));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
+        assertFalse(computeMonitoringEnabled.isPresent());
+    }
+
+    private Telemetry getTelemetry(boolean telemetryPresent, boolean monitoringEnabled) {
+        Telemetry telemetry = null;
+        if (telemetryPresent) {
+            telemetry = new Telemetry();
+            if (monitoringEnabled) {
+                Monitoring monitoring = new Monitoring();
+                monitoring.setRemoteWriteUrl("something");
+                telemetry.setMonitoring(monitoring);
+            }
+        }
+        return telemetry;
     }
 }

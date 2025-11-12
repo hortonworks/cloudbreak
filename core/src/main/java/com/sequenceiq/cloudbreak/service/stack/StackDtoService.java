@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -61,9 +63,10 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
-public class StackDtoService implements LocalPaasSdxService {
+public class StackDtoService implements LocalPaasSdxService, MonitoringEnablementService<StackDto> {
 
     private static final Logger LOGGER = getLogger(StackDtoService.class);
 
@@ -106,10 +109,27 @@ public class StackDtoService implements LocalPaasSdxService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
     private StackParametersService stackParametersService;
 
     @Inject
     private RuntimeVersionService runtimeVersionService;
+
+    @Override
+    public Optional<Boolean> computeMonitoringEnabled(StackDto entity) {
+        try {
+            Telemetry telemetry = componentConfigProviderService.getTelemetry(entity.getId());
+            if (telemetry != null) {
+                return Optional.of(telemetry.isComputeMonitoringEnabled());
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
 
     public StackDto getByNameOrCrn(NameOrCrn nameOrCrn, String accountId, StackType stackType,
             ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig config, boolean withResources) {

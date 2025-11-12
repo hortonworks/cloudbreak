@@ -311,6 +311,13 @@ public class SaltStateService {
         return minionStatus;
     }
 
+    public MinionStatusSaltResponse collectNodeStatusWithLimitedRetry(SaltConnector sc) {
+        MinionStatusSaltResponse minionStatus = measure(() -> sc.runWithLimitedRetry("manage.status", RUNNER, MinionStatusSaltResponse.class), LOGGER,
+                "Manage status call took {}ms");
+        LOGGER.debug("Minion status: {}", minionStatus);
+        return minionStatus;
+    }
+
     @Retryable(retryFor = WebApplicationException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public PingResponse ping(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");

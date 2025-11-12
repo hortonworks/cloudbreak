@@ -99,7 +99,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -147,7 +146,7 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider, MonitoringEnablementService<StackDto> {
+public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(
             CloudConstants.AWS,
@@ -1205,20 +1204,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public int getNotUpgradedStackCount(String envCrn, Collection<Tunnel> upgradableTunnels) {
         return stackRepository.getNotUpgradedStackCount(envCrn, upgradableTunnels);
-    }
-
-    @Override
-    public Optional<Boolean> computeMonitoringEnabled(StackDto entity) {
-        try {
-            Telemetry telemetry = componentConfigProviderService.getTelemetry(entity.getId());
-            if (telemetry != null) {
-                return Optional.of(telemetry.isComputeMonitoringEnabled());
-            } else {
-                return Optional.empty();
-            }
-        } catch (Exception e) {
-            return Optional.empty();
-        }
     }
 
     public String findEnvironmentCrnByStackId(Long id) {

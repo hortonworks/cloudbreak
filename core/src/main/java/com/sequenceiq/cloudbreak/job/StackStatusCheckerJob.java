@@ -49,8 +49,11 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -59,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.ServiceStatusCheckerLogLocationDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
@@ -156,9 +158,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private StatusCheckerJobService jobService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private StackDtoService stackDtoService;
 
     @Inject
@@ -206,6 +205,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Value("${cb.statuschecker.skip.window.minutes:2}")
     private Integer skipWindow;
 
+    @Inject
+    private SaltSyncService saltSyncService;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
@@ -238,12 +243,20 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 }
                 if (stackStatus != null) {
                     metricsClient.processStackStatus(stack.getResourceCrn(), stack.getCloudPlatform(), stackStatus.name(), stackStatus.ordinal(),
-                            stackService.computeMonitoringEnabled(stack));
+                            stackDtoService.computeMonitoringEnabled(stack));
                 }
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
         }
+    }
+
+    private void checkSalt(StackDto stackDto) {
+        // will be used when CB-31130 is implemented
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        Optional<Set<String>> minions = saltSyncService.checkSaltMinions(gatewayConfig);
+        minions.ifPresentOrElse(failedMinions -> LOGGER.debug("Salt minions check failed for: {}", failedMinions),
+                () -> LOGGER.debug("Salt minions check: OK"));
     }
 
     private boolean shouldSkipStatusCheck() {

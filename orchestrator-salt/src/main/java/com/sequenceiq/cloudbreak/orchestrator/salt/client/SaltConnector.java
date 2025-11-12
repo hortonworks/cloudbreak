@@ -89,7 +89,8 @@ public class SaltConnector implements Closeable {
     private final String hostname;
 
     public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
-            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout) {
+            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout,
+            OptionalInt proxyTimeoutMs) {
         try {
             Collection<Object> saltFilters = Collections.emptySet();
             if (saltLoggerEnabled) {
@@ -104,13 +105,19 @@ public class SaltConnector implements Closeable {
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
                     .register(HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd))
                     .register(new DisableProxyAuthFeature())
-                    .register(new SetProxyTimeoutFeature(PROXY_TIMEOUT));
+                    .register(new SetProxyTimeoutFeature(proxyTimeoutMs.orElse(PROXY_TIMEOUT)));
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
             this.saltErrorResolver = saltErrorResolver;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
+    }
+
+    public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
+            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout) {
+        this(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled, connectTimeoutMs, readTimeout,
+                OptionalInt.of(PROXY_TIMEOUT));
     }
 
     public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean debug, boolean saltLogger,
@@ -160,6 +167,11 @@ public class SaltConnector implements Closeable {
 
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T run(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(null, fun, clientType, clazz, arg);
+    }
+
+    @Retryable(maxAttempts = 2, value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 500))
+    public <T> T runWithLimitedRetry(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         return run(null, fun, clientType, clazz, arg);
     }
 

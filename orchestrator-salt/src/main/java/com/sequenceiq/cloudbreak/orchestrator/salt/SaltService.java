@@ -47,6 +47,13 @@ public class SaltService {
         return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled);
     }
 
+    public SaltConnector createSaltConnectorWithCustomTimeout(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeoutMs, int proxyTimeoutMs) {
+        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
+                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
+        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
+                connectTimeoutMs, OptionalInt.of(readTimeoutMs), OptionalInt.of(proxyTimeoutMs));
+    }
+
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeout) {
         SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
                 gatewayConfig.getClientCert(), gatewayConfig.getClientKey());

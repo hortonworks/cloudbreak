@@ -67,7 +67,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
@@ -139,6 +141,12 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private MetricsClient metricsClient;
+
+    @MockBean
+    private SaltSyncService saltSyncService;
+
+    @MockBean
+    private GatewayConfigService gatewayConfigService;
 
     @MockBean
     private StackViewService stackViewService;

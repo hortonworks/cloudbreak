@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDeta
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,8 +36,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-
-import jakarta.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,8 +117,6 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.common.api.telemetry.model.Monitoring;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ProviderSyncState;
@@ -713,49 +708,6 @@ class StackServiceTest {
 
         List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);
         assertEquals(1, statuses.size());
-    }
-
-    @Test
-    void testGetComputeMonitoringFlagWhenEnabled() {
-        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, true));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
-        assertTrue(computeMonitoringEnabled.isPresent());
-        assertTrue(computeMonitoringEnabled.get());
-    }
-
-    @Test
-    void testGetComputeMonitoringFlagWhenDisabled() {
-        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, false));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
-        assertTrue(computeMonitoringEnabled.isPresent());
-        assertFalse(computeMonitoringEnabled.get());
-    }
-
-    @Test
-    void testGetComputeMonitoringFlagWhenTelemetryNull() {
-        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(false, false));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
-        assertFalse(computeMonitoringEnabled.isPresent());
-    }
-
-    @Test
-    void testGetComputeMonitoringFlagWhenExceptionThrown() {
-        when(componentConfigProviderService.getTelemetry(any())).thenThrow(new InternalServerErrorException("something"));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
-        assertFalse(computeMonitoringEnabled.isPresent());
-    }
-
-    private Telemetry getTelemetry(boolean telemetryPresent, boolean monitoringEnabled) {
-        Telemetry telemetry = null;
-        if (telemetryPresent) {
-            telemetry = new Telemetry();
-            if (monitoringEnabled) {
-                Monitoring monitoring = new Monitoring();
-                monitoring.setRemoteWriteUrl("something");
-                telemetry.setMonitoring(monitoring);
-            }
-        }
-        return telemetry;
     }
 
     private Set<StackIdView> findClusterConnectedToDatalake(
