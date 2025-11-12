@@ -3,8 +3,7 @@ tests:
   - name: "aws_longrunning_e2e_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXAwsMigrationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesModificationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDeleteAndAddVolumesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXAwsMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxVolumesVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests

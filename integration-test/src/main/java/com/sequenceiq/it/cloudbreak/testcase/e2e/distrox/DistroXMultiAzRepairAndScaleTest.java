@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -27,19 +29,82 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXMultiAzScaleTest extends PreconditionSdxE2ETest {
+public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableResourcesTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMultiAzScaleTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMultiAzRepairAndScaleTest.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private DistroxUtil distroxUtil;
+
+    @Override
+    protected void setupClass(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultUser(testContext);
+        initializeDefaultBlueprints(testContext);
+        createDefaultCredential(testContext);
+        initializeAzureMarketplaceTermsPolicy(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+        testContext.given(SdxInternalTestDto.class)
+                .withCloudStorage()
+                .withEnableMultiAz(true)
+                .when(sdxTestClient.createInternal())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            when = " valid MultiAz Datahub is provisioned, scaled up and scaled down",
+            then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
+    public void testDistroXMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {
+        String datahubKey = "multiAzDistroxRepair";
+
+        testContext.given(DistroXTestDto.class)
+                .given(datahubKey, DistroXTestDto.class)
+                .withEnableMultiAz(true)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withStorageOptimizedInstancetype()
+                        .build())
+                .when(distroXTestClient.create(), key(datahubKey))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    validateMultiAz(testDto, tc, "provisioning");
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
+                    Map<String, String> instancesToDelete = distroxUtil.getInstancesWithAz(testDto, client, MASTER.getName());
+                    cloudFunctionality.deleteInstances(testDto.getName(), instancesToDelete);
+                    return testDto;
+                })
+                .awaitForHostGroup(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .when(distroXTestClient.repair(MASTER))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    validateMultiAz(testDto, tc, "repair");
+                    return testDto;
+                })
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -50,12 +115,7 @@ public class DistroXMultiAzScaleTest extends PreconditionSdxE2ETest {
         String datahubKey = "multiAzDistroxScale";
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
 
-        testContext.given(SdxInternalTestDto.class)
-                .withCloudStorage()
-                .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
-                .given(DistroXTestDto.class)
+        testContext.given(DistroXTestDto.class)
                 .given(datahubKey, DistroXTestDto.class)
                 .withEnableMultiAz(true)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)

@@ -65,7 +65,7 @@ public class DistroXAwsMultiAzRepairTest extends PreconditionSdxE2ETest {
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "valid MultiAz Datahub is provisioned, worker nodes scaled up and scaled down",
             then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
-    public void testDistroXMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {
+    public void testDistroXAwsMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {
         String datahubKey = "multiAzDistroxRepair";
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
 

@@ -24,9 +24,8 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzScaleTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzUpgradeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzRepairTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzUpgradeTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzRepairTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzRepairAndScaleTest

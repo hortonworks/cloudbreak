@@ -29,6 +29,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 @Component
 public class TagsUtil {
 
+    public static final String REUSABLE_RESOURCE_TAG_PREFIX = "reusable-for";
+
     static final String TEST_NAME_TAG = "test-name";
 
     static final String MISSING_TEST_NAME_TAG_MESSAGE =
@@ -184,6 +186,9 @@ public class TagsUtil {
 
             if (tagValue.equalsIgnoreCase(testName)) {
                 Log.log(LOGGER, format(" PASSED:: [%s] tag value: [%s] equals [%s] test method name! ", tagKey, tagValue, testName));
+            } else if (tagValue.contains(REUSABLE_RESOURCE_TAG_PREFIX)) {
+                Log.log(LOGGER, format(" PASSED:: [%s] tag value: [%s] contains [%s], skipping exact match with [%s] test method name! ",
+                        tagKey, tagValue, REUSABLE_RESOURCE_TAG_PREFIX, testName));
             } else {
                 String message = format(TEST_NAME_TAG_VALUE_FAILURE_PATTERN, tagKey, tagValue, testName);
                 LOGGER.error(message);

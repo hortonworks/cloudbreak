@@ -636,6 +636,15 @@ public abstract class TestContext implements ApplicationContextAware {
         return get(clss.getSimpleName());
     }
 
+    public <T extends CloudbreakTestDto> T getInstanceOf(Class<T> clss) {
+        return resourceNames.values().stream()
+                .filter(clss::isInstance)
+                .map(clss::cast)
+                .filter(e -> e.getName() != null)
+                .findFirst()
+                .orElse(null);
+    }
+
     public <O> O getSelected(String key) {
         return (O) selections.get(key);
     }

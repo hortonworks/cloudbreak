@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
@@ -33,7 +33,7 @@ import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXEphemeralTests extends AbstractE2ETest {
+public class DistroXEphemeralTests extends AbstractE2EWithReusableResourcesTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXEphemeralTests.class);
 
@@ -53,7 +53,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Override
-    protected void setupTest(TestContext testContext) {
+    protected void setupClass(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
@@ -63,8 +63,6 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
         String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
         createAndWaitDatalakeWithRuntime(testContext, currentUpgradeRuntimeVersion);
-        createDataHubWithStorageOptimizedInstancesAndWithRuntime(testContext, currentUpgradeRuntimeVersion);
-        waitForDatahubCreation(testContext);
     }
 
     private void createAndWaitDatalakeWithRuntime(TestContext testContext, String currentRuntimeVersion) {
@@ -78,7 +76,9 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void createDataHubWithStorageOptimizedInstancesAndWithRuntime(TestContext testContext, String currentRuntimeVersion) {
+    private void createAndWaitDataHubWithStorageOptimizedInstancesAndWithUpgradeRuntime(TestContext testContext) {
+        boolean govCloud = testContext.getCloudProvider().getGovCloud();
+        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
         testContext
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentRuntimeVersion))
@@ -88,6 +88,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
                         .build())
                 .when(distroXTestClient.create())
                 .validate();
+        waitForDatahubCreation(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -97,6 +98,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
             when = "stopping and starting the cluster",
             then = "clusters is available, device mount point are checked, and after stopping and starting the cluster ephemeral store handling checked again")
     public void testStopStartDistroXWithEphemeralTemporaryStorage(TestContext testContext) {
+        createAndWaitDataHubWithStorageOptimizedInstancesAndWithUpgradeRuntime(testContext);
         testContext
                 .given(DistroXTestDto.class)
                 .await(STACK_AVAILABLE)
@@ -130,6 +132,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
             then = "DistroX recovery should be successful, the cluster should be up and running"
     )
     public void testEphemeralDistroXMasterRepairWithTerminatedEC2Instances(TestContext testContext) {
+        createAndWaitDataHubWithStorageOptimizedInstancesAndWithUpgradeRuntime(testContext);
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
@@ -171,6 +174,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
     @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXEphemeralUpgrade(TestContext testContext) {
+        createAndWaitDataHubWithStorageOptimizedInstancesAndWithUpgradeRuntime(testContext);
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
         testContext
                 .given(DistroXUpgradeTestDto.class)
