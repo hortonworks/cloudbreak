@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import java.util.List;
@@ -16,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -44,6 +44,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
+        createEnvironment(testContext, Boolean.FALSE, 1);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -54,13 +55,17 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                     "AND the stack is rebuilt",
             then = "the stack should be available AND deletable")
     public void testRebuildv2FreeIpaWithTwoInstances(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
         int instanceCountByGroup = 2;
 
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                    .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                    .withTelemetry("telemetry")
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     validateAz(testDto.getRequest().getEnvironmentCrn(), client, tc);
                     return testDto;
@@ -69,7 +74,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                 .await(Status.REBUILD_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)
                 .await(COMPLETED)
-                .given(FreeIpaTestDto.class)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     validateAz(testDto.getRequest().getEnvironmentCrn(), client, tc);
@@ -77,10 +82,10 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                 })
                 .given(FreeIpaUpscaleTestDto.class)
                 .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
-                .when(freeIpaTestClient.upscale())
+                .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .given(FreeIpaOperationStatusTestDto.class).withOperationId(testContext.get(FreeIpaUpscaleTestDto.class).getOperationId())
                 .await(COMPLETED)
-                .given(FreeIpaTestDto.class)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> {
                     validateAz(testDto.getRequest().getEnvironmentCrn(), client, tc);
                     return testDto;

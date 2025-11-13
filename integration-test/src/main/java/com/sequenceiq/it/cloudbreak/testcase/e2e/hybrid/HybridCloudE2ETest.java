@@ -129,7 +129,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                     .withDefaultSecurityGroup(hybridCloudSecurityGroupID)
                     .withFreeIpaOs(yarnCloudProvider.getOsType().getOs());
-        createDefaultEnvironment(testContext);
+        createEnvironmentWithFreeIpa(testContext);
 
         testContext
                 .given(YARN_IMAGE_CATALOG, ImageCatalogTestDto.class, CHILD_CLOUD_PLATFORM)
