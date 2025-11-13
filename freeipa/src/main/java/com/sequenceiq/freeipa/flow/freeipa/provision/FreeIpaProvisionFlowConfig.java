@@ -47,24 +47,54 @@ public class FreeIpaProvisionFlowConfig extends StackStatusFinalizerAbstractFlow
     private static final FlowEdgeConfig<FreeIpaProvisionState, FreeIpaProvisionEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, FREEIPA_PROVISION_FAILED_STATE, FREEIPA_PROVISION_FAILURE_HANDLED_EVENT);
 
-    private static final List<Transition<FreeIpaProvisionState, FreeIpaProvisionEvent>> TRANSITIONS =
-            new Builder<FreeIpaProvisionState, FreeIpaProvisionEvent>().defaultFailureEvent(FREEIPA_PROVISION_FAILED_EVENT)
-            .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(FREEIPA_PROVISION_EVENT).noFailureEvent()
-            .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
-                    .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(COLLECTING_HOST_METADATA_STATE).to(ORCHESTRATOR_CONFIG_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
-                    .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
-            .from(ORCHESTRATOR_CONFIG_STATE).to(VALIDATING_CLOUD_STORAGE_STATE).event(ORCHESTRATOR_CONFIG_FINISHED_EVENT)
-                    .failureEvent(ORCHESTRATOR_CONFIG_FAILED_EVENT)
-            .from(VALIDATING_CLOUD_STORAGE_STATE).to(FREEIPA_INSTALL_STATE).event(VALIDATING_CLOUD_STORAGE_FINISHED_EVENT)
-                    .failureEvent(VALIDATING_CLOUD_STORAGE_FAILED_EVENT)
-            .from(FREEIPA_INSTALL_STATE).to(CLUSTERPROXY_UPDATE_REGISTRATION_STATE)
-                    .event(FREEIPA_INSTALL_FINISHED_EVENT).failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
-            .from(CLUSTERPROXY_UPDATE_REGISTRATION_STATE).to(FREEIPA_POST_INSTALL_STATE)
-                    .event(CLUSTER_PROXY_UPDATE_REGISTRATION_FINISHED_EVENT).failureEvent(CLUSTER_PROXY_UPDATE_REGISTRATION_FAILED_EVENT)
-            .from(FREEIPA_POST_INSTALL_STATE).to(FREEIPA_PROVISION_FINISHED_STATE).event(FREEIPA_POST_INSTALL_FINISHED_EVENT)
-                    .failureEvent(FREEIPA_POST_INSTALL_FAILED_EVENT)
-            .from(FREEIPA_PROVISION_FINISHED_STATE).to(FINAL_STATE).event(FREEIPA_PROVISION_FINISHED_EVENT).defaultFailureEvent()
+    private static final List<Transition<FreeIpaProvisionState, FreeIpaProvisionEvent>> TRANSITIONS
+            = new Builder<FreeIpaProvisionState, FreeIpaProvisionEvent>().defaultFailureEvent(FREEIPA_PROVISION_FAILED_EVENT)
+
+            .from(INIT_STATE)
+            .to(BOOTSTRAPPING_MACHINES_STATE)
+            .event(FREEIPA_PROVISION_EVENT)
+            .noFailureEvent()
+
+            .from(BOOTSTRAPPING_MACHINES_STATE)
+            .to(COLLECTING_HOST_METADATA_STATE)
+            .event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
+            .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
+
+            .from(COLLECTING_HOST_METADATA_STATE)
+            .to(ORCHESTRATOR_CONFIG_STATE)
+            .event(HOST_METADATASETUP_FINISHED_EVENT)
+            .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
+
+            .from(ORCHESTRATOR_CONFIG_STATE)
+            .to(VALIDATING_CLOUD_STORAGE_STATE)
+            .event(ORCHESTRATOR_CONFIG_FINISHED_EVENT)
+            .failureEvent(ORCHESTRATOR_CONFIG_FAILED_EVENT)
+
+            .from(VALIDATING_CLOUD_STORAGE_STATE)
+            .to(FREEIPA_INSTALL_STATE)
+            .event(VALIDATING_CLOUD_STORAGE_FINISHED_EVENT)
+            .failureEvent(VALIDATING_CLOUD_STORAGE_FAILED_EVENT)
+
+            .from(FREEIPA_INSTALL_STATE)
+            .to(CLUSTERPROXY_UPDATE_REGISTRATION_STATE)
+            .event(FREEIPA_INSTALL_FINISHED_EVENT)
+            .failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
+
+            .from(CLUSTERPROXY_UPDATE_REGISTRATION_STATE)
+            .to(FREEIPA_POST_INSTALL_STATE)
+            .event(CLUSTER_PROXY_UPDATE_REGISTRATION_FINISHED_EVENT)
+            .failureEvent(CLUSTER_PROXY_UPDATE_REGISTRATION_FAILED_EVENT)
+
+            .from(FREEIPA_POST_INSTALL_STATE)
+            .to(FREEIPA_PROVISION_FINISHED_STATE)
+            .event(FREEIPA_POST_INSTALL_FINISHED_EVENT)
+            .failureEvent(FREEIPA_POST_INSTALL_FAILED_EVENT)
+
+            .from(FREEIPA_PROVISION_FINISHED_STATE)
+            .to(FINAL_STATE)
+            .event(FREEIPA_PROVISION_FINISHED_EVENT)
+            .defaultFailureEvent()
+
             .build();
 
     public FreeIpaProvisionFlowConfig() {

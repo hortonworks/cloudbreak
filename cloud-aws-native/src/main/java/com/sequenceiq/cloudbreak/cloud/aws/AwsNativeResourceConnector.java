@@ -63,8 +63,7 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     private AwsCommonDiskUpdateService awsCommonDiskUpdateService;
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         LOGGER.info("Launching elastic load balancers");
         CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
         String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
@@ -74,8 +73,7 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         LOGGER.debug("Updating loadbalancer");
         return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
     }

@@ -49,6 +49,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
@@ -64,6 +65,9 @@ class UpgradeFlowEventChainFactoryTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private FreeIpaLoadBalancerProvisionCondition loadBalancerProvisionCondition;
 
     @InjectMocks
     private UpgradeFlowEventChainFactory underTest;

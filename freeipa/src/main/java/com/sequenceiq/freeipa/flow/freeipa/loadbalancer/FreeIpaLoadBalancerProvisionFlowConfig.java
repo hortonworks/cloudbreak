@@ -33,23 +33,34 @@ public class FreeIpaLoadBalancerProvisionFlowConfig
     private static final FlowEdgeConfig<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, PROVISION_FAILED_STATE, FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT);
 
-    private static final List<Transition<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>> TRANSITIONS =
-            new Builder<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>()
-                    .defaultFailureEvent(FAILURE_EVENT)
+    private static final List<Transition<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>> TRANSITIONS
+            = new Builder<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent>().defaultFailureEvent(FAILURE_EVENT)
 
-            .from(INIT_STATE).to(CREATE_CONFIGURATION_STATE).event(FREEIPA_LOAD_BALANCER_CREATION_EVENT).noFailureEvent()
+            .from(INIT_STATE)
+            .to(CREATE_CONFIGURATION_STATE)
+            .event(FREEIPA_LOAD_BALANCER_CREATION_EVENT)
+            .noFailureEvent()
 
-            .from(CREATE_CONFIGURATION_STATE).to(PROVISIONING_STATE).event(CONFIGURATION_CREATION_FINISHED_EVENT)
-                    .defaultFailureEvent()
+            .from(CREATE_CONFIGURATION_STATE)
+            .to(PROVISIONING_STATE)
+            .event(CONFIGURATION_CREATION_FINISHED_EVENT)
+            .defaultFailureEvent()
 
-            .from(PROVISIONING_STATE).to(METADATA_COLLECTION_STATE).event(PROVISION_FINISHED_EVENT)
-                    .defaultFailureEvent()
+            .from(PROVISIONING_STATE)
+            .to(METADATA_COLLECTION_STATE)
+            .event(PROVISION_FINISHED_EVENT)
+            .defaultFailureEvent()
 
-            .from(METADATA_COLLECTION_STATE).to(LOAD_BALANCER_CREATION_FINISHED_STATE).event(METADATA_COLLECTION_FINISHED_EVENT)
-                    .defaultFailureEvent()
+            .from(METADATA_COLLECTION_STATE)
+            .to(LOAD_BALANCER_CREATION_FINISHED_STATE)
+            .event(METADATA_COLLECTION_FINISHED_EVENT)
+            .defaultFailureEvent()
 
-            .from(LOAD_BALANCER_CREATION_FINISHED_STATE).to(FINAL_STATE).event(FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT)
-                    .defaultFailureEvent()
+            .from(LOAD_BALANCER_CREATION_FINISHED_STATE)
+            .to(FINAL_STATE)
+            .event(FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT)
+            .defaultFailureEvent()
+
             .build();
 
     public FreeIpaLoadBalancerProvisionFlowConfig() {

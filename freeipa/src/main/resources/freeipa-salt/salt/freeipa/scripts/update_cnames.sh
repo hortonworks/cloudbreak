@@ -30,11 +30,16 @@ addCname() {
   CNAME=$2
 
   set +e
-  ipa dnsrecord-show "$DOMAIN" "$NAME"
+  RESULT=$(ipa dnsrecord-show "$DOMAIN" "$NAME")
   EXISTS=$?
   set -e
   if [ $EXISTS -ne 0 ]; then
     ipa dnsrecord-add "$DOMAIN" "$NAME" "--cname-rec=$CNAME"
+  else
+    if [[ ! ($RESULT =~ $CNAME) ]]; then
+      echo "Modifying $NAME CNAME record to $CNAME"
+      ipa dnsrecord-mod "$DOMAIN" "$NAME" "--cname-rec=$CNAME"
+    fi
   fi
 }
 

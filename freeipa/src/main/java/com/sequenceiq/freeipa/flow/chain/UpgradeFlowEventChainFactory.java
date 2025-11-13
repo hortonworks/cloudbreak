@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED;
+import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_MASTER_KEY_PAIR;
@@ -11,7 +12,6 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PA
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -51,9 +52,11 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
@@ -76,6 +79,9 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Inject
     private StackService stackService;
 
+    @Inject
+    private FreeIpaLoadBalancerProvisionCondition loadBalancerProvisionCondition;
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.UPGRADE_TRIGGER_EVENT;
@@ -84,25 +90,104 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        getSaltSecretRotationTriggerEvent(event.getResourceId()).ifPresent(flowEventChain::add);
-        flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
-        if (event.getVerticalScaleRequest() != null) {
-            flowEventChain.add(new FreeIpaVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getResourceId(),
-                    event.getVerticalScaleRequest()).withOperationId(event.getOperationId()));
-        }
-        flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
-                .withOperationId(event.getOperationId()));
 
-        int nonPrimaryGwInstanceCount = event.getInstanceIds().size();
-        int instanceCountForUpscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT + 1, MAX_NODE_COUNT_FOR_UPSCALE);
-        int instanceCountForDownscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT, MAX_NODE_COUNT_FOR_DOWNSCALE);
-        Set<String> groupNames = instanceGroupService.findGroupNamesByStackId(event.getResourceId());
-        flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
-        flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
-        flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, true, event.getOperationId()));
-        flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
+        flowEventChain.addAll(createInitEvent(event));
+        flowEventChain.addAll(createLoadBalancerCreationFlowIfNecessary(event));
+        flowEventChain.addAll(createSaltSecretRotationFlow(event.getResourceId()));
+        flowEventChain.addAll(createSaltUpdateNonChainedFlow(event));
+        flowEventChain.addAll(createFreeIpaVerticalScalingFlowIfNecessary(event));
+        flowEventChain.addAll(createImageChangeFlow(event));
+        flowEventChain.addAll(createScaleEventsAndChangePrimaryGatewayFlow(event));
+        flowEventChain.addAll(createScaleEventsForNonPrimaryGatewayFlow(event));
+        flowEventChain.addAll(createSaltUpdateChainedFlow(event));
+        flowEventChain.addAll(createFinalizeFlow(event));
+
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private List<Selectable> createInitEvent(UpgradeEvent event) {
+        return List.of(
+                new FlowChainInitPayload(
+                        getName(),
+                        event.getResourceId(),
+                        event.accepted()
+                )
+        );
+    }
+
+    private List<Selectable> createFinalizeFlow(UpgradeEvent event) {
+        return List.of(
+                new FlowChainFinalizePayload(
+                        getName(),
+                        event.getResourceId(),
+                        event.accepted()
+                )
+        );
+    }
+
+    private Set<String> groupNames(UpgradeEvent event) {
+        return instanceGroupService.findGroupNamesByStackId(event.getResourceId());
+    }
+
+    private int instanceCountForDownscale(UpgradeEvent event) {
+        return Math.min(getInstanceSize(event) + PRIMARY_GW_INSTANCE_COUNT, MAX_NODE_COUNT_FOR_DOWNSCALE);
+    }
+
+    private int instanceCountForUpscale(UpgradeEvent event) {
+        return Math.min(getInstanceSize(event) + PRIMARY_GW_INSTANCE_COUNT + 1, MAX_NODE_COUNT_FOR_UPSCALE);
+    }
+
+    private int getInstanceSize(UpgradeEvent event) {
+        return event.getInstanceIds().size();
+    }
+
+    private List<Selectable> createFreeIpaVerticalScalingFlowIfNecessary(UpgradeEvent event) {
+        if (event.getVerticalScaleRequest() != null) {
+            return List.of(
+                    new FreeIpaVerticalScalingTriggerEvent(
+                            STACK_VERTICALSCALE_EVENT.event(),
+                            event.getResourceId(),
+                            event.getVerticalScaleRequest())
+                            .withOperationId(event.getOperationId())
+                    );
+        } else {
+            return List.of();
+        }
+    }
+
+    private List<Selectable> createSaltUpdateChainedFlow(UpgradeEvent event) {
+        return List.of(
+                new SaltUpdateTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        true,
+                        true,
+                        event.getOperationId()
+                )
+        );
+    }
+
+    private List<Selectable> createImageChangeFlow(UpgradeEvent event) {
+        return List.of(
+                new ImageChangeEvent(
+                        IMAGE_CHANGE_EVENT.event(),
+                        event.getResourceId(),
+                        event.getImageSettingsRequest()
+                )
+                .withOperationId(event.getOperationId())
+        );
+    }
+
+    private List<Selectable> createSaltUpdateNonChainedFlow(UpgradeEvent event) {
+        return List.of(
+                new SaltUpdateTriggerEvent(
+                        event.getResourceId(),
+                        event.accepted(),
+                        true,
+                        false,
+                        event.getOperationId()
+                )
+        );
     }
 
     @Override
@@ -118,8 +203,10 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         }
     }
 
-    private List<Selectable> createScaleEventsAndChangePgw(UpgradeEvent event, int instanceCountForUpscale, int instanceCountForDownscale,
-            Set<String> groupNames) {
+    private List<Selectable> createScaleEventsAndChangePrimaryGatewayFlow(UpgradeEvent event) {
+        int instanceCountForUpscale = instanceCountForUpscale(event);
+        int instanceCountForDownscale = instanceCountForDownscale(event);
+        Set<String> groupNames = groupNames(event);
         LOGGER.debug("Add events for primary gateway with id: [{}]", event.getPrimareGwInstanceId());
         List<Selectable> events = new ArrayList<>(PRIMARY_GW_EVENT_COUNT);
         ArrayList<String> instanceIdToDownscale = Lists.newArrayList(event.getPrimareGwInstanceId());
@@ -140,11 +227,13 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         return events;
     }
 
-    private List<Selectable> createScaleEventsForNonPgwInstances(UpgradeEvent event, int instanceCountForUpscale, int instanceCountForDownscale,
-            Set<String> groupNames) {
+    private List<Selectable> createScaleEventsForNonPrimaryGatewayFlow(UpgradeEvent event) {
+        int instanceCountForUpscale = instanceCountForUpscale(event);
+        int instanceCountForDownscale = instanceCountForDownscale(event);
+        Set<String> groupNames = groupNames(event);
         LOGGER.debug("Add scale events for non primary gateway instances. upscale count: [{}] downscale count: [{}]",
                 instanceCountForUpscale, instanceCountForDownscale);
-        List<Selectable> events = new ArrayList<>(event.getInstanceIds().size() * 2);
+        List<Selectable> events = new ArrayList<>(getInstanceSize(event) * 2);
         Set<String> instanceIds = CollectionUtils.isEmpty(event.getInstancesOnOldImage()) ? event.getInstanceIds()
                 : event.getInstanceIds().stream().filter(instanceId -> event.getInstancesOnOldImage().contains(instanceId)).collect(Collectors.toSet());
         if (!instanceIds.isEmpty()) {
@@ -175,7 +264,15 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         }
     }
 
-    public Optional<SecretRotationFlowChainTriggerEvent> getSaltSecretRotationTriggerEvent(Long stackId) {
+    private List<Selectable> createLoadBalancerCreationFlowIfNecessary(UpgradeEvent event) {
+        List<Selectable> events = new ArrayList<>();
+        if (loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId(), FreeIpaLoadBalancerType.INTERNAL_NLB)) {
+            events.add(new StackEvent(FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId()));
+        }
+        return events;
+    }
+
+    public List<Selectable> createSaltSecretRotationFlow(Long stackId) {
         List<SecretType> secretTypes = new ArrayList<>();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
@@ -188,11 +285,19 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         }
         if (secretTypes.isEmpty()) {
             LOGGER.info("Secret rotation is not required.");
-            return Optional.empty();
+            return List.of();
         } else {
             LOGGER.info("Secret rotation flow chain trigger added with secret types: {}", secretTypes);
-            return Optional.of(new SecretRotationFlowChainTriggerEvent(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
-                    stackId, stack.getEnvironmentCrn(), secretTypes, null, null));
+            return List.of(
+                    new SecretRotationFlowChainTriggerEvent(
+                        EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
+                        stackId,
+                        stack.getEnvironmentCrn(),
+                        secretTypes,
+                        null,
+                        null
+                    )
+            );
         }
     }
 }

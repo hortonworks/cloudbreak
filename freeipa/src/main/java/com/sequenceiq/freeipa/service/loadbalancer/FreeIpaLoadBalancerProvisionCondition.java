@@ -54,24 +54,29 @@ public class FreeIpaLoadBalancerProvisionCondition {
     private CachedEnvironmentClientService environmentService;
 
     public boolean loadBalancerProvisionEnabled(Long stackId, FreeIpaLoadBalancerType loadBalancer) {
-        boolean loadBalancerProvisionEntitled = isLoadBalancerProvisionEntitled();
         Stack stack = stackService.getStackById(stackId);
-        String platformVariant = stack.getPlatformvariant();
-        boolean platformVariantSupported = supportedVariants.contains(platformVariant);
-        boolean healthAgentVersionSupported = isHealthAgentVersionSupported(stack);
-
-        if (platformVariantSupported
-                && (loadBalancerProvisionEntitled || isHybridEnvironment(stack.getEnvironmentCrn()))
-                && healthAgentVersionSupported
-                && loadBalancer == INTERNAL_NLB) {
+        if (loadBalancerCreationSupported(stack) && internalLoadbalancerRequested(loadBalancer)) {
             LOGGER.debug("Load balancer creation is enabled for FreeIPA cluster.");
             return true;
         } else {
             LOGGER.debug("Load balancer creation is not enabled for FreeIPA cluster. Entitlement enabled: {}, Platform variant supported: {}, " +
                             "Health agent version supported: {}, LoadBalancer creation in request: {}",
-                    loadBalancerProvisionEntitled, platformVariantSupported, healthAgentVersionSupported, loadBalancer);
+                    isLoadBalancerProvisionEntitled(),
+                    supportedVariants.contains(stack.getPlatformvariant()),
+                    isHealthAgentVersionSupported(stack),
+                    loadBalancer);
             return false;
         }
+    }
+
+    private boolean internalLoadbalancerRequested(FreeIpaLoadBalancerType loadBalancer) {
+        return loadBalancer == INTERNAL_NLB;
+    }
+
+    private boolean loadBalancerCreationSupported(Stack stack) {
+        return supportedVariants.contains(stack.getPlatformvariant())
+                && (isLoadBalancerProvisionEntitled() || isHybridEnvironment(stack.getEnvironmentCrn()))
+                && isHealthAgentVersionSupported(stack);
     }
 
     private boolean isHealthAgentVersionSupported(Stack stack) {
