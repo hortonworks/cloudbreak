@@ -53,7 +53,11 @@ public class CmTemplateValidator implements BlueprintValidator {
             new ServiceRoleRestriction("KUDU", "KUDU_TSERVER", nodecountAtLeast(1),
                     "Minimal number of hosts with KUDU_TSERVER role is 1."),
             new ServiceRoleRestriction("KAFKA", "KAFKA_BROKER", nodecountAtLeast(3),
-                    "Minimal number of hosts with KAFKA_BROKER role is 3.")
+                    "Minimal number of hosts with KAFKA_BROKER role is 3."),
+            new ServiceRoleRestriction("KAFKA", "KRAFT", nodecountAtLeast(3),
+                    "Minimal number of hosts with KRAFT role is 3."),
+            new ServiceRoleRestriction("KAFKA", "KRAFT", (nodecount) -> (nodecount % 2) == 1,
+                    "Number of KRAFT nodes should be an odd number.")
     );
 
     @Inject

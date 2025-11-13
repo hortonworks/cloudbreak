@@ -451,6 +451,64 @@ public class CmTemplateValidatorTest {
                 "Based on the template this role is present on the nifi host group(s).", badRequestException.getMessage());
     }
 
+    @Test
+    public void testValidationIfKraftNotAllowedToScaleToLessThanThreeNodes() {
+        Blueprint blueprint = readBlueprint("input/cdp-streaming-small.bp");
+
+        String hostGroup = "kraft";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.3.1");
+
+        InstanceGroup master = new InstanceGroup();
+        master.setGroupName("master");
+        master.setInstanceMetaData(Set.of(new InstanceMetaData()));
+        InstanceGroup kraft = new InstanceGroup();
+        kraft.setGroupName("kraft");
+        kraft.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup broker = new InstanceGroup();
+        broker.setGroupName("broker");
+        broker.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup coreBroker = new InstanceGroup();
+        coreBroker.setGroupName("core_broker");
+        coreBroker.setInstanceMetaData(Set.of(new InstanceMetaData()));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1,
+                        List.of(master, kraft, broker, coreBroker), false));
+        assertEquals("Scaling adjustment is not allowed. KRAFT role has restriction on node count but after the scaling operation 2 host(s) " +
+                "would not fulfill this restriction: Minimal number of hosts with KRAFT role is 3. " +
+                "Based on the template this role is present on the kraft host group(s).", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidationIfKraftNotAllowedToScaleToEvenNumber() {
+        Blueprint blueprint = readBlueprint("input/cdp-streaming-small.bp");
+
+        String hostGroup = "kraft";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.3.1");
+
+        InstanceGroup master = new InstanceGroup();
+        master.setGroupName("master");
+        master.setInstanceMetaData(Set.of(new InstanceMetaData()));
+        InstanceGroup kraft = new InstanceGroup();
+        kraft.setGroupName("kraft");
+        kraft.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup broker = new InstanceGroup();
+        broker.setGroupName("broker");
+        broker.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup coreBroker = new InstanceGroup();
+        coreBroker.setGroupName("core_broker");
+        coreBroker.setInstanceMetaData(Set.of(new InstanceMetaData()));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 1,
+                        List.of(master, kraft, broker, coreBroker), false));
+        assertEquals("Scaling adjustment is not allowed. KRAFT role has restriction on node count but after the scaling operation 4 host(s) " +
+                "would not fulfill this restriction: Number of KRAFT nodes should be an odd number. " +
+                "Based on the template this role is present on the kraft host group(s).", badRequestException.getMessage());
+    }
+
     private Blueprint readBlueprint(String file) {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly(file));
