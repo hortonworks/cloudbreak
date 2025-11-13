@@ -1240,8 +1240,6 @@ public final class NotificationAdminGrpc {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getPublishEmailTargetedEventMethod(), getCallOptions(), request);
     }
-<<<<<<< HEAD
-=======
 
     /**
      * <pre>
@@ -1252,7 +1250,6 @@ public final class NotificationAdminGrpc {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getGetPublishedEventStatusMethod(), getCallOptions(), request);
     }
->>>>>>> 97727b4b88 (CB-30441 EDH integration about the sent notifications + DTO refactors and updates)
   }
 
   /**

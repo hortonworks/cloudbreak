@@ -29,20 +29,15 @@ out/
 curl_config_admin_user
 *.suml
 startit.sh
-integration-test/integcb/*.log
 integration-test/integcb/docker-containers
 integration-test/build/
 integration-test/test-output/
 integration-test/src/main/resources/testsuites/custom/
-owners_log/
-stacks_log/
-suites_log/
-redbeams-log/*.log
-test-output/
+*_log/
+*-output/
 gradle/wrapper/
 */build
-cloudbreak-shell.log
-cloud-break.cbh
+*.cbh
 *.class
 .java-version
 .attach*
@@ -54,23 +49,8 @@ cloud-break.cbh
 *.war
 *.ear
 
-hs_err_pid
-node_modules/
-npm-debug.log
-start-local.sh
-cloudbreak.log
-cloudbreak-log/*.log
-mock-thunderhead-log/*.log
-autoscale-log/
-environment-log/
-core/cloudbreak-log/
-freeipa-log/
-sdx-log/
 .deps/
 ImageId*
 resource_names_*.json
 
 *.log
-
-environment-public-api-client/src/generated/
-servicediscovery-api-client/src/generated/
