@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINALIZE_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
@@ -86,7 +88,7 @@ public class MigrateZookeeperToKraftRollbackActions {
                 LOGGER.debug("Rollback Zookeeper to KRaft migration finished state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_FINISHED_EVENT);
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_FINISHED_EVENT);
                 String nextEvent = FINALIZE_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftRollbackEvent(nextEvent, payload.getResourceId()));
             }
@@ -115,14 +117,15 @@ public class MigrateZookeeperToKraftRollbackActions {
                 LOGGER.error("Rollback Zookeeper to KRaft migration failed: {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_FAILED_EVENT);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_FAILED_EVENT,
+                        payload.getException().getMessage());
                 sendEvent(context, HANDLED_FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(MigrateZookeeperToKraftRollbackFailureEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
-                return null;
+                return new MigrateZookeeperToKraftRollbackFailureEvent(payload.getResourceId(), ex);
             }
         };
     }

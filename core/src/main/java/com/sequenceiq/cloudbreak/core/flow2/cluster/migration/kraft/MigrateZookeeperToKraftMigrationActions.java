@@ -61,6 +61,7 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka broker nodes state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
                 String nextEvent = RESTART_KAFKA_BROKER_NODES_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
             }
@@ -114,7 +115,6 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.debug("Migrate Zookeeper to KRaft state started {}", payload);
                 Long stackId = payload.getResourceId();
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event();
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT);
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
             }
 
@@ -168,14 +168,14 @@ public class MigrateZookeeperToKraftMigrationActions {
                 LOGGER.error("Migrate Zookeeper to KRaft failed: {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FAILED_EVENT);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FAILED_EVENT, payload.getException().getMessage());
                 sendEvent(context, HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(MigrateZookeeperToKraftFailureEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
-                return null;
+                return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
             }
         };
     }

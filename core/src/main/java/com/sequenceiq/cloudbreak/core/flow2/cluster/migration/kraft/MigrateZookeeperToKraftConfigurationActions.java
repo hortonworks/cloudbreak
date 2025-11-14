@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -113,15 +114,15 @@ public class MigrateZookeeperToKraftConfigurationActions {
                     Map<Object, Object> variables) {
                 LOGGER.error("Migrate Zookeeper to KRaft configuration failed: {}", payload);
                 Long stackId = payload.getResourceId();
-                stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FAILED_EVENT);
+                stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FAILED_EVENT, payload.getException().getMessage());
                 sendEvent(context, HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(MigrateZookeeperToKraftConfigurationFailureEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
-                return null;
+                return new MigrateZookeeperToKraftConfigurationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }

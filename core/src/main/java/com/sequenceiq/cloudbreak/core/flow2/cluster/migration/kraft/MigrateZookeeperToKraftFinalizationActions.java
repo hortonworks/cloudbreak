@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
@@ -86,7 +88,7 @@ public class MigrateZookeeperToKraftFinalizationActions {
                 LOGGER.debug("Finalize Zookeeper to KRaft migration finished state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_FINISHED_EVENT);
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_FINISHED_EVENT);
                 String nextEvent = FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftFinalizationEvent(nextEvent, payload.getResourceId()));
             }
@@ -115,14 +117,15 @@ public class MigrateZookeeperToKraftFinalizationActions {
                 LOGGER.error("Finalize Zookeeper to KRaft migration failed: {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED);
-                flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT,
+                        payload.getException().getMessage());
                 sendEvent(context, HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(MigrateZookeeperToKraftFinalizationFailureEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
-                return null;
+                return new MigrateZookeeperToKraftFinalizationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }

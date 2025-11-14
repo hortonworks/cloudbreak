@@ -1,9 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_STARTED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -79,6 +86,8 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(stackUpdater).updateStackStatus(event.getResourceId(), ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS);
+        verify(flowMessageService).fireEventAndLog(event.getResourceId(), UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_STARTED_EVENT);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         assertEquals(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event(), captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
@@ -97,6 +106,7 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(stackUpdater).updateStackStatus(event.getResourceId(), ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         String selector = FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event();
         assertEquals(selector, captor.getValue());
@@ -105,7 +115,8 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
 
     @Test
     void testMigrateZookeeperToKraftConfigurationFailed() throws Exception {
-        RuntimeException error = new RuntimeException("error");
+        String errorMessage = "Error KRaft migration configuration";
+        RuntimeException error = new RuntimeException(errorMessage);
         MigrateZookeeperToKraftConfigurationFailureEvent event = new MigrateZookeeperToKraftConfigurationFailureEvent(STACK_ID, error);
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
@@ -116,6 +127,9 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(stackUpdater).updateStackStatus(event.getResourceId(), ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED);
+        verify(flowMessageService).fireEventAndLog(event.getResourceId(), UPDATE_FAILED.name(), CLUSTER_KRAFT_MIGRATION_FAILED_EVENT,
+                errorMessage);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         assertEquals(HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event(), captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
