@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhClusterComponentName;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
@@ -93,7 +94,12 @@ public class CentralCDHVersionCoordinator {
     }
 
     public String calculateStackVersionFromClusterComponents(Set<ClusterComponent> components) {
-        ClouderaManagerProduct runtime = clusterComponentConfigProvider.getComponent(components, ClouderaManagerProduct.class, cdhProductDetails());
+        ClouderaManagerProduct runtime = clusterComponentConfigProvider.getComponent(
+                components,
+                ClouderaManagerProduct.class,
+                cdhProductDetails(),
+                cdhClusterComponentName()
+        );
         return getRuntimeVersionFromClouderaManagerProduct(runtime);
     }
 

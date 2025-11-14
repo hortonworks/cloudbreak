@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhClusterComponentName;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
@@ -115,6 +120,63 @@ class ClusterComponentConfigProviderTest {
     void testDeleteComponentByClusterIdAndComponentType() {
         underTest.deleteClusterComponentByClusterIdAndComponentType(CLUSTER_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
         verify(componentRepository).deleteComponentByClusterIdAndComponentType(CLUSTER_ID, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
+    }
+
+    @Test
+    void getComponentShouldReturnAttributeWhenComponentAndAttributeArePresent() {
+        ClouderaManagerProduct cdh = underTest.getComponent(
+                Set.of(createClusterComponent("CDH")),
+                ClouderaManagerProduct.class,
+                cdhProductDetails(),
+                cdhClusterComponentName()
+        );
+
+        assertNotNull(cdh);
+        assertTrue(cdh.getName().equals(cdhClusterComponentName()));
+    }
+
+    @Test
+    void getComponentShouldReturnAttributeWhenComponentAndAttributeArePresentAndMoreComponentIsThere() {
+        ClouderaManagerProduct cdh = underTest.getComponent(
+                Set.of(
+                        createClusterComponent("EFM"),
+                        createClusterComponent("FLINK"),
+                        createClusterComponent("CDH")
+                ),
+                ClouderaManagerProduct.class,
+                cdhProductDetails(),
+                cdhClusterComponentName()
+        );
+
+        assertNotNull(cdh);
+        assertTrue(cdh.getName().equals(cdhClusterComponentName()));
+    }
+
+    @Test
+    void getComponentShouldReturnAttributeWhenComponentAndAttributeAreNOTPresentAndMoreComponentIsThere() {
+        ClouderaManagerProduct cdh = underTest.getComponent(
+                Set.of(
+                        createClusterComponent("EFM"),
+                        createClusterComponent("FLINK"),
+                        createClusterComponent("NIFI")
+                ),
+                ClouderaManagerProduct.class,
+                cdhProductDetails(),
+                cdhClusterComponentName()
+        );
+
+        assertNull(cdh);
+    }
+
+    private ClusterComponent createClusterComponent(String name) {
+        String json = "{\"name\":\"%s\",\"version\":\"7.2.15-1.cdh7.2.15.p1.26792553\"," +
+                "\"parcel\":\"http://build-cache.vpc.cloudera.com/s3/build/26792553/cdh/7.x/parcels/\"}";
+        ClusterComponent clusterComponent = new ClusterComponent();
+        clusterComponent.setAttributes(new Json(String.format(json, name)));
+        clusterComponent.setName(name);
+        clusterComponent.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        clusterComponent.setCluster(new Cluster());
+        return clusterComponent;
     }
 
     private ClusterComponent createClusterComponent(Long id) {
