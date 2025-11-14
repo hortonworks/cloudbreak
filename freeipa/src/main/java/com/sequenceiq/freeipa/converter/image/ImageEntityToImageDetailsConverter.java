@@ -16,6 +16,7 @@ public class ImageEntityToImageDetailsConverter {
         imageDetails.setImageCatalogUrl(source.getImageCatalogUrl());
         imageDetails.setImageId(source.getImageId());
         imageDetails.setImageCatalogName(source.getImageCatalogName());
+        imageDetails.setImageArchitecture(source.getArchitecture());
         return imageDetails;
     }
 }

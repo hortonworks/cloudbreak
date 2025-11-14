@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.ImageDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
+import com.sequenceiq.common.model.Architecture;
 
 class StructuredEventToCDPImageDetailsConverterTest {
 
@@ -23,6 +24,8 @@ class StructuredEventToCDPImageDetailsConverterTest {
     private static final String IMAGE_CATALOG = "image catalog";
 
     private static final String IMAGE_CATALOG_URL = "image catalog url";
+
+    private static final String IMAGE_ARCHITECTURE = Architecture.X86_64.getName().toLowerCase();
 
     private StructuredEventToCDPImageDetailsConverter underTest;
 
@@ -48,6 +51,7 @@ class StructuredEventToCDPImageDetailsConverterTest {
         assertEquals("", flowdetails.getOsType());
         assertEquals("", flowdetails.getImageCatalogUrl());
         assertEquals("", flowdetails.getImageName());
+        assertEquals("", flowdetails.getImageArchitecture());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
@@ -58,6 +62,7 @@ class StructuredEventToCDPImageDetailsConverterTest {
         assertEquals("", syncDetails.getOsType());
         assertEquals("", syncDetails.getImageCatalogUrl());
         assertEquals("", syncDetails.getImageName());
+        assertEquals("", flowdetails.getImageArchitecture());
     }
 
     @Test
@@ -72,6 +77,7 @@ class StructuredEventToCDPImageDetailsConverterTest {
         assertEquals(IMAGE_CATALOG_URL, flowdetails.getImageCatalogUrl());
         assertEquals(OS_TYPE, flowdetails.getOsType());
         assertEquals(IMAGE_NAME, flowdetails.getImageName());
+        assertEquals(IMAGE_ARCHITECTURE, flowdetails.getImageArchitecture());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -83,6 +89,7 @@ class StructuredEventToCDPImageDetailsConverterTest {
         assertEquals(IMAGE_CATALOG_URL, syncDetails.getImageCatalogUrl());
         assertEquals(OS_TYPE, syncDetails.getOsType());
         assertEquals(IMAGE_NAME, syncDetails.getImageName());
+        assertEquals(IMAGE_ARCHITECTURE, syncDetails.getImageArchitecture());
     }
 
     private StackDetails createStackDetails() {
@@ -98,6 +105,7 @@ class StructuredEventToCDPImageDetailsConverterTest {
         imageDetails.setImageCatalogName(IMAGE_CATALOG);
         imageDetails.setImageCatalogUrl(IMAGE_CATALOG_URL);
         imageDetails.setImageName(IMAGE_NAME);
+        imageDetails.setImageArchitecture(IMAGE_ARCHITECTURE);
         return imageDetails;
     }
 }

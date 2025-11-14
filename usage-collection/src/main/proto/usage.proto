@@ -2942,6 +2942,8 @@ message CDPImageDetails {
   string osType = 4;
   // Image name - used for Azure Marketplace usage tracking
   string imageName = 5;
+  // CPU architecture
+  string imageArchitecture = 6;
 }
 
 message CDPClusterShape {

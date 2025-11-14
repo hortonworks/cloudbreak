@@ -17,6 +17,7 @@ public class ImageToImageDetailsConverter {
         imageDetails.setImageId(source.getImageId());
         imageDetails.setImageCatalogName(source.getImageCatalogName());
         imageDetails.setPackageVersions(source.getPackageVersions());
+        imageDetails.setImageArchitecture(source.getArchitecture());
         return imageDetails;
     }
 }

@@ -26,6 +26,8 @@ public class ImageDetails implements Serializable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> packageVersions = new HashMap<>();
 
+    private String imageArchitecture;
+
     public String getImageName() {
         return imageName;
     }
@@ -82,6 +84,14 @@ public class ImageDetails implements Serializable {
         this.packageVersions = packageVersions;
     }
 
+    public String getImageArchitecture() {
+        return imageArchitecture;
+    }
+
+    public void setImageArchitecture(String imageArchitecture) {
+        this.imageArchitecture = imageArchitecture;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -91,6 +101,7 @@ public class ImageDetails implements Serializable {
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
-                + ", packageVersions=" + packageVersions + '}';
+                + ", packageVersions=" + packageVersions + '\''
+                + ", imageArchitecture=" + imageArchitecture + '}';
     }
 }

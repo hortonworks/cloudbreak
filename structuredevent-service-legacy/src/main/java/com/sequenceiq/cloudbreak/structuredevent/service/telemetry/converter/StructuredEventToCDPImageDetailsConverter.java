@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.ImageDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
+import com.sequenceiq.common.model.Architecture;
 
 @Component
 public class StructuredEventToCDPImageDetailsConverter {
@@ -47,6 +48,7 @@ public class StructuredEventToCDPImageDetailsConverter {
                 cdpImageDetails.setImageCatalogUrl(defaultIfEmpty(image.getImageCatalogUrl(), ""));
                 cdpImageDetails.setOsType(defaultIfEmpty(image.getOsType(), ""));
                 cdpImageDetails.setImageName(defaultIfEmpty(image.getImageName(), ""));
+                cdpImageDetails.setImageArchitecture(defaultIfEmpty(image.getImageArchitecture(), Architecture.X86_64.getName().toLowerCase()));
             }
         }
 
