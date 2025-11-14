@@ -102,20 +102,19 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
             ExtendedPollingResult extendedPollingResult = clusterSetupService.waitForHostsHealthy(new HashSet<>(allInstancesToCommission));
             List<InstanceMetadataView> healthyInstancesToCommision;
             if (!extendedPollingResult.isSuccess()) {
-                healthyInstancesToCommision = allInstancesToCommission.stream().filter(instanceMetadataView -> !extendedPollingResult.getFailedInstanceIds()
-                        .contains(instanceMetadataView.getPrivateId())).collect(Collectors.toList());
+                healthyInstancesToCommision = allInstancesToCommission.stream().filter(instanceMetadataView ->
+                        !extendedPollingResult.getFailedInstancePrivateIds().contains(instanceMetadataView.getPrivateId())).toList();
                 List<InstanceMetadataView> unhealthyInstances = allInstancesToCommission.stream()
-                        .filter(instanceMetadataView -> extendedPollingResult.getFailedInstanceIds()
-                        .contains(instanceMetadataView.getPrivateId())).collect(Collectors.toList());
+                        .filter(instanceMetadataView -> extendedPollingResult.getFailedInstancePrivateIds()
+                        .contains(instanceMetadataView.getPrivateId())).toList();
                 if (healthyInstancesToCommision.isEmpty()) {
-                    throw new BadRequestException(String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. " +
-                            "MissingNodes=[%s]", allInstancesToCommission.size(), allInstancesToCommission.stream().map(InstanceMetadataView::getDiscoveryFQDN)
-                            .collect(Collectors.toList())));
+                    throw new BadRequestException(String.format("Operation timed out. " +
+                            "Failed while waiting for %d nodes to move into health state. MissingNodes=[%s]",
+                            allInstancesToCommission.size(), allInstancesToCommission.stream().map(InstanceMetadataView::getDiscoveryFQDN).toList()));
                 }
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CM_TIMEOUT,
                         String.valueOf(allInstancesToCommission.size()), String.valueOf(unhealthyInstances.size()),
-                        String.join(", ", unhealthyInstances.stream()
-                                .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toList())));
+                        unhealthyInstances.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.joining(", ")));
             } else {
                 healthyInstancesToCommision = allInstancesToCommission.stream().toList();
             }

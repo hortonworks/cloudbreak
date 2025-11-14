@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.handler.rollingvs;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -18,16 +21,24 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleResult;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs.RollingVerticalScaleStatus;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleStartInstancesResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -44,6 +55,15 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
 
     @Inject
     private RollingVerticalScaleService rollingVerticalScaleService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
 
     @Override
     public String selector() {
@@ -71,12 +91,10 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
 
             List<String> successfullyStartedCloudInstance = cloudVmInstanceStatuses.stream()
                     .map(CloudVmInstanceStatus::getCloudInstance)
-                    .map(CloudInstance::getInstanceId)
-                    .collect(Collectors.toList());
+                    .map(CloudInstance::getInstanceId).toList();
             List<String> failedToRestartCloudInstance = request.getCloudInstances().stream()
                     .map(CloudInstance::getInstanceId)
-                    .filter(instanceId -> !successfullyStartedCloudInstance.contains(instanceId))
-                    .collect(Collectors.toList());
+                    .filter(instanceId -> !successfullyStartedCloudInstance.contains(instanceId)).toList();
             rollingVerticalScaleService.finishStartInstances(request.getResourceId(), successfullyStartedCloudInstance, rollingVerticalScaleResult.getGroup());
             if (!failedToRestartCloudInstance.isEmpty()) {
                 rollingVerticalScaleService.failedStartInstances(request.getResourceId(),
@@ -84,6 +102,10 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
             }
             LOGGER.info("Started instances. Result: Successfully Started:[{}]. Failed to Start:[{}]",
                     successfullyStartedCloudInstance, failedToRestartCloudInstance);
+
+            if (!successfullyStartedCloudInstance.isEmpty()) {
+                waitForServicesHealthy(request.getResourceId(), successfullyStartedCloudInstance, rollingVerticalScaleResult);
+            }
 
             return new RollingVerticalScaleStartInstancesResult(request.getResourceId(), rollingVerticalScaleResult);
         } catch (Exception e) {
@@ -100,7 +122,7 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
         try {
             List<CloudVmInstanceStatus> startedCloudInstance = connector.instances()
                     .startWithLimitedRetry(ac,  cloudResources, instancesToStart, RESTART_POLL_TIMEBOUND_MS);
-            return startedCloudInstance.stream().filter(i -> i.getStatus().equals(InstanceStatus.STARTED)).collect(Collectors.toList());
+            return startedCloudInstance.stream().filter(i -> i.getStatus().equals(InstanceStatus.STARTED)).toList();
         } catch (PollerStoppedException p) {
             LOGGER.warn("Timed out while attempting to start instances. Attempting to get states for attempted nodes", p);
             return getInstanceStatusOnStartError(connector, ac, instancesToStart, p);
@@ -114,7 +136,7 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
             List<CloudInstance> instancesToRestart, Exception originalException) {
         try {
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().checkWithoutRetry(ac, instancesToRestart);
-            return instanceStatuses.stream().filter(i -> i.getStatus().equals(InstanceStatus.STARTED)).collect(Collectors.toList());
+            return instanceStatuses.stream().filter(i -> i.getStatus().equals(InstanceStatus.STARTED)).toList();
         } catch (Exception e) {
             LOGGER.warn("Error while trying to get instance status after start failure. Propagating original error from the start attempt", e);
             String message = "Error while attempting to start instances";
@@ -139,5 +161,58 @@ public class RollingVerticalScaleStartInstancesHandler extends ExceptionCatcherE
                 result.setStatus(instanceId, RollingVerticalScaleStatus.SCALING_RESTART_FAILED);
             }
         }
+    }
+
+    private void waitForServicesHealthy(Long stackId, List<String> instanceIds, RollingVerticalScaleResult rollingVerticalScaleResult) {
+        try {
+            LOGGER.info("Waiting for services to be healthy on instances: {}", instanceIds);
+            StackDto stackDto = stackDtoService.getById(stackId);
+
+            Set<InstanceMetadataView> instancesToWaitFor = stackDto.getAllAvailableInstances().stream()
+                    .filter(instance -> instanceIds.contains(instance.getInstanceId()))
+                    .filter(instance -> instance.getDiscoveryFQDN() != null)
+                    .collect(Collectors.toSet());
+            List<String> instanceIdsToWaitFor = instancesToWaitFor.stream().map(InstanceMetadataView::getInstanceId).toList();
+
+            if (instancesToWaitFor.isEmpty()) {
+                LOGGER.warn("No instances with FQDN found for instance IDs: {}. Skipping service health check.", instanceIds);
+                return;
+            }
+
+            LOGGER.debug("Waiting for services to be healthy on {} instances: {}", instancesToWaitFor.size(),
+                    instancesToWaitFor.stream().map(InstanceMetadataView::getDiscoveryFQDN).toList());
+            rollingVerticalScaleService.waitingForServicesHealthy(stackId, rollingVerticalScaleResult.getGroup(), instanceIdsToWaitFor);
+
+            ClusterStatusService clusterStatusService = clusterApiConnectors.getConnector(stackDto).clusterStatusService();
+            Long clusterId = stackDto.getCluster() != null ? stackDto.getCluster().getId() : null;
+            Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(clusterId);
+            ExtendedPollingResult pollingResult = clusterStatusService.waitForHostHealthyServices(new HashSet<>(instancesToWaitFor), runtimeVersion);
+
+            if (!pollingResult.isSuccess()) {
+                Set<Long> failedHostIds = pollingResult.getFailedInstancePrivateIds();
+                List<String> failedInstanceIds = instancesToWaitFor.stream()
+                        .filter(instance -> failedHostIds.contains(instance.getPrivateId()))
+                        .map(InstanceMetadataView::getInstanceId).toList();
+                LOGGER.warn("Waiting for services to be healthy timed out or failed for instances: {}. Flow execution continues.",
+                        failedInstanceIds);
+                updateRollingVerticalScaleResultWithNonHealthyServices(stackId, rollingVerticalScaleResult, failedInstanceIds);
+            } else {
+                LOGGER.info("All services are healthy on instances: {}",
+                        instancesToWaitFor.stream().map(InstanceMetadataView::getDiscoveryFQDN).toList());
+                rollingVerticalScaleService.updateInstancesToServicesHealthy(stackId, instancesToWaitFor);
+            }
+        } catch (ClusterClientInitException e) {
+            LOGGER.warn("Failed to initialize cluster client for service health check. Flow execution continues.", e);
+        } catch (Exception e) {
+            LOGGER.warn("Unexpected error while waiting for services to be healthy. Flow execution continues.", e);
+        }
+    }
+
+    private void updateRollingVerticalScaleResultWithNonHealthyServices(Long stackId,
+            RollingVerticalScaleResult rollingVerticalScaleResult, List<String> failedInstanceIds) {
+        for (String instanceId : failedInstanceIds) {
+            rollingVerticalScaleResult.setStatus(instanceId, RollingVerticalScaleStatus.SERVICES_UNHEALTHY);
+        }
+        rollingVerticalScaleService.updateInstancesToServiceUnhealthy(stackId, rollingVerticalScaleResult.getGroup(), failedInstanceIds);
     }
 }

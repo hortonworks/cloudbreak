@@ -51,7 +51,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
     }
 
     @Override
-    public Set<Long> getFailedInstanceIds() {
+    public Set<Long> getFailedInstancePrivateIds() {
         return notKnownInstanceIds;
     }
 

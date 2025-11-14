@@ -96,7 +96,7 @@ public class PollingService<T> {
             return new ExtendedPollingResult.ExtendedPollingResultBuilder()
                     .timeout()
                     .withException(actual)
-                    .withPayload(statusCheckerTask.getFailedInstanceIds())
+                    .withPayload(statusCheckerTask.getFailedInstancePrivateIds())
                     .build();
         }
         LOGGER.debug("Poller exiting.");

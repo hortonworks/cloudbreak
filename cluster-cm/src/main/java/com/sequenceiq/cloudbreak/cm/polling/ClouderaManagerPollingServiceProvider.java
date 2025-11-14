@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelStatusList
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelsApiListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceDeletionListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSingleParcelActivationListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSpecificHostsServicesHealthCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStatusListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSyncApiCommandIdCheckerTask;
@@ -131,6 +132,15 @@ public class ClouderaManagerPollingServiceProvider {
         return pollApiWithTimeListener(stack, apiClient, POLL_FOR_5_MINUTES,
                 new ClouderaManagerHostServicesHealthCheckerTask(clouderaManagerApiPojoFactory, clusterEventService,
                         clouderaManagerHealthService, runtimeVersion));
+    }
+
+    public ExtendedPollingResult startPollingCmSpecificHostsServicesHealthy(StackDtoDelegate stack, ApiClient apiClient,
+            ClouderaManagerHealthService clouderaManagerHealthService, Optional<String> runtimeVersion, Set<InstanceMetadataView> hostsToCheckFor) {
+        LOGGER.debug("Waiting for Cloudera Manager services to be in a healthy status for {} specific hosts.",
+                hostsToCheckFor.size());
+        return pollApiWithTimeListener(stack, apiClient, POLL_FOR_5_MINUTES,
+                new ClouderaManagerSpecificHostsServicesHealthCheckerTask(clouderaManagerApiPojoFactory, clusterEventService,
+                        clouderaManagerHealthService, runtimeVersion, hostsToCheckFor));
     }
 
     public ExtendedPollingResult startPollingCmHostStatus(StackDtoDelegate stack, ApiClient apiClient) {

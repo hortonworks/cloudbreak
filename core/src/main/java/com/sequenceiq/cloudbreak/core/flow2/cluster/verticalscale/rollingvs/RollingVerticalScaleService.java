@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASING;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES;
@@ -14,10 +12,13 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCAL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOP_INSTANCES_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES_FAILED;
 
 import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class RollingVerticalScaleService {
@@ -136,14 +138,29 @@ public class RollingVerticalScaleService {
                 CLUSTER_VERTICALSCALE_RESTART_INSTANCES_FAILED, group, String.join(", ", instanceIds), message);
     }
 
-    public void finishVerticalScale(Long stackId, List<String> instanceIds, String group, String previousInstanceType, String targetInstanceType) {
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE);
-        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_VERTICALSCALED, group, previousInstanceType, targetInstanceType);
-    }
-
     public void failedVerticalScale(Long stackId, List<String> instanceIds, String message) {
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_FAILED, message);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(),
                 CLUSTER_VERTICALSCALED_FAILED, message, String.join(", ", instanceIds));
+    }
+
+    public void updateInstancesToServicesHealthy(Long stackId, Set<InstanceMetadataView> instances) {
+        if (!instances.isEmpty()) {
+            List<String> instanceIds = instances.stream().map(InstanceMetadataView::getInstanceId).toList();
+            instanceMetaDataService.updateStatus(stackId, instanceIds, InstanceStatus.SERVICES_HEALTHY);
+        }
+    }
+
+    public void updateInstancesToServiceUnhealthy(Long stackId, String group, List<String> unhealthyInstanceIds) {
+        if (!unhealthyInstanceIds.isEmpty()) {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
+                    CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL, group, String.join(", ", unhealthyInstanceIds));
+            instanceMetaDataService.updateStatus(stackId, unhealthyInstanceIds, InstanceStatus.SERVICES_UNHEALTHY);
+        }
+    }
+
+    public void waitingForServicesHealthy(Long stackId, String group, List<String> instanceIds) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
+                CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY, group, String.join(", ", instanceIds));
     }
 }

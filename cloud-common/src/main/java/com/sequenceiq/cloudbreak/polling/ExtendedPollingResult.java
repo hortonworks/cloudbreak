@@ -8,12 +8,12 @@ public class ExtendedPollingResult {
 
     private Exception exception;
 
-    private Set<Long> failedInstanceIds;
+    private Set<Long> failedInstancePrivateIds;
 
-    private ExtendedPollingResult(PollingResult pollingResult, Exception exception, Set<Long> payload) {
+    private ExtendedPollingResult(PollingResult pollingResult, Exception exception, Set<Long> failedInstancePrivateIds) {
         this.pollingResult = pollingResult;
         this.exception = exception;
-        this.failedInstanceIds = payload;
+        this.failedInstancePrivateIds = failedInstancePrivateIds;
     }
 
     public boolean isSuccess() {
@@ -40,19 +40,19 @@ public class ExtendedPollingResult {
         return exception;
     }
 
-    public Set<Long> getFailedInstanceIds() {
-        return failedInstanceIds;
+    public Set<Long> getFailedInstancePrivateIds() {
+        return failedInstancePrivateIds;
     }
 
     public static class ExtendedPollingResultBuilder {
-        private Set<Long> failedInstaceIds;
+        private Set<Long> failedInstancePrivateIds;
 
         private Exception exception;
 
         private PollingResult pollingResult;
 
         public ExtendedPollingResultBuilder withPayload(Set<Long> failedInstanceIds) {
-            this.failedInstaceIds = failedInstanceIds;
+            this.failedInstancePrivateIds = failedInstanceIds;
             return this;
         }
 
@@ -87,7 +87,7 @@ public class ExtendedPollingResult {
         }
 
         public ExtendedPollingResult build() {
-            return new ExtendedPollingResult(pollingResult, exception, failedInstaceIds);
+            return new ExtendedPollingResult(pollingResult, exception, failedInstancePrivateIds);
         }
     }
 

@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
@@ -66,8 +67,10 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 @Scope("prototype")
@@ -131,6 +134,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ApiClusterTemplateToCmTemplateConverter apiClusterTemplateToCmTemplateConverter;
@@ -434,6 +440,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.warn("Unexpected error while waiting for services to be in a healthy status.", e);
         }
         return false;
+    }
+
+    @Override
+    public ExtendedPollingResult waitForHostHealthyServices(Set<InstanceMetadataView> hostsInCluster,
+            Optional<String> runtimeVersion) throws ClusterClientInitException {
+        return clouderaManagerPollingServiceProvider.startPollingCmSpecificHostsServicesHealthy(
+                stack, client, clouderaManagerHealthService, runtimeVersion, hostsInCluster);
     }
 
     @Override
