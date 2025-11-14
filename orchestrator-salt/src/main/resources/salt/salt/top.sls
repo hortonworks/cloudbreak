@@ -58,6 +58,7 @@ base:
     - cloudera.agent
     - gateway.cm
     - atlas
+    - saltsyncer
 
   'G@roles:manager_agent':
     - cloudera.repo

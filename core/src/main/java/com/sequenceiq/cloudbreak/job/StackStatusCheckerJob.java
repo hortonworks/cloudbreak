@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.UNKNOWN;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
@@ -23,11 +24,11 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
@@ -202,14 +204,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private Clock clock;
 
-    @Value("${cb.statuschecker.skip.window.minutes:2}")
-    private Integer skipWindow;
+    @Inject
+    private StackStatusCheckerConfig config;
 
     @Inject
     private SaltSyncService saltSyncService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
@@ -251,12 +256,18 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void checkSalt(StackDto stackDto) {
-        // will be used when CB-31130 is implemented
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
-        Optional<Set<String>> minions = saltSyncService.checkSaltMinions(gatewayConfig);
-        minions.ifPresentOrElse(failedMinions -> LOGGER.debug("Salt minions check failed for: {}", failedMinions),
-                () -> LOGGER.debug("Salt minions check: OK"));
+    private Set<String> getHostsWithSaltFailure(StackDto stackDto) {
+        if (config.isSaltCheckEnabled()) {
+            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+            Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
+            if (failedMinions.isPresent()) {
+                LOGGER.debug("Salt minions check failed for: {}", failedMinions.get());
+                if (config.isSaltCheckStatusChangeEnabled()) {
+                    return failedMinions.get();
+                }
+            }
+        }
+        return Set.of();
     }
 
     private boolean shouldSkipStatusCheck() {
@@ -267,11 +278,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLogWithEndTime(getStackId());
         if (lastFlowLog.isPresent()) {
             FlowLog flowLog = lastFlowLog.get();
-            Instant skipTimeInstant = clock.nowMinus(Duration.ofMinutes(skipWindow));
+            Instant skipTimeInstant = clock.nowMinus(Duration.ofMinutes(config.getSkipWindow()));
             Instant lastFlowLogEndTimeInstant = Instant.ofEpochMilli(flowLog.getEndTime());
             if (lastFlowLogEndTimeInstant.isAfter(skipTimeInstant)) {
                 LOGGER.debug("StackStatusCheckerJob skipped, because the last flow log was finished for stack {}. Skip window is {} minutes. " +
-                                "Last flow log endtime in UTC: {}. Skip time in UTC: {}.", getStackId(), skipWindow,
+                                "Last flow log endtime in UTC: {}. Skip time in UTC: {}.", getStackId(), config.getSkipWindow(),
                         lastFlowLogEndTimeInstant.atZone(ZoneOffset.UTC), skipTimeInstant.atZone(ZoneOffset.UTC));
                 return true;
             }
@@ -293,6 +304,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void doSync(StackDto stack) {
+        Set<String> hostsWithSaltFailure = getHostsWithSaltFailure(stack);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stack.getId());
         try {
@@ -301,8 +313,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
                         stack.getId(), extendedHostStatuses.isAnyCertExpiring(), hostStatuses);
-                reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(stack, extendedHostStatuses, runningInstances),
-                        getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring(),
+                Map<InstanceMetadataView, Optional<String>> failedInstancesInstanceMetadata =
+                        getFailedInstancesInstanceMetadata(stack, extendedHostStatuses, runningInstances);
+                updateFailedInstancesWithSaltCheckResult(hostsWithSaltFailure, failedInstancesInstanceMetadata, runningInstances);
+                reportHealthAndSyncInstances(stack, runningInstances, failedInstancesInstanceMetadata,
+                        getNewHealthyHostNames(extendedHostStatuses, runningInstances, hostsWithSaltFailure), extendedHostStatuses.isAnyCertExpiring(),
                         extendedHostStatuses.getCertExpirationDetails());
             } else {
                 syncInstances(stack, runningInstances);
@@ -311,6 +326,33 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             LOGGER.warn("Error during sync", e);
             syncInstances(stack, runningInstances);
         }
+    }
+
+    private void updateFailedInstancesWithSaltCheckResult(Set<String> hostsWithSaltFailure,
+            Map<InstanceMetadataView, Optional<String>> failedInstancesInstanceMetadata,
+            List<InstanceMetadataView> runningInstances) {
+        String saltFailureMessage = messagesService.getMessage(CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT.getMessage());
+        hostsWithSaltFailure.forEach(hostWithSaltFailure -> {
+            Optional<InstanceMetadataView> instanceMetadataView;
+            Optional<String> reasonWithSaltMessage = Optional.of(saltFailureMessage);
+            Optional<Map.Entry<InstanceMetadataView, Optional<String>>> entryForHost = failedInstancesInstanceMetadata.entrySet().stream()
+                    .filter(entry -> StringUtils.equals(entry.getKey().getDiscoveryFQDN(), hostWithSaltFailure))
+                    .findFirst();
+            if (entryForHost.isPresent()) {
+                Optional<String> reason = entryForHost.get().getValue();
+                instanceMetadataView = Optional.ofNullable(entryForHost.get().getKey());
+                if (reason.isPresent()) {
+                    reasonWithSaltMessage = Optional.of(String.format("%s %s", reason.get(), saltFailureMessage));
+                }
+            } else {
+                instanceMetadataView = runningInstances.stream()
+                        .filter(imd -> StringUtils.equals(imd.getDiscoveryFQDN(), hostWithSaltFailure))
+                        .findFirst();
+            }
+            if (instanceMetadataView.isPresent()) {
+                failedInstancesInstanceMetadata.put(instanceMetadataView.get(), reasonWithSaltMessage);
+            }
+        });
     }
 
     private void reportHealthAndSyncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
@@ -406,10 +448,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 "Getting extended host statuses");
     }
 
-    private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Collection<InstanceMetadataView> runningInstances) {
+    private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Collection<InstanceMetadataView> runningInstances,
+            Set<String> hostsWithSaltFailure) {
         Set<String> healthyHosts = hostStatuses.getHostsHealth().keySet().stream()
                 .filter(hostStatuses::isHostHealthy)
                 .map(HostName::value)
+                .filter(host -> !hostsWithSaltFailure.contains(host))
                 .collect(toSet());
         Set<String> unhealthyStoredHosts = runningInstances.stream()
                 .filter(i -> STATES_FROM_HEALTHY_ALLOWED.contains(i.getInstanceStatus()))

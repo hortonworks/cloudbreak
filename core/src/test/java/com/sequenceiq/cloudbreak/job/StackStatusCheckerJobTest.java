@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -61,8 +62,12 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -74,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -86,6 +92,15 @@ public class StackStatusCheckerJobTest {
 
     @InjectMocks
     private StackStatusCheckerJob underTest;
+
+    @Mock
+    private SaltSyncService saltSyncService;
+
+    @Mock
+    private GatewayConfigService gatewayConfigService;
+
+    @Mock
+    private StackStatusCheckerConfig config;
 
     @Mock
     private StatusCheckerJobService jobService;
@@ -174,6 +189,9 @@ public class StackStatusCheckerJobTest {
     @Mock
     private Clock clock;
 
+    @Mock
+    private CloudbreakMessagesService messagesService;
+
     @BeforeEach
     public void init() {
         underTest = new StackStatusCheckerJob();
@@ -202,11 +220,70 @@ public class StackStatusCheckerJobTest {
         lenient().when(blueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         lenient().when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         lenient().when(stackDtoService.computeMonitoringEnabled(any())).thenReturn(Optional.of(true));
+        lenient().when(config.isSaltCheckEnabled()).thenReturn(Boolean.FALSE);
+        lenient().when(messagesService.getMessage(eq(CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT.getMessage())))
+                .thenReturn("Salt is not healthy for this host.");
     }
 
     @AfterEach
     public void tearDown() {
         validateMockitoUsage();
+    }
+
+    @Test
+    public void testSaltCheckFailure() {
+        setupForCM();
+        when(config.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(config.isSaltCheckStatusChangeEnabled()).thenReturn(Boolean.TRUE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of("host1")));
+        underTest.executeJob(jobExecutionContext);
+
+        ArgumentCaptor<Map<String, Optional<String>>> failedNodesCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(clusterOperationService).reportHealthChange(anyString(), failedNodesCaptor.capture(), anySet());
+        assertEquals(1, failedNodesCaptor.getValue().size());
+        Map.Entry<String, Optional<String>> entry = failedNodesCaptor.getValue().entrySet().iterator().next();
+        assertEquals("host1", entry.getKey());
+        assertTrue(entry.getValue().isPresent());
+        assertEquals("Salt is not healthy for this host.", entry.getValue().get());
+        verify(saltSyncService).checkSaltMinions(any());
+    }
+
+    @Test
+    public void testSaltCheckFailureWhenCmCheckAlsoFails() {
+        setupForCM();
+        when(config.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(config.isSaltCheckStatusChangeEnabled()).thenReturn(Boolean.TRUE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of("host1")));
+        Set<HealthCheck> healthChecks = Sets.newHashSet(
+                new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of("CM check failed haha!"), Optional.empty()),
+                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty(), Optional.empty()));
+        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
+        Map<InstanceMetadataView, Optional<String>> metadataViewOptionalHashMap = new HashMap<>();
+        metadataViewOptionalHashMap.put(instanceMetaData, Optional.of("Failure."));
+        when(serviceStatusCheckerLogLocationDecorator.decorate(any(), any(), any())).thenReturn(metadataViewOptionalHashMap);
+        underTest.executeJob(jobExecutionContext);
+
+        ArgumentCaptor<Map<String, Optional<String>>> failedNodesCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(clusterOperationService).reportHealthChange(anyString(), failedNodesCaptor.capture(), anySet());
+        assertEquals(1, failedNodesCaptor.getValue().size());
+        Map.Entry<String, Optional<String>> entry = failedNodesCaptor.getValue().entrySet().iterator().next();
+        assertEquals("host1", entry.getKey());
+        assertTrue(entry.getValue().isPresent());
+        assertEquals("Failure. Salt is not healthy for this host.", entry.getValue().get());
+        verify(saltSyncService).checkSaltMinions(any());
+    }
+
+    @Test
+    public void testSaltCheckFailureStatusChangeNotEnabled() {
+        setupForCM();
+        when(config.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(config.isSaltCheckStatusChangeEnabled()).thenReturn(Boolean.FALSE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of("host1")));
+        underTest.executeJob(jobExecutionContext);
+
+        verify(clusterOperationService).reportHealthChange(anyString(), eq(Map.of()), eq(Set.of()));
+        verify(saltSyncService).checkSaltMinions(any());
     }
 
     @Test
@@ -217,7 +294,7 @@ public class StackStatusCheckerJobTest {
         ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
         Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030245000L);
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
-        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+        when(config.getSkipWindow()).thenReturn(2);
 
         underTest.executeJob(jobExecutionContext);
 
@@ -233,7 +310,7 @@ public class StackStatusCheckerJobTest {
         ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
         Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030290000L);
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
-        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+        when(config.getSkipWindow()).thenReturn(2);
 
         underTest.executeJob(jobExecutionContext);
 
@@ -249,7 +326,7 @@ public class StackStatusCheckerJobTest {
         ArgumentCaptor<TemporalAmount> temporalAmountArgumentCaptor = ArgumentCaptor.forClass(TemporalAmount.class);
         Instant nowMinus2Minutes = Instant.ofEpochMilli(1676030005000L);
         when(clock.nowMinus(temporalAmountArgumentCaptor.capture())).thenReturn(nowMinus2Minutes);
-        ReflectionTestUtils.setField(underTest, "skipWindow", 2);
+        when(config.getSkipWindow()).thenReturn(2);
 
         underTest.executeJob(jobExecutionContext);
 
@@ -286,6 +363,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMNotRunning() {
         setupForCM();
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         underTest.executeJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
@@ -389,6 +467,9 @@ public class StackStatusCheckerJobTest {
 
     private void setupForCM() {
         setStackStatus(DetailedStackStatus.AVAILABLE);
+        lenient().when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
+        lenient().when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
+        lenient().when(clusterApiConnectors.getConnector(any(StackDtoDelegate.class))).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         lenient().when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty()),

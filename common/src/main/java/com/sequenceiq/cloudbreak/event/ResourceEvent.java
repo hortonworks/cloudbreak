@@ -364,6 +364,7 @@ public enum ResourceEvent {
     CLUSTER_GATEWAY_CHANGE("cluster.gateway.change"),
     CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT("cluster.failednodes.reported.cluster"),
     CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT("cluster.failednodes.reported.host"),
+    CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT("cluster.failednodes.reported.salt"),
     CLUSTER_START_IGNORED("cluster.start.ignored"),
     CLUSTER_STOP_IGNORED("cluster.stop.ignored"),
     CLUSTER_HOST_STATUS_UPDATED("cluster.host.status.updated"),

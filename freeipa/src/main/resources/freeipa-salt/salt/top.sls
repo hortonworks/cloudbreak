@@ -43,6 +43,7 @@ base:
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock
+             - saltsyncer
 
            'roles:freeipa_replica':
              - match: grain

@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionRespon
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusFromFileResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
@@ -311,9 +312,9 @@ public class SaltStateService {
         return minionStatus;
     }
 
-    public MinionStatusSaltResponse collectNodeStatusWithLimitedRetry(SaltConnector sc) {
-        MinionStatusSaltResponse minionStatus = measure(() -> sc.runWithLimitedRetry("manage.status", RUNNER, MinionStatusSaltResponse.class), LOGGER,
-                "Manage status call took {}ms");
+    public MinionStatusFromFileResponse collectNodeStatusWithLimitedRetry(SaltConnector sc, String resultFileLocation) {
+        MinionStatusFromFileResponse minionStatus = measure(() -> sc.runWithLimitedRetry(new HostList(List.of(sc.getHostname())), "file.read", LOCAL,
+                MinionStatusFromFileResponse.class, resultFileLocation), LOGGER, "Read minion status json file took {} ms");
         LOGGER.debug("Minion status: {}", minionStatus);
         return minionStatus;
     }

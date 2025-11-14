@@ -171,8 +171,8 @@ public class SaltConnector implements Closeable {
     }
 
     @Retryable(maxAttempts = 2, value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 500))
-    public <T> T runWithLimitedRetry(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
-        return run(null, fun, clientType, clazz, arg);
+    public <T> T runWithLimitedRetry(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(target, fun, clientType, clazz, null, arg);
     }
 
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))

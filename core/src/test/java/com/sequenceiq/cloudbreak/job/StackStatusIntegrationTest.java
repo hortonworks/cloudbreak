@@ -116,6 +116,9 @@ class StackStatusIntegrationTest {
     private StackStatusCheckerJob underTest;
 
     @MockBean
+    private StackStatusCheckerConfig config;
+
+    @MockBean
     private StackService stackService;
 
     @MockBean

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -33,7 +34,8 @@ public class FreeipaChecker {
     @Inject
     private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
-    private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
+    private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances,
+            Set<String> hostsWithSaltFailure) {
         return checkedMeasure(() -> {
             Map<InstanceMetaData, DetailedStackStatus> statuses = new HashMap<>();
             List<RPCResponse<Boolean>> responses = new LinkedList<>();
@@ -45,7 +47,7 @@ public class FreeipaChecker {
                             ":::Auto sync::: FreeIPA health check ran in {}ms");
                     responses.add(response);
                     DetailedStackStatus newDetailedStackStatus;
-                    if (response.getResult()) {
+                    if (response.getResult() && !hostsWithSaltFailure.contains(instanceMetaData.getDiscoveryFQDN())) {
                         newDetailedStackStatus = DetailedStackStatus.AVAILABLE;
                     } else {
                         newDetailedStackStatus = DetailedStackStatus.UNHEALTHY;
@@ -58,11 +60,14 @@ public class FreeipaChecker {
                 }
             }
             String message = getMessages(responses);
+            if (!hostsWithSaltFailure.isEmpty()) {
+                message = String.format("%s. %s: %s.", message, "Salt is not healthy on node(s)", Joiner.on(",").join(hostsWithSaltFailure));
+            }
             return Pair.of(statuses, message);
         }, LOGGER, ":::Auto sync::: freeipa server status is checked in {}ms");
     }
 
-    public SyncResult getStatus(Stack stack, Set<InstanceMetaData> checkableInstances) {
+    public SyncResult getStatus(Stack stack, Set<InstanceMetaData> checkableInstances, Set<String> hostsWithSaltFailure) {
         try {
             if (checkableInstances.isEmpty()) {
                 throw new UnsupportedOperationException("There are no instances of FreeIPA to check the status of");
@@ -72,7 +77,7 @@ public class FreeipaChecker {
             Set<InstanceMetaData> notTermiatedStackInstances = stack.getAllInstanceMetaDataList().stream()
                     .filter(Predicate.not(InstanceMetaData::isTerminated))
                     .collect(Collectors.toSet());
-            Pair<Map<InstanceMetaData, DetailedStackStatus>, String> statusCheckPair = checkStatus(stack, checkableInstances);
+            Pair<Map<InstanceMetaData, DetailedStackStatus>, String> statusCheckPair = checkStatus(stack, checkableInstances, hostsWithSaltFailure);
             List<DetailedStackStatus> responses = new ArrayList<>(statusCheckPair.getFirst().values());
             DetailedStackStatus status;
             if (areAllStatusTheSame(responses) && !hasMissingStatus(responses, notTermiatedStackInstances)) {

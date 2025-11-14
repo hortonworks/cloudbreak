@@ -18,11 +18,12 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -32,6 +33,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -72,11 +74,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private StatusCheckerJobService jobService;
 
-    @Value("${freeipa.statuschecker.stale.after.days:30}")
-    private int staleAfterDays;
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
-    @Value("${freeipa.autosync.update.status:true}")
-    private boolean updateStatus;
+    @Inject
+    private SaltSyncService saltSyncService;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -102,6 +104,20 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         } catch (InterruptSyncingException e) {
             LOGGER.info("Syncing was interrupted", e);
         }
+    }
+
+    private Set<String> getHostsWithSaltFailure(Stack stack) {
+        if (autoSyncConfig.isSaltCheckEnabled()) {
+            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
+            if (failedMinions.isPresent()) {
+                LOGGER.debug("Salt minions check failed for: {}", failedMinions.get());
+                if (autoSyncConfig.isSaltCheckStatusChangeEnabled()) {
+                    return failedMinions.get();
+                }
+            }
+        }
+        return Set.of();
     }
 
     private void rescheduleIfRequired(Status stackStatus, JobExecutionContext context) {
@@ -145,7 +161,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Count of already in deleted on provider side state: {}", alreadyDeletedCount);
                 }
                 if (!checkableInstances.isEmpty()) {
-                    SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
+                    Set<String> hostsWithSaltFailure = getHostsWithSaltFailure(stack);
+                    SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances, hostsWithSaltFailure);
                     if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
                         for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
                             updateInstanceStatus(entry.getKey(), entry.getValue());
@@ -249,7 +266,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private boolean isStale(StackStatus stackStatus) {
         if (DetailedStackStatus.UNREACHABLE == stackStatus.getDetailedStackStatus() && stackStatus.getCreated() != null) {
-            long daysInMillis = TimeUnit.DAYS.toMillis(staleAfterDays);
+            long daysInMillis = TimeUnit.DAYS.toMillis(autoSyncConfig.getStaleAfterDays());
             return (System.currentTimeMillis() - stackStatus.getCreated()) > daysInMillis;
         } else if (DetailedStackStatus.STALE == stackStatus.getDetailedStackStatus()) {
             return true;
@@ -264,7 +281,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private void setStatusIfNotTheSame(InstanceMetaData instanceMetaData, InstanceStatus newStatus) {
         InstanceStatus oldStatus = instanceMetaData.getInstanceStatus();
         if (oldStatus != newStatus) {
-            if (updateStatus) {
+            if (autoSyncConfig.isUpdateStatus()) {
                 instanceMetaData.setInstanceStatus(newStatus);
                 LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The instance status updated from {} to {}", oldStatus, newStatus);
             } else {

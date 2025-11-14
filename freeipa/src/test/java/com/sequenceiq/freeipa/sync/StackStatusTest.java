@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.sync;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -42,6 +45,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -61,6 +65,15 @@ class StackStatusTest {
 
     @Inject
     private StackStatusCheckerJob underTest;
+
+    @MockBean
+    private AutoSyncConfig autoSyncConfig;
+
+    @MockBean
+    private GatewayConfigService gatewayConfigService;
+
+    @MockBean
+    private SaltSyncService saltSyncService;
 
     @MockBean
     private StackService stackService;
@@ -109,9 +122,7 @@ class StackStatusTest {
 
         stack = new Stack();
         stack.setId(STACK_ID);
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setDetailedStackStatus(DetailedStackStatus.PROVISIONED);
-        stack.setStackStatus(stackStatus);
+        setStackSatus(DetailedStackStatus.PROVISIONED);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
 
         when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
@@ -134,6 +145,10 @@ class StackStatusTest {
 
         rpcResponse = new RPCResponse<>();
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(eq(stack), any())).thenReturn(rpcResponse);
+
+        lenient().when(autoSyncConfig.isSaltCheckEnabled()).thenReturn(Boolean.FALSE);
+        lenient().when(autoSyncConfig.isUpdateStatus()).thenReturn(Boolean.TRUE);
+        lenient().when(autoSyncConfig.isEnabled()).thenReturn(Boolean.TRUE);
     }
 
     private InstanceMetaData createInstance(String instanceName, String ip) {
@@ -143,6 +158,58 @@ class StackStatusTest {
         instanceMetaData.setDiscoveryFQDN(instanceName);
         instanceMetaData.setPrivateIp(ip);
         return instanceMetaData;
+    }
+
+    private void setStackSatus(DetailedStackStatus available) {
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setDetailedStackStatus(available);
+        stack.setStackStatus(stackStatus);
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+                    "WHEN FreeIpa instance is available but salt check fails for it " +
+                    "THEN stack status should change"
+    )
+    void saltCheckFailed() throws Exception {
+        setUp(1);
+        setUpFreeIpaAvailabilityResponse(true);
+        when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
+        ));
+        when(autoSyncConfig.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(autoSyncConfig.isSaltCheckStatusChangeEnabled()).thenReturn(Boolean.TRUE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of(INSTANCE_1)));
+        setStackSatus(DetailedStackStatus.AVAILABLE);
+
+        underTest.executeJob(jobExecutionContext);
+
+        verify(stackUpdater).updateStackStatus(eq(stack), any(), any());
+        verify(saltSyncService).checkSaltMinions(any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+                    "WHEN FreeIpa instance is available, salt check fails for it but status change is not enabled for salt failure " +
+                    "THEN stack status should not change"
+    )
+    void saltCheckFailedStatusChangeNotEnabled() throws Exception {
+        setUp(1);
+        setUpFreeIpaAvailabilityResponse(true);
+        when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
+                createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
+        ));
+        when(autoSyncConfig.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(autoSyncConfig.isSaltCheckStatusChangeEnabled()).thenReturn(Boolean.FALSE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of(INSTANCE_1)));
+        setStackSatus(DetailedStackStatus.AVAILABLE);
+
+        underTest.executeJob(jobExecutionContext);
+
+        verify(stackUpdater, never()).updateStackStatus(eq(stack), any(), any());
+        verify(saltSyncService).checkSaltMinions(any());
     }
 
     @Test
@@ -157,9 +224,7 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        setStackSatus(DetailedStackStatus.AVAILABLE);
 
         underTest.executeJob(jobExecutionContext);
 
@@ -191,9 +256,7 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, Set.of(instance1))).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        setStackSatus(DetailedStackStatus.AVAILABLE);
 
         underTest.executeJob(jobExecutionContext);
 
@@ -227,9 +290,7 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, Set.of(instance1))).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        setStackSatus(DetailedStackStatus.AVAILABLE);
 
         underTest.executeJob(jobExecutionContext);
 
