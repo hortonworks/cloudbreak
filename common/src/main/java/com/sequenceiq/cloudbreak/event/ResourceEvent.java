@@ -335,6 +335,8 @@ public enum ResourceEvent {
     CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES("cluster.verticalscale.starting.instances"),
     CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES("cluster.verticalscale.started.instances"),
     CLUSTER_VERTICALSCALE_RESTART_INSTANCES_FAILED("cluster.verticalscale.restart.instances.failed"),
+    CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY("cluster.verticalscale.waiting.for.services.healthy"),
+    CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL("cluster.verticalscale.waiting.for.services.healthy.unsuccessful"),
     CLUSTER_ROOT_VOLUME_INCREASING("cluster.increasing.rootvolume"),
     CLUSTER_ROOT_VOLUME_INCREASED("cluster.increased.rootvolume"),
     CLUSTER_VERTICALSCALED_FAILED("cluster.change.verticalscale.failed"),

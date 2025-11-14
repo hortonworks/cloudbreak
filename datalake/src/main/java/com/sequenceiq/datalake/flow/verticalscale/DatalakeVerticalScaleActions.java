@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleFailedEvent;
@@ -26,8 +28,11 @@ public class DatalakeVerticalScaleActions {
 
     private final SdxStatusService sdxStatusService;
 
-    public DatalakeVerticalScaleActions(SdxStatusService sdxStatusService) {
+    private final EntitlementService entitlementService;
+
+    public DatalakeVerticalScaleActions(SdxStatusService sdxStatusService, EntitlementService entitlementService) {
         this.sdxStatusService = sdxStatusService;
+        this.entitlementService = entitlementService;
     }
 
     @Bean(name = "VERTICAL_SCALING_DATALAKE_VALIDATION_STATE")
@@ -63,8 +68,14 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.STOPPED,
-                        "Vertical scale has finished on the Data Lake.", payload.getResourceId());
+                String accountId = Crn.safeFromString(payload.getResourceCrn()).getAccountId();
+                if (entitlementService.isVerticalScaleHaEnabled(accountId)) {
+                    sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.RUNNING,
+                            "Vertical scale has finished on the Data Lake.", payload.getResourceId());
+                } else {
+                    sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.STOPPED,
+                            "Vertical scale has finished on the Data Lake.", payload.getResourceId());
+                }
                 sendEvent(context, FINALIZE_VERTICAL_SCALING_DATALAKE_EVENT.selector(), payload);
             }
         };

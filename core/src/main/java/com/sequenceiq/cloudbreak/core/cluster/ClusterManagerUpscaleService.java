@@ -112,15 +112,15 @@ public class ClusterManagerUpscaleService {
                     "Upscaling cluster manager were not successful, waiting for hosts timed out");
         }
 
-        if (!targetedUpscaleAvailable || CollectionUtils.isEmpty(result.getFailedInstanceIds())) {
+        if (!targetedUpscaleAvailable || CollectionUtils.isEmpty(result.getFailedInstancePrivateIds())) {
             throw new CloudbreakServiceException(errorMessage, result.getException());
         }
     }
 
     private String getTimeoutResultMessage(ExtendedPollingResult result) {
         StringBuilder errorMessage = new StringBuilder("Upscaling cluster manager was not successful, waiting for hosts timed out");
-        if (CollectionUtils.isNotEmpty(result.getFailedInstanceIds())) {
-            errorMessage.append(" for nodes: ").append(result.getFailedInstanceIds());
+        if (CollectionUtils.isNotEmpty(result.getFailedInstancePrivateIds())) {
+            errorMessage.append(" for nodes: ").append(result.getFailedInstancePrivateIds());
         }
         if (result.getException() != null) {
             errorMessage.append(", reason: ").append(result.getException().getMessage());
@@ -132,8 +132,8 @@ public class ClusterManagerUpscaleService {
 
     private Set<Long> collectFailedInstanceIds(StackView stack, ExtendedPollingResult result) {
         Set<Long> failedInstanceIds = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(result.getFailedInstanceIds())) {
-            failedInstanceIds.addAll(result.getFailedInstanceIds());
+        if (CollectionUtils.isNotEmpty(result.getFailedInstancePrivateIds())) {
+            failedInstanceIds.addAll(result.getFailedInstancePrivateIds());
         } else {
             List<InstanceMetadataView> allInstanceMetadataInServicesRunningStatus = instanceMetaDataService.getAllStatusInForStack(
                     stack.getId(), Set.of(InstanceStatus.SERVICES_RUNNING));

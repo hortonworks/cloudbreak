@@ -62,17 +62,17 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
     }
 
     @Override
-    public Set<Long> getFailedInstanceIds() {
-        Set<Long> failedInstanceIds = new HashSet<>();
+    public Set<Long> getFailedInstancePrivateIds() {
+        Set<Long> failedInstancePrivateIds = new HashSet<>();
         for (String hostNameToCheckFor: hostnamesToCheckFor) {
             for (InstanceMetadataView instanceMetadataView : hostsToCheckFor) {
                 if (instanceMetadataView.getDiscoveryFQDN().equals(hostNameToCheckFor)) {
-                    failedInstanceIds.add(instanceMetadataView.getPrivateId());
+                    failedInstancePrivateIds.add(instanceMetadataView.getPrivateId());
                     break;
                 }
             }
         }
-        return failedInstanceIds;
+        return failedInstancePrivateIds;
     }
 
     @Override

@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,9 +61,12 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 import okhttp3.OkHttpClient;
 
@@ -108,13 +113,23 @@ public class ClouderaManagerClusterStatusServiceTest {
     @Mock
     private OkHttpClient okHttpClient;
 
+    @Mock
+    private ClouderaManagerHealthService clouderaManagerHealthService;
+
+    @Mock
+    private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
+
+    private Stack stack;
+
+    private Cluster cluster;
+
     private ClouderaManagerClusterStatusService subject;
 
     @BeforeEach
     public void init() throws ClouderaManagerClientInitException, ClusterClientInitException {
-        Cluster cluster = new Cluster();
+        cluster = new Cluster();
         cluster.setName(CLUSTER_NAME);
-        Stack stack = new Stack();
+        stack = new Stack();
         stack.setName(CLUSTER_NAME);
         stack.setCluster(cluster);
 
@@ -126,6 +141,8 @@ public class ClouderaManagerClusterStatusServiceTest {
         ReflectionTestUtils.setField(subject, "clouderaManagerCommandsService", clouderaManagerCommandsService);
         ReflectionTestUtils.setField(subject, "connectQuickTimeoutSeconds", 1);
         ReflectionTestUtils.setField(subject, "metricService", metricService);
+        ReflectionTestUtils.setField(subject, "clouderaManagerHealthService", clouderaManagerHealthService);
+        ReflectionTestUtils.setField(subject, "clouderaManagerPollingServiceProvider", clouderaManagerPollingServiceProvider);
         when(okHttpClient.newBuilder()).thenReturn(new OkHttpClient.Builder());
         when(client.getHttpClient()).thenReturn(okHttpClient);
         when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cluster.getCloudbreakClusterManagerUser(),
@@ -381,6 +398,22 @@ public class ClouderaManagerClusterStatusServiceTest {
         verify(clouderaManagerApiFactory, times(1)).getClouderaManagerResourceApi(any());
         verify(clouderaManagerResourceApi, times(1)).getVersion();
         verify(metricService, times(1)).incrementMetricCounter(eq("stack_sync_cm_unreachable"), any(String[].class));
+    }
+
+    @Test
+    void testWaitForHostHealthyServicesDelegatesToPollingProvider() throws ClusterClientInitException {
+        Set<InstanceMetadataView> hosts = Set.of(mock(InstanceMetadataView.class));
+        Optional<String> runtimeVersion = Optional.of("7.2.17");
+        ExtendedPollingResult expectedResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+
+        when(clouderaManagerPollingServiceProvider.startPollingCmSpecificHostsServicesHealthy(eq(stack), eq(client),
+                eq(clouderaManagerHealthService), eq(runtimeVersion), eq(hosts))).thenReturn(expectedResult);
+
+        ExtendedPollingResult result = subject.waitForHostHealthyServices(hosts, runtimeVersion);
+
+        assertEquals(expectedResult, result);
+        verify(clouderaManagerPollingServiceProvider).startPollingCmSpecificHostsServicesHealthy(eq(stack), eq(client),
+                eq(clouderaManagerHealthService), eq(runtimeVersion), eq(hosts));
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {

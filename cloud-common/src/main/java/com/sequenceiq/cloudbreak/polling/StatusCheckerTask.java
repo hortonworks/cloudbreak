@@ -16,7 +16,7 @@ public interface StatusCheckerTask<T> {
 
     void handleException(Exception e);
 
-    default Set<Long> getFailedInstanceIds() {
+    default Set<Long> getFailedInstancePrivateIds() {
         return Collections.emptySet();
     }
 

@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASING;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES;
@@ -15,16 +13,22 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCAL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOP_INSTANCES_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES_FAILED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class RollingVerticalScaleServiceTest {
@@ -55,8 +60,6 @@ class RollingVerticalScaleServiceTest {
     private static final List<String> INSTANCE_IDS = List.of(INSTANCE_ID_1, INSTANCE_ID_2);
 
     private static final String ERROR_MESSAGE = "Test error message";
-
-    private static final String PREVIOUS_INSTANCE_TYPE = "m5.xlarge";
 
     private static final String TARGET_INSTANCE_TYPE = "m5.2xlarge";
 
@@ -306,15 +309,6 @@ class RollingVerticalScaleServiceTest {
     }
 
     @Test
-    void testFinishVerticalScale() {
-        underTest.finishVerticalScale(STACK_ID, INSTANCE_IDS, GROUP, PREVIOUS_INSTANCE_TYPE, TARGET_INSTANCE_TYPE);
-
-        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(STACK_ID), eq(DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE));
-        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(AVAILABLE.name()),
-                eq(CLUSTER_VERTICALSCALED), eq(GROUP), eq(PREVIOUS_INSTANCE_TYPE), eq(TARGET_INSTANCE_TYPE));
-    }
-
-    @Test
     void testFailedVerticalScale() {
         underTest.failedVerticalScale(STACK_ID, INSTANCE_IDS, ERROR_MESSAGE);
 
@@ -323,11 +317,61 @@ class RollingVerticalScaleServiceTest {
                 eq(CLUSTER_VERTICALSCALED_FAILED), eq(ERROR_MESSAGE), any(String.class));
     }
 
+    @Test
+    void testUpdateInstancesToServicesHealthyUpdatesStatuses() {
+        InstanceMetadataView instance1 = mockInstanceMetadataView(INSTANCE_ID_1);
+        InstanceMetadataView instance2 = mockInstanceMetadataView(INSTANCE_ID_2);
+        Set<InstanceMetadataView> instances = new LinkedHashSet<>(List.of(instance1, instance2));
+
+        underTest.updateInstancesToServicesHealthy(STACK_ID, instances);
+
+        verify(instanceMetaDataService).updateStatus(eq(STACK_ID), eq(List.of(INSTANCE_ID_1, INSTANCE_ID_2)),
+                eq(InstanceStatus.SERVICES_HEALTHY));
+    }
+
+    @Test
+    void testUpdateInstancesToServicesHealthySkipsWhenEmpty() {
+        underTest.updateInstancesToServicesHealthy(STACK_ID, Collections.emptySet());
+
+        verify(instanceMetaDataService, never()).updateStatus(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateInstancesToServiceUnhealthyUpdatesStatusesAndFiresEvent() {
+        underTest.updateInstancesToServiceUnhealthy(STACK_ID, GROUP, INSTANCE_IDS);
+
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)));
+        verify(instanceMetaDataService).updateStatus(eq(STACK_ID), eq(INSTANCE_IDS), eq(InstanceStatus.SERVICES_UNHEALTHY));
+    }
+
+    @Test
+    void testUpdateInstancesToServiceUnhealthySkipsWhenEmpty() {
+        underTest.updateInstancesToServiceUnhealthy(STACK_ID, GROUP, Collections.emptyList());
+
+        verify(flowMessageService, never()).fireEventAndLog(any(), any(), any(), any());
+        verify(instanceMetaDataService, never()).updateStatus(any(), any(), any());
+    }
+
+    @Test
+    void testWaitingForServicesHealthyFiresEvent() {
+        underTest.waitingForServicesHealthy(STACK_ID, GROUP, INSTANCE_IDS);
+
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)));
+    }
+
     private StackVerticalScaleV4Request createStackVerticalScaleV4Request() {
         StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
         request.setGroup(GROUP);
         request.setTemplate(new InstanceTemplateV4Request());
         return request;
+    }
+
+    private InstanceMetadataView mockInstanceMetadataView(String instanceId) {
+        InstanceMetadataView metadataView = mock(InstanceMetadataView.class);
+        when(metadataView.getInstanceId()).thenReturn(instanceId);
+        return metadataView;
     }
 }
 
