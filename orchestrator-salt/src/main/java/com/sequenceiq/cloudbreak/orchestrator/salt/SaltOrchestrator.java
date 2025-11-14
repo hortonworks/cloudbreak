@@ -626,7 +626,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                     .filter(node -> node.getHostGroup().contains(HYBRID_ECS_GROUP))
                     .map(Node::getHostname)
                     .collect(Collectors.toSet());
-            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, ecsNodes, allNodes, "ecs"), exitModel, exitCriteria);
+            if (!ecsNodes.isEmpty()) {
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, ecsNodes, allNodes, "ecs"), exitModel, exitCriteria);
+            }
         }
     }
 
