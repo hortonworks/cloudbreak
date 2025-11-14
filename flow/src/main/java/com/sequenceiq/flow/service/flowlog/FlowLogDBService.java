@@ -38,8 +38,8 @@ import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowEventContext;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -81,16 +81,16 @@ public class FlowLogDBService implements FlowLogService {
     private Clock clock;
 
     @Override
-    public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
-            FlowState currentState) {
+    public FlowLog save(FlowEventContext flowEventContext, Map<Object, Object> variables, Class<?> flowType, FlowState currentState) {
+        Payload payload = flowEventContext.getPayload();
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
 
-        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChainId, flowParameters.getFlowTriggerUserCrn(), key,
-                payloadJackson, ClassValue.of(payload.getClass()), variablesJackson,
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowEventContext.getFlowId(), flowEventContext.getFlowChainId(),
+                flowEventContext.getFlowTriggerUserCrn(), flowEventContext.getKey(), payloadJackson, ClassValue.of(payload.getClass()), variablesJackson,
                 ClassValue.of(flowType), currentState.toString());
-        flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
-                ? OperationType.valueOf(flowParameters.getFlowOperationType())
+        flowLog.setOperationType(StringUtils.isNotBlank(flowEventContext.getFlowOperationType())
+                ? OperationType.valueOf(flowEventContext.getFlowOperationType())
                 : OperationType.UNKNOWN);
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         if (payload.getException() != null) {
@@ -105,9 +105,9 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog finish(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason)
+    public FlowLog finish(FlowEventContext flowEventContext, Map<Object, Object> contextParams, boolean failed, String reason)
             throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed, contextParams, reason);
+        return finalize(flowEventContext.getResourceId(), flowEventContext.getFlowId(), FlowConstants.FINISHED_STATE, failed, contextParams, reason);
     }
 
     @Override

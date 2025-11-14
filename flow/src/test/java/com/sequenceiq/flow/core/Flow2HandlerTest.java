@@ -192,15 +192,14 @@ class Flow2HandlerTest {
         given(flowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
         given(flow.getCurrentState()).willReturn(flowState);
-        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
+        given(flow.sendEvent(any())).willReturn(true);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull());
-        verify(flowLogService, times(1))
-                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
-        verify(flow, times(1)).sendEvent(anyString(), isNull(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flowLogService, times(1)).save(any(FlowEventContext.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
+        verify(flow, times(1)).sendEvent(any());
     }
 
     @Test
@@ -213,16 +212,15 @@ class Flow2HandlerTest {
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
-        when(flowLogService.save(any(FlowParameters.class), nullable(String.class), anyString(), any(Payload.class), any(),
-                eq(flowConfig.getClass()), eq(flowState))).thenThrow(new RuntimeException("Can't save flow log"));
+        when(flowLogService.save(any(FlowEventContext.class), anyMap(), eq(flowConfig.getClass()), eq(flowState)))
+                .thenThrow(new RuntimeException("Can't save flow log"));
         assertThrows(CloudbreakServiceException.class,
                 () -> underTest.accept(event));
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull());
-        verify(flowLogService, times(1))
-                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1)).save(any(FlowEventContext.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(1)).remove(anyString());
-        verify(flow, times(0)).sendEvent(anyString(), isNull(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flow, times(0)).sendEvent(any());
     }
 
     @Test
@@ -232,8 +230,10 @@ class Flow2HandlerTest {
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
         given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
+        when(flowConfig.getFlowOperationType()).thenReturn(OperationType.UNKNOWN);
         given(flow.getCurrentState()).willReturn(flowState);
         when(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).thenReturn(FlowTriggerConditionResult.fail("It's not triggerable!"));
+        when(runningFlows.remove(any())).thenReturn(flow);
 
         Promise accepted = mock(Promise.class);
         Payload mockPayload = new MockPayload(accepted);
@@ -244,14 +244,11 @@ class Flow2HandlerTest {
 
         verify(accepted, times(1)).onError(any(FlowNotTriggerableException.class));
 
-        verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(0)).put(eq(flow), isNull());
-        verify(flowLogService, times(0))
-                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
-        verify(runningFlows, times(0)).remove(anyString());
-        verify(flowChains, times(0)).cleanFlowChain(anyString(), anyString());
-        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any());
-        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
+        verify(flowConfigurationMap, times(2)).get(anyString());
+        verify(runningFlows, times(1)).put(eq(flow), isNull());
+        verify(flowLogService, times(0)).save(any(FlowEventContext.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
+        verify(runningFlows, times(1)).remove(anyString());
+        verify(flow, times(0)).sendEvent(any());
     }
 
     @Test
@@ -259,8 +256,7 @@ class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
-        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
-        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
+        when(flowConfig.getFlowOperationType()).thenReturn(OperationType.UNKNOWN);
         given(flow.getCurrentState()).willReturn(flowState);
         when(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).thenReturn(FlowTriggerConditionResult.skip("Skip!"));
 
@@ -272,13 +268,12 @@ class Flow2HandlerTest {
         underTest.accept(event);
 
         verify(accepted, times(0)).onError(any(FlowNotTriggerableException.class));
-        verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(0)).put(eq(flow), isNull());
+        verify(flowConfigurationMap, times(2)).get(anyString());
+        verify(runningFlows, times(1)).put(eq(flow), isNull());
         verify(flowLogService, times(0))
-                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
-        verify(runningFlows, times(0)).remove(anyString());
-        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any());
-        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
+                .save(any(FlowEventContext.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
+        verify(runningFlows, times(1)).remove(anyString());
+        verify(flow, times(0)).sendEvent(any());
     }
 
     @Test
@@ -292,15 +287,14 @@ class Flow2HandlerTest {
         given(helloWorldFlowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
         given(flow.getCurrentState()).willReturn(flowState);
-        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
+        given(flow.sendEvent(any())).willReturn(true);
         Event<Payload> event = new Event<>(new Event.Headers(Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN)), payload);
         event.setKey("KEY");
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull());
-        verify(flowLogService, times(1)).save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(),
-                ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
-        verify(flow, times(1)).sendEvent(anyString(), anyString(), any(), eq(UNKNOWN_OP_TYPE));
+        verify(flowLogService, times(1)).save(any(FlowEventContext.class), anyMap(), ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
+        verify(flow, times(1)).sendEvent(any());
     }
 
     @Test
@@ -311,7 +305,7 @@ class Flow2HandlerTest {
         assertEquals("Couldn't start process.", exception.getMessage());
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, never()).put(any(Flow.class), isNull());
-        verify(flowLogService, never()).save(any(FlowParameters.class), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
+        verify(flowLogService, never()).save(any(FlowEventContext.class), anyMap(), nullable(Class.class), any(FlowState.class));
     }
 
     @Test
@@ -323,18 +317,17 @@ class Flow2HandlerTest {
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
-        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
+        given(flow.sendEvent(any(FlowEventContext.class))).willReturn(true);
         given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
-        ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
+        ArgumentCaptor<FlowEventContext> flowEventContextCaptor = ArgumentCaptor.forClass(FlowEventContext.class);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1))
-                .save(flowParamsCaptor.capture(), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
-        FlowParameters flowParameters = flowParamsCaptor.getValue();
-        assertEquals(FLOW_ID, flowParameters.getFlowId());
-        assertNull(flowParameters.getFlowTriggerUserCrn());
+        verify(flowLogService, times(1)).save(flowEventContextCaptor.capture(), anyMap(), nullable(Class.class), eq(flowState));
+        verify(flow, times(1)).sendEvent(any(FlowEventContext.class));
+        FlowEventContext flowEventContext = flowEventContextCaptor.getValue();
+        assertEquals(FLOW_ID, flowEventContext.getFlowId());
+        assertNull(flowEventContext.getFlowTriggerUserCrn());
     }
 
     @Test
@@ -346,18 +339,18 @@ class Flow2HandlerTest {
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
-        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
+        given(flow.sendEvent(any(FlowEventContext.class))).willReturn(true);
         given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
-        ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
+        ArgumentCaptor<FlowEventContext> flowEventContextCaptor = ArgumentCaptor.forClass(FlowEventContext.class);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
-                .save(flowParamsCaptor.capture(), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
-        FlowParameters flowParameters = flowParamsCaptor.getValue();
-        assertEquals(FLOW_ID, flowParameters.getFlowId());
-        assertNull(flowParameters.getFlowTriggerUserCrn());
+                .save(flowEventContextCaptor.capture(), anyMap(), nullable(Class.class), eq(flowState));
+        verify(flow, times(1)).sendEvent(any(FlowEventContext.class));
+        FlowEventContext flowEventContext = flowEventContextCaptor.getValue();
+        assertEquals(FLOW_ID, flowEventContext.getFlowId());
+        assertNull(flowEventContext.getFlowTriggerUserCrn());
     }
 
     @Test
@@ -375,8 +368,8 @@ class Flow2HandlerTest {
 
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, never()).save(any(), any(), any(), any(), any(), any(), any());
-        verify(flow, never()).sendEvent(any(), any(), any(), any());
+        verify(flowLogService, never()).save(any(), anyMap(), any(), any());
+        verify(flow, never()).sendEvent(any());
         verify(inMemoryCleanup, times(1)).cancelFlowWithoutDbUpdate(FLOW_ID);
     }
 
@@ -389,7 +382,7 @@ class Flow2HandlerTest {
 
         Map<Object, Object> variables = Map.of("repeated", 2);
         given(flow.getVariables()).willReturn(variables);
-        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
+        given(flow.sendEvent(any())).willReturn(true);
 
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setNextEvent("KEY");
@@ -400,7 +393,7 @@ class Flow2HandlerTest {
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
                 .updateLastFlowLogPayload(lastFlowLog, payload, variables);
-        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
+        verify(flow, times(1)).sendEvent(any());
     }
 
     @Test
@@ -408,8 +401,8 @@ class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, never()).save(any(FlowParameters.class), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
-        verify(flow, never()).sendEvent(anyString(), anyString(), any(), any());
+        verify(flowLogService, never()).save(any(FlowEventContext.class), anyMap(), any(), any(FlowState.class));
+        verify(flow, never()).sendEvent(any());
     }
 
     @Test
@@ -417,7 +410,7 @@ class Flow2HandlerTest {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).finish(anyLong(), eq(FLOW_ID), eq(false), anyMap(), isNull());
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(false), isNull());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull());
@@ -432,7 +425,7 @@ class Flow2HandlerTest {
         dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).finish(anyLong(), eq(FLOW_ID), eq(false), anyMap(), isNull());
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(false), isNull());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull());
@@ -447,20 +440,19 @@ class Flow2HandlerTest {
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
         dummyEvent = new Event<>(new Event.Headers(headers), payload);
         dummyEvent.setKey("KEY");
+        given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
-        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
-        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.fail("Not triggerable."));
+        when(runningFlows.remove(any())).thenReturn(flow);
+        when(flow.isFlowFailed()).thenReturn(true);
 
         FlowNotTriggerableException exception = assertThrows(FlowNotTriggerableException.class, () -> underTest.accept(dummyEvent));
 
         assertEquals("Not triggerable.", exception.getMessage());
-        verify(flowLogService, times(1)).save(any(), eq(FLOW_CHAIN_ID), any(), eq(payload), any(), eq(flowConfig.getClass()), eq(FlowStateConstants.INIT_STATE));
-        verify(flowLogService, times(1)).finish(eq(payload.getResourceId()), any(), eq(true), anyMap(), eq("Trigger condition: fail, reason: Not triggerable."));
-        verify(flowChains, times(1)).cleanFlowChain(eq(FLOW_CHAIN_ID), anyString());
+        verify(flowLogService, times(1)).save(any(), anyMap(), eq(flowConfig.getClass()), eq(FlowStateConstants.INIT_STATE));
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(true), eq("Trigger condition: fail, reason: Not triggerable."));
         verify(flowChains, times(1)).removeFullFlowChain(FLOW_CHAIN_ID, false);
-        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
     @Test
@@ -475,14 +467,15 @@ class Flow2HandlerTest {
         FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
         given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.skip("Skipped."));
+        when(runningFlows.remove(any())).thenReturn(flow);
 
         underTest.accept(dummyEvent);
 
-        verify(flowLogService, times(1)).save(any(), eq(FLOW_CHAIN_ID), any(), eq(payload), any(), eq(flowConfig.getClass()), eq(FlowStateConstants.INIT_STATE));
-        verify(flowLogService, times(1)).finish(eq(payload.getResourceId()), any(), eq(false), anyMap(), eq("Trigger condition: skip, reason: Skipped."));
-        verify(flowChains, times(1)).cleanFlowChain(eq(FLOW_CHAIN_ID), anyString());
-        verify(flowChains, times(1)).removeFullFlowChain(FLOW_CHAIN_ID, true);
-        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
+        verify(flowLogService, times(1)).save(any(), anyMap(), eq(flowConfig.getClass()), eq(FlowStateConstants.INIT_STATE));
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(false), eq("Trigger condition: skip, reason: Skipped."));
+        verify(flowChains, never()).removeFullFlowChain(eq(FLOW_CHAIN_ID), anyBoolean());
+        verify(flowFinalizerCallback, never()).onFinalize(eq(payload.getResourceId()));
+        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), eq(FLOW_TRIGGER_USERCRN), any(), any(), any());
     }
 
     @Test
@@ -492,7 +485,7 @@ class Flow2HandlerTest {
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).finish(anyLong(), eq(FLOW_ID), eq(false), anyMap(), isNull());
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(false), isNull());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull());
@@ -508,7 +501,7 @@ class Flow2HandlerTest {
         dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).finish(anyLong(), eq(FLOW_ID), eq(false), anyMap(), isNull());
+        verify(flowLogService, times(1)).finish(any(), anyMap(), eq(false), isNull());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull());
@@ -656,15 +649,15 @@ class Flow2HandlerTest {
         return flowLog;
     }
 
-    private void setUpFlowConfigCreateFlow(HelloWorldFlowConfig stackStartFlowConfig) {
+    private void setUpFlowConfigCreateFlow(HelloWorldFlowConfig helloWorldFlowConfig) {
         doReturn(stateMachine).when(stateMachineFactory).getStateMachine();
         doReturn(stateMachineAccessor).when(stateMachine).getStateMachineAccessor();
         doReturn(Collections.singletonList(stateMachineAccess)).when(stateMachineAccessor).withAllRegions();
 
         when(stateMachine.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
-        ReflectionTestUtils.setField(stackStartFlowConfig, "stateMachineFactory", stateMachineFactory);
-        ReflectionTestUtils.setField(stackStartFlowConfig, "applicationContext", applicationContext);
+        ReflectionTestUtils.setField(helloWorldFlowConfig, "stateMachineFactory", stateMachineFactory);
+        ReflectionTestUtils.setField(helloWorldFlowConfig, "applicationContext", applicationContext);
         when(applicationContext.getBean(anyString(), any(Class.class))).thenReturn(defaultRestartAction);
     }
 

@@ -20,11 +20,11 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
 
     private final MessageFactory<E> messageFactory;
 
-    private boolean flowFailed;
-
     private final Class<? extends FlowConfiguration<E>> flowConfigClass;
 
     private final FlowEventListener<S, E> flowEventListener;
+
+    private boolean flowFailed;
 
     public FlowAdapter(String flowId, StateMachine<S, E> flowMachine, MessageFactory<E> messageFactory, StateConverter<S> stateConverter,
             EventConverter<E> eventConverter, Class<? extends FlowConfiguration<E>> flowConfigClass, FlowEventListener<S, E> flowEventListener) {
@@ -79,8 +79,8 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     }
 
     @Override
-    public boolean sendEvent(String key, String flowTriggerUserCrn, Object payload, String operationType) {
-        return flowMachine.sendEvent(messageFactory.createMessage(flowId, flowTriggerUserCrn, eventConverter.convert(key), payload, operationType));
+    public boolean sendEvent(FlowEventContext flowEventContext) {
+        return flowMachine.sendEvent(messageFactory.createMessage(flowEventContext, eventConverter.convert(flowEventContext.getKey())));
     }
 
     @Override
@@ -89,13 +89,13 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     }
 
     @Override
-    public void setFlowFailed(Exception exception) {
-        flowFailed = true;
-        flowEventListener.setException(exception);
+    public boolean isFlowFailed() {
+        return flowFailed;
     }
 
     @Override
-    public boolean isFlowFailed() {
-        return flowFailed;
+    public void setFlowFailed(Exception exception) {
+        flowFailed = true;
+        flowEventListener.setException(exception);
     }
 }
