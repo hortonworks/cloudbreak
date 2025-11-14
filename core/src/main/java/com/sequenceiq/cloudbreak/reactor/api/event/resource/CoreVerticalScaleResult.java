@@ -20,9 +20,9 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
 
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
-    private final int instanceStorageCount;
+    private final Integer instanceStorageCount;
 
-    private final int instanceStorageSize;
+    private final Integer instanceStorageSize;
 
     @JsonCreator
     public CoreVerticalScaleResult(
@@ -30,8 +30,8 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
             @JsonProperty("resourceStatus") ResourceStatus resourceStatus,
             @JsonProperty("results") List<CloudResourceStatus> results,
             @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request,
-            @JsonProperty("instanceStorageCount") int instanceStorageCount,
-            @JsonProperty("instanceStorageSize") int instanceStorageSize) {
+            @JsonProperty("instanceStorageCount") Integer instanceStorageCount,
+            @JsonProperty("instanceStorageSize") Integer instanceStorageSize) {
         super(resourceId);
         this.resourceStatus = resourceStatus;
         this.results = results;
@@ -66,11 +66,11 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
         return stackVerticalScaleV4Request;
     }
 
-    public int getInstanceStorageCount() {
+    public Integer getInstanceStorageCount() {
         return instanceStorageCount;
     }
 
-    public int getInstanceStorageSize() {
+    public Integer getInstanceStorageSize() {
         return instanceStorageSize;
     }
 

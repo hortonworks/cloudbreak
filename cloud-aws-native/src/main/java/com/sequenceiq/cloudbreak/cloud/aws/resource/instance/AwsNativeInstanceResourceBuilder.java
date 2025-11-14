@@ -197,11 +197,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         }
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
-        if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
+        if (!UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES.equals(updateType)
+                && existedOpt.isPresent()
+                && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             awsInstance = existedOpt.get();
             String requestedInstanceType = instance.getTemplate().getFlavor();
-            LOGGER.info("Instance exists with name: {} ({}), check the state: {} and the instance type is: {}. " +
-                            "The user requested {} type.",
+            LOGGER.info("Instance exists with name: {} ({}), state: {}, instance type is: {}. " +
+                            "Our template instance type: {}",
                     awsInstance.instanceId(),
                     instance.getInstanceId(),
                     awsInstance.state().name(),

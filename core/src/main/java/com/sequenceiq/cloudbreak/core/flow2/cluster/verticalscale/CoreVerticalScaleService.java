@@ -89,7 +89,7 @@ public class CoreVerticalScaleService {
     }
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
-            int instanceStorageCount, int instanceStorageSize) {
+            Integer instanceStorageCount, Integer instanceStorageSize) {
         Stack stack = stackService.getById(stackId);
         Optional<InstanceGroup> optionalGroup = instanceGroupService.getInstanceGroupWithTemplateAndInstancesByGroupNameInStack(stackId,
                 stackVerticalScaleV4Request.getGroup());
@@ -112,10 +112,12 @@ public class CoreVerticalScaleService {
                 template.setRootVolumeSize(rootVolumeSize);
             }
             updateVolumeTemplate(requestedTemplate, template);
-            if (instanceStorageCount > 0 && template.getTemporaryStorage().equals(TemporaryStorage.ATTACHED_VOLUMES) && !stack.isDatalake()) {
-                template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
-            } else if (instanceStorageCount == 0) {
-                template.setTemporaryStorage(TemporaryStorage.ATTACHED_VOLUMES);
+            if (instanceStorageCount != null) {
+                if (instanceStorageCount > 0 && template.getTemporaryStorage().equals(TemporaryStorage.ATTACHED_VOLUMES) && !stack.isDatalake()) {
+                    template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+                } else if (instanceStorageCount == 0) {
+                    template.setTemporaryStorage(TemporaryStorage.ATTACHED_VOLUMES);
+                }
             }
             templateService.savePure(template);
         }

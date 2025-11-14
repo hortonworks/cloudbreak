@@ -53,22 +53,16 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
-            List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector,
-                        stackVerticalScaleV4Request.getGroup());
-            LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
-            InstanceStoreMetadata instanceStoreMetadata =  stackUpscaleService.getInstanceStorageInfo(ac,
-                    requestedInstanceType, connector);
-            Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(requestedInstanceType);
-            Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(requestedInstanceType);
-            CoreVerticalScaleResult result = new CoreVerticalScaleResult(
-                    request.getResourceId(),
-                    ResourceStatus.UPDATED,
-                    resourceStatus,
-                    stackVerticalScaleV4Request,
-                    instanceStorageCount,
-                    instanceStorageSize);
+            CoreVerticalScaleResult result;
+            if (requestedInstanceType != null) {
+                result = getCoreVerticalScaleResult(ac, request, connector, stackVerticalScaleV4Request, requestedInstanceType);
+            } else {
+                result = getCoreVerticalScaleResultWithoutInstances(ac, request, connector, stackVerticalScaleV4Request);
+            }
+
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(stackVerticalScaleRequestEvent.getHeaders(), result));
+
             LOGGER.debug("Vertical scaling successfully finished for {}, and the result is: {}", cloudContext, result);
         } catch (Exception e) {
             LOGGER.error("Vertical scaling stack failed", e);
@@ -81,6 +75,42 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
             eventBus.notify(CloudPlatformResult.failureSelector(CoreVerticalScaleResult.class),
                     new Event<>(stackVerticalScaleRequestEvent.getHeaders(), result));
         }
+    }
+
+    private CoreVerticalScaleResult getCoreVerticalScaleResultWithoutInstances(AuthenticatedContext ac,
+            CoreVerticalScaleRequest<CoreVerticalScaleResult> request, CloudConnector connector,
+            StackVerticalScaleV4Request stackVerticalScaleV4Request) throws Exception {
+        CoreVerticalScaleResult result;
+        List<CloudResourceStatus> resourceStatus =
+                stackUpscaleService.verticalScaleWithoutInstances(ac, request, connector, stackVerticalScaleV4Request.getGroup());
+        LOGGER.info("Vertical scaling without instances, resource statuses: {}", resourceStatus);
+        result = new CoreVerticalScaleResult(
+                request.getResourceId(),
+                ResourceStatus.UPDATED,
+                resourceStatus,
+                stackVerticalScaleV4Request,
+                null,
+                null);
+        return result;
+    }
+
+    private CoreVerticalScaleResult getCoreVerticalScaleResult(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+            CloudConnector connector, StackVerticalScaleV4Request stackVerticalScaleV4Request, String requestedInstanceType) throws Exception {
+        CoreVerticalScaleResult result;
+        List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector, stackVerticalScaleV4Request.getGroup());
+        LOGGER.info("Vertical scaling, resource statuses: {}", resourceStatus);
+        InstanceStoreMetadata instanceStoreMetadata =  stackUpscaleService.getInstanceStorageInfo(ac,
+                requestedInstanceType, connector);
+        Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(requestedInstanceType);
+        Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(requestedInstanceType);
+        result = new CoreVerticalScaleResult(
+                request.getResourceId(),
+                ResourceStatus.UPDATED,
+                resourceStatus,
+                stackVerticalScaleV4Request,
+                instanceStorageCount,
+                instanceStorageSize);
+        return result;
     }
 
     private AuthenticatedContext getAuthenticatedContext(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,

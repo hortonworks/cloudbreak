@@ -274,7 +274,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         RootVolumeV4Request rootVolume = new RootVolumeV4Request();
         rootVolume.setSize(defaultRootVolumeSize);
         template.setRootVolume(rootVolume);
-        template.setInstanceType(instanceType);
         stackVerticalScaleV4Request.setTemplate(template);
         return stackVerticalScaleV4Request;
     }
