@@ -936,7 +936,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public FlowIdentifier updatelicDnsEntriesByName(@ResourceName String name) {
+    public FlowIdentifier updatePublicDnsEntriesByName(@ResourceName String name) {
         return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 

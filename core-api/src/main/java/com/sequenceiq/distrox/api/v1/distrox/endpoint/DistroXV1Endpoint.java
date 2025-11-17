@@ -876,7 +876,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = "Update the public DNS entries of the cluster by name",
             operationId = "updateDataHubPublicDnsEntriesByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier updatelicDnsEntriesByName(@PathParam("name") String name);
+    FlowIdentifier updatePublicDnsEntriesByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/update_dns_entries")
