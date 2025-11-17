@@ -21,6 +21,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
@@ -69,10 +72,30 @@ public class RotateSaltPasswordService {
     @Inject
     private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
+    @Inject
+    private SecretRotationValidationService secretRotationValidationService;
+
+    @Inject
+    private SaltUpdateService saltUpdateService;
+
+    @Inject
+    private SecretRotationStepProgressService secretRotationStepProgressService;
+
     public FlowIdentifier triggerRotateSaltPassword(String environmentCrn, String accountId, RotateSaltPasswordReason reason) {
-        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
-        request.setSecrets(List.of(FreeIpaSecretType.SALT_PASSWORD.value()));
-        return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
+        if (secretRotationValidationService.failedRotationAlreadyHappened(environmentCrn, FreeIpaSecretType.SALT_PASSWORD)) {
+            secretRotationStepProgressService.deleteCurrentRotation(RotationMetadata.builder()
+                    .secretType(FreeIpaSecretType.SALT_PASSWORD)
+                    .resourceCrn(environmentCrn)
+                    .build());
+            LOGGER.info("Since there is already a failed salt password rotation for freeipa of environment {}, " +
+                    "we are doing salt update to initiate a salt rebootstrap and resolve the issue with saltuser.", environmentCrn);
+            return saltUpdateService.updateSaltStates(environmentCrn, accountId);
+        } else {
+            LOGGER.info("Triggering rotate salt password for freeipa of environment {}", environmentCrn);
+            FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+            request.setSecrets(List.of(FreeIpaSecretType.SALT_PASSWORD.value()));
+            return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
+        }
     }
 
     public void rotateSaltPassword(Stack stack) {

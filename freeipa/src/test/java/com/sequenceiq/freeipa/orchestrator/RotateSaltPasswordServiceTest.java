@@ -1,14 +1,17 @@
 package com.sequenceiq.freeipa.orchestrator;
 
 import static com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService.SALTUSER_DELETE_COMMAND;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,17 +39,18 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
@@ -94,6 +98,15 @@ class RotateSaltPasswordServiceTest {
 
     @Mock
     private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
+
+    @Mock
+    private SecretRotationValidationService secretRotationValidationService;
+
+    @Mock
+    private SaltUpdateService saltUpdateService;
+
+    @Mock
+    private SecretRotationStepProgressService secretRotationStepProgressService;
 
     @InjectMocks
     private RotateSaltPasswordService underTest;
@@ -190,13 +203,29 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void triggerRotateSaltPassword() {
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollable-id");
+        when(secretRotationValidationService.failedRotationAlreadyHappened(any(), any())).thenReturn(Boolean.FALSE);
 
-        FlowIdentifier result = underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+        underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
 
         verify(freeIpaSecretRotationService).rotateSecretsByCrn(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), requestCaptor.capture());
         FreeIpaSecretRotationRequest request = requestCaptor.getValue();
-        assertThat(request.getSecrets()).containsOnly(FreeIpaSecretType.SALT_PASSWORD.value());
+        assertThat(request.getSecrets()).containsOnly(SALT_PASSWORD.value());
+        verify(saltUpdateService, never()).updateSaltStates(any(), any());
+    }
+
+    @Test
+    void triggerSaltUpdate() {
+        when(secretRotationValidationService.failedRotationAlreadyHappened(any(), any())).thenReturn(Boolean.TRUE);
+        when(saltUpdateService.updateSaltStates(any(), any())).thenReturn(FlowIdentifier.notTriggered());
+
+        underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+
+        verify(freeIpaSecretRotationService, never()).rotateSecretsByCrn(any(), any(), any());
+        verify(saltUpdateService).updateSaltStates(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
+        ArgumentCaptor<RotationMetadata> mdCaptor = ArgumentCaptor.forClass(RotationMetadata.class);
+        verify(secretRotationStepProgressService).deleteCurrentRotation(mdCaptor.capture());
+        assertEquals(SALT_PASSWORD, mdCaptor.getValue().secretType());
+        assertEquals(ENVIRONMENT_CRN, mdCaptor.getValue().resourceCrn());
     }
 
     @Test

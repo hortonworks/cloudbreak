@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -55,7 +56,7 @@ public class SecretRotationValidationService {
             validateExecutionType(secretTypes, rotationFlowExecutionType, stepProgressList);
             return Optional.ofNullable(rotationFlowExecutionType);
         } else {
-            Optional<SecretRotationStepProgress> failedStep = getFailedRotationFlowStep(stepProgressList);
+            Optional<SecretRotationStepProgress> failedStep = getFailedRotationStep(stepProgressList);
             if (failedStep.isPresent()) {
                 return validateForFailedStep(failedStep.get(), secretTypes, rotationFlowExecutionType);
             } else {
@@ -63,6 +64,17 @@ public class SecretRotationValidationService {
                 return Optional.ofNullable(rotationFlowExecutionType);
             }
         }
+    }
+
+    public boolean failedRotationAlreadyHappened(String resourceCrn, SecretType secretType) {
+        List<SecretRotationStepProgress> stepProgressList = secretRotationStepProgressService.getProgressList(resourceCrn);
+        if (!stepProgressList.isEmpty()) {
+            return stepProgressList.stream()
+                    .filter(progress -> progress.getSecretType().equals(secretType))
+                    .filter(progress -> Set.of(ROLLBACK, FINALIZE).contains(progress.getCurrentExecutionType()))
+                    .anyMatch(progress -> progress.getStatus().equals(SecretRotationStepProgressStatus.FAILED));
+        }
+        return false;
     }
 
     private Optional<RotationFlowExecutionType> validateForFailedStep(SecretRotationStepProgress failedStep, Collection<SecretType> secretTypes,
@@ -100,7 +112,7 @@ public class SecretRotationValidationService {
         }
     }
 
-    private Optional<SecretRotationStepProgress> getFailedRotationFlowStep(List<SecretRotationStepProgress> stepProgressList) {
+    private Optional<SecretRotationStepProgress> getFailedRotationStep(List<SecretRotationStepProgress> stepProgressList) {
         return stepProgressList.stream()
                 .filter(step -> SecretRotationStepProgressStatus.FAILED.equals(step.getStatus()))
                 .findFirst();
