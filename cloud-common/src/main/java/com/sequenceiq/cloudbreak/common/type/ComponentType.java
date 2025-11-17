@@ -15,4 +15,8 @@ public enum ComponentType {
     public static ComponentType cdhProductDetails() {
         return CDH_PRODUCT_DETAILS;
     }
+
+    public static String cdhClusterComponentName() {
+        return "CDH";
+    }
 }
