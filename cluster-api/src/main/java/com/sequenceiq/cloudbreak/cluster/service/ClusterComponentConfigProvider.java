@@ -163,10 +163,12 @@ public class ClusterComponentConfigProvider {
         return result;
     }
 
-    public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
+    public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType, String name) {
         try {
-            Optional<ClusterComponent> comp = components.stream().filter(
-                    c -> c.getComponentType() == componentType).findFirst();
+            Optional<ClusterComponent> comp = components.stream()
+                    .filter(c -> c.getComponentType() == componentType)
+                    .filter(c -> c.getName().equals(name))
+                    .findFirst();
             return comp.isPresent() ? comp.get().getAttributes().get(clazz) : null;
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read component", e);
