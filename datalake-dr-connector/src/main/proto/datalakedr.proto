@@ -286,6 +286,7 @@ message ListDatalakeBackupRequest {
 */
 message ListDatalakeBackupResponse {
   repeated DatalakeBackupInfo datalake_info = 1; //
+  string testCheck = 3; // Test
 }
 
 /**
