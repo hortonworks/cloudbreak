@@ -145,7 +145,7 @@ public class EncryptionProfileProvider {
         }
         List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(userSuites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
-        return effectiveSuites.stream().map(CipherSuite::ianaName).collect(Collectors.toList());
+        return effectiveSuites.stream().map(CipherSuite::ianaName).distinct().collect(Collectors.toList());
     }
 
     public List<String> getTlsCipherSuitesIanaList(Map<String, List<String>> userEncryptionProfileMap, CipherSuitesLimitType cipherSuitesLimitType) {
@@ -160,9 +160,9 @@ public class EncryptionProfileProvider {
         List<CipherSuite> givenSuites = validateCipherSuites(Arrays.stream(userSuites).toList());
         List<CipherSuite> effectiveSuites = getEffectiveCipherSuites(givenSuites, cipherSuitesLimitType);
         if (useIanaNames) {
-            return effectiveSuites.stream().map(CipherSuite::ianaName).collect(Collectors.joining(separator));
+            return effectiveSuites.stream().map(CipherSuite::ianaName).distinct().collect(Collectors.joining(separator));
         } else {
-            return effectiveSuites.stream().map(CipherSuite::name).collect(Collectors.joining(separator));
+            return effectiveSuites.stream().map(CipherSuite::name).distinct().collect(Collectors.joining(separator));
         }
     }
 
@@ -222,6 +222,7 @@ public class EncryptionProfileProvider {
                     .sorted(Entry.comparingByKey())
                     .map(Entry::getValue)
                     .flatMap(List::stream)
+                    .distinct()
                     .toArray(String[]::new);
         }
         return userCipherSuits;
@@ -316,6 +317,7 @@ public class EncryptionProfileProvider {
         List<CipherSuite> effectiveSuites = givenSuites
                 .stream()
                 .filter(gs -> finalReferenceList.contains(gs.ianaName()))
+                .distinct()
                 .toList();
         return effectiveSuites;
     }

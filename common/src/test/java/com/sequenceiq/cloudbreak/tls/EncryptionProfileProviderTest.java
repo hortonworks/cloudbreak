@@ -225,7 +225,7 @@ public class EncryptionProfileProviderTest {
     }
 
     @Test
-    public void testGetTlsCipherSuitesDefaultRepeatedInput() {
+    public void testGetTlsCipherSuitesRepeatedCipherSuitesShouldBeRemoved() {
         String[] suites = List.of(
                 "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
                 "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
@@ -245,7 +245,6 @@ public class EncryptionProfileProviderTest {
 
         List<String> result = Arrays.asList(assertValue.split(":"));
         assertThat(result).containsExactly(
-                "ECDHE-ECDSA-AES128-GCM-SHA256",
                 "ECDHE-ECDSA-AES128-GCM-SHA256",
                 "ECDHE-RSA-AES128-GCM-SHA256",
                 "ECDHE-RSA-AES256-GCM-SHA384",
@@ -492,8 +491,8 @@ public class EncryptionProfileProviderTest {
 
     @Test
     public void testConvertCipherSuitesToIanaDoesNotIgnoreNotAllowed() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> underTest.convertCipherSuitesToIana(
-                List.of(
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                underTest.convertCipherSuitesToIana(List.of(
                         "ECDHE-ECDSA-AES128-GCM-SHA256",
                         "NOT_ALLOWED"
                 )));
@@ -503,7 +502,32 @@ public class EncryptionProfileProviderTest {
 
     @Test
     public void testGetTlsCipherSuitesIanaListEnsureOrdering() {
-        List<String> assertValue = underTest.getTlsCipherSuitesIanaList(new String[0], CipherSuitesLimitType.BLACKBOX_EXPORTER);
-        assertThat(assertValue).containsExactly(underTest.getDefaultCipherSuiteList(CipherSuitesLimitType.BLACKBOX_EXPORTER));
+        List<String> assertValue = underTest.getTlsCipherSuitesIanaList(new String[0],
+                CipherSuitesLimitType.BLACKBOX_EXPORTER);
+
+        assertThat(assertValue).containsExactly(
+                underTest.getDefaultCipherSuiteList(CipherSuitesLimitType.BLACKBOX_EXPORTER));
+    }
+
+    @Test
+    public void testGetTlsCipherSuitesIanaRemoveDuplicates() {
+        String[] suites = List.of(
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+                        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384")
+                .toArray(new String[7]);
+
+        List<String> assertValue = underTest.getTlsCipherSuitesIanaList(suites,
+                CipherSuitesLimitType.JAVA_INTERMEDIATE2018);
+
+        assertThat(assertValue).containsExactly(
+                "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384");
     }
 }
