@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 class Spark2UpgradeValidatorTest {
 
     public static final String EXPECTED = "Your current cluster configuration includes Spark2, " +
-            "which will be deprecated in the upcoming 7.3.x release. " +
-            "As a result, your cluster will only support the 7.2.x line" +
-            " and you will not be able to upgrade to the 7.3.x line. " +
-            "To ensure a smooth transition and continued support, " +
-            "please start planning to migrate to Spark3 by recreating your DH cluster. " +
-            "This will involve setting up a new cluster with Spark3 " +
-            "alongside your existing cluster.";
+            "which will be deprecated in the upcoming 7.3.x release. As a result, your cluster" +
+            " will only support the 7.2.x line and you will not be able to upgrade to the 7.3.x" +
+            " line. To ensure a smooth transition and continued support, please start planning " +
+            "to migrate to Spark3 by recreating your DH cluster (This will involve setting up a " +
+            "new cluster with Spark3 alongside your existing cluster) or remove Spark 2 and install" +
+            " Spark 3 on Cloudera Manager UI. This will involve setting up a new cluster with Spark3" +
+            " (This will be automatically synced into CDP Control Plane).";
 
     @InjectMocks
     private Spark2UpgradeValidator underTest;
