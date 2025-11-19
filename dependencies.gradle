@@ -62,7 +62,7 @@ ext {
   commonsCodecVersion = '1.20.0'
   commonsCollections4Version = '4.4'
   guavaVersion = '33.5.0-jre'
-  byteBuddyVersion = '1.17.8'
+  byteBuddyVersion = '1.18.1'
   commonsBeanutilsVersion = '1.11.0'
 
   // Logging
