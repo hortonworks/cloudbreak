@@ -53,7 +53,7 @@ doesDatabaseExist() {
 }
 
 getDataSizesForDatabases() {
-  DATABASES='"hive" "ranger" "profiler_agent" "profiler_metric"'
+  DATABASES='"hive" "ranger" "profiler_agent" "profiler_metric" "knox_gateway"'
   RESULT=""
   CUR_DB_SIZE=0
   TRIMMED_DB=""

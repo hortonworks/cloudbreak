@@ -111,6 +111,14 @@ execute_run() {
     doLog "INFO database for $SERVICE exist"
   fi
 
+  is_database_exists "knox_gateway"
+  if [ "$?" -eq 1 ]; then
+    doLog "ERROR database for $SERVICE doesn't exist"
+    ((FAILED++))
+  else
+    doLog "INFO database for $SERVICE exist"
+  fi
+
   OBJECT_STORE_PATH="${BACKUP_LOCATION::-1}"dry-run.txt
   doLog "INFO objectStore path" $OBJECT_STORE_PATH
   doLog "INFO testfile location" $TESTFILE_LOCATION

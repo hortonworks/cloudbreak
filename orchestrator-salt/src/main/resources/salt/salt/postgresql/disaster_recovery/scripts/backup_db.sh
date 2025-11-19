@@ -276,11 +276,12 @@ run_backup() {
   doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
 
   if [[ -z "$DATABASENAMES" || "$DATABASENAMES" == "DEFAULT" ]]; then
-    doLog "INFO No database name provided. Will backup hive, ranger, profiler_agent and profiler_metric databases."
+    doLog "INFO No database name provided. Will backup hive, ranger, profiler_agent, profiler_metric and knox_gateway databases."
     backup_database_for_service "hive"
     backup_database_for_service "ranger"
     backup_database_for_service "profiler_agent"
     backup_database_for_service "profiler_metric"
+    backup_database_for_service "knox_gateway"
   else
     for db in $DATABASENAMES; do
       doLog "INFO Backing up ${db}."

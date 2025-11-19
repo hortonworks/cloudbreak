@@ -103,6 +103,7 @@ errorExit() {
     limit_incomming_connection "ranger" -1
     limit_incomming_connection "profiler_agent" -1
     limit_incomming_connection "profiler_metric" -1
+    limit_incomming_connection "knox_gateway" -1
   else
     for db in $DATABASENAME; do
       doLog "Limiting incomming connections to ${db}."
@@ -238,11 +239,12 @@ run_restore() {
   hdfs --loglevel ERROR dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
   if [[ -z "$DATABASENAME" || "$DATABASENAME" == "DEFAULT" ]]; then
-    echo "No database name provided. Will restore hive, ranger, profiler_agent and profiler_metric databases."
+    echo "No database name provided. Will restore hive, ranger, profiler_agent, profiler_metric and knox_gateway databases."
     restore_db_from_local "hive"
     restore_db_from_local "ranger"
     restore_db_from_local "profiler_agent"
     restore_db_from_local "profiler_metric"
+    restore_db_from_local "knox_gateway"
   else
     echo "Restoring ${DATABASENAME}."
     restore_db_from_local "${DATABASENAME}"
