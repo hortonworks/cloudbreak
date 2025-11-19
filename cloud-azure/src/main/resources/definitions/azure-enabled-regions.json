@@ -19,6 +19,18 @@
       "cdpSupportedServices": [ "ALL" ]
     },
     {
+      "name": "Austria East",
+      "latitude": "48.20849",
+      "longitude": "16.37208",
+      "cdpSupportedServices": [ "ALL" ]
+    },
+    {
+      "name": "Belgium Central",
+      "latitude": "50.85045",
+      "longitude": "4.34878",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+    },
+    {
       "name": "Brazil South",
       "latitude": "-23.55",
       "longitude": "-46.633",
@@ -49,6 +61,12 @@
       "cdpSupportedServices": [ "ALL" ]
     },
     {
+      "name": "Chile Central",
+      "latitude": "-33.45694",
+      "longitude": "-70.64827",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+    },
+    {
       "name": "East Asia",
       "latitude": "22.267",
       "longitude": "114.188",
@@ -77,6 +95,12 @@
       "latitude": "50.110924",
       "longitude": "8.682127",
       "cdpSupportedServices": [ "ALL" ]
+    },
+    {
+      "name": "Indonesia Central",
+      "latitude": "-6.21462",
+      "longitude": "106.84513",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
     },
     {
       "name": "Israel Central",
@@ -118,6 +142,12 @@
       "name": "Malaysia West",
       "latitude": "3.140853",
       "longitude": "101.693207",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+    },
+    {
+      "name": "Mexico Central",
+      "latitude": "19.42847",
+      "longitude": "-99.12766",
       "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
     },
     {
@@ -260,6 +290,11 @@
       "latitude": "47.233",
       "longitude": "-119.852",
       "cdpSupportedServices": [ "ALL" ]
+    },{
+      "name": "West US 3",
+      "latitude": "33.44838",
+      "longitude": "-112.07404",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
     }
   ]
 }
