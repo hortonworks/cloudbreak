@@ -1045,7 +1045,11 @@ public abstract class TestContext implements ApplicationContextAware {
         }
     }
 
-    public void cleanupTestContext() {
+    public synchronized void cleanupTestContext() {
+        if (shutdown) {
+            LOGGER.info("Cleanup already performed for this TestContext.");
+            return;
+        }
         if (!cleanUp) {
             LOGGER.info("Clean up is skipped due to cleanUp paramater");
             return;
@@ -1054,8 +1058,6 @@ public abstract class TestContext implements ApplicationContextAware {
             throw new IllegalStateException(
                     "Test context should be validated! Maybe you forgot to call .validate() at the end of the test? See other tests as an example.");
         }
-
-        checkShutdown();
 
         handleExceptionsDuringTest(TestErrorLog.IGNORE);
 

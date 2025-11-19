@@ -30,7 +30,7 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractE2EWithReusableResourcesTest.class);
 
-    private static final Set<TestContext> TEST_CONTEXTS = new java.util.HashSet<>();
+    private static final Set<TestContext> TEST_CONTEXTS = new java.util.concurrent.CopyOnWriteArraySet<>();
 
     @Inject
     private SpotUtil spotUtil;

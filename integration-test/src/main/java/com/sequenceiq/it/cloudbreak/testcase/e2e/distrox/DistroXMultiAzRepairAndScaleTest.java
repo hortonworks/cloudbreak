@@ -57,7 +57,6 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
         createEnvironmentWithFreeIpa(testContext);
         testContext.given(SdxInternalTestDto.class)
                 .withCloudStorage()
-                .withEnableMultiAz(true)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances();
