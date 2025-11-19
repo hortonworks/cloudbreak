@@ -54,9 +54,9 @@ public class StatusCheckerJobService implements JobSchedulerService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(),
-                statusCheckerConfig.getSnoozeSeconds() + RandomUtil.getInt(statusCheckerConfig.getIntervalInSeconds()),
-                statusCheckerConfig.getIntervalInSeconds());
+        int intervalInSeconds = statusCheckerConfig.getIntervalInSeconds();
+        int randomizedDelay = statusCheckerConfig.getSnoozeSeconds() + getUniformlyDistributedDelay(intervalInSeconds);
+        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), randomizedDelay, intervalInSeconds);
         schedule(jobDetail, trigger, resource.getJobResource());
     }
 
@@ -78,8 +78,9 @@ public class StatusCheckerJobService implements JobSchedulerService {
 
     public <T> void scheduleLongIntervalCheck(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource, Map.of(SYNC_JOB_TYPE, LONG_SYNC_JOB_TYPE));
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), statusCheckerConfig.getIntervalInSeconds(),
-                statusCheckerConfig.getLongIntervalInSeconds());
+        int longIntervalInSeconds = statusCheckerConfig.getLongIntervalInSeconds();
+        int randomizedDelay = getUniformlyDistributedDelay(longIntervalInSeconds);
+        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), randomizedDelay, longIntervalInSeconds);
         schedule(jobDetail, trigger, resource.getJobResource());
     }
 
@@ -166,6 +167,10 @@ public class StatusCheckerJobService implements JobSchedulerService {
 
     private Date delayedStart(int delayInSeconds) {
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(delayInSeconds)));
+    }
+
+    private int getUniformlyDistributedDelay(int intervalInSeconds) {
+        return RandomUtil.getQuickRandomInt(intervalInSeconds);
     }
 
     @Override

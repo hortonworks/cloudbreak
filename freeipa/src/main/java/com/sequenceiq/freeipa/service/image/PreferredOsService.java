@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.common.model.OsType;
 
 @Service
@@ -38,7 +39,7 @@ public class PreferredOsService {
 
     private String getOsTypeBasedOnRequestedOsType(String requestedOs, String accountId) {
         if (requestedRhel9(requestedOs)) {
-            if (entitlementService.isEntitledToUseOS(accountId, RHEL9)) {
+            if (notInternalUser() && entitlementService.isEntitledToUseOS(accountId, RHEL9)) {
                 return requestedOs;
             } else {
                 return defaultOs;
@@ -57,7 +58,12 @@ public class PreferredOsService {
     }
 
     private boolean mustUseRhel9(String accountId) {
-        return entitlementService.isEntitledToUseOS(accountId, RHEL9)
+        return notInternalUser()
+                && entitlementService.isEntitledToUseOS(accountId, RHEL9)
                 && entitlementService.isRhel9ImagePreferred(accountId);
+    }
+
+    private boolean notInternalUser() {
+        return !RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn());
     }
 }
