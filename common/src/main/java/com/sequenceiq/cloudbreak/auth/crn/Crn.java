@@ -233,7 +233,8 @@ public class Crn {
         COMMONCONSOLE("commonconsole", NON_ADMIN_SERVICE),
         HYBRID("hybrid", NON_ADMIN_SERVICE),
         REMOTECLUSTER("remotecluster", NON_ADMIN_SERVICE),
-        APP_FACTORY("appfactory", NON_ADMIN_SERVICE);
+        APP_FACTORY("appfactory", NON_ADMIN_SERVICE),
+        APPLICATIONS("applications", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
