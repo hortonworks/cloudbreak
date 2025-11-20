@@ -6,6 +6,7 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum MigrateZookeeperToKraftMigrationState implements FlowState {
     INIT_STATE,
+    MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE,
     RESTART_KAFKA_BROKER_NODES_STATE,
     RESTART_KAFKA_CONNECT_NODES_STATE,
     MIGRATE_ZOOKEEPER_TO_KRAFT_STATE,

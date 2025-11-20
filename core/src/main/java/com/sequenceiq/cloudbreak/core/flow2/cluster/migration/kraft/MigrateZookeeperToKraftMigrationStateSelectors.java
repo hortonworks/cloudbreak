@@ -4,6 +4,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum MigrateZookeeperToKraftMigrationStateSelectors implements FlowEvent {
 
+    START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT,
     START_RESTART_KAFKA_BROKER_NODES_EVENT,
     START_RESTART_KAFKA_CONNECT_NODES_EVENT,
     START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT,

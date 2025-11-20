@@ -7,12 +7,14 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_CONNECT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
@@ -82,12 +84,29 @@ class MigrateZookeeperToKraftMigrationActionsTest {
     private ArgumentCaptor<String> captor;
 
     @Test
-    void testRestartKafkaBrokerNodesAction() throws Exception {
+    void testMigrateZookeeperToKraftValidationAction() throws Exception {
         MigrateZookeeperToKraftTriggerEvent event = new MigrateZookeeperToKraftTriggerEvent(STACK_ID, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent>) underTest.restartKafkaBrokerNodesAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftTriggerEvent>) underTest.migrateZookeeperToKraftValidationAction();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testRestartKafkaBrokerNodesAction() throws Exception {
+        MigrateZookeeperToKraftEvent event = new MigrateZookeeperToKraftEvent(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftEvent>) underTest.restartKafkaBrokerNodesAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);

@@ -7,9 +7,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINALIZE_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.HANDLED_FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_ROLLBACK_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_ROLLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_ROLLBACK_STARTED_EVENT;
@@ -77,12 +79,31 @@ class MigrateZookeeperToKraftRollbackActionsTest {
     private ArgumentCaptor<String> captor;
 
     @Test
-    void testRollbackZookeeperToKraftMigrationAction() throws Exception {
+    void testRollbackZookeeperToKraftMigrationValidationAction() throws Exception {
         MigrateZookeeperToKraftRollbackTriggerEvent event = new MigrateZookeeperToKraftRollbackTriggerEvent(STACK_ID, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftRollbackTriggerEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftRollbackTriggerEvent>) underTest.rollbackZookeeperToKraftMigrationAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftRollbackTriggerEvent>)
+                        underTest.rollbackZookeeperToKraftMigrationValidationAction();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testRollbackZookeeperToKraftMigrationAction() throws Exception {
+        MigrateZookeeperToKraftRollbackEvent event = new MigrateZookeeperToKraftRollbackEvent(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(),
+                STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftRollbackEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftRollbackEvent>) underTest.rollbackZookeeperToKraftMigrationAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +14,7 @@ public class MigrateZookeeperToKraftFinalizationTriggerEvent extends StackEvent 
     public MigrateZookeeperToKraftFinalizationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), resourceId, accepted);
+        super(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), resourceId, accepted);
     }
 
     @Override

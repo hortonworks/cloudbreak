@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationState.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationState.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationState.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationState.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
 
 import java.util.List;
 
@@ -27,7 +29,11 @@ public class MigrateZookeeperToKraftConfigurationFlowConfig extends StackStatusF
             new Transition.Builder<MigrateZookeeperToKraftConfigurationState, MigrateZookeeperToKraftConfigurationStateSelectors>()
                     .defaultFailureEvent(MigrateZookeeperToKraftConfigurationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT)
 
-                    .from(INIT_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE)
+                    .from(INIT_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE)
+                    .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE)
                     .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT)
                     .defaultFailureEvent()
 
@@ -67,7 +73,7 @@ public class MigrateZookeeperToKraftConfigurationFlowConfig extends StackStatusF
     @Override
     public MigrateZookeeperToKraftConfigurationStateSelectors[] getInitEvents() {
         return new MigrateZookeeperToKraftConfigurationStateSelectors[]{
-                START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT
+                START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT
         };
     }
 

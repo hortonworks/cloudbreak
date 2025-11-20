@@ -7,9 +7,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_STARTED_EVENT;
@@ -77,12 +79,31 @@ class MigrateZookeeperToKraftFinalizationActionsTest {
     private ArgumentCaptor<String> captor;
 
     @Test
-    void testFinalizeZookeeperToKraftMigrationAction() throws Exception {
+    void testFinalizeZookeeperToKraftMigrationValidationAction() throws Exception {
         MigrateZookeeperToKraftFinalizationTriggerEvent event = new MigrateZookeeperToKraftFinalizationTriggerEvent(STACK_ID, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
-        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationTriggerEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationTriggerEvent>) underTest.finalizeZookeeperToKraftMigrationAction();
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationTriggerEvent> action;
+        action = (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationTriggerEvent>)
+                underTest.finalizeZookeeperToKraftMigrationValidationAction();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testFinalizeZookeeperToKraftMigrationAction() throws Exception {
+        MigrateZookeeperToKraftFinalizationEvent event = new MigrateZookeeperToKraftFinalizationEvent(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(),
+                STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationEvent>) underTest.finalizeZookeeperToKraftMigrationAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);

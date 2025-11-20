@@ -5,12 +5,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_BROKER_NODES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.RESTART_KAFKA_CONNECT_NODES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_CONNECT_NODES_EVENT;
 
@@ -31,7 +33,11 @@ public class MigrateZookeeperToKraftMigrationFlowConfig extends StackStatusFinal
             new Transition.Builder<MigrateZookeeperToKraftMigrationState, MigrateZookeeperToKraftMigrationStateSelectors>()
                     .defaultFailureEvent(MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT)
 
-                    .from(INIT_STATE).to(RESTART_KAFKA_BROKER_NODES_STATE)
+                    .from(INIT_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE)
+                    .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE).to(RESTART_KAFKA_BROKER_NODES_STATE)
                     .event(START_RESTART_KAFKA_BROKER_NODES_EVENT)
                     .defaultFailureEvent()
 
@@ -77,7 +83,7 @@ public class MigrateZookeeperToKraftMigrationFlowConfig extends StackStatusFinal
     @Override
     public MigrateZookeeperToKraftMigrationStateSelectors[] getInitEvents() {
         return new MigrateZookeeperToKraftMigrationStateSelectors[]{
-                START_RESTART_KAFKA_BROKER_NODES_EVENT
+                START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT
         };
     }
 

@@ -741,7 +741,7 @@ class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         underTest.triggerZookeeperToKraftMigration(nameOrCrn, "accountId");
 
@@ -753,7 +753,7 @@ class StackOperationServiceTest {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         assertThrows(BadRequestException.class, () -> underTest.triggerZookeeperToKraftMigration(nameOrCrn, "accountId"));
 
@@ -766,7 +766,7 @@ class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         underTest.triggerZookeeperToKraftMigrationFinalization(nameOrCrn, "accountId");
 
@@ -778,7 +778,7 @@ class StackOperationServiceTest {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         assertThrows(BadRequestException.class, () -> underTest.triggerZookeeperToKraftMigrationFinalization(nameOrCrn, "accountId"));
 
@@ -791,7 +791,7 @@ class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         underTest.triggerZookeeperToKraftMigrationRollback(nameOrCrn, "accountId");
 
@@ -803,7 +803,7 @@ class StackOperationServiceTest {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
-        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigration(stack, "accountId");
+        doThrow(BadRequestException.class).when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationEligibility(stack, "accountId");
 
         assertThrows(BadRequestException.class, () -> underTest.triggerZookeeperToKraftMigrationRollback(nameOrCrn, "accountId"));
 

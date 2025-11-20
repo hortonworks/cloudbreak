@@ -28,6 +28,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -69,51 +70,54 @@ class ZookeeperToKraftMigrationValidatorTest {
     @BeforeEach
     void setup() {
         initGlobalPrivateFields();
-        when(stack.getStatus()).thenReturn(status);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {STREAMS_MESSAGING_LIGHT_DUTY, STREAMS_MESSAGING_HIGH_AVAILABILITY, STREAMS_MESSAGING_HEAVY_DUTY})
-    void testValidateZookeeperToKraftMigrationWithValidTemplates(String template) {
+    void testValidateZookeeperToKraftMigrationEligibilityWithValidTemplates(String template) {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn(template);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWithHigherVersion() {
+    void testValidateZookeeperToKraftMigrationEligibilityWithHigherVersion() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Streams Messaging Light Duty");
         when(stack.getStackVersion()).thenReturn(HIGHER_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWhenClusterNotAvailable() {
+    void testValidateZookeeperToKraftMigrationEligibilityWhenClusterNotAvailable() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(false);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
         assertEquals("Zookeeper to KRaft migration can only be performed when the cluster is in Available state. Please ensure the cluster is " +
-                        "fully operational before starting the migration.", exception.getMessage());
+                "fully operational before starting the migration.", exception.getMessage());
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWithUnsupportedTemplateType() {
+    void testValidateZookeeperToKraftMigrationEligibilityWithUnsupportedTemplateType() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Unsupported Template Type");
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
         String message = exception.getMessage();
         assertThat(message, containsString("Zookeeper to KRaft migration is supported only for the following template types:"));
@@ -123,21 +127,39 @@ class ZookeeperToKraftMigrationValidatorTest {
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWithLowVersion() {
+    void testValidateZookeeperToKraftMigrationEligibilityWithNullBlueprint() {
+        when(stack.getStatus()).thenReturn(status);
+        when(status.isAvailable()).thenReturn(true);
+        when(stack.getBlueprint()).thenReturn(null);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+
+        String message = exception.getMessage();
+        assertThat(message, containsString("Zookeeper to KRaft migration is supported only for the following template types:"));
+        assertThat(message, containsString("Streams Messaging High Availability"));
+        assertThat(message, containsString("Streams Messaging Light Duty"));
+        assertThat(message, containsString("Streams Messaging Heavy Duty"));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationEligibilityWithLowVersion() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Streams Messaging Light Duty");
         when(stack.getStackVersion()).thenReturn(LOWER_VERSION);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
         assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2 or higher",
                 exception.getMessage());
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWhenEntitlementNotEnabled() {
+    void testValidateZookeeperToKraftMigrationEligibilityWhenEntitlementNotEnabled() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Streams Messaging Light Duty");
@@ -145,25 +167,59 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
         assertEquals(String.format("Your account is not entitled to perform Zookeeper to KRaft migration. Please contact Cloudera to enable '%s' " +
-                        "entitlement for your account.", CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION), exception.getMessage());
+                "entitlement for your account.", CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION), exception.getMessage());
     }
 
     @Test
-    void testValidateZookeeperToKraftMigrationWithMinimumVersion() {
+    void testValidateZookeeperToKraftMigrationEligibilityWithMinimumVersion() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Streams Messaging Light Duty");
         when(stack.getStackVersion()).thenReturn("7.3.2");
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigration(stack, ACCOUNT_ID));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationState() {
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateWhenAlreadyMigratedNotFinalized() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+
+        assertEquals("Cannot start KRaft migration. The cluster has been migrated already to KRaft.",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateWhenAlreadyMigrated() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+
+        assertEquals("Cannot start KRaft migration. The cluster has been migrated already to KRaft.",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateWhenMigrationInProgress() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_MIGRATION.name()));
+
+        assertEquals("Cannot start KRaft migration. The cluster is being migrated to KRaft and has the status: BROKERS_IN_MIGRATION.",
+                exception.getMessage());
     }
 
     @Test
     void testIsMigrationFromZookeeperToKraftSupported() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn(STREAMS_MESSAGING_HIGH_AVAILABILITY);
@@ -176,6 +232,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @ParameterizedTest
     @MethodSource("testIsMigrationFromZookeeperToKraftNotSupportedParameters")
     void testIsMigrationFromZookeeperToKraftNotSupported() {
+        when(stack.getStatus()).thenReturn(status);
         when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn(STREAMS_MESSAGING_HIGH_AVAILABILITY);
@@ -193,6 +250,52 @@ class ZookeeperToKraftMigrationValidatorTest {
                 Arguments.of(true, INVALID_TEMPLATE, VALID_VERSION, true),
                 Arguments.of(false, STREAMS_MESSAGING_LIGHT_DUTY, VALID_VERSION, true)
         );
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForFinalization() {
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForFinalizationWhenAlreadyFinalized() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+
+        assertEquals("Cannot finalize KRaft migration. KRaft migration is already finalized for this cluster.",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForFinalizationWhenNotMigratedYet() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+
+        assertEquals("Cannot finalize KRaft migration. The cluster has not been migrated to KRaft yet.",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForRollback() {
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForRollbackWhenAlreadyFinalized() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+
+        assertEquals("Cannot rollback KRaft migration. KRaft migration is already finalized for this cluster.",
+                exception.getMessage());
+    }
+
+    @Test
+    void testValidateZookeeperToKraftMigrationStateForRollbackWhenNotMigratedYet() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+
+        assertEquals("Cannot rollback KRaft migration. The cluster has not been migrated to KRaft yet.",
+                exception.getMessage());
     }
 
     private void initGlobalPrivateFields() {

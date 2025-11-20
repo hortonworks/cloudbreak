@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINALIZE_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.HANDLED_FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_ROLLBACK_FAILED_EVENT;
@@ -44,8 +45,8 @@ public class MigrateZookeeperToKraftRollbackActions {
     @Inject
     private FlowMessageService flowMessageService;
 
-    @Bean(name = "ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE")
-    public Action<?, ?> rollbackZookeeperToKraftMigrationAction() {
+    @Bean(name = "ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE")
+    public Action<?, ?> rollbackZookeeperToKraftMigrationValidationAction() {
         return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftRollbackTriggerEvent.class) {
 
             @Override
@@ -57,6 +58,33 @@ public class MigrateZookeeperToKraftRollbackActions {
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftRollbackTriggerEvent payload,
                     Map<Object, Object> variables) {
+                LOGGER.debug("Rollback Zookeeper to KRaft migration validation state started {}", payload);
+                Long stackId = payload.getResourceId();
+                String nextEvent = ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftRollbackEvent(nextEvent, payload.getResourceId()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftRollbackTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftRollbackFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE")
+    public Action<?, ?> rollbackZookeeperToKraftMigrationAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftRollbackEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftRollbackEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftRollbackEvent payload,
+                    Map<Object, Object> variables) {
                 LOGGER.debug("Rollback Zookeeper to KRaft migration state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
@@ -66,7 +94,7 @@ public class MigrateZookeeperToKraftRollbackActions {
             }
 
             @Override
-            protected Object getFailurePayload(MigrateZookeeperToKraftRollbackTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+            protected Object getFailurePayload(MigrateZookeeperToKraftRollbackEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
                 return new MigrateZookeeperToKraftRollbackFailureEvent(payload.getResourceId(), ex);
             }

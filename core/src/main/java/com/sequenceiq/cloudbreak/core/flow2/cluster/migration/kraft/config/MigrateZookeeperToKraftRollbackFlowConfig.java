@@ -5,11 +5,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINALIZE_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.HANDLED_FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 
 import java.util.List;
 
@@ -29,7 +31,11 @@ public class MigrateZookeeperToKraftRollbackFlowConfig extends StackStatusFinali
             new Transition.Builder<MigrateZookeeperToKraftRollbackState, MigrateZookeeperToKraftRollbackStateSelectors>()
                     .defaultFailureEvent(FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
 
-                    .from(INIT_STATE).to(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE)
+                    .from(INIT_STATE).to(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE)
+                    .event(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE).to(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE)
                     .event(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
                     .defaultFailureEvent()
 
@@ -68,7 +74,7 @@ public class MigrateZookeeperToKraftRollbackFlowConfig extends StackStatusFinali
     @Override
     public MigrateZookeeperToKraftRollbackStateSelectors[] getInitEvents() {
         return new MigrateZookeeperToKraftRollbackStateSelectors[]{
-                START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT
+                START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT
         };
     }
 

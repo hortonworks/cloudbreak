@@ -573,21 +573,21 @@ public class StackOperationService {
     public FlowIdentifier triggerZookeeperToKraftMigration(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
-        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationEligibility(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigration(stack.getId());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationFinalization(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
-        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationEligibility(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigrationFinalization(stack.getId());
     }
 
     public FlowIdentifier triggerZookeeperToKraftMigrationRollback(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
         MDCBuilder.buildMdcContext(stack);
-        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigration(stack, accountId);
+        zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationEligibility(stack, accountId);
         return flowManager.triggerZookeeperToKraftMigrationRollback(stack.getId());
     }
 

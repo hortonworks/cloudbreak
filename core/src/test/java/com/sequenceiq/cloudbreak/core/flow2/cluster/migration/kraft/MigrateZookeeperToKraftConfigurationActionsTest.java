@@ -6,9 +6,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_STARTED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,12 +77,31 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
     private ArgumentCaptor<String> captor;
 
     @Test
-    void testMigrateZookeeperToKraftConfigurationAction() throws Exception {
+    void testMigrateZookeeperToKraftConfigurationValidationAction() throws Exception {
         MigrateZookeeperToKraftConfigurationTriggerEvent event = new MigrateZookeeperToKraftConfigurationTriggerEvent(STACK_ID, new Promise<>());
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
 
         AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftConfigurationTriggerEvent> action =
-                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftConfigurationTriggerEvent>) underTest.migrateZookeeperToKraftConfigurationAction();
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftConfigurationTriggerEvent>)
+                        underTest.migrateZookeeperToKraftConfigurationValidationAction();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testMigrateZookeeperToKraftConfigurationAction() throws Exception {
+        MigrateZookeeperToKraftConfigurationEvent event =
+                new MigrateZookeeperToKraftConfigurationEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftConfigurationEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftConfigurationEvent>) underTest.migrateZookeeperToKraftConfigurationAction();
         initActionPrivateFields(action);
         context = new MigrateZookeeperToKraftContext(flowParameters, event);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);

@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_BROKER_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.RESTART_KAFKA_CONNECT_NODES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
@@ -46,8 +47,8 @@ public class MigrateZookeeperToKraftMigrationActions {
     @Inject
     private FlowMessageService flowMessageService;
 
-    @Bean(name = "RESTART_KAFKA_BROKER_NODES_STATE")
-    public Action<?, ?> restartKafkaBrokerNodesAction() {
+    @Bean(name = "MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_STATE")
+    public Action<?, ?> migrateZookeeperToKraftValidationAction() {
         return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftTriggerEvent.class) {
 
             @Override
@@ -58,6 +59,32 @@ public class MigrateZookeeperToKraftMigrationActions {
 
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftTriggerEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Migrate Zookeeper to KRaft validation state started {}", payload);
+                Long stackId = payload.getResourceId();
+                String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftEvent(nextEvent, stackId));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "RESTART_KAFKA_BROKER_NODES_STATE")
+    public Action<?, ?> restartKafkaBrokerNodesAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Migrate Zookeeper to KRaft restart Kafka broker nodes state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
@@ -67,7 +94,7 @@ public class MigrateZookeeperToKraftMigrationActions {
             }
 
             @Override
-            protected Object getFailurePayload(MigrateZookeeperToKraftTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+            protected Object getFailurePayload(MigrateZookeeperToKraftEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
                 return new MigrateZookeeperToKraftFailureEvent(payload.getResourceId(), ex);
             }

@@ -4,6 +4,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum MigrateZookeeperToKraftRollbackHandlerSelectors implements FlowEvent {
 
+    ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT,
     ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 
     @Override

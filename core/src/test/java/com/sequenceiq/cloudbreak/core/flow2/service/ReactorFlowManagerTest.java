@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
@@ -466,20 +466,22 @@ class ReactorFlowManagerTest {
     void testTriggerZookeeperToKraftMigrationFinalization() {
         underTest.triggerZookeeperToKraftMigrationFinalization(STACK_ID);
         ArgumentCaptor<MigrateZookeeperToKraftFinalizationTriggerEvent> captor = ArgumentCaptor.forClass(MigrateZookeeperToKraftFinalizationTriggerEvent.class);
-        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event()), captor.capture());
+        verify(reactorNotifier, times(1)).notify(eq(stack.getId()),
+                eq(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event()), captor.capture());
         MigrateZookeeperToKraftFinalizationTriggerEvent event = captor.getValue();
         assertEquals(1L, captor.getValue().getResourceId());
-        assertEquals(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), event.selector());
+        assertEquals(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), event.selector());
     }
 
     @Test
     void testTriggerZookeeperToKraftMigrationRollback() {
         underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
         ArgumentCaptor<MigrateZookeeperToKraftRollbackTriggerEvent> captor = ArgumentCaptor.forClass(MigrateZookeeperToKraftRollbackTriggerEvent.class);
-        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event()), captor.capture());
+        verify(reactorNotifier, times(1)).notify(eq(stack.getId()),
+                eq(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event()), captor.capture());
         MigrateZookeeperToKraftRollbackTriggerEvent event = captor.getValue();
         assertEquals(1L, captor.getValue().getResourceId());
-        assertEquals(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), event.selector());
+        assertEquals(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), event.selector());
     }
 
     @Test

@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT;
@@ -44,8 +45,8 @@ public class MigrateZookeeperToKraftFinalizationActions {
     @Inject
     private FlowMessageService flowMessageService;
 
-    @Bean(name = "FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE")
-    public Action<?, ?> finalizeZookeeperToKraftMigrationAction() {
+    @Bean(name = "FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE")
+    public Action<?, ?> finalizeZookeeperToKraftMigrationValidationAction() {
         return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftFinalizationTriggerEvent.class) {
 
             @Override
@@ -57,6 +58,33 @@ public class MigrateZookeeperToKraftFinalizationActions {
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftFinalizationTriggerEvent payload,
                     Map<Object, Object> variables) {
+                LOGGER.debug("Finalize Zookeeper to KRaft migration validation state started {}", payload);
+                Long stackId = payload.getResourceId();
+                String nextEvent = FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftFinalizationEvent(nextEvent, payload.getResourceId()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftFinalizationTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftFinalizationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE")
+    public Action<?, ?> finalizeZookeeperToKraftMigrationAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftFinalizationEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftFinalizationEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftFinalizationEvent payload,
+                    Map<Object, Object> variables) {
                 LOGGER.debug("Finalize Zookeeper to KRaft migration state started {}", payload);
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
@@ -66,7 +94,7 @@ public class MigrateZookeeperToKraftFinalizationActions {
             }
 
             @Override
-            protected Object getFailurePayload(MigrateZookeeperToKraftFinalizationTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+            protected Object getFailurePayload(MigrateZookeeperToKraftFinalizationEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
                 return new MigrateZookeeperToKraftFinalizationFailureEvent(payload.getResourceId(), ex);
             }

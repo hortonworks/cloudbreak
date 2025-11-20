@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.config;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
@@ -10,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 
 import java.util.List;
 
@@ -28,7 +30,11 @@ public class MigrateZookeeperToKraftFinalizationFlowConfig extends StackStatusFi
             new Transition.Builder<MigrateZookeeperToKraftFinalizationState, MigrateZookeeperToKraftFinalizationStateSelectors>()
                     .defaultFailureEvent(FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
 
-                    .from(INIT_STATE).to(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE)
+                    .from(INIT_STATE).to(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE)
+                    .event(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE).to(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE)
                     .event(START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
                     .defaultFailureEvent()
 
@@ -67,7 +73,7 @@ public class MigrateZookeeperToKraftFinalizationFlowConfig extends StackStatusFi
     @Override
     public MigrateZookeeperToKraftFinalizationStateSelectors[] getInitEvents() {
         return new MigrateZookeeperToKraftFinalizationStateSelectors[]{
-                START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT
+                START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT
         };
     }
 
