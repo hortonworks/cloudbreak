@@ -1,11 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_FQDN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUSTSETUP_DNS_STATE;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 
+import java.util.Locale;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -19,6 +21,8 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
@@ -28,9 +32,9 @@ import com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatus
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-public abstract class TrustSetupSteps {
+public abstract class TrustProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TrustSetupSteps.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrustProvider.class);
 
     @Value("${freeipa.max.salt.trustsetup.maxretry}")
     private int maxRetryCount;
@@ -98,6 +102,20 @@ public abstract class TrustSetupSteps {
         } else {
             LOGGER.info("Successful validation of crossRealm trust [{}] without warnings", crossRealmTrust);
         }
+    }
+
+    public abstract void deleteTrust(Long stackId) throws Exception;
+
+    public void deleteDnsZones(Long stackId) throws FreeIpaClientException {
+        Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
+        CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stackId);
+        FreeIpaClient client = getFreeIpaClientFactory().getFreeIpaClientForStack(stack);
+        String realm = crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT);
+        ignoreNotFoundException(() -> client.deleteForwardDnsZone("in-addr.arpa."),
+                "Deleting DNS forward zone for [in-addr.arpa.] but it was not found", realm);
+        ignoreNotFoundException(() -> client.deleteForwardDnsZone(realm),
+                "Deleting DNS forward zone for [{}] but it was not found", realm);
+        LOGGER.debug("Deleting DNS forward zone for crossRealm [{}]", crossRealmTrust);
     }
 
     protected StackService getStackService() {

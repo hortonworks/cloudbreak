@@ -1,11 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Locale;
+import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +21,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Trust;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -71,6 +80,9 @@ class ActiveDirectoryTrustServiceTest {
 
     @Mock
     private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private FreeIpaClient freeIpaClient;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -150,5 +162,118 @@ class ActiveDirectoryTrustServiceTest {
         underTest.addTrust(stackId);
 
         verify(client).addTrust("secret", "ad", true, "REALM");
+    }
+
+    @Test
+    void testDeleteTrust() throws Exception {
+        Long stackId = 1L;
+        String realm = "ad.realm";
+        String realmUpper = realm.toUpperCase(Locale.ROOT);
+
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(crossRealmTrustService.getByStackId(stackId)).thenReturn(crossRealmTrust);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(crossRealmTrust.getKdcRealm()).thenReturn(realm);
+
+        underTest.deleteTrust(stackId);
+
+        verify(stackService).getByIdWithListsInTransaction(stackId);
+        verify(crossRealmTrustService).getByStackId(stackId);
+        verify(freeIpaClientFactory).getFreeIpaClientForStack(stack);
+        verify(freeIpaClient).deleteTrust(realmUpper);
+    }
+
+    @Test
+    void testDeleteTrustIgnoreNotFound() throws Exception {
+        Long stackId = 1L;
+        String realm = "ad.realm";
+        String realmUpper = realm.toUpperCase(Locale.ROOT);
+
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(crossRealmTrustService.getByStackId(stackId)).thenReturn(crossRealmTrust);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(crossRealmTrust.getKdcRealm()).thenReturn(realm);
+
+        when(freeIpaClient.deleteTrust(realmUpper)).thenThrow(buildIpaException(FreeIpaErrorCodes.NOT_FOUND, "Not found"));
+
+        underTest.deleteTrust(stackId);
+
+        verify(stackService).getByIdWithListsInTransaction(stackId);
+        verify(crossRealmTrustService).getByStackId(stackId);
+        verify(freeIpaClientFactory).getFreeIpaClientForStack(stack);
+        verify(freeIpaClient).deleteTrust(realmUpper);
+    }
+
+    private FreeIpaClientException buildIpaException(FreeIpaErrorCodes freeIpaErrorCodes, String message) {
+        JsonRpcClientException cause =
+                new JsonRpcClientException(freeIpaErrorCodes.getValue(), "", new IntNode(freeIpaErrorCodes.getValue()));
+        return new FreeIpaClientException(message, cause, OptionalInt.of(freeIpaErrorCodes.getValue()));
+    }
+
+    @Test
+    void testDeleteTrustThrowForError() throws Exception {
+        Long stackId = 1L;
+        String realm = "ad.realm";
+        String realmUpper = realm.toUpperCase(Locale.ROOT);
+
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(crossRealmTrustService.getByStackId(stackId)).thenReturn(crossRealmTrust);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(crossRealmTrust.getKdcRealm()).thenReturn(realm);
+
+        when(freeIpaClient.deleteTrust(realmUpper))
+                .thenThrow(buildIpaException(FreeIpaErrorCodes.NETWORK_ERROR, "Network error"));
+
+        assertThrows(FreeIpaClientException.class, () -> underTest.deleteTrust(stackId));
+
+        verify(stackService).getByIdWithListsInTransaction(stackId);
+        verify(crossRealmTrustService).getByStackId(stackId);
+        verify(freeIpaClientFactory).getFreeIpaClientForStack(stack);
+        verify(freeIpaClient).deleteTrust(realmUpper);
+    }
+
+    @Test
+    void testDeleteDnsZonesSuccess() throws Exception {
+        Long stackId = 1L;
+        String realm = "ad.realm";
+        String realmUpper = realm.toUpperCase(Locale.ROOT);
+
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(crossRealmTrustService.getByStackId(stackId)).thenReturn(crossRealmTrust);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(crossRealmTrust.getKdcRealm()).thenReturn(realm);
+
+        underTest.deleteDnsZones(stackId);
+
+        verify(stackService).getByIdWithListsInTransaction(stackId);
+        verify(crossRealmTrustService).getByStackId(stackId);
+        verify(freeIpaClientFactory).getFreeIpaClientForStack(stack);
+        verify(freeIpaClient).deleteForwardDnsZone("in-addr.arpa.");
+        verify(freeIpaClient).deleteForwardDnsZone(realmUpper);
+    }
+
+    @Test
+    void testDeleteDnsZonesIgnoreNotFound() throws Exception {
+        Long stackId = 2L;
+        String realm = "ad.realm";
+        String realmUpper = realm.toUpperCase(Locale.ROOT);
+
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(crossRealmTrustService.getByStackId(stackId)).thenReturn(crossRealmTrust);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        when(crossRealmTrust.getKdcRealm()).thenReturn(realm);
+
+        doThrow(buildIpaException(FreeIpaErrorCodes.NOT_FOUND, "Not found"))
+                .when(freeIpaClient).deleteForwardDnsZone("in-addr.arpa.");
+        doThrow(buildIpaException(FreeIpaErrorCodes.NOT_FOUND, "Not found"))
+                .when(freeIpaClient).deleteForwardDnsZone(realmUpper);
+
+        underTest.deleteDnsZones(stackId);
+
+        verify(stackService).getByIdWithListsInTransaction(stackId);
+        verify(crossRealmTrustService).getByStackId(stackId);
+        verify(freeIpaClientFactory).getFreeIpaClientForStack(stack);
+        verify(freeIpaClient).deleteForwardDnsZone("in-addr.arpa.");
+        verify(freeIpaClient).deleteForwardDnsZone(realmUpper);
     }
 }

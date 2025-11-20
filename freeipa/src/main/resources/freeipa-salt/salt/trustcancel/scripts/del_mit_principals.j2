@@ -1,0 +1,21 @@
+{%- set freeipa_realm = salt['pillar.get']('freeipa:trust_setup:freeipa_realm') %}
+{%- set kdc_realm = salt['pillar.get']('freeipa:trust_setup:kdc_realm') %}
+#!/bin/bash
+
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
+echo $FPW | kinit {{ salt['pillar.get']('sssd-ipa:principal') }}
+
+kadmin.local -x ipa-setup-override-restrictions -q "delete_principal -force krbtgt/{{ freeipa_realm | upper }}@{{ kdc_realm | upper }}"
+
+rc1=${PIPESTATUS[0]}
+
+kadmin.local -x ipa-setup-override-restrictions -q "delete_principal -force krbtgt/{{ kdc_realm | upper }}@{{ freeipa_realm | upper }}"
+
+rc2=${PIPESTATUS[0]}
+
+exit $(( rc1 != 0 ? rc1 : rc2 ))

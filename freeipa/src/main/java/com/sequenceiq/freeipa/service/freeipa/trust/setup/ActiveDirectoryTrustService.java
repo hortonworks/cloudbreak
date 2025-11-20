@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUSTSETUP_ADTRUST_INSTALL;
 
 import java.util.Locale;
@@ -20,7 +21,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Service
-public class ActiveDirectoryTrustService extends TrustSetupSteps {
+public class ActiveDirectoryTrustService extends TrustProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActiveDirectoryTrustService.class);
 
@@ -54,5 +55,16 @@ public class ActiveDirectoryTrustService extends TrustSetupSteps {
         FreeIpaClient client = getFreeIpaClientFactory().getFreeIpaClientForStack(stack);
         Trust trust = client.addTrust(crossRealmTrust.getTrustSecret(), "ad", true, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT));
         LOGGER.debug("Added Active Directory trust [{}] for crossRealm [{}], start validation", trust, crossRealmTrust);
+    }
+
+    @Override
+    public void deleteTrust(Long stackId) throws Exception  {
+        Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
+        CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stackId);
+        FreeIpaClient client = getFreeIpaClientFactory().getFreeIpaClientForStack(stack);
+        String realm = crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT);
+        ignoreNotFoundException(() -> client.deleteTrust(realm),
+                "Deleting trust for [{}] but it was not found", realm);
+        LOGGER.debug("Deleting trust for crossRealm [{}]", crossRealmTrust);
     }
 }

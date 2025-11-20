@@ -63,8 +63,8 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.handler.FreeIpaTrustCanc
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.freeipa.trust.cancel.CancelTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -135,7 +135,7 @@ class CancelTrustSetupFlowIntegrationTest {
     private NodeValidator nodeValidator;
 
     @MockBean
-    private CancelTrustService cancelTrustService;
+    private ActiveDirectoryTrustService activeDirectoryTrustService;
 
     @MockBean
     private CrossRealmTrustService crossRealmTrustService;
@@ -168,6 +168,7 @@ class CancelTrustSetupFlowIntegrationTest {
 
     @Test
     void testCancelCrossRealmTrustWhenSuccessful() {
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -183,7 +184,8 @@ class CancelTrustSetupFlowIntegrationTest {
 
     @Test
     public void testCancelTrustSetupConfigurationFails() throws FreeIpaClientException {
-        doThrow(new CloudbreakServiceException("Cancel trust failed")).when(cancelTrustService).cancelTrust(STACK_ID);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        doThrow(new CloudbreakServiceException("Cancel trust failed")).when(activeDirectoryTrustService).deleteDnsZones(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -236,7 +238,6 @@ class CancelTrustSetupFlowIntegrationTest {
             FreeIpaTrustCancelFailedAction.class,
             FreeIpaTrustCancelConfigurationAction.class,
             FreeIpaTrustCancelFinishedAction.class,
-            CancelTrustService.class,
             CrossRealmTrustService.class,
             FreeIpaTrustCancelConfigurationHandler.class,
             TaskResultConverter.class

@@ -15,7 +15,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustS
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishAddTrustFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishAddTrustSuccess;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @Component
 public class FreeIpaTrustSetupFinishAddTrustHandler extends ExceptionCatcherEventHandler<FreeIpaTrustSetupFinishAddRequest> {
@@ -35,9 +35,9 @@ public class FreeIpaTrustSetupFinishAddTrustHandler extends ExceptionCatcherEven
     protected Selectable doAccept(HandlerEvent<FreeIpaTrustSetupFinishAddRequest> event) {
         FreeIpaTrustSetupFinishAddRequest request = event.getData();
         try {
-            TrustSetupSteps trustSetupSteps = crossRealmTrustService.getTrustSetupSteps(request.getResourceId());
-            trustSetupSteps.addTrust(request.getResourceId());
-            trustSetupSteps.validateTrust(request.getResourceId());
+            TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(request.getResourceId());
+            trustProvider.addTrust(request.getResourceId());
+            trustProvider.validateTrust(request.getResourceId());
             return new FreeIpaTrustSetupFinishAddTrustSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to add trust on FreeIPA", e);

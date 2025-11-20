@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPr
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPrepareServerRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPrepareServerSuccess;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaTrustSetupPrepareServerHandlerTest {
@@ -32,7 +32,7 @@ class FreeIpaTrustSetupPrepareServerHandlerTest {
     private CrossRealmTrustService crossRealmTrustService;
 
     @Mock
-    private TrustSetupSteps trustSetupSteps;
+    private TrustProvider trustProvider;
 
     @Mock
     private Event event;
@@ -47,19 +47,19 @@ class FreeIpaTrustSetupPrepareServerHandlerTest {
     void testDoAcceptSuccess() throws Exception {
         HandlerEvent<FreeIpaTrustSetupPrepareServerRequest> handlerEvent = new HandlerEvent<>(event);
 
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(trustSetupSteps);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(trustProvider);
 
         Selectable result = handler.doAccept(handlerEvent);
 
         assertTrue(result instanceof FreeIpaTrustSetupPrepareServerSuccess);
-        verify(trustSetupSteps).prepare(STACK_ID);
+        verify(trustProvider).prepare(STACK_ID);
     }
 
     @Test
     void testDoAcceptFailure() {
         HandlerEvent<FreeIpaTrustSetupPrepareServerRequest> handlerEvent = new HandlerEvent<>(event);
 
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenThrow(new RuntimeException("error"));
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenThrow(new RuntimeException("error"));
 
         Selectable result = handler.doAccept(handlerEvent);
 

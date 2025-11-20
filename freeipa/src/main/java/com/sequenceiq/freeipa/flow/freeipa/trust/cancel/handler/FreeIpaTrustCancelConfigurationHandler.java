@@ -14,7 +14,8 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelConfigurationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelConfigurationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelConfigurationSuccess;
-import com.sequenceiq.freeipa.service.freeipa.trust.cancel.CancelTrustService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @Component
 public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEventHandler<FreeIpaTrustCancelConfigurationRequest> {
@@ -22,7 +23,7 @@ public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEven
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaTrustCancelConfigurationHandler.class);
 
     @Inject
-    private CancelTrustService cancelTrustService;
+    private CrossRealmTrustService crossRealmTrustService;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustCancelConfigurationRequest> event) {
@@ -34,7 +35,9 @@ public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEven
     protected Selectable doAccept(HandlerEvent<FreeIpaTrustCancelConfigurationRequest> event) {
         FreeIpaTrustCancelConfigurationRequest request = event.getData();
         try {
-            cancelTrustService.cancelTrust(request.getResourceId());
+            TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(request.getResourceId());
+            trustProvider.deleteTrust(request.getResourceId());
+            trustProvider.deleteDnsZones(request.getResourceId());
             return new FreeIpaTrustCancelConfigurationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to cancel trust on FreeIPA", e);

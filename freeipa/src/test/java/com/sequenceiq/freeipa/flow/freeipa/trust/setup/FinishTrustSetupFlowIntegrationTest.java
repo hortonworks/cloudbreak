@@ -175,7 +175,7 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @Test
     void testFinishCrossRealmTrustWhenSuccessful() {
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -192,7 +192,7 @@ class FinishTrustSetupFlowIntegrationTest {
 
     @Test
     public void testAddTrustFails() throws FreeIpaClientException {
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(activeDirectoryTrustService).addTrust(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);

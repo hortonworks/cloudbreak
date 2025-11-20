@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.repository.CrossRealmTrustRepository;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @Component
 public class CrossRealmTrustService {
@@ -27,13 +27,13 @@ public class CrossRealmTrustService {
     private CrossRealmTrustRepository crossRealmTrustRepository;
 
     @Inject
-    private List<TrustSetupSteps> trustSetupStepsList;
+    private List<TrustProvider> trustProviderList;
 
-    private final Map<KdcType, TrustSetupSteps> trustSetupStepsMap = new HashMap<>();
+    private final Map<KdcType, TrustProvider> trustSetupStepsMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        trustSetupStepsList.forEach(steps -> trustSetupStepsMap.put(steps.kdcType(), steps));
+        trustProviderList.forEach(steps -> trustSetupStepsMap.put(steps.kdcType(), steps));
     }
 
     public CrossRealmTrust getByStackId(Long stackId) {
@@ -64,7 +64,7 @@ public class CrossRealmTrustService {
         return crossRealmTrustRepository.save(crossRealmTrust);
     }
 
-    public TrustSetupSteps getTrustSetupSteps(Long stackId) {
+    public TrustProvider getTrustProvider(Long stackId) {
         CrossRealmTrust crossRealmTrust = getByStackId(stackId);
         return trustSetupStepsMap.computeIfAbsent(crossRealmTrust.getKdcType(), kdcType -> {
             throw new IllegalArgumentException("Unsupported KDC type: " + kdcType);

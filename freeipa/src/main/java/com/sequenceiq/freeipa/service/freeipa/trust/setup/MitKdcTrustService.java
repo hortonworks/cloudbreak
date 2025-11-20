@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsC
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA_REALM;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_FQDN;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_REALM;
+import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUSTCANCEL_DEL_MIT_TRUST;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUSTSETUP_ADD_TRUST;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SECRET;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
@@ -25,7 +26,7 @@ import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 
 @Service
-public class MitKdcTrustService extends TrustSetupSteps {
+public class MitKdcTrustService extends TrustProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MitKdcTrustService.class);
 
@@ -60,6 +61,25 @@ public class MitKdcTrustService extends TrustSetupSteps {
                 KDC_REALM, StringUtils.capitalize(crossRealmTrust.getKdcRealm()),
                 TRUST_SECRET, crossRealmTrust.getTrustSecret()))));
         LOGGER.debug("Created OrchestratorStateParams for running prepare MIT KDC: {}", stateParameters);
+        return stateParameters;
+    }
+
+    @Override
+    public void deleteTrust(Long stackId) throws Exception {
+        Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
+        OrchestratorStateParams stateParams = createDeleteKdcPrincipalsOrchestratorStateParams(stack);
+        getHostOrchestrator().runOrchestratorState(stateParams);
+    }
+
+    private OrchestratorStateParams createDeleteKdcPrincipalsOrchestratorStateParams(Stack stack) {
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn());
+        CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stack.getId());
+        OrchestratorStateParams stateParameters = getSaltStateParamsService().createStateParams(stack, TRUSTCANCEL_DEL_MIT_TRUST, false,
+                getMaxRetryCount(), getMaxRetryCountOnError());
+        stateParameters.setStateParams(Map.of(FREEIPA, Map.of(TRUST_SETUP_PILLAR, Map.of(
+                FREEIPA_REALM, kerberosConfig.getRealm(),
+                KDC_REALM, StringUtils.capitalize(crossRealmTrust.getKdcRealm())))));
+        LOGGER.debug("Created OrchestratorStateParams for running delete MIT KDC principals: {}", stateParameters);
         return stateParameters;
     }
 }

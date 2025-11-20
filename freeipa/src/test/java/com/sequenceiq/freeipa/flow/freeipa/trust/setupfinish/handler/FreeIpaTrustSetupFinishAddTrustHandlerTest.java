@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustS
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishAddTrustFailed;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishAddTrustSuccess;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaTrustSetupFinishAddTrustHandlerTest {
@@ -31,7 +31,7 @@ class FreeIpaTrustSetupFinishAddTrustHandlerTest {
     private CrossRealmTrustService crossRealmTrustService;
 
     @Mock
-    private TrustSetupSteps trustSetupSteps;
+    private TrustProvider trustProvider;
 
     @Mock
     private Event event;
@@ -46,20 +46,20 @@ class FreeIpaTrustSetupFinishAddTrustHandlerTest {
     void testDoAcceptSuccess() throws Exception {
         HandlerEvent<FreeIpaTrustSetupFinishAddRequest> handlerEvent = new HandlerEvent<>(event);
 
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(trustSetupSteps);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(trustProvider);
 
         Selectable result = handler.doAccept(handlerEvent);
 
         assertTrue(result instanceof FreeIpaTrustSetupFinishAddTrustSuccess);
-        verify(trustSetupSteps).addTrust(STACK_ID);
-        verify(trustSetupSteps).validateTrust(STACK_ID);
+        verify(trustProvider).addTrust(STACK_ID);
+        verify(trustProvider).validateTrust(STACK_ID);
     }
 
     @Test
     void testDoAcceptFailure() {
         HandlerEvent<FreeIpaTrustSetupFinishAddRequest> handlerEvent = new HandlerEvent<>(event);
 
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenThrow(new RuntimeException("error"));
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenThrow(new RuntimeException("error"));
 
         Selectable result = handler.doAccept(handlerEvent);
 

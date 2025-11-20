@@ -25,7 +25,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.MitKdcTrustService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 import com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatusValidationService;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -70,23 +70,23 @@ class CrossRealmTrustServiceTest {
     private KerberosConfigService kerberosConfigService;
 
     @Test
-    void testGetTrustSetupSteps() {
+    void testGetTrustProvider() {
         when(crossRealmTrustRepository.findByStackId(STACK_ID)).thenReturn(Optional.of(crossRealmTrust));
         when(crossRealmTrust.getKdcType()).thenReturn(KdcType.ACTIVE_DIRECTORY);
 
-        TrustSetupSteps adTrustSetupSteps = underTest.getTrustSetupSteps(STACK_ID);
-        assertTrue(adTrustSetupSteps instanceof ActiveDirectoryTrustService);
+        TrustProvider adTrustProvider = underTest.getTrustProvider(STACK_ID);
+        assertTrue(adTrustProvider instanceof ActiveDirectoryTrustService);
 
         when(crossRealmTrust.getKdcType()).thenReturn(KdcType.MIT);
-        TrustSetupSteps mitTrustSetupSteps = underTest.getTrustSetupSteps(STACK_ID);
-        assertTrue(mitTrustSetupSteps instanceof MitKdcTrustService);
+        TrustProvider mitTrustProvider = underTest.getTrustProvider(STACK_ID);
+        assertTrue(mitTrustProvider instanceof MitKdcTrustService);
     }
 
     @TestConfiguration
     @Import(value = {
             CrossRealmTrustService.class,
             MitKdcTrustService.class,
-            ActiveDirectoryTrustService.class
+            ActiveDirectoryTrustService.class,
     })
     static class Config {
     }

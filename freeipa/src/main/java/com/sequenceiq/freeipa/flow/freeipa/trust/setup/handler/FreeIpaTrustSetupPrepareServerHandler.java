@@ -15,7 +15,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPr
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPrepareServerRequest;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupPrepareServerSuccess;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
-import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupSteps;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
 @Component
 public class FreeIpaTrustSetupPrepareServerHandler extends ExceptionCatcherEventHandler<FreeIpaTrustSetupPrepareServerRequest> {
@@ -34,8 +34,8 @@ public class FreeIpaTrustSetupPrepareServerHandler extends ExceptionCatcherEvent
     protected Selectable doAccept(HandlerEvent<FreeIpaTrustSetupPrepareServerRequest> event) {
         FreeIpaTrustSetupPrepareServerRequest request = event.getData();
         try {
-            TrustSetupSteps trustSetupSteps = crossRealmTrustService.getTrustSetupSteps(request.getResourceId());
-            trustSetupSteps.prepare(request.getResourceId());
+            TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(request.getResourceId());
+            trustProvider.prepare(request.getResourceId());
             return new FreeIpaTrustSetupPrepareServerSuccess(request.getResourceId());
         } catch (Exception e) {
             return new FreeIpaTrustSetupPrepareServerFailed(request.getResourceId(), e);

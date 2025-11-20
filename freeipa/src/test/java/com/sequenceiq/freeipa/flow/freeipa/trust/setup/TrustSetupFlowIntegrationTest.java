@@ -185,7 +185,7 @@ class TrustSetupFlowIntegrationTest {
     void testPrepareCrossRealmTrustWhenSuccessful() {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults()
                 .addTaskResult(new TaskResult(TaskResultType.INFO, "Success", Map.of())));
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
@@ -255,7 +255,7 @@ class TrustSetupFlowIntegrationTest {
     @Test
     public void testPrepareIpaServerFails() throws Exception {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         doThrow(new CloudbreakServiceException("Prepare IPA server failed")).when(activeDirectoryTrustService).prepare(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
@@ -280,7 +280,7 @@ class TrustSetupFlowIntegrationTest {
     @Test
     public void testConfigureDnsServerFails() throws Exception {
         when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
-        when(crossRealmTrustService.getTrustSetupSteps(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
         doThrow(new CloudbreakServiceException("Configure DNS server failed")).when(activeDirectoryTrustService).configureDns(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
