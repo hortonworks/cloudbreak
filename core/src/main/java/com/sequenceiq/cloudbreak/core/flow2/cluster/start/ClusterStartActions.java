@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.job.diskusage.DiskUsageSyncJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
 import com.sequenceiq.cloudbreak.job.provider.ProviderSyncJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -58,6 +59,9 @@ public class ClusterStartActions {
 
     @Inject
     private ProviderSyncJobService providerSyncJobService;
+
+    @Inject
+    private DiskUsageSyncJobService diskUsageSyncJobService;
 
     @Bean(name = "CLUSTER_DB_CERT_ROTATION_STATE")
     public Action<?, ?> clusterDbCertRotation() {
@@ -130,6 +134,7 @@ public class ClusterStartActions {
                 meteringService.scheduleSync(context.getStackId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStackId());
                 providerSyncJobService.schedule(context.getStack());
+                diskUsageSyncJobService.schedule(context.getStack());
                 sendEvent(context);
             }
 

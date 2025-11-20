@@ -1215,7 +1215,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void preServiceDeploymentRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         LOGGER.debug("Executing pre-service-deployment recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT, false);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, PRE_SERVICE_DEPLOYMENT, false);
     }
 
     @Override
@@ -1962,6 +1962,16 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.warn("Error occurred during the salt enableSeLinuxOnNodes operation", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Optional<Integer> getDatabaseDiskUsagePercentage(GatewayConfig primaryGateway, String targetFqdn) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            return saltStateService.getDiskUsagePercentage(sc, targetFqdn, "/dbfs");
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during the salt getDiskUsagePercentage operation", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

@@ -63,12 +63,11 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
@@ -394,8 +393,8 @@ class ReactorFlowManagerTest {
         ClusterView clusterView = mock(ClusterView.class);
         doReturn(clusterView).when(stackDto).getCluster();
         underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
-        ArgumentCaptor<DistroXDiskUpdateEvent> eventCaptor = ArgumentCaptor.forClass(DistroXDiskUpdateEvent.class);
-        verify(reactorNotifier).notify(eq(1L), eq(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.event()), eventCaptor.capture());
+        ArgumentCaptor<DistroXDiskUpdateTriggerEvent> eventCaptor = ArgumentCaptor.forClass(DistroXDiskUpdateTriggerEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT), eventCaptor.capture());
         assertEquals(stackDto.getId(), eventCaptor.getValue().getStackId());
     }
 

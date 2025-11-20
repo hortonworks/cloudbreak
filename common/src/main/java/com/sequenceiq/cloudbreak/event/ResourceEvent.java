@@ -775,6 +775,8 @@ public enum ResourceEvent {
     DATAHUB_DISK_UPDATE_IN_PROGRESS("datahub.disk.update.in.progress"),
     DATAHUB_DISK_UPDATE_FAILED("datahub.disk.update.failed"),
     DATAHUB_DISK_UPDATE_FINISHED("datahub.disk.update.finished"),
+    DATAHUB_AUTOMATIC_DB_DISK_RESIZE_INITIATED("datahub.automatic.db.disk.resize.initiated"),
+    DATAHUB_AUTOMATIC_DB_DISK_RESIZE_LIMIT_REACHED("datahub.automatic.db.disk.resize.limit.reached"),
     DISK_RESIZE_FAILED("cluster.disk.resize.failed"),
     DISK_RESIZE_STARTED("cluster.disk.resize.started"),
     DISK_RESIZE_COMPLETE("cluster.disk.resize.complete"),

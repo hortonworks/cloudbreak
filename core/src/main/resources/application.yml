@@ -876,6 +876,13 @@ provider-sync:
   enabled-providers: AZURE
   enabled: true
 
+diskusage-sync:
+  intervalminutes: 720
+  enabled: true
+  dbdiskthreshold: 80
+  increment: 100
+  maxsize: 1000
+
 clusterdns:
   host: localhost
   port: 8982

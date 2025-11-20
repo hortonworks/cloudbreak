@@ -76,6 +76,8 @@ public class FlowChainTriggers {
 
     public static final String ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT = "ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT";
 
+    public static final String DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT = "DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

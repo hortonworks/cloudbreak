@@ -210,4 +210,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void enableSeLinuxOnNodes(List<GatewayConfig> allGateway, Set<Node> allNodesInTargetGroup,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
+
+    Optional<Integer> getDatabaseDiskUsagePercentage(GatewayConfig primaryGateway, String targetFqdn) throws CloudbreakOrchestratorFailedException;
 }

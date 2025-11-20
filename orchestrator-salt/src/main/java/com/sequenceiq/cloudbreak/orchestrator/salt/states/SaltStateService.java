@@ -468,6 +468,23 @@ public class SaltStateService {
         }
     }
 
+    public Optional<Integer> getDiskUsagePercentage(SaltConnector sc, String masterFqdn, String mountPoint) {
+        try {
+            CommandExecutionResponse result = measure(() -> sc.run(new HostList(List.of(masterFqdn)), "disk.percent", LOCAL,
+                    CommandExecutionResponse.class, mountPoint), LOGGER, "Run disk.percent took {}ms with path [{}]", mountPoint);
+            String resultString = result.getResultByMinionId().get(masterFqdn);
+            if (resultString == null || resultString.isEmpty()) {
+                return Optional.empty();
+            } else {
+                String numericString = resultString.replace("%", "").trim();
+                return Optional.of(Integer.parseInt(numericString));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Couldn't get disk usage percentage from master {}. Message: {}", masterFqdn, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
     public Map<String, String> runCommand(SaltConnector sc, String command, RetryType retryType) {
         return retryType.execute(retry, () -> runCommand(sc, command));
     }

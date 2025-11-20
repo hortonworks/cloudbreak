@@ -730,4 +730,38 @@ class SaltStateServiceTest {
                 eq("cat /etc/default/cloudera-scm-server | grep '^export CMF_JAVA_OPTS' | tail -n1"));
         assertEquals("host.master0.site", captor.getValue().getTarget());
     }
+
+    @Test
+    void testGetDiskUsagePercentage() {
+        // GIVEN
+        int resultValue = 15;
+        Map<String, String> commandOutputs = new HashMap<>();
+        commandOutputs.put("master", resultValue + "%");
+        CommandExecutionResponse resp = new CommandExecutionResponse();
+        List<Map<String, String>> commandOutputsList = new ArrayList<>();
+        commandOutputsList.add(commandOutputs);
+        resp.setResult(commandOutputsList);
+        when(saltConnector.run(any(Target.class), eq("disk.percent"), eq(LOCAL), eq(CommandExecutionResponse.class), eq("/dbfs"))).thenReturn(resp);
+        // WHEN
+        Optional<Integer> result = underTest.getDiskUsagePercentage(saltConnector, "master", "/dbfs");
+        // THEN
+        assertTrue(result.isPresent());
+        assertEquals(resultValue, result.get());
+    }
+
+    @Test
+    void testGetDiskUsagePercentageWhenNoPartition() {
+        // GIVEN
+        Map<String, String> commandOutputs = new HashMap<>();
+        commandOutputs.put("master", "");
+        CommandExecutionResponse resp = new CommandExecutionResponse();
+        List<Map<String, String>> commandOutputsList = new ArrayList<>();
+        commandOutputsList.add(commandOutputs);
+        resp.setResult(commandOutputsList);
+        when(saltConnector.run(any(Target.class), eq("disk.percent"), eq(LOCAL), eq(CommandExecutionResponse.class), eq("/dbfs"))).thenReturn(resp);
+        // WHEN
+        Optional<Integer> result = underTest.getDiskUsagePercentage(saltConnector, "master", "/dbfs");
+        // THEN
+        assertTrue(result.isEmpty());
+    }
 }

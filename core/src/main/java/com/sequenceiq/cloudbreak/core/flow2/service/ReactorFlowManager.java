@@ -74,8 +74,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWith
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.update.publicdns.UpdatePublicDnsEntriesFlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
@@ -88,6 +86,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DataLakeUpgradeFlowChainTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXDiskUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -540,12 +539,11 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerStackUpdateDisks(StackDto stack, DiskUpdateRequest updateRequest) {
-        MDCBuilder.buildMdcContext(stack);
+        String selector = FlowChainTriggers.DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT;
         Long stackId = stack.getId();
-        String selector = DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector();
         updateRequest.setGroup(updateRequest.getGroup().toLowerCase(Locale.ROOT));
         LOGGER.info("Datahub Vertical Scale flow triggered for datahub {}", stack.getName());
-        DistroXDiskUpdateEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateEvent.builder()
+        DistroXDiskUpdateTriggerEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateTriggerEvent.builder()
                 .withResourceId(stackId)
                 .withStackId(stackId)
                 .withGroup(updateRequest.getGroup())
@@ -555,6 +553,7 @@ public class ReactorFlowManager {
                 .withClusterName(stack.getCluster().getResourceName())
                 .withAccountId(stack.getAccountId())
                 .withSelector(selector)
+                .withAccepted(new Promise<>())
                 .build();
         LOGGER.debug("Disk Update flow trigger event sent for datahub {}", stack.getName());
         return reactorNotifier.notify(stackId, selector, datahubDiskUpdateTriggerEvent);

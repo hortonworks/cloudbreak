@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event;
+package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-@JsonDeserialize(builder = DistroXDiskUpdateEvent.Builder.class)
-public class DistroXDiskUpdateEvent  extends StackEvent {
+@JsonDeserialize(builder = DistroXDiskUpdateTriggerEvent.Builder.class)
+public class DistroXDiskUpdateTriggerEvent extends StackEvent {
 
     private final String volumeType;
 
@@ -33,7 +33,7 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
 
     private final String cloudPlatform;
 
-    public DistroXDiskUpdateEvent(
+    public DistroXDiskUpdateTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
@@ -94,16 +94,19 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
         return diskType;
     }
 
+    @Override
     public String toString() {
-        return new StringJoiner(", ", DistroXDiskUpdateEvent.class.getSimpleName() + "[", "]")
-            .add("volumeType=" + volumeType)
-            .add("size=" + size)
-            .add("group=" + group)
-            .add("diskType=" + diskType)
-            .add("clusterName=" + clusterName)
-            .add("volumesToBeUpdated=" + volumesToBeUpdated)
-            .add("cloudPlatform=" + cloudPlatform)
-            .toString();
+        return new StringJoiner(", ", DistroXDiskUpdateTriggerEvent.class.getSimpleName() + "[", "]")
+                .add("volumeType='" + volumeType + "'")
+                .add("size=" + size)
+                .add("group='" + group + "'")
+                .add("diskType='" + diskType + "'")
+                .add("stackId=" + stackId)
+                .add("clusterName='" + clusterName + "'")
+                .add("accountId='" + accountId + "'")
+                .add("volumesToBeUpdated=" + volumesToBeUpdated)
+                .add("cloudPlatform='" + cloudPlatform + "'")
+                .toString();
     }
 
     public static Builder builder() {
@@ -200,8 +203,8 @@ public class DistroXDiskUpdateEvent  extends StackEvent {
             return this;
         }
 
-        public DistroXDiskUpdateEvent build() {
-            return new DistroXDiskUpdateEvent(
+        public DistroXDiskUpdateTriggerEvent build() {
+            return new DistroXDiskUpdateTriggerEvent(
                     selector,
                     resourceId,
                     accepted,

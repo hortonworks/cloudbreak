@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMetaDataJobService;
+import com.sequenceiq.cloudbreak.job.diskusage.DiskUsageSyncJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
 import com.sequenceiq.cloudbreak.job.provider.ProviderSyncJobService;
 import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
@@ -152,6 +153,9 @@ public class ClusterCreationActions {
 
     @Inject
     private ProviderSyncJobService providerSyncJobService;
+
+    @Inject
+    private DiskUsageSyncJobService diskUsageSyncJobService;
 
     @Inject
     private StackUtil stackUtil;
@@ -741,6 +745,7 @@ public class ClusterCreationActions {
                 aimJobService.schedule(context.getStackId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStackId());
                 providerSyncJobService.schedule(context.getStack());
+                diskUsageSyncJobService.schedule(context.getStack());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
                     existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);
                 }

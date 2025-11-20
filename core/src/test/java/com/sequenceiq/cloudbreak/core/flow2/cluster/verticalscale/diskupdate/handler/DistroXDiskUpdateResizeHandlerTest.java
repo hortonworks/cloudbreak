@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -61,6 +62,7 @@ class DistroXDiskUpdateResizeHandlerTest {
         handlerRequest = new DistroXDiskUpdateEvent(
                 selector,
                 STACK_ID,
+                new Promise<>(),
                 "TEST",
                 "accountId",
                 List.of(),
