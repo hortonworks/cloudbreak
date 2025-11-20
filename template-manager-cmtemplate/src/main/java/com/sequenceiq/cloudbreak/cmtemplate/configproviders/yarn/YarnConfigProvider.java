@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -27,8 +28,15 @@ public class YarnConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String HADOOP_OPTS = "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"";
 
+    private static final String MR_APPLICATION_FRAMEWORK_PATH = "mapreduce_application_framework_path";
+
+    private static final String DEFAULT_MR_APPLICATION_FRAMEWORK_PATH = "/user/yarn/mapreduce/mr-framework/{version}-mr-framework.tar.gz#mr-framework";
+
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
+
+    @Inject
+    private HdfsConfigHelper hdfsConfigHelper;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
@@ -43,7 +51,13 @@ public class YarnConfigProvider extends AbstractRoleConfigProvider {
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.GATEWAY:
-                return List.of(config(MAPREDUCE_CLIENT_ENV_SAFETY_VALVE, HADOOP_OPTS));
+                List<ApiClusterTemplateConfig> roleConfigs = Lists.newArrayList();
+                roleConfigs.add(config(MAPREDUCE_CLIENT_ENV_SAFETY_VALVE, HADOOP_OPTS));
+                if (templateProcessor.isHybridDatahub(source)) {
+                    hdfsConfigHelper.getHdfsUrl(templateProcessor, source)
+                            .ifPresent(hdfsUrl -> roleConfigs.add(config(MR_APPLICATION_FRAMEWORK_PATH, hdfsUrl + DEFAULT_MR_APPLICATION_FRAMEWORK_PATH)));
+                }
+                return roleConfigs;
             default:
                 return List.of();
         }
