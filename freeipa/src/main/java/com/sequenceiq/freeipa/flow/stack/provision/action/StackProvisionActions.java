@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_STARTED;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstants.START_DATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 
@@ -48,6 +51,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -98,6 +102,9 @@ public class StackProvisionActions {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private EventSenderService eventService;
+
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
@@ -108,6 +115,7 @@ public class StackProvisionActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
+                eventService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CREATION_STARTED);
                 return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
             }
         };
@@ -373,6 +381,7 @@ public class StackProvisionActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
+                eventService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CREATION_FINISHED);
                 return new StackEvent(StackProvisionEvent.STACK_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
@@ -394,6 +403,8 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackProvisionService.handleStackCreationFailure(context.getStack(), payload.getException());
+                eventService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CREATION_FAILED,
+                        List.of(payload.getException()));
                 sendEvent(context);
             }
 

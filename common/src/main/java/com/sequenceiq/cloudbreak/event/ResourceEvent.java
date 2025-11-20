@@ -850,7 +850,11 @@ public enum ResourceEvent {
     ENVIRONMENT_REPAIR_TRUST_STARTED("environment.repair.cross.realm.trust.started"),
     ENVIRONMENT_REPAIR_TRUST_FINISHED("environment.repair.cross.realm.trust.finished"),
     ENVIRONMENT_REPAIR_TRUST_VALIDATION_FAILED("environment.repair.cross.realm.trust.validation.failed"),
-    ENVIRONMENT_REPAIR_TRUST_FAILED("environment.repair.cross.realm.trust.failed");
+    ENVIRONMENT_REPAIR_TRUST_FAILED("environment.repair.cross.realm.trust.failed"),
+
+    FREEIPA_CREATION_STARTED("freeipa.creation.started"),
+    FREEIPA_CREATION_FINISHED("freeipa.creation.finished"),
+    FREEIPA_CREATION_FAILED("freeipa.creation.failed");
 
     private final String message;
 

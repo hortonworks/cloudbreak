@@ -115,8 +115,7 @@ public class CDPStructuredEventDBServiceTest {
 
     @Test
     public void testCreateWithRestEvent() {
-        CDPStructuredEvent event = new CDPStructuredRestCallEvent();
-        event.setType(CDPStructuredRestCallEvent.class.getSimpleName());
+        CDPStructuredEvent event = getCdpStructuredEvent(CDPStructuredRestCallEvent.class.getSimpleName());
 
         underTest.create(event);
 
@@ -126,12 +125,20 @@ public class CDPStructuredEventDBServiceTest {
 
     @Test
     public void testCreateWithFlowEvent() {
-        CDPStructuredEvent event = new CDPStructuredRestCallEvent();
-        event.setType(CDPStructuredFlowEvent.class.getSimpleName());
+        CDPStructuredEvent event = getCdpStructuredEvent(CDPStructuredFlowEvent.class.getSimpleName());
 
         underTest.create(event);
 
         assertEquals("CDPStructuredFlowEvent", event.getType());
         verify(structuredEventRepository, Mockito.times(0)).save(any());
+    }
+
+    private CDPStructuredEvent getCdpStructuredEvent(String simpleName) {
+        CDPStructuredEvent event = new CDPStructuredRestCallEvent();
+        event.setType(simpleName);
+        CDPOperationDetails operation = new CDPOperationDetails();
+        operation.setResourceCrn("crn");
+        event.setOperation(operation);
+        return event;
     }
 }

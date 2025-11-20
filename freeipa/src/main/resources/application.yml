@@ -433,3 +433,6 @@ wiam:
 clusterdns:
   host: localhost
   port: 8982
+
+notification:
+  urls: http://localhost:3000/notifications

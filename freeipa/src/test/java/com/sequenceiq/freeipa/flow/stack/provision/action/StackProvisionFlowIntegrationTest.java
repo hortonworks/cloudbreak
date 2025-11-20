@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_STARTED;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.START_CREATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,6 +90,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -212,6 +216,9 @@ class StackProvisionFlowIntegrationTest {
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
 
+    @MockBean
+    private EventSenderService eventSenderService;
+
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
     private Stack stack;
@@ -250,6 +257,9 @@ class StackProvisionFlowIntegrationTest {
     @Test
     public void testSuccessfulProvision() {
         testFlow();
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_STARTED));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FINISHED));
+        verify(eventSenderService, never()).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FAILED), any());
     }
 
     @Test
@@ -265,6 +275,9 @@ class StackProvisionFlowIntegrationTest {
         verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.PROVISION_FAILED, "Image fallback started second time!");
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verifyNoInteractions(tlsSetupService, metadataSetupService);
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_STARTED));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FAILED), any());
+        verify(eventSenderService, never()).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FINISHED));
     }
 
     @Test
@@ -277,6 +290,9 @@ class StackProvisionFlowIntegrationTest {
 
         flowFinishedSuccessfully();
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_STARTED));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FINISHED));
+        verify(eventSenderService, never()).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FAILED), any());
     }
 
     @Test
@@ -292,6 +308,9 @@ class StackProvisionFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         verify(imageFallbackService, never()).performImageFallback(any(), eq(stack));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_STARTED));
+        verify(eventSenderService).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FAILED), any());
+        verify(eventSenderService, never()).sendEventAndNotification(eq(stack), eq(USER_CRN), eq(FREEIPA_CREATION_FINISHED));
     }
 
     private void testFlow() {
@@ -321,7 +340,7 @@ class StackProvisionFlowIntegrationTest {
             i++;
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 30);
     }

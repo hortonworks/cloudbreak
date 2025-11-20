@@ -63,7 +63,7 @@ public class WebSocketNotificationService {
                 .filter(Objects::nonNull)
                 .filter(e -> !e.isEmpty())
                 .map(url -> {
-                    if (isUrlMissProtocol(url)) {
+                    if (hasNoProtocol(url)) {
                         return "http://" + url;
                     }
                     return url;
@@ -71,7 +71,7 @@ public class WebSocketNotificationService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isUrlMissProtocol(String url) {
+    private boolean hasNoProtocol(String url) {
         return !(url.startsWith("http://") ^ url.startsWith("https://"));
     }
 
