@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.termination.action;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -19,7 +20,6 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.dto.Credential;
-import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -62,10 +62,9 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        List<Resource> resourceList = resourceService.findAllByStackId(stack.getId());
-        List<CloudResource> resources = resourceList.stream()
+        List<CloudResource> resources = resourceService.findAllByStackId(stack.getId()).stream()
                 .map(r -> resourceConverter.convert(r))
-                .filter(cr -> cr.getParameterStrict(CloudResource.ATTRIBUTES, ExternalResourceAttributes.class) == null)
+                .filter(Predicate.not(ExternalResourceAttributes::isExternalResource))
                 .collect(Collectors.toList());
         return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources);
     }

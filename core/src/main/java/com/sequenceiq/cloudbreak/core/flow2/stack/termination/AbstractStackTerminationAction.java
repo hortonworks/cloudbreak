@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -80,7 +81,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                 .map(r -> cloudResourceConverter.convert(r))
-                .filter(cr -> cr.getParameterStrict(CloudResource.ATTRIBUTES, ExternalResourceAttributes.class) == null)
+                .filter(Predicate.not(ExternalResourceAttributes::isExternalResource))
                 .collect(Collectors.toList());
         return createStackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }

@@ -135,14 +135,14 @@ class AbstractStackTerminationActionTest {
     }
 
     private static Stream<Arguments> createFlowContextTestDataProvider() {
-        CloudResource cloudResourceWithAttributes = mock(CloudResource.class);
-        when(cloudResourceWithAttributes.getParameterStrict(CloudResource.ATTRIBUTES, ExternalResourceAttributes.class))
-                .thenReturn(mock(ExternalResourceAttributes.class));
-        CloudResource cloudResourceWithoutAttributes = mock(CloudResource.class);
-        when(cloudResourceWithoutAttributes.getParameterStrict(CloudResource.ATTRIBUTES, ExternalResourceAttributes.class)).thenReturn(null);
+        CloudResource cloudResourceWithExternalAttributes = mock(CloudResource.class);
+        when(cloudResourceWithExternalAttributes.getParameter(CloudResource.ATTRIBUTE_TYPE, String.class))
+                .thenReturn(ExternalResourceAttributes.class.getCanonicalName());
+        CloudResource cloudResourceWithOtherAttributes = mock(CloudResource.class);
+        when(cloudResourceWithOtherAttributes.getParameter(CloudResource.ATTRIBUTE_TYPE, String.class)).thenReturn("SomeOtherAttributeType");
         return Stream.of(
-                Arguments.of(cloudResourceWithAttributes, 0),
-                Arguments.of(cloudResourceWithoutAttributes, 1)
+                Arguments.of(cloudResourceWithExternalAttributes, 0),
+                Arguments.of(cloudResourceWithOtherAttributes, 1)
         );
     }
 
