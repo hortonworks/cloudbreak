@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureAuthenticationTypeProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional configurations needed for app-based authentication.
@@ -36,22 +39,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreateAzureCredentialRequestAppBased {
   public static final String JSON_PROPERTY_AUTHENTICATION_TYPE = "authenticationType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureAuthenticationTypeProperties authenticationType;
 
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String applicationId;
 
   public static final String JSON_PROPERTY_SECRET_KEY = "secretKey";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String secretKey;
 
-  public CreateAzureCredentialRequestAppBased() {
+  public CreateAzureCredentialRequestAppBased() { 
   }
 
-  public CreateAzureCredentialRequestAppBased authenticationType(@javax.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
-    
+  public CreateAzureCredentialRequestAppBased authenticationType(@jakarta.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
     return this;
   }
@@ -60,7 +62,7 @@ public class CreateAzureCredentialRequestAppBased {
    * Get authenticationType
    * @return authenticationType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,12 +73,12 @@ public class CreateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthenticationType(@javax.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
+  public void setAuthenticationType(@jakarta.annotation.Nullable AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
   }
 
-  public CreateAzureCredentialRequestAppBased applicationId(@javax.annotation.Nullable String applicationId) {
-    
+
+  public CreateAzureCredentialRequestAppBased applicationId(@jakarta.annotation.Nullable String applicationId) {
     this.applicationId = applicationId;
     return this;
   }
@@ -85,7 +87,7 @@ public class CreateAzureCredentialRequestAppBased {
    * The id of the application registered in Azure.
    * @return applicationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -96,12 +98,12 @@ public class CreateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setApplicationId(@javax.annotation.Nullable String applicationId) {
+  public void setApplicationId(@jakarta.annotation.Nullable String applicationId) {
     this.applicationId = applicationId;
   }
 
-  public CreateAzureCredentialRequestAppBased secretKey(@javax.annotation.Nullable String secretKey) {
-    
+
+  public CreateAzureCredentialRequestAppBased secretKey(@jakarta.annotation.Nullable String secretKey) {
     this.secretKey = secretKey;
     return this;
   }
@@ -110,7 +112,7 @@ public class CreateAzureCredentialRequestAppBased {
    * The client secret key (also referred to as application password) for the registered application.
    * @return secretKey
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -121,11 +123,14 @@ public class CreateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecretKey(@javax.annotation.Nullable String secretKey) {
+  public void setSecretKey(@jakarta.annotation.Nullable String secretKey) {
     this.secretKey = secretKey;
   }
 
 
+  /**
+   * Return true if this CreateAzureCredentialRequest_appBased object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

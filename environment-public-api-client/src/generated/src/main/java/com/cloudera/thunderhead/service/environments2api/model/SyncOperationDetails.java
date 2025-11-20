@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.SyncOperationAdditionalDetail;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Details object of the sync operation for success or falure.
@@ -38,22 +40,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SyncOperationDetails {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String message;
 
   public static final String JSON_PROPERTY_ADDITIONAL_DETAILS = "additionalDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<SyncOperationAdditionalDetail> additionalDetails = new ArrayList<>();
 
-  public SyncOperationDetails() {
+  public SyncOperationDetails() { 
   }
 
-  public SyncOperationDetails environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
-    
+  public SyncOperationDetails environmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -62,7 +63,7 @@ public class SyncOperationDetails {
    * environment crn.
    * @return environmentCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -73,12 +74,12 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-  public SyncOperationDetails message(@javax.annotation.Nullable String message) {
-    
+
+  public SyncOperationDetails message(@jakarta.annotation.Nullable String message) {
     this.message = message;
     return this;
   }
@@ -87,7 +88,7 @@ public class SyncOperationDetails {
    * The detail of the success or failure.
    * @return message
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -98,12 +99,12 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(@javax.annotation.Nullable String message) {
+  public void setMessage(@jakarta.annotation.Nullable String message) {
     this.message = message;
   }
 
-  public SyncOperationDetails additionalDetails(@javax.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
-    
+
+  public SyncOperationDetails additionalDetails(@jakarta.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
     this.additionalDetails = additionalDetails;
     return this;
   }
@@ -120,7 +121,7 @@ public class SyncOperationDetails {
    * List of additional details for a sync operation.
    * @return additionalDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -131,11 +132,14 @@ public class SyncOperationDetails {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalDetails(@javax.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
+  public void setAdditionalDetails(@jakarta.annotation.Nullable List<SyncOperationAdditionalDetail> additionalDetails) {
     this.additionalDetails = additionalDetails;
   }
 
 
+  /**
+   * Return true if this SyncOperationDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

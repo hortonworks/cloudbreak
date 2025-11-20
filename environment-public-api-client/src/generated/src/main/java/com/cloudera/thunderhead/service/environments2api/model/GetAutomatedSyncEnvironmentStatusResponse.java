@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.LastAutomatedSyncDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for getting automated sync environment status.
@@ -35,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetAutomatedSyncEnvironmentStatusResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentCrn;
 
   /**
@@ -80,18 +83,17 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
   }
 
   public static final String JSON_PROPERTY_SYNC_PENDING_STATE = "syncPendingState";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private SyncPendingStateEnum syncPendingState;
 
   public static final String JSON_PROPERTY_LAST_SYNC_STATUS = "lastSyncStatus";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private LastAutomatedSyncDetails lastSyncStatus;
 
-  public GetAutomatedSyncEnvironmentStatusResponse() {
+  public GetAutomatedSyncEnvironmentStatusResponse() { 
   }
 
-  public GetAutomatedSyncEnvironmentStatusResponse environmentCrn(@javax.annotation.Nullable String environmentCrn) {
-    
+  public GetAutomatedSyncEnvironmentStatusResponse environmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -100,7 +102,7 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
    * The CRN of the environment.
    * @return environmentCrn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -111,12 +113,12 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-  public GetAutomatedSyncEnvironmentStatusResponse syncPendingState(@javax.annotation.Nullable SyncPendingStateEnum syncPendingState) {
-    
+
+  public GetAutomatedSyncEnvironmentStatusResponse syncPendingState(@jakarta.annotation.Nullable SyncPendingStateEnum syncPendingState) {
     this.syncPendingState = syncPendingState;
     return this;
   }
@@ -125,7 +127,7 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
    * The state to indicate whether the environment is synced or has a sync pending.
    * @return syncPendingState
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SYNC_PENDING_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -136,12 +138,12 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_SYNC_PENDING_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSyncPendingState(@javax.annotation.Nullable SyncPendingStateEnum syncPendingState) {
+  public void setSyncPendingState(@jakarta.annotation.Nullable SyncPendingStateEnum syncPendingState) {
     this.syncPendingState = syncPendingState;
   }
 
-  public GetAutomatedSyncEnvironmentStatusResponse lastSyncStatus(@javax.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
-    
+
+  public GetAutomatedSyncEnvironmentStatusResponse lastSyncStatus(@jakarta.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
     this.lastSyncStatus = lastSyncStatus;
     return this;
   }
@@ -150,7 +152,7 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
    * Get lastSyncStatus
    * @return lastSyncStatus
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LAST_SYNC_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -161,11 +163,14 @@ public class GetAutomatedSyncEnvironmentStatusResponse {
 
   @JsonProperty(JSON_PROPERTY_LAST_SYNC_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLastSyncStatus(@javax.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
+  public void setLastSyncStatus(@jakarta.annotation.Nullable LastAutomatedSyncDetails lastSyncStatus) {
     this.lastSyncStatus = lastSyncStatus;
   }
 
 
+  /**
+   * Return true if this GetAutomatedSyncEnvironmentStatusResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

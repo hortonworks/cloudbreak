@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The certificate used for the credential
@@ -72,30 +75,29 @@ public class AzureCredentialCertificateProperties {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_EXPIRATION = "expiration";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String expiration;
 
   public static final String JSON_PROPERTY_EXPIRATION_DATE = "expirationDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime expirationDate;
 
   public static final String JSON_PROPERTY_SHA512 = "sha512";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String sha512;
 
   public static final String JSON_PROPERTY_BASE64 = "base64";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String base64;
 
-  public AzureCredentialCertificateProperties() {
+  public AzureCredentialCertificateProperties() { 
   }
 
-  public AzureCredentialCertificateProperties status(@javax.annotation.Nullable StatusEnum status) {
-    
+  public AzureCredentialCertificateProperties status(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -104,7 +106,7 @@ public class AzureCredentialCertificateProperties {
    * The status of an Azure credential.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -115,12 +117,12 @@ public class AzureCredentialCertificateProperties {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
   }
 
-  public AzureCredentialCertificateProperties expiration(@javax.annotation.Nullable String expiration) {
-    
+
+  public AzureCredentialCertificateProperties expiration(@jakarta.annotation.Nullable String expiration) {
     this.expiration = expiration;
     return this;
   }
@@ -129,7 +131,7 @@ public class AzureCredentialCertificateProperties {
    * the expiration timestamp
    * @return expiration
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXPIRATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -140,12 +142,12 @@ public class AzureCredentialCertificateProperties {
 
   @JsonProperty(JSON_PROPERTY_EXPIRATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExpiration(@javax.annotation.Nullable String expiration) {
+  public void setExpiration(@jakarta.annotation.Nullable String expiration) {
     this.expiration = expiration;
   }
 
-  public AzureCredentialCertificateProperties expirationDate(@javax.annotation.Nullable OffsetDateTime expirationDate) {
-    
+
+  public AzureCredentialCertificateProperties expirationDate(@jakarta.annotation.Nullable OffsetDateTime expirationDate) {
     this.expirationDate = expirationDate;
     return this;
   }
@@ -154,7 +156,7 @@ public class AzureCredentialCertificateProperties {
    * the expiration in date format
    * @return expirationDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXPIRATION_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -165,12 +167,12 @@ public class AzureCredentialCertificateProperties {
 
   @JsonProperty(JSON_PROPERTY_EXPIRATION_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExpirationDate(@javax.annotation.Nullable OffsetDateTime expirationDate) {
+  public void setExpirationDate(@jakarta.annotation.Nullable OffsetDateTime expirationDate) {
     this.expirationDate = expirationDate;
   }
 
-  public AzureCredentialCertificateProperties sha512(@javax.annotation.Nullable String sha512) {
-    
+
+  public AzureCredentialCertificateProperties sha512(@jakarta.annotation.Nullable String sha512) {
     this.sha512 = sha512;
     return this;
   }
@@ -179,7 +181,7 @@ public class AzureCredentialCertificateProperties {
    * The SHA512 digest of the certificate
    * @return sha512
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHA512)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -190,12 +192,12 @@ public class AzureCredentialCertificateProperties {
 
   @JsonProperty(JSON_PROPERTY_SHA512)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSha512(@javax.annotation.Nullable String sha512) {
+  public void setSha512(@jakarta.annotation.Nullable String sha512) {
     this.sha512 = sha512;
   }
 
-  public AzureCredentialCertificateProperties base64(@javax.annotation.Nullable String base64) {
-    
+
+  public AzureCredentialCertificateProperties base64(@jakarta.annotation.Nullable String base64) {
     this.base64 = base64;
     return this;
   }
@@ -204,7 +206,7 @@ public class AzureCredentialCertificateProperties {
    * The certificate (PEM) encoded in base64 format
    * @return base64
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BASE64)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -215,11 +217,14 @@ public class AzureCredentialCertificateProperties {
 
   @JsonProperty(JSON_PROPERTY_BASE64)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBase64(@javax.annotation.Nullable String base64) {
+  public void setBase64(@jakarta.annotation.Nullable String base64) {
     this.base64 = base64;
   }
 
 
+  /**
+   * Return true if this AzureCredentialCertificateProperties object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

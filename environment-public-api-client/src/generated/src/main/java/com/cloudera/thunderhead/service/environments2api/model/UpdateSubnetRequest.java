@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request for updating subnets of the given environment.
@@ -37,22 +39,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateSubnetRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> subnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> endpointAccessGatewaySubnetIds = new ArrayList<>();
 
-  public UpdateSubnetRequest() {
+  public UpdateSubnetRequest() { 
   }
 
-  public UpdateSubnetRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateSubnetRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -61,7 +62,7 @@ public class UpdateSubnetRequest {
    * The name or the CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -72,12 +73,12 @@ public class UpdateSubnetRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateSubnetRequest subnetIds(@javax.annotation.Nullable List<String> subnetIds) {
-    
+
+  public UpdateSubnetRequest subnetIds(@jakarta.annotation.Nullable List<String> subnetIds) {
     this.subnetIds = subnetIds;
     return this;
   }
@@ -94,7 +95,7 @@ public class UpdateSubnetRequest {
    * The selected subnets to update the given environment to.
    * @return subnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -105,12 +106,12 @@ public class UpdateSubnetRequest {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetIds(@javax.annotation.Nullable List<String> subnetIds) {
+  public void setSubnetIds(@jakarta.annotation.Nullable List<String> subnetIds) {
     this.subnetIds = subnetIds;
   }
 
-  public UpdateSubnetRequest endpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
-    
+
+  public UpdateSubnetRequest endpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -127,7 +128,7 @@ public class UpdateSubnetRequest {
    * The selected subnets to update for the given environment&#39;s endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -138,11 +139,14 @@ public class UpdateSubnetRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
 
+  /**
+   * Return true if this UpdateSubnetRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

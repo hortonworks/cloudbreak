@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A single entry that contains the name of the given Data Service and its related resource(s).
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ConnectedDataService {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_CLUSTERS = "clusters";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<String> clusters = new ArrayList<>();
 
-  public ConnectedDataService() {
+  public ConnectedDataService() { 
   }
 
-  public ConnectedDataService name(@javax.annotation.Nonnull String name) {
-    
+  public ConnectedDataService name(@jakarta.annotation.Nonnull String name) {
     this.name = name;
     return this;
   }
@@ -56,7 +57,7 @@ public class ConnectedDataService {
    * The name of the given Data Service.
    * @return name
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -67,12 +68,12 @@ public class ConnectedDataService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(@javax.annotation.Nonnull String name) {
+  public void setName(@jakarta.annotation.Nonnull String name) {
     this.name = name;
   }
 
-  public ConnectedDataService clusters(@javax.annotation.Nonnull List<String> clusters) {
-    
+
+  public ConnectedDataService clusters(@jakarta.annotation.Nonnull List<String> clusters) {
     this.clusters = clusters;
     return this;
   }
@@ -89,7 +90,7 @@ public class ConnectedDataService {
    * List of resource names for the given Data Service.
    * @return clusters
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -100,11 +101,14 @@ public class ConnectedDataService {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusters(@javax.annotation.Nonnull List<String> clusters) {
+  public void setClusters(@jakarta.annotation.Nonnull List<String> clusters) {
     this.clusters = clusters;
   }
 
 
+  /**
+   * Return true if this ConnectedDataService object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

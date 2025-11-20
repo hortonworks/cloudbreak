@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a Datalake client configs response.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetConfigFilesResponse {
   public static final String JSON_PROPERTY_VERSION_HASH = "versionHash";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String versionHash;
 
   public static final String JSON_PROPERTY_FILE = "file";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String _file;
 
-  public GetConfigFilesResponse() {
+  public GetConfigFilesResponse() { 
   }
 
-  public GetConfigFilesResponse versionHash(@javax.annotation.Nullable String versionHash) {
-    
+  public GetConfigFilesResponse versionHash(@jakarta.annotation.Nullable String versionHash) {
     this.versionHash = versionHash;
     return this;
   }
@@ -53,7 +55,7 @@ public class GetConfigFilesResponse {
    * an opaque string (sha or similar) to detect config changes.
    * @return versionHash
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSION_HASH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class GetConfigFilesResponse {
 
   @JsonProperty(JSON_PROPERTY_VERSION_HASH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersionHash(@javax.annotation.Nullable String versionHash) {
+  public void setVersionHash(@jakarta.annotation.Nullable String versionHash) {
     this.versionHash = versionHash;
   }
 
-  public GetConfigFilesResponse _file(@javax.annotation.Nullable String _file) {
-    
+
+  public GetConfigFilesResponse _file(@jakarta.annotation.Nullable String _file) {
     this._file = _file;
     return this;
   }
@@ -78,7 +80,7 @@ public class GetConfigFilesResponse {
    * config files for the data lake including root cert and krb.conf
    * @return _file
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class GetConfigFilesResponse {
 
   @JsonProperty(JSON_PROPERTY_FILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFile(@javax.annotation.Nullable String _file) {
+  public void setFile(@jakarta.annotation.Nullable String _file) {
     this._file = _file;
   }
 
 
+  /**
+   * Return true if this GetConfigFilesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

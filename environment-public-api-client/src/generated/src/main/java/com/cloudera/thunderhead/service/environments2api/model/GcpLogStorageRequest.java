@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * GCP storage configuration for cluster and audit logs.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GcpLogStorageRequest {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String serviceAccountEmail;
 
   public static final String JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE = "backupStorageLocationBase";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String backupStorageLocationBase;
 
-  public GcpLogStorageRequest() {
+  public GcpLogStorageRequest() { 
   }
 
-  public GcpLogStorageRequest storageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
-    
+  public GcpLogStorageRequest storageLocationBase(@jakarta.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
     return this;
   }
@@ -58,7 +60,7 @@ public class GcpLogStorageRequest {
    * The Google storage bucket to use. This should be a gs:// url.
    * @return storageLocationBase
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class GcpLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
+  public void setStorageLocationBase(@jakarta.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-  public GcpLogStorageRequest serviceAccountEmail(@javax.annotation.Nonnull String serviceAccountEmail) {
-    
+
+  public GcpLogStorageRequest serviceAccountEmail(@jakarta.annotation.Nonnull String serviceAccountEmail) {
     this.serviceAccountEmail = serviceAccountEmail;
     return this;
   }
@@ -83,7 +85,7 @@ public class GcpLogStorageRequest {
    * Email id of the service account to be associated with the instances. This service account should have \&quot;storage.ObjectCreator\&quot; role on the given storage bucket.
    * @return serviceAccountEmail
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -94,12 +96,12 @@ public class GcpLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setServiceAccountEmail(@javax.annotation.Nonnull String serviceAccountEmail) {
+  public void setServiceAccountEmail(@jakarta.annotation.Nonnull String serviceAccountEmail) {
     this.serviceAccountEmail = serviceAccountEmail;
   }
 
-  public GcpLogStorageRequest backupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
-    
+
+  public GcpLogStorageRequest backupStorageLocationBase(@jakarta.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
     return this;
   }
@@ -108,7 +110,7 @@ public class GcpLogStorageRequest {
    * The Google storage bucket to use. This should be a gs:// url.
    * @return backupStorageLocationBase
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class GcpLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBackupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
+  public void setBackupStorageLocationBase(@jakarta.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
   }
 
 
+  /**
+   * Return true if this GcpLogStorageRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

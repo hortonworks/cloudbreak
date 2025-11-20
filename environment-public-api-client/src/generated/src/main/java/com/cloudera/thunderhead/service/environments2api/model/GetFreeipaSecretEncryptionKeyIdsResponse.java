@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object containing the secret encryption keys&#39; IDs of the FreeIPA cluster.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetFreeipaSecretEncryptionKeyIdsResponse {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_LUKS = "encryptionKeyLuks";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionKeyLuks;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER = "encryptionKeyCloudSecretManager";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionKeyCloudSecretManager;
 
-  public GetFreeipaSecretEncryptionKeyIdsResponse() {
+  public GetFreeipaSecretEncryptionKeyIdsResponse() { 
   }
 
-  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyLuks(@javax.annotation.Nullable String encryptionKeyLuks) {
-    
+  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyLuks(@jakarta.annotation.Nullable String encryptionKeyLuks) {
     this.encryptionKeyLuks = encryptionKeyLuks;
     return this;
   }
@@ -53,7 +55,7 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
    * The LUKS (Linux Unified Key Setup) encryption key of the cluster.
    * @return encryptionKeyLuks
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_LUKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_LUKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyLuks(@javax.annotation.Nullable String encryptionKeyLuks) {
+  public void setEncryptionKeyLuks(@jakarta.annotation.Nullable String encryptionKeyLuks) {
     this.encryptionKeyLuks = encryptionKeyLuks;
   }
 
-  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyCloudSecretManager(@javax.annotation.Nullable String encryptionKeyCloudSecretManager) {
-    
+
+  public GetFreeipaSecretEncryptionKeyIdsResponse encryptionKeyCloudSecretManager(@jakarta.annotation.Nullable String encryptionKeyCloudSecretManager) {
     this.encryptionKeyCloudSecretManager = encryptionKeyCloudSecretManager;
     return this;
   }
@@ -78,7 +80,7 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
    * The Cloud Secret Manager encryption key of the cluster.
    * @return encryptionKeyCloudSecretManager
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class GetFreeipaSecretEncryptionKeyIdsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_CLOUD_SECRET_MANAGER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyCloudSecretManager(@javax.annotation.Nullable String encryptionKeyCloudSecretManager) {
+  public void setEncryptionKeyCloudSecretManager(@jakarta.annotation.Nullable String encryptionKeyCloudSecretManager) {
     this.encryptionKeyCloudSecretManager = encryptionKeyCloudSecretManager;
   }
 
 
+  /**
+   * Return true if this GetFreeipaSecretEncryptionKeyIdsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

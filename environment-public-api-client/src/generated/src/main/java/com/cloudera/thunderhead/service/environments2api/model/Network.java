@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CloudSubnet;
 import com.cloudera.thunderhead.service.environments2api.model.NetworkAwsParams;
 import com.cloudera.thunderhead.service.environments2api.model.NetworkAzureParams;
@@ -26,12 +27,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The network.
@@ -54,11 +57,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Network {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Set<String> subnetIds = new LinkedHashSet<>();
 
   /**
@@ -97,54 +100,53 @@ public class Network {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Set<String> endpointAccessGatewaySubnetIds = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_AWS = "aws";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private NetworkAwsParams aws;
 
   public static final String JSON_PROPERTY_AZURE = "azure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private NetworkAzureParams azure;
 
   public static final String JSON_PROPERTY_GCP = "gcp";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private NetworkGcpParams gcp;
 
   public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String networkCidr;
 
   public static final String JSON_PROPERTY_DWX_SUBNETS = "dwxSubnets";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, CloudSubnet> dwxSubnets = new HashMap<>();
 
   public static final String JSON_PROPERTY_LIFTIE_SUBNETS = "liftieSubnets";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, CloudSubnet> liftieSubnets = new HashMap<>();
 
   public static final String JSON_PROPERTY_SUBNET_METADATA = "subnetMetadata";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, CloudSubnet> subnetMetadata = new HashMap<>();
 
   public static final String JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION = "serviceEndpointsCreation";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ServiceEndpointsCreation serviceEndpointsCreation;
 
   public static final String JSON_PROPERTY_ENABLE_LOAD_BALANCERS = "enableLoadBalancers";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableLoadBalancers;
 
-  public Network() {
+  public Network() { 
   }
 
-  public Network networkName(@javax.annotation.Nonnull String networkName) {
-    
+  public Network networkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
     return this;
   }
@@ -153,7 +155,7 @@ public class Network {
    * Name or id of the network
    * @return networkName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -164,12 +166,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
+  public void setNetworkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-  public Network subnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
-    
+
+  public Network subnetIds(@jakarta.annotation.Nonnull Set<String> subnetIds) {
     this.subnetIds = subnetIds;
     return this;
   }
@@ -186,7 +188,7 @@ public class Network {
    * Subnet names or ids of the network.
    * @return subnetIds
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -198,12 +200,12 @@ public class Network {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubnetIds(@javax.annotation.Nonnull Set<String> subnetIds) {
+  public void setSubnetIds(@jakarta.annotation.Nonnull Set<String> subnetIds) {
     this.subnetIds = subnetIds;
   }
 
-  public Network endpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
-    
+
+  public Network endpointAccessGatewayScheme(@jakarta.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -212,7 +214,7 @@ public class Network {
    * The scheme for the endpoint gateway. PUBLIC indicates an external endpoint that can be accessed over the Internet.
    * @return endpointAccessGatewayScheme
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -223,12 +225,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@jakarta.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-  public Network endpointAccessGatewaySubnetIds(@javax.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
-    
+
+  public Network endpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -245,7 +247,7 @@ public class Network {
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -257,12 +259,12 @@ public class Network {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable Set<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
-  public Network aws(@javax.annotation.Nullable NetworkAwsParams aws) {
-    
+
+  public Network aws(@jakarta.annotation.Nullable NetworkAwsParams aws) {
     this.aws = aws;
     return this;
   }
@@ -271,7 +273,7 @@ public class Network {
    * Get aws
    * @return aws
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -282,12 +284,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(@javax.annotation.Nullable NetworkAwsParams aws) {
+  public void setAws(@jakarta.annotation.Nullable NetworkAwsParams aws) {
     this.aws = aws;
   }
 
-  public Network azure(@javax.annotation.Nullable NetworkAzureParams azure) {
-    
+
+  public Network azure(@jakarta.annotation.Nullable NetworkAzureParams azure) {
     this.azure = azure;
     return this;
   }
@@ -296,7 +298,7 @@ public class Network {
    * Get azure
    * @return azure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -307,12 +309,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(@javax.annotation.Nullable NetworkAzureParams azure) {
+  public void setAzure(@jakarta.annotation.Nullable NetworkAzureParams azure) {
     this.azure = azure;
   }
 
-  public Network gcp(@javax.annotation.Nullable NetworkGcpParams gcp) {
-    
+
+  public Network gcp(@jakarta.annotation.Nullable NetworkGcpParams gcp) {
     this.gcp = gcp;
     return this;
   }
@@ -321,7 +323,7 @@ public class Network {
    * Get gcp
    * @return gcp
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -332,12 +334,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(@javax.annotation.Nullable NetworkGcpParams gcp) {
+  public void setGcp(@jakarta.annotation.Nullable NetworkGcpParams gcp) {
     this.gcp = gcp;
   }
 
-  public Network networkCidr(@javax.annotation.Nullable String networkCidr) {
-    
+
+  public Network networkCidr(@jakarta.annotation.Nullable String networkCidr) {
     this.networkCidr = networkCidr;
     return this;
   }
@@ -346,7 +348,7 @@ public class Network {
    * The range of private IPv4 addresses that resources will use under this network.
    * @return networkCidr
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -357,12 +359,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkCidr(@javax.annotation.Nullable String networkCidr) {
+  public void setNetworkCidr(@jakarta.annotation.Nullable String networkCidr) {
     this.networkCidr = networkCidr;
   }
 
-  public Network dwxSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
-    
+
+  public Network dwxSubnets(@jakarta.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
     this.dwxSubnets = dwxSubnets;
     return this;
   }
@@ -379,7 +381,7 @@ public class Network {
    * DWX subnet parameters.
    * @return dwxSubnets
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DWX_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -390,12 +392,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_DWX_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDwxSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
+  public void setDwxSubnets(@jakarta.annotation.Nullable Map<String, CloudSubnet> dwxSubnets) {
     this.dwxSubnets = dwxSubnets;
   }
 
-  public Network liftieSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
-    
+
+  public Network liftieSubnets(@jakarta.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
     this.liftieSubnets = liftieSubnets;
     return this;
   }
@@ -412,7 +414,7 @@ public class Network {
    * Subnet parameters for experiences that managed by Liftie.
    * @return liftieSubnets
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LIFTIE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -423,12 +425,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_LIFTIE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLiftieSubnets(@javax.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
+  public void setLiftieSubnets(@jakarta.annotation.Nullable Map<String, CloudSubnet> liftieSubnets) {
     this.liftieSubnets = liftieSubnets;
   }
 
-  public Network subnetMetadata(@javax.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
-    
+
+  public Network subnetMetadata(@jakarta.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
     this.subnetMetadata = subnetMetadata;
     return this;
   }
@@ -445,7 +447,7 @@ public class Network {
    * Additional subnet metadata of the network.
    * @return subnetMetadata
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -456,12 +458,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_METADATA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetMetadata(@javax.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
+  public void setSubnetMetadata(@jakarta.annotation.Nullable Map<String, CloudSubnet> subnetMetadata) {
     this.subnetMetadata = subnetMetadata;
   }
 
-  public Network serviceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
-    
+
+  public Network serviceEndpointsCreation(@jakarta.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
     return this;
   }
@@ -470,7 +472,7 @@ public class Network {
    * Get serviceEndpointsCreation
    * @return serviceEndpointsCreation
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -481,12 +483,12 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
+  public void setServiceEndpointsCreation(@jakarta.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
   }
 
-  public Network enableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
-    
+
+  public Network enableLoadBalancers(@jakarta.annotation.Nullable Boolean enableLoadBalancers) {
     this.enableLoadBalancers = enableLoadBalancers;
     return this;
   }
@@ -495,7 +497,7 @@ public class Network {
    * The load balancer creation mode for all Data Lakes and Data Hubs in the environment. This will override the load balancer creation mode at the cluster level.
    * @return enableLoadBalancers
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -506,11 +508,14 @@ public class Network {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_LOAD_BALANCERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableLoadBalancers(@javax.annotation.Nullable Boolean enableLoadBalancers) {
+  public void setEnableLoadBalancers(@jakarta.annotation.Nullable Boolean enableLoadBalancers) {
     this.enableLoadBalancers = enableLoadBalancers;
   }
 
 
+  /**
+   * Return true if this Network object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

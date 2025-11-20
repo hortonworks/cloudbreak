@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Datalake truststore password.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetTruststorePasswordRequest {
   public static final String JSON_PROPERTY_DATALAKE_CRN = "datalakeCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String datalakeCrn;
 
-  public GetTruststorePasswordRequest() {
+  public GetTruststorePasswordRequest() { 
   }
 
-  public GetTruststorePasswordRequest datalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
-    
+  public GetTruststorePasswordRequest datalakeCrn(@jakarta.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetTruststorePasswordRequest {
    * The CRN of the Datalake
    * @return datalakeCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class GetTruststorePasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
+  public void setDatalakeCrn(@jakarta.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
   }
 
 
+  /**
+   * Return true if this GetTruststorePasswordRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

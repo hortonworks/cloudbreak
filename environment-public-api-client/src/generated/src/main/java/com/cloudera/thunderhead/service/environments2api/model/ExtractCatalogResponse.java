@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Images;
 import com.cloudera.thunderhead.service.environments2api.model.Versions;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The response object to extract catalog for a FreeIPA request.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ExtractCatalogResponse {
   public static final String JSON_PROPERTY_IMAGES = "images";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Images images;
 
   public static final String JSON_PROPERTY_VERSIONS = "versions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Versions versions;
 
-  public ExtractCatalogResponse() {
+  public ExtractCatalogResponse() { 
   }
 
-  public ExtractCatalogResponse images(@javax.annotation.Nullable Images images) {
-    
+  public ExtractCatalogResponse images(@jakarta.annotation.Nullable Images images) {
     this.images = images;
     return this;
   }
@@ -55,7 +57,7 @@ public class ExtractCatalogResponse {
    * Get images
    * @return images
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -66,12 +68,12 @@ public class ExtractCatalogResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(@javax.annotation.Nullable Images images) {
+  public void setImages(@jakarta.annotation.Nullable Images images) {
     this.images = images;
   }
 
-  public ExtractCatalogResponse versions(@javax.annotation.Nullable Versions versions) {
-    
+
+  public ExtractCatalogResponse versions(@jakarta.annotation.Nullable Versions versions) {
     this.versions = versions;
     return this;
   }
@@ -80,7 +82,7 @@ public class ExtractCatalogResponse {
    * Get versions
    * @return versions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class ExtractCatalogResponse {
 
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersions(@javax.annotation.Nullable Versions versions) {
+  public void setVersions(@jakarta.annotation.Nullable Versions versions) {
     this.versions = versions;
   }
 
 
+  /**
+   * Return true if this ExtractCatalogResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

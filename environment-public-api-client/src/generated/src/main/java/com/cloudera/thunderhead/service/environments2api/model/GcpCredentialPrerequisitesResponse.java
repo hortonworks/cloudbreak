@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for getting GCP credential prerequisites.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GcpCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND = "serviceAccountCreationCommand";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String serviceAccountCreationCommand;
 
-  public GcpCredentialPrerequisitesResponse() {
+  public GcpCredentialPrerequisitesResponse() { 
   }
 
-  public GcpCredentialPrerequisitesResponse serviceAccountCreationCommand(@javax.annotation.Nonnull String serviceAccountCreationCommand) {
-    
+  public GcpCredentialPrerequisitesResponse serviceAccountCreationCommand(@jakarta.annotation.Nonnull String serviceAccountCreationCommand) {
     this.serviceAccountCreationCommand = serviceAccountCreationCommand;
     return this;
   }
@@ -48,7 +50,7 @@ public class GcpCredentialPrerequisitesResponse {
    * GCP CLI command to create service account encoded in base64.
    * @return serviceAccountCreationCommand
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class GcpCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setServiceAccountCreationCommand(@javax.annotation.Nonnull String serviceAccountCreationCommand) {
+  public void setServiceAccountCreationCommand(@jakarta.annotation.Nonnull String serviceAccountCreationCommand) {
     this.serviceAccountCreationCommand = serviceAccountCreationCommand;
   }
 
 
+  /**
+   * Return true if this GcpCredentialPrerequisitesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Resource pool quota for the Environment.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class EnvironmentQuota {
   public static final String JSON_PROPERTY_CPU_QUOTA = "cpuQuota";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Long cpuQuota;
 
   public static final String JSON_PROPERTY_MEMORY_QUOTA = "memoryQuota";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Long memoryQuota;
 
   public static final String JSON_PROPERTY_GPU_QUOTA = "gpuQuota";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Long gpuQuota;
 
-  public EnvironmentQuota() {
+  public EnvironmentQuota() { 
   }
 
-  public EnvironmentQuota cpuQuota(@javax.annotation.Nullable Long cpuQuota) {
-    
+  public EnvironmentQuota cpuQuota(@jakarta.annotation.Nullable Long cpuQuota) {
     this.cpuQuota = cpuQuota;
     return this;
   }
@@ -59,7 +61,7 @@ public class EnvironmentQuota {
    * minimum: 1
    * @return cpuQuota
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -70,12 +72,12 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_CPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCpuQuota(@javax.annotation.Nullable Long cpuQuota) {
+  public void setCpuQuota(@jakarta.annotation.Nullable Long cpuQuota) {
     this.cpuQuota = cpuQuota;
   }
 
-  public EnvironmentQuota memoryQuota(@javax.annotation.Nullable Long memoryQuota) {
-    
+
+  public EnvironmentQuota memoryQuota(@jakarta.annotation.Nullable Long memoryQuota) {
     this.memoryQuota = memoryQuota;
     return this;
   }
@@ -85,7 +87,7 @@ public class EnvironmentQuota {
    * minimum: 1
    * @return memoryQuota
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MEMORY_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -96,12 +98,12 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_MEMORY_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMemoryQuota(@javax.annotation.Nullable Long memoryQuota) {
+  public void setMemoryQuota(@jakarta.annotation.Nullable Long memoryQuota) {
     this.memoryQuota = memoryQuota;
   }
 
-  public EnvironmentQuota gpuQuota(@javax.annotation.Nullable Long gpuQuota) {
-    
+
+  public EnvironmentQuota gpuQuota(@jakarta.annotation.Nullable Long gpuQuota) {
     this.gpuQuota = gpuQuota;
     return this;
   }
@@ -111,7 +113,7 @@ public class EnvironmentQuota {
    * minimum: 1
    * @return gpuQuota
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -122,11 +124,14 @@ public class EnvironmentQuota {
 
   @JsonProperty(JSON_PROPERTY_GPU_QUOTA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGpuQuota(@javax.annotation.Nullable Long gpuQuota) {
+  public void setGpuQuota(@jakarta.annotation.Nullable Long gpuQuota) {
     this.gpuQuota = gpuQuota;
   }
 
 
+  /**
+   * Return true if this EnvironmentQuota object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

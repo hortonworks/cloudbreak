@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AnonymizationRuleRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for testing text input against provided account telemetry anonymization rules.
@@ -37,18 +39,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class TestAccountTelemetryRulesRequest {
   public static final String JSON_PROPERTY_TEST_INPUT = "testInput";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String testInput;
 
   public static final String JSON_PROPERTY_RULES = "rules";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<AnonymizationRuleRequest> rules = new ArrayList<>();
 
-  public TestAccountTelemetryRulesRequest() {
+  public TestAccountTelemetryRulesRequest() { 
   }
 
-  public TestAccountTelemetryRulesRequest testInput(@javax.annotation.Nonnull String testInput) {
-    
+  public TestAccountTelemetryRulesRequest testInput(@jakarta.annotation.Nonnull String testInput) {
     this.testInput = testInput;
     return this;
   }
@@ -57,7 +58,7 @@ public class TestAccountTelemetryRulesRequest {
    * Text input that will be tested against the provided account telemetry anonymization rules.
    * @return testInput
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -68,12 +69,12 @@ public class TestAccountTelemetryRulesRequest {
 
   @JsonProperty(JSON_PROPERTY_TEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTestInput(@javax.annotation.Nonnull String testInput) {
+  public void setTestInput(@jakarta.annotation.Nonnull String testInput) {
     this.testInput = testInput;
   }
 
-  public TestAccountTelemetryRulesRequest rules(@javax.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
-    
+
+  public TestAccountTelemetryRulesRequest rules(@jakarta.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
     this.rules = rules;
     return this;
   }
@@ -90,7 +91,7 @@ public class TestAccountTelemetryRulesRequest {
    * List of anonymization rules that are applied on logs that are shipped to Cloudera
    * @return rules
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -101,11 +102,14 @@ public class TestAccountTelemetryRulesRequest {
 
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRules(@javax.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
+  public void setRules(@jakarta.annotation.Nonnull List<AnonymizationRuleRequest> rules) {
     this.rules = rules;
   }
 
 
+  /**
+   * Return true if this TestAccountTelemetryRulesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

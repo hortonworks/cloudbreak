@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Azure network parameters.
@@ -43,46 +45,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class NetworkAzureParams {
   public static final String JSON_PROPERTY_NETWORK_ID = "networkId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String networkId;
 
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String networkName;
 
   public static final String JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDnsZoneId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String databasePrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String aksPrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER = "enableOutboundLoadBalancer";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableOutboundLoadBalancer;
 
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS = "usePublicDnsForPrivateAks";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean usePublicDnsForPrivateAks;
 
-  public NetworkAzureParams() {
+  public NetworkAzureParams() { 
   }
 
-  public NetworkAzureParams networkId(@javax.annotation.Nonnull String networkId) {
-    
+  public NetworkAzureParams networkId(@jakarta.annotation.Nonnull String networkId) {
     this.networkId = networkId;
     return this;
   }
@@ -91,7 +92,7 @@ public class NetworkAzureParams {
    * The id of the Azure VNet.
    * @return networkId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -102,12 +103,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkId(@javax.annotation.Nonnull String networkId) {
+  public void setNetworkId(@jakarta.annotation.Nonnull String networkId) {
     this.networkId = networkId;
   }
 
-  public NetworkAzureParams resourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
-    
+
+  public NetworkAzureParams resourceGroupName(@jakarta.annotation.Nonnull String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
     return this;
   }
@@ -116,7 +117,7 @@ public class NetworkAzureParams {
    * The name of the resource group associated with the VNet.
    * @return resourceGroupName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -127,12 +128,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResourceGroupName(@javax.annotation.Nonnull String resourceGroupName) {
+  public void setResourceGroupName(@jakarta.annotation.Nonnull String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-  public NetworkAzureParams usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
-    
+
+  public NetworkAzureParams usePublicIp(@jakarta.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
     return this;
   }
@@ -141,7 +142,7 @@ public class NetworkAzureParams {
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -152,12 +153,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
+  public void setUsePublicIp(@jakarta.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-  public NetworkAzureParams networkName(@javax.annotation.Nullable String networkName) {
-    
+
+  public NetworkAzureParams networkName(@jakarta.annotation.Nullable String networkName) {
     this.networkName = networkName;
     return this;
   }
@@ -166,7 +167,7 @@ public class NetworkAzureParams {
    * The name of the Azure VNet.
    * @return networkName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -177,12 +178,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkName(@javax.annotation.Nullable String networkName) {
+  public void setNetworkName(@jakarta.annotation.Nullable String networkName) {
     this.networkName = networkName;
   }
 
-  public NetworkAzureParams databasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
-    
+
+  public NetworkAzureParams databasePrivateDnsZoneId(@jakarta.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
@@ -191,7 +192,7 @@ public class NetworkAzureParams {
    * The full Azure resource ID of the existing Private DNS Zone used for Flexible Server and Single Server Databases.
    * @return databasePrivateDnsZoneId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -202,12 +203,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
+  public void setDatabasePrivateDnsZoneId(@jakarta.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
   }
 
-  public NetworkAzureParams aksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
-    
+
+  public NetworkAzureParams aksPrivateDnsZoneId(@jakarta.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     return this;
   }
@@ -216,7 +217,7 @@ public class NetworkAzureParams {
    * The full Azure resource ID of an existing Private DNS zone used for the AKS.
    * @return aksPrivateDnsZoneId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -227,12 +228,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
+  public void setAksPrivateDnsZoneId(@jakarta.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
   }
 
-  public NetworkAzureParams enableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
-    
+
+  public NetworkAzureParams enableOutboundLoadBalancer(@jakarta.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
     return this;
   }
@@ -241,7 +242,7 @@ public class NetworkAzureParams {
    * Whether the outbound load balancer was created for this environment.
    * @return enableOutboundLoadBalancer
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -252,12 +253,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableOutboundLoadBalancer(@javax.annotation.Nullable Boolean enableOutboundLoadBalancer) {
+  public void setEnableOutboundLoadBalancer(@jakarta.annotation.Nullable Boolean enableOutboundLoadBalancer) {
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
   }
 
-  public NetworkAzureParams flexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
-    
+
+  public NetworkAzureParams flexibleServerSubnetIds(@jakarta.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
   }
@@ -274,7 +275,7 @@ public class NetworkAzureParams {
    * The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
    * @return flexibleServerSubnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -285,12 +286,12 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
+  public void setFlexibleServerSubnetIds(@jakarta.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
   }
 
-  public NetworkAzureParams usePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
-    
+
+  public NetworkAzureParams usePublicDnsForPrivateAks(@jakarta.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
     return this;
   }
@@ -299,7 +300,7 @@ public class NetworkAzureParams {
    * Use public DNS for all DNS records in a private cluster.
    * @return usePublicDnsForPrivateAks
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -310,11 +311,14 @@ public class NetworkAzureParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUsePublicDnsForPrivateAks(@javax.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
+  public void setUsePublicDnsForPrivateAks(@jakarta.annotation.Nullable Boolean usePublicDnsForPrivateAks) {
     this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
   }
 
 
+  /**
+   * Return true if this NetworkAzureParams object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

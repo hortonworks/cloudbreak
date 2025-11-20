@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object to set catalog for a FreeIPA.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetCatalogRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_CATALOG = "catalog";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String catalog;
 
-  public SetCatalogRequest() {
+  public SetCatalogRequest() { 
   }
 
-  public SetCatalogRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public SetCatalogRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -53,7 +55,7 @@ public class SetCatalogRequest {
    * The name or CRN of the affected environment that holds the FreeIPA installation.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class SetCatalogRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public SetCatalogRequest catalog(@javax.annotation.Nonnull String catalog) {
-    
+
+  public SetCatalogRequest catalog(@jakarta.annotation.Nonnull String catalog) {
     this.catalog = catalog;
     return this;
   }
@@ -78,7 +80,7 @@ public class SetCatalogRequest {
    * URL of the FreeIPA catalog to be used.
    * @return catalog
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class SetCatalogRequest {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCatalog(@javax.annotation.Nonnull String catalog) {
+  public void setCatalog(@jakarta.annotation.Nonnull String catalog) {
     this.catalog = catalog;
   }
 
 
+  /**
+   * Return true if this SetCatalogRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

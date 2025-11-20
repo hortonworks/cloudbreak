@@ -14,8 +14,10 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CredentialGranularPolicyResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GranularPolicyResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for getting AWS credential prerequisites.
@@ -33,27 +36,31 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   AwsCredentialPrerequisitesResponse.JSON_PROPERTY_EXTERNAL_ID,
   AwsCredentialPrerequisitesResponse.JSON_PROPERTY_POLICY_JSON,
-  AwsCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES
+  AwsCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES,
+  AwsCredentialPrerequisitesResponse.JSON_PROPERTY_GRANULAR_POLICIES
 })
 
 public class AwsCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_EXTERNAL_ID = "externalId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String externalId;
 
   public static final String JSON_PROPERTY_POLICY_JSON = "policyJson";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String policyJson;
 
   public static final String JSON_PROPERTY_POLICIES = "policies";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CredentialGranularPolicyResponse> policies = new ArrayList<>();
 
-  public AwsCredentialPrerequisitesResponse() {
+  public static final String JSON_PROPERTY_GRANULAR_POLICIES = "granularPolicies";
+  @jakarta.annotation.Nullable
+  private List<GranularPolicyResponse> granularPolicies = new ArrayList<>();
+
+  public AwsCredentialPrerequisitesResponse() { 
   }
 
-  public AwsCredentialPrerequisitesResponse externalId(@javax.annotation.Nonnull String externalId) {
-    
+  public AwsCredentialPrerequisitesResponse externalId(@jakarta.annotation.Nonnull String externalId) {
     this.externalId = externalId;
     return this;
   }
@@ -62,7 +69,7 @@ public class AwsCredentialPrerequisitesResponse {
    * The cross-account external ID.
    * @return externalId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_EXTERNAL_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -73,12 +80,12 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_EXTERNAL_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setExternalId(@javax.annotation.Nonnull String externalId) {
+  public void setExternalId(@jakarta.annotation.Nonnull String externalId) {
     this.externalId = externalId;
   }
 
-  public AwsCredentialPrerequisitesResponse policyJson(@javax.annotation.Nonnull String policyJson) {
-    
+
+  public AwsCredentialPrerequisitesResponse policyJson(@jakarta.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
     return this;
   }
@@ -87,7 +94,7 @@ public class AwsCredentialPrerequisitesResponse {
    * The related policy json encoded in base64
    * @return policyJson
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -98,12 +105,12 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPolicyJson(@javax.annotation.Nonnull String policyJson) {
+  public void setPolicyJson(@jakarta.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
   }
 
-  public AwsCredentialPrerequisitesResponse policies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
-    
+
+  public AwsCredentialPrerequisitesResponse policies(@jakarta.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
     return this;
   }
@@ -120,7 +127,7 @@ public class AwsCredentialPrerequisitesResponse {
    * The fine-grained policies related to each service.
    * @return policies
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -131,11 +138,47 @@ public class AwsCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPolicies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
+  public void setPolicies(@jakarta.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
   }
 
 
+  public AwsCredentialPrerequisitesResponse granularPolicies(@jakarta.annotation.Nullable List<GranularPolicyResponse> granularPolicies) {
+    this.granularPolicies = granularPolicies;
+    return this;
+  }
+
+  public AwsCredentialPrerequisitesResponse addGranularPoliciesItem(GranularPolicyResponse granularPoliciesItem) {
+    if (this.granularPolicies == null) {
+      this.granularPolicies = new ArrayList<>();
+    }
+    this.granularPolicies.add(granularPoliciesItem);
+    return this;
+  }
+
+  /**
+   * The component-separated policies related to each service.
+   * @return granularPolicies
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_GRANULAR_POLICIES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<GranularPolicyResponse> getGranularPolicies() {
+    return granularPolicies;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_GRANULAR_POLICIES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setGranularPolicies(@jakarta.annotation.Nullable List<GranularPolicyResponse> granularPolicies) {
+    this.granularPolicies = granularPolicies;
+  }
+
+
+  /**
+   * Return true if this AwsCredentialPrerequisitesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -147,12 +190,13 @@ public class AwsCredentialPrerequisitesResponse {
     AwsCredentialPrerequisitesResponse awsCredentialPrerequisitesResponse = (AwsCredentialPrerequisitesResponse) o;
     return Objects.equals(this.externalId, awsCredentialPrerequisitesResponse.externalId) &&
         Objects.equals(this.policyJson, awsCredentialPrerequisitesResponse.policyJson) &&
-        Objects.equals(this.policies, awsCredentialPrerequisitesResponse.policies);
+        Objects.equals(this.policies, awsCredentialPrerequisitesResponse.policies) &&
+        Objects.equals(this.granularPolicies, awsCredentialPrerequisitesResponse.granularPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(externalId, policyJson, policies);
+    return Objects.hash(externalId, policyJson, policies, granularPolicies);
   }
 
   @Override
@@ -162,6 +206,7 @@ public class AwsCredentialPrerequisitesResponse {
     sb.append("    externalId: ").append(toIndentedString(externalId)).append("\n");
     sb.append("    policyJson: ").append(toIndentedString(policyJson)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    granularPolicies: ").append(toIndentedString(granularPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

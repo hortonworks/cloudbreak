@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for getting the audit credential prerequisites for GovCloud for the enabled providers.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetGovCloudAuditCredentialPrerequisitesRequest {
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String cloudPlatform;
 
-  public GetGovCloudAuditCredentialPrerequisitesRequest() {
+  public GetGovCloudAuditCredentialPrerequisitesRequest() { 
   }
 
-  public GetGovCloudAuditCredentialPrerequisitesRequest cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
-    
+  public GetGovCloudAuditCredentialPrerequisitesRequest cloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetGovCloudAuditCredentialPrerequisitesRequest {
    * The kind of cloud platform. As of now, the following cloud provider is accepted as the value of this field - AWS
    * @return cloudPlatform
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class GetGovCloudAuditCredentialPrerequisitesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
+  public void setCloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
 
 
+  /**
+   * Return true if this GetGovCloudAuditCredentialPrerequisitesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

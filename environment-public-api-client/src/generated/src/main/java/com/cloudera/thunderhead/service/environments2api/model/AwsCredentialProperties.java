@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The credential properties that closely related to those that have been created on AWS.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AwsCredentialProperties {
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String roleArn;
 
   public static final String JSON_PROPERTY_GOV_CLOUD = "govCloud";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean govCloud;
 
   public static final String JSON_PROPERTY_DEFAULT_REGION = "defaultRegion";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String defaultRegion;
 
-  public AwsCredentialProperties() {
+  public AwsCredentialProperties() { 
   }
 
-  public AwsCredentialProperties roleArn(@javax.annotation.Nullable String roleArn) {
-    
+  public AwsCredentialProperties roleArn(@jakarta.annotation.Nullable String roleArn) {
     this.roleArn = roleArn;
     return this;
   }
@@ -58,7 +60,7 @@ public class AwsCredentialProperties {
    * The AWS role arn for the given credential.
    * @return roleArn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRoleArn(@javax.annotation.Nullable String roleArn) {
+  public void setRoleArn(@jakarta.annotation.Nullable String roleArn) {
     this.roleArn = roleArn;
   }
 
-  public AwsCredentialProperties govCloud(@javax.annotation.Nullable Boolean govCloud) {
-    
+
+  public AwsCredentialProperties govCloud(@jakarta.annotation.Nullable Boolean govCloud) {
     this.govCloud = govCloud;
     return this;
   }
@@ -83,7 +85,7 @@ public class AwsCredentialProperties {
    * Flag that indicates that the given AWS credential is GovCloud specific.
    * @return govCloud
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GOV_CLOUD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_GOV_CLOUD)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGovCloud(@javax.annotation.Nullable Boolean govCloud) {
+  public void setGovCloud(@jakarta.annotation.Nullable Boolean govCloud) {
     this.govCloud = govCloud;
   }
 
-  public AwsCredentialProperties defaultRegion(@javax.annotation.Nullable String defaultRegion) {
-    
+
+  public AwsCredentialProperties defaultRegion(@jakarta.annotation.Nullable String defaultRegion) {
     this.defaultRegion = defaultRegion;
     return this;
   }
@@ -108,7 +110,7 @@ public class AwsCredentialProperties {
    * The default region for the Credential to be used during API interactions.
    * @return defaultRegion
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class AwsCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_REGION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultRegion(@javax.annotation.Nullable String defaultRegion) {
+  public void setDefaultRegion(@jakarta.annotation.Nullable String defaultRegion) {
     this.defaultRegion = defaultRegion;
   }
 
 
+  /**
+   * Return true if this AwsCredentialProperties object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

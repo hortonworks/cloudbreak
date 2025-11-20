@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for retrieving the user sync state of an environment.
@@ -72,18 +75,17 @@ public class GetEnvironmentUserSyncStateResponse {
   }
 
   public static final String JSON_PROPERTY_STATE = "state";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private StateEnum state;
 
   public static final String JSON_PROPERTY_USER_SYNC_OPERATION_ID = "userSyncOperationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String userSyncOperationId;
 
-  public GetEnvironmentUserSyncStateResponse() {
+  public GetEnvironmentUserSyncStateResponse() { 
   }
 
-  public GetEnvironmentUserSyncStateResponse state(@javax.annotation.Nonnull StateEnum state) {
-    
+  public GetEnvironmentUserSyncStateResponse state(@jakarta.annotation.Nonnull StateEnum state) {
     this.state = state;
     return this;
   }
@@ -92,7 +94,7 @@ public class GetEnvironmentUserSyncStateResponse {
    * The user sync state of the environment.
    * @return state
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -103,12 +105,12 @@ public class GetEnvironmentUserSyncStateResponse {
 
   @JsonProperty(JSON_PROPERTY_STATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setState(@javax.annotation.Nonnull StateEnum state) {
+  public void setState(@jakarta.annotation.Nonnull StateEnum state) {
     this.state = state;
   }
 
-  public GetEnvironmentUserSyncStateResponse userSyncOperationId(@javax.annotation.Nullable String userSyncOperationId) {
-    
+
+  public GetEnvironmentUserSyncStateResponse userSyncOperationId(@jakarta.annotation.Nullable String userSyncOperationId) {
     this.userSyncOperationId = userSyncOperationId;
     return this;
   }
@@ -117,7 +119,7 @@ public class GetEnvironmentUserSyncStateResponse {
    * Operation Id for the latest user sync operation, if any, run for this environment.
    * @return userSyncOperationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER_SYNC_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -128,11 +130,14 @@ public class GetEnvironmentUserSyncStateResponse {
 
   @JsonProperty(JSON_PROPERTY_USER_SYNC_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserSyncOperationId(@javax.annotation.Nullable String userSyncOperationId) {
+  public void setUserSyncOperationId(@jakarta.annotation.Nullable String userSyncOperationId) {
     this.userSyncOperationId = userSyncOperationId;
   }
 
 
+  /**
+   * Return true if this GetEnvironmentUserSyncStateResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

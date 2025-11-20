@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaVersions;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * List of the versions.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Versions {
   public static final String JSON_PROPERTY_FREEIPA = "freeipa";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<FreeIpaVersions> freeipa = new ArrayList<>();
 
-  public Versions() {
+  public Versions() { 
   }
 
-  public Versions freeipa(@javax.annotation.Nullable List<FreeIpaVersions> freeipa) {
-    
+  public Versions freeipa(@jakarta.annotation.Nullable List<FreeIpaVersions> freeipa) {
     this.freeipa = freeipa;
     return this;
   }
@@ -60,7 +61,7 @@ public class Versions {
    * List of the FreeIPA-related versions.
    * @return freeipa
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class Versions {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeipa(@javax.annotation.Nullable List<FreeIpaVersions> freeipa) {
+  public void setFreeipa(@jakarta.annotation.Nullable List<FreeIpaVersions> freeipa) {
     this.freeipa = freeipa;
   }
 
 
+  /**
+   * Return true if this Versions object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

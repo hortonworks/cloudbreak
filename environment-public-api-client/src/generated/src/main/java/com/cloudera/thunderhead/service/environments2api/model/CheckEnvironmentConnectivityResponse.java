@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CdpCluster;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object to check connectivity to private cloud environment.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CheckEnvironmentConnectivityResponse {
   public static final String JSON_PROPERTY_CLUSTERS = "clusters";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<CdpCluster> clusters = new ArrayList<>();
 
-  public CheckEnvironmentConnectivityResponse() {
+  public CheckEnvironmentConnectivityResponse() { 
   }
 
-  public CheckEnvironmentConnectivityResponse clusters(@javax.annotation.Nonnull List<CdpCluster> clusters) {
-    
+  public CheckEnvironmentConnectivityResponse clusters(@jakarta.annotation.Nonnull List<CdpCluster> clusters) {
     this.clusters = clusters;
     return this;
   }
@@ -60,7 +61,7 @@ public class CheckEnvironmentConnectivityResponse {
    * List of discovered clusters
    * @return clusters
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class CheckEnvironmentConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTERS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setClusters(@javax.annotation.Nonnull List<CdpCluster> clusters) {
+  public void setClusters(@jakarta.annotation.Nonnull List<CdpCluster> clusters) {
     this.clusters = clusters;
   }
 
 
+  /**
+   * Return true if this CheckEnvironmentConnectivityResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

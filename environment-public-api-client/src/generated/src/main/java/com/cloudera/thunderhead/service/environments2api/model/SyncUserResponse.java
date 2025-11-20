@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.OperationType;
 import com.cloudera.thunderhead.service.environments2api.model.SyncOperationDetails;
 import com.cloudera.thunderhead.service.environments2api.model.SyncStatus;
@@ -28,7 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response Object for single user sync operation.
@@ -48,50 +50,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SyncUserResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String operationId;
 
   public static final String JSON_PROPERTY_OPERATION_TYPE = "operationType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OperationType operationType;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private SyncStatus status;
 
   public static final String JSON_PROPERTY_SUCCESS = "success";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<SyncOperationDetails> success = new ArrayList<>();
 
   public static final String JSON_PROPERTY_FAILURE = "failure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<SyncOperationDetails> failure = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ERROR = "error";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String error;
 
   public static final String JSON_PROPERTY_START_TIME = "startTime";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String startTime;
 
   public static final String JSON_PROPERTY_END_TIME = "endTime";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String endTime;
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime endDate;
 
-  public SyncUserResponse() {
+  public SyncUserResponse() { 
   }
 
-  public SyncUserResponse operationId(@javax.annotation.Nonnull String operationId) {
-    
+  public SyncUserResponse operationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -100,7 +101,7 @@ public class SyncUserResponse {
    * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -111,12 +112,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOperationId(@javax.annotation.Nonnull String operationId) {
+  public void setOperationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
   }
 
-  public SyncUserResponse operationType(@javax.annotation.Nullable OperationType operationType) {
-    
+
+  public SyncUserResponse operationType(@jakarta.annotation.Nullable OperationType operationType) {
     this.operationType = operationType;
     return this;
   }
@@ -125,7 +126,7 @@ public class SyncUserResponse {
    * Get operationType
    * @return operationType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -136,12 +137,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationType(@javax.annotation.Nullable OperationType operationType) {
+  public void setOperationType(@jakarta.annotation.Nullable OperationType operationType) {
     this.operationType = operationType;
   }
 
-  public SyncUserResponse status(@javax.annotation.Nullable SyncStatus status) {
-    
+
+  public SyncUserResponse status(@jakarta.annotation.Nullable SyncStatus status) {
     this.status = status;
     return this;
   }
@@ -150,7 +151,7 @@ public class SyncUserResponse {
    * Get status
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -161,12 +162,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable SyncStatus status) {
+  public void setStatus(@jakarta.annotation.Nullable SyncStatus status) {
     this.status = status;
   }
 
-  public SyncUserResponse success(@javax.annotation.Nullable List<SyncOperationDetails> success) {
-    
+
+  public SyncUserResponse success(@jakarta.annotation.Nullable List<SyncOperationDetails> success) {
     this.success = success;
     return this;
   }
@@ -183,7 +184,7 @@ public class SyncUserResponse {
    * List of sync operation details for all succeeded environments.
    * @return success
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUCCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -194,12 +195,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_SUCCESS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSuccess(@javax.annotation.Nullable List<SyncOperationDetails> success) {
+  public void setSuccess(@jakarta.annotation.Nullable List<SyncOperationDetails> success) {
     this.success = success;
   }
 
-  public SyncUserResponse failure(@javax.annotation.Nullable List<SyncOperationDetails> failure) {
-    
+
+  public SyncUserResponse failure(@jakarta.annotation.Nullable List<SyncOperationDetails> failure) {
     this.failure = failure;
     return this;
   }
@@ -216,7 +217,7 @@ public class SyncUserResponse {
    * List of sync operation details for all failed envs.
    * @return failure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FAILURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -227,12 +228,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_FAILURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFailure(@javax.annotation.Nullable List<SyncOperationDetails> failure) {
+  public void setFailure(@jakarta.annotation.Nullable List<SyncOperationDetails> failure) {
     this.failure = failure;
   }
 
-  public SyncUserResponse error(@javax.annotation.Nullable String error) {
-    
+
+  public SyncUserResponse error(@jakarta.annotation.Nullable String error) {
     this.error = error;
     return this;
   }
@@ -241,7 +242,7 @@ public class SyncUserResponse {
    * If there is any error associated.
    * @return error
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -252,12 +253,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(@javax.annotation.Nullable String error) {
+  public void setError(@jakarta.annotation.Nullable String error) {
     this.error = error;
   }
 
-  public SyncUserResponse startTime(@javax.annotation.Nullable String startTime) {
-    
+
+  public SyncUserResponse startTime(@jakarta.annotation.Nullable String startTime) {
     this.startTime = startTime;
     return this;
   }
@@ -266,7 +267,7 @@ public class SyncUserResponse {
    * Sync operation start timestamp.
    * @return startTime
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_TIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -277,12 +278,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_START_TIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartTime(@javax.annotation.Nullable String startTime) {
+  public void setStartTime(@jakarta.annotation.Nullable String startTime) {
     this.startTime = startTime;
   }
 
-  public SyncUserResponse endTime(@javax.annotation.Nullable String endTime) {
-    
+
+  public SyncUserResponse endTime(@jakarta.annotation.Nullable String endTime) {
     this.endTime = endTime;
     return this;
   }
@@ -291,7 +292,7 @@ public class SyncUserResponse {
    * Sync operation end timestamp.
    * @return endTime
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_TIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -302,12 +303,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_END_TIME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndTime(@javax.annotation.Nullable String endTime) {
+  public void setEndTime(@jakarta.annotation.Nullable String endTime) {
     this.endTime = endTime;
   }
 
-  public SyncUserResponse startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
-    
+
+  public SyncUserResponse startDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
     return this;
   }
@@ -316,7 +317,7 @@ public class SyncUserResponse {
    * Date when the sync operation started.
    * @return startDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -327,12 +328,12 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
+  public void setStartDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-  public SyncUserResponse endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
-    
+
+  public SyncUserResponse endDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
     return this;
   }
@@ -341,7 +342,7 @@ public class SyncUserResponse {
    * Date when the sync operation ended. Omitted if operation has not ended.
    * @return endDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -352,11 +353,14 @@ public class SyncUserResponse {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
+  public void setEndDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
 
 
+  /**
+   * Return true if this SyncUserResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

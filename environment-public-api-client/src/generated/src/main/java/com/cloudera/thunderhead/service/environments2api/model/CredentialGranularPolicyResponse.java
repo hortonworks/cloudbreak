@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for the granular policy for the given service or experience.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CredentialGranularPolicyResponse {
   public static final String JSON_PROPERTY_SERVICE = "service";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String service;
 
   public static final String JSON_PROPERTY_POLICY_JSON = "policyJson";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String policyJson;
 
-  public CredentialGranularPolicyResponse() {
+  public CredentialGranularPolicyResponse() { 
   }
 
-  public CredentialGranularPolicyResponse service(@javax.annotation.Nonnull String service) {
-    
+  public CredentialGranularPolicyResponse service(@jakarta.annotation.Nonnull String service) {
     this.service = service;
     return this;
   }
@@ -53,7 +55,7 @@ public class CredentialGranularPolicyResponse {
    * The name of the service that requires the given policy for resource management.
    * @return service
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVICE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class CredentialGranularPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_SERVICE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setService(@javax.annotation.Nonnull String service) {
+  public void setService(@jakarta.annotation.Nonnull String service) {
     this.service = service;
   }
 
-  public CredentialGranularPolicyResponse policyJson(@javax.annotation.Nonnull String policyJson) {
-    
+
+  public CredentialGranularPolicyResponse policyJson(@jakarta.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
     return this;
   }
@@ -78,7 +80,7 @@ public class CredentialGranularPolicyResponse {
    * The policy JSON encoded in base64.
    * @return policyJson
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class CredentialGranularPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICY_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPolicyJson(@javax.annotation.Nonnull String policyJson) {
+  public void setPolicyJson(@jakarta.annotation.Nonnull String policyJson) {
     this.policyJson = policyJson;
   }
 
 
+  /**
+   * Return true if this CredentialGranularPolicyResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

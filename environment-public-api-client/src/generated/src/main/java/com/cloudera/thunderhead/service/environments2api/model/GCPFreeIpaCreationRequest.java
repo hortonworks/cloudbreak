@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for creating FreeIPA in the environment.
@@ -38,26 +40,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GCPFreeIpaCreationRequest {
   public static final String JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP = "instanceCountByGroup";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer instanceCountByGroup;
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> recipes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceType;
 
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean multiAz = false;
 
-  public GCPFreeIpaCreationRequest() {
+  public GCPFreeIpaCreationRequest() { 
   }
 
-  public GCPFreeIpaCreationRequest instanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
-    
+  public GCPFreeIpaCreationRequest instanceCountByGroup(@jakarta.annotation.Nullable Integer instanceCountByGroup) {
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
@@ -66,7 +67,7 @@ public class GCPFreeIpaCreationRequest {
    * The number of FreeIPA instances to create per group when creating FreeIPA in the environment
    * @return instanceCountByGroup
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -77,12 +78,12 @@ public class GCPFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceCountByGroup(@javax.annotation.Nullable Integer instanceCountByGroup) {
+  public void setInstanceCountByGroup(@jakarta.annotation.Nullable Integer instanceCountByGroup) {
     this.instanceCountByGroup = instanceCountByGroup;
   }
 
-  public GCPFreeIpaCreationRequest recipes(@javax.annotation.Nullable List<String> recipes) {
-    
+
+  public GCPFreeIpaCreationRequest recipes(@jakarta.annotation.Nullable List<String> recipes) {
     this.recipes = recipes;
     return this;
   }
@@ -99,7 +100,7 @@ public class GCPFreeIpaCreationRequest {
    * The recipes for the FreeIPA cluster.
    * @return recipes
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -110,12 +111,12 @@ public class GCPFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRecipes(@javax.annotation.Nullable List<String> recipes) {
+  public void setRecipes(@jakarta.annotation.Nullable List<String> recipes) {
     this.recipes = recipes;
   }
 
-  public GCPFreeIpaCreationRequest instanceType(@javax.annotation.Nullable String instanceType) {
-    
+
+  public GCPFreeIpaCreationRequest instanceType(@jakarta.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
     return this;
   }
@@ -124,7 +125,7 @@ public class GCPFreeIpaCreationRequest {
    * Custom instance type of FreeIPA instances.
    * @return instanceType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -135,12 +136,12 @@ public class GCPFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceType(@javax.annotation.Nullable String instanceType) {
+  public void setInstanceType(@jakarta.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
   }
 
-  public GCPFreeIpaCreationRequest multiAz(@javax.annotation.Nullable Boolean multiAz) {
-    
+
+  public GCPFreeIpaCreationRequest multiAz(@jakarta.annotation.Nullable Boolean multiAz) {
     this.multiAz = multiAz;
     return this;
   }
@@ -149,7 +150,7 @@ public class GCPFreeIpaCreationRequest {
    * Flag that enables deployment of the FreeIPA in a multi-availability zone.
    * @return multiAz
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -160,11 +161,14 @@ public class GCPFreeIpaCreationRequest {
 
   @JsonProperty(JSON_PROPERTY_MULTI_AZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMultiAz(@javax.annotation.Nullable Boolean multiAz) {
+  public void setMultiAz(@jakarta.annotation.Nullable Boolean multiAz) {
     this.multiAz = multiAz;
   }
 
 
+  /**
+   * Return true if this GCPFreeIpaCreationRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

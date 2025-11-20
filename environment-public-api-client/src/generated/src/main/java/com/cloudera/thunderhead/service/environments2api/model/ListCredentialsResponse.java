@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Credential;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a list credentials request.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListCredentialsResponse {
   public static final String JSON_PROPERTY_CREDENTIALS = "credentials";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<Credential> credentials = new ArrayList<>();
 
-  public ListCredentialsResponse() {
+  public ListCredentialsResponse() { 
   }
 
-  public ListCredentialsResponse credentials(@javax.annotation.Nonnull List<Credential> credentials) {
-    
+  public ListCredentialsResponse credentials(@jakarta.annotation.Nonnull List<Credential> credentials) {
     this.credentials = credentials;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListCredentialsResponse {
    * The credentials.
    * @return credentials
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIALS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class ListCredentialsResponse {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIALS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentials(@javax.annotation.Nonnull List<Credential> credentials) {
+  public void setCredentials(@jakarta.annotation.Nonnull List<Credential> credentials) {
     this.credentials = credentials;
   }
 
 
+  /**
+   * Return true if this ListCredentialsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

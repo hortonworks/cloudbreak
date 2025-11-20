@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * AWS network parameters.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class NetworkAwsParams {
   public static final String JSON_PROPERTY_VPC_ID = "vpcId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String vpcId;
 
-  public NetworkAwsParams() {
+  public NetworkAwsParams() { 
   }
 
-  public NetworkAwsParams vpcId(@javax.annotation.Nonnull String vpcId) {
-    
+  public NetworkAwsParams vpcId(@jakarta.annotation.Nonnull String vpcId) {
     this.vpcId = vpcId;
     return this;
   }
@@ -48,7 +50,7 @@ public class NetworkAwsParams {
    * VPC ids of the specified networks.
    * @return vpcId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class NetworkAwsParams {
 
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVpcId(@javax.annotation.Nonnull String vpcId) {
+  public void setVpcId(@jakarta.annotation.Nonnull String vpcId) {
     this.vpcId = vpcId;
   }
 
 
+  /**
+   * Return true if this NetworkAwsParams object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

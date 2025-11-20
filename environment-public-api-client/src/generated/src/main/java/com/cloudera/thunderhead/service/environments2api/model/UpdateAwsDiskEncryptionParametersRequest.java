@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for updating AWS encryption parameters.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAwsDiskEncryptionParametersRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String encryptionKeyArn;
 
-  public UpdateAwsDiskEncryptionParametersRequest() {
+  public UpdateAwsDiskEncryptionParametersRequest() { 
   }
 
-  public UpdateAwsDiskEncryptionParametersRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateAwsDiskEncryptionParametersRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -53,7 +55,7 @@ public class UpdateAwsDiskEncryptionParametersRequest {
    * The name or CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class UpdateAwsDiskEncryptionParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateAwsDiskEncryptionParametersRequest encryptionKeyArn(@javax.annotation.Nonnull String encryptionKeyArn) {
-    
+
+  public UpdateAwsDiskEncryptionParametersRequest encryptionKeyArn(@jakarta.annotation.Nonnull String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -78,7 +80,7 @@ public class UpdateAwsDiskEncryptionParametersRequest {
    * The ARN of an encryption key, which will be used to encrypt the AWS EBS volumes, if the entitlement has been granted.
    * @return encryptionKeyArn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class UpdateAwsDiskEncryptionParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEncryptionKeyArn(@javax.annotation.Nonnull String encryptionKeyArn) {
+  public void setEncryptionKeyArn(@jakarta.annotation.Nonnull String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
   }
 
 
+  /**
+   * Return true if this UpdateAwsDiskEncryptionParametersRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AwsDiskEncryptionParameters;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for an update AWS encryption parameters request.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAwsDiskEncryptionParametersResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Environment environment;
 
   public static final String JSON_PROPERTY_AWS_DISK_ENCRYPTION_PARAMETERS = "awsDiskEncryptionParameters";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AwsDiskEncryptionParameters awsDiskEncryptionParameters;
 
-  public UpdateAwsDiskEncryptionParametersResponse() {
+  public UpdateAwsDiskEncryptionParametersResponse() { 
   }
 
-  public UpdateAwsDiskEncryptionParametersResponse environment(@javax.annotation.Nonnull Environment environment) {
-    
+  public UpdateAwsDiskEncryptionParametersResponse environment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
     return this;
   }
@@ -55,7 +57,7 @@ public class UpdateAwsDiskEncryptionParametersResponse {
    * Get environment
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,12 +68,12 @@ public class UpdateAwsDiskEncryptionParametersResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull Environment environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
   }
 
-  public UpdateAwsDiskEncryptionParametersResponse awsDiskEncryptionParameters(@javax.annotation.Nullable AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
-    
+
+  public UpdateAwsDiskEncryptionParametersResponse awsDiskEncryptionParameters(@jakarta.annotation.Nullable AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
     this.awsDiskEncryptionParameters = awsDiskEncryptionParameters;
     return this;
   }
@@ -80,7 +82,7 @@ public class UpdateAwsDiskEncryptionParametersResponse {
    * Get awsDiskEncryptionParameters
    * @return awsDiskEncryptionParameters
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DISK_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class UpdateAwsDiskEncryptionParametersResponse {
 
   @JsonProperty(JSON_PROPERTY_AWS_DISK_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDiskEncryptionParameters(@javax.annotation.Nullable AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
+  public void setAwsDiskEncryptionParameters(@jakarta.annotation.Nullable AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
     this.awsDiskEncryptionParameters = awsDiskEncryptionParameters;
   }
 
 
+  /**
+   * Return true if this UpdateAwsDiskEncryptionParametersResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

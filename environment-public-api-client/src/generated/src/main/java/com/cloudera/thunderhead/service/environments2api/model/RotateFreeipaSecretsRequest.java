@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for starting secret rotation for FreeIPA.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class RotateFreeipaSecretsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_SECRET_TYPES = "secretTypes";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<String> secretTypes = new ArrayList<>();
 
-  public RotateFreeipaSecretsRequest() {
+  public RotateFreeipaSecretsRequest() { 
   }
 
-  public RotateFreeipaSecretsRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public RotateFreeipaSecretsRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -56,7 +57,7 @@ public class RotateFreeipaSecretsRequest {
    * The environment CRN where FreeIPA is located and we wish to rotate secrets.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -67,12 +68,12 @@ public class RotateFreeipaSecretsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public RotateFreeipaSecretsRequest secretTypes(@javax.annotation.Nonnull List<String> secretTypes) {
-    
+
+  public RotateFreeipaSecretsRequest secretTypes(@jakarta.annotation.Nonnull List<String> secretTypes) {
     this.secretTypes = secretTypes;
     return this;
   }
@@ -89,7 +90,7 @@ public class RotateFreeipaSecretsRequest {
    * The list of secrets that need replacement.
    * @return secretTypes
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -100,11 +101,14 @@ public class RotateFreeipaSecretsRequest {
 
   @JsonProperty(JSON_PROPERTY_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecretTypes(@javax.annotation.Nonnull List<String> secretTypes) {
+  public void setSecretTypes(@jakarta.annotation.Nonnull List<String> secretTypes) {
     this.secretTypes = secretTypes;
   }
 
 
+  /**
+   * Return true if this RotateFreeipaSecretsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

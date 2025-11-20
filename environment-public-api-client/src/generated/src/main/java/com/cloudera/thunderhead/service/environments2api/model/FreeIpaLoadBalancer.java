@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Details of a FreeIPA load balancer.
@@ -37,22 +39,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeIpaLoadBalancer {
   public static final String JSON_PROPERTY_RESOURCE_ID = "resourceId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String resourceId;
 
   public static final String JSON_PROPERTY_FQDN = "fqdn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String fqdn;
 
   public static final String JSON_PROPERTY_PRIVATE_IPS = "privateIps";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> privateIps = new ArrayList<>();
 
-  public FreeIpaLoadBalancer() {
+  public FreeIpaLoadBalancer() { 
   }
 
-  public FreeIpaLoadBalancer resourceId(@javax.annotation.Nullable String resourceId) {
-    
+  public FreeIpaLoadBalancer resourceId(@jakarta.annotation.Nullable String resourceId) {
     this.resourceId = resourceId;
     return this;
   }
@@ -61,7 +62,7 @@ public class FreeIpaLoadBalancer {
    * The cloud resource ID of the provisioned load balancer.
    * @return resourceId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -72,12 +73,12 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceId(@javax.annotation.Nullable String resourceId) {
+  public void setResourceId(@jakarta.annotation.Nullable String resourceId) {
     this.resourceId = resourceId;
   }
 
-  public FreeIpaLoadBalancer fqdn(@javax.annotation.Nullable String fqdn) {
-    
+
+  public FreeIpaLoadBalancer fqdn(@jakarta.annotation.Nullable String fqdn) {
     this.fqdn = fqdn;
     return this;
   }
@@ -86,7 +87,7 @@ public class FreeIpaLoadBalancer {
    * The fully qualified domain name of the load balancer.
    * @return fqdn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -97,12 +98,12 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_FQDN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFqdn(@javax.annotation.Nullable String fqdn) {
+  public void setFqdn(@jakarta.annotation.Nullable String fqdn) {
     this.fqdn = fqdn;
   }
 
-  public FreeIpaLoadBalancer privateIps(@javax.annotation.Nullable List<String> privateIps) {
-    
+
+  public FreeIpaLoadBalancer privateIps(@jakarta.annotation.Nullable List<String> privateIps) {
     this.privateIps = privateIps;
     return this;
   }
@@ -119,7 +120,7 @@ public class FreeIpaLoadBalancer {
    * The private IP addresses of the load balancer.
    * @return privateIps
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_IPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -130,11 +131,14 @@ public class FreeIpaLoadBalancer {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_IPS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateIps(@javax.annotation.Nullable List<String> privateIps) {
+  public void setPrivateIps(@jakarta.annotation.Nullable List<String> privateIps) {
     this.privateIps = privateIps;
   }
 
 
+  /**
+   * Return true if this FreeIpaLoadBalancer object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

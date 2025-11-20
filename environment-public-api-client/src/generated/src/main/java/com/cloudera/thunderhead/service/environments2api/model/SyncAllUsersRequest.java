@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a All Users and Groups Sync.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SyncAllUsersRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAMES = "environmentNames";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> environmentNames = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ACTOR_CRNS = "actorCrns";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> actorCrns = new ArrayList<>();
 
-  public SyncAllUsersRequest() {
+  public SyncAllUsersRequest() { 
   }
 
-  public SyncAllUsersRequest environmentNames(@javax.annotation.Nullable List<String> environmentNames) {
-    
+  public SyncAllUsersRequest environmentNames(@jakarta.annotation.Nullable List<String> environmentNames) {
     this.environmentNames = environmentNames;
     return this;
   }
@@ -64,7 +65,7 @@ public class SyncAllUsersRequest {
    * List of environments to be synced. If not present, all environments will be synced.
    * @return environmentNames
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -75,12 +76,12 @@ public class SyncAllUsersRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentNames(@javax.annotation.Nullable List<String> environmentNames) {
+  public void setEnvironmentNames(@jakarta.annotation.Nullable List<String> environmentNames) {
     this.environmentNames = environmentNames;
   }
 
-  public SyncAllUsersRequest actorCrns(@javax.annotation.Nullable List<String> actorCrns) {
-    
+
+  public SyncAllUsersRequest actorCrns(@jakarta.annotation.Nullable List<String> actorCrns) {
     this.actorCrns = actorCrns;
     return this;
   }
@@ -97,7 +98,7 @@ public class SyncAllUsersRequest {
    * List of actor crns to be synced. If not present, all actors with environment access will be synced.
    * @return actorCrns
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACTOR_CRNS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -108,11 +109,14 @@ public class SyncAllUsersRequest {
 
   @JsonProperty(JSON_PROPERTY_ACTOR_CRNS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setActorCrns(@javax.annotation.Nullable List<String> actorCrns) {
+  public void setActorCrns(@jakarta.annotation.Nullable List<String> actorCrns) {
     this.actorCrns = actorCrns;
   }
 
 
+  /**
+   * Return true if this SyncAllUsersRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

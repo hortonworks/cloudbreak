@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for tracking the latest (current/last) operation on the environment resource.
@@ -32,16 +35,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GetOperationResponse.JSON_PROPERTY_OPERATION_NAME,
   GetOperationResponse.JSON_PROPERTY_OPERATION_STATUS,
   GetOperationResponse.JSON_PROPERTY_STARTED,
-  GetOperationResponse.JSON_PROPERTY_ENDED
+  GetOperationResponse.JSON_PROPERTY_ENDED,
+  GetOperationResponse.JSON_PROPERTY_MESSAGE
 })
 
 public class GetOperationResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationId;
 
   public static final String JSON_PROPERTY_OPERATION_NAME = "operationName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationName;
 
   /**
@@ -86,22 +90,25 @@ public class GetOperationResponse {
   }
 
   public static final String JSON_PROPERTY_OPERATION_STATUS = "operationStatus";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OperationStatusEnum operationStatus;
 
   public static final String JSON_PROPERTY_STARTED = "started";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime started;
 
   public static final String JSON_PROPERTY_ENDED = "ended";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime ended;
 
-  public GetOperationResponse() {
+  public static final String JSON_PROPERTY_MESSAGE = "message";
+  @jakarta.annotation.Nullable
+  private String message;
+
+  public GetOperationResponse() { 
   }
 
-  public GetOperationResponse operationId(@javax.annotation.Nullable String operationId) {
-    
+  public GetOperationResponse operationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -110,7 +117,7 @@ public class GetOperationResponse {
    * Identifier of the operation.
    * @return operationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -121,12 +128,12 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(@javax.annotation.Nullable String operationId) {
+  public void setOperationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
-  public GetOperationResponse operationName(@javax.annotation.Nullable String operationName) {
-    
+
+  public GetOperationResponse operationName(@jakarta.annotation.Nullable String operationName) {
     this.operationName = operationName;
     return this;
   }
@@ -135,7 +142,7 @@ public class GetOperationResponse {
    * Name of the operation.
    * @return operationName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -146,12 +153,12 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationName(@javax.annotation.Nullable String operationName) {
+  public void setOperationName(@jakarta.annotation.Nullable String operationName) {
     this.operationName = operationName;
   }
 
-  public GetOperationResponse operationStatus(@javax.annotation.Nullable OperationStatusEnum operationStatus) {
-    
+
+  public GetOperationResponse operationStatus(@jakarta.annotation.Nullable OperationStatusEnum operationStatus) {
     this.operationStatus = operationStatus;
     return this;
   }
@@ -160,7 +167,7 @@ public class GetOperationResponse {
    * Status of the operation.
    * @return operationStatus
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -171,12 +178,12 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationStatus(@javax.annotation.Nullable OperationStatusEnum operationStatus) {
+  public void setOperationStatus(@jakarta.annotation.Nullable OperationStatusEnum operationStatus) {
     this.operationStatus = operationStatus;
   }
 
-  public GetOperationResponse started(@javax.annotation.Nullable OffsetDateTime started) {
-    
+
+  public GetOperationResponse started(@jakarta.annotation.Nullable OffsetDateTime started) {
     this.started = started;
     return this;
   }
@@ -185,7 +192,7 @@ public class GetOperationResponse {
    * Start time of the operation.
    * @return started
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -196,12 +203,12 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_STARTED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStarted(@javax.annotation.Nullable OffsetDateTime started) {
+  public void setStarted(@jakarta.annotation.Nullable OffsetDateTime started) {
     this.started = started;
   }
 
-  public GetOperationResponse ended(@javax.annotation.Nullable OffsetDateTime ended) {
-    
+
+  public GetOperationResponse ended(@jakarta.annotation.Nullable OffsetDateTime ended) {
     this.ended = ended;
     return this;
   }
@@ -210,7 +217,7 @@ public class GetOperationResponse {
    * End time of the operation.
    * @return ended
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -221,11 +228,39 @@ public class GetOperationResponse {
 
   @JsonProperty(JSON_PROPERTY_ENDED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnded(@javax.annotation.Nullable OffsetDateTime ended) {
+  public void setEnded(@jakarta.annotation.Nullable OffsetDateTime ended) {
     this.ended = ended;
   }
 
 
+  public GetOperationResponse message(@jakarta.annotation.Nullable String message) {
+    this.message = message;
+    return this;
+  }
+
+  /**
+   * Supplementary message towards the user regarding the input or outcome of the given call.
+   * @return message
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_MESSAGE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getMessage() {
+    return message;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_MESSAGE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setMessage(@jakarta.annotation.Nullable String message) {
+    this.message = message;
+  }
+
+
+  /**
+   * Return true if this GetOperationResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -239,12 +274,13 @@ public class GetOperationResponse {
         Objects.equals(this.operationName, getOperationResponse.operationName) &&
         Objects.equals(this.operationStatus, getOperationResponse.operationStatus) &&
         Objects.equals(this.started, getOperationResponse.started) &&
-        Objects.equals(this.ended, getOperationResponse.ended);
+        Objects.equals(this.ended, getOperationResponse.ended) &&
+        Objects.equals(this.message, getOperationResponse.message);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(operationId, operationName, operationStatus, started, ended);
+    return Objects.hash(operationId, operationName, operationStatus, started, ended, message);
   }
 
   @Override
@@ -256,6 +292,7 @@ public class GetOperationResponse {
     sb.append("    operationStatus: ").append(toIndentedString(operationStatus)).append("\n");
     sb.append("    started: ").append(toIndentedString(started)).append("\n");
     sb.append("    ended: ").append(toIndentedString(ended)).append("\n");
+    sb.append("    message: ").append(toIndentedString(message)).append("\n");
     sb.append("}");
     return sb.toString();
   }

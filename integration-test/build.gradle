@@ -196,7 +196,7 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
   implementation group: 'com.google.inject',             name: 'guice',                          version: '7.0.0'
   implementation project(path: ':environment-remote-api')
-  implementation project(path: ':environment-remote-api')
+  implementation project(path: ':environment-public-api-client')
 }
 
 test {

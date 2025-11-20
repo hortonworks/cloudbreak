@@ -14,43 +14,50 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Sync Status.
  */
 @JsonPropertyOrder({
-  LastSyncStatusRequest.JSON_PROPERTY_ENV_NAME_OR_CRN
+  LastSyncStatusRequest.JSON_PROPERTY_ENV_NAME_OR_CRN,
+  LastSyncStatusRequest.JSON_PROPERTY_ENVIRONMENT
 })
 
 public class LastSyncStatusRequest {
   public static final String JSON_PROPERTY_ENV_NAME_OR_CRN = "envNameOrCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nullable
   private String envNameOrCrn;
 
-  public LastSyncStatusRequest() {
+  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @jakarta.annotation.Nullable
+  private String environment;
+
+  public LastSyncStatusRequest() { 
   }
 
-  public LastSyncStatusRequest envNameOrCrn(@javax.annotation.Nonnull String envNameOrCrn) {
-    
+  public LastSyncStatusRequest envNameOrCrn(@jakarta.annotation.Nullable String envNameOrCrn) {
     this.envNameOrCrn = envNameOrCrn;
     return this;
   }
 
   /**
-   * Name or Crn of the environment.
+   * Deprecated. Please use &#39;environment&#39; field instead.
    * @return envNameOrCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENV_NAME_OR_CRN)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
   public String getEnvNameOrCrn() {
     return envNameOrCrn;
@@ -58,12 +65,40 @@ public class LastSyncStatusRequest {
 
 
   @JsonProperty(JSON_PROPERTY_ENV_NAME_OR_CRN)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvNameOrCrn(@javax.annotation.Nonnull String envNameOrCrn) {
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnvNameOrCrn(@jakarta.annotation.Nullable String envNameOrCrn) {
     this.envNameOrCrn = envNameOrCrn;
   }
 
 
+  public LastSyncStatusRequest environment(@jakarta.annotation.Nullable String environment) {
+    this.environment = environment;
+    return this;
+  }
+
+  /**
+   * The name or CRN of the environment.
+   * @return environment
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getEnvironment() {
+    return environment;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnvironment(@jakarta.annotation.Nullable String environment) {
+    this.environment = environment;
+  }
+
+
+  /**
+   * Return true if this LastSyncStatusRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -73,12 +108,13 @@ public class LastSyncStatusRequest {
       return false;
     }
     LastSyncStatusRequest lastSyncStatusRequest = (LastSyncStatusRequest) o;
-    return Objects.equals(this.envNameOrCrn, lastSyncStatusRequest.envNameOrCrn);
+    return Objects.equals(this.envNameOrCrn, lastSyncStatusRequest.envNameOrCrn) &&
+        Objects.equals(this.environment, lastSyncStatusRequest.environment);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(envNameOrCrn);
+    return Objects.hash(envNameOrCrn, environment);
   }
 
   @Override
@@ -86,6 +122,7 @@ public class LastSyncStatusRequest {
     StringBuilder sb = new StringBuilder();
     sb.append("class LastSyncStatusRequest {\n");
     sb.append("    envNameOrCrn: ").append(toIndentedString(envNameOrCrn)).append("\n");
+    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("}");
     return sb.toString();
   }

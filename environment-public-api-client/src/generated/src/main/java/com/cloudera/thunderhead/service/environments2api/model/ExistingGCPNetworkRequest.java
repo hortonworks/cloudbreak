@@ -14,17 +14,20 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for creating an GCP environment using existing VPC and subnets.
@@ -37,22 +40,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ExistingGCPNetworkRequest {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_SUBNET_NAMES = "subnetNames";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Set<String> subnetNames = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String sharedProjectId;
 
-  public ExistingGCPNetworkRequest() {
+  public ExistingGCPNetworkRequest() { 
   }
 
-  public ExistingGCPNetworkRequest networkName(@javax.annotation.Nonnull String networkName) {
-    
+  public ExistingGCPNetworkRequest networkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
     return this;
   }
@@ -61,7 +63,7 @@ public class ExistingGCPNetworkRequest {
    * The name of the GCP VPC.
    * @return networkName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -72,12 +74,12 @@ public class ExistingGCPNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
+  public void setNetworkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-  public ExistingGCPNetworkRequest subnetNames(@javax.annotation.Nonnull Set<String> subnetNames) {
-    
+
+  public ExistingGCPNetworkRequest subnetNames(@jakarta.annotation.Nonnull Set<String> subnetNames) {
     this.subnetNames = subnetNames;
     return this;
   }
@@ -94,7 +96,7 @@ public class ExistingGCPNetworkRequest {
    * One or more subnet names within the VPC. Google VPC&#39;s are global, please give subnets from single geographic region only to reduce latency.
    * @return subnetNames
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -106,12 +108,12 @@ public class ExistingGCPNetworkRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_NAMES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubnetNames(@javax.annotation.Nonnull Set<String> subnetNames) {
+  public void setSubnetNames(@jakarta.annotation.Nonnull Set<String> subnetNames) {
     this.subnetNames = subnetNames;
   }
 
-  public ExistingGCPNetworkRequest sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
-    
+
+  public ExistingGCPNetworkRequest sharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
     return this;
   }
@@ -120,7 +122,7 @@ public class ExistingGCPNetworkRequest {
    * The ID of the Google project associated with the VPC.
    * @return sharedProjectId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -131,11 +133,14 @@ public class ExistingGCPNetworkRequest {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
+  public void setSharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
 
 
+  /**
+   * Return true if this ExistingGCPNetworkRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

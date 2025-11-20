@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for checking Database connectivity.
@@ -68,18 +71,17 @@ public class CheckDatabaseConnectivityResponse {
   }
 
   public static final String JSON_PROPERTY_RESULT = "result";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private ResultEnum result;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String message;
 
-  public CheckDatabaseConnectivityResponse() {
+  public CheckDatabaseConnectivityResponse() { 
   }
 
-  public CheckDatabaseConnectivityResponse result(@javax.annotation.Nonnull ResultEnum result) {
-    
+  public CheckDatabaseConnectivityResponse result(@jakarta.annotation.Nonnull ResultEnum result) {
     this.result = result;
     return this;
   }
@@ -88,7 +90,7 @@ public class CheckDatabaseConnectivityResponse {
    * Result of the connectivity check.
    * @return result
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -99,12 +101,12 @@ public class CheckDatabaseConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResult(@javax.annotation.Nonnull ResultEnum result) {
+  public void setResult(@jakarta.annotation.Nonnull ResultEnum result) {
     this.result = result;
   }
 
-  public CheckDatabaseConnectivityResponse message(@javax.annotation.Nullable String message) {
-    
+
+  public CheckDatabaseConnectivityResponse message(@jakarta.annotation.Nullable String message) {
     this.message = message;
     return this;
   }
@@ -113,7 +115,7 @@ public class CheckDatabaseConnectivityResponse {
    * Message explaining the result.
    * @return message
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -124,11 +126,14 @@ public class CheckDatabaseConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(@javax.annotation.Nullable String message) {
+  public void setMessage(@jakarta.annotation.Nullable String message) {
     this.message = message;
   }
 
 
+  /**
+   * Return true if this CheckDatabaseConnectivityResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

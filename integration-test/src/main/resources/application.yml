@@ -47,6 +47,8 @@ integrationtest:
     server: http://localhost
   remoteenvironment:
     server: http://localhost
+  environmentpublicapi:
+    server: http://localhost
   ums:
     host: usermanagement.internal-insecure.dps.mow-dev.cloudera.com
     port: 80

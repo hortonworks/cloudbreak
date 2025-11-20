@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CdwVw;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CDW database catalog.
@@ -40,30 +42,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdwDbc {
   public static final String JSON_PROPERTY_CRN = "crn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_ID = "id";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_CDW_VWS = "cdwVws";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CdwVw> cdwVws;
 
-  public CdwDbc() {
+  public CdwDbc() { 
   }
 
-  public CdwDbc crn(@javax.annotation.Nullable String crn) {
-    
+  public CdwDbc crn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
     return this;
   }
@@ -72,7 +73,7 @@ public class CdwDbc {
    * The CRN of the Database Catalog.
    * @return crn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -83,12 +84,12 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(@javax.annotation.Nullable String crn) {
+  public void setCrn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-  public CdwDbc id(@javax.annotation.Nullable String id) {
-    
+
+  public CdwDbc id(@jakarta.annotation.Nullable String id) {
     this.id = id;
     return this;
   }
@@ -97,7 +98,7 @@ public class CdwDbc {
    * The ID of the Database Catalog.
    * @return id
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -108,12 +109,12 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(@javax.annotation.Nullable String id) {
+  public void setId(@jakarta.annotation.Nullable String id) {
     this.id = id;
   }
 
-  public CdwDbc name(@javax.annotation.Nullable String name) {
-    
+
+  public CdwDbc name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -122,7 +123,7 @@ public class CdwDbc {
    * The name of the Database Catalog.
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -133,12 +134,12 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public CdwDbc status(@javax.annotation.Nullable String status) {
-    
+
+  public CdwDbc status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -147,7 +148,7 @@ public class CdwDbc {
    * The status of the Database Catalog.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -158,12 +159,12 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
-  public CdwDbc cdwVws(@javax.annotation.Nullable List<CdwVw> cdwVws) {
-    
+
+  public CdwDbc cdwVws(@jakarta.annotation.Nullable List<CdwVw> cdwVws) {
     this.cdwVws = cdwVws;
     return this;
   }
@@ -180,7 +181,7 @@ public class CdwDbc {
    * List of virtual warehouse based on the Database Catalog.
    * @return cdwVws
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_VWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -191,11 +192,14 @@ public class CdwDbc {
 
   @JsonProperty(JSON_PROPERTY_CDW_VWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwVws(@javax.annotation.Nullable List<CdwVw> cdwVws) {
+  public void setCdwVws(@jakarta.annotation.Nullable List<CdwVw> cdwVws) {
     this.cdwVws = cdwVws;
   }
 
 
+  /**
+   * Return true if this CdwDbc object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

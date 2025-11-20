@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for creating Externalized compute cluster for the environment.
@@ -38,11 +40,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AzureComputeClusterConfigurationRequest {
   public static final String JSON_PROPERTY_PRIVATE_CLUSTER = "privateCluster";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean privateCluster;
 
   public static final String JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES = "kubeApiAuthorizedIpRanges";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> kubeApiAuthorizedIpRanges = new ArrayList<>();
 
   /**
@@ -79,18 +81,17 @@ public class AzureComputeClusterConfigurationRequest {
   }
 
   public static final String JSON_PROPERTY_OUTBOUND_TYPE = "outboundType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OutboundTypeEnum outboundType;
 
   public static final String JSON_PROPERTY_WORKER_NODE_SUBNETS = "workerNodeSubnets";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> workerNodeSubnets = new ArrayList<>();
 
-  public AzureComputeClusterConfigurationRequest() {
+  public AzureComputeClusterConfigurationRequest() { 
   }
 
-  public AzureComputeClusterConfigurationRequest privateCluster(@javax.annotation.Nullable Boolean privateCluster) {
-    
+  public AzureComputeClusterConfigurationRequest privateCluster(@jakarta.annotation.Nullable Boolean privateCluster) {
     this.privateCluster = privateCluster;
     return this;
   }
@@ -99,7 +100,7 @@ public class AzureComputeClusterConfigurationRequest {
    * If true, creates private cluster
    * @return privateCluster
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -110,12 +111,12 @@ public class AzureComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateCluster(@javax.annotation.Nullable Boolean privateCluster) {
+  public void setPrivateCluster(@jakarta.annotation.Nullable Boolean privateCluster) {
     this.privateCluster = privateCluster;
   }
 
-  public AzureComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
-    
+
+  public AzureComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(@jakarta.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     return this;
   }
@@ -132,7 +133,7 @@ public class AzureComputeClusterConfigurationRequest {
    * Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster.
    * @return kubeApiAuthorizedIpRanges
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -143,12 +144,12 @@ public class AzureComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKubeApiAuthorizedIpRanges(@javax.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
+  public void setKubeApiAuthorizedIpRanges(@jakarta.annotation.Nullable List<String> kubeApiAuthorizedIpRanges) {
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
   }
 
-  public AzureComputeClusterConfigurationRequest outboundType(@javax.annotation.Nullable OutboundTypeEnum outboundType) {
-    
+
+  public AzureComputeClusterConfigurationRequest outboundType(@jakarta.annotation.Nullable OutboundTypeEnum outboundType) {
     this.outboundType = outboundType;
     return this;
   }
@@ -157,7 +158,7 @@ public class AzureComputeClusterConfigurationRequest {
    * Customize cluster egress with defined outbound type in Azure Kubernetes Service.
    * @return outboundType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTBOUND_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -168,12 +169,12 @@ public class AzureComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_OUTBOUND_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutboundType(@javax.annotation.Nullable OutboundTypeEnum outboundType) {
+  public void setOutboundType(@jakarta.annotation.Nullable OutboundTypeEnum outboundType) {
     this.outboundType = outboundType;
   }
 
-  public AzureComputeClusterConfigurationRequest workerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
-    
+
+  public AzureComputeClusterConfigurationRequest workerNodeSubnets(@jakarta.annotation.Nullable List<String> workerNodeSubnets) {
     this.workerNodeSubnets = workerNodeSubnets;
     return this;
   }
@@ -190,7 +191,7 @@ public class AzureComputeClusterConfigurationRequest {
    * Specify subnets for Kubernetes Worker Nodes
    * @return workerNodeSubnets
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -201,11 +202,14 @@ public class AzureComputeClusterConfigurationRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkerNodeSubnets(@javax.annotation.Nullable List<String> workerNodeSubnets) {
+  public void setWorkerNodeSubnets(@jakarta.annotation.Nullable List<String> workerNodeSubnets) {
     this.workerNodeSubnets = workerNodeSubnets;
   }
 
 
+  /**
+   * Return true if this AzureComputeClusterConfigurationRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

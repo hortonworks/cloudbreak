@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ImageInfoResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The response object for FreeIPA upgrade.
@@ -35,22 +38,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpgradeFreeipaResponse {
   public static final String JSON_PROPERTY_TARGET_IMAGE = "targetImage";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ImageInfoResponse targetImage;
 
   public static final String JSON_PROPERTY_ORIGINAL_IMAGE = "originalImage";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ImageInfoResponse originalImage;
 
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationId;
 
-  public UpgradeFreeipaResponse() {
+  public UpgradeFreeipaResponse() { 
   }
 
-  public UpgradeFreeipaResponse targetImage(@javax.annotation.Nullable ImageInfoResponse targetImage) {
-    
+  public UpgradeFreeipaResponse targetImage(@jakarta.annotation.Nullable ImageInfoResponse targetImage) {
     this.targetImage = targetImage;
     return this;
   }
@@ -59,7 +61,7 @@ public class UpgradeFreeipaResponse {
    * Get targetImage
    * @return targetImage
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TARGET_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -70,12 +72,12 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_TARGET_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTargetImage(@javax.annotation.Nullable ImageInfoResponse targetImage) {
+  public void setTargetImage(@jakarta.annotation.Nullable ImageInfoResponse targetImage) {
     this.targetImage = targetImage;
   }
 
-  public UpgradeFreeipaResponse originalImage(@javax.annotation.Nullable ImageInfoResponse originalImage) {
-    
+
+  public UpgradeFreeipaResponse originalImage(@jakarta.annotation.Nullable ImageInfoResponse originalImage) {
     this.originalImage = originalImage;
     return this;
   }
@@ -84,7 +86,7 @@ public class UpgradeFreeipaResponse {
    * Get originalImage
    * @return originalImage
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ORIGINAL_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -95,12 +97,12 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ORIGINAL_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOriginalImage(@javax.annotation.Nullable ImageInfoResponse originalImage) {
+  public void setOriginalImage(@jakarta.annotation.Nullable ImageInfoResponse originalImage) {
     this.originalImage = originalImage;
   }
 
-  public UpgradeFreeipaResponse operationId(@javax.annotation.Nullable String operationId) {
-    
+
+  public UpgradeFreeipaResponse operationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -109,7 +111,7 @@ public class UpgradeFreeipaResponse {
    * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -120,11 +122,14 @@ public class UpgradeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(@javax.annotation.Nullable String operationId) {
+  public void setOperationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
 
+  /**
+   * Return true if this UpgradeFreeipaResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

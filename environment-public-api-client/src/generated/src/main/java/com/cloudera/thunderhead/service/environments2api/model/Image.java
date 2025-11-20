@@ -14,17 +14,20 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ImageReferenceSet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Basic information about an image.
@@ -43,46 +46,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Image {
   public static final String JSON_PROPERTY_CREATED = "created";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Long created;
 
   public static final String JSON_PROPERTY_DATE = "date";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String date;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ADVERTISED = "advertised";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean advertised;
 
   public static final String JSON_PROPERTY_OS = "os";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String os;
 
   public static final String JSON_PROPERTY_OS_TYPE = "osType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String osType;
 
   public static final String JSON_PROPERTY_UUID = "uuid";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String uuid;
 
   public static final String JSON_PROPERTY_IMAGES = "images";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ImageReferenceSet images;
 
   public static final String JSON_PROPERTY_PACKAGE_VERSIONS = "packageVersions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> packageVersions = new HashMap<>();
 
-  public Image() {
+  public Image() { 
   }
 
-  public Image created(@javax.annotation.Nullable Long created) {
-    
+  public Image created(@jakarta.annotation.Nullable Long created) {
     this.created = created;
     return this;
   }
@@ -91,7 +93,7 @@ public class Image {
    * Image creation timestamp.
    * @return created
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -102,12 +104,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreated(@javax.annotation.Nullable Long created) {
+  public void setCreated(@jakarta.annotation.Nullable Long created) {
     this.created = created;
   }
 
-  public Image date(@javax.annotation.Nullable String date) {
-    
+
+  public Image date(@jakarta.annotation.Nullable String date) {
     this.date = date;
     return this;
   }
@@ -116,7 +118,7 @@ public class Image {
    * The date when the image was created.
    * @return date
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -127,12 +129,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDate(@javax.annotation.Nullable String date) {
+  public void setDate(@jakarta.annotation.Nullable String date) {
     this.date = date;
   }
 
-  public Image description(@javax.annotation.Nullable String description) {
-    
+
+  public Image description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -141,7 +143,7 @@ public class Image {
    * Description of the image.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -152,12 +154,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
-  public Image advertised(@javax.annotation.Nullable Boolean advertised) {
-    
+
+  public Image advertised(@jakarta.annotation.Nullable Boolean advertised) {
     this.advertised = advertised;
     return this;
   }
@@ -166,7 +168,7 @@ public class Image {
    * Indicates the visibility of the imgae in the catalog.
    * @return advertised
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADVERTISED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -177,12 +179,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_ADVERTISED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdvertised(@javax.annotation.Nullable Boolean advertised) {
+  public void setAdvertised(@jakarta.annotation.Nullable Boolean advertised) {
     this.advertised = advertised;
   }
 
-  public Image os(@javax.annotation.Nullable String os) {
-    
+
+  public Image os(@jakarta.annotation.Nullable String os) {
     this.os = os;
     return this;
   }
@@ -191,7 +193,7 @@ public class Image {
    * Installed OS of the image.
    * @return os
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -202,12 +204,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(@javax.annotation.Nullable String os) {
+  public void setOs(@jakarta.annotation.Nullable String os) {
     this.os = os;
   }
 
-  public Image osType(@javax.annotation.Nullable String osType) {
-    
+
+  public Image osType(@jakarta.annotation.Nullable String osType) {
     this.osType = osType;
     return this;
   }
@@ -216,7 +218,7 @@ public class Image {
    * The distribution family of OS installed on the image.
    * @return osType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -227,12 +229,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_OS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOsType(@javax.annotation.Nullable String osType) {
+  public void setOsType(@jakarta.annotation.Nullable String osType) {
     this.osType = osType;
   }
 
-  public Image uuid(@javax.annotation.Nullable String uuid) {
-    
+
+  public Image uuid(@jakarta.annotation.Nullable String uuid) {
     this.uuid = uuid;
     return this;
   }
@@ -241,7 +243,7 @@ public class Image {
    * The UUID of the image.
    * @return uuid
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_UUID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -252,12 +254,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_UUID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUuid(@javax.annotation.Nullable String uuid) {
+  public void setUuid(@jakarta.annotation.Nullable String uuid) {
     this.uuid = uuid;
   }
 
-  public Image images(@javax.annotation.Nullable ImageReferenceSet images) {
-    
+
+  public Image images(@jakarta.annotation.Nullable ImageReferenceSet images) {
     this.images = images;
     return this;
   }
@@ -266,7 +268,7 @@ public class Image {
    * Get images
    * @return images
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -277,12 +279,12 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(@javax.annotation.Nullable ImageReferenceSet images) {
+  public void setImages(@jakarta.annotation.Nullable ImageReferenceSet images) {
     this.images = images;
   }
 
-  public Image packageVersions(@javax.annotation.Nullable Map<String, String> packageVersions) {
-    
+
+  public Image packageVersions(@jakarta.annotation.Nullable Map<String, String> packageVersions) {
     this.packageVersions = packageVersions;
     return this;
   }
@@ -299,7 +301,7 @@ public class Image {
    * Package versions.
    * @return packageVersions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PACKAGE_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -310,11 +312,14 @@ public class Image {
 
   @JsonProperty(JSON_PROPERTY_PACKAGE_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPackageVersions(@javax.annotation.Nullable Map<String, String> packageVersions) {
+  public void setPackageVersions(@jakarta.annotation.Nullable Map<String, String> packageVersions) {
     this.packageVersions = packageVersions;
   }
 
 
+  /**
+   * Return true if this Image object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

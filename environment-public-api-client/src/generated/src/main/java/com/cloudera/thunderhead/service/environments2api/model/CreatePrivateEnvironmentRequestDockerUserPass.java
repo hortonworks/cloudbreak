@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Alternative to dockerConfigJson.
@@ -36,26 +39,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreatePrivateEnvironmentRequestDockerUserPass {
   public static final String JSON_PROPERTY_USERNAME = "username";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String username;
 
   public static final String JSON_PROPERTY_PASSWORD = "password";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String password;
 
   public static final String JSON_PROPERTY_EMAIL = "email";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String email;
 
   public static final String JSON_PROPERTY_SERVER = "server";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String server;
 
-  public CreatePrivateEnvironmentRequestDockerUserPass() {
+  public CreatePrivateEnvironmentRequestDockerUserPass() { 
   }
 
-  public CreatePrivateEnvironmentRequestDockerUserPass username(@javax.annotation.Nonnull String username) {
-    
+  public CreatePrivateEnvironmentRequestDockerUserPass username(@jakarta.annotation.Nonnull String username) {
     this.username = username;
     return this;
   }
@@ -64,7 +66,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
    * Docker username.
    * @return username
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -75,12 +77,12 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsername(@javax.annotation.Nonnull String username) {
+  public void setUsername(@jakarta.annotation.Nonnull String username) {
     this.username = username;
   }
 
-  public CreatePrivateEnvironmentRequestDockerUserPass password(@javax.annotation.Nonnull String password) {
-    
+
+  public CreatePrivateEnvironmentRequestDockerUserPass password(@jakarta.annotation.Nonnull String password) {
     this.password = password;
     return this;
   }
@@ -89,7 +91,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
    * Docker password.
    * @return password
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -100,12 +102,12 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(@javax.annotation.Nonnull String password) {
+  public void setPassword(@jakarta.annotation.Nonnull String password) {
     this.password = password;
   }
 
-  public CreatePrivateEnvironmentRequestDockerUserPass email(@javax.annotation.Nullable String email) {
-    
+
+  public CreatePrivateEnvironmentRequestDockerUserPass email(@jakarta.annotation.Nullable String email) {
     this.email = email;
     return this;
   }
@@ -114,7 +116,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
    * Docker email.
    * @return email
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -125,12 +127,12 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEmail(@javax.annotation.Nullable String email) {
+  public void setEmail(@jakarta.annotation.Nullable String email) {
     this.email = email;
   }
 
-  public CreatePrivateEnvironmentRequestDockerUserPass server(@javax.annotation.Nonnull String server) {
-    
+
+  public CreatePrivateEnvironmentRequestDockerUserPass server(@jakarta.annotation.Nonnull String server) {
     this.server = server;
     return this;
   }
@@ -139,7 +141,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
    * Docker Registry FQDN.
    * @return server
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SERVER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -150,11 +152,14 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
   @JsonProperty(JSON_PROPERTY_SERVER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setServer(@javax.annotation.Nonnull String server) {
+  public void setServer(@jakarta.annotation.Nonnull String server) {
     this.server = server;
   }
 
 
+  /**
+   * Return true if this CreatePrivateEnvironmentRequest_dockerUserPass object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

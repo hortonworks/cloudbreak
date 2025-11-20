@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureDatabaseResources;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a update Azure Database resources request.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureDatabaseResourcesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Environment environment;
 
   public static final String JSON_PROPERTY_AZURE_DATABASE_RESOURCES = "azureDatabaseResources";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureDatabaseResources azureDatabaseResources;
 
-  public UpdateAzureDatabaseResourcesResponse() {
+  public UpdateAzureDatabaseResourcesResponse() { 
   }
 
-  public UpdateAzureDatabaseResourcesResponse environment(@javax.annotation.Nonnull Environment environment) {
-    
+  public UpdateAzureDatabaseResourcesResponse environment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
     return this;
   }
@@ -55,7 +57,7 @@ public class UpdateAzureDatabaseResourcesResponse {
    * Get environment
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,12 +68,12 @@ public class UpdateAzureDatabaseResourcesResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull Environment environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
   }
 
-  public UpdateAzureDatabaseResourcesResponse azureDatabaseResources(@javax.annotation.Nullable AzureDatabaseResources azureDatabaseResources) {
-    
+
+  public UpdateAzureDatabaseResourcesResponse azureDatabaseResources(@jakarta.annotation.Nullable AzureDatabaseResources azureDatabaseResources) {
     this.azureDatabaseResources = azureDatabaseResources;
     return this;
   }
@@ -80,7 +82,7 @@ public class UpdateAzureDatabaseResourcesResponse {
    * Get azureDatabaseResources
    * @return azureDatabaseResources
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DATABASE_RESOURCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class UpdateAzureDatabaseResourcesResponse {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DATABASE_RESOURCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDatabaseResources(@javax.annotation.Nullable AzureDatabaseResources azureDatabaseResources) {
+  public void setAzureDatabaseResources(@jakarta.annotation.Nullable AzureDatabaseResources azureDatabaseResources) {
     this.azureDatabaseResources = azureDatabaseResources;
   }
 
 
+  /**
+   * Return true if this UpdateAzureDatabaseResourcesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

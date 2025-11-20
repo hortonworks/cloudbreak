@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for diagnostic collection details.
@@ -39,42 +42,41 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeipaDiagnosticsCollectionDetailsResponse {
   public static final String JSON_PROPERTY_CASE = "case";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String _case;
 
   public static final String JSON_PROPERTY_OUTPUT = "output";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String output;
 
   public static final String JSON_PROPERTY_DESTINATION = "destination";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String destination;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ACCOUNT_ID = "accountId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String accountId;
 
   public static final String JSON_PROPERTY_RESOURCE_CRN = "resourceCrn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String resourceCrn;
 
   public static final String JSON_PROPERTY_CLUSTER_VERSION = "clusterVersion";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String clusterVersion;
 
   public static final String JSON_PROPERTY_STATUS_REASON = "statusReason";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String statusReason;
 
-  public FreeipaDiagnosticsCollectionDetailsResponse() {
+  public FreeipaDiagnosticsCollectionDetailsResponse() { 
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse _case(@javax.annotation.Nullable String _case) {
-    
+  public FreeipaDiagnosticsCollectionDetailsResponse _case(@jakarta.annotation.Nullable String _case) {
     this._case = _case;
     return this;
   }
@@ -83,7 +85,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Case number for the diagnostics collection.
    * @return _case
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_CASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCase(@javax.annotation.Nullable String _case) {
+  public void setCase(@jakarta.annotation.Nullable String _case) {
     this._case = _case;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse output(@javax.annotation.Nullable String output) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse output(@jakarta.annotation.Nullable String output) {
     this.output = output;
     return this;
   }
@@ -108,7 +110,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Output destination of the diagnostics collection.
    * @return output
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,12 +121,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutput(@javax.annotation.Nullable String output) {
+  public void setOutput(@jakarta.annotation.Nullable String output) {
     this.output = output;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse destination(@javax.annotation.Nullable String destination) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse destination(@jakarta.annotation.Nullable String destination) {
     this.destination = destination;
     return this;
   }
@@ -133,7 +135,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Destination type of the diagnostics collection.
    * @return destination
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESTINATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -144,12 +146,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_DESTINATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDestination(@javax.annotation.Nullable String destination) {
+  public void setDestination(@jakarta.annotation.Nullable String destination) {
     this.destination = destination;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse description(@javax.annotation.Nullable String description) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -158,7 +160,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Description of the diagnostics collection.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -169,12 +171,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse accountId(@javax.annotation.Nullable String accountId) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse accountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
     return this;
   }
@@ -183,7 +185,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Account Id that was used for the diagnostics collection.
    * @return accountId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -194,12 +196,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountId(@javax.annotation.Nullable String accountId) {
+  public void setAccountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse resourceCrn(@javax.annotation.Nullable String resourceCrn) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse resourceCrn(@jakarta.annotation.Nullable String resourceCrn) {
     this.resourceCrn = resourceCrn;
     return this;
   }
@@ -208,7 +210,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Crn of the Freeipa cluster.
    * @return resourceCrn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -219,12 +221,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceCrn(@javax.annotation.Nullable String resourceCrn) {
+  public void setResourceCrn(@jakarta.annotation.Nullable String resourceCrn) {
     this.resourceCrn = resourceCrn;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse clusterVersion(@javax.annotation.Nullable String clusterVersion) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse clusterVersion(@jakarta.annotation.Nullable String clusterVersion) {
     this.clusterVersion = clusterVersion;
     return this;
   }
@@ -233,7 +235,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Version of the cluster that was used for the diagnostics collection.
    * @return clusterVersion
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -244,12 +246,12 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterVersion(@javax.annotation.Nullable String clusterVersion) {
+  public void setClusterVersion(@jakarta.annotation.Nullable String clusterVersion) {
     this.clusterVersion = clusterVersion;
   }
 
-  public FreeipaDiagnosticsCollectionDetailsResponse statusReason(@javax.annotation.Nullable String statusReason) {
-    
+
+  public FreeipaDiagnosticsCollectionDetailsResponse statusReason(@jakarta.annotation.Nullable String statusReason) {
     this.statusReason = statusReason;
     return this;
   }
@@ -258,7 +260,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
    * Status message of a failed diagnostics.
    * @return statusReason
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -269,11 +271,14 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatusReason(@javax.annotation.Nullable String statusReason) {
+  public void setStatusReason(@jakarta.annotation.Nullable String statusReason) {
     this.statusReason = statusReason;
   }
 
 
+  /**
+   * Return true if this FreeipaDiagnosticsCollectionDetailsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

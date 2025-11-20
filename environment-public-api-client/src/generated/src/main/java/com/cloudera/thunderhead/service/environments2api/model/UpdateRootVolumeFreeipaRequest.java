@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.RootDiskOptions;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for FreeIpa root volume update.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateRootVolumeFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_ROOT_DISK_OPTIONS = "rootDiskOptions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private RootDiskOptions rootDiskOptions;
 
-  public UpdateRootVolumeFreeipaRequest() {
+  public UpdateRootVolumeFreeipaRequest() { 
   }
 
-  public UpdateRootVolumeFreeipaRequest environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
-    
+  public UpdateRootVolumeFreeipaRequest environmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -54,7 +56,7 @@ public class UpdateRootVolumeFreeipaRequest {
    * The CRN of the environment.
    * @return environmentCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,12 +67,12 @@ public class UpdateRootVolumeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-  public UpdateRootVolumeFreeipaRequest rootDiskOptions(@javax.annotation.Nullable RootDiskOptions rootDiskOptions) {
-    
+
+  public UpdateRootVolumeFreeipaRequest rootDiskOptions(@jakarta.annotation.Nullable RootDiskOptions rootDiskOptions) {
     this.rootDiskOptions = rootDiskOptions;
     return this;
   }
@@ -79,7 +81,7 @@ public class UpdateRootVolumeFreeipaRequest {
    * Get rootDiskOptions
    * @return rootDiskOptions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ROOT_DISK_OPTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -90,11 +92,14 @@ public class UpdateRootVolumeFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ROOT_DISK_OPTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRootDiskOptions(@javax.annotation.Nullable RootDiskOptions rootDiskOptions) {
+  public void setRootDiskOptions(@jakarta.annotation.Nullable RootDiskOptions rootDiskOptions) {
     this.rootDiskOptions = rootDiskOptions;
   }
 
 
+  /**
+   * Return true if this UpdateRootVolumeFreeipaRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

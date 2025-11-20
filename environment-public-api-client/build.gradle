@@ -18,25 +18,53 @@ repositories {
   mavenCentral()
 }
 
-dependencies {
+task tagOpenApiSpec {
+  // Input: The original file
+  inputs.file file("$projectDir/src/main/yaml/environments2.yaml")
+
+  // Output: The new file with tags
+  outputs.file layout.buildDirectory.file("openapi-temp/environments2.tagged.yaml")
+
+  doLast {
+    def originalSpec = inputs.files.singleFile
+    def taggedSpec = outputs.files.singleFile
+
+    // Ensure output directory exists
+    taggedSpec.getParentFile().mkdirs()
+
+    // Read original
+    String specText = originalSpec.text
+
+    // Do the regex replacement
+    String tagNameToUse = "EnvironmentPublic"
+    String regex = "(?m)^(\\s+)(get|post|put|delete|patch|options|head):(\\s*\$)"
+    String replacement = "\$1\$2:\$3\n\$1  tags:\n\$1    - \"${tagNameToUse}\""
+    String taggedSpecText = specText.replaceAll(regex, replacement)
+
+    // Write to the output file
+    taggedSpec.text = taggedSpecText
+  }
 }
 
 openApiGenerate {
+
   globalProperties.set([
-          apis: "false",
+          apis: "",                    // Generate API interfaces
+          models: "",                 // generate models
+          supportingFiles: "",        // generate client files
+
           apiDocs: "false",
           apiTests: "false",
           verbose: "true",
-          generateSupportingFiles: "false",
           modelDocs: "false",
-          modelTests: "false",
-          models: "",
+          modelTests: "false"
   ])
+
   generatorName = "java"
-  library = "resttemplate"
-  inputSpec = "$projectDir/src/main/yaml/environments2.yaml"
+  library = "jersey3"
   outputDir = "$projectDir/src/generated"
   modelPackage = "com.cloudera.thunderhead.service.environments2api.model"
+  apiPackage = "com.cloudera.thunderhead.service.environments2api.api"
   templateDir = "$projectDir/openapi-templates".toString()
   configOptions.set([
           openApiNullable: "false",
@@ -47,6 +75,23 @@ openApiGenerate {
   ])
 }
 
+tasks.named('openApiGenerate') {
+  // A) Tell this task it must run AFTER 'tagOpenApiSpec'
+  dependsOn tasks.named('tagOpenApiSpec')
+
+  // B) Lazily wire the output path of our task to the input of this one
+  //    We add .absolutePath to convert the File object to a String
+  inputSpec.set(tasks.named('tagOpenApiSpec').map { it.outputs.files.singleFile.absolutePath })
+
+  doLast {
+    delete(fileTree("${projectDir}/src/generated").matching {
+      exclude("src/main/**")
+    })
+    delete("${projectDir}/src/generated/.gitignore")
+    delete("${projectDir}/src/generated/src/main/AndroidManifest.xml")
+  }
+}
+
 dependencies {
   implementation project(':common')
   implementation project(':auth-connector')
@@ -54,9 +99,10 @@ dependencies {
   implementation project(":structuredevent-api-cdp")
   implementation project(":structuredevent-model")
 
-  implementation     group: 'org.glassfish.jersey.media',  name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation     group: 'org.openapitools',            name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
-  implementation     group: 'javax.annotation',            name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation     group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation     group: 'org.openapitools',                 name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
+  implementation     group: 'javax.annotation',                 name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+  implementation     group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
 }
 
 compileJava.dependsOn tasks.openApiGenerate

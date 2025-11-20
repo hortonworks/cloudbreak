@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.SecretTypeResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response for listing possible secret values for Freeipa.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListFreeipaSecretTypesResponse {
   public static final String JSON_PROPERTY_FREEIPA_SECRET_TYPES = "freeipaSecretTypes";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<SecretTypeResponse> freeipaSecretTypes = new ArrayList<>();
 
-  public ListFreeipaSecretTypesResponse() {
+  public ListFreeipaSecretTypesResponse() { 
   }
 
-  public ListFreeipaSecretTypesResponse freeipaSecretTypes(@javax.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
-    
+  public ListFreeipaSecretTypesResponse freeipaSecretTypes(@jakarta.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
     this.freeipaSecretTypes = freeipaSecretTypes;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListFreeipaSecretTypesResponse {
    * The list of secret types supported by FreeIpa.
    * @return freeipaSecretTypes
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FREEIPA_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class ListFreeipaSecretTypesResponse {
 
   @JsonProperty(JSON_PROPERTY_FREEIPA_SECRET_TYPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFreeipaSecretTypes(@javax.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
+  public void setFreeipaSecretTypes(@jakarta.annotation.Nonnull List<SecretTypeResponse> freeipaSecretTypes) {
     this.freeipaSecretTypes = freeipaSecretTypes;
   }
 
 
+  /**
+   * Return true if this ListFreeipaSecretTypesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

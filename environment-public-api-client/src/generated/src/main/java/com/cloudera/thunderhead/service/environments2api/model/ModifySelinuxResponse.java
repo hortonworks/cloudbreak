@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for modifying SELinux mode on FreeIPA.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ModifySelinuxResponse {
   public static final String JSON_PROPERTY_FLOW_ID = "flowId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String flowId;
 
   public static final String JSON_PROPERTY_TYPE = "type";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String type;
 
-  public ModifySelinuxResponse() {
+  public ModifySelinuxResponse() { 
   }
 
-  public ModifySelinuxResponse flowId(@javax.annotation.Nonnull String flowId) {
-    
+  public ModifySelinuxResponse flowId(@jakarta.annotation.Nonnull String flowId) {
     this.flowId = flowId;
     return this;
   }
@@ -53,7 +55,7 @@ public class ModifySelinuxResponse {
    * Flow ID of the modify SELinux flow.
    * @return flowId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class ModifySelinuxResponse {
 
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFlowId(@javax.annotation.Nonnull String flowId) {
+  public void setFlowId(@jakarta.annotation.Nonnull String flowId) {
     this.flowId = flowId;
   }
 
-  public ModifySelinuxResponse type(@javax.annotation.Nonnull String type) {
-    
+
+  public ModifySelinuxResponse type(@jakarta.annotation.Nonnull String type) {
     this.type = type;
     return this;
   }
@@ -78,7 +80,7 @@ public class ModifySelinuxResponse {
    * Flow Type of the modify SELinux flow.
    * @return type
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class ModifySelinuxResponse {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setType(@javax.annotation.Nonnull String type) {
+  public void setType(@jakarta.annotation.Nonnull String type) {
     this.type = type;
   }
 
 
+  /**
+   * Return true if this ModifySelinuxResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

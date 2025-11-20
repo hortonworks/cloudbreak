@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Basic information about an image.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ImageInfo {
   public static final String JSON_PROPERTY_IMAGE_ID = "imageId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String imageId;
 
   public static final String JSON_PROPERTY_IMAGE_CATALOG_NAME = "imageCatalogName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String imageCatalogName;
 
   public static final String JSON_PROPERTY_IMAGE_OS = "imageOs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String imageOs;
 
-  public ImageInfo() {
+  public ImageInfo() { 
   }
 
-  public ImageInfo imageId(@javax.annotation.Nullable String imageId) {
-    
+  public ImageInfo imageId(@jakarta.annotation.Nullable String imageId) {
     this.imageId = imageId;
     return this;
   }
@@ -58,7 +60,7 @@ public class ImageInfo {
    * The ID of the image.
    * @return imageId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageId(@javax.annotation.Nullable String imageId) {
+  public void setImageId(@jakarta.annotation.Nullable String imageId) {
     this.imageId = imageId;
   }
 
-  public ImageInfo imageCatalogName(@javax.annotation.Nullable String imageCatalogName) {
-    
+
+  public ImageInfo imageCatalogName(@jakarta.annotation.Nullable String imageCatalogName) {
     this.imageCatalogName = imageCatalogName;
     return this;
   }
@@ -83,7 +85,7 @@ public class ImageInfo {
    * The name of the image catalog of the image.
    * @return imageCatalogName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageCatalogName(@javax.annotation.Nullable String imageCatalogName) {
+  public void setImageCatalogName(@jakarta.annotation.Nullable String imageCatalogName) {
     this.imageCatalogName = imageCatalogName;
   }
 
-  public ImageInfo imageOs(@javax.annotation.Nullable String imageOs) {
-    
+
+  public ImageInfo imageOs(@jakarta.annotation.Nullable String imageOs) {
     this.imageOs = imageOs;
     return this;
   }
@@ -108,7 +110,7 @@ public class ImageInfo {
    * The OS of the image.
    * @return imageOs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class ImageInfo {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageOs(@javax.annotation.Nullable String imageOs) {
+  public void setImageOs(@jakarta.annotation.Nullable String imageOs) {
     this.imageOs = imageOs;
   }
 
 
+  /**
+   * Return true if this ImageInfo object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

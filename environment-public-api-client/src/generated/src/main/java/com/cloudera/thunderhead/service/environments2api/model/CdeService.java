@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CdeVc;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CDE service.
@@ -40,30 +42,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdeService {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentName;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_CDE_VCS = "cdeVcs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CdeVc> cdeVcs;
 
-  public CdeService() {
+  public CdeService() { 
   }
 
-  public CdeService name(@javax.annotation.Nullable String name) {
-    
+  public CdeService name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -72,7 +73,7 @@ public class CdeService {
    * Name of the CDE service
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -83,12 +84,12 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public CdeService clusterId(@javax.annotation.Nullable String clusterId) {
-    
+
+  public CdeService clusterId(@jakarta.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
     return this;
   }
@@ -97,7 +98,7 @@ public class CdeService {
    * Cluster Id of the CDE Service.
    * @return clusterId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -108,12 +109,12 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(@javax.annotation.Nullable String clusterId) {
+  public void setClusterId(@jakarta.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-  public CdeService environmentName(@javax.annotation.Nullable String environmentName) {
-    
+
+  public CdeService environmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -122,7 +123,7 @@ public class CdeService {
    * The name of the service&#39;s environment.
    * @return environmentName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -133,12 +134,12 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public CdeService status(@javax.annotation.Nullable String status) {
-    
+
+  public CdeService status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -147,7 +148,7 @@ public class CdeService {
    * Status of the CDE service.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -158,12 +159,12 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
-  public CdeService cdeVcs(@javax.annotation.Nullable List<CdeVc> cdeVcs) {
-    
+
+  public CdeService cdeVcs(@jakarta.annotation.Nullable List<CdeVc> cdeVcs) {
     this.cdeVcs = cdeVcs;
     return this;
   }
@@ -180,7 +181,7 @@ public class CdeService {
    * List of virtual clusters associated with the CDE service.
    * @return cdeVcs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDE_VCS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -191,11 +192,14 @@ public class CdeService {
 
   @JsonProperty(JSON_PROPERTY_CDE_VCS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdeVcs(@javax.annotation.Nullable List<CdeVc> cdeVcs) {
+  public void setCdeVcs(@jakarta.annotation.Nullable List<CdeVc> cdeVcs) {
     this.cdeVcs = cdeVcs;
   }
 
 
+  /**
+   * Return true if this CdeService object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

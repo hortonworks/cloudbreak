@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for get keytab request.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetKeytabRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_ACTOR_CRN = "actorCrn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String actorCrn;
 
-  public GetKeytabRequest() {
+  public GetKeytabRequest() { 
   }
 
-  public GetKeytabRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public GetKeytabRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -53,7 +55,7 @@ public class GetKeytabRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class GetKeytabRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public GetKeytabRequest actorCrn(@javax.annotation.Nullable String actorCrn) {
-    
+
+  public GetKeytabRequest actorCrn(@jakarta.annotation.Nullable String actorCrn) {
     this.actorCrn = actorCrn;
     return this;
   }
@@ -78,7 +80,7 @@ public class GetKeytabRequest {
    * The CRN of the user or machine user to retrieve the keytab for. If it is not included, it defaults to the user making the request.
    * @return actorCrn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACTOR_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class GetKeytabRequest {
 
   @JsonProperty(JSON_PROPERTY_ACTOR_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setActorCrn(@javax.annotation.Nullable String actorCrn) {
+  public void setActorCrn(@jakarta.annotation.Nullable String actorCrn) {
     this.actorCrn = actorCrn;
   }
 
 
+  /**
+   * Return true if this GetKeytabRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

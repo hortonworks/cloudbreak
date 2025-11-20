@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CML workspace.
@@ -37,34 +40,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CmlWorkspace {
   public static final String JSON_PROPERTY_INSTANCE_NAME = "instanceName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceName;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentName;
 
   public static final String JSON_PROPERTY_INSTANCE_STATUS = "instanceStatus";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceStatus;
 
   public static final String JSON_PROPERTY_INSTANCE_URL = "instanceUrl";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceUrl;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_CRN = "crn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String crn;
 
-  public CmlWorkspace() {
+  public CmlWorkspace() { 
   }
 
-  public CmlWorkspace instanceName(@javax.annotation.Nullable String instanceName) {
-    
+  public CmlWorkspace instanceName(@jakarta.annotation.Nullable String instanceName) {
     this.instanceName = instanceName;
     return this;
   }
@@ -73,7 +75,7 @@ public class CmlWorkspace {
    * The name of the workspace.
    * @return instanceName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -84,12 +86,12 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceName(@javax.annotation.Nullable String instanceName) {
+  public void setInstanceName(@jakarta.annotation.Nullable String instanceName) {
     this.instanceName = instanceName;
   }
 
-  public CmlWorkspace environmentName(@javax.annotation.Nullable String environmentName) {
-    
+
+  public CmlWorkspace environmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -98,7 +100,7 @@ public class CmlWorkspace {
    * The name of the workspace&#39;s environment.
    * @return environmentName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -109,12 +111,12 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public CmlWorkspace instanceStatus(@javax.annotation.Nullable String instanceStatus) {
-    
+
+  public CmlWorkspace instanceStatus(@jakarta.annotation.Nullable String instanceStatus) {
     this.instanceStatus = instanceStatus;
     return this;
   }
@@ -123,7 +125,7 @@ public class CmlWorkspace {
    * The workspace&#39;s current status.
    * @return instanceStatus
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -134,12 +136,12 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceStatus(@javax.annotation.Nullable String instanceStatus) {
+  public void setInstanceStatus(@jakarta.annotation.Nullable String instanceStatus) {
     this.instanceStatus = instanceStatus;
   }
 
-  public CmlWorkspace instanceUrl(@javax.annotation.Nullable String instanceUrl) {
-    
+
+  public CmlWorkspace instanceUrl(@jakarta.annotation.Nullable String instanceUrl) {
     this.instanceUrl = instanceUrl;
     return this;
   }
@@ -148,7 +150,7 @@ public class CmlWorkspace {
    * URL of the workspace&#39;s user interface.
    * @return instanceUrl
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -159,12 +161,12 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceUrl(@javax.annotation.Nullable String instanceUrl) {
+  public void setInstanceUrl(@jakarta.annotation.Nullable String instanceUrl) {
     this.instanceUrl = instanceUrl;
   }
 
-  public CmlWorkspace environmentCrn(@javax.annotation.Nullable String environmentCrn) {
-    
+
+  public CmlWorkspace environmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -173,7 +175,7 @@ public class CmlWorkspace {
    * CRN of the environment.
    * @return environmentCrn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -184,12 +186,12 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-  public CmlWorkspace crn(@javax.annotation.Nullable String crn) {
-    
+
+  public CmlWorkspace crn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
     return this;
   }
@@ -198,7 +200,7 @@ public class CmlWorkspace {
    * The CRN of the workspace.
    * @return crn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -209,11 +211,14 @@ public class CmlWorkspace {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(@javax.annotation.Nullable String crn) {
+  public void setCrn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
 
+  /**
+   * Return true if this CmlWorkspace object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

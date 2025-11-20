@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CloudProviderType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for generating a create environment CLI command.
@@ -35,22 +38,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetCliForEnvironmentRequest {
   public static final String JSON_PROPERTY_COMMAND_CLOUD_PROVIDER = "commandCloudProvider";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CloudProviderType commandCloudProvider;
 
   public static final String JSON_PROPERTY_COMMAND_REQUEST_INPUT = "commandRequestInput";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String commandRequestInput;
 
   public static final String JSON_PROPERTY_COMMAND_RESPONSE_INPUT = "commandResponseInput";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String commandResponseInput;
 
-  public GetCliForEnvironmentRequest() {
+  public GetCliForEnvironmentRequest() { 
   }
 
-  public GetCliForEnvironmentRequest commandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
-    
+  public GetCliForEnvironmentRequest commandCloudProvider(@jakarta.annotation.Nullable CloudProviderType commandCloudProvider) {
     this.commandCloudProvider = commandCloudProvider;
     return this;
   }
@@ -59,7 +61,7 @@ public class GetCliForEnvironmentRequest {
    * Get commandCloudProvider
    * @return commandCloudProvider
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -70,12 +72,12 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_CLOUD_PROVIDER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandCloudProvider(@javax.annotation.Nullable CloudProviderType commandCloudProvider) {
+  public void setCommandCloudProvider(@jakarta.annotation.Nullable CloudProviderType commandCloudProvider) {
     this.commandCloudProvider = commandCloudProvider;
   }
 
-  public GetCliForEnvironmentRequest commandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
-    
+
+  public GetCliForEnvironmentRequest commandRequestInput(@jakarta.annotation.Nullable String commandRequestInput) {
     this.commandRequestInput = commandRequestInput;
     return this;
   }
@@ -84,7 +86,7 @@ public class GetCliForEnvironmentRequest {
    * cloudbreak environment request object of the private API, encoded in base64
    * @return commandRequestInput
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -95,12 +97,12 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_REQUEST_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandRequestInput(@javax.annotation.Nullable String commandRequestInput) {
+  public void setCommandRequestInput(@jakarta.annotation.Nullable String commandRequestInput) {
     this.commandRequestInput = commandRequestInput;
   }
 
-  public GetCliForEnvironmentRequest commandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
-    
+
+  public GetCliForEnvironmentRequest commandResponseInput(@jakarta.annotation.Nullable String commandResponseInput) {
     this.commandResponseInput = commandResponseInput;
     return this;
   }
@@ -109,7 +111,7 @@ public class GetCliForEnvironmentRequest {
    * cloudbreak environment response object of the private API, encoded in base64
    * @return commandResponseInput
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -120,11 +122,14 @@ public class GetCliForEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMMAND_RESPONSE_INPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommandResponseInput(@javax.annotation.Nullable String commandResponseInput) {
+  public void setCommandResponseInput(@jakarta.annotation.Nullable String commandResponseInput) {
     this.commandResponseInput = commandResponseInput;
   }
 
 
+  /**
+   * Return true if this GetCliForEnvironmentRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

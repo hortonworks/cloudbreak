@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Log descriptor, contains a path and label pair. Used for diagnostics collections.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeipaVmLogResponse {
   public static final String JSON_PROPERTY_PATH = "path";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String path;
 
   public static final String JSON_PROPERTY_LABEL = "label";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String label;
 
-  public FreeipaVmLogResponse() {
+  public FreeipaVmLogResponse() { 
   }
 
-  public FreeipaVmLogResponse path(@javax.annotation.Nullable String path) {
-    
+  public FreeipaVmLogResponse path(@jakarta.annotation.Nullable String path) {
     this.path = path;
     return this;
   }
@@ -53,7 +55,7 @@ public class FreeipaVmLogResponse {
    * Path of the log file(s) that needs to be collected. (Can be glob wildcard)
    * @return path
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class FreeipaVmLogResponse {
 
   @JsonProperty(JSON_PROPERTY_PATH)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPath(@javax.annotation.Nullable String path) {
+  public void setPath(@jakarta.annotation.Nullable String path) {
     this.path = path;
   }
 
-  public FreeipaVmLogResponse label(@javax.annotation.Nullable String label) {
-    
+
+  public FreeipaVmLogResponse label(@jakarta.annotation.Nullable String label) {
     this.label = label;
     return this;
   }
@@ -78,7 +80,7 @@ public class FreeipaVmLogResponse {
    * Label that will be used to identify a log descriptor. (will be used as a folder inside logs folder)
    * @return label
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class FreeipaVmLogResponse {
 
   @JsonProperty(JSON_PROPERTY_LABEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLabel(@javax.annotation.Nullable String label) {
+  public void setLabel(@jakarta.annotation.Nullable String label) {
     this.label = label;
   }
 
 
+  /**
+   * Return true if this FreeipaVmLogResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a change environment credentials request.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ChangeEnvironmentCredentialRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialName;
 
-  public ChangeEnvironmentCredentialRequest() {
+  public ChangeEnvironmentCredentialRequest() { 
   }
 
-  public ChangeEnvironmentCredentialRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public ChangeEnvironmentCredentialRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -53,7 +55,7 @@ public class ChangeEnvironmentCredentialRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class ChangeEnvironmentCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public ChangeEnvironmentCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
-    
+
+  public ChangeEnvironmentCredentialRequest credentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -78,7 +80,7 @@ public class ChangeEnvironmentCredentialRequest {
    * The credential name to set for the environment. This must be a credential that already exists.
    * @return credentialName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class ChangeEnvironmentCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
 
+  /**
+   * Return true if this ChangeEnvironmentCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

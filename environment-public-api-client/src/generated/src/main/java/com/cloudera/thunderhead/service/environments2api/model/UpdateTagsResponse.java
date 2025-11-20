@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for an update environment tags request.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateTagsResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Environment environment;
 
-  public UpdateTagsResponse() {
+  public UpdateTagsResponse() { 
   }
 
-  public UpdateTagsResponse environment(@javax.annotation.Nonnull Environment environment) {
-    
+  public UpdateTagsResponse environment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
     return this;
   }
@@ -49,7 +51,7 @@ public class UpdateTagsResponse {
    * Get environment
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -60,11 +62,14 @@ public class UpdateTagsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull Environment environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
   }
 
 
+  /**
+   * Return true if this UpdateTagsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

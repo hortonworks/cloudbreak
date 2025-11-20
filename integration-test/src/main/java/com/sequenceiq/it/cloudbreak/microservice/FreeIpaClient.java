@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -69,9 +71,13 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
             TestContext testContext, Set<E> ignoredFailedStatuses) {
         if (entity instanceof FreeIpaUserSyncTestDto) {
             FreeIpaUserSyncTestDto freeIpaSyncTestDto = (FreeIpaUserSyncTestDto) entity;
-            if (freeIpaSyncTestDto.getOperationId() == null) {
+            if (freeIpaSyncTestDto.getOperationId() == null ||
+                    (Crn.isCrn(freeIpaSyncTestDto.getOperationId())
+                            && CrnResourceDescriptor.USERSYNC.checkIfCrnMatches(Crn.safeFromString(freeIpaSyncTestDto.getOperationId())))) {
+                E desiredStatus = desiredStatuses.get("status");
+                UserSyncState desiredUserSyncState = getDesiredUserSyncState(desiredStatus);
                 return new FreeIpaUserSyncWaitObject(this, freeIpaSyncTestDto.getName(), freeIpaSyncTestDto.getEnvironmentCrn(),
-                        (UserSyncState) desiredStatuses.get("status"), (Set<UserSyncState>) ignoredFailedStatuses);
+                        desiredUserSyncState, (Set<UserSyncState>) ignoredFailedStatuses, testContext);
             } else {
                 return new FreeIpaOperationWaitObject(this, freeIpaSyncTestDto.getOperationId(), freeIpaSyncTestDto.getName(),
                         freeIpaSyncTestDto.getEnvironmentCrn(), (OperationState) desiredStatuses.get("status"), (Set<OperationState>) ignoredFailedStatuses);
@@ -86,6 +92,20 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
             return new FreeIpaWaitObject(this, entity.getName(), environmentAware.getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
                     (Set<Status>) ignoredFailedStatuses);
         }
+    }
+
+    private <E extends Enum<E>> UserSyncState getDesiredUserSyncState(E desiredStatus) {
+        UserSyncState desiredUserSyncState;
+        if (desiredStatus instanceof OperationState operationState) {
+            desiredUserSyncState = switch (operationState) {
+                case REQUESTED, RUNNING -> UserSyncState.SYNC_IN_PROGRESS;
+                case COMPLETED -> UserSyncState.UP_TO_DATE;
+                case FAILED, TIMEDOUT, REJECTED -> UserSyncState.SYNC_FAILED;
+            };
+        } else {
+            desiredUserSyncState = (UserSyncState) desiredStatus;
+        }
+        return desiredUserSyncState;
     }
 
     @Override

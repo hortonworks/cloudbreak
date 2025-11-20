@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Application;
 import com.cloudera.thunderhead.service.environments2api.model.CdeSummary;
 import com.cloudera.thunderhead.service.environments2api.model.CdwSummary;
@@ -25,10 +26,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Configuration details specific to the Private Cloud environment. Only returned when the output view is set to &#39;FULL&#39;.
@@ -45,38 +48,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class PvcEnvironmentDetails {
   public static final String JSON_PROPERTY_CM_HOST = "cmHost";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String cmHost;
 
   public static final String JSON_PROPERTY_CML_SUMMARY = "cmlSummary";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CmlSummary cmlSummary;
 
   public static final String JSON_PROPERTY_CDW_SUMMARY = "cdwSummary";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CdwSummary cdwSummary;
 
   public static final String JSON_PROPERTY_CDE_SUMMARY = "cdeSummary";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CdeSummary cdeSummary;
 
   public static final String JSON_PROPERTY_APPLICATIONS = "applications";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, Application> applications = new HashMap<>();
 
   public static final String JSON_PROPERTY_KNOX_GATEWAY_URL = "knoxGatewayUrl";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String knoxGatewayUrl;
 
   public static final String JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS = "privateDatalakeDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private PrivateDatalakeDetails privateDatalakeDetails;
 
-  public PvcEnvironmentDetails() {
+  public PvcEnvironmentDetails() { 
   }
 
-  public PvcEnvironmentDetails cmHost(@javax.annotation.Nullable String cmHost) {
-    
+  public PvcEnvironmentDetails cmHost(@jakarta.annotation.Nullable String cmHost) {
     this.cmHost = cmHost;
     return this;
   }
@@ -85,7 +87,7 @@ public class PvcEnvironmentDetails {
    * The CM host.
    * @return cmHost
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -96,12 +98,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmHost(@javax.annotation.Nullable String cmHost) {
+  public void setCmHost(@jakarta.annotation.Nullable String cmHost) {
     this.cmHost = cmHost;
   }
 
-  public PvcEnvironmentDetails cmlSummary(@javax.annotation.Nullable CmlSummary cmlSummary) {
-    
+
+  public PvcEnvironmentDetails cmlSummary(@jakarta.annotation.Nullable CmlSummary cmlSummary) {
     this.cmlSummary = cmlSummary;
     return this;
   }
@@ -110,7 +112,7 @@ public class PvcEnvironmentDetails {
    * Get cmlSummary
    * @return cmlSummary
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CML_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -121,12 +123,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_CML_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmlSummary(@javax.annotation.Nullable CmlSummary cmlSummary) {
+  public void setCmlSummary(@jakarta.annotation.Nullable CmlSummary cmlSummary) {
     this.cmlSummary = cmlSummary;
   }
 
-  public PvcEnvironmentDetails cdwSummary(@javax.annotation.Nullable CdwSummary cdwSummary) {
-    
+
+  public PvcEnvironmentDetails cdwSummary(@jakarta.annotation.Nullable CdwSummary cdwSummary) {
     this.cdwSummary = cdwSummary;
     return this;
   }
@@ -135,7 +137,7 @@ public class PvcEnvironmentDetails {
    * Get cdwSummary
    * @return cdwSummary
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -146,12 +148,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_CDW_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwSummary(@javax.annotation.Nullable CdwSummary cdwSummary) {
+  public void setCdwSummary(@jakarta.annotation.Nullable CdwSummary cdwSummary) {
     this.cdwSummary = cdwSummary;
   }
 
-  public PvcEnvironmentDetails cdeSummary(@javax.annotation.Nullable CdeSummary cdeSummary) {
-    
+
+  public PvcEnvironmentDetails cdeSummary(@jakarta.annotation.Nullable CdeSummary cdeSummary) {
     this.cdeSummary = cdeSummary;
     return this;
   }
@@ -160,7 +162,7 @@ public class PvcEnvironmentDetails {
    * Get cdeSummary
    * @return cdeSummary
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDE_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -171,12 +173,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_CDE_SUMMARY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdeSummary(@javax.annotation.Nullable CdeSummary cdeSummary) {
+  public void setCdeSummary(@jakarta.annotation.Nullable CdeSummary cdeSummary) {
     this.cdeSummary = cdeSummary;
   }
 
-  public PvcEnvironmentDetails applications(@javax.annotation.Nullable Map<String, Application> applications) {
-    
+
+  public PvcEnvironmentDetails applications(@jakarta.annotation.Nullable Map<String, Application> applications) {
     this.applications = applications;
     return this;
   }
@@ -193,7 +195,7 @@ public class PvcEnvironmentDetails {
    * A map of applications that provide services for the Service Discovery
    * @return applications
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -204,12 +206,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_APPLICATIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setApplications(@javax.annotation.Nullable Map<String, Application> applications) {
+  public void setApplications(@jakarta.annotation.Nullable Map<String, Application> applications) {
     this.applications = applications;
   }
 
-  public PvcEnvironmentDetails knoxGatewayUrl(@javax.annotation.Nullable String knoxGatewayUrl) {
-    
+
+  public PvcEnvironmentDetails knoxGatewayUrl(@jakarta.annotation.Nullable String knoxGatewayUrl) {
     this.knoxGatewayUrl = knoxGatewayUrl;
     return this;
   }
@@ -218,7 +220,7 @@ public class PvcEnvironmentDetails {
    * The knox gateway url in the base cluster.
    * @return knoxGatewayUrl
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KNOX_GATEWAY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -229,12 +231,12 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_KNOX_GATEWAY_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKnoxGatewayUrl(@javax.annotation.Nullable String knoxGatewayUrl) {
+  public void setKnoxGatewayUrl(@jakarta.annotation.Nullable String knoxGatewayUrl) {
     this.knoxGatewayUrl = knoxGatewayUrl;
   }
 
-  public PvcEnvironmentDetails privateDatalakeDetails(@javax.annotation.Nullable PrivateDatalakeDetails privateDatalakeDetails) {
-    
+
+  public PvcEnvironmentDetails privateDatalakeDetails(@jakarta.annotation.Nullable PrivateDatalakeDetails privateDatalakeDetails) {
     this.privateDatalakeDetails = privateDatalakeDetails;
     return this;
   }
@@ -243,7 +245,7 @@ public class PvcEnvironmentDetails {
    * Get privateDatalakeDetails
    * @return privateDatalakeDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -254,11 +256,14 @@ public class PvcEnvironmentDetails {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_DATALAKE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateDatalakeDetails(@javax.annotation.Nullable PrivateDatalakeDetails privateDatalakeDetails) {
+  public void setPrivateDatalakeDetails(@jakarta.annotation.Nullable PrivateDatalakeDetails privateDatalakeDetails) {
     this.privateDatalakeDetails = privateDatalakeDetails;
   }
 
 
+  /**
+   * Return true if this PvcEnvironmentDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object to retrieve current value of setting that controls automatic acceptance of Azure Marketplace image terms.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetAzureImageTermsPolicyResponse {
   public static final String JSON_PROPERTY_ACCEPTED = "accepted";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Boolean accepted;
 
-  public GetAzureImageTermsPolicyResponse() {
+  public GetAzureImageTermsPolicyResponse() { 
   }
 
-  public GetAzureImageTermsPolicyResponse accepted(@javax.annotation.Nonnull Boolean accepted) {
-    
+  public GetAzureImageTermsPolicyResponse accepted(@jakarta.annotation.Nonnull Boolean accepted) {
     this.accepted = accepted;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetAzureImageTermsPolicyResponse {
    * Flag denoting whether automatic Azure Marketplace image terms acceptance is enabled or disabled.
    * @return accepted
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ACCEPTED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class GetAzureImageTermsPolicyResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCEPTED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAccepted(@javax.annotation.Nonnull Boolean accepted) {
+  public void setAccepted(@jakarta.annotation.Nonnull Boolean accepted) {
     this.accepted = accepted;
   }
 
 
+  /**
+   * Return true if this GetAzureImageTermsPolicyResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

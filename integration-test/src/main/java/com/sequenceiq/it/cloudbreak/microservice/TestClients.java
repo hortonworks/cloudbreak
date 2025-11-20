@@ -93,6 +93,8 @@ public class TestClients {
             RedbeamsClient redbeamsClient = createRedbeamsClient(cloudbreakUser);
             PeriscopeClient periscopeClient = createPeriscopeClient(cloudbreakUser);
             RemoteEnvironmentClient remoteEnvironmentClient = createRemoteEnvironmentClient(cloudbreakUser);
+            EnvironmentPublicApiClient environmentPublicApiClient = createEnvironmentPublicApiClient(cloudbreakUser);
+
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Maps.newHashMap();
             clientMap.put(CloudbreakClient.class, cloudbreakClient);
             clientMap.put(FreeIpaClient.class, freeIpaClient);
@@ -104,6 +106,7 @@ public class TestClients {
             clientMap.put(AuthDistributorClient.class, authDistributorClient);
             clientMap.put(PeriscopeClient.class, periscopeClient);
             clientMap.put(RemoteEnvironmentClient.class, remoteEnvironmentClient);
+            clientMap.put(EnvironmentPublicApiClient.class, environmentPublicApiClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             LOGGER.info(" Microservice clients have been initialized successfully for account: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +
                             "\nCrn: {} \nAdmin: {}", cloudbreakUser.getDisplayName(), cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey(),
@@ -154,5 +157,9 @@ public class TestClients {
 
     private synchronized AuthDistributorClient createAuthDistributorClient() {
         return new AuthDistributorClient(regionAwareInternalCrnGeneratorFactory, serverProperties.getAuthDistributorHost());
+    }
+
+    private EnvironmentPublicApiClient createEnvironmentPublicApiClient(CloudbreakUser cloudbreakUser) {
+        return new EnvironmentPublicApiClient(cloudbreakUser, serverProperties.getEnvironmentPublicApiAddress());
     }
 }

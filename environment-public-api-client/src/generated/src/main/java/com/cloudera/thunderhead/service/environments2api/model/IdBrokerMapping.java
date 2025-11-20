@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A mapping of an actor or group to a cloud provider role.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class IdBrokerMapping {
   public static final String JSON_PROPERTY_ACCESSOR_CRN = "accessorCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String accessorCrn;
 
   public static final String JSON_PROPERTY_ROLE = "role";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String role;
 
-  public IdBrokerMapping() {
+  public IdBrokerMapping() { 
   }
 
-  public IdBrokerMapping accessorCrn(@javax.annotation.Nonnull String accessorCrn) {
-    
+  public IdBrokerMapping accessorCrn(@jakarta.annotation.Nonnull String accessorCrn) {
     this.accessorCrn = accessorCrn;
     return this;
   }
@@ -53,7 +55,7 @@ public class IdBrokerMapping {
    * The CRN of the actor or group.
    * @return accessorCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ACCESSOR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class IdBrokerMapping {
 
   @JsonProperty(JSON_PROPERTY_ACCESSOR_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAccessorCrn(@javax.annotation.Nonnull String accessorCrn) {
+  public void setAccessorCrn(@jakarta.annotation.Nonnull String accessorCrn) {
     this.accessorCrn = accessorCrn;
   }
 
-  public IdBrokerMapping role(@javax.annotation.Nonnull String role) {
-    
+
+  public IdBrokerMapping role(@jakarta.annotation.Nonnull String role) {
     this.role = role;
     return this;
   }
@@ -78,7 +80,7 @@ public class IdBrokerMapping {
    * The cloud provider role (e.g., ARN in AWS, Resource ID in Azure) to which the actor or group is mapped.
    * @return role
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class IdBrokerMapping {
 
   @JsonProperty(JSON_PROPERTY_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRole(@javax.annotation.Nonnull String role) {
+  public void setRole(@jakarta.annotation.Nonnull String role) {
     this.role = role;
   }
 
 
+  /**
+   * Return true if this IdBrokerMapping object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional configurations needed for app-based authentication.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetAzureAuditCredentialRequestAppBased {
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String applicationId;
 
   public static final String JSON_PROPERTY_SECRET_KEY = "secretKey";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String secretKey;
 
-  public SetAzureAuditCredentialRequestAppBased() {
+  public SetAzureAuditCredentialRequestAppBased() { 
   }
 
-  public SetAzureAuditCredentialRequestAppBased applicationId(@javax.annotation.Nonnull String applicationId) {
-    
+  public SetAzureAuditCredentialRequestAppBased applicationId(@jakarta.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
     return this;
   }
@@ -54,7 +56,7 @@ public class SetAzureAuditCredentialRequestAppBased {
    * The id of the application registered in Azure.
    * @return applicationId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,12 +67,12 @@ public class SetAzureAuditCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setApplicationId(@javax.annotation.Nonnull String applicationId) {
+  public void setApplicationId(@jakarta.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
   }
 
-  public SetAzureAuditCredentialRequestAppBased secretKey(@javax.annotation.Nonnull String secretKey) {
-    
+
+  public SetAzureAuditCredentialRequestAppBased secretKey(@jakarta.annotation.Nonnull String secretKey) {
     this.secretKey = secretKey;
     return this;
   }
@@ -79,7 +81,7 @@ public class SetAzureAuditCredentialRequestAppBased {
    * The client secret key (also referred to as application password) for the registered application.
    * @return secretKey
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -90,11 +92,14 @@ public class SetAzureAuditCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_SECRET_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecretKey(@javax.annotation.Nonnull String secretKey) {
+  public void setSecretKey(@jakarta.annotation.Nonnull String secretKey) {
     this.secretKey = secretKey;
   }
 
 
+  /**
+   * Return true if this SetAzureAuditCredentialRequest_appBased object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

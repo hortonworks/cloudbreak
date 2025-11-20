@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * VM encryption related environment configuration information.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class VmEncryptionDetails {
   public static final String JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION = "enableSecretEncryption";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableSecretEncryption;
 
-  public VmEncryptionDetails() {
+  public VmEncryptionDetails() { 
   }
 
-  public VmEncryptionDetails enableSecretEncryption(@javax.annotation.Nullable Boolean enableSecretEncryption) {
-    
+  public VmEncryptionDetails enableSecretEncryption(@jakarta.annotation.Nullable Boolean enableSecretEncryption) {
     this.enableSecretEncryption = enableSecretEncryption;
     return this;
   }
@@ -48,7 +50,7 @@ public class VmEncryptionDetails {
    * True if the secret encryption feature is enabled for the environment.
    * @return enableSecretEncryption
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class VmEncryptionDetails {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableSecretEncryption(@javax.annotation.Nullable Boolean enableSecretEncryption) {
+  public void setEnableSecretEncryption(@jakarta.annotation.Nullable Boolean enableSecretEncryption) {
     this.enableSecretEncryption = enableSecretEncryption;
   }
 
 
+  /**
+   * Return true if this VmEncryptionDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a create createYARNEnvironment method.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreateYARNEnvironmentRequest {
   public static final String JSON_PROPERTY_INPUT_JSON = "inputJson";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String inputJson;
 
-  public CreateYARNEnvironmentRequest() {
+  public CreateYARNEnvironmentRequest() { 
   }
 
-  public CreateYARNEnvironmentRequest inputJson(@javax.annotation.Nonnull String inputJson) {
-    
+  public CreateYARNEnvironmentRequest inputJson(@jakarta.annotation.Nonnull String inputJson) {
     this.inputJson = inputJson;
     return this;
   }
@@ -48,7 +50,7 @@ public class CreateYARNEnvironmentRequest {
    * Provides the input values for YCLOUD environment creation in JSON format.
    * @return inputJson
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INPUT_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class CreateYARNEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_INPUT_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInputJson(@javax.annotation.Nonnull String inputJson) {
+  public void setInputJson(@jakarta.annotation.Nonnull String inputJson) {
     this.inputJson = inputJson;
   }
 
 
+  /**
+   * Return true if this CreateYARNEnvironmentRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

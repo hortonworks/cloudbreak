@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.FreeipaVmLogResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for obtaining log descriptors. (useful for diagnostics collection filtering)
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetFreeipaLogDescriptorsResponse {
   public static final String JSON_PROPERTY_LOGS = "logs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<FreeipaVmLogResponse> logs = new ArrayList<>();
 
-  public GetFreeipaLogDescriptorsResponse() {
+  public GetFreeipaLogDescriptorsResponse() { 
   }
 
-  public GetFreeipaLogDescriptorsResponse logs(@javax.annotation.Nullable List<FreeipaVmLogResponse> logs) {
-    
+  public GetFreeipaLogDescriptorsResponse logs(@jakarta.annotation.Nullable List<FreeipaVmLogResponse> logs) {
     this.logs = logs;
     return this;
   }
@@ -60,7 +61,7 @@ public class GetFreeipaLogDescriptorsResponse {
    * Array of log descriptors. (useful for diagnostics collection filtering)
    * @return logs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class GetFreeipaLogDescriptorsResponse {
 
   @JsonProperty(JSON_PROPERTY_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLogs(@javax.annotation.Nullable List<FreeipaVmLogResponse> logs) {
+  public void setLogs(@jakarta.annotation.Nullable List<FreeipaVmLogResponse> logs) {
     this.logs = logs;
   }
 
 
+  /**
+   * Return true if this GetFreeipaLogDescriptorsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

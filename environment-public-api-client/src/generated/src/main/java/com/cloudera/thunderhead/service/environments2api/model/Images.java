@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Image;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * List of the images.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Images {
   public static final String JSON_PROPERTY_FREE_IPA_IMAGES = "freeIpaImages";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<Image> freeIpaImages = new ArrayList<>();
 
-  public Images() {
+  public Images() { 
   }
 
-  public Images freeIpaImages(@javax.annotation.Nullable List<Image> freeIpaImages) {
-    
+  public Images freeIpaImages(@jakarta.annotation.Nullable List<Image> freeIpaImages) {
     this.freeIpaImages = freeIpaImages;
     return this;
   }
@@ -60,7 +61,7 @@ public class Images {
    * List of the FreeIPA-related images.
    * @return freeIpaImages
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREE_IPA_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class Images {
 
   @JsonProperty(JSON_PROPERTY_FREE_IPA_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeIpaImages(@javax.annotation.Nullable List<Image> freeIpaImages) {
+  public void setFreeIpaImages(@jakarta.annotation.Nullable List<Image> freeIpaImages) {
     this.freeIpaImages = freeIpaImages;
   }
 
 
+  /**
+   * Return true if this Images object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Credential;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a create Azure credential request.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreateAzureCredentialResponse {
   public static final String JSON_PROPERTY_CREDENTIAL = "credential";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Credential credential;
 
-  public CreateAzureCredentialResponse() {
+  public CreateAzureCredentialResponse() { 
   }
 
-  public CreateAzureCredentialResponse credential(@javax.annotation.Nonnull Credential credential) {
-    
+  public CreateAzureCredentialResponse credential(@jakarta.annotation.Nonnull Credential credential) {
     this.credential = credential;
     return this;
   }
@@ -49,7 +51,7 @@ public class CreateAzureCredentialResponse {
    * Get credential
    * @return credential
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -60,11 +62,14 @@ public class CreateAzureCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredential(@javax.annotation.Nonnull Credential credential) {
+  public void setCredential(@jakarta.annotation.Nonnull Credential credential) {
     this.credential = credential;
   }
 
 
+  /**
+   * Return true if this CreateAzureCredentialResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

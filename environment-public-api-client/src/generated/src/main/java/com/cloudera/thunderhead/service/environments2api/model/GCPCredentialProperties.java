@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The credential properties that closely related to those that have created on GCP.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GCPCredentialProperties {
   public static final String JSON_PROPERTY_KEY_TYPE = "keyType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String keyType;
 
-  public GCPCredentialProperties() {
+  public GCPCredentialProperties() { 
   }
 
-  public GCPCredentialProperties keyType(@javax.annotation.Nullable String keyType) {
-    
+  public GCPCredentialProperties keyType(@jakarta.annotation.Nullable String keyType) {
     this.keyType = keyType;
     return this;
   }
@@ -48,7 +50,7 @@ public class GCPCredentialProperties {
    * The GCP credential key type. Json is the only supported key type.
    * @return keyType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KEY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class GCPCredentialProperties {
 
   @JsonProperty(JSON_PROPERTY_KEY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKeyType(@javax.annotation.Nullable String keyType) {
+  public void setKeyType(@jakarta.annotation.Nullable String keyType) {
     this.keyType = keyType;
   }
 
 
+  /**
+   * Return true if this GCPCredentialProperties object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for set endpoint access gateway request.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetEndpointAccessGatewayResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationId;
 
-  public SetEndpointAccessGatewayResponse() {
+  public SetEndpointAccessGatewayResponse() { 
   }
 
-  public SetEndpointAccessGatewayResponse operationId(@javax.annotation.Nullable String operationId) {
-    
+  public SetEndpointAccessGatewayResponse operationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -48,7 +50,7 @@ public class SetEndpointAccessGatewayResponse {
    * Unique operation ID assigned to this command execution. Use this identifier with &#39;get-operation&#39; to track status and retrieve detailed results.
    * @return operationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class SetEndpointAccessGatewayResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(@javax.annotation.Nullable String operationId) {
+  public void setOperationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
 
+  /**
+   * Return true if this SetEndpointAccessGatewayResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

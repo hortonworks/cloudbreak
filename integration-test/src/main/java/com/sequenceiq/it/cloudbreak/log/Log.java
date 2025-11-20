@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 
 public class Log<T extends CloudbreakTestDto> {
@@ -21,13 +24,17 @@ public class Log<T extends CloudbreakTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Log.class);
 
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .registerModule(new JavaTimeModule());
+
     private Log() {
     }
 
     public static void whenJson(Logger logger, String message, Object jsonObject) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
-        mapper.writeValue(writer, jsonObject);
+        MAPPER.writeValue(writer, jsonObject);
         log(logger, "When", message, writer.toString());
     }
 

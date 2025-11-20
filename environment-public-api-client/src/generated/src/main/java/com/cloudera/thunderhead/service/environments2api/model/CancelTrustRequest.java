@@ -14,57 +14,61 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
- * [Deprecated] Parameteres needed to automatically create VNet and Subnets.
+ * Request object to cancel an existing trust.
  */
 @JsonPropertyOrder({
-  CreateAzureEnvironmentRequestNewNetworkParams.JSON_PROPERTY_NETWORK_CIDR
+  CancelTrustRequest.JSON_PROPERTY_ENVIRONMENT
 })
-@JsonTypeName("CreateAzureEnvironmentRequest_newNetworkParams")
 
-public class CreateAzureEnvironmentRequestNewNetworkParams {
-  public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
-  @javax.annotation.Nonnull
-  private String networkCidr;
+public class CancelTrustRequest {
+  public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
+  @jakarta.annotation.Nonnull
+  private String environment;
 
-  public CreateAzureEnvironmentRequestNewNetworkParams() {
+  public CancelTrustRequest() { 
   }
 
-  public CreateAzureEnvironmentRequestNewNetworkParams networkCidr(@javax.annotation.Nonnull String networkCidr) {
-    
-    this.networkCidr = networkCidr;
+  public CancelTrustRequest environment(@jakarta.annotation.Nonnull String environment) {
+    this.environment = environment;
     return this;
   }
 
   /**
-   * The range of private IPv4 addresses that resources will use under the created VNet.
-   * @return networkCidr
+   * The Environment Name or CRN.
+   * @return environment
    */
-  @javax.annotation.Nonnull
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getNetworkCidr() {
-    return networkCidr;
+  public String getEnvironment() {
+    return environment;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkCidr(@javax.annotation.Nonnull String networkCidr) {
-    this.networkCidr = networkCidr;
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
+    this.environment = environment;
   }
 
 
+  /**
+   * Return true if this CancelTrustRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -73,20 +77,20 @@ public class CreateAzureEnvironmentRequestNewNetworkParams {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CreateAzureEnvironmentRequestNewNetworkParams createAzureEnvironmentRequestNewNetworkParams = (CreateAzureEnvironmentRequestNewNetworkParams) o;
-    return Objects.equals(this.networkCidr, createAzureEnvironmentRequestNewNetworkParams.networkCidr);
+    CancelTrustRequest cancelTrustRequest = (CancelTrustRequest) o;
+    return Objects.equals(this.environment, cancelTrustRequest.environment);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(networkCidr);
+    return Objects.hash(environment);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CreateAzureEnvironmentRequestNewNetworkParams {\n");
-    sb.append("    networkCidr: ").append(toIndentedString(networkCidr)).append("\n");
+    sb.append("class CancelTrustRequest {\n");
+    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("}");
     return sb.toString();
   }

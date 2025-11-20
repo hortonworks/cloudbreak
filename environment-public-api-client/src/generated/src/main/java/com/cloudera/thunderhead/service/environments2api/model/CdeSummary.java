@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CdeService;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CDE summary.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdeSummary {
   public static final String JSON_PROPERTY_CDE_SERVICES = "cdeServices";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CdeService> cdeServices;
 
-  public CdeSummary() {
+  public CdeSummary() { 
   }
 
-  public CdeSummary cdeServices(@javax.annotation.Nullable List<CdeService> cdeServices) {
-    
+  public CdeSummary cdeServices(@jakarta.annotation.Nullable List<CdeService> cdeServices) {
     this.cdeServices = cdeServices;
     return this;
   }
@@ -60,7 +61,7 @@ public class CdeSummary {
    * The list of CDE services associated with the environment.
    * @return cdeServices
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDE_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class CdeSummary {
 
   @JsonProperty(JSON_PROPERTY_CDE_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdeServices(@javax.annotation.Nullable List<CdeService> cdeServices) {
+  public void setCdeServices(@jakarta.annotation.Nullable List<CdeService> cdeServices) {
     this.cdeServices = cdeServices;
   }
 
 
+  /**
+   * Return true if this CdeSummary object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

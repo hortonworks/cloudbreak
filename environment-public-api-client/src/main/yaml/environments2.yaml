@@ -339,6 +339,29 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/updateGCPCredential:
+    post:
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      summary: Updates an existing GCP credential.
+      description: Updates an existing GCP credential.
+      operationId: updateGCPCredential
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateGCPCredentialRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/UpdateGCPCredentialResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
   /api/v1/environments2/changeEnvironmentCredential:
     post:
       summary: Changes the credential for an environment.
@@ -450,13 +473,14 @@ paths:
   /api/v1/environments2/disableS3Guard:
     post:
       summary: Disable the S3Guard for an environment.
-      description: Disables the S3Guard for an environment.
+      description: Deprecated, S3Guard is no longer supported.
       operationId: disableS3Guard
       x-hidden: true
       x-hidden-reason: IN_DEVELOPMENT
       x-mutating: true
       x-entitlement: CDP_RAW_S3
       x-hidden-retention: BETA
+      x-deprecated: true
       parameters:
         - name: input
           in: body
@@ -816,10 +840,6 @@ paths:
       summary: Gets the the automated sync status for the environment.
       description: Gets the the automated sync status for the environment.
       operationId: getAutomatedSyncEnvironmentStatus
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-hidden-retention: BETA
-      x-no-compatibility-guarantee: true
       x-entitlement: WORKLOAD_IAM_SYNC
       x-mutating: false
       parameters:
@@ -840,8 +860,9 @@ paths:
   /api/v1/environments2/synchronizeAllEnvironments:
     post:
       summary: Synchronizes all environments in the calling account.
-      description: Invokes the automated user sync service to synchronize all environments in the calling account.
+      description: Deprecated. No plans to release this API.
       operationId: synchronizeAllEnvironments
+      x-deprecated: true
       x-hidden: true
       x-hidden-reason: IN_DEVELOPMENT
       x-no-compatibility-guarantee: true
@@ -2437,6 +2458,7 @@ paths:
       x-mutating: true
       x-hidden: true
       x-hidden-reason: IN_DEVELOPMENT
+      x-hidden-retention: BETA
       x-form-factors: public
       parameters:
         - name: input
@@ -2476,7 +2498,297 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/createEncryptionProfile:
+    post:
+      summary: Creates an encryption profile.
+      description: Creates an encryption profile.
+      operationId: createEncryptionProfile
+      x-mutating: true
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateEncryptionProfileRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/CreateEncryptionProfileResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/listEncryptionProfiles:
+    post:
+      summary: Lists all encryption profiles.
+      description: Lists all encryption profiles.
+      operationId: listEncryptionProfiles
+      x-mutating: false
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListEncryptionProfilesRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/ListEncryptionProfilesResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/deleteEncryptionProfile:
+    post:
+      summary: Deletes an encryption profile.
+      description: Deletes an encryption profile.
+      operationId: deleteEncryptionProfile
+      x-mutating: true
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DeleteEncryptionProfileRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/DeleteEncryptionProfileResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/setupTrust:
+    post:
+      summary: Set up cross-realm trust for FreeIPA.
+      description: Initiates cross-realm trust setup between FreeIPA and Active Directory. After this operation completes, configure the Active Directory side of the trust relationship. Then call finishSetupTrust to validate and activate the trust for production use.
+      operationId: setupTrust
+      x-entitlement: CDP_HYBRID_CLOUD
+      x-hidden-reason: IN_DEVELOPMENT
+      x-mutating: true
+      x-hidden: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetupTrustRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/SetupTrustResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/finishSetupTrust:
+    post:
+      summary: Complete cross-realm trust setup for FreeIPA.
+      description: Completes and validates the cross-realm trust setup initiated by setupTrust. Call this after configuring the Active Directory side of the trust relationship. This operation tests the bidirectional trust and activates it for production use.
+      operationId: finishSetupTrust
+      x-entitlement: CDP_HYBRID_CLOUD
+      x-hidden-reason: IN_DEVELOPMENT
+      x-mutating: true
+      x-hidden: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FinishSetupTrustRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/FinishSetupTrustResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/cancelTrust:
+    post:
+      summary: Cancel cross-realm trust for FreeIPA.
+      description: Cancel cross-realm trust setup between FreeIPA and Active Directory.
+      operationId: cancelTrust
+      x-entitlement: CDP_HYBRID_CLOUD
+      x-hidden-reason: IN_DEVELOPMENT
+      x-mutating: true
+      x-hidden: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CancelTrustRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/CancelTrustResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/listTruststoreCertificates:
+    post:
+      summary: Lists trust store certificates.
+      description: Lists trust store certificates.
+      operationId: listTruststoreCertificates
+      x-form-factor: private
+      x-right: environments/listTruststoreCertificates
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      x-mutating: false
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ListTruststoreCertificatesRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/ListTruststoreCertificatesResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/deleteCaCertificateFromTruststore:
+    post:
+      summary: Deletes a CA certificate from the trust store.
+      description: Deletes a CA certificate from the trust store.
+      operationId: deleteCaCertificateFromTruststore
+      x-form-factor: private
+      x-right: environments/deleteCaCertificateFromTruststore
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DeleteCaCertificateFromTruststoreRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/DeleteCaCertificateFromTruststoreResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
+  CancelTrustRequest:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Request object to cancel an existing trust.
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The Environment Name or CRN.
+  CancelTrustResponse:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Response object to cancel an existing trust.
+    required:
+      - flowId
+    properties:
+      flowId:
+        type: string
+        description: Flow ID of the trust cancel flow.
+      operationId:
+        description: Unique operation ID assigned to this command execution. Use this identifier with 'get-operation' to track status and retrieve detailed results.
+        type: string
+  FinishSetupTrustRequest:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Request object to create an Trust finish setup command.
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The Environment CRN.
+  FinishSetupTrustResponse:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Response object for Finish Setting up Trust.
+    required:
+      - flowId
+    properties:
+      flowId:
+        type: string
+        description: Flow ID of the trust setup finish flow.
+      operationId:
+        description: Unique operation ID assigned to this command execution. Use this identifier with 'get-operation' to track status and retrieve detailed results.
+        type: string
+  SetupTrustRequest:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Request object to Setting up Trust.
+    required:
+      - environment
+      - fqdn
+      - ip
+      - realm
+      - remoteEnvironmentCrn
+    properties:
+      environment:
+        type: string
+        description: The Environment CRN.
+      fqdn:
+        type: string
+        description: Active Directory Fully Qualified Domain Name.
+      ip:
+        type: string
+        description: Active Directory IPv4 address.
+      realm:
+        type: string
+        description: Cross-realm trust REALM name (uppercase by convention).
+      remoteEnvironmentCrn:
+        type: string
+        description: Private cloud control plane environment CRN.
+      trustSecret:
+        type: string
+        description: Existing trust secret. If not provided, CDP will generate a secure random secret.
+        x-sensitive: true
+  SetupTrustResponse:
+    x-hidden: true
+    x-entitlement: CDP_HYBRID_CLOUD
+    x-hidden-reason: IN_DEVELOPMENT
+    type: object
+    description: Response object for Setting up Trust.
+    required:
+      - flowId
+    properties:
+      flowId:
+        type: string
+        description: Flow ID of the trust setup flow.
   GetIdBrokerMappingsCliForEnvRequest:
     x-hidden: true
     x-hidden-reason: FOR_CLOUDERA_USE_ONLY
@@ -2876,6 +3188,38 @@ definitions:
       description:
         type: string
         description: A description for the credential.
+  UpdateGCPCredentialRequest:
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-no-compatibility-guarantee: true
+    type: object
+    description: Request object for a GCP credential update.
+    required:
+      - credentialName
+      - credentialKey
+    properties:
+      credentialName:
+        type: string
+        description: The name of the credential which is going to be updated.
+      credentialKey:
+        type: string
+        x-sensitive: true
+        description: The JSON key for the service account. Please use local path when using the CLI (e.g. file:///absolute/path/to/cred.json) to avoid exposing the keys in the command line history.
+      description:
+        type: string
+        description: A - new - description for the credential.
+  UpdateGCPCredentialResponse:
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-no-compatibility-guarantee: true
+    type: object
+    description: Response object for a create GCP credential update.
+    required:
+      - credential
+    properties:
+      credential:
+        description: The credential object.
+        $ref: '#/definitions/Credential'
   CreateAzureCredentialResponse:
     type: object
     description: Response object for a create Azure credential request.
@@ -3052,6 +3396,33 @@ definitions:
         description: The fine-grained policies related to each service.
         items:
           $ref: '#/definitions/CredentialGranularPolicyResponse'
+      granularPolicies:
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        type: array
+        description: The component-separated policies related to each service.
+        items:
+          $ref: '#/definitions/GranularPolicyResponse'
+  GranularPolicyResponse:
+    type: object
+    description: Response object for getting AWS credential prerequisites.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-no-compatibility-guarantee: true
+    required:
+      - name
+      - component
+      - policy
+    properties:
+      name:
+        type: string
+        description: The name of the policy.
+      component:
+        type: string
+        description: The component that the given policy is related to.
+      policy:
+        type: string
+        description: The related policy json encoded in base64
   AzureCredentialPrerequisitesResponse:
     type: object
     description: Response object for getting Azure credential prerequisites.
@@ -3070,6 +3441,13 @@ definitions:
         description: The fine-grained policies related to each service.
         items:
           $ref: '#/definitions/CredentialGranularPolicyResponse'
+      granularPolicies:
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        type: array
+        description: The component-separated policies related to each service.
+        items:
+          $ref: '#/definitions/GranularPolicyResponse'
   GcpCredentialPrerequisitesResponse:
     type: object
     description: Response object for getting GCP credential prerequisites.
@@ -3283,6 +3661,23 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-hidden-retention: BETA
+      environmentType:
+        description: Environment type which can be hybrid or public cloud.
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_HYBRID_CLOUD
+        x-hidden-enum-values: HYBRID_BASE
+        enum:
+          - PUBLIC_CLOUD
+          - HYBRID
+          - HYBRID_BASE
+      encryptionProfileName:
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+        description: Name of the encryption profile to use for the environment.
   CreateAWSGovCloudEnvironmentRequest:
     type: object
     description: Request object for a create AWS GovCloud environment request.
@@ -3849,6 +4244,7 @@ definitions:
       - securityAccess
       - usePublicIp
       - logStorage
+      - existingNetworkParams
     properties:
       environmentName:
         type: string
@@ -3874,19 +4270,6 @@ definitions:
       existingNetworkParams:
         description: Parameters needed to use an existing VNet and Subnets.
         $ref: '#/definitions/ExistingAzureNetworkRequest'
-      newNetworkParams:
-        type: object
-        x-deprecated: true
-        x-hidden: true
-        x-hidden-reason: 'FOR_CLOUDERA_USE_ONLY: For testing purposes'
-        x-no-compatibility-guarantee: true
-        description: '[Deprecated] Parameteres needed to automatically create VNet and Subnets.'
-        required:
-          - networkCidr
-        properties:
-          networkCidr:
-            type: string
-            description: The range of private IPv4 addresses that resources will use under the created VNet.
       description:
         type: string
         description: An description of the environment.
@@ -4021,6 +4404,23 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-hidden-retention: BETA
+      environmentType:
+        description: Environment type which can be hybrid or public cloud.
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_HYBRID_CLOUD
+        x-hidden-enum-values: HYBRID_BASE
+        enum:
+          - PUBLIC_CLOUD
+          - HYBRID
+          - HYBRID_BASE
+      encryptionProfileName:
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+        description: Name of the encryption profile to use for the environment.
   CreateGCPEnvironmentRequest:
     type: object
     description: Request object for a create GCP environment request.
@@ -4140,6 +4540,23 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-hidden-retention: BETA
+      environmentType:
+        description: Environment type which can be hybrid or public cloud.
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_HYBRID_CLOUD
+        x-hidden-enum-values: HYBRID_BASE
+        enum:
+          - PUBLIC_CLOUD
+          - HYBRID
+          - HYBRID_BASE
+      encryptionProfileName:
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+        description: Name of the encryption profile to use for the environment.
   ExistingAzureNetworkRequest:
     type: object
     description: Request object for creating an Azure environment using existing VNet and subnets.
@@ -4728,6 +5145,23 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-hidden-retention: BETA
+      environmentType:
+        description: Environment type which can be hybrid or public cloud.
+        type: string
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_HYBRID_CLOUD
+        x-hidden-enum-values: HYBRID_BASE
+        enum:
+          - PUBLIC_CLOUD
+          - HYBRID
+          - HYBRID_BASE
+      encryptionProfileName:
+        type: string
+        description: The name of the encryption profile.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
   PvcEnvironmentDetails:
     type: object
     description: Configuration details specific to the Private Cloud environment. Only returned when the output view is set to 'FULL'.
@@ -5420,16 +5854,10 @@ definitions:
         type: string
         format: date-time
         description: Date when the sync operation started.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
       endDate:
         type: string
         format: date-time
         description: Date when the sync operation ended. Omitted if operation has not ended.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
   SyncUserRequest:
     type: object
     description: Request Object for single user sync operation.
@@ -5471,16 +5899,10 @@ definitions:
         type: string
         format: date-time
         description: Date when the sync operation started.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
       endDate:
         type: string
         format: date-time
         description: Date when the sync operation ended. Omitted if operation has not ended.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
   SetPasswordRequest:
     type: object
     description: Request object for set password request. (deprecated)
@@ -5536,16 +5958,10 @@ definitions:
         type: string
         format: date-time
         description: Date when the sync operation started.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
       endDate:
         type: string
         format: date-time
         description: Date when the sync operation ended. Omitted if operation has not ended.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
   SyncStatusRequest:
     type: object
     description: Request object for Sync Status.
@@ -5593,25 +6009,21 @@ definitions:
         type: string
         format: date-time
         description: Date when the sync operation started.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
       endDate:
         type: string
         format: date-time
         description: Date when the sync operation ended. Omitted if operation has not ended.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        x-no-compatibility-guarantee: true
   LastSyncStatusRequest:
     type: object
     description: Request object for Sync Status.
-    required:
-      - envNameOrCrn
     properties:
       envNameOrCrn:
         type: string
-        description: Name or Crn of the environment.
+        description: Deprecated. Please use 'environment' field instead.
+        x-deprecated: true
+      environment:
+        type: string
+        description: The name or CRN of the environment.
   ListConnectedDataServicesRequest:
     type: object
     description: Request object for listing connected Data Service(s) for a given environment.
@@ -5747,9 +6159,6 @@ definitions:
   GetAutomatedSyncEnvironmentStatusRequest:
     type: object
     description: Request object for getting automated sync environment status.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     required:
       - environmentName
     properties:
@@ -5759,9 +6168,6 @@ definitions:
   GetAutomatedSyncEnvironmentStatusResponse:
     type: object
     description: Response object for getting automated sync environment status.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     properties:
       environmentCrn:
         type: string
@@ -5769,7 +6175,6 @@ definitions:
       syncPendingState:
         type: string
         description: The state to indicate whether the environment is synced or has a sync pending.
-        x-hidden-enum-values: QUARANTINED
         enum:
           - UNKNOWN
           - SYNC_PENDING
@@ -5781,14 +6186,16 @@ definitions:
         $ref: '#/definitions/LastAutomatedSyncDetails'
   SynchronizeAllEnvironmentsRequest:
     type: object
-    description: Request object for synchronizing all environments.
+    description: Deprecated. Request object for synchronizing all environments.
+    x-deprecated: true
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
     x-no-compatibility-guarantee: true
     x-hidden-retention: BETA
   SynchronizeAllEnvironmentsResponse:
     type: object
-    description: Response object for synchronizing all environments.
+    description: Deprecated. Response object for synchronizing all environments.
+    x-deprecated: true
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
     x-no-compatibility-guarantee: true
@@ -5921,6 +6328,11 @@ definitions:
       environmentName:
         type: string
         description: The name or CRN of the environment.
+      ignoreInvalidMappings:
+        type: boolean
+        description: If true, skip missing actor/group CRNs instead of throwing an error.
+        x-hidden: true
+        x-hidden-reason: 'IN_DEVELOPMENT: Hidden until the syncMappings fix is fully deployed to prod.'
   SyncIdBrokerMappingsResponse:
     type: object
     description: Response object for synchronizing ID Broker mappings for an environment.
@@ -6188,6 +6600,12 @@ definitions:
         type: string
         format: date-time
         description: End time of the operation.
+      message:
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-no-compatibility-guarantee: true
+        type: string
+        description: Supplementary message towards the user regarding the input or outcome of the given call.
   ExposedService:
     x-form-factors: private
     description: Exposed CDP DC service object.
@@ -6778,8 +7196,6 @@ definitions:
       loadBalancer:
         $ref: '#/definitions/FreeIpaLoadBalancer'
         description: Details of a FreeIPA load balancer.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
       imageDetails:
         $ref: '#/definitions/ImageInfo'
         description: The image details.
@@ -6835,8 +7251,6 @@ definitions:
   FreeIpaLoadBalancer:
     description: Details of a FreeIPA load balancer.
     type: object
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
     properties:
       resourceId:
         type: string
@@ -7395,6 +7809,11 @@ definitions:
       includeNginxReport:
         type: boolean
         description: Include Nginx report generated by GoAccess (if available).
+      includeSelinuxReport:
+        type: boolean
+        description: Include SELinux report in the diagnostics collection.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       includeSaltLogs:
         type: boolean
         description: Include salt minion/master/api system logs in the diagnostics collection.
@@ -7763,9 +8182,6 @@ definitions:
   LastAutomatedSyncDetails:
     type: object
     description: The details of the last sync performed by automated user sync.
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     required:
       - timestamp
       - status
@@ -8630,6 +9046,7 @@ definitions:
     description: Request object for FreeIpa root volume update.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     required:
       - environmentCrn
     properties:
@@ -8644,6 +9061,7 @@ definitions:
     description: Root volume properties to modify.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     properties:
       modifyDisks:
         description: Modifies root volume attached to all instances in a group.
@@ -8653,6 +9071,7 @@ definitions:
     description: Volume configuration.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     required:
       - size
       - volumeType
@@ -8669,6 +9088,7 @@ definitions:
     description: The response object for FreeIpa root volume update.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     properties:
       result:
         type: string
@@ -8706,3 +9126,211 @@ definitions:
       type:
         type: string
         description: Flow Type of the modify SELinux flow.
+  EncryptionProfile:
+    type: object
+    description: An Encryption Profile object.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    required:
+      - name
+      - crn
+      - tlsVersions
+      - cipherSuites
+      - description
+      - status
+    properties:
+      name:
+        type: string
+        description: The name of the encryption profile.
+      crn:
+        type: string
+        description: The CRN of the encryption profile.
+      tlsVersions:
+        type: array
+        items:
+          type: string
+        description: The TLS versions used in the encryption profile.
+      cipherSuites:
+        type: array
+        items:
+          type: string
+        description: The cipher suites used in the encryption profile.
+      description:
+        type: string
+        description: The description of the encryption profile.
+      status:
+        type: string
+        description: Status of the encryption profile, represented as a string (e.g. 'DEFAULT', 'USER_MANAGED')
+  CreateEncryptionProfileRequest:
+    type: object
+    description: Request object for creating an encryption profile.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    required:
+      - name
+      - tlsVersions
+    properties:
+      name:
+        type: string
+        description: The name of the encryption profile.
+      tlsVersions:
+        type: array
+        items:
+          type: string
+        description: The TLS versions to be used in the encryption profile.
+        enum:
+          - TLSv1.2
+          - TLSv1.3
+      cipherSuites:
+        type: array
+        items:
+          type: string
+        description: The cipher suites to be used in the encryption profile.
+      description:
+        type: string
+        description: The description of the encryption profile.
+  CreateEncryptionProfileResponse:
+    type: object
+    description: Response object for a create encryption profile request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    required:
+      - encryptionProfile
+    properties:
+      encryptionProfile:
+        description: The Encryption Profile Object.
+        $ref: '#/definitions/EncryptionProfile'
+  ListEncryptionProfilesRequest:
+    type: object
+    description: Request object for a list encryption profile request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    properties:
+      encryptionProfile:
+        type: string
+        description: An optional encryption profile name or CRN to search by.
+  ListEncryptionProfilesResponse:
+    type: object
+    description: Response object for a list encryption profiles request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    required:
+      - responses
+    properties:
+      responses:
+        type: array
+        items:
+          $ref: '#/definitions/EncryptionProfile'
+        description: List of encryption profiles.
+  DeleteEncryptionProfileRequest:
+    type: object
+    description: Request object for a delete encryption profile request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+    required:
+      - encryptionProfile
+    properties:
+      encryptionProfile:
+        type: string
+        description: The name or CRN of the encryption profile to be deleted.
+  DeleteEncryptionProfileResponse:
+    type: object
+    description: Response object for a delete encryption profile request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-entitlement: CDP_CB_CONFIGURE_ENCRYPTION_PROFILE
+  ListTruststoreCertificatesRequest:
+    type: object
+    description: Request object for listing trust store certificates.
+    x-form-factor: private
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      environmentCrn:
+        type: string
+        description: CRN of the environment to retrieve trust store certificates from.
+  ListTruststoreCertificatesResponse:
+    type: object
+    description: Response object for listing trust store certificates.
+    x-form-factor: private
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - truststoreCertificates
+    properties:
+      truststoreCertificates:
+        type: array
+        description: List of all trust store certificates.
+        items:
+          $ref: '#/definitions/TruststoreCertificate'
+  DeleteCaCertificateFromTruststoreRequest:
+    type: object
+    description: Request object for deleting a CA certificate from the trust store.
+    x-form-factor: private
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      environmentCrn:
+        type: string
+        description: CRN of the environment from which the CA certificate will be deleted.
+      certificateCN:
+        type: string
+        description: The common name of the CA certificate to be deleted.
+      caCertificateType:
+        type: string
+        description: The type of the CA certificate to be deleted.
+        enum:
+          - MISCELLANEOUS
+          - VAULT
+  DeleteCaCertificateFromTruststoreResponse:
+    type: object
+    description: Response object for deleting a CA certificate from the trust store.
+    x-form-factor: private
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - deletionStatus
+    properties:
+      deletionStatus:
+        type: string
+        description: Status of the deletion operation.
+  TruststoreCertificate:
+    type: object
+    description: Trust store certificate metadata.
+    x-form-factor: private
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - cn
+      - notBefore
+      - notAfter
+      - issuer
+      - san
+      - caCertificateType
+    properties:
+      cn:
+        type: string
+        description: Common Name of the certificate.
+      notBefore:
+        type: string
+        format: date-time
+        description: Start validity of the certificate.
+      notAfter:
+        type: string
+        format: date-time
+        description: Expiry date of the certificate.
+      issuer:
+        type: string
+        description: Issuer information of the certificate.
+      san:
+        type: string
+        description: Subject Alternative Names of the certificate.
+      caCertificateType:
+        type: string
+        description: CA Certificate Type.

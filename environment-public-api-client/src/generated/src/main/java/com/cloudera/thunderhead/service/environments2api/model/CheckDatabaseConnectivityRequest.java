@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for checking Database connectivity.
@@ -36,30 +39,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CheckDatabaseConnectivityRequest {
   public static final String JSON_PROPERTY_HOST = "host";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String host;
 
   public static final String JSON_PROPERTY_PORT = "port";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Integer port;
 
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_USERNAME = "username";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String username;
 
   public static final String JSON_PROPERTY_PASSWORD = "password";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String password;
 
-  public CheckDatabaseConnectivityRequest() {
+  public CheckDatabaseConnectivityRequest() { 
   }
 
-  public CheckDatabaseConnectivityRequest host(@javax.annotation.Nonnull String host) {
-    
+  public CheckDatabaseConnectivityRequest host(@jakarta.annotation.Nonnull String host) {
     this.host = host;
     return this;
   }
@@ -68,7 +70,7 @@ public class CheckDatabaseConnectivityRequest {
    * Host value.
    * @return host
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -79,12 +81,12 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setHost(@javax.annotation.Nonnull String host) {
+  public void setHost(@jakarta.annotation.Nonnull String host) {
     this.host = host;
   }
 
-  public CheckDatabaseConnectivityRequest port(@javax.annotation.Nonnull Integer port) {
-    
+
+  public CheckDatabaseConnectivityRequest port(@jakarta.annotation.Nonnull Integer port) {
     this.port = port;
     return this;
   }
@@ -93,7 +95,7 @@ public class CheckDatabaseConnectivityRequest {
    * Port value.
    * @return port
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -104,12 +106,12 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPort(@javax.annotation.Nonnull Integer port) {
+  public void setPort(@jakarta.annotation.Nonnull Integer port) {
     this.port = port;
   }
 
-  public CheckDatabaseConnectivityRequest name(@javax.annotation.Nonnull String name) {
-    
+
+  public CheckDatabaseConnectivityRequest name(@jakarta.annotation.Nonnull String name) {
     this.name = name;
     return this;
   }
@@ -118,7 +120,7 @@ public class CheckDatabaseConnectivityRequest {
    * Database name value.
    * @return name
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -129,12 +131,12 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(@javax.annotation.Nonnull String name) {
+  public void setName(@jakarta.annotation.Nonnull String name) {
     this.name = name;
   }
 
-  public CheckDatabaseConnectivityRequest username(@javax.annotation.Nonnull String username) {
-    
+
+  public CheckDatabaseConnectivityRequest username(@jakarta.annotation.Nonnull String username) {
     this.username = username;
     return this;
   }
@@ -143,7 +145,7 @@ public class CheckDatabaseConnectivityRequest {
    * Username value.
    * @return username
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -154,12 +156,12 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_USERNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsername(@javax.annotation.Nonnull String username) {
+  public void setUsername(@jakarta.annotation.Nonnull String username) {
     this.username = username;
   }
 
-  public CheckDatabaseConnectivityRequest password(@javax.annotation.Nonnull String password) {
-    
+
+  public CheckDatabaseConnectivityRequest password(@jakarta.annotation.Nonnull String password) {
     this.password = password;
     return this;
   }
@@ -168,7 +170,7 @@ public class CheckDatabaseConnectivityRequest {
    * Password value.
    * @return password
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -179,11 +181,14 @@ public class CheckDatabaseConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(@javax.annotation.Nonnull String password) {
+  public void setPassword(@jakarta.annotation.Nonnull String password) {
     this.password = password;
   }
 
 
+  /**
+   * Return true if this CheckDatabaseConnectivityRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

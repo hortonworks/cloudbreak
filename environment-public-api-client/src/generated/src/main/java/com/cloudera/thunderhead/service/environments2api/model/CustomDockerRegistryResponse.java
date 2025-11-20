@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The configured custom docker registry for data services.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CustomDockerRegistryResponse {
   public static final String JSON_PROPERTY_CRN = "crn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String crn;
 
-  public CustomDockerRegistryResponse() {
+  public CustomDockerRegistryResponse() { 
   }
 
-  public CustomDockerRegistryResponse crn(@javax.annotation.Nonnull String crn) {
-    
+  public CustomDockerRegistryResponse crn(@jakarta.annotation.Nonnull String crn) {
     this.crn = crn;
     return this;
   }
@@ -48,7 +50,7 @@ public class CustomDockerRegistryResponse {
    * The CRN of the configured custom docker registry for data services on the environment.
    * @return crn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class CustomDockerRegistryResponse {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCrn(@javax.annotation.Nonnull String crn) {
+  public void setCrn(@jakarta.annotation.Nonnull String crn) {
     this.crn = crn;
   }
 
 
+  /**
+   * Return true if this CustomDockerRegistryResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

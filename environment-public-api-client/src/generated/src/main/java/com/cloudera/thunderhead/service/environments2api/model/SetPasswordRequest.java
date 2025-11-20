@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for set password request. (deprecated)
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetPasswordRequest {
   public static final String JSON_PROPERTY_PASSWORD = "password";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String password;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_C_R_NS = "environmentCRNs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> environmentCRNs = new ArrayList<>();
 
-  public SetPasswordRequest() {
+  public SetPasswordRequest() { 
   }
 
-  public SetPasswordRequest password(@javax.annotation.Nonnull String password) {
-    
+  public SetPasswordRequest password(@jakarta.annotation.Nonnull String password) {
     this.password = password;
     return this;
   }
@@ -56,7 +57,7 @@ public class SetPasswordRequest {
    * password field.
    * @return password
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -67,12 +68,12 @@ public class SetPasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_PASSWORD)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPassword(@javax.annotation.Nonnull String password) {
+  public void setPassword(@jakarta.annotation.Nonnull String password) {
     this.password = password;
   }
 
-  public SetPasswordRequest environmentCRNs(@javax.annotation.Nullable List<String> environmentCRNs) {
-    
+
+  public SetPasswordRequest environmentCRNs(@jakarta.annotation.Nullable List<String> environmentCRNs) {
     this.environmentCRNs = environmentCRNs;
     return this;
   }
@@ -89,7 +90,7 @@ public class SetPasswordRequest {
    * Optional list of environment CRNs. Only the passed environments user&#39;s password will be affected. If this field is not present, all environments will be affected.
    * @return environmentCRNs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_C_R_NS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -100,11 +101,14 @@ public class SetPasswordRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_C_R_NS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCRNs(@javax.annotation.Nullable List<String> environmentCRNs) {
+  public void setEnvironmentCRNs(@jakarta.annotation.Nullable List<String> environmentCRNs) {
     this.environmentCRNs = environmentCRNs;
   }
 
 
+  /**
+   * Return true if this SetPasswordRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Repair Status.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetRepairFreeipaStatusRequest {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String operationId;
 
-  public GetRepairFreeipaStatusRequest() {
+  public GetRepairFreeipaStatusRequest() { 
   }
 
-  public GetRepairFreeipaStatusRequest operationId(@javax.annotation.Nonnull String operationId) {
-    
+  public GetRepairFreeipaStatusRequest operationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetRepairFreeipaStatusRequest {
    * operationId for the previously requested repair operation.
    * @return operationId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class GetRepairFreeipaStatusRequest {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOperationId(@javax.annotation.Nonnull String operationId) {
+  public void setOperationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
   }
 
 
+  /**
+   * Return true if this GetRepairFreeipaStatusRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

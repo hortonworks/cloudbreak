@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Security related configuration for Data Hub cluster.
@@ -67,14 +70,13 @@ public class SecurityRequest {
   }
 
   public static final String JSON_PROPERTY_SE_LINUX = "seLinux";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private SeLinuxEnum seLinux;
 
-  public SecurityRequest() {
+  public SecurityRequest() { 
   }
 
-  public SecurityRequest seLinux(@javax.annotation.Nullable SeLinuxEnum seLinux) {
-    
+  public SecurityRequest seLinux(@jakarta.annotation.Nullable SeLinuxEnum seLinux) {
     this.seLinux = seLinux;
     return this;
   }
@@ -83,7 +85,7 @@ public class SecurityRequest {
    * Override default SELinux configuration which is PERMISSIVE by default
    * @return seLinux
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SE_LINUX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,11 +96,14 @@ public class SecurityRequest {
 
   @JsonProperty(JSON_PROPERTY_SE_LINUX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSeLinux(@javax.annotation.Nullable SeLinuxEnum seLinux) {
+  public void setSeLinux(@jakarta.annotation.Nullable SeLinuxEnum seLinux) {
     this.seLinux = seLinux;
   }
 
 
+  /**
+   * Return true if this SecurityRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

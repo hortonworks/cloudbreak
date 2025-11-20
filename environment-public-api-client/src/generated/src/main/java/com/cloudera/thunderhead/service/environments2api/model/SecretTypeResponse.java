@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for showing the secret types and descriptions.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SecretTypeResponse {
   public static final String JSON_PROPERTY_SECRET_TYPE = "secretType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String secretType;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
-  public SecretTypeResponse() {
+  public SecretTypeResponse() { 
   }
 
-  public SecretTypeResponse secretType(@javax.annotation.Nullable String secretType) {
-    
+  public SecretTypeResponse secretType(@jakarta.annotation.Nullable String secretType) {
     this.secretType = secretType;
     return this;
   }
@@ -53,7 +55,7 @@ public class SecretTypeResponse {
    * The type of secret that can be used with the rotate-freeipa-secrets command.
    * @return secretType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECRET_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class SecretTypeResponse {
 
   @JsonProperty(JSON_PROPERTY_SECRET_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecretType(@javax.annotation.Nullable String secretType) {
+  public void setSecretType(@jakarta.annotation.Nullable String secretType) {
     this.secretType = secretType;
   }
 
-  public SecretTypeResponse description(@javax.annotation.Nullable String description) {
-    
+
+  public SecretTypeResponse description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -78,7 +80,7 @@ public class SecretTypeResponse {
    * The description of the secret type.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class SecretTypeResponse {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
 
+  /**
+   * Return true if this SecretTypeResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

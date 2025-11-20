@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.SyncStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Status of an ID Broker mappings sync operation.
@@ -37,26 +40,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class IdBrokerSyncStatus {
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private SyncStatus status;
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime endDate;
 
   public static final String JSON_PROPERTY_ERROR_DETAIL = "errorDetail";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String errorDetail;
 
-  public IdBrokerSyncStatus() {
+  public IdBrokerSyncStatus() { 
   }
 
-  public IdBrokerSyncStatus status(@javax.annotation.Nonnull SyncStatus status) {
-    
+  public IdBrokerSyncStatus status(@jakarta.annotation.Nonnull SyncStatus status) {
     this.status = status;
     return this;
   }
@@ -65,7 +67,7 @@ public class IdBrokerSyncStatus {
    * Get status
    * @return status
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -76,12 +78,12 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(@javax.annotation.Nonnull SyncStatus status) {
+  public void setStatus(@jakarta.annotation.Nonnull SyncStatus status) {
     this.status = status;
   }
 
-  public IdBrokerSyncStatus startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
-    
+
+  public IdBrokerSyncStatus startDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
     return this;
   }
@@ -90,7 +92,7 @@ public class IdBrokerSyncStatus {
    * The date when the mappings sync started executing. Omitted if status is NEVER_RUN.
    * @return startDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -101,12 +103,12 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
+  public void setStartDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-  public IdBrokerSyncStatus endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
-    
+
+  public IdBrokerSyncStatus endDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
     return this;
   }
@@ -115,7 +117,7 @@ public class IdBrokerSyncStatus {
    * The date when the mappings sync completed or was terminated. Omitted if status is NEVER_RUN or RUNNING.
    * @return endDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -126,12 +128,12 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
+  public void setEndDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
 
-  public IdBrokerSyncStatus errorDetail(@javax.annotation.Nullable String errorDetail) {
-    
+
+  public IdBrokerSyncStatus errorDetail(@jakarta.annotation.Nullable String errorDetail) {
     this.errorDetail = errorDetail;
     return this;
   }
@@ -140,7 +142,7 @@ public class IdBrokerSyncStatus {
    * The detail of the error. Omitted if status is not FAILED.
    * @return errorDetail
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR_DETAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -151,11 +153,14 @@ public class IdBrokerSyncStatus {
 
   @JsonProperty(JSON_PROPERTY_ERROR_DETAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setErrorDetail(@javax.annotation.Nullable String errorDetail) {
+  public void setErrorDetail(@jakarta.annotation.Nullable String errorDetail) {
     this.errorDetail = errorDetail;
   }
 
 
+  /**
+   * Return true if this IdBrokerSyncStatus object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

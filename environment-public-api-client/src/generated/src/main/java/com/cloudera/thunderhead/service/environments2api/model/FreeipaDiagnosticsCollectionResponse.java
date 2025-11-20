@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.FreeipaDiagnosticsCollectionDetailsResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for diagnostic collection flow details.
@@ -78,34 +81,33 @@ public class FreeipaDiagnosticsCollectionResponse {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_FLOW_ID = "flowId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String flowId;
 
   public static final String JSON_PROPERTY_FLOW_STATE = "flowState";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String flowState;
 
   public static final String JSON_PROPERTY_CREATED = "created";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime created;
 
   public static final String JSON_PROPERTY_PROGRESS_PERCENTAGE = "progressPercentage";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer progressPercentage;
 
   public static final String JSON_PROPERTY_COLLECTION_DETAILS = "collectionDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private FreeipaDiagnosticsCollectionDetailsResponse collectionDetails;
 
-  public FreeipaDiagnosticsCollectionResponse() {
+  public FreeipaDiagnosticsCollectionResponse() { 
   }
 
-  public FreeipaDiagnosticsCollectionResponse status(@javax.annotation.Nullable StatusEnum status) {
-    
+  public FreeipaDiagnosticsCollectionResponse status(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -114,7 +116,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Status of the diagnostics collection flow.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -125,12 +127,12 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
   }
 
-  public FreeipaDiagnosticsCollectionResponse flowId(@javax.annotation.Nullable String flowId) {
-    
+
+  public FreeipaDiagnosticsCollectionResponse flowId(@jakarta.annotation.Nullable String flowId) {
     this.flowId = flowId;
     return this;
   }
@@ -139,7 +141,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Flow ID of the diagnostics collection flow.
    * @return flowId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -150,12 +152,12 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_FLOW_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlowId(@javax.annotation.Nullable String flowId) {
+  public void setFlowId(@jakarta.annotation.Nullable String flowId) {
     this.flowId = flowId;
   }
 
-  public FreeipaDiagnosticsCollectionResponse flowState(@javax.annotation.Nullable String flowState) {
-    
+
+  public FreeipaDiagnosticsCollectionResponse flowState(@jakarta.annotation.Nullable String flowState) {
     this.flowState = flowState;
     return this;
   }
@@ -164,7 +166,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Current state of the diagnostics collection flow.
    * @return flowState
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLOW_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -175,12 +177,12 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_FLOW_STATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlowState(@javax.annotation.Nullable String flowState) {
+  public void setFlowState(@jakarta.annotation.Nullable String flowState) {
     this.flowState = flowState;
   }
 
-  public FreeipaDiagnosticsCollectionResponse created(@javax.annotation.Nullable OffsetDateTime created) {
-    
+
+  public FreeipaDiagnosticsCollectionResponse created(@jakarta.annotation.Nullable OffsetDateTime created) {
     this.created = created;
     return this;
   }
@@ -189,7 +191,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Creation date of the diagnostics collection flow.
    * @return created
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -200,12 +202,12 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreated(@javax.annotation.Nullable OffsetDateTime created) {
+  public void setCreated(@jakarta.annotation.Nullable OffsetDateTime created) {
     this.created = created;
   }
 
-  public FreeipaDiagnosticsCollectionResponse progressPercentage(@javax.annotation.Nullable Integer progressPercentage) {
-    
+
+  public FreeipaDiagnosticsCollectionResponse progressPercentage(@jakarta.annotation.Nullable Integer progressPercentage) {
     this.progressPercentage = progressPercentage;
     return this;
   }
@@ -214,7 +216,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Progress percentage of the diagnostics collection flow (maximum value if finished).
    * @return progressPercentage
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROGRESS_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -225,12 +227,12 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_PROGRESS_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProgressPercentage(@javax.annotation.Nullable Integer progressPercentage) {
+  public void setProgressPercentage(@jakarta.annotation.Nullable Integer progressPercentage) {
     this.progressPercentage = progressPercentage;
   }
 
-  public FreeipaDiagnosticsCollectionResponse collectionDetails(@javax.annotation.Nullable FreeipaDiagnosticsCollectionDetailsResponse collectionDetails) {
-    
+
+  public FreeipaDiagnosticsCollectionResponse collectionDetails(@jakarta.annotation.Nullable FreeipaDiagnosticsCollectionDetailsResponse collectionDetails) {
     this.collectionDetails = collectionDetails;
     return this;
   }
@@ -239,7 +241,7 @@ public class FreeipaDiagnosticsCollectionResponse {
    * Get collectionDetails
    * @return collectionDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COLLECTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -250,11 +252,14 @@ public class FreeipaDiagnosticsCollectionResponse {
 
   @JsonProperty(JSON_PROPERTY_COLLECTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCollectionDetails(@javax.annotation.Nullable FreeipaDiagnosticsCollectionDetailsResponse collectionDetails) {
+  public void setCollectionDetails(@jakarta.annotation.Nullable FreeipaDiagnosticsCollectionDetailsResponse collectionDetails) {
     this.collectionDetails = collectionDetails;
   }
 
 
+  /**
+   * Return true if this FreeipaDiagnosticsCollectionResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.EnvValidation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Exposed CDP DC service object.
@@ -42,38 +44,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ExposedService {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_TYPE = "type";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_SERVICE_URL = "serviceUrl";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String serviceUrl;
 
   public static final String JSON_PROPERTY_SERVICE_VERSION = "serviceVersion";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String serviceVersion;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES = "serviceValidationMessages";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<EnvValidation> serviceValidationMessages = new ArrayList<>();
 
-  public ExposedService() {
+  public ExposedService() { 
   }
 
-  public ExposedService name(@javax.annotation.Nullable String name) {
-    
+  public ExposedService name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -82,7 +83,7 @@ public class ExposedService {
    * Name of service.
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -93,12 +94,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public ExposedService type(@javax.annotation.Nullable String type) {
-    
+
+  public ExposedService type(@jakarta.annotation.Nullable String type) {
     this.type = type;
     return this;
   }
@@ -107,7 +108,7 @@ public class ExposedService {
    * Type of service.
    * @return type
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -118,12 +119,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(@javax.annotation.Nullable String type) {
+  public void setType(@jakarta.annotation.Nullable String type) {
     this.type = type;
   }
 
-  public ExposedService displayName(@javax.annotation.Nullable String displayName) {
-    
+
+  public ExposedService displayName(@jakarta.annotation.Nullable String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -132,7 +133,7 @@ public class ExposedService {
    * Display name of service.
    * @return displayName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -143,12 +144,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(@javax.annotation.Nullable String displayName) {
+  public void setDisplayName(@jakarta.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-  public ExposedService serviceUrl(@javax.annotation.Nullable String serviceUrl) {
-    
+
+  public ExposedService serviceUrl(@jakarta.annotation.Nullable String serviceUrl) {
     this.serviceUrl = serviceUrl;
     return this;
   }
@@ -157,7 +158,7 @@ public class ExposedService {
    * URL of service.
    * @return serviceUrl
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -168,12 +169,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceUrl(@javax.annotation.Nullable String serviceUrl) {
+  public void setServiceUrl(@jakarta.annotation.Nullable String serviceUrl) {
     this.serviceUrl = serviceUrl;
   }
 
-  public ExposedService serviceVersion(@javax.annotation.Nullable String serviceVersion) {
-    
+
+  public ExposedService serviceVersion(@jakarta.annotation.Nullable String serviceVersion) {
     this.serviceVersion = serviceVersion;
     return this;
   }
@@ -182,7 +183,7 @@ public class ExposedService {
    * Version of service.
    * @return serviceVersion
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -193,12 +194,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceVersion(@javax.annotation.Nullable String serviceVersion) {
+  public void setServiceVersion(@jakarta.annotation.Nullable String serviceVersion) {
     this.serviceVersion = serviceVersion;
   }
 
-  public ExposedService status(@javax.annotation.Nullable String status) {
-    
+
+  public ExposedService status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -207,7 +208,7 @@ public class ExposedService {
    * Status of service.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -218,12 +219,12 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
-  public ExposedService serviceValidationMessages(@javax.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
-    
+
+  public ExposedService serviceValidationMessages(@jakarta.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
     this.serviceValidationMessages = serviceValidationMessages;
     return this;
   }
@@ -240,7 +241,7 @@ public class ExposedService {
    * List of service validation message.
    * @return serviceValidationMessages
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -251,11 +252,14 @@ public class ExposedService {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceValidationMessages(@javax.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
+  public void setServiceValidationMessages(@jakarta.annotation.Nullable List<EnvValidation> serviceValidationMessages) {
     this.serviceValidationMessages = serviceValidationMessages;
   }
 
 
+  /**
+   * Return true if this ExposedService object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

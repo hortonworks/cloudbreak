@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CmlWorkspace;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CML summary.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CmlSummary {
   public static final String JSON_PROPERTY_CML_WORKSPACES = "cmlWorkspaces";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CmlWorkspace> cmlWorkspaces;
 
-  public CmlSummary() {
+  public CmlSummary() { 
   }
 
-  public CmlSummary cmlWorkspaces(@javax.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
-    
+  public CmlSummary cmlWorkspaces(@jakarta.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
     this.cmlWorkspaces = cmlWorkspaces;
     return this;
   }
@@ -60,7 +61,7 @@ public class CmlSummary {
    * List of CML workspaces based on the environment.
    * @return cmlWorkspaces
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CML_WORKSPACES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class CmlSummary {
 
   @JsonProperty(JSON_PROPERTY_CML_WORKSPACES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmlWorkspaces(@javax.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
+  public void setCmlWorkspaces(@jakarta.annotation.Nullable List<CmlWorkspace> cmlWorkspaces) {
     this.cmlWorkspaces = cmlWorkspaces;
   }
 
 
+  /**
+   * Return true if this CmlSummary object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

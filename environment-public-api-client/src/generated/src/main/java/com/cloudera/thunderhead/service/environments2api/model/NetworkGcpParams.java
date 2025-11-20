@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * GCP network parameters.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class NetworkGcpParams {
   public static final String JSON_PROPERTY_NETWORK_NAME = "networkName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String networkName;
 
   public static final String JSON_PROPERTY_USE_PUBLIC_IP = "usePublicIp";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Boolean usePublicIp;
 
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String sharedProjectId;
 
-  public NetworkGcpParams() {
+  public NetworkGcpParams() { 
   }
 
-  public NetworkGcpParams networkName(@javax.annotation.Nonnull String networkName) {
-    
+  public NetworkGcpParams networkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
     return this;
   }
@@ -58,7 +60,7 @@ public class NetworkGcpParams {
    * The name of the GCP VPC.
    * @return networkName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNetworkName(@javax.annotation.Nonnull String networkName) {
+  public void setNetworkName(@jakarta.annotation.Nonnull String networkName) {
     this.networkName = networkName;
   }
 
-  public NetworkGcpParams usePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
-    
+
+  public NetworkGcpParams usePublicIp(@jakarta.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
     return this;
   }
@@ -83,7 +85,7 @@ public class NetworkGcpParams {
    * Whether to associate public ip&#39;s to the resources within the network.
    * @return usePublicIp
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -94,12 +96,12 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_USE_PUBLIC_IP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUsePublicIp(@javax.annotation.Nonnull Boolean usePublicIp) {
+  public void setUsePublicIp(@jakarta.annotation.Nonnull Boolean usePublicIp) {
     this.usePublicIp = usePublicIp;
   }
 
-  public NetworkGcpParams sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
-    
+
+  public NetworkGcpParams sharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
     return this;
   }
@@ -108,7 +110,7 @@ public class NetworkGcpParams {
    * The ID of the Google project associated with the VPC.
    * @return sharedProjectId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class NetworkGcpParams {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
+  public void setSharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
 
 
+  /**
+   * Return true if this NetworkGcpParams object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

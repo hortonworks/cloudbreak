@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a list environments request.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListEnvironmentsResponse {
   public static final String JSON_PROPERTY_ENVIRONMENTS = "environments";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<EnvironmentSummary> environments = new ArrayList<>();
 
-  public ListEnvironmentsResponse() {
+  public ListEnvironmentsResponse() { 
   }
 
-  public ListEnvironmentsResponse environments(@javax.annotation.Nonnull List<EnvironmentSummary> environments) {
-    
+  public ListEnvironmentsResponse environments(@jakarta.annotation.Nonnull List<EnvironmentSummary> environments) {
     this.environments = environments;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListEnvironmentsResponse {
    * The environment.
    * @return environments
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class ListEnvironmentsResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironments(@javax.annotation.Nonnull List<EnvironmentSummary> environments) {
+  public void setEnvironments(@jakarta.annotation.Nonnull List<EnvironmentSummary> environments) {
     this.environments = environments;
   }
 
 
+  /**
+   * Return true if this ListEnvironmentsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

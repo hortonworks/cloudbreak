@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object with base64 encoded contents of the public certificate for an environment.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetRootCertificateResponse {
   public static final String JSON_PROPERTY_CONTENTS = "contents";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String contents;
 
-  public GetRootCertificateResponse() {
+  public GetRootCertificateResponse() { 
   }
 
-  public GetRootCertificateResponse contents(@javax.annotation.Nullable String contents) {
-    
+  public GetRootCertificateResponse contents(@jakarta.annotation.Nullable String contents) {
     this.contents = contents;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetRootCertificateResponse {
    * Contents of a certificate.
    * @return contents
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONTENTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class GetRootCertificateResponse {
 
   @JsonProperty(JSON_PROPERTY_CONTENTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setContents(@javax.annotation.Nullable String contents) {
+  public void setContents(@jakarta.annotation.Nullable String contents) {
     this.contents = contents;
   }
 
 
+  /**
+   * Return true if this GetRootCertificateResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

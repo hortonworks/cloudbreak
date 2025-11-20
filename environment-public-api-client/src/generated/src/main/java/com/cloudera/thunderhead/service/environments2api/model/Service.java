@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A Service Discovery Service definition
@@ -40,22 +42,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Service {
   public static final String JSON_PROPERTY_TYPE = "type";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String type;
 
   public static final String JSON_PROPERTY_ENDPOINTS = "endpoints";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<ServiceEndPoint> endpoints = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CONFIG = "config";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> config = new HashMap<>();
 
-  public Service() {
+  public Service() { 
   }
 
-  public Service type(@javax.annotation.Nullable String type) {
-    
+  public Service type(@jakarta.annotation.Nullable String type) {
     this.type = type;
     return this;
   }
@@ -64,7 +65,7 @@ public class Service {
    * The type the service represents
    * @return type
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -75,12 +76,12 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setType(@javax.annotation.Nullable String type) {
+  public void setType(@jakarta.annotation.Nullable String type) {
     this.type = type;
   }
 
-  public Service endpoints(@javax.annotation.Nullable List<ServiceEndPoint> endpoints) {
-    
+
+  public Service endpoints(@jakarta.annotation.Nullable List<ServiceEndPoint> endpoints) {
     this.endpoints = endpoints;
     return this;
   }
@@ -97,7 +98,7 @@ public class Service {
    * The endpoints that the service presents
    * @return endpoints
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -108,12 +109,12 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpoints(@javax.annotation.Nullable List<ServiceEndPoint> endpoints) {
+  public void setEndpoints(@jakarta.annotation.Nullable List<ServiceEndPoint> endpoints) {
     this.endpoints = endpoints;
   }
 
-  public Service config(@javax.annotation.Nullable Map<String, String> config) {
-    
+
+  public Service config(@jakarta.annotation.Nullable Map<String, String> config) {
     this.config = config;
     return this;
   }
@@ -130,7 +131,7 @@ public class Service {
    * Configuration key values for a service
    * @return config
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -141,11 +142,14 @@ public class Service {
 
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfig(@javax.annotation.Nullable Map<String, String> config) {
+  public void setConfig(@jakarta.annotation.Nullable Map<String, String> config) {
     this.config = config;
   }
 
 
+  /**
+   * Return true if this Service object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

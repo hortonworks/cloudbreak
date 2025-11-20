@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AwsCredentialProperties;
 import com.cloudera.thunderhead.service.environments2api.model.AzureCredentialProperties;
 import com.cloudera.thunderhead.service.environments2api.model.GCPCredentialProperties;
@@ -24,8 +25,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A credential object.
@@ -45,50 +48,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Credential {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_CRN = "crn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String crn;
 
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String cloudPlatform;
 
   public static final String JSON_PROPERTY_CREATED = "created";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime created;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS = "skipOrgPolicyDecisions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean skipOrgPolicyDecisions = false;
 
   public static final String JSON_PROPERTY_VERIFY_PERMISSIONS = "verifyPermissions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean verifyPermissions = false;
 
   public static final String JSON_PROPERTY_AWS_CREDENTIAL_PROPERTIES = "awsCredentialProperties";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AwsCredentialProperties awsCredentialProperties;
 
   public static final String JSON_PROPERTY_AZURE_CREDENTIAL_PROPERTIES = "azureCredentialProperties";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureCredentialProperties azureCredentialProperties;
 
   public static final String JSON_PROPERTY_GCP_CREDENTIAL_PROPERTIES = "gcpCredentialProperties";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private GCPCredentialProperties gcpCredentialProperties;
 
-  public Credential() {
+  public Credential() { 
   }
 
-  public Credential credentialName(@javax.annotation.Nonnull String credentialName) {
-    
+  public Credential credentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -97,7 +99,7 @@ public class Credential {
    * The name of the credential.
    * @return credentialName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -108,12 +110,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-  public Credential crn(@javax.annotation.Nonnull String crn) {
-    
+
+  public Credential crn(@jakarta.annotation.Nonnull String crn) {
     this.crn = crn;
     return this;
   }
@@ -122,7 +124,7 @@ public class Credential {
    * The CRN of the credential.
    * @return crn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -133,12 +135,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCrn(@javax.annotation.Nonnull String crn) {
+  public void setCrn(@jakarta.annotation.Nonnull String crn) {
     this.crn = crn;
   }
 
-  public Credential cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
-    
+
+  public Credential cloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -147,7 +149,7 @@ public class Credential {
    * The cloud provider.
    * @return cloudPlatform
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -158,12 +160,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
+  public void setCloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
 
-  public Credential created(@javax.annotation.Nullable OffsetDateTime created) {
-    
+
+  public Credential created(@jakarta.annotation.Nullable OffsetDateTime created) {
     this.created = created;
     return this;
   }
@@ -172,7 +174,7 @@ public class Credential {
    * Creation date
    * @return created
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -183,12 +185,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_CREATED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreated(@javax.annotation.Nullable OffsetDateTime created) {
+  public void setCreated(@jakarta.annotation.Nullable OffsetDateTime created) {
     this.created = created;
   }
 
-  public Credential description(@javax.annotation.Nullable String description) {
-    
+
+  public Credential description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -197,7 +199,7 @@ public class Credential {
    * A description for the credential.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -208,12 +210,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
-  public Credential skipOrgPolicyDecisions(@javax.annotation.Nullable Boolean skipOrgPolicyDecisions) {
-    
+
+  public Credential skipOrgPolicyDecisions(@jakarta.annotation.Nullable Boolean skipOrgPolicyDecisions) {
     this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
     return this;
   }
@@ -222,7 +224,7 @@ public class Credential {
    * Skips organization policy decisions during cloud storage validation.
    * @return skipOrgPolicyDecisions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -233,12 +235,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSkipOrgPolicyDecisions(@javax.annotation.Nullable Boolean skipOrgPolicyDecisions) {
+  public void setSkipOrgPolicyDecisions(@jakarta.annotation.Nullable Boolean skipOrgPolicyDecisions) {
     this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
   }
 
-  public Credential verifyPermissions(@javax.annotation.Nullable Boolean verifyPermissions) {
-    
+
+  public Credential verifyPermissions(@jakarta.annotation.Nullable Boolean verifyPermissions) {
     this.verifyPermissions = verifyPermissions;
     return this;
   }
@@ -247,7 +249,7 @@ public class Credential {
    * When true, verifies credential permissions.
    * @return verifyPermissions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERIFY_PERMISSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -258,12 +260,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_VERIFY_PERMISSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVerifyPermissions(@javax.annotation.Nullable Boolean verifyPermissions) {
+  public void setVerifyPermissions(@jakarta.annotation.Nullable Boolean verifyPermissions) {
     this.verifyPermissions = verifyPermissions;
   }
 
-  public Credential awsCredentialProperties(@javax.annotation.Nullable AwsCredentialProperties awsCredentialProperties) {
-    
+
+  public Credential awsCredentialProperties(@jakarta.annotation.Nullable AwsCredentialProperties awsCredentialProperties) {
     this.awsCredentialProperties = awsCredentialProperties;
     return this;
   }
@@ -272,7 +274,7 @@ public class Credential {
    * Get awsCredentialProperties
    * @return awsCredentialProperties
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -283,12 +285,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_AWS_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsCredentialProperties(@javax.annotation.Nullable AwsCredentialProperties awsCredentialProperties) {
+  public void setAwsCredentialProperties(@jakarta.annotation.Nullable AwsCredentialProperties awsCredentialProperties) {
     this.awsCredentialProperties = awsCredentialProperties;
   }
 
-  public Credential azureCredentialProperties(@javax.annotation.Nullable AzureCredentialProperties azureCredentialProperties) {
-    
+
+  public Credential azureCredentialProperties(@jakarta.annotation.Nullable AzureCredentialProperties azureCredentialProperties) {
     this.azureCredentialProperties = azureCredentialProperties;
     return this;
   }
@@ -297,7 +299,7 @@ public class Credential {
    * Get azureCredentialProperties
    * @return azureCredentialProperties
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -308,12 +310,12 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_AZURE_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureCredentialProperties(@javax.annotation.Nullable AzureCredentialProperties azureCredentialProperties) {
+  public void setAzureCredentialProperties(@jakarta.annotation.Nullable AzureCredentialProperties azureCredentialProperties) {
     this.azureCredentialProperties = azureCredentialProperties;
   }
 
-  public Credential gcpCredentialProperties(@javax.annotation.Nullable GCPCredentialProperties gcpCredentialProperties) {
-    
+
+  public Credential gcpCredentialProperties(@jakarta.annotation.Nullable GCPCredentialProperties gcpCredentialProperties) {
     this.gcpCredentialProperties = gcpCredentialProperties;
     return this;
   }
@@ -322,7 +324,7 @@ public class Credential {
    * Get gcpCredentialProperties
    * @return gcpCredentialProperties
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -333,11 +335,14 @@ public class Credential {
 
   @JsonProperty(JSON_PROPERTY_GCP_CREDENTIAL_PROPERTIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpCredentialProperties(@javax.annotation.Nullable GCPCredentialProperties gcpCredentialProperties) {
+  public void setGcpCredentialProperties(@jakarta.annotation.Nullable GCPCredentialProperties gcpCredentialProperties) {
     this.gcpCredentialProperties = gcpCredentialProperties;
   }
 
 
+  /**
+   * Return true if this Credential object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

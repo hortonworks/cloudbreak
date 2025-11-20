@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Instance;
 import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Configuration details specific to the on premises datalake cluster. Only returned when the output view is set to &#39;FULL&#39;.
@@ -45,27 +47,27 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class PrivateDatalakeDetails {
   public static final String JSON_PROPERTY_DATALAKE_NAME = "datalakeName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String datalakeName;
 
   public static final String JSON_PROPERTY_ENABLE_RANGER_RAZ = "enableRangerRaz";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableRangerRaz;
 
   public static final String JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS = "creationTimeEpochMillis";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Long creationTimeEpochMillis;
 
   public static final String JSON_PROPERTY_CM_F_Q_D_N = "cmFQDN";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String cmFQDN;
 
   public static final String JSON_PROPERTY_CM_I_P = "cmIP";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String cmIP;
 
   public static final String JSON_PROPERTY_CM_SERVER_ID = "cmServerId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String cmServerId;
 
   /**
@@ -104,22 +106,21 @@ public class PrivateDatalakeDetails {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<Instance> instances = new ArrayList<>();
 
   public static final String JSON_PROPERTY_KERBEROS_INFO = "kerberosInfo";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private KerberosInfo kerberosInfo;
 
-  public PrivateDatalakeDetails() {
+  public PrivateDatalakeDetails() { 
   }
 
-  public PrivateDatalakeDetails datalakeName(@javax.annotation.Nullable String datalakeName) {
-    
+  public PrivateDatalakeDetails datalakeName(@jakarta.annotation.Nullable String datalakeName) {
     this.datalakeName = datalakeName;
     return this;
   }
@@ -128,7 +129,7 @@ public class PrivateDatalakeDetails {
    * Name of the datalake.
    * @return datalakeName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -139,12 +140,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatalakeName(@javax.annotation.Nullable String datalakeName) {
+  public void setDatalakeName(@jakarta.annotation.Nullable String datalakeName) {
     this.datalakeName = datalakeName;
   }
 
-  public PrivateDatalakeDetails enableRangerRaz(@javax.annotation.Nullable Boolean enableRangerRaz) {
-    
+
+  public PrivateDatalakeDetails enableRangerRaz(@jakarta.annotation.Nullable Boolean enableRangerRaz) {
     this.enableRangerRaz = enableRangerRaz;
     return this;
   }
@@ -153,7 +154,7 @@ public class PrivateDatalakeDetails {
    * Whether Ranger RAZ is enabled for the datalake.
    * @return enableRangerRaz
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_RANGER_RAZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -164,12 +165,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_RANGER_RAZ)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableRangerRaz(@javax.annotation.Nullable Boolean enableRangerRaz) {
+  public void setEnableRangerRaz(@jakarta.annotation.Nullable Boolean enableRangerRaz) {
     this.enableRangerRaz = enableRangerRaz;
   }
 
-  public PrivateDatalakeDetails creationTimeEpochMillis(@javax.annotation.Nullable Long creationTimeEpochMillis) {
-    
+
+  public PrivateDatalakeDetails creationTimeEpochMillis(@jakarta.annotation.Nullable Long creationTimeEpochMillis) {
     this.creationTimeEpochMillis = creationTimeEpochMillis;
     return this;
   }
@@ -178,7 +179,7 @@ public class PrivateDatalakeDetails {
    * The timestamp in Unix epoch when the datalake was created.
    * @return creationTimeEpochMillis
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -189,12 +190,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CREATION_TIME_EPOCH_MILLIS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreationTimeEpochMillis(@javax.annotation.Nullable Long creationTimeEpochMillis) {
+  public void setCreationTimeEpochMillis(@jakarta.annotation.Nullable Long creationTimeEpochMillis) {
     this.creationTimeEpochMillis = creationTimeEpochMillis;
   }
 
-  public PrivateDatalakeDetails cmFQDN(@javax.annotation.Nullable String cmFQDN) {
-    
+
+  public PrivateDatalakeDetails cmFQDN(@jakarta.annotation.Nullable String cmFQDN) {
     this.cmFQDN = cmFQDN;
     return this;
   }
@@ -203,7 +204,7 @@ public class PrivateDatalakeDetails {
    * The Cloudera Manager FQDN.
    * @return cmFQDN
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -214,12 +215,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmFQDN(@javax.annotation.Nullable String cmFQDN) {
+  public void setCmFQDN(@jakarta.annotation.Nullable String cmFQDN) {
     this.cmFQDN = cmFQDN;
   }
 
-  public PrivateDatalakeDetails cmIP(@javax.annotation.Nullable String cmIP) {
-    
+
+  public PrivateDatalakeDetails cmIP(@jakarta.annotation.Nullable String cmIP) {
     this.cmIP = cmIP;
     return this;
   }
@@ -228,7 +229,7 @@ public class PrivateDatalakeDetails {
    * The Cloudera Manager IP.
    * @return cmIP
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -239,12 +240,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmIP(@javax.annotation.Nullable String cmIP) {
+  public void setCmIP(@jakarta.annotation.Nullable String cmIP) {
     this.cmIP = cmIP;
   }
 
-  public PrivateDatalakeDetails cmServerId(@javax.annotation.Nullable String cmServerId) {
-    
+
+  public PrivateDatalakeDetails cmServerId(@jakarta.annotation.Nullable String cmServerId) {
     this.cmServerId = cmServerId;
     return this;
   }
@@ -253,7 +254,7 @@ public class PrivateDatalakeDetails {
    * The Cloudera Manager server ID.
    * @return cmServerId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_SERVER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -264,12 +265,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_CM_SERVER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmServerId(@javax.annotation.Nullable String cmServerId) {
+  public void setCmServerId(@jakarta.annotation.Nullable String cmServerId) {
     this.cmServerId = cmServerId;
   }
 
-  public PrivateDatalakeDetails status(@javax.annotation.Nullable StatusEnum status) {
-    
+
+  public PrivateDatalakeDetails status(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -278,7 +279,7 @@ public class PrivateDatalakeDetails {
    * Status of the datalake.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -289,12 +290,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nullable StatusEnum status) {
     this.status = status;
   }
 
-  public PrivateDatalakeDetails instances(@javax.annotation.Nullable List<Instance> instances) {
-    
+
+  public PrivateDatalakeDetails instances(@jakarta.annotation.Nullable List<Instance> instances) {
     this.instances = instances;
     return this;
   }
@@ -311,7 +312,7 @@ public class PrivateDatalakeDetails {
    * Hosts information for instances within the on premises datalake cluster.
    * @return instances
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -322,12 +323,12 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstances(@javax.annotation.Nullable List<Instance> instances) {
+  public void setInstances(@jakarta.annotation.Nullable List<Instance> instances) {
     this.instances = instances;
   }
 
-  public PrivateDatalakeDetails kerberosInfo(@javax.annotation.Nullable KerberosInfo kerberosInfo) {
-    
+
+  public PrivateDatalakeDetails kerberosInfo(@jakarta.annotation.Nullable KerberosInfo kerberosInfo) {
     this.kerberosInfo = kerberosInfo;
     return this;
   }
@@ -336,7 +337,7 @@ public class PrivateDatalakeDetails {
    * Get kerberosInfo
    * @return kerberosInfo
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KERBEROS_INFO)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -347,11 +348,14 @@ public class PrivateDatalakeDetails {
 
   @JsonProperty(JSON_PROPERTY_KERBEROS_INFO)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKerberosInfo(@javax.annotation.Nullable KerberosInfo kerberosInfo) {
+  public void setKerberosInfo(@jakarta.annotation.Nullable KerberosInfo kerberosInfo) {
     this.kerberosInfo = kerberosInfo;
   }
 
 
+  /**
+   * Return true if this PrivateDatalakeDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

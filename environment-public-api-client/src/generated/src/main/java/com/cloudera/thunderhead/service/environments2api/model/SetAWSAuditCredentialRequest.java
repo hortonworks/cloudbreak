@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a set AWS audit credential request.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetAWSAuditCredentialRequest {
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String roleArn;
 
-  public SetAWSAuditCredentialRequest() {
+  public SetAWSAuditCredentialRequest() { 
   }
 
-  public SetAWSAuditCredentialRequest roleArn(@javax.annotation.Nonnull String roleArn) {
-    
+  public SetAWSAuditCredentialRequest roleArn(@jakarta.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
     return this;
   }
@@ -48,7 +50,7 @@ public class SetAWSAuditCredentialRequest {
    * The ARN of the delegated access role.
    * @return roleArn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class SetAWSAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleArn(@javax.annotation.Nonnull String roleArn) {
+  public void setRoleArn(@jakarta.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
   }
 
 
+  /**
+   * Return true if this SetAWSAuditCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

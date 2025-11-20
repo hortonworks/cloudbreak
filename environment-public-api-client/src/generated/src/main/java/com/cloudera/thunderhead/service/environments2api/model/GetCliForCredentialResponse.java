@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for generating a create credential CLI command.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetCliForCredentialResponse {
   public static final String JSON_PROPERTY_COMMAND = "command";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String command;
 
   public static final String JSON_PROPERTY_ADDITIONAL_COMMANDS = "additionalCommands";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> additionalCommands = new ArrayList<>();
 
-  public GetCliForCredentialResponse() {
+  public GetCliForCredentialResponse() { 
   }
 
-  public GetCliForCredentialResponse command(@javax.annotation.Nullable String command) {
-    
+  public GetCliForCredentialResponse command(@jakarta.annotation.Nullable String command) {
     this.command = command;
     return this;
   }
@@ -56,7 +57,7 @@ public class GetCliForCredentialResponse {
    * cdp cli command string for creating the credential
    * @return command
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -67,12 +68,12 @@ public class GetCliForCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommand(@javax.annotation.Nullable String command) {
+  public void setCommand(@jakarta.annotation.Nullable String command) {
     this.command = command;
   }
 
-  public GetCliForCredentialResponse additionalCommands(@javax.annotation.Nullable List<String> additionalCommands) {
-    
+
+  public GetCliForCredentialResponse additionalCommands(@jakarta.annotation.Nullable List<String> additionalCommands) {
     this.additionalCommands = additionalCommands;
     return this;
   }
@@ -89,7 +90,7 @@ public class GetCliForCredentialResponse {
    * additional cdp cli commands for creating the credential
    * @return additionalCommands
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_COMMANDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -100,11 +101,14 @@ public class GetCliForCredentialResponse {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_COMMANDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalCommands(@javax.annotation.Nullable List<String> additionalCommands) {
+  public void setAdditionalCommands(@jakarta.annotation.Nullable List<String> additionalCommands) {
     this.additionalCommands = additionalCommands;
   }
 
 
+  /**
+   * Return true if this GetCliForCredentialResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

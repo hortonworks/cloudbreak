@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Azure-specific log storage configuration information.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class LogStorageAzureDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String managedIdentity;
 
-  public LogStorageAzureDetails() {
+  public LogStorageAzureDetails() { 
   }
 
-  public LogStorageAzureDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
-    
+  public LogStorageAzureDetails storageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
     return this;
   }
@@ -54,7 +56,7 @@ public class LogStorageAzureDetails {
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net.
    * @return storageLocationBase
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -65,12 +67,12 @@ public class LogStorageAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
+  public void setStorageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-  public LogStorageAzureDetails managedIdentity(@javax.annotation.Nullable String managedIdentity) {
-    
+
+  public LogStorageAzureDetails managedIdentity(@jakarta.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
     return this;
   }
@@ -79,7 +81,7 @@ public class LogStorageAzureDetails {
    * The managed identity associated with the logger. This identity should have Storage Blob Data Contributor role on the given storage account.
    * @return managedIdentity
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -90,11 +92,14 @@ public class LogStorageAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setManagedIdentity(@javax.annotation.Nullable String managedIdentity) {
+  public void setManagedIdentity(@jakarta.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
 
 
+  /**
+   * Return true if this LogStorage_azureDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

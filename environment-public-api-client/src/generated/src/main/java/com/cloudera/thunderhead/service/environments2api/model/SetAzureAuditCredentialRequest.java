@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.SetAzureAuditCredentialRequestAppBased;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a set Azure audit credential request.
@@ -35,22 +38,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetAzureAuditCredentialRequest {
   public static final String JSON_PROPERTY_SUBSCRIPTION_ID = "subscriptionId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String subscriptionId;
 
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String tenantId;
 
   public static final String JSON_PROPERTY_APP_BASED = "appBased";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private SetAzureAuditCredentialRequestAppBased appBased;
 
-  public SetAzureAuditCredentialRequest() {
+  public SetAzureAuditCredentialRequest() { 
   }
 
-  public SetAzureAuditCredentialRequest subscriptionId(@javax.annotation.Nonnull String subscriptionId) {
-    
+  public SetAzureAuditCredentialRequest subscriptionId(@jakarta.annotation.Nonnull String subscriptionId) {
     this.subscriptionId = subscriptionId;
     return this;
   }
@@ -59,7 +61,7 @@ public class SetAzureAuditCredentialRequest {
    * The Azure subscription ID.
    * @return subscriptionId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -70,12 +72,12 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubscriptionId(@javax.annotation.Nonnull String subscriptionId) {
+  public void setSubscriptionId(@jakarta.annotation.Nonnull String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
-  public SetAzureAuditCredentialRequest tenantId(@javax.annotation.Nonnull String tenantId) {
-    
+
+  public SetAzureAuditCredentialRequest tenantId(@jakarta.annotation.Nonnull String tenantId) {
     this.tenantId = tenantId;
     return this;
   }
@@ -84,7 +86,7 @@ public class SetAzureAuditCredentialRequest {
    * The Azure AD tenant ID for the Azure subscription.
    * @return tenantId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -95,12 +97,12 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTenantId(@javax.annotation.Nonnull String tenantId) {
+  public void setTenantId(@jakarta.annotation.Nonnull String tenantId) {
     this.tenantId = tenantId;
   }
 
-  public SetAzureAuditCredentialRequest appBased(@javax.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
-    
+
+  public SetAzureAuditCredentialRequest appBased(@jakarta.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
     this.appBased = appBased;
     return this;
   }
@@ -109,7 +111,7 @@ public class SetAzureAuditCredentialRequest {
    * Get appBased
    * @return appBased
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -120,11 +122,14 @@ public class SetAzureAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppBased(@javax.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
+  public void setAppBased(@jakarta.annotation.Nonnull SetAzureAuditCredentialRequestAppBased appBased) {
     this.appBased = appBased;
   }
 
 
+  /**
+   * Return true if this SetAzureAuditCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

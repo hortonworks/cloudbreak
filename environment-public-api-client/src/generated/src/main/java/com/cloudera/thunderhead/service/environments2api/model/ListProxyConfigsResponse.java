@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ProxyConfig;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a list proxy configs request.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListProxyConfigsResponse {
   public static final String JSON_PROPERTY_PROXY_CONFIGS = "proxyConfigs";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<ProxyConfig> proxyConfigs = new ArrayList<>();
 
-  public ListProxyConfigsResponse() {
+  public ListProxyConfigsResponse() { 
   }
 
-  public ListProxyConfigsResponse proxyConfigs(@javax.annotation.Nonnull List<ProxyConfig> proxyConfigs) {
-    
+  public ListProxyConfigsResponse proxyConfigs(@jakarta.annotation.Nonnull List<ProxyConfig> proxyConfigs) {
     this.proxyConfigs = proxyConfigs;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListProxyConfigsResponse {
    * The proxy configs.
    * @return proxyConfigs
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class ListProxyConfigsResponse {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProxyConfigs(@javax.annotation.Nonnull List<ProxyConfig> proxyConfigs) {
+  public void setProxyConfigs(@jakarta.annotation.Nonnull List<ProxyConfig> proxyConfigs) {
     this.proxyConfigs = proxyConfigs;
   }
 
 
+  /**
+   * Return true if this ListProxyConfigsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

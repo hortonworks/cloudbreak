@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureResourceEncryptionParameters;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Azure specific environment configuration information.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class EnvironmentAzureDetails {
   public static final String JSON_PROPERTY_RESOURCE_GROUP_NAME = "resourceGroupName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String resourceGroupName;
 
   public static final String JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS = "resourceEncryptionParameters";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
-  public EnvironmentAzureDetails() {
+  public EnvironmentAzureDetails() { 
   }
 
-  public EnvironmentAzureDetails resourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
-    
+  public EnvironmentAzureDetails resourceGroupName(@jakarta.annotation.Nullable String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
     return this;
   }
@@ -55,7 +57,7 @@ public class EnvironmentAzureDetails {
    * Name of an existing Azure resource group to be used for the environment. If it is not specified then new resource groups will be generated.
    * @return resourceGroupName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -66,12 +68,12 @@ public class EnvironmentAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceGroupName(@javax.annotation.Nullable String resourceGroupName) {
+  public void setResourceGroupName(@jakarta.annotation.Nullable String resourceGroupName) {
     this.resourceGroupName = resourceGroupName;
   }
 
-  public EnvironmentAzureDetails resourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
-    
+
+  public EnvironmentAzureDetails resourceEncryptionParameters(@jakarta.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     this.resourceEncryptionParameters = resourceEncryptionParameters;
     return this;
   }
@@ -80,7 +82,7 @@ public class EnvironmentAzureDetails {
    * Get resourceEncryptionParameters
    * @return resourceEncryptionParameters
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class EnvironmentAzureDetails {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
+  public void setResourceEncryptionParameters(@jakarta.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     this.resourceEncryptionParameters = resourceEncryptionParameters;
   }
 
 
+  /**
+   * Return true if this Environment_azureDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

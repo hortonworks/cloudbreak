@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Endpoint of an Service Discovery Service
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ServiceEndPoint {
   public static final String JSON_PROPERTY_HOST = "host";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String host;
 
   public static final String JSON_PROPERTY_PORT = "port";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer port;
 
   public static final String JSON_PROPERTY_URI = "uri";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String uri;
 
-  public ServiceEndPoint() {
+  public ServiceEndPoint() { 
   }
 
-  public ServiceEndPoint host(@javax.annotation.Nullable String host) {
-    
+  public ServiceEndPoint host(@jakarta.annotation.Nullable String host) {
     this.host = host;
     return this;
   }
@@ -58,7 +60,7 @@ public class ServiceEndPoint {
    * The endpoints hostname or ip address.
    * @return host
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_HOST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setHost(@javax.annotation.Nullable String host) {
+  public void setHost(@jakarta.annotation.Nullable String host) {
     this.host = host;
   }
 
-  public ServiceEndPoint port(@javax.annotation.Nullable Integer port) {
-    
+
+  public ServiceEndPoint port(@jakarta.annotation.Nullable Integer port) {
     this.port = port;
     return this;
   }
@@ -83,7 +85,7 @@ public class ServiceEndPoint {
    * The endpoints port.
    * @return port
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPort(@javax.annotation.Nullable Integer port) {
+  public void setPort(@jakarta.annotation.Nullable Integer port) {
     this.port = port;
   }
 
-  public ServiceEndPoint uri(@javax.annotation.Nullable String uri) {
-    
+
+  public ServiceEndPoint uri(@jakarta.annotation.Nullable String uri) {
     this.uri = uri;
     return this;
   }
@@ -108,7 +110,7 @@ public class ServiceEndPoint {
    * The connection uri for the endpoint.
    * @return uri
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class ServiceEndPoint {
 
   @JsonProperty(JSON_PROPERTY_URI)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUri(@javax.annotation.Nullable String uri) {
+  public void setUri(@jakarta.annotation.Nullable String uri) {
     this.uri = uri;
   }
 
 
+  /**
+   * Return true if this ServiceEndPoint object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

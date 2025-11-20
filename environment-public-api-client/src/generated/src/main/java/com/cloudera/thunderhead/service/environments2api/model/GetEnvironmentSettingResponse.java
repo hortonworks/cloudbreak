@@ -14,16 +14,19 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object containing configuration settings.
@@ -34,14 +37,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetEnvironmentSettingResponse {
   public static final String JSON_PROPERTY_SETTINGS = "settings";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> settings = new HashMap<>();
 
-  public GetEnvironmentSettingResponse() {
+  public GetEnvironmentSettingResponse() { 
   }
 
-  public GetEnvironmentSettingResponse settings(@javax.annotation.Nullable Map<String, String> settings) {
-    
+  public GetEnvironmentSettingResponse settings(@jakarta.annotation.Nullable Map<String, String> settings) {
     this.settings = settings;
     return this;
   }
@@ -58,7 +60,7 @@ public class GetEnvironmentSettingResponse {
    * Dictionary of settings found.
    * @return settings
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,11 +71,14 @@ public class GetEnvironmentSettingResponse {
 
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSettings(@javax.annotation.Nullable Map<String, String> settings) {
+  public void setSettings(@jakarta.annotation.Nullable Map<String, String> settings) {
     this.settings = settings;
   }
 
 
+  /**
+   * Return true if this GetEnvironmentSettingResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

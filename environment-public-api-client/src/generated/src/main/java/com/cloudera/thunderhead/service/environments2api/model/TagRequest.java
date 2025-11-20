@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A label that can be attached to some resources.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class TagRequest {
   public static final String JSON_PROPERTY_KEY = "key";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String key;
 
   public static final String JSON_PROPERTY_VALUE = "value";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String value;
 
-  public TagRequest() {
+  public TagRequest() { 
   }
 
-  public TagRequest key(@javax.annotation.Nonnull String key) {
-    
+  public TagRequest key(@jakarta.annotation.Nonnull String key) {
     this.key = key;
     return this;
   }
@@ -53,7 +55,7 @@ public class TagRequest {
    * The tag&#39;s name.
    * @return key
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class TagRequest {
 
   @JsonProperty(JSON_PROPERTY_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKey(@javax.annotation.Nonnull String key) {
+  public void setKey(@jakarta.annotation.Nonnull String key) {
     this.key = key;
   }
 
-  public TagRequest value(@javax.annotation.Nonnull String value) {
-    
+
+  public TagRequest value(@jakarta.annotation.Nonnull String value) {
     this.value = value;
     return this;
   }
@@ -78,7 +80,7 @@ public class TagRequest {
    * The associated value of the tag.
    * @return value
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class TagRequest {
 
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setValue(@javax.annotation.Nonnull String value) {
+  public void setValue(@jakarta.annotation.Nonnull String value) {
     this.value = value;
   }
 
 
+  /**
+   * Return true if this TagRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object to check connectivity to private cloud environment.
@@ -39,15 +41,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CheckEnvironmentConnectivityRequest {
   public static final String JSON_PROPERTY_ADDRESS = "address";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String address;
 
   public static final String JSON_PROPERTY_USER = "user";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String user;
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN = "authenticationToken";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String authenticationToken;
 
   /**
@@ -84,18 +86,17 @@ public class CheckEnvironmentConnectivityRequest {
   }
 
   public static final String JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE = "authenticationTokenType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AuthenticationTokenTypeEnum authenticationTokenType;
 
   public static final String JSON_PROPERTY_CLUSTER_NAMES = "clusterNames";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> clusterNames = new ArrayList<>();
 
-  public CheckEnvironmentConnectivityRequest() {
+  public CheckEnvironmentConnectivityRequest() { 
   }
 
-  public CheckEnvironmentConnectivityRequest address(@javax.annotation.Nonnull String address) {
-    
+  public CheckEnvironmentConnectivityRequest address(@jakarta.annotation.Nonnull String address) {
     this.address = address;
     return this;
   }
@@ -104,7 +105,7 @@ public class CheckEnvironmentConnectivityRequest {
    * The address of the Cloudera Manager managing the Datalake cluster.
    * @return address
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -115,12 +116,12 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDRESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAddress(@javax.annotation.Nonnull String address) {
+  public void setAddress(@jakarta.annotation.Nonnull String address) {
     this.address = address;
   }
 
-  public CheckEnvironmentConnectivityRequest user(@javax.annotation.Nonnull String user) {
-    
+
+  public CheckEnvironmentConnectivityRequest user(@jakarta.annotation.Nonnull String user) {
     this.user = user;
     return this;
   }
@@ -129,7 +130,7 @@ public class CheckEnvironmentConnectivityRequest {
    * User name for accessing the Cloudera Manager.
    * @return user
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -140,12 +141,12 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_USER)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setUser(@javax.annotation.Nonnull String user) {
+  public void setUser(@jakarta.annotation.Nonnull String user) {
     this.user = user;
   }
 
-  public CheckEnvironmentConnectivityRequest authenticationToken(@javax.annotation.Nonnull String authenticationToken) {
-    
+
+  public CheckEnvironmentConnectivityRequest authenticationToken(@jakarta.annotation.Nonnull String authenticationToken) {
     this.authenticationToken = authenticationToken;
     return this;
   }
@@ -154,7 +155,7 @@ public class CheckEnvironmentConnectivityRequest {
    * A string (text or json) used to authenticate to the Cloudera Manager.
    * @return authenticationToken
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -165,12 +166,12 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthenticationToken(@javax.annotation.Nonnull String authenticationToken) {
+  public void setAuthenticationToken(@jakarta.annotation.Nonnull String authenticationToken) {
     this.authenticationToken = authenticationToken;
   }
 
-  public CheckEnvironmentConnectivityRequest authenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
-    
+
+  public CheckEnvironmentConnectivityRequest authenticationTokenType(@jakarta.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     this.authenticationTokenType = authenticationTokenType;
     return this;
   }
@@ -179,7 +180,7 @@ public class CheckEnvironmentConnectivityRequest {
    * How to interpret the authenticationToken field. Defaults to CLEARTEXT_PASSWORD.
    * @return authenticationTokenType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -190,12 +191,12 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TOKEN_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAuthenticationTokenType(@javax.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
+  public void setAuthenticationTokenType(@jakarta.annotation.Nullable AuthenticationTokenTypeEnum authenticationTokenType) {
     this.authenticationTokenType = authenticationTokenType;
   }
 
-  public CheckEnvironmentConnectivityRequest clusterNames(@javax.annotation.Nullable List<String> clusterNames) {
-    
+
+  public CheckEnvironmentConnectivityRequest clusterNames(@jakarta.annotation.Nullable List<String> clusterNames) {
     this.clusterNames = clusterNames;
     return this;
   }
@@ -212,7 +213,7 @@ public class CheckEnvironmentConnectivityRequest {
    * The name of the cluster(s) to use as a Datalake for the environment.
    * @return clusterNames
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -223,11 +224,14 @@ public class CheckEnvironmentConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_NAMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterNames(@javax.annotation.Nullable List<String> clusterNames) {
+  public void setClusterNames(@jakarta.annotation.Nullable List<String> clusterNames) {
     this.clusterNames = clusterNames;
   }
 
 
+  /**
+   * Return true if this CheckEnvironmentConnectivityRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

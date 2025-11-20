@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for modifying SELinux mode on FreeIPA.
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ModifySelinuxRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   /**
@@ -72,14 +75,13 @@ public class ModifySelinuxRequest {
   }
 
   public static final String JSON_PROPERTY_SELINUX = "selinux";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private SelinuxEnum selinux;
 
-  public ModifySelinuxRequest() {
+  public ModifySelinuxRequest() { 
   }
 
-  public ModifySelinuxRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public ModifySelinuxRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -88,7 +90,7 @@ public class ModifySelinuxRequest {
    * The Environment CRN.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -99,12 +101,12 @@ public class ModifySelinuxRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public ModifySelinuxRequest selinux(@javax.annotation.Nonnull SelinuxEnum selinux) {
-    
+
+  public ModifySelinuxRequest selinux(@jakarta.annotation.Nonnull SelinuxEnum selinux) {
     this.selinux = selinux;
     return this;
   }
@@ -113,7 +115,7 @@ public class ModifySelinuxRequest {
    * SELinux Mode.
    * @return selinux
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SELINUX)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -124,11 +126,14 @@ public class ModifySelinuxRequest {
 
   @JsonProperty(JSON_PROPERTY_SELINUX)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSelinux(@javax.annotation.Nonnull SelinuxEnum selinux) {
+  public void setSelinux(@jakarta.annotation.Nonnull SelinuxEnum selinux) {
     this.selinux = selinux;
   }
 
 
+  /**
+   * Return true if this ModifySelinuxRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

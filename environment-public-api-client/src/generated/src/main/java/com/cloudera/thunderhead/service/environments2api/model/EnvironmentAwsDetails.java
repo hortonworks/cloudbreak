@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * AWS-specific environment configuration information.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class EnvironmentAwsDetails {
   public static final String JSON_PROPERTY_S3_GUARD_TABLE_NAME = "s3GuardTableName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String s3GuardTableName;
 
-  public EnvironmentAwsDetails() {
+  public EnvironmentAwsDetails() { 
   }
 
-  public EnvironmentAwsDetails s3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
-    
+  public EnvironmentAwsDetails s3GuardTableName(@jakarta.annotation.Nullable String s3GuardTableName) {
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
@@ -49,7 +51,7 @@ public class EnvironmentAwsDetails {
    * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -60,11 +62,14 @@ public class EnvironmentAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setS3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
+  public void setS3GuardTableName(@jakarta.annotation.Nullable String s3GuardTableName) {
     this.s3GuardTableName = s3GuardTableName;
   }
 
 
+  /**
+   * Return true if this Environment_awsDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

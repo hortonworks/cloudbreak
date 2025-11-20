@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AwsCredentialPrerequisitesResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The credential prerequisites for GovCloud for the enabled providers.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetGovCloudCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_ACCOUNT_ID = "accountId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String accountId;
 
   public static final String JSON_PROPERTY_AWS = "aws";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AwsCredentialPrerequisitesResponse aws;
 
-  public GetGovCloudCredentialPrerequisitesResponse() {
+  public GetGovCloudCredentialPrerequisitesResponse() { 
   }
 
-  public GetGovCloudCredentialPrerequisitesResponse accountId(@javax.annotation.Nullable String accountId) {
-    
+  public GetGovCloudCredentialPrerequisitesResponse accountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
     return this;
   }
@@ -54,7 +56,7 @@ public class GetGovCloudCredentialPrerequisitesResponse {
    * The provider specific identifier of the account/subscription/project.
    * @return accountId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -65,12 +67,12 @@ public class GetGovCloudCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountId(@javax.annotation.Nullable String accountId) {
+  public void setAccountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
   }
 
-  public GetGovCloudCredentialPrerequisitesResponse aws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
-    
+
+  public GetGovCloudCredentialPrerequisitesResponse aws(@jakarta.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
     return this;
   }
@@ -79,7 +81,7 @@ public class GetGovCloudCredentialPrerequisitesResponse {
    * Get aws
    * @return aws
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -90,11 +92,14 @@ public class GetGovCloudCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
+  public void setAws(@jakarta.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
   }
 
 
+  /**
+   * Return true if this GetGovCloudCredentialPrerequisitesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

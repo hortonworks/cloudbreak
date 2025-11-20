@@ -14,16 +14,19 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object for updating the tags of the given environment.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateTagsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Map<String, String> tags = new HashMap<>();
 
-  public UpdateTagsRequest() {
+  public UpdateTagsRequest() { 
   }
 
-  public UpdateTagsRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateTagsRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -55,7 +57,7 @@ public class UpdateTagsRequest {
    * The name or the CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,17 +68,20 @@ public class UpdateTagsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateTagsRequest tags(@javax.annotation.Nonnull Map<String, String> tags) {
-    
+
+  public UpdateTagsRequest tags(@jakarta.annotation.Nonnull Map<String, String> tags) {
     this.tags = tags;
     return this;
   }
 
   public UpdateTagsRequest putTagsItem(String key, String tagsItem) {
+    if (this.tags == null) {
+      this.tags = new HashMap<>();
+    }
     this.tags.put(key, tagsItem);
     return this;
   }
@@ -85,7 +90,7 @@ public class UpdateTagsRequest {
    * Map of tag names to values for the environment.
    * @return tags
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -96,11 +101,14 @@ public class UpdateTagsRequest {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTags(@javax.annotation.Nonnull Map<String, String> tags) {
+  public void setTags(@jakarta.annotation.Nonnull Map<String, String> tags) {
     this.tags = tags;
   }
 
 
+  /**
+   * Return true if this UpdateTagsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

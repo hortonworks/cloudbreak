@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Information about FreeIPA image.
@@ -37,34 +40,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ImageInfoResponse {
   public static final String JSON_PROPERTY_CATALOG = "catalog";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String catalog;
 
   public static final String JSON_PROPERTY_ID = "id";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_OS = "os";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String os;
 
   public static final String JSON_PROPERTY_IMAGE_NAME = "imageName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String imageName;
 
   public static final String JSON_PROPERTY_DATE = "date";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String date;
 
   public static final String JSON_PROPERTY_CATALOG_NAME = "catalogName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String catalogName;
 
-  public ImageInfoResponse() {
+  public ImageInfoResponse() { 
   }
 
-  public ImageInfoResponse catalog(@javax.annotation.Nullable String catalog) {
-    
+  public ImageInfoResponse catalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
     return this;
   }
@@ -73,7 +75,7 @@ public class ImageInfoResponse {
    * Image catalog URL.
    * @return catalog
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -84,12 +86,12 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalog(@javax.annotation.Nullable String catalog) {
+  public void setCatalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
   }
 
-  public ImageInfoResponse id(@javax.annotation.Nullable String id) {
-    
+
+  public ImageInfoResponse id(@jakarta.annotation.Nullable String id) {
     this.id = id;
     return this;
   }
@@ -98,7 +100,7 @@ public class ImageInfoResponse {
    * Virtual machine image ID from ImageCatalog, machines of the cluster will be started from this image.
    * @return id
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -109,12 +111,12 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(@javax.annotation.Nullable String id) {
+  public void setId(@jakarta.annotation.Nullable String id) {
     this.id = id;
   }
 
-  public ImageInfoResponse os(@javax.annotation.Nullable String os) {
-    
+
+  public ImageInfoResponse os(@jakarta.annotation.Nullable String os) {
     this.os = os;
     return this;
   }
@@ -123,7 +125,7 @@ public class ImageInfoResponse {
    * OS type of the image, this property is only considered when no specific image ID is provided.
    * @return os
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -134,12 +136,12 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(@javax.annotation.Nullable String os) {
+  public void setOs(@jakarta.annotation.Nullable String os) {
     this.os = os;
   }
 
-  public ImageInfoResponse imageName(@javax.annotation.Nullable String imageName) {
-    
+
+  public ImageInfoResponse imageName(@jakarta.annotation.Nullable String imageName) {
     this.imageName = imageName;
     return this;
   }
@@ -148,7 +150,7 @@ public class ImageInfoResponse {
    * Image name
    * @return imageName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -159,12 +161,12 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImageName(@javax.annotation.Nullable String imageName) {
+  public void setImageName(@jakarta.annotation.Nullable String imageName) {
     this.imageName = imageName;
   }
 
-  public ImageInfoResponse date(@javax.annotation.Nullable String date) {
-    
+
+  public ImageInfoResponse date(@jakarta.annotation.Nullable String date) {
     this.date = date;
     return this;
   }
@@ -173,7 +175,7 @@ public class ImageInfoResponse {
    * Creation date of the image from catalog.
    * @return date
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -184,12 +186,12 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDate(@javax.annotation.Nullable String date) {
+  public void setDate(@jakarta.annotation.Nullable String date) {
     this.date = date;
   }
 
-  public ImageInfoResponse catalogName(@javax.annotation.Nullable String catalogName) {
-    
+
+  public ImageInfoResponse catalogName(@jakarta.annotation.Nullable String catalogName) {
     this.catalogName = catalogName;
     return this;
   }
@@ -198,7 +200,7 @@ public class ImageInfoResponse {
    * Image catalog name.
    * @return catalogName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -209,11 +211,14 @@ public class ImageInfoResponse {
 
   @JsonProperty(JSON_PROPERTY_CATALOG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalogName(@javax.annotation.Nullable String catalogName) {
+  public void setCatalogName(@jakarta.annotation.Nullable String catalogName) {
     this.catalogName = catalogName;
   }
 
 
+  /**
+   * Return true if this ImageInfoResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

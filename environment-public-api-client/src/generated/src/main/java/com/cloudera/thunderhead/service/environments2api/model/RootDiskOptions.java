@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ModifyDisks;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Root volume properties to modify.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class RootDiskOptions {
   public static final String JSON_PROPERTY_MODIFY_DISKS = "modifyDisks";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ModifyDisks modifyDisks;
 
-  public RootDiskOptions() {
+  public RootDiskOptions() { 
   }
 
-  public RootDiskOptions modifyDisks(@javax.annotation.Nullable ModifyDisks modifyDisks) {
-    
+  public RootDiskOptions modifyDisks(@jakarta.annotation.Nullable ModifyDisks modifyDisks) {
     this.modifyDisks = modifyDisks;
     return this;
   }
@@ -49,7 +51,7 @@ public class RootDiskOptions {
    * Get modifyDisks
    * @return modifyDisks
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -60,11 +62,14 @@ public class RootDiskOptions {
 
   @JsonProperty(JSON_PROPERTY_MODIFY_DISKS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setModifyDisks(@javax.annotation.Nullable ModifyDisks modifyDisks) {
+  public void setModifyDisks(@jakarta.annotation.Nullable ModifyDisks modifyDisks) {
     this.modifyDisks = modifyDisks;
   }
 
 
+  /**
+   * Return true if this RootDiskOptions object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

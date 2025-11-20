@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional SSH key authentication configuration for accessing cluster node.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AuthenticationRequest {
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String publicKey;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY_ID = "publicKeyId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String publicKeyId;
 
-  public AuthenticationRequest() {
+  public AuthenticationRequest() { 
   }
 
-  public AuthenticationRequest publicKey(@javax.annotation.Nullable String publicKey) {
-    
+  public AuthenticationRequest publicKey(@jakarta.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
     return this;
   }
@@ -53,7 +55,7 @@ public class AuthenticationRequest {
    * Public SSH key string. Mutually exclusive with publicKeyId.
    * @return publicKey
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class AuthenticationRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKey(@javax.annotation.Nullable String publicKey) {
+  public void setPublicKey(@jakarta.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
   }
 
-  public AuthenticationRequest publicKeyId(@javax.annotation.Nullable String publicKeyId) {
-    
+
+  public AuthenticationRequest publicKeyId(@jakarta.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
     return this;
   }
@@ -78,7 +80,7 @@ public class AuthenticationRequest {
    * Public SSH key ID already registered in the cloud provider. Mutually exclusive with publicKey.
    * @return publicKeyId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class AuthenticationRequest {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKeyId(@javax.annotation.Nullable String publicKeyId) {
+  public void setPublicKeyId(@jakarta.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
   }
 
 
+  /**
+   * Return true if this AuthenticationRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

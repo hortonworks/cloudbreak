@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Azure environment cloud storage validation.
@@ -37,34 +40,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ValidateAzureCloudStorageRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_CRN = "credentialCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialCrn;
 
   public static final String JSON_PROPERTY_STORAGE_LOCATION = "storageLocation";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String storageLocation;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String managedIdentity;
 
   public static final String JSON_PROPERTY_ACCOUNT_KEY = "accountKey";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String accountKey;
 
   public static final String JSON_PROPERTY_ACCOUNT_NAME = "accountName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String accountName;
 
   public static final String JSON_PROPERTY_SECURE = "secure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean secure;
 
-  public ValidateAzureCloudStorageRequest() {
+  public ValidateAzureCloudStorageRequest() { 
   }
 
-  public ValidateAzureCloudStorageRequest credentialCrn(@javax.annotation.Nonnull String credentialCrn) {
-    
+  public ValidateAzureCloudStorageRequest credentialCrn(@jakarta.annotation.Nonnull String credentialCrn) {
     this.credentialCrn = credentialCrn;
     return this;
   }
@@ -73,7 +75,7 @@ public class ValidateAzureCloudStorageRequest {
    * The CRN of the credential.
    * @return credentialCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -84,12 +86,12 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialCrn(@javax.annotation.Nonnull String credentialCrn) {
+  public void setCredentialCrn(@jakarta.annotation.Nonnull String credentialCrn) {
     this.credentialCrn = credentialCrn;
   }
 
-  public ValidateAzureCloudStorageRequest storageLocation(@javax.annotation.Nonnull String storageLocation) {
-    
+
+  public ValidateAzureCloudStorageRequest storageLocation(@jakarta.annotation.Nonnull String storageLocation) {
     this.storageLocation = storageLocation;
     return this;
   }
@@ -98,7 +100,7 @@ public class ValidateAzureCloudStorageRequest {
    * Azure storage location for logging.
    * @return storageLocation
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -109,12 +111,12 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocation(@javax.annotation.Nonnull String storageLocation) {
+  public void setStorageLocation(@jakarta.annotation.Nonnull String storageLocation) {
     this.storageLocation = storageLocation;
   }
 
-  public ValidateAzureCloudStorageRequest managedIdentity(@javax.annotation.Nullable String managedIdentity) {
-    
+
+  public ValidateAzureCloudStorageRequest managedIdentity(@jakarta.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
     return this;
   }
@@ -123,7 +125,7 @@ public class ValidateAzureCloudStorageRequest {
    * Azure managed identity.
    * @return managedIdentity
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -134,12 +136,12 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setManagedIdentity(@javax.annotation.Nullable String managedIdentity) {
+  public void setManagedIdentity(@jakarta.annotation.Nullable String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
 
-  public ValidateAzureCloudStorageRequest accountKey(@javax.annotation.Nullable String accountKey) {
-    
+
+  public ValidateAzureCloudStorageRequest accountKey(@jakarta.annotation.Nullable String accountKey) {
     this.accountKey = accountKey;
     return this;
   }
@@ -148,7 +150,7 @@ public class ValidateAzureCloudStorageRequest {
    * Azure account key.
    * @return accountKey
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -159,12 +161,12 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountKey(@javax.annotation.Nullable String accountKey) {
+  public void setAccountKey(@jakarta.annotation.Nullable String accountKey) {
     this.accountKey = accountKey;
   }
 
-  public ValidateAzureCloudStorageRequest accountName(@javax.annotation.Nullable String accountName) {
-    
+
+  public ValidateAzureCloudStorageRequest accountName(@jakarta.annotation.Nullable String accountName) {
     this.accountName = accountName;
     return this;
   }
@@ -173,7 +175,7 @@ public class ValidateAzureCloudStorageRequest {
    * Azure account name.
    * @return accountName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -184,12 +186,12 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountName(@javax.annotation.Nullable String accountName) {
+  public void setAccountName(@jakarta.annotation.Nullable String accountName) {
     this.accountName = accountName;
   }
 
-  public ValidateAzureCloudStorageRequest secure(@javax.annotation.Nullable Boolean secure) {
-    
+
+  public ValidateAzureCloudStorageRequest secure(@jakarta.annotation.Nullable Boolean secure) {
     this.secure = secure;
     return this;
   }
@@ -198,7 +200,7 @@ public class ValidateAzureCloudStorageRequest {
    * Azure secure flag.
    * @return secure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -209,11 +211,14 @@ public class ValidateAzureCloudStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecure(@javax.annotation.Nullable Boolean secure) {
+  public void setSecure(@jakarta.annotation.Nullable Boolean secure) {
     this.secure = secure;
   }
 
 
+  /**
+   * Return true if this ValidateAzureCloudStorageRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

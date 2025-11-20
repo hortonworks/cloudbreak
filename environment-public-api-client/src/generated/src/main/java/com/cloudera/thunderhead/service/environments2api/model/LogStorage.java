@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.LogStorageAwsDetails;
 import com.cloudera.thunderhead.service.environments2api.model.LogStorageAzureDetails;
 import com.cloudera.thunderhead.service.environments2api.model.LogStorageGcpDetails;
@@ -23,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Storage configuration for cluster and audit logs.
@@ -38,26 +41,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class LogStorage {
   public static final String JSON_PROPERTY_ENABLED = "enabled";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Boolean enabled;
 
   public static final String JSON_PROPERTY_AWS_DETAILS = "awsDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private LogStorageAwsDetails awsDetails;
 
   public static final String JSON_PROPERTY_AZURE_DETAILS = "azureDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private LogStorageAzureDetails azureDetails;
 
   public static final String JSON_PROPERTY_GCP_DETAILS = "gcpDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private LogStorageGcpDetails gcpDetails;
 
-  public LogStorage() {
+  public LogStorage() { 
   }
 
-  public LogStorage enabled(@javax.annotation.Nonnull Boolean enabled) {
-    
+  public LogStorage enabled(@jakarta.annotation.Nonnull Boolean enabled) {
     this.enabled = enabled;
     return this;
   }
@@ -66,7 +68,7 @@ public class LogStorage {
    * Whether external log storage is enabled.
    * @return enabled
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -77,12 +79,12 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnabled(@javax.annotation.Nonnull Boolean enabled) {
+  public void setEnabled(@jakarta.annotation.Nonnull Boolean enabled) {
     this.enabled = enabled;
   }
 
-  public LogStorage awsDetails(@javax.annotation.Nullable LogStorageAwsDetails awsDetails) {
-    
+
+  public LogStorage awsDetails(@jakarta.annotation.Nullable LogStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
     return this;
   }
@@ -91,7 +93,7 @@ public class LogStorage {
    * Get awsDetails
    * @return awsDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -102,12 +104,12 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDetails(@javax.annotation.Nullable LogStorageAwsDetails awsDetails) {
+  public void setAwsDetails(@jakarta.annotation.Nullable LogStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
   }
 
-  public LogStorage azureDetails(@javax.annotation.Nullable LogStorageAzureDetails azureDetails) {
-    
+
+  public LogStorage azureDetails(@jakarta.annotation.Nullable LogStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
     return this;
   }
@@ -116,7 +118,7 @@ public class LogStorage {
    * Get azureDetails
    * @return azureDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -127,12 +129,12 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDetails(@javax.annotation.Nullable LogStorageAzureDetails azureDetails) {
+  public void setAzureDetails(@jakarta.annotation.Nullable LogStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
   }
 
-  public LogStorage gcpDetails(@javax.annotation.Nullable LogStorageGcpDetails gcpDetails) {
-    
+
+  public LogStorage gcpDetails(@jakarta.annotation.Nullable LogStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
     return this;
   }
@@ -141,7 +143,7 @@ public class LogStorage {
    * Get gcpDetails
    * @return gcpDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -152,11 +154,14 @@ public class LogStorage {
 
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpDetails(@javax.annotation.Nullable LogStorageGcpDetails gcpDetails) {
+  public void setGcpDetails(@jakarta.annotation.Nullable LogStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
   }
 
 
+  /**
+   * Return true if this LogStorage object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

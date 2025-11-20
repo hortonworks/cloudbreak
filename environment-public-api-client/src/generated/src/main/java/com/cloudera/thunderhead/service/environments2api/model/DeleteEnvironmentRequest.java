@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a delete environment request.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class DeleteEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CASCADING = "cascading";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean cascading;
 
   public static final String JSON_PROPERTY_FORCED = "forced";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean forced;
 
-  public DeleteEnvironmentRequest() {
+  public DeleteEnvironmentRequest() { 
   }
 
-  public DeleteEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public DeleteEnvironmentRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -58,7 +60,7 @@ public class DeleteEnvironmentRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public DeleteEnvironmentRequest cascading(@javax.annotation.Nullable Boolean cascading) {
-    
+
+  public DeleteEnvironmentRequest cascading(@jakarta.annotation.Nullable Boolean cascading) {
     this.cascading = cascading;
     return this;
   }
@@ -83,7 +85,7 @@ public class DeleteEnvironmentRequest {
    * Delete all connected resources too.
    * @return cascading
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CASCADING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CASCADING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCascading(@javax.annotation.Nullable Boolean cascading) {
+  public void setCascading(@jakarta.annotation.Nullable Boolean cascading) {
     this.cascading = cascading;
   }
 
-  public DeleteEnvironmentRequest forced(@javax.annotation.Nullable Boolean forced) {
-    
+
+  public DeleteEnvironmentRequest forced(@jakarta.annotation.Nullable Boolean forced) {
     this.forced = forced;
     return this;
   }
@@ -108,7 +110,7 @@ public class DeleteEnvironmentRequest {
    * Force delete action removes CDP resources and may leave cloud provider resources running even if the deletion did not succeed.
    * @return forced
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORCED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class DeleteEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FORCED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setForced(@javax.annotation.Nullable Boolean forced) {
+  public void setForced(@jakarta.annotation.Nullable Boolean forced) {
     this.forced = forced;
   }
 
 
+  /**
+   * Return true if this DeleteEnvironmentRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.RepairOperationDetails;
 import com.cloudera.thunderhead.service.environments2api.model.RepairStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,7 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for an FreeIPA repair request.
@@ -44,38 +46,37 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class RepairFreeipaResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationId;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private RepairStatus status;
 
   public static final String JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS = "successfulOperationDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<RepairOperationDetails> successfulOperationDetails = new ArrayList<>();
 
   public static final String JSON_PROPERTY_FAILURE_OPERATION_DETAILS = "failureOperationDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<RepairOperationDetails> failureOperationDetails = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ERROR = "error";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String error;
 
   public static final String JSON_PROPERTY_START_DATE = "startDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime startDate;
 
   public static final String JSON_PROPERTY_END_DATE = "endDate";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OffsetDateTime endDate;
 
-  public RepairFreeipaResponse() {
+  public RepairFreeipaResponse() { 
   }
 
-  public RepairFreeipaResponse operationId(@javax.annotation.Nullable String operationId) {
-    
+  public RepairFreeipaResponse operationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -84,7 +85,7 @@ public class RepairFreeipaResponse {
    * Operation ID of the request for this operation. This ID can be used for geting status on the operation.
    * @return operationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -95,12 +96,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(@javax.annotation.Nullable String operationId) {
+  public void setOperationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
-  public RepairFreeipaResponse status(@javax.annotation.Nullable RepairStatus status) {
-    
+
+  public RepairFreeipaResponse status(@jakarta.annotation.Nullable RepairStatus status) {
     this.status = status;
     return this;
   }
@@ -109,7 +110,7 @@ public class RepairFreeipaResponse {
    * Get status
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -120,12 +121,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable RepairStatus status) {
+  public void setStatus(@jakarta.annotation.Nullable RepairStatus status) {
     this.status = status;
   }
 
-  public RepairFreeipaResponse successfulOperationDetails(@javax.annotation.Nullable List<RepairOperationDetails> successfulOperationDetails) {
-    
+
+  public RepairFreeipaResponse successfulOperationDetails(@jakarta.annotation.Nullable List<RepairOperationDetails> successfulOperationDetails) {
     this.successfulOperationDetails = successfulOperationDetails;
     return this;
   }
@@ -142,7 +143,7 @@ public class RepairFreeipaResponse {
    * List of operation details for all successes. If the repair is only partially successful both successful and failure operation details will be populated.
    * @return successfulOperationDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -153,12 +154,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_SUCCESSFUL_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSuccessfulOperationDetails(@javax.annotation.Nullable List<RepairOperationDetails> successfulOperationDetails) {
+  public void setSuccessfulOperationDetails(@jakarta.annotation.Nullable List<RepairOperationDetails> successfulOperationDetails) {
     this.successfulOperationDetails = successfulOperationDetails;
   }
 
-  public RepairFreeipaResponse failureOperationDetails(@javax.annotation.Nullable List<RepairOperationDetails> failureOperationDetails) {
-    
+
+  public RepairFreeipaResponse failureOperationDetails(@jakarta.annotation.Nullable List<RepairOperationDetails> failureOperationDetails) {
     this.failureOperationDetails = failureOperationDetails;
     return this;
   }
@@ -175,7 +176,7 @@ public class RepairFreeipaResponse {
    * List of operation details for failures. If the repair is only partially successful both successful and failure operation details will be populated.
    * @return failureOperationDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FAILURE_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -186,12 +187,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_FAILURE_OPERATION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFailureOperationDetails(@javax.annotation.Nullable List<RepairOperationDetails> failureOperationDetails) {
+  public void setFailureOperationDetails(@jakarta.annotation.Nullable List<RepairOperationDetails> failureOperationDetails) {
     this.failureOperationDetails = failureOperationDetails;
   }
 
-  public RepairFreeipaResponse error(@javax.annotation.Nullable String error) {
-    
+
+  public RepairFreeipaResponse error(@jakarta.annotation.Nullable String error) {
     this.error = error;
     return this;
   }
@@ -200,7 +201,7 @@ public class RepairFreeipaResponse {
    * If there is any error associated. The error will be populated on any error and it may be populated when the operation failure details are empty. The error will typically contain the high level information such as the assocated repair failure phase.
    * @return error
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -211,12 +212,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(@javax.annotation.Nullable String error) {
+  public void setError(@jakarta.annotation.Nullable String error) {
     this.error = error;
   }
 
-  public RepairFreeipaResponse startDate(@javax.annotation.Nullable OffsetDateTime startDate) {
-    
+
+  public RepairFreeipaResponse startDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
     return this;
   }
@@ -225,7 +226,7 @@ public class RepairFreeipaResponse {
    * Date when the operation started.
    * @return startDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -236,12 +237,12 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_START_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStartDate(@javax.annotation.Nullable OffsetDateTime startDate) {
+  public void setStartDate(@jakarta.annotation.Nullable OffsetDateTime startDate) {
     this.startDate = startDate;
   }
 
-  public RepairFreeipaResponse endDate(@javax.annotation.Nullable OffsetDateTime endDate) {
-    
+
+  public RepairFreeipaResponse endDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
     return this;
   }
@@ -250,7 +251,7 @@ public class RepairFreeipaResponse {
    * Date when the operation ended. Omitted if operation has not ended.
    * @return endDate
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -261,11 +262,14 @@ public class RepairFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_END_DATE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndDate(@javax.annotation.Nullable OffsetDateTime endDate) {
+  public void setEndDate(@jakarta.annotation.Nullable OffsetDateTime endDate) {
     this.endDate = endDate;
   }
 
 
+  /**
+   * Return true if this RepairFreeipaResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

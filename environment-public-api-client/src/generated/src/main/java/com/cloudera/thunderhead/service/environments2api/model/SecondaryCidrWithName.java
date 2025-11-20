@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A single entry that contains secondary cidr and name.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SecondaryCidrWithName {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String name;
 
   public static final String JSON_PROPERTY_CIDR = "cidr";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String cidr;
 
-  public SecondaryCidrWithName() {
+  public SecondaryCidrWithName() { 
   }
 
-  public SecondaryCidrWithName name(@javax.annotation.Nonnull String name) {
-    
+  public SecondaryCidrWithName name(@jakarta.annotation.Nonnull String name) {
     this.name = name;
     return this;
   }
@@ -53,7 +55,7 @@ public class SecondaryCidrWithName {
    * The name of the secondary range.
    * @return name
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class SecondaryCidrWithName {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setName(@javax.annotation.Nonnull String name) {
+  public void setName(@jakarta.annotation.Nonnull String name) {
     this.name = name;
   }
 
-  public SecondaryCidrWithName cidr(@javax.annotation.Nonnull String cidr) {
-    
+
+  public SecondaryCidrWithName cidr(@jakarta.annotation.Nonnull String cidr) {
     this.cidr = cidr;
     return this;
   }
@@ -78,7 +80,7 @@ public class SecondaryCidrWithName {
    * The cidr of the secondary range.
    * @return cidr
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class SecondaryCidrWithName {
 
   @JsonProperty(JSON_PROPERTY_CIDR)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCidr(@javax.annotation.Nonnull String cidr) {
+  public void setCidr(@jakarta.annotation.Nonnull String cidr) {
     this.cidr = cidr;
   }
 
 
+  /**
+   * Return true if this SecondaryCidrWithName object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,8 +14,10 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CredentialGranularPolicyResponse;
+import com.cloudera.thunderhead.service.environments2api.model.GranularPolicyResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for getting Azure credential prerequisites.
@@ -33,27 +36,31 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   AzureCredentialPrerequisitesResponse.JSON_PROPERTY_APP_CREATION_COMMAND,
   AzureCredentialPrerequisitesResponse.JSON_PROPERTY_ROLE_DEFINITION_JSON,
-  AzureCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES
+  AzureCredentialPrerequisitesResponse.JSON_PROPERTY_POLICIES,
+  AzureCredentialPrerequisitesResponse.JSON_PROPERTY_GRANULAR_POLICIES
 })
 
 public class AzureCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_APP_CREATION_COMMAND = "appCreationCommand";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String appCreationCommand;
 
   public static final String JSON_PROPERTY_ROLE_DEFINITION_JSON = "roleDefinitionJson";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String roleDefinitionJson;
 
   public static final String JSON_PROPERTY_POLICIES = "policies";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<CredentialGranularPolicyResponse> policies = new ArrayList<>();
 
-  public AzureCredentialPrerequisitesResponse() {
+  public static final String JSON_PROPERTY_GRANULAR_POLICIES = "granularPolicies";
+  @jakarta.annotation.Nullable
+  private List<GranularPolicyResponse> granularPolicies = new ArrayList<>();
+
+  public AzureCredentialPrerequisitesResponse() { 
   }
 
-  public AzureCredentialPrerequisitesResponse appCreationCommand(@javax.annotation.Nonnull String appCreationCommand) {
-    
+  public AzureCredentialPrerequisitesResponse appCreationCommand(@jakarta.annotation.Nonnull String appCreationCommand) {
     this.appCreationCommand = appCreationCommand;
     return this;
   }
@@ -62,7 +69,7 @@ public class AzureCredentialPrerequisitesResponse {
    * Azure CLI command to create Azure AD Application encoded in base64.
    * @return appCreationCommand
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -73,12 +80,12 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_APP_CREATION_COMMAND)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppCreationCommand(@javax.annotation.Nonnull String appCreationCommand) {
+  public void setAppCreationCommand(@jakarta.annotation.Nonnull String appCreationCommand) {
     this.appCreationCommand = appCreationCommand;
   }
 
-  public AzureCredentialPrerequisitesResponse roleDefinitionJson(@javax.annotation.Nonnull String roleDefinitionJson) {
-    
+
+  public AzureCredentialPrerequisitesResponse roleDefinitionJson(@jakarta.annotation.Nonnull String roleDefinitionJson) {
     this.roleDefinitionJson = roleDefinitionJson;
     return this;
   }
@@ -87,7 +94,7 @@ public class AzureCredentialPrerequisitesResponse {
    * The related role definition json encoded in base64
    * @return roleDefinitionJson
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_DEFINITION_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -98,12 +105,12 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ROLE_DEFINITION_JSON)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleDefinitionJson(@javax.annotation.Nonnull String roleDefinitionJson) {
+  public void setRoleDefinitionJson(@jakarta.annotation.Nonnull String roleDefinitionJson) {
     this.roleDefinitionJson = roleDefinitionJson;
   }
 
-  public AzureCredentialPrerequisitesResponse policies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
-    
+
+  public AzureCredentialPrerequisitesResponse policies(@jakarta.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
     return this;
   }
@@ -120,7 +127,7 @@ public class AzureCredentialPrerequisitesResponse {
    * The fine-grained policies related to each service.
    * @return policies
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -131,11 +138,47 @@ public class AzureCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_POLICIES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPolicies(@javax.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
+  public void setPolicies(@jakarta.annotation.Nullable List<CredentialGranularPolicyResponse> policies) {
     this.policies = policies;
   }
 
 
+  public AzureCredentialPrerequisitesResponse granularPolicies(@jakarta.annotation.Nullable List<GranularPolicyResponse> granularPolicies) {
+    this.granularPolicies = granularPolicies;
+    return this;
+  }
+
+  public AzureCredentialPrerequisitesResponse addGranularPoliciesItem(GranularPolicyResponse granularPoliciesItem) {
+    if (this.granularPolicies == null) {
+      this.granularPolicies = new ArrayList<>();
+    }
+    this.granularPolicies.add(granularPoliciesItem);
+    return this;
+  }
+
+  /**
+   * The component-separated policies related to each service.
+   * @return granularPolicies
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_GRANULAR_POLICIES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<GranularPolicyResponse> getGranularPolicies() {
+    return granularPolicies;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_GRANULAR_POLICIES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setGranularPolicies(@jakarta.annotation.Nullable List<GranularPolicyResponse> granularPolicies) {
+    this.granularPolicies = granularPolicies;
+  }
+
+
+  /**
+   * Return true if this AzureCredentialPrerequisitesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -147,12 +190,13 @@ public class AzureCredentialPrerequisitesResponse {
     AzureCredentialPrerequisitesResponse azureCredentialPrerequisitesResponse = (AzureCredentialPrerequisitesResponse) o;
     return Objects.equals(this.appCreationCommand, azureCredentialPrerequisitesResponse.appCreationCommand) &&
         Objects.equals(this.roleDefinitionJson, azureCredentialPrerequisitesResponse.roleDefinitionJson) &&
-        Objects.equals(this.policies, azureCredentialPrerequisitesResponse.policies);
+        Objects.equals(this.policies, azureCredentialPrerequisitesResponse.policies) &&
+        Objects.equals(this.granularPolicies, azureCredentialPrerequisitesResponse.granularPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(appCreationCommand, roleDefinitionJson, policies);
+    return Objects.hash(appCreationCommand, roleDefinitionJson, policies, granularPolicies);
   }
 
   @Override
@@ -162,6 +206,7 @@ public class AzureCredentialPrerequisitesResponse {
     sb.append("    appCreationCommand: ").append(toIndentedString(appCreationCommand)).append("\n");
     sb.append("    roleDefinitionJson: ").append(toIndentedString(roleDefinitionJson)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    granularPolicies: ").append(toIndentedString(granularPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object to query environment configuration settings.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetEnvironmentSettingRequest {
   public static final String JSON_PROPERTY_ATTRS = "attrs";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<String> attrs = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentName;
 
-  public GetEnvironmentSettingRequest() {
+  public GetEnvironmentSettingRequest() { 
   }
 
-  public GetEnvironmentSettingRequest attrs(@javax.annotation.Nonnull List<String> attrs) {
-    
+  public GetEnvironmentSettingRequest attrs(@jakarta.annotation.Nonnull List<String> attrs) {
     this.attrs = attrs;
     return this;
   }
@@ -64,7 +65,7 @@ public class GetEnvironmentSettingRequest {
    * List of attributes to query settings for. Non-existant settings will be ignored.
    * @return attrs
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ATTRS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -75,12 +76,12 @@ public class GetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_ATTRS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAttrs(@javax.annotation.Nonnull List<String> attrs) {
+  public void setAttrs(@jakarta.annotation.Nonnull List<String> attrs) {
     this.attrs = attrs;
   }
 
-  public GetEnvironmentSettingRequest environmentName(@javax.annotation.Nullable String environmentName) {
-    
+
+  public GetEnvironmentSettingRequest environmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -89,7 +90,7 @@ public class GetEnvironmentSettingRequest {
    * The name or CRN of the environment. Empty to get system wide settings.
    * @return environmentName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -100,11 +101,14 @@ public class GetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
 
 
+  /**
+   * Return true if this GetEnvironmentSettingRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

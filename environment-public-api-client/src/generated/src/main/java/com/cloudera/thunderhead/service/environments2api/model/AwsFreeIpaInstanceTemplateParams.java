@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * AWS specific FreeIPA parameters.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AwsFreeIpaInstanceTemplateParams {
   public static final String JSON_PROPERTY_SPOT_PERCENTAGE = "spotPercentage";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer spotPercentage;
 
   public static final String JSON_PROPERTY_SPOT_MAX_PRICE = "spotMaxPrice";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Double spotMaxPrice;
 
-  public AwsFreeIpaInstanceTemplateParams() {
+  public AwsFreeIpaInstanceTemplateParams() { 
   }
 
-  public AwsFreeIpaInstanceTemplateParams spotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
-    
+  public AwsFreeIpaInstanceTemplateParams spotPercentage(@jakarta.annotation.Nullable Integer spotPercentage) {
     this.spotPercentage = spotPercentage;
     return this;
   }
@@ -55,7 +57,7 @@ public class AwsFreeIpaInstanceTemplateParams {
    * maximum: 100
    * @return spotPercentage
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -66,12 +68,12 @@ public class AwsFreeIpaInstanceTemplateParams {
 
   @JsonProperty(JSON_PROPERTY_SPOT_PERCENTAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotPercentage(@javax.annotation.Nullable Integer spotPercentage) {
+  public void setSpotPercentage(@jakarta.annotation.Nullable Integer spotPercentage) {
     this.spotPercentage = spotPercentage;
   }
 
-  public AwsFreeIpaInstanceTemplateParams spotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
-    
+
+  public AwsFreeIpaInstanceTemplateParams spotMaxPrice(@jakarta.annotation.Nullable Double spotMaxPrice) {
     this.spotMaxPrice = spotMaxPrice;
     return this;
   }
@@ -82,7 +84,7 @@ public class AwsFreeIpaInstanceTemplateParams {
    * maximum: 255
    * @return spotMaxPrice
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -93,11 +95,14 @@ public class AwsFreeIpaInstanceTemplateParams {
 
   @JsonProperty(JSON_PROPERTY_SPOT_MAX_PRICE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSpotMaxPrice(@javax.annotation.Nullable Double spotMaxPrice) {
+  public void setSpotMaxPrice(@jakarta.annotation.Nullable Double spotMaxPrice) {
     this.spotMaxPrice = spotMaxPrice;
   }
 
 
+  /**
+   * Return true if this AwsFreeIpaInstanceTemplateParams object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

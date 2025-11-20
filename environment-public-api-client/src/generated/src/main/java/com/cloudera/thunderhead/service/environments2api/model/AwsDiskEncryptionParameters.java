@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Object containing details of encryption parameters for AWS cloud.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AwsDiskEncryptionParameters {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionKeyArn;
 
-  public AwsDiskEncryptionParameters() {
+  public AwsDiskEncryptionParameters() { 
   }
 
-  public AwsDiskEncryptionParameters encryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
-    
+  public AwsDiskEncryptionParameters encryptionKeyArn(@jakarta.annotation.Nullable String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -48,7 +50,7 @@ public class AwsDiskEncryptionParameters {
    * ARN of the CMK which is used to encrypt the AWS EBS volumes.
    * @return encryptionKeyArn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class AwsDiskEncryptionParameters {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
+  public void setEncryptionKeyArn(@jakarta.annotation.Nullable String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
   }
 
 
+  /**
+   * Return true if this AwsDiskEncryptionParameters object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

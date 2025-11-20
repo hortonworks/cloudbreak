@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a set GCP audit credential request.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetGCPAuditCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_KEY = "credentialKey";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialKey;
 
-  public SetGCPAuditCredentialRequest() {
+  public SetGCPAuditCredentialRequest() { 
   }
 
-  public SetGCPAuditCredentialRequest credentialKey(@javax.annotation.Nonnull String credentialKey) {
-    
+  public SetGCPAuditCredentialRequest credentialKey(@jakarta.annotation.Nonnull String credentialKey) {
     this.credentialKey = credentialKey;
     return this;
   }
@@ -48,7 +50,7 @@ public class SetGCPAuditCredentialRequest {
    * The JSON key for the service account. Please use the local path when using the CLI (e.g. file:///absolute/path/to/cred.json) to avoid exposing the keys in the command line history.
    * @return credentialKey
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class SetGCPAuditCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_KEY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialKey(@javax.annotation.Nonnull String credentialKey) {
+  public void setCredentialKey(@jakarta.annotation.Nonnull String credentialKey) {
     this.credentialKey = credentialKey;
   }
 
 
+  /**
+   * Return true if this SetGCPAuditCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

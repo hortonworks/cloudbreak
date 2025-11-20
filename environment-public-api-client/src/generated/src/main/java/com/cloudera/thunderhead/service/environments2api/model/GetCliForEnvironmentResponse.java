@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for generating a create environment CLI command.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetCliForEnvironmentResponse {
   public static final String JSON_PROPERTY_COMMAND = "command";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String command;
 
-  public GetCliForEnvironmentResponse() {
+  public GetCliForEnvironmentResponse() { 
   }
 
-  public GetCliForEnvironmentResponse command(@javax.annotation.Nullable String command) {
-    
+  public GetCliForEnvironmentResponse command(@jakarta.annotation.Nullable String command) {
     this.command = command;
     return this;
   }
@@ -48,7 +50,7 @@ public class GetCliForEnvironmentResponse {
    * cdp cli command string for creating the environment
    * @return command
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class GetCliForEnvironmentResponse {
 
   @JsonProperty(JSON_PROPERTY_COMMAND)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCommand(@javax.annotation.Nullable String command) {
+  public void setCommand(@jakarta.annotation.Nullable String command) {
     this.command = command;
   }
 
 
+  /**
+   * Return true if this GetCliForEnvironmentResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

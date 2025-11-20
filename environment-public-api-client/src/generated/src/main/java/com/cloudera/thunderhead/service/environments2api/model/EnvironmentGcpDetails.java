@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * GCP specific environment configuration information.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class EnvironmentGcpDetails {
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String sharedProjectId;
 
-  public EnvironmentGcpDetails() {
+  public EnvironmentGcpDetails() { 
   }
 
-  public EnvironmentGcpDetails sharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
-    
+  public EnvironmentGcpDetails sharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
     return this;
   }
@@ -49,7 +51,7 @@ public class EnvironmentGcpDetails {
    * ID of the Google project where the resources are created.
    * @return sharedProjectId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -60,11 +62,14 @@ public class EnvironmentGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_SHARED_PROJECT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSharedProjectId(@javax.annotation.Nullable String sharedProjectId) {
+  public void setSharedProjectId(@jakarta.annotation.Nullable String sharedProjectId) {
     this.sharedProjectId = sharedProjectId;
   }
 
 
+  /**
+   * Return true if this Environment_gcpDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

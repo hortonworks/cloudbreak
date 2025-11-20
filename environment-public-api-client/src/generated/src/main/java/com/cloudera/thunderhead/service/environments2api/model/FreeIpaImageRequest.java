@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for FreeIPA image.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeIpaImageRequest {
   public static final String JSON_PROPERTY_CATALOG = "catalog";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String catalog;
 
   public static final String JSON_PROPERTY_ID = "id";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_OS = "os";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String os;
 
-  public FreeIpaImageRequest() {
+  public FreeIpaImageRequest() { 
   }
 
-  public FreeIpaImageRequest catalog(@javax.annotation.Nullable String catalog) {
-    
+  public FreeIpaImageRequest catalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
     return this;
   }
@@ -58,7 +60,7 @@ public class FreeIpaImageRequest {
    * Image catalog to use for FreeIPA image selection.
    * @return catalog
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalog(@javax.annotation.Nullable String catalog) {
+  public void setCatalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
   }
 
-  public FreeIpaImageRequest id(@javax.annotation.Nullable String id) {
-    
+
+  public FreeIpaImageRequest id(@jakarta.annotation.Nullable String id) {
     this.id = id;
     return this;
   }
@@ -83,7 +85,7 @@ public class FreeIpaImageRequest {
    * Image ID to use for creating FreeIPA instances.
    * @return id
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(@javax.annotation.Nullable String id) {
+  public void setId(@jakarta.annotation.Nullable String id) {
     this.id = id;
   }
 
-  public FreeIpaImageRequest os(@javax.annotation.Nullable String os) {
-    
+
+  public FreeIpaImageRequest os(@jakarta.annotation.Nullable String os) {
     this.os = os;
     return this;
   }
@@ -108,7 +110,7 @@ public class FreeIpaImageRequest {
    * The OS to use for creating FreeIPA instances.
    * @return os
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class FreeIpaImageRequest {
 
   @JsonProperty(JSON_PROPERTY_OS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOs(@javax.annotation.Nullable String os) {
+  public void setOs(@jakarta.annotation.Nullable String os) {
     this.os = os;
   }
 
 
+  /**
+   * Return true if this FreeIpaImageRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

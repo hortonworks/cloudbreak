@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.UpdateAzureCredentialRequestAppBased;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for an update Azure credential request.
@@ -37,30 +40,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_SUBSCRIPTION_ID = "subscriptionId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String subscriptionId;
 
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String tenantId;
 
   public static final String JSON_PROPERTY_APP_BASED = "appBased";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private UpdateAzureCredentialRequestAppBased appBased;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
-  public UpdateAzureCredentialRequest() {
+  public UpdateAzureCredentialRequest() { 
   }
 
-  public UpdateAzureCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
-    
+  public UpdateAzureCredentialRequest credentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -69,7 +71,7 @@ public class UpdateAzureCredentialRequest {
    * The name of the credential.
    * @return credentialName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -80,12 +82,12 @@ public class UpdateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-  public UpdateAzureCredentialRequest subscriptionId(@javax.annotation.Nonnull String subscriptionId) {
-    
+
+  public UpdateAzureCredentialRequest subscriptionId(@jakarta.annotation.Nonnull String subscriptionId) {
     this.subscriptionId = subscriptionId;
     return this;
   }
@@ -94,7 +96,7 @@ public class UpdateAzureCredentialRequest {
    * The Azure subscription ID.
    * @return subscriptionId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -105,12 +107,12 @@ public class UpdateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_SUBSCRIPTION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSubscriptionId(@javax.annotation.Nonnull String subscriptionId) {
+  public void setSubscriptionId(@jakarta.annotation.Nonnull String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
-  public UpdateAzureCredentialRequest tenantId(@javax.annotation.Nonnull String tenantId) {
-    
+
+  public UpdateAzureCredentialRequest tenantId(@jakarta.annotation.Nonnull String tenantId) {
     this.tenantId = tenantId;
     return this;
   }
@@ -119,7 +121,7 @@ public class UpdateAzureCredentialRequest {
    * The Azure AD tenant ID for the Azure subscription.
    * @return tenantId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -130,12 +132,12 @@ public class UpdateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_TENANT_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTenantId(@javax.annotation.Nonnull String tenantId) {
+  public void setTenantId(@jakarta.annotation.Nonnull String tenantId) {
     this.tenantId = tenantId;
   }
 
-  public UpdateAzureCredentialRequest appBased(@javax.annotation.Nonnull UpdateAzureCredentialRequestAppBased appBased) {
-    
+
+  public UpdateAzureCredentialRequest appBased(@jakarta.annotation.Nonnull UpdateAzureCredentialRequestAppBased appBased) {
     this.appBased = appBased;
     return this;
   }
@@ -144,7 +146,7 @@ public class UpdateAzureCredentialRequest {
    * Get appBased
    * @return appBased
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -155,12 +157,12 @@ public class UpdateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_APP_BASED)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAppBased(@javax.annotation.Nonnull UpdateAzureCredentialRequestAppBased appBased) {
+  public void setAppBased(@jakarta.annotation.Nonnull UpdateAzureCredentialRequestAppBased appBased) {
     this.appBased = appBased;
   }
 
-  public UpdateAzureCredentialRequest description(@javax.annotation.Nullable String description) {
-    
+
+  public UpdateAzureCredentialRequest description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -169,7 +171,7 @@ public class UpdateAzureCredentialRequest {
    * A description for the credential.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -180,11 +182,14 @@ public class UpdateAzureCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
 
+  /**
+   * Return true if this UpdateAzureCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

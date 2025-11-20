@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Host information for instances within the on premises datalake cluster.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Instance {
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceId;
 
   public static final String JSON_PROPERTY_DISCOVERY_F_Q_D_N = "discoveryFQDN";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String discoveryFQDN;
 
   public static final String JSON_PROPERTY_PRIVATE_IP = "privateIp";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String privateIp;
 
-  public Instance() {
+  public Instance() { 
   }
 
-  public Instance instanceId(@javax.annotation.Nullable String instanceId) {
-    
+  public Instance instanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
     return this;
   }
@@ -58,7 +60,7 @@ public class Instance {
    * ID of the instance
    * @return instanceId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceId(@javax.annotation.Nullable String instanceId) {
+  public void setInstanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
   }
 
-  public Instance discoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
-    
+
+  public Instance discoveryFQDN(@jakarta.annotation.Nullable String discoveryFQDN) {
     this.discoveryFQDN = discoveryFQDN;
     return this;
   }
@@ -83,7 +85,7 @@ public class Instance {
    * The fully qualified domain name of the instance in the cluster.
    * @return discoveryFQDN
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDiscoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
+  public void setDiscoveryFQDN(@jakarta.annotation.Nullable String discoveryFQDN) {
     this.discoveryFQDN = discoveryFQDN;
   }
 
-  public Instance privateIp(@javax.annotation.Nullable String privateIp) {
-    
+
+  public Instance privateIp(@jakarta.annotation.Nullable String privateIp) {
     this.privateIp = privateIp;
     return this;
   }
@@ -108,7 +110,7 @@ public class Instance {
    * The private IP of the instance
    * @return privateIp
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class Instance {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_IP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateIp(@javax.annotation.Nullable String privateIp) {
+  public void setPrivateIp(@jakarta.annotation.Nullable String privateIp) {
     this.privateIp = privateIp;
   }
 
 
+  /**
+   * Return true if this Instance object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

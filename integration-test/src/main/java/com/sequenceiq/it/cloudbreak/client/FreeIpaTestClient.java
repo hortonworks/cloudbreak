@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.client;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -57,6 +59,9 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 @Service
 public class FreeIpaTestClient {
 
+    @Inject
+    private EnvironmentPublicApiTestClient environmentPublicApiTestClient;
+
     public Action<FreeIpaTestDto, FreeIpaClient> create() {
         return new FreeIpaCreateAction();
     }
@@ -98,7 +103,7 @@ public class FreeIpaTestClient {
     }
 
     public Action<FreeIpaUserSyncTestDto, FreeIpaClient> getLastSyncOperationStatus() {
-        return new FreeIpaGetLastSyncOperationStatus();
+        return new FreeIpaGetLastSyncOperationStatus(environmentPublicApiTestClient);
     }
 
     public Action<FreeIpaUserSyncTestDto, FreeIpaClient> setPassword(Set<String> environmentCrns, String newPassword) {

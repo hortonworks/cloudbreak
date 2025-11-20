@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureAuthenticationTypeProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional configurations needed for app-based authentication.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureCredentialRequestAppBased {
   public static final String JSON_PROPERTY_AUTHENTICATION_TYPE = "authenticationType";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private AzureAuthenticationTypeProperties authenticationType;
 
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String applicationId;
 
-  public UpdateAzureCredentialRequestAppBased() {
+  public UpdateAzureCredentialRequestAppBased() { 
   }
 
-  public UpdateAzureCredentialRequestAppBased authenticationType(@javax.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
-    
+  public UpdateAzureCredentialRequestAppBased authenticationType(@jakarta.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
     return this;
   }
@@ -55,7 +57,7 @@ public class UpdateAzureCredentialRequestAppBased {
    * Get authenticationType
    * @return authenticationType
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,12 +68,12 @@ public class UpdateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthenticationType(@javax.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
+  public void setAuthenticationType(@jakarta.annotation.Nonnull AzureAuthenticationTypeProperties authenticationType) {
     this.authenticationType = authenticationType;
   }
 
-  public UpdateAzureCredentialRequestAppBased applicationId(@javax.annotation.Nonnull String applicationId) {
-    
+
+  public UpdateAzureCredentialRequestAppBased applicationId(@jakarta.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
     return this;
   }
@@ -80,7 +82,7 @@ public class UpdateAzureCredentialRequestAppBased {
    * The id of the application registered in Azure.
    * @return applicationId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -91,11 +93,14 @@ public class UpdateAzureCredentialRequestAppBased {
 
   @JsonProperty(JSON_PROPERTY_APPLICATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setApplicationId(@javax.annotation.Nonnull String applicationId) {
+  public void setApplicationId(@jakarta.annotation.Nonnull String applicationId) {
     this.applicationId = applicationId;
   }
 
 
+  /**
+   * Return true if this UpdateAzureCredentialRequest_appBased object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for checking Kubernetes connectivity.
@@ -68,18 +71,17 @@ public class CheckKubernetesConnectivityResponse {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_MESSAGE = "message";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String message;
 
-  public CheckKubernetesConnectivityResponse() {
+  public CheckKubernetesConnectivityResponse() { 
   }
 
-  public CheckKubernetesConnectivityResponse status(@javax.annotation.Nonnull StatusEnum status) {
-    
+  public CheckKubernetesConnectivityResponse status(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -88,7 +90,7 @@ public class CheckKubernetesConnectivityResponse {
    * Status of Kubernetes cluster. Also indicates connectivity.
    * @return status
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -99,12 +101,12 @@ public class CheckKubernetesConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-  public CheckKubernetesConnectivityResponse message(@javax.annotation.Nullable String message) {
-    
+
+  public CheckKubernetesConnectivityResponse message(@jakarta.annotation.Nullable String message) {
     this.message = message;
     return this;
   }
@@ -113,7 +115,7 @@ public class CheckKubernetesConnectivityResponse {
    * Message explaining the status. Used for Errors.
    * @return message
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -124,11 +126,14 @@ public class CheckKubernetesConnectivityResponse {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMessage(@javax.annotation.Nullable String message) {
+  public void setMessage(@jakarta.annotation.Nullable String message) {
     this.message = message;
   }
 
 
+  /**
+   * Return true if this CheckKubernetesConnectivityResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * AWS-specific backup storage configuration information.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class BackupStorageAwsDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_INSTANCE_PROFILE = "instanceProfile";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceProfile;
 
-  public BackupStorageAwsDetails() {
+  public BackupStorageAwsDetails() { 
   }
 
-  public BackupStorageAwsDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
-    
+  public BackupStorageAwsDetails storageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
     return this;
   }
@@ -54,7 +56,7 @@ public class BackupStorageAwsDetails {
    * The base location to store backup in S3. This should be an s3a:// url.
    * @return storageLocationBase
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -65,12 +67,12 @@ public class BackupStorageAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
+  public void setStorageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-  public BackupStorageAwsDetails instanceProfile(@javax.annotation.Nullable String instanceProfile) {
-    
+
+  public BackupStorageAwsDetails instanceProfile(@jakarta.annotation.Nullable String instanceProfile) {
     this.instanceProfile = instanceProfile;
     return this;
   }
@@ -79,7 +81,7 @@ public class BackupStorageAwsDetails {
    * The AWS instance profile which contains the necessary permissions to access the S3 storage location.
    * @return instanceProfile
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -90,11 +92,14 @@ public class BackupStorageAwsDetails {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_PROFILE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceProfile(@javax.annotation.Nullable String instanceProfile) {
+  public void setInstanceProfile(@jakarta.annotation.Nullable String instanceProfile) {
     this.instanceProfile = instanceProfile;
   }
 
 
+  /**
+   * Return true if this BackupStorage_awsDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a create AWS credential request.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreateAWSCredentialRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_ROLE_ARN = "roleArn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String roleArn;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
-  public CreateAWSCredentialRequest() {
+  public CreateAWSCredentialRequest() { 
   }
 
-  public CreateAWSCredentialRequest credentialName(@javax.annotation.Nonnull String credentialName) {
-    
+  public CreateAWSCredentialRequest credentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -58,7 +60,7 @@ public class CreateAWSCredentialRequest {
    * The name of the credential.
    * @return credentialName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class CreateAWSCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-  public CreateAWSCredentialRequest roleArn(@javax.annotation.Nonnull String roleArn) {
-    
+
+  public CreateAWSCredentialRequest roleArn(@jakarta.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
     return this;
   }
@@ -83,7 +85,7 @@ public class CreateAWSCredentialRequest {
    * The ARN of the delegated access role.
    * @return roleArn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -94,12 +96,12 @@ public class CreateAWSCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_ROLE_ARN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRoleArn(@javax.annotation.Nonnull String roleArn) {
+  public void setRoleArn(@jakarta.annotation.Nonnull String roleArn) {
     this.roleArn = roleArn;
   }
 
-  public CreateAWSCredentialRequest description(@javax.annotation.Nullable String description) {
-    
+
+  public CreateAWSCredentialRequest description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -108,7 +110,7 @@ public class CreateAWSCredentialRequest {
    * A description for the credential.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class CreateAWSCredentialRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
 
+  /**
+   * Return true if this CreateAWSCredentialRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for repairing the FreeIPA servers.
@@ -38,15 +40,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class RepairFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_FORCE = "force";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean force = false;
 
   public static final String JSON_PROPERTY_INSTANCES = "instances";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> instances = new ArrayList<>();
 
   /**
@@ -87,14 +89,13 @@ public class RepairFreeipaRequest {
   }
 
   public static final String JSON_PROPERTY_REPAIR_TYPE = "repairType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private RepairTypeEnum repairType;
 
-  public RepairFreeipaRequest() {
+  public RepairFreeipaRequest() { 
   }
 
-  public RepairFreeipaRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public RepairFreeipaRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -103,7 +104,7 @@ public class RepairFreeipaRequest {
    * The environment name or CRN of the FreeIPA to repair
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -114,12 +115,12 @@ public class RepairFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public RepairFreeipaRequest force(@javax.annotation.Nullable Boolean force) {
-    
+
+  public RepairFreeipaRequest force(@jakarta.annotation.Nullable Boolean force) {
     this.force = force;
     return this;
   }
@@ -128,7 +129,7 @@ public class RepairFreeipaRequest {
    * Force the repair even if the status if the FreeIPA nodes are good.
    * @return force
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -139,12 +140,12 @@ public class RepairFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_FORCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setForce(@javax.annotation.Nullable Boolean force) {
+  public void setForce(@jakarta.annotation.Nullable Boolean force) {
     this.force = force;
   }
 
-  public RepairFreeipaRequest instances(@javax.annotation.Nullable List<String> instances) {
-    
+
+  public RepairFreeipaRequest instances(@jakarta.annotation.Nullable List<String> instances) {
     this.instances = instances;
     return this;
   }
@@ -161,7 +162,7 @@ public class RepairFreeipaRequest {
    * The instance Ids to repair. If not provided then all instances are looked at for repair.
    * @return instances
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -172,12 +173,12 @@ public class RepairFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstances(@javax.annotation.Nullable List<String> instances) {
+  public void setInstances(@jakarta.annotation.Nullable List<String> instances) {
     this.instances = instances;
   }
 
-  public RepairFreeipaRequest repairType(@javax.annotation.Nullable RepairTypeEnum repairType) {
-    
+
+  public RepairFreeipaRequest repairType(@jakarta.annotation.Nullable RepairTypeEnum repairType) {
     this.repairType = repairType;
     return this;
   }
@@ -186,7 +187,7 @@ public class RepairFreeipaRequest {
    * The type of FreeIPA repair to perform. * AUTO - Currently, this is the same as reboot but this may change in the future. * REBOOT - Repair the failed instances by rebooting them. * REBUILD - Repair the failed instances by deleting them and creating new instances, then replicate data from an existing instance to the new instances.
    * @return repairType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPAIR_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -197,11 +198,14 @@ public class RepairFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_REPAIR_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRepairType(@javax.annotation.Nullable RepairTypeEnum repairType) {
+  public void setRepairType(@jakarta.annotation.Nullable RepairTypeEnum repairType) {
     this.repairType = repairType;
   }
 
 
+  /**
+   * Return true if this RepairFreeipaRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

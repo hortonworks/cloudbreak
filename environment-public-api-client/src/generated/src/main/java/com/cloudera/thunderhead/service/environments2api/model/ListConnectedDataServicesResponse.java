@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ConnectedDataService;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for listing connected Data Service(s) for a given environment.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListConnectedDataServicesResponse {
   public static final String JSON_PROPERTY_RESULT = "result";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<ConnectedDataService> result = new ArrayList<>();
 
-  public ListConnectedDataServicesResponse() {
+  public ListConnectedDataServicesResponse() { 
   }
 
-  public ListConnectedDataServicesResponse result(@javax.annotation.Nonnull List<ConnectedDataService> result) {
-    
+  public ListConnectedDataServicesResponse result(@jakarta.annotation.Nonnull List<ConnectedDataService> result) {
     this.result = result;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListConnectedDataServicesResponse {
    * List of connected Data Service for the given environment.
    * @return result
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,11 +72,14 @@ public class ListConnectedDataServicesResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setResult(@javax.annotation.Nonnull List<ConnectedDataService> result) {
+  public void setResult(@jakarta.annotation.Nonnull List<ConnectedDataService> result) {
     this.result = result;
   }
 
 
+  /**
+   * Return true if this ListConnectedDataServicesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

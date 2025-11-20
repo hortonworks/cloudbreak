@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional detail object for a sync operation.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SyncOperationAdditionalDetail {
   public static final String JSON_PROPERTY_MESSAGE = "message";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String message;
 
   public static final String JSON_PROPERTY_DETAILS = "details";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<String> details = new ArrayList<>();
 
-  public SyncOperationAdditionalDetail() {
+  public SyncOperationAdditionalDetail() { 
   }
 
-  public SyncOperationAdditionalDetail message(@javax.annotation.Nonnull String message) {
-    
+  public SyncOperationAdditionalDetail message(@jakarta.annotation.Nonnull String message) {
     this.message = message;
     return this;
   }
@@ -56,7 +57,7 @@ public class SyncOperationAdditionalDetail {
    * The message string for an additional detail.
    * @return message
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -67,12 +68,12 @@ public class SyncOperationAdditionalDetail {
 
   @JsonProperty(JSON_PROPERTY_MESSAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setMessage(@javax.annotation.Nonnull String message) {
+  public void setMessage(@jakarta.annotation.Nonnull String message) {
     this.message = message;
   }
 
-  public SyncOperationAdditionalDetail details(@javax.annotation.Nonnull List<String> details) {
-    
+
+  public SyncOperationAdditionalDetail details(@jakarta.annotation.Nonnull List<String> details) {
     this.details = details;
     return this;
   }
@@ -89,7 +90,7 @@ public class SyncOperationAdditionalDetail {
    * The array of details strings.
    * @return details
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -100,11 +101,14 @@ public class SyncOperationAdditionalDetail {
 
   @JsonProperty(JSON_PROPERTY_DETAILS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDetails(@javax.annotation.Nonnull List<String> details) {
+  public void setDetails(@jakarta.annotation.Nonnull List<String> details) {
     this.details = details;
   }
 
 
+  /**
+   * Return true if this SyncOperationAdditionalDetail object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

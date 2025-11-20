@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.EnvValidation;
 import com.cloudera.thunderhead.service.environments2api.model.ExposedService;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Discovered CdpCluster object.
@@ -42,34 +44,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdpCluster {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_DISPLAY_NAME = "displayName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String displayName;
 
   public static final String JSON_PROPERTY_CM_URL = "cmUrl";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String cmUrl;
 
   public static final String JSON_PROPERTY_VERSION = "version";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String version;
 
   public static final String JSON_PROPERTY_EXPOSED_SERVICES = "exposedServices";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<ExposedService> exposedServices = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES = "clusterValidationMessages";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<EnvValidation> clusterValidationMessages = new ArrayList<>();
 
-  public CdpCluster() {
+  public CdpCluster() { 
   }
 
-  public CdpCluster name(@javax.annotation.Nullable String name) {
-    
+  public CdpCluster name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -78,7 +79,7 @@ public class CdpCluster {
    * Name of cluster.
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,12 +90,12 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public CdpCluster displayName(@javax.annotation.Nullable String displayName) {
-    
+
+  public CdpCluster displayName(@jakarta.annotation.Nullable String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -103,7 +104,7 @@ public class CdpCluster {
    * Display name of cluster.
    * @return displayName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -114,12 +115,12 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_DISPLAY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDisplayName(@javax.annotation.Nullable String displayName) {
+  public void setDisplayName(@jakarta.annotation.Nullable String displayName) {
     this.displayName = displayName;
   }
 
-  public CdpCluster cmUrl(@javax.annotation.Nullable String cmUrl) {
-    
+
+  public CdpCluster cmUrl(@jakarta.annotation.Nullable String cmUrl) {
     this.cmUrl = cmUrl;
     return this;
   }
@@ -128,7 +129,7 @@ public class CdpCluster {
    * The Url to Cloudera Manager.
    * @return cmUrl
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CM_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -139,12 +140,12 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_CM_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCmUrl(@javax.annotation.Nullable String cmUrl) {
+  public void setCmUrl(@jakarta.annotation.Nullable String cmUrl) {
     this.cmUrl = cmUrl;
   }
 
-  public CdpCluster version(@javax.annotation.Nullable String version) {
-    
+
+  public CdpCluster version(@jakarta.annotation.Nullable String version) {
     this.version = version;
     return this;
   }
@@ -153,7 +154,7 @@ public class CdpCluster {
    * Version of Cloudera Manager.
    * @return version
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -164,12 +165,12 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_VERSION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersion(@javax.annotation.Nullable String version) {
+  public void setVersion(@jakarta.annotation.Nullable String version) {
     this.version = version;
   }
 
-  public CdpCluster exposedServices(@javax.annotation.Nullable List<ExposedService> exposedServices) {
-    
+
+  public CdpCluster exposedServices(@jakarta.annotation.Nullable List<ExposedService> exposedServices) {
     this.exposedServices = exposedServices;
     return this;
   }
@@ -186,7 +187,7 @@ public class CdpCluster {
    * List of exposed CDP DC services
    * @return exposedServices
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_EXPOSED_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -197,12 +198,12 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_EXPOSED_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setExposedServices(@javax.annotation.Nullable List<ExposedService> exposedServices) {
+  public void setExposedServices(@jakarta.annotation.Nullable List<ExposedService> exposedServices) {
     this.exposedServices = exposedServices;
   }
 
-  public CdpCluster clusterValidationMessages(@javax.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
-    
+
+  public CdpCluster clusterValidationMessages(@jakarta.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
     this.clusterValidationMessages = clusterValidationMessages;
     return this;
   }
@@ -219,7 +220,7 @@ public class CdpCluster {
    * List of cluster validation message.
    * @return clusterValidationMessages
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -230,11 +231,14 @@ public class CdpCluster {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_VALIDATION_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterValidationMessages(@javax.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
+  public void setClusterValidationMessages(@jakarta.annotation.Nullable List<EnvValidation> clusterValidationMessages) {
     this.clusterValidationMessages = clusterValidationMessages;
   }
 
 
+  /**
+   * Return true if this CdpCluster object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

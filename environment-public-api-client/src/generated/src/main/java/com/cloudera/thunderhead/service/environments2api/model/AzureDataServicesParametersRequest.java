@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Azure-specific Data Service parameters request.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AzureDataServicesParametersRequest {
   public static final String JSON_PROPERTY_SHARED_MANAGED_IDENTITY = "sharedManagedIdentity";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String sharedManagedIdentity;
 
   public static final String JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String aksPrivateDnsZoneId;
 
-  public AzureDataServicesParametersRequest() {
+  public AzureDataServicesParametersRequest() { 
   }
 
-  public AzureDataServicesParametersRequest sharedManagedIdentity(@javax.annotation.Nonnull String sharedManagedIdentity) {
-    
+  public AzureDataServicesParametersRequest sharedManagedIdentity(@jakarta.annotation.Nonnull String sharedManagedIdentity) {
     this.sharedManagedIdentity = sharedManagedIdentity;
     return this;
   }
@@ -53,7 +55,7 @@ public class AzureDataServicesParametersRequest {
    * User-assigned managed identity used by the AKS control plane.
    * @return sharedManagedIdentity
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SHARED_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class AzureDataServicesParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_SHARED_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSharedManagedIdentity(@javax.annotation.Nonnull String sharedManagedIdentity) {
+  public void setSharedManagedIdentity(@jakarta.annotation.Nonnull String sharedManagedIdentity) {
     this.sharedManagedIdentity = sharedManagedIdentity;
   }
 
-  public AzureDataServicesParametersRequest aksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
-    
+
+  public AzureDataServicesParametersRequest aksPrivateDnsZoneId(@jakarta.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     return this;
   }
@@ -78,7 +80,7 @@ public class AzureDataServicesParametersRequest {
    * The full Azure resource ID of an existing Private DNS zone used for the AKS.
    * @return aksPrivateDnsZoneId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class AzureDataServicesParametersRequest {
 
   @JsonProperty(JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAksPrivateDnsZoneId(@javax.annotation.Nullable String aksPrivateDnsZoneId) {
+  public void setAksPrivateDnsZoneId(@jakarta.annotation.Nullable String aksPrivateDnsZoneId) {
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
   }
 
 
+  /**
+   * Return true if this AzureDataServicesParametersRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

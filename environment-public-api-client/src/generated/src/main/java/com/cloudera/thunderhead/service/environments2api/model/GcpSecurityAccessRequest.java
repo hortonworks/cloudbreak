@@ -14,17 +14,20 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Firewall rules for FreeIPA, Data Lake and Data Hub deployment.
@@ -38,26 +41,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GcpSecurityAccessRequest {
   public static final String JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX = "securityGroupIdForKnox";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String securityGroupIdForKnox;
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String defaultSecurityGroupId;
 
   public static final String JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX = "securityGroupIDsForKnox";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Set<String> securityGroupIDsForKnox = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS = "defaultSecurityGroupIDs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Set<String> defaultSecurityGroupIDs = new LinkedHashSet<>();
 
-  public GcpSecurityAccessRequest() {
+  public GcpSecurityAccessRequest() { 
   }
 
-  public GcpSecurityAccessRequest securityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
-    
+  public GcpSecurityAccessRequest securityGroupIdForKnox(@jakarta.annotation.Nullable String securityGroupIdForKnox) {
     this.securityGroupIdForKnox = securityGroupIdForKnox;
     return this;
   }
@@ -66,7 +68,7 @@ public class GcpSecurityAccessRequest {
    * Firewall rule for Knox hosts.
    * @return securityGroupIdForKnox
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -77,12 +79,12 @@ public class GcpSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_ID_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityGroupIdForKnox(@javax.annotation.Nullable String securityGroupIdForKnox) {
+  public void setSecurityGroupIdForKnox(@jakarta.annotation.Nullable String securityGroupIdForKnox) {
     this.securityGroupIdForKnox = securityGroupIdForKnox;
   }
 
-  public GcpSecurityAccessRequest defaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
-    
+
+  public GcpSecurityAccessRequest defaultSecurityGroupId(@jakarta.annotation.Nullable String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
@@ -91,7 +93,7 @@ public class GcpSecurityAccessRequest {
    * Firewall rule for other hosts.
    * @return defaultSecurityGroupId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -102,12 +104,12 @@ public class GcpSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultSecurityGroupId(@javax.annotation.Nullable String defaultSecurityGroupId) {
+  public void setDefaultSecurityGroupId(@jakarta.annotation.Nullable String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
 
-  public GcpSecurityAccessRequest securityGroupIDsForKnox(@javax.annotation.Nullable Set<String> securityGroupIDsForKnox) {
-    
+
+  public GcpSecurityAccessRequest securityGroupIDsForKnox(@jakarta.annotation.Nullable Set<String> securityGroupIDsForKnox) {
     this.securityGroupIDsForKnox = securityGroupIDsForKnox;
     return this;
   }
@@ -124,7 +126,7 @@ public class GcpSecurityAccessRequest {
    * Security group IDs where Knox-enabled hosts are placed. Mutually exclusive with CIDR.
    * @return securityGroupIDsForKnox
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -136,12 +138,12 @@ public class GcpSecurityAccessRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SECURITY_GROUP_I_DS_FOR_KNOX)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurityGroupIDsForKnox(@javax.annotation.Nullable Set<String> securityGroupIDsForKnox) {
+  public void setSecurityGroupIDsForKnox(@jakarta.annotation.Nullable Set<String> securityGroupIDsForKnox) {
     this.securityGroupIDsForKnox = securityGroupIDsForKnox;
   }
 
-  public GcpSecurityAccessRequest defaultSecurityGroupIDs(@javax.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
-    
+
+  public GcpSecurityAccessRequest defaultSecurityGroupIDs(@jakarta.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
     return this;
   }
@@ -158,7 +160,7 @@ public class GcpSecurityAccessRequest {
    * Security group IDs where all other hosts are placed. Mutually exclusive with CIDR.
    * @return defaultSecurityGroupIDs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -170,11 +172,14 @@ public class GcpSecurityAccessRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaultSecurityGroupIDs(@javax.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
+  public void setDefaultSecurityGroupIDs(@jakarta.annotation.Nullable Set<String> defaultSecurityGroupIDs) {
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
   }
 
 
+  /**
+   * Return true if this GcpSecurityAccessRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

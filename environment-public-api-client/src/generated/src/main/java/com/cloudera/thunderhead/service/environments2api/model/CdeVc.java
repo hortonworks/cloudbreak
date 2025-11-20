@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CML virtual cluster.
@@ -36,30 +39,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdeVc {
   public static final String JSON_PROPERTY_VC_ID = "vcId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String vcId;
 
   public static final String JSON_PROPERTY_VC_NAME = "vcName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String vcName;
 
   public static final String JSON_PROPERTY_CLUSTER_ID = "clusterId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String clusterId;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_VC_UI_URL = "vcUiUrl";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String vcUiUrl;
 
-  public CdeVc() {
+  public CdeVc() { 
   }
 
-  public CdeVc vcId(@javax.annotation.Nullable String vcId) {
-    
+  public CdeVc vcId(@jakarta.annotation.Nullable String vcId) {
     this.vcId = vcId;
     return this;
   }
@@ -68,7 +70,7 @@ public class CdeVc {
    * Virtual Cluster ID.
    * @return vcId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -79,12 +81,12 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcId(@javax.annotation.Nullable String vcId) {
+  public void setVcId(@jakarta.annotation.Nullable String vcId) {
     this.vcId = vcId;
   }
 
-  public CdeVc vcName(@javax.annotation.Nullable String vcName) {
-    
+
+  public CdeVc vcName(@jakarta.annotation.Nullable String vcName) {
     this.vcName = vcName;
     return this;
   }
@@ -93,7 +95,7 @@ public class CdeVc {
    * Virtual Cluster Name.
    * @return vcName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -104,12 +106,12 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcName(@javax.annotation.Nullable String vcName) {
+  public void setVcName(@jakarta.annotation.Nullable String vcName) {
     this.vcName = vcName;
   }
 
-  public CdeVc clusterId(@javax.annotation.Nullable String clusterId) {
-    
+
+  public CdeVc clusterId(@jakarta.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
     return this;
   }
@@ -118,7 +120,7 @@ public class CdeVc {
    * Cluster ID of the CDE service that contains the virtual cluster.
    * @return clusterId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -129,12 +131,12 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_CLUSTER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setClusterId(@javax.annotation.Nullable String clusterId) {
+  public void setClusterId(@jakarta.annotation.Nullable String clusterId) {
     this.clusterId = clusterId;
   }
 
-  public CdeVc status(@javax.annotation.Nullable String status) {
-    
+
+  public CdeVc status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -143,7 +145,7 @@ public class CdeVc {
    * Status of the Virtual Cluster.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -154,12 +156,12 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
-  public CdeVc vcUiUrl(@javax.annotation.Nullable String vcUiUrl) {
-    
+
+  public CdeVc vcUiUrl(@jakarta.annotation.Nullable String vcUiUrl) {
     this.vcUiUrl = vcUiUrl;
     return this;
   }
@@ -168,7 +170,7 @@ public class CdeVc {
    * Url for the Virtual Cluster UI.
    * @return vcUiUrl
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VC_UI_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -179,11 +181,14 @@ public class CdeVc {
 
   @JsonProperty(JSON_PROPERTY_VC_UI_URL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVcUiUrl(@javax.annotation.Nullable String vcUiUrl) {
+  public void setVcUiUrl(@jakarta.annotation.Nullable String vcUiUrl) {
     this.vcUiUrl = vcUiUrl;
   }
 
 
+  /**
+   * Return true if this CdeVc object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

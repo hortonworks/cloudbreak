@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The response object for FreeIpa root volume update.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateRootVolumeFreeipaResponse {
   public static final String JSON_PROPERTY_RESULT = "result";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String result;
 
-  public UpdateRootVolumeFreeipaResponse() {
+  public UpdateRootVolumeFreeipaResponse() { 
   }
 
-  public UpdateRootVolumeFreeipaResponse result(@javax.annotation.Nullable String result) {
-    
+  public UpdateRootVolumeFreeipaResponse result(@jakarta.annotation.Nullable String result) {
     this.result = result;
     return this;
   }
@@ -48,7 +50,7 @@ public class UpdateRootVolumeFreeipaResponse {
    * The result of the operation.
    * @return result
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class UpdateRootVolumeFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_RESULT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResult(@javax.annotation.Nullable String result) {
+  public void setResult(@jakarta.annotation.Nullable String result) {
     this.result = result;
   }
 
 
+  /**
+   * Return true if this UpdateRootVolumeFreeipaResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

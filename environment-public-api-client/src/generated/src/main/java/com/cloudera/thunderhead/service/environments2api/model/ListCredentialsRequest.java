@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a list credentials request.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListCredentialsRequest {
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String credentialName;
 
-  public ListCredentialsRequest() {
+  public ListCredentialsRequest() { 
   }
 
-  public ListCredentialsRequest credentialName(@javax.annotation.Nullable String credentialName) {
-    
+  public ListCredentialsRequest credentialName(@jakarta.annotation.Nullable String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -48,7 +50,7 @@ public class ListCredentialsRequest {
    * An optional credential name to search by.
    * @return credentialName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class ListCredentialsRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCredentialName(@javax.annotation.Nullable String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nullable String credentialName) {
     this.credentialName = credentialName;
   }
 
 
+  /**
+   * Return true if this ListCredentialsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

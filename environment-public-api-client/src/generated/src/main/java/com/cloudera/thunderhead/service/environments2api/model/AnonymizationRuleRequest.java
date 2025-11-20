@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Anonymization rule request object that is applied on logs that are sent to Cloudera.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AnonymizationRuleRequest {
   public static final String JSON_PROPERTY_VALUE = "value";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String value;
 
   public static final String JSON_PROPERTY_REPLACEMENT = "replacement";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String replacement = "[REDACTED]";
 
-  public AnonymizationRuleRequest() {
+  public AnonymizationRuleRequest() { 
   }
 
-  public AnonymizationRuleRequest value(@javax.annotation.Nonnull String value) {
-    
+  public AnonymizationRuleRequest value(@jakarta.annotation.Nonnull String value) {
     this.value = value;
     return this;
   }
@@ -53,7 +55,7 @@ public class AnonymizationRuleRequest {
    * Pattern of the rule that should be redacted.
    * @return value
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class AnonymizationRuleRequest {
 
   @JsonProperty(JSON_PROPERTY_VALUE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setValue(@javax.annotation.Nonnull String value) {
+  public void setValue(@jakarta.annotation.Nonnull String value) {
     this.value = value;
   }
 
-  public AnonymizationRuleRequest replacement(@javax.annotation.Nullable String replacement) {
-    
+
+  public AnonymizationRuleRequest replacement(@jakarta.annotation.Nullable String replacement) {
     this.replacement = replacement;
     return this;
   }
@@ -78,7 +80,7 @@ public class AnonymizationRuleRequest {
    * If rule pattern (value) matches, that will be replaced for this string (default [REDACTED])
    * @return replacement
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPLACEMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class AnonymizationRuleRequest {
 
   @JsonProperty(JSON_PROPERTY_REPLACEMENT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReplacement(@javax.annotation.Nullable String replacement) {
+  public void setReplacement(@jakarta.annotation.Nullable String replacement) {
     this.replacement = replacement;
   }
 
 
+  /**
+   * Return true if this AnonymizationRuleRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

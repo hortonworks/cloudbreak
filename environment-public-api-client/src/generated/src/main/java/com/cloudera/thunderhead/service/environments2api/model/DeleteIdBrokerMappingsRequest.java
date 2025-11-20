@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for deleting ID Broker mappings for an environment.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class DeleteIdBrokerMappingsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentCrn;
 
-  public DeleteIdBrokerMappingsRequest() {
+  public DeleteIdBrokerMappingsRequest() { 
   }
 
-  public DeleteIdBrokerMappingsRequest environmentCrn(@javax.annotation.Nonnull String environmentCrn) {
-    
+  public DeleteIdBrokerMappingsRequest environmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -48,7 +50,7 @@ public class DeleteIdBrokerMappingsRequest {
    * The CRN of the environment.
    * @return environmentCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class DeleteIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentCrn(@javax.annotation.Nonnull String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nonnull String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
 
+  /**
+   * Return true if this DeleteIdBrokerMappingsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

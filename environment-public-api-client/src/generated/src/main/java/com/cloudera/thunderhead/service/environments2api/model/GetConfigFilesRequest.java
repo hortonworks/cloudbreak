@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Datalake client configs.
@@ -38,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetConfigFilesRequest {
   public static final String JSON_PROPERTY_DATALAKE_CRN = "datalakeCrn";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String datalakeCrn;
 
   /**
@@ -99,22 +101,21 @@ public class GetConfigFilesRequest {
   }
 
   public static final String JSON_PROPERTY_CONFIG_SET = "configSet";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ConfigSetEnum configSet;
 
   public static final String JSON_PROPERTY_SERVICE_OVERRIDE_LIST = "serviceOverrideList";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> serviceOverrideList = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ADDITIONAL_SERVICES = "additionalServices";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String additionalServices;
 
-  public GetConfigFilesRequest() {
+  public GetConfigFilesRequest() { 
   }
 
-  public GetConfigFilesRequest datalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
-    
+  public GetConfigFilesRequest datalakeCrn(@jakarta.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
     return this;
   }
@@ -123,7 +124,7 @@ public class GetConfigFilesRequest {
    * The CRN of the Datalake
    * @return datalakeCrn
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -134,12 +135,12 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_DATALAKE_CRN)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDatalakeCrn(@javax.annotation.Nonnull String datalakeCrn) {
+  public void setDatalakeCrn(@jakarta.annotation.Nonnull String datalakeCrn) {
     this.datalakeCrn = datalakeCrn;
   }
 
-  public GetConfigFilesRequest configSet(@javax.annotation.Nullable ConfigSetEnum configSet) {
-    
+
+  public GetConfigFilesRequest configSet(@jakarta.annotation.Nullable ConfigSetEnum configSet) {
     this.configSet = configSet;
     return this;
   }
@@ -148,7 +149,7 @@ public class GetConfigFilesRequest {
    * config file set to retrieve.
    * @return configSet
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG_SET)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -159,12 +160,12 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_CONFIG_SET)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfigSet(@javax.annotation.Nullable ConfigSetEnum configSet) {
+  public void setConfigSet(@jakarta.annotation.Nullable ConfigSetEnum configSet) {
     this.configSet = configSet;
   }
 
-  public GetConfigFilesRequest serviceOverrideList(@javax.annotation.Nullable List<String> serviceOverrideList) {
-    
+
+  public GetConfigFilesRequest serviceOverrideList(@jakarta.annotation.Nullable List<String> serviceOverrideList) {
     this.serviceOverrideList = serviceOverrideList;
     return this;
   }
@@ -181,7 +182,7 @@ public class GetConfigFilesRequest {
    * The Datalakservices to collect client configs.
    * @return serviceOverrideList
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_OVERRIDE_LIST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -192,12 +193,12 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_OVERRIDE_LIST)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceOverrideList(@javax.annotation.Nullable List<String> serviceOverrideList) {
+  public void setServiceOverrideList(@jakarta.annotation.Nullable List<String> serviceOverrideList) {
     this.serviceOverrideList = serviceOverrideList;
   }
 
-  public GetConfigFilesRequest additionalServices(@javax.annotation.Nullable String additionalServices) {
-    
+
+  public GetConfigFilesRequest additionalServices(@jakarta.annotation.Nullable String additionalServices) {
     this.additionalServices = additionalServices;
     return this;
   }
@@ -206,7 +207,7 @@ public class GetConfigFilesRequest {
    * A list of service types and role types to get their process configs. The input format must be \&quot;serviceType1,roleType1;serviceType2,roleType2\&quot;. Each service type and its role type maps to a process. Different service type and role type groups are separated by \&quot;;\&quot; and each service type and its associated role type is separated by \&quot;,\&quot;. The input is case sensitive. If the format is wrong or service is not found, exceptions will be thrown. If no roles are found for the service, no config files for that role and service will be returned. e.g. \&quot;HIVE,HIVESERVER2;HUE,HUE_SERVER\&quot;.
    * @return additionalServices
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -217,11 +218,14 @@ public class GetConfigFilesRequest {
 
   @JsonProperty(JSON_PROPERTY_ADDITIONAL_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAdditionalServices(@javax.annotation.Nullable String additionalServices) {
+  public void setAdditionalServices(@jakarta.annotation.Nullable String additionalServices) {
     this.additionalServices = additionalServices;
   }
 
 
+  /**
+   * Return true if this GetConfigFilesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

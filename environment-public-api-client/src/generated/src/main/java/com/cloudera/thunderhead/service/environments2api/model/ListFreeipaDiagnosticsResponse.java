@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.FreeipaDiagnosticsCollectionResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for listing recent FreeIPA diagnostics collections.
@@ -36,14 +38,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListFreeipaDiagnosticsResponse {
   public static final String JSON_PROPERTY_COLLECTIONS = "collections";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<FreeipaDiagnosticsCollectionResponse> collections = new ArrayList<>();
 
-  public ListFreeipaDiagnosticsResponse() {
+  public ListFreeipaDiagnosticsResponse() { 
   }
 
-  public ListFreeipaDiagnosticsResponse collections(@javax.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
-    
+  public ListFreeipaDiagnosticsResponse collections(@jakarta.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
     this.collections = collections;
     return this;
   }
@@ -60,7 +61,7 @@ public class ListFreeipaDiagnosticsResponse {
    * description.
    * @return collections
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COLLECTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -71,11 +72,14 @@ public class ListFreeipaDiagnosticsResponse {
 
   @JsonProperty(JSON_PROPERTY_COLLECTIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCollections(@javax.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
+  public void setCollections(@jakarta.annotation.Nullable List<FreeipaDiagnosticsCollectionResponse> collections) {
     this.collections = collections;
   }
 
 
+  /**
+   * Return true if this ListFreeipaDiagnosticsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

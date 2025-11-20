@@ -139,6 +139,15 @@ public class ServerProperties {
     @Value("${integrationtest.remoteenvironment.contextPath:/remoteenvironmentservice}")
     private String remoteEnvironmentContextPath;
 
+    @Value("${integrationtest.environmentpublicapi.server}")
+    private String environmentPublicApiServer;
+
+    @Value("${integrationtest.environmentpublicapi.port:0}")
+    private int environmentPublicApiPort;
+
+    @Value("${integrationtest.environmentpublicapi.contextPath:}")
+    private String environmentPublicApiContextPath;
+
     private String cbVersion;
 
     @Inject
@@ -245,6 +254,14 @@ public class ServerProperties {
 
     public String getMockImageCatalogAddr() {
         return mockImageCatalogAddr + ":" + mockImageCatalogPort;
+    }
+
+    public String getEnvironmentPublicApiAddress() {
+        if (environmentPublicApiPort != 0) {
+            return environmentPublicApiServer + ":" + environmentPublicApiPort + environmentPublicApiContextPath;
+        } else {
+            return environmentPublicApiServer + environmentPublicApiContextPath;
+        }
     }
 
     public String getCbVersion() {

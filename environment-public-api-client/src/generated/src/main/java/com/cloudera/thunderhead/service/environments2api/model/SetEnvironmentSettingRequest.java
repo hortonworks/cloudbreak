@@ -14,16 +14,19 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object to set environment configuration settings.
@@ -35,23 +38,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetEnvironmentSettingRequest {
   public static final String JSON_PROPERTY_SETTINGS = "settings";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Map<String, String> settings = new HashMap<>();
 
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentName;
 
-  public SetEnvironmentSettingRequest() {
+  public SetEnvironmentSettingRequest() { 
   }
 
-  public SetEnvironmentSettingRequest settings(@javax.annotation.Nonnull Map<String, String> settings) {
-    
+  public SetEnvironmentSettingRequest settings(@jakarta.annotation.Nonnull Map<String, String> settings) {
     this.settings = settings;
     return this;
   }
 
   public SetEnvironmentSettingRequest putSettingsItem(String key, String settingsItem) {
+    if (this.settings == null) {
+      this.settings = new HashMap<>();
+    }
     this.settings.put(key, settingsItem);
     return this;
   }
@@ -60,7 +65,7 @@ public class SetEnvironmentSettingRequest {
    * Dictionary of settings to set.
    * @return settings
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -71,12 +76,12 @@ public class SetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_SETTINGS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSettings(@javax.annotation.Nonnull Map<String, String> settings) {
+  public void setSettings(@jakarta.annotation.Nonnull Map<String, String> settings) {
     this.settings = settings;
   }
 
-  public SetEnvironmentSettingRequest environmentName(@javax.annotation.Nullable String environmentName) {
-    
+
+  public SetEnvironmentSettingRequest environmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -85,7 +90,7 @@ public class SetEnvironmentSettingRequest {
    * The name or CRN of the environment. Empty to set system wide settings.
    * @return environmentName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -96,11 +101,14 @@ public class SetEnvironmentSettingRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentName(@javax.annotation.Nullable String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nullable String environmentName) {
     this.environmentName = environmentName;
   }
 
 
+  /**
+   * Return true if this SetEnvironmentSettingRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

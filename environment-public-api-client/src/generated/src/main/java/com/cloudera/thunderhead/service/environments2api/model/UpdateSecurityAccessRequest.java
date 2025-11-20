@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object for updating security access of the given environment.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateSecurityAccessRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID = "gatewayNodeSecurityGroupId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String gatewayNodeSecurityGroupId;
 
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String defaultSecurityGroupId;
 
-  public UpdateSecurityAccessRequest() {
+  public UpdateSecurityAccessRequest() { 
   }
 
-  public UpdateSecurityAccessRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateSecurityAccessRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -58,7 +60,7 @@ public class UpdateSecurityAccessRequest {
    * The name or the CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateSecurityAccessRequest gatewayNodeSecurityGroupId(@javax.annotation.Nonnull String gatewayNodeSecurityGroupId) {
-    
+
+  public UpdateSecurityAccessRequest gatewayNodeSecurityGroupId(@jakarta.annotation.Nonnull String gatewayNodeSecurityGroupId) {
     this.gatewayNodeSecurityGroupId = gatewayNodeSecurityGroupId;
     return this;
   }
@@ -83,7 +85,7 @@ public class UpdateSecurityAccessRequest {
    * Security group ID where Knox-enabled hosts are placed.
    * @return gatewayNodeSecurityGroupId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -94,12 +96,12 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_GATEWAY_NODE_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setGatewayNodeSecurityGroupId(@javax.annotation.Nonnull String gatewayNodeSecurityGroupId) {
+  public void setGatewayNodeSecurityGroupId(@jakarta.annotation.Nonnull String gatewayNodeSecurityGroupId) {
     this.gatewayNodeSecurityGroupId = gatewayNodeSecurityGroupId;
   }
 
-  public UpdateSecurityAccessRequest defaultSecurityGroupId(@javax.annotation.Nonnull String defaultSecurityGroupId) {
-    
+
+  public UpdateSecurityAccessRequest defaultSecurityGroupId(@jakarta.annotation.Nonnull String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
@@ -108,7 +110,7 @@ public class UpdateSecurityAccessRequest {
    * Security group ID for non-gateway nodes.
    * @return defaultSecurityGroupId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -119,11 +121,14 @@ public class UpdateSecurityAccessRequest {
 
   @JsonProperty(JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDefaultSecurityGroupId(@javax.annotation.Nonnull String defaultSecurityGroupId) {
+  public void setDefaultSecurityGroupId(@jakarta.annotation.Nonnull String defaultSecurityGroupId) {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
 
 
+  /**
+   * Return true if this UpdateSecurityAccessRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

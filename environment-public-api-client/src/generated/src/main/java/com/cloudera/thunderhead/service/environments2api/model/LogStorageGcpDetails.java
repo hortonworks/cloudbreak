@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * GCP-specific log storage configuration information.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class LogStorageGcpDetails {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String serviceAccountEmail;
 
-  public LogStorageGcpDetails() {
+  public LogStorageGcpDetails() { 
   }
 
-  public LogStorageGcpDetails storageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
-    
+  public LogStorageGcpDetails storageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
     return this;
   }
@@ -54,7 +56,7 @@ public class LogStorageGcpDetails {
    * The storage location to use. This should be a gs:// url.
    * @return storageLocationBase
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -65,12 +67,12 @@ public class LogStorageGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStorageLocationBase(@javax.annotation.Nullable String storageLocationBase) {
+  public void setStorageLocationBase(@jakarta.annotation.Nullable String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-  public LogStorageGcpDetails serviceAccountEmail(@javax.annotation.Nullable String serviceAccountEmail) {
-    
+
+  public LogStorageGcpDetails serviceAccountEmail(@jakarta.annotation.Nullable String serviceAccountEmail) {
     this.serviceAccountEmail = serviceAccountEmail;
     return this;
   }
@@ -79,7 +81,7 @@ public class LogStorageGcpDetails {
    * Email ID of the service account associated with the logging instances.
    * @return serviceAccountEmail
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -90,11 +92,14 @@ public class LogStorageGcpDetails {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ACCOUNT_EMAIL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceAccountEmail(@javax.annotation.Nullable String serviceAccountEmail) {
+  public void setServiceAccountEmail(@jakarta.annotation.Nullable String serviceAccountEmail) {
     this.serviceAccountEmail = serviceAccountEmail;
   }
 
 
+  /**
+   * Return true if this LogStorage_gcpDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

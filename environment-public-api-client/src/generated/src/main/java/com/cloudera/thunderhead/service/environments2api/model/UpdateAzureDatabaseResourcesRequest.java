@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ServiceEndpointsCreation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for updating Azure Database resources.
@@ -39,26 +41,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureDatabaseResourcesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID = "databasePrivateDnsZoneId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String databasePrivateDnsZoneId;
 
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION = "serviceEndpointsCreation";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ServiceEndpointsCreation serviceEndpointsCreation;
 
-  public UpdateAzureDatabaseResourcesRequest() {
+  public UpdateAzureDatabaseResourcesRequest() { 
   }
 
-  public UpdateAzureDatabaseResourcesRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateAzureDatabaseResourcesRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -67,7 +68,7 @@ public class UpdateAzureDatabaseResourcesRequest {
    * The name or CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -78,12 +79,12 @@ public class UpdateAzureDatabaseResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateAzureDatabaseResourcesRequest databasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
-    
+
+  public UpdateAzureDatabaseResourcesRequest databasePrivateDnsZoneId(@jakarta.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
@@ -92,7 +93,7 @@ public class UpdateAzureDatabaseResourcesRequest {
    * The full Azure resource ID of the existing Private DNS Zone used for Flexible Server and Single Server Databases.
    * @return databasePrivateDnsZoneId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -103,12 +104,12 @@ public class UpdateAzureDatabaseResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDatabasePrivateDnsZoneId(@javax.annotation.Nullable String databasePrivateDnsZoneId) {
+  public void setDatabasePrivateDnsZoneId(@jakarta.annotation.Nullable String databasePrivateDnsZoneId) {
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
   }
 
-  public UpdateAzureDatabaseResourcesRequest flexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
-    
+
+  public UpdateAzureDatabaseResourcesRequest flexibleServerSubnetIds(@jakarta.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
   }
@@ -125,7 +126,7 @@ public class UpdateAzureDatabaseResourcesRequest {
    * The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
    * @return flexibleServerSubnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -136,12 +137,12 @@ public class UpdateAzureDatabaseResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFlexibleServerSubnetIds(@javax.annotation.Nullable List<String> flexibleServerSubnetIds) {
+  public void setFlexibleServerSubnetIds(@jakarta.annotation.Nullable List<String> flexibleServerSubnetIds) {
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
   }
 
-  public UpdateAzureDatabaseResourcesRequest serviceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
-    
+
+  public UpdateAzureDatabaseResourcesRequest serviceEndpointsCreation(@jakarta.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
     return this;
   }
@@ -150,7 +151,7 @@ public class UpdateAzureDatabaseResourcesRequest {
    * Get serviceEndpointsCreation
    * @return serviceEndpointsCreation
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -161,11 +162,14 @@ public class UpdateAzureDatabaseResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceEndpointsCreation(@javax.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
+  public void setServiceEndpointsCreation(@jakarta.annotation.Nullable ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
   }
 
 
+  /**
+   * Return true if this UpdateAzureDatabaseResourcesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

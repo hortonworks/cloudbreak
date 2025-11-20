@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Azure storage configuration for cluster and audit logs.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AzureLogStorageRequest {
   public static final String JSON_PROPERTY_STORAGE_LOCATION_BASE = "storageLocationBase";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String storageLocationBase;
 
   public static final String JSON_PROPERTY_MANAGED_IDENTITY = "managedIdentity";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String managedIdentity;
 
   public static final String JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE = "backupStorageLocationBase";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String backupStorageLocationBase;
 
-  public AzureLogStorageRequest() {
+  public AzureLogStorageRequest() { 
   }
 
-  public AzureLogStorageRequest storageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
-    
+  public AzureLogStorageRequest storageLocationBase(@jakarta.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
     return this;
   }
@@ -58,7 +60,7 @@ public class AzureLogStorageRequest {
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net. The filesystem must already exist and the storage account must be StorageV2.
    * @return storageLocationBase
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStorageLocationBase(@javax.annotation.Nonnull String storageLocationBase) {
+  public void setStorageLocationBase(@jakarta.annotation.Nonnull String storageLocationBase) {
     this.storageLocationBase = storageLocationBase;
   }
 
-  public AzureLogStorageRequest managedIdentity(@javax.annotation.Nonnull String managedIdentity) {
-    
+
+  public AzureLogStorageRequest managedIdentity(@jakarta.annotation.Nonnull String managedIdentity) {
     this.managedIdentity = managedIdentity;
     return this;
   }
@@ -83,7 +85,7 @@ public class AzureLogStorageRequest {
    * The managed identity associated with the logger. This identity should have Storage Blob Data Contributor role on the given storage account.
    * @return managedIdentity
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -94,12 +96,12 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setManagedIdentity(@javax.annotation.Nonnull String managedIdentity) {
+  public void setManagedIdentity(@jakarta.annotation.Nonnull String managedIdentity) {
     this.managedIdentity = managedIdentity;
   }
 
-  public AzureLogStorageRequest backupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
-    
+
+  public AzureLogStorageRequest backupStorageLocationBase(@jakarta.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
     return this;
   }
@@ -108,7 +110,7 @@ public class AzureLogStorageRequest {
    * The storage location to use. The location has to be in the following format abfs://filesystem@storage-account-name.dfs.core.windows.net. The filesystem must already exist and the storage account must be StorageV2.
    * @return backupStorageLocationBase
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class AzureLogStorageRequest {
 
   @JsonProperty(JSON_PROPERTY_BACKUP_STORAGE_LOCATION_BASE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBackupStorageLocationBase(@javax.annotation.Nullable String backupStorageLocationBase) {
+  public void setBackupStorageLocationBase(@jakarta.annotation.Nullable String backupStorageLocationBase) {
     this.backupStorageLocationBase = backupStorageLocationBase;
   }
 
 
+  /**
+   * Return true if this AzureLogStorageRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

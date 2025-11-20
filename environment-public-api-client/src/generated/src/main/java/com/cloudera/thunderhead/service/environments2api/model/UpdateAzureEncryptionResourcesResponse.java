@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureResourceEncryptionParameters;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a update Azure encryption resources request.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureEncryptionResourcesResponse {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Environment environment;
 
   public static final String JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS = "resourceEncryptionParameters";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
-  public UpdateAzureEncryptionResourcesResponse() {
+  public UpdateAzureEncryptionResourcesResponse() { 
   }
 
-  public UpdateAzureEncryptionResourcesResponse environment(@javax.annotation.Nonnull Environment environment) {
-    
+  public UpdateAzureEncryptionResourcesResponse environment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
     return this;
   }
@@ -55,7 +57,7 @@ public class UpdateAzureEncryptionResourcesResponse {
    * Get environment
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,12 +68,12 @@ public class UpdateAzureEncryptionResourcesResponse {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull Environment environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull Environment environment) {
     this.environment = environment;
   }
 
-  public UpdateAzureEncryptionResourcesResponse resourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
-    
+
+  public UpdateAzureEncryptionResourcesResponse resourceEncryptionParameters(@jakarta.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     this.resourceEncryptionParameters = resourceEncryptionParameters;
     return this;
   }
@@ -80,7 +82,7 @@ public class UpdateAzureEncryptionResourcesResponse {
    * Get resourceEncryptionParameters
    * @return resourceEncryptionParameters
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class UpdateAzureEncryptionResourcesResponse {
 
   @JsonProperty(JSON_PROPERTY_RESOURCE_ENCRYPTION_PARAMETERS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResourceEncryptionParameters(@javax.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
+  public void setResourceEncryptionParameters(@jakarta.annotation.Nullable AzureResourceEncryptionParameters resourceEncryptionParameters) {
     this.resourceEncryptionParameters = resourceEncryptionParameters;
   }
 
 
+  /**
+   * Return true if this UpdateAzureEncryptionResourcesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

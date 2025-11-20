@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AttachedVolumeDetail;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Object for a FreeIPA instance providing specific information about the instance.
@@ -49,66 +51,65 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeIpaInstance {
   public static final String JSON_PROPERTY_AVAILABILITY_ZONE = "availabilityZone";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String availabilityZone;
 
   public static final String JSON_PROPERTY_DISCOVERY_F_Q_D_N = "discoveryFQDN";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String discoveryFQDN;
 
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceId;
 
   public static final String JSON_PROPERTY_INSTANCE_GROUP = "instanceGroup";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceGroup;
 
   public static final String JSON_PROPERTY_INSTANCE_STATUS = "instanceStatus";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceStatus;
 
   public static final String JSON_PROPERTY_INSTANCE_STATUS_REASON = "instanceStatusReason";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceStatusReason;
 
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceType;
 
   public static final String JSON_PROPERTY_INSTANCE_VM_TYPE = "instanceVmType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceVmType;
 
   public static final String JSON_PROPERTY_LIFE_CYCLE = "lifeCycle";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String lifeCycle;
 
   public static final String JSON_PROPERTY_PRIVATE_I_P = "privateIP";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String privateIP;
 
   public static final String JSON_PROPERTY_PUBLIC_I_P = "publicIP";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String publicIP;
 
   public static final String JSON_PROPERTY_SSH_PORT = "sshPort";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer sshPort;
 
   public static final String JSON_PROPERTY_SUBNET_ID = "subnetId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String subnetId;
 
   public static final String JSON_PROPERTY_ATTACHED_VOLUMES = "attachedVolumes";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<AttachedVolumeDetail> attachedVolumes = new ArrayList<>();
 
-  public FreeIpaInstance() {
+  public FreeIpaInstance() { 
   }
 
-  public FreeIpaInstance availabilityZone(@javax.annotation.Nullable String availabilityZone) {
-    
+  public FreeIpaInstance availabilityZone(@jakarta.annotation.Nullable String availabilityZone) {
     this.availabilityZone = availabilityZone;
     return this;
   }
@@ -117,7 +118,7 @@ public class FreeIpaInstance {
    * The availability zone of the instance.
    * @return availabilityZone
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -128,12 +129,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_AVAILABILITY_ZONE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAvailabilityZone(@javax.annotation.Nullable String availabilityZone) {
+  public void setAvailabilityZone(@jakarta.annotation.Nullable String availabilityZone) {
     this.availabilityZone = availabilityZone;
   }
 
-  public FreeIpaInstance discoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
-    
+
+  public FreeIpaInstance discoveryFQDN(@jakarta.annotation.Nullable String discoveryFQDN) {
     this.discoveryFQDN = discoveryFQDN;
     return this;
   }
@@ -142,7 +143,7 @@ public class FreeIpaInstance {
    * The fully qualified domain name of the instance in the service discovery cluster.
    * @return discoveryFQDN
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -153,12 +154,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_DISCOVERY_F_Q_D_N)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDiscoveryFQDN(@javax.annotation.Nullable String discoveryFQDN) {
+  public void setDiscoveryFQDN(@jakarta.annotation.Nullable String discoveryFQDN) {
     this.discoveryFQDN = discoveryFQDN;
   }
 
-  public FreeIpaInstance instanceId(@javax.annotation.Nullable String instanceId) {
-    
+
+  public FreeIpaInstance instanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
     return this;
   }
@@ -167,7 +168,7 @@ public class FreeIpaInstance {
    * The instance ID for the instance.
    * @return instanceId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -178,12 +179,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceId(@javax.annotation.Nullable String instanceId) {
+  public void setInstanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
   }
 
-  public FreeIpaInstance instanceGroup(@javax.annotation.Nullable String instanceGroup) {
-    
+
+  public FreeIpaInstance instanceGroup(@jakarta.annotation.Nullable String instanceGroup) {
     this.instanceGroup = instanceGroup;
     return this;
   }
@@ -192,7 +193,7 @@ public class FreeIpaInstance {
    * The instance group that contains the instance.
    * @return instanceGroup
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -203,12 +204,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_GROUP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceGroup(@javax.annotation.Nullable String instanceGroup) {
+  public void setInstanceGroup(@jakarta.annotation.Nullable String instanceGroup) {
     this.instanceGroup = instanceGroup;
   }
 
-  public FreeIpaInstance instanceStatus(@javax.annotation.Nullable String instanceStatus) {
-    
+
+  public FreeIpaInstance instanceStatus(@jakarta.annotation.Nullable String instanceStatus) {
     this.instanceStatus = instanceStatus;
     return this;
   }
@@ -217,7 +218,7 @@ public class FreeIpaInstance {
    * The status of the instance.
    * @return instanceStatus
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -228,12 +229,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceStatus(@javax.annotation.Nullable String instanceStatus) {
+  public void setInstanceStatus(@jakarta.annotation.Nullable String instanceStatus) {
     this.instanceStatus = instanceStatus;
   }
 
-  public FreeIpaInstance instanceStatusReason(@javax.annotation.Nullable String instanceStatusReason) {
-    
+
+  public FreeIpaInstance instanceStatusReason(@jakarta.annotation.Nullable String instanceStatusReason) {
     this.instanceStatusReason = instanceStatusReason;
     return this;
   }
@@ -242,7 +243,7 @@ public class FreeIpaInstance {
    * The status reason for the instance.
    * @return instanceStatusReason
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -253,12 +254,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_STATUS_REASON)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceStatusReason(@javax.annotation.Nullable String instanceStatusReason) {
+  public void setInstanceStatusReason(@jakarta.annotation.Nullable String instanceStatusReason) {
     this.instanceStatusReason = instanceStatusReason;
   }
 
-  public FreeIpaInstance instanceType(@javax.annotation.Nullable String instanceType) {
-    
+
+  public FreeIpaInstance instanceType(@jakarta.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
     return this;
   }
@@ -267,7 +268,7 @@ public class FreeIpaInstance {
    * The type of the instance (either GATEWAY or GATEWAY_PRIMARY).
    * @return instanceType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -278,12 +279,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceType(@javax.annotation.Nullable String instanceType) {
+  public void setInstanceType(@jakarta.annotation.Nullable String instanceType) {
     this.instanceType = instanceType;
   }
 
-  public FreeIpaInstance instanceVmType(@javax.annotation.Nullable String instanceVmType) {
-    
+
+  public FreeIpaInstance instanceVmType(@jakarta.annotation.Nullable String instanceVmType) {
     this.instanceVmType = instanceVmType;
     return this;
   }
@@ -292,7 +293,7 @@ public class FreeIpaInstance {
    * The VM type of the instance. Supported values depend on the cloud platform.
    * @return instanceVmType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_VM_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -303,12 +304,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_VM_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceVmType(@javax.annotation.Nullable String instanceVmType) {
+  public void setInstanceVmType(@jakarta.annotation.Nullable String instanceVmType) {
     this.instanceVmType = instanceVmType;
   }
 
-  public FreeIpaInstance lifeCycle(@javax.annotation.Nullable String lifeCycle) {
-    
+
+  public FreeIpaInstance lifeCycle(@jakarta.annotation.Nullable String lifeCycle) {
     this.lifeCycle = lifeCycle;
     return this;
   }
@@ -317,7 +318,7 @@ public class FreeIpaInstance {
    * The life cycle type for the instance (either NORMAL or SPOT).
    * @return lifeCycle
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LIFE_CYCLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -328,12 +329,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_LIFE_CYCLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLifeCycle(@javax.annotation.Nullable String lifeCycle) {
+  public void setLifeCycle(@jakarta.annotation.Nullable String lifeCycle) {
     this.lifeCycle = lifeCycle;
   }
 
-  public FreeIpaInstance privateIP(@javax.annotation.Nullable String privateIP) {
-    
+
+  public FreeIpaInstance privateIP(@jakarta.annotation.Nullable String privateIP) {
     this.privateIP = privateIP;
     return this;
   }
@@ -342,7 +343,7 @@ public class FreeIpaInstance {
    * The private IP of the instance.
    * @return privateIP
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PRIVATE_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -353,12 +354,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_PRIVATE_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPrivateIP(@javax.annotation.Nullable String privateIP) {
+  public void setPrivateIP(@jakarta.annotation.Nullable String privateIP) {
     this.privateIP = privateIP;
   }
 
-  public FreeIpaInstance publicIP(@javax.annotation.Nullable String publicIP) {
-    
+
+  public FreeIpaInstance publicIP(@jakarta.annotation.Nullable String publicIP) {
     this.publicIP = publicIP;
     return this;
   }
@@ -367,7 +368,7 @@ public class FreeIpaInstance {
    * The public IP of the instance.
    * @return publicIP
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -378,12 +379,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_I_P)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicIP(@javax.annotation.Nullable String publicIP) {
+  public void setPublicIP(@jakarta.annotation.Nullable String publicIP) {
     this.publicIP = publicIP;
   }
 
-  public FreeIpaInstance sshPort(@javax.annotation.Nullable Integer sshPort) {
-    
+
+  public FreeIpaInstance sshPort(@jakarta.annotation.Nullable Integer sshPort) {
     this.sshPort = sshPort;
     return this;
   }
@@ -392,7 +393,7 @@ public class FreeIpaInstance {
    * The SSH port of the instance.
    * @return sshPort
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SSH_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -403,12 +404,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_SSH_PORT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSshPort(@javax.annotation.Nullable Integer sshPort) {
+  public void setSshPort(@jakarta.annotation.Nullable Integer sshPort) {
     this.sshPort = sshPort;
   }
 
-  public FreeIpaInstance subnetId(@javax.annotation.Nullable String subnetId) {
-    
+
+  public FreeIpaInstance subnetId(@jakarta.annotation.Nullable String subnetId) {
     this.subnetId = subnetId;
     return this;
   }
@@ -417,7 +418,7 @@ public class FreeIpaInstance {
    * The subnet ID of the instance.
    * @return subnetId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -428,12 +429,12 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_SUBNET_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetId(@javax.annotation.Nullable String subnetId) {
+  public void setSubnetId(@jakarta.annotation.Nullable String subnetId) {
     this.subnetId = subnetId;
   }
 
-  public FreeIpaInstance attachedVolumes(@javax.annotation.Nullable List<AttachedVolumeDetail> attachedVolumes) {
-    
+
+  public FreeIpaInstance attachedVolumes(@jakarta.annotation.Nullable List<AttachedVolumeDetail> attachedVolumes) {
     this.attachedVolumes = attachedVolumes;
     return this;
   }
@@ -450,7 +451,7 @@ public class FreeIpaInstance {
    * List of volumes attached to this instance.
    * @return attachedVolumes
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ATTACHED_VOLUMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -461,11 +462,14 @@ public class FreeIpaInstance {
 
   @JsonProperty(JSON_PROPERTY_ATTACHED_VOLUMES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAttachedVolumes(@javax.annotation.Nullable List<AttachedVolumeDetail> attachedVolumes) {
+  public void setAttachedVolumes(@jakarta.annotation.Nullable List<AttachedVolumeDetail> attachedVolumes) {
     this.attachedVolumes = attachedVolumes;
   }
 
 
+  /**
+   * Return true if this FreeIpaInstance object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

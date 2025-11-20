@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Additional SSH key authentication configuration for accessing cluster node instances.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Authentication {
   public static final String JSON_PROPERTY_PUBLIC_KEY = "publicKey";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String publicKey;
 
   public static final String JSON_PROPERTY_PUBLIC_KEY_ID = "publicKeyId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String publicKeyId;
 
   public static final String JSON_PROPERTY_LOGIN_USER_NAME = "loginUserName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String loginUserName;
 
-  public Authentication() {
+  public Authentication() { 
   }
 
-  public Authentication publicKey(@javax.annotation.Nullable String publicKey) {
-    
+  public Authentication publicKey(@jakarta.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
     return this;
   }
@@ -58,7 +60,7 @@ public class Authentication {
    * SSH Public key string.
    * @return publicKey
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKey(@javax.annotation.Nullable String publicKey) {
+  public void setPublicKey(@jakarta.annotation.Nullable String publicKey) {
     this.publicKey = publicKey;
   }
 
-  public Authentication publicKeyId(@javax.annotation.Nullable String publicKeyId) {
-    
+
+  public Authentication publicKeyId(@jakarta.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
     return this;
   }
@@ -83,7 +85,7 @@ public class Authentication {
    * Public SSH key ID already registered in the cloud provider.
    * @return publicKeyId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_PUBLIC_KEY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPublicKeyId(@javax.annotation.Nullable String publicKeyId) {
+  public void setPublicKeyId(@jakarta.annotation.Nullable String publicKeyId) {
     this.publicKeyId = publicKeyId;
   }
 
-  public Authentication loginUserName(@javax.annotation.Nullable String loginUserName) {
-    
+
+  public Authentication loginUserName(@jakarta.annotation.Nullable String loginUserName) {
     this.loginUserName = loginUserName;
     return this;
   }
@@ -108,7 +110,7 @@ public class Authentication {
    * The SSH user name created on the nodes for SSH access.
    * @return loginUserName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_LOGIN_USER_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class Authentication {
 
   @JsonProperty(JSON_PROPERTY_LOGIN_USER_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setLoginUserName(@javax.annotation.Nullable String loginUserName) {
+  public void setLoginUserName(@jakarta.annotation.Nullable String loginUserName) {
     this.loginUserName = loginUserName;
   }
 
 
+  /**
+   * Return true if this Authentication object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

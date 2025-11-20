@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object to enable environment level telemetry features.
@@ -35,26 +38,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetTelemetryFeaturesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean cloudStorageLogging;
 
-  public SetTelemetryFeaturesRequest() {
+  public SetTelemetryFeaturesRequest() { 
   }
 
-  public SetTelemetryFeaturesRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public SetTelemetryFeaturesRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -63,7 +65,7 @@ public class SetTelemetryFeaturesRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -74,12 +76,12 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public SetTelemetryFeaturesRequest workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
-    
+
+  public SetTelemetryFeaturesRequest workloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -88,7 +90,7 @@ public class SetTelemetryFeaturesRequest {
    * Flag to enable environment level workload analytics.
    * @return workloadAnalytics
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -99,12 +101,12 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-  public SetTelemetryFeaturesRequest reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
-    
+
+  public SetTelemetryFeaturesRequest reportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -113,7 +115,7 @@ public class SetTelemetryFeaturesRequest {
    * [Deprecated] Flag to enable environment level deployment log collection.
    * @return reportDeploymentLogs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -124,12 +126,12 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-  public SetTelemetryFeaturesRequest cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
-    
+
+  public SetTelemetryFeaturesRequest cloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -138,7 +140,7 @@ public class SetTelemetryFeaturesRequest {
    * Flag to enable environment level cloud storage logging (enabled by default).
    * @return cloudStorageLogging
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -149,11 +151,14 @@ public class SetTelemetryFeaturesRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
 
+  /**
+   * Return true if this SetTelemetryFeaturesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The details of the last sync performed by automated user sync.
@@ -38,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class LastAutomatedSyncDetails {
   public static final String JSON_PROPERTY_TIMESTAMP = "timestamp";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private OffsetDateTime timestamp;
 
   /**
@@ -79,18 +81,17 @@ public class LastAutomatedSyncDetails {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_STATUS_MESSAGES = "statusMessages";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> statusMessages = new ArrayList<>();
 
-  public LastAutomatedSyncDetails() {
+  public LastAutomatedSyncDetails() { 
   }
 
-  public LastAutomatedSyncDetails timestamp(@javax.annotation.Nonnull OffsetDateTime timestamp) {
-    
+  public LastAutomatedSyncDetails timestamp(@jakarta.annotation.Nonnull OffsetDateTime timestamp) {
     this.timestamp = timestamp;
     return this;
   }
@@ -99,7 +100,7 @@ public class LastAutomatedSyncDetails {
    * The time when the sync was processed.
    * @return timestamp
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TIMESTAMP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -110,12 +111,12 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_TIMESTAMP)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTimestamp(@javax.annotation.Nonnull OffsetDateTime timestamp) {
+  public void setTimestamp(@jakarta.annotation.Nonnull OffsetDateTime timestamp) {
     this.timestamp = timestamp;
   }
 
-  public LastAutomatedSyncDetails status(@javax.annotation.Nonnull StatusEnum status) {
-    
+
+  public LastAutomatedSyncDetails status(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -124,7 +125,7 @@ public class LastAutomatedSyncDetails {
    * The status of the sync.
    * @return status
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -135,12 +136,12 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-  public LastAutomatedSyncDetails statusMessages(@javax.annotation.Nullable List<String> statusMessages) {
-    
+
+  public LastAutomatedSyncDetails statusMessages(@jakarta.annotation.Nullable List<String> statusMessages) {
     this.statusMessages = statusMessages;
     return this;
   }
@@ -157,7 +158,7 @@ public class LastAutomatedSyncDetails {
    * Additional detail related to the status.
    * @return statusMessages
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -168,11 +169,14 @@ public class LastAutomatedSyncDetails {
 
   @JsonProperty(JSON_PROPERTY_STATUS_MESSAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatusMessages(@javax.annotation.Nullable List<String> statusMessages) {
+  public void setStatusMessages(@jakarta.annotation.Nullable List<String> statusMessages) {
     this.statusMessages = statusMessages;
   }
 
 
+  /**
+   * Return true if this LastAutomatedSyncDetails object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

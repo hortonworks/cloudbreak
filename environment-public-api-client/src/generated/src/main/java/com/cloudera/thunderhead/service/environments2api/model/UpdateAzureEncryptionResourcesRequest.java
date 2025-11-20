@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for updating Azure encryption resources.
@@ -35,26 +38,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpdateAzureEncryptionResourcesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_URL = "encryptionKeyUrl";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String encryptionKeyUrl;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "encryptionKeyResourceGroupName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionKeyResourceGroupName;
 
   public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionUserManagedIdentity;
 
-  public UpdateAzureEncryptionResourcesRequest() {
+  public UpdateAzureEncryptionResourcesRequest() { 
   }
 
-  public UpdateAzureEncryptionResourcesRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public UpdateAzureEncryptionResourcesRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -63,7 +65,7 @@ public class UpdateAzureEncryptionResourcesRequest {
    * The name or CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -74,12 +76,12 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public UpdateAzureEncryptionResourcesRequest encryptionKeyUrl(@javax.annotation.Nonnull String encryptionKeyUrl) {
-    
+
+  public UpdateAzureEncryptionResourcesRequest encryptionKeyUrl(@jakarta.annotation.Nonnull String encryptionKeyUrl) {
     this.encryptionKeyUrl = encryptionKeyUrl;
     return this;
   }
@@ -88,7 +90,7 @@ public class UpdateAzureEncryptionResourcesRequest {
    * The URL of an encryption key, which will be used to encrypt the Azure Managed Disks, if the entitlement has been granted.
    * @return encryptionKeyUrl
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -99,12 +101,12 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_URL)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEncryptionKeyUrl(@javax.annotation.Nonnull String encryptionKeyUrl) {
+  public void setEncryptionKeyUrl(@jakarta.annotation.Nonnull String encryptionKeyUrl) {
     this.encryptionKeyUrl = encryptionKeyUrl;
   }
 
-  public UpdateAzureEncryptionResourcesRequest encryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
-    
+
+  public UpdateAzureEncryptionResourcesRequest encryptionKeyResourceGroupName(@jakarta.annotation.Nullable String encryptionKeyResourceGroupName) {
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     return this;
   }
@@ -113,7 +115,7 @@ public class UpdateAzureEncryptionResourcesRequest {
    * Name of the existing Azure resource group hosting the Azure Key Vault containing customer managed key which will be used to encrypt the Azure Managed Disks. It is required only when the entitlement is granted and the resource group of the key vault is different from the resource group in which the environment is to be created. Omitting it implies that, the key vault containing the encryption key is present in the same resource group where the environment would be created.
    * @return encryptionKeyResourceGroupName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -124,12 +126,12 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyResourceGroupName(@javax.annotation.Nullable String encryptionKeyResourceGroupName) {
+  public void setEncryptionKeyResourceGroupName(@jakarta.annotation.Nullable String encryptionKeyResourceGroupName) {
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
   }
 
-  public UpdateAzureEncryptionResourcesRequest encryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
-    
+
+  public UpdateAzureEncryptionResourcesRequest encryptionUserManagedIdentity(@jakarta.annotation.Nullable String encryptionUserManagedIdentity) {
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
     return this;
   }
@@ -138,7 +140,7 @@ public class UpdateAzureEncryptionResourcesRequest {
    * User managed identity for encryption.
    * @return encryptionUserManagedIdentity
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -149,11 +151,14 @@ public class UpdateAzureEncryptionResourcesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionUserManagedIdentity(@javax.annotation.Nullable String encryptionUserManagedIdentity) {
+  public void setEncryptionUserManagedIdentity(@jakarta.annotation.Nullable String encryptionUserManagedIdentity) {
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
   }
 
 
+  /**
+   * Return true if this UpdateAzureEncryptionResourcesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

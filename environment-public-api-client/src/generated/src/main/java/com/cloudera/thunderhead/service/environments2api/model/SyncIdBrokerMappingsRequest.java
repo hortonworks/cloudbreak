@@ -14,32 +14,39 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for synchronizing ID Broker mappings for an environment.
  */
 @JsonPropertyOrder({
-  SyncIdBrokerMappingsRequest.JSON_PROPERTY_ENVIRONMENT_NAME
+  SyncIdBrokerMappingsRequest.JSON_PROPERTY_ENVIRONMENT_NAME,
+  SyncIdBrokerMappingsRequest.JSON_PROPERTY_IGNORE_INVALID_MAPPINGS
 })
 
 public class SyncIdBrokerMappingsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
-  public SyncIdBrokerMappingsRequest() {
+  public static final String JSON_PROPERTY_IGNORE_INVALID_MAPPINGS = "ignoreInvalidMappings";
+  @jakarta.annotation.Nullable
+  private Boolean ignoreInvalidMappings;
+
+  public SyncIdBrokerMappingsRequest() { 
   }
 
-  public SyncIdBrokerMappingsRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public SyncIdBrokerMappingsRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -48,7 +55,7 @@ public class SyncIdBrokerMappingsRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +66,39 @@ public class SyncIdBrokerMappingsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
 
+  public SyncIdBrokerMappingsRequest ignoreInvalidMappings(@jakarta.annotation.Nullable Boolean ignoreInvalidMappings) {
+    this.ignoreInvalidMappings = ignoreInvalidMappings;
+    return this;
+  }
+
+  /**
+   * If true, skip missing actor/group CRNs instead of throwing an error.
+   * @return ignoreInvalidMappings
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_IGNORE_INVALID_MAPPINGS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getIgnoreInvalidMappings() {
+    return ignoreInvalidMappings;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_IGNORE_INVALID_MAPPINGS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setIgnoreInvalidMappings(@jakarta.annotation.Nullable Boolean ignoreInvalidMappings) {
+    this.ignoreInvalidMappings = ignoreInvalidMappings;
+  }
+
+
+  /**
+   * Return true if this SyncIdBrokerMappingsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -73,12 +108,13 @@ public class SyncIdBrokerMappingsRequest {
       return false;
     }
     SyncIdBrokerMappingsRequest syncIdBrokerMappingsRequest = (SyncIdBrokerMappingsRequest) o;
-    return Objects.equals(this.environmentName, syncIdBrokerMappingsRequest.environmentName);
+    return Objects.equals(this.environmentName, syncIdBrokerMappingsRequest.environmentName) &&
+        Objects.equals(this.ignoreInvalidMappings, syncIdBrokerMappingsRequest.ignoreInvalidMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName);
+    return Objects.hash(environmentName, ignoreInvalidMappings);
   }
 
   @Override
@@ -86,6 +122,7 @@ public class SyncIdBrokerMappingsRequest {
     StringBuilder sb = new StringBuilder();
     sb.append("class SyncIdBrokerMappingsRequest {\n");
     sb.append("    environmentName: ").append(toIndentedString(environmentName)).append("\n");
+    sb.append("    ignoreInvalidMappings: ").append(toIndentedString(ignoreInvalidMappings)).append("\n");
     sb.append("}");
     return sb.toString();
   }

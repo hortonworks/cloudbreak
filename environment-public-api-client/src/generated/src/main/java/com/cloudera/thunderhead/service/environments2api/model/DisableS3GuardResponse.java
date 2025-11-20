@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for disabling S3Guard in an environment.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class DisableS3GuardResponse {
   public static final String JSON_PROPERTY_S3_GUARD_RESPONSE = "s3GuardResponse";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String s3GuardResponse;
 
-  public DisableS3GuardResponse() {
+  public DisableS3GuardResponse() { 
   }
 
-  public DisableS3GuardResponse s3GuardResponse(@javax.annotation.Nullable String s3GuardResponse) {
-    
+  public DisableS3GuardResponse s3GuardResponse(@jakarta.annotation.Nullable String s3GuardResponse) {
     this.s3GuardResponse = s3GuardResponse;
     return this;
   }
@@ -48,7 +50,7 @@ public class DisableS3GuardResponse {
    * Response status for disabling S3Guard in an environment.
    * @return s3GuardResponse
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_S3_GUARD_RESPONSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class DisableS3GuardResponse {
 
   @JsonProperty(JSON_PROPERTY_S3_GUARD_RESPONSE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setS3GuardResponse(@javax.annotation.Nullable String s3GuardResponse) {
+  public void setS3GuardResponse(@jakarta.annotation.Nullable String s3GuardResponse) {
     this.s3GuardResponse = s3GuardResponse;
   }
 
 
+  /**
+   * Return true if this DisableS3GuardResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

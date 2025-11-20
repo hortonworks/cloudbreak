@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object for retrieving FreeIPA upgrade candidates.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetFreeipaUpgradeOptionsRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_CATALOG = "catalog";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String catalog;
 
   public static final String JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE = "allowMajorOsUpgrade";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean allowMajorOsUpgrade;
 
-  public GetFreeipaUpgradeOptionsRequest() {
+  public GetFreeipaUpgradeOptionsRequest() { 
   }
 
-  public GetFreeipaUpgradeOptionsRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public GetFreeipaUpgradeOptionsRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -58,7 +60,7 @@ public class GetFreeipaUpgradeOptionsRequest {
    * The name or the CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -69,12 +71,12 @@ public class GetFreeipaUpgradeOptionsRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public GetFreeipaUpgradeOptionsRequest catalog(@javax.annotation.Nullable String catalog) {
-    
+
+  public GetFreeipaUpgradeOptionsRequest catalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
     return this;
   }
@@ -83,7 +85,7 @@ public class GetFreeipaUpgradeOptionsRequest {
    * The URL of the source image catalog. If not specify this option we&#39;ll use image catalog of the current image.
    * @return catalog
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class GetFreeipaUpgradeOptionsRequest {
 
   @JsonProperty(JSON_PROPERTY_CATALOG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCatalog(@javax.annotation.Nullable String catalog) {
+  public void setCatalog(@jakarta.annotation.Nullable String catalog) {
     this.catalog = catalog;
   }
 
-  public GetFreeipaUpgradeOptionsRequest allowMajorOsUpgrade(@javax.annotation.Nullable Boolean allowMajorOsUpgrade) {
-    
+
+  public GetFreeipaUpgradeOptionsRequest allowMajorOsUpgrade(@jakarta.annotation.Nullable Boolean allowMajorOsUpgrade) {
     this.allowMajorOsUpgrade = allowMajorOsUpgrade;
     return this;
   }
@@ -108,7 +110,7 @@ public class GetFreeipaUpgradeOptionsRequest {
    * Allows the upgrade to a subsequent major OS version in the series.
    * @return allowMajorOsUpgrade
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class GetFreeipaUpgradeOptionsRequest {
 
   @JsonProperty(JSON_PROPERTY_ALLOW_MAJOR_OS_UPGRADE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAllowMajorOsUpgrade(@javax.annotation.Nullable Boolean allowMajorOsUpgrade) {
+  public void setAllowMajorOsUpgrade(@jakarta.annotation.Nullable Boolean allowMajorOsUpgrade) {
     this.allowMajorOsUpgrade = allowMajorOsUpgrade;
   }
 
 
+  /**
+   * Return true if this GetFreeipaUpgradeOptionsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

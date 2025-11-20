@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.BackupStorageAwsDetails;
 import com.cloudera.thunderhead.service.environments2api.model.BackupStorageAzureDetails;
 import com.cloudera.thunderhead.service.environments2api.model.BackupStorageGcpDetails;
@@ -23,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Storage configuration for backup.
@@ -38,26 +41,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class BackupStorage {
   public static final String JSON_PROPERTY_ENABLED = "enabled";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enabled;
 
   public static final String JSON_PROPERTY_AWS_DETAILS = "awsDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private BackupStorageAwsDetails awsDetails;
 
   public static final String JSON_PROPERTY_AZURE_DETAILS = "azureDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private BackupStorageAzureDetails azureDetails;
 
   public static final String JSON_PROPERTY_GCP_DETAILS = "gcpDetails";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private BackupStorageGcpDetails gcpDetails;
 
-  public BackupStorage() {
+  public BackupStorage() { 
   }
 
-  public BackupStorage enabled(@javax.annotation.Nullable Boolean enabled) {
-    
+  public BackupStorage enabled(@jakarta.annotation.Nullable Boolean enabled) {
     this.enabled = enabled;
     return this;
   }
@@ -66,7 +68,7 @@ public class BackupStorage {
    * Whether external backup storage is enabled. The default value is disabled.
    * @return enabled
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -77,12 +79,12 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_ENABLED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnabled(@javax.annotation.Nullable Boolean enabled) {
+  public void setEnabled(@jakarta.annotation.Nullable Boolean enabled) {
     this.enabled = enabled;
   }
 
-  public BackupStorage awsDetails(@javax.annotation.Nullable BackupStorageAwsDetails awsDetails) {
-    
+
+  public BackupStorage awsDetails(@jakarta.annotation.Nullable BackupStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
     return this;
   }
@@ -91,7 +93,7 @@ public class BackupStorage {
    * Get awsDetails
    * @return awsDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -102,12 +104,12 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_AWS_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAwsDetails(@javax.annotation.Nullable BackupStorageAwsDetails awsDetails) {
+  public void setAwsDetails(@jakarta.annotation.Nullable BackupStorageAwsDetails awsDetails) {
     this.awsDetails = awsDetails;
   }
 
-  public BackupStorage azureDetails(@javax.annotation.Nullable BackupStorageAzureDetails azureDetails) {
-    
+
+  public BackupStorage azureDetails(@jakarta.annotation.Nullable BackupStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
     return this;
   }
@@ -116,7 +118,7 @@ public class BackupStorage {
    * Get azureDetails
    * @return azureDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -127,12 +129,12 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_AZURE_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzureDetails(@javax.annotation.Nullable BackupStorageAzureDetails azureDetails) {
+  public void setAzureDetails(@jakarta.annotation.Nullable BackupStorageAzureDetails azureDetails) {
     this.azureDetails = azureDetails;
   }
 
-  public BackupStorage gcpDetails(@javax.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
-    
+
+  public BackupStorage gcpDetails(@jakarta.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
     return this;
   }
@@ -141,7 +143,7 @@ public class BackupStorage {
    * Get gcpDetails
    * @return gcpDetails
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -152,11 +154,14 @@ public class BackupStorage {
 
   @JsonProperty(JSON_PROPERTY_GCP_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcpDetails(@javax.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
+  public void setGcpDetails(@jakarta.annotation.Nullable BackupStorageGcpDetails gcpDetails) {
     this.gcpDetails = gcpDetails;
   }
 
 
+  /**
+   * Return true if this BackupStorage object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

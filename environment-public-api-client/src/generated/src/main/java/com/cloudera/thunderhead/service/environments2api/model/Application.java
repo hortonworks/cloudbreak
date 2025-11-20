@@ -14,17 +14,20 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.Service;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * A Service Discovery Application grouping
@@ -37,22 +40,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class Application {
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_SERVICES = "services";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, Service> services = new HashMap<>();
 
   public static final String JSON_PROPERTY_CONFIG = "config";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> config = new HashMap<>();
 
-  public Application() {
+  public Application() { 
   }
 
-  public Application name(@javax.annotation.Nullable String name) {
-    
+  public Application name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -61,7 +63,7 @@ public class Application {
    * The name of the service
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -72,12 +74,12 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public Application services(@javax.annotation.Nullable Map<String, Service> services) {
-    
+
+  public Application services(@jakarta.annotation.Nullable Map<String, Service> services) {
     this.services = services;
     return this;
   }
@@ -94,7 +96,7 @@ public class Application {
    * The services provided by the application
    * @return services
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -105,12 +107,12 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_SERVICES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServices(@javax.annotation.Nullable Map<String, Service> services) {
+  public void setServices(@jakarta.annotation.Nullable Map<String, Service> services) {
     this.services = services;
   }
 
-  public Application config(@javax.annotation.Nullable Map<String, String> config) {
-    
+
+  public Application config(@jakarta.annotation.Nullable Map<String, String> config) {
     this.config = config;
     return this;
   }
@@ -127,7 +129,7 @@ public class Application {
    * Configuration key values for an application
    * @return config
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -138,11 +140,14 @@ public class Application {
 
   @JsonProperty(JSON_PROPERTY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setConfig(@javax.annotation.Nullable Map<String, String> config) {
+  public void setConfig(@jakarta.annotation.Nullable Map<String, String> config) {
     this.config = config;
   }
 
 
+  /**
+   * Return true if this Application object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

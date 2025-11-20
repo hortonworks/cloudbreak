@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The status and issues of an individual FreeIPA node.
@@ -38,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeIPANodeStatus {
   public static final String JSON_PROPERTY_HOSTNAME = "hostname";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String hostname;
 
   /**
@@ -101,22 +103,21 @@ public class FreeIPANodeStatus {
   }
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private StatusEnum status;
 
   public static final String JSON_PROPERTY_ISSUES = "issues";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> issues = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String instanceId;
 
-  public FreeIPANodeStatus() {
+  public FreeIPANodeStatus() { 
   }
 
-  public FreeIPANodeStatus hostname(@javax.annotation.Nonnull String hostname) {
-    
+  public FreeIPANodeStatus hostname(@jakarta.annotation.Nonnull String hostname) {
     this.hostname = hostname;
     return this;
   }
@@ -125,7 +126,7 @@ public class FreeIPANodeStatus {
    * The hostname of the ipa instance.
    * @return hostname
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -136,12 +137,12 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_HOSTNAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setHostname(@javax.annotation.Nonnull String hostname) {
+  public void setHostname(@jakarta.annotation.Nonnull String hostname) {
     this.hostname = hostname;
   }
 
-  public FreeIPANodeStatus status(@javax.annotation.Nonnull StatusEnum status) {
-    
+
+  public FreeIPANodeStatus status(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -150,7 +151,7 @@ public class FreeIPANodeStatus {
    * The status of the individual node
    * @return status
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -161,12 +162,12 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setStatus(@javax.annotation.Nonnull StatusEnum status) {
+  public void setStatus(@jakarta.annotation.Nonnull StatusEnum status) {
     this.status = status;
   }
 
-  public FreeIPANodeStatus issues(@javax.annotation.Nullable List<String> issues) {
-    
+
+  public FreeIPANodeStatus issues(@jakarta.annotation.Nullable List<String> issues) {
     this.issues = issues;
     return this;
   }
@@ -183,7 +184,7 @@ public class FreeIPANodeStatus {
    * A list of issues the node is having
    * @return issues
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ISSUES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -194,12 +195,12 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_ISSUES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIssues(@javax.annotation.Nullable List<String> issues) {
+  public void setIssues(@jakarta.annotation.Nullable List<String> issues) {
     this.issues = issues;
   }
 
-  public FreeIPANodeStatus instanceId(@javax.annotation.Nullable String instanceId) {
-    
+
+  public FreeIPANodeStatus instanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
     return this;
   }
@@ -208,7 +209,7 @@ public class FreeIPANodeStatus {
    * The instance ID for the instance.
    * @return instanceId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -219,11 +220,14 @@ public class FreeIPANodeStatus {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setInstanceId(@javax.annotation.Nullable String instanceId) {
+  public void setInstanceId(@jakarta.annotation.Nullable String instanceId) {
     this.instanceId = instanceId;
   }
 
 
+  /**
+   * Return true if this FreeIPANodeStatus object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

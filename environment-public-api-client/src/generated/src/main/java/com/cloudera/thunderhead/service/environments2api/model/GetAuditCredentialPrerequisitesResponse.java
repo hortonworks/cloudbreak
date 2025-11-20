@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AwsCredentialPrerequisitesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.AzureCredentialPrerequisitesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GcpCredentialPrerequisitesResponse;
@@ -23,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The audit credential prerequisites.
@@ -39,30 +42,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetAuditCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String cloudPlatform;
 
   public static final String JSON_PROPERTY_ACCOUNT_ID = "accountId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String accountId;
 
   public static final String JSON_PROPERTY_AWS = "aws";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AwsCredentialPrerequisitesResponse aws;
 
   public static final String JSON_PROPERTY_AZURE = "azure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureCredentialPrerequisitesResponse azure;
 
   public static final String JSON_PROPERTY_GCP = "gcp";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private GcpCredentialPrerequisitesResponse gcp;
 
-  public GetAuditCredentialPrerequisitesResponse() {
+  public GetAuditCredentialPrerequisitesResponse() { 
   }
 
-  public GetAuditCredentialPrerequisitesResponse cloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
-    
+  public GetAuditCredentialPrerequisitesResponse cloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -71,7 +73,7 @@ public class GetAuditCredentialPrerequisitesResponse {
    * The name of the given cloud platform
    * @return cloudPlatform
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -82,12 +84,12 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_PLATFORM)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCloudPlatform(@javax.annotation.Nonnull String cloudPlatform) {
+  public void setCloudPlatform(@jakarta.annotation.Nonnull String cloudPlatform) {
     this.cloudPlatform = cloudPlatform;
   }
 
-  public GetAuditCredentialPrerequisitesResponse accountId(@javax.annotation.Nullable String accountId) {
-    
+
+  public GetAuditCredentialPrerequisitesResponse accountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
     return this;
   }
@@ -96,7 +98,7 @@ public class GetAuditCredentialPrerequisitesResponse {
    * The provider specific identifier of the account/subscription/project that is used by Cloudbreak.
    * @return accountId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -107,12 +109,12 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_ACCOUNT_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAccountId(@javax.annotation.Nullable String accountId) {
+  public void setAccountId(@jakarta.annotation.Nullable String accountId) {
     this.accountId = accountId;
   }
 
-  public GetAuditCredentialPrerequisitesResponse aws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
-    
+
+  public GetAuditCredentialPrerequisitesResponse aws(@jakarta.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
     return this;
   }
@@ -121,7 +123,7 @@ public class GetAuditCredentialPrerequisitesResponse {
    * Get aws
    * @return aws
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -132,12 +134,12 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(@javax.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
+  public void setAws(@jakarta.annotation.Nullable AwsCredentialPrerequisitesResponse aws) {
     this.aws = aws;
   }
 
-  public GetAuditCredentialPrerequisitesResponse azure(@javax.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
-    
+
+  public GetAuditCredentialPrerequisitesResponse azure(@jakarta.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
     this.azure = azure;
     return this;
   }
@@ -146,7 +148,7 @@ public class GetAuditCredentialPrerequisitesResponse {
    * Get azure
    * @return azure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -157,12 +159,12 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(@javax.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
+  public void setAzure(@jakarta.annotation.Nullable AzureCredentialPrerequisitesResponse azure) {
     this.azure = azure;
   }
 
-  public GetAuditCredentialPrerequisitesResponse gcp(@javax.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
-    
+
+  public GetAuditCredentialPrerequisitesResponse gcp(@jakarta.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
     this.gcp = gcp;
     return this;
   }
@@ -171,7 +173,7 @@ public class GetAuditCredentialPrerequisitesResponse {
    * Get gcp
    * @return gcp
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -182,11 +184,14 @@ public class GetAuditCredentialPrerequisitesResponse {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(@javax.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
+  public void setGcp(@jakarta.annotation.Nullable GcpCredentialPrerequisitesResponse gcp) {
     this.gcp = gcp;
   }
 
 
+  /**
+   * Return true if this GetAuditCredentialPrerequisitesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

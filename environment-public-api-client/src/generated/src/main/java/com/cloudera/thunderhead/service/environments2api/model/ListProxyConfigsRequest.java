@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a list proxy configs request.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ListProxyConfigsRequest {
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String proxyConfigName;
 
-  public ListProxyConfigsRequest() {
+  public ListProxyConfigsRequest() { 
   }
 
-  public ListProxyConfigsRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
-    
+  public ListProxyConfigsRequest proxyConfigName(@jakarta.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -48,7 +50,7 @@ public class ListProxyConfigsRequest {
    * An optional proxy config name to search by.
    * @return proxyConfigName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class ListProxyConfigsRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
+  public void setProxyConfigName(@jakarta.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
 
+  /**
+   * Return true if this ListProxyConfigsRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

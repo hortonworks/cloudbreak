@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for checking Kubernetes connectivity.
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CheckKubernetesConnectivityRequest {
   public static final String JSON_PROPERTY_KUBE_CONFIG = "kubeConfig";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String kubeConfig;
 
   /**
@@ -70,14 +73,13 @@ public class CheckKubernetesConnectivityRequest {
   }
 
   public static final String JSON_PROPERTY_FORMAT = "format";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private FormatEnum format;
 
-  public CheckKubernetesConnectivityRequest() {
+  public CheckKubernetesConnectivityRequest() { 
   }
 
-  public CheckKubernetesConnectivityRequest kubeConfig(@javax.annotation.Nonnull String kubeConfig) {
-    
+  public CheckKubernetesConnectivityRequest kubeConfig(@jakarta.annotation.Nonnull String kubeConfig) {
     this.kubeConfig = kubeConfig;
     return this;
   }
@@ -86,7 +88,7 @@ public class CheckKubernetesConnectivityRequest {
    * Content of Kubernetes configuration file as a text blob in YAML format.
    * @return kubeConfig
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -97,12 +99,12 @@ public class CheckKubernetesConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_KUBE_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKubeConfig(@javax.annotation.Nonnull String kubeConfig) {
+  public void setKubeConfig(@jakarta.annotation.Nonnull String kubeConfig) {
     this.kubeConfig = kubeConfig;
   }
 
-  public CheckKubernetesConnectivityRequest format(@javax.annotation.Nullable FormatEnum format) {
-    
+
+  public CheckKubernetesConnectivityRequest format(@jakarta.annotation.Nullable FormatEnum format) {
     this.format = format;
     return this;
   }
@@ -111,7 +113,7 @@ public class CheckKubernetesConnectivityRequest {
    * Format of Kubernetes configuration file. Defaults to YAML.
    * @return format
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FORMAT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -122,11 +124,14 @@ public class CheckKubernetesConnectivityRequest {
 
   @JsonProperty(JSON_PROPERTY_FORMAT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFormat(@javax.annotation.Nullable FormatEnum format) {
+  public void setFormat(@jakarta.annotation.Nullable FormatEnum format) {
     this.format = format;
   }
 
 
+  /**
+   * Return true if this CheckKubernetesConnectivityRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

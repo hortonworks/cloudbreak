@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object for FreeIPA upscale.
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UpscaleFreeipaRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   /**
@@ -72,14 +75,13 @@ public class UpscaleFreeipaRequest {
   }
 
   public static final String JSON_PROPERTY_TARGET_AVAILABILITY_TYPE = "targetAvailabilityType";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private TargetAvailabilityTypeEnum targetAvailabilityType;
 
-  public UpscaleFreeipaRequest() {
+  public UpscaleFreeipaRequest() { 
   }
 
-  public UpscaleFreeipaRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public UpscaleFreeipaRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -88,7 +90,7 @@ public class UpscaleFreeipaRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -99,12 +101,12 @@ public class UpscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public UpscaleFreeipaRequest targetAvailabilityType(@javax.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
-    
+
+  public UpscaleFreeipaRequest targetAvailabilityType(@jakarta.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
@@ -113,7 +115,7 @@ public class UpscaleFreeipaRequest {
    * The target FreeIPA availability type.
    * @return targetAvailabilityType
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -124,11 +126,14 @@ public class UpscaleFreeipaRequest {
 
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTargetAvailabilityType(@javax.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public void setTargetAvailabilityType(@jakarta.annotation.Nonnull TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
   }
 
 
+  /**
+   * Return true if this UpscaleFreeipaRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

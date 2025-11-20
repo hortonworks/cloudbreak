@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CDW Cluster.
@@ -36,30 +39,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdwCluster {
   public static final String JSON_PROPERTY_CRN = "crn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String crn;
 
   public static final String JSON_PROPERTY_ID = "id";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String id;
 
   public static final String JSON_PROPERTY_ENVIRONMENT_CRN = "environmentCrn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String environmentCrn;
 
   public static final String JSON_PROPERTY_NAME = "name";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String name;
 
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
-  public CdwCluster() {
+  public CdwCluster() { 
   }
 
-  public CdwCluster crn(@javax.annotation.Nullable String crn) {
-    
+  public CdwCluster crn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
     return this;
   }
@@ -68,7 +70,7 @@ public class CdwCluster {
    * The CRN of the cluster.
    * @return crn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -79,12 +81,12 @@ public class CdwCluster {
 
   @JsonProperty(JSON_PROPERTY_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCrn(@javax.annotation.Nullable String crn) {
+  public void setCrn(@jakarta.annotation.Nullable String crn) {
     this.crn = crn;
   }
 
-  public CdwCluster id(@javax.annotation.Nullable String id) {
-    
+
+  public CdwCluster id(@jakarta.annotation.Nullable String id) {
     this.id = id;
     return this;
   }
@@ -93,7 +95,7 @@ public class CdwCluster {
    * The ID of the cluster.
    * @return id
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -104,12 +106,12 @@ public class CdwCluster {
 
   @JsonProperty(JSON_PROPERTY_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setId(@javax.annotation.Nullable String id) {
+  public void setId(@jakarta.annotation.Nullable String id) {
     this.id = id;
   }
 
-  public CdwCluster environmentCrn(@javax.annotation.Nullable String environmentCrn) {
-    
+
+  public CdwCluster environmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -118,7 +120,7 @@ public class CdwCluster {
    * CRN of the environment.
    * @return environmentCrn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -129,12 +131,12 @@ public class CdwCluster {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_CRN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentCrn(@javax.annotation.Nullable String environmentCrn) {
+  public void setEnvironmentCrn(@jakarta.annotation.Nullable String environmentCrn) {
     this.environmentCrn = environmentCrn;
   }
 
-  public CdwCluster name(@javax.annotation.Nullable String name) {
-    
+
+  public CdwCluster name(@jakarta.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -143,7 +145,7 @@ public class CdwCluster {
    * Name of the cluster.
    * @return name
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -154,12 +156,12 @@ public class CdwCluster {
 
   @JsonProperty(JSON_PROPERTY_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setName(@javax.annotation.Nullable String name) {
+  public void setName(@jakarta.annotation.Nullable String name) {
     this.name = name;
   }
 
-  public CdwCluster status(@javax.annotation.Nullable String status) {
-    
+
+  public CdwCluster status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -168,7 +170,7 @@ public class CdwCluster {
    * Status of the cluster.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -179,11 +181,14 @@ public class CdwCluster {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
 
+  /**
+   * Return true if this CdwCluster object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,16 +14,19 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Environment tags object containing the tag values defined for the environment.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class EnvironmentTags {
   public static final String JSON_PROPERTY_USER_DEFINED = "userDefined";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> userDefined = new HashMap<>();
 
   public static final String JSON_PROPERTY_DEFAULTS = "defaults";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> defaults = new HashMap<>();
 
-  public EnvironmentTags() {
+  public EnvironmentTags() { 
   }
 
-  public EnvironmentTags userDefined(@javax.annotation.Nullable Map<String, String> userDefined) {
-    
+  public EnvironmentTags userDefined(@jakarta.annotation.Nullable Map<String, String> userDefined) {
     this.userDefined = userDefined;
     return this;
   }
@@ -63,7 +65,7 @@ public class EnvironmentTags {
    * Map of tag names to values, for user-defined tags.
    * @return userDefined
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_USER_DEFINED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -74,12 +76,12 @@ public class EnvironmentTags {
 
   @JsonProperty(JSON_PROPERTY_USER_DEFINED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setUserDefined(@javax.annotation.Nullable Map<String, String> userDefined) {
+  public void setUserDefined(@jakarta.annotation.Nullable Map<String, String> userDefined) {
     this.userDefined = userDefined;
   }
 
-  public EnvironmentTags defaults(@javax.annotation.Nullable Map<String, String> defaults) {
-    
+
+  public EnvironmentTags defaults(@jakarta.annotation.Nullable Map<String, String> defaults) {
     this.defaults = defaults;
     return this;
   }
@@ -96,7 +98,7 @@ public class EnvironmentTags {
    * Map of tag names to values, for default tags.
    * @return defaults
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -107,11 +109,14 @@ public class EnvironmentTags {
 
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaults(@javax.annotation.Nullable Map<String, String> defaults) {
+  public void setDefaults(@jakarta.annotation.Nullable Map<String, String> defaults) {
     this.defaults = defaults;
   }
 
 
+  /**
+   * Return true if this EnvironmentTags object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

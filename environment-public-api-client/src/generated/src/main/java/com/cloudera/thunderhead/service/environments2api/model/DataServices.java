@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AzureDataServicesParameters;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Data Services parameters response of the environment.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class DataServices {
   public static final String JSON_PROPERTY_AZURE = "azure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AzureDataServicesParameters azure;
 
-  public DataServices() {
+  public DataServices() { 
   }
 
-  public DataServices azure(@javax.annotation.Nullable AzureDataServicesParameters azure) {
-    
+  public DataServices azure(@jakarta.annotation.Nullable AzureDataServicesParameters azure) {
     this.azure = azure;
     return this;
   }
@@ -49,7 +51,7 @@ public class DataServices {
    * Get azure
    * @return azure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -60,11 +62,14 @@ public class DataServices {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(@javax.annotation.Nullable AzureDataServicesParameters azure) {
+  public void setAzure(@jakarta.annotation.Nullable AzureDataServicesParameters azure) {
     this.azure = azure;
   }
 
 
+  /**
+   * Return true if this DataServices object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

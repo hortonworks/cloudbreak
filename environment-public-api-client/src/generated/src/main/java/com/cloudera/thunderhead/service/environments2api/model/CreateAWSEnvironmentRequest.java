@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AWSComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AWSFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AuthenticationRequest;
@@ -38,7 +39,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a create AWS environment request.
@@ -74,52 +76,54 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateAWSEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_KEY_ARN,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
-  CreateAWSEnvironmentRequest.JSON_PROPERTY_SECURITY
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_SECURITY,
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_TYPE,
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_PROFILE_NAME
 })
 
 public class CreateAWSEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_CREDENTIAL_NAME = "credentialName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String credentialName;
 
   public static final String JSON_PROPERTY_REGION = "region";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String region;
 
   public static final String JSON_PROPERTY_SECURITY_ACCESS = "securityAccess";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private SecurityAccessRequest securityAccess;
 
   public static final String JSON_PROPERTY_AUTHENTICATION = "authentication";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private AuthenticationRequest authentication;
 
   public static final String JSON_PROPERTY_LOG_STORAGE = "logStorage";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private AwsLogStorageRequest logStorage;
 
   public static final String JSON_PROPERTY_VPC_ID = "vpcId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String vpcId;
 
   public static final String JSON_PROPERTY_SUBNET_IDS = "subnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Set<String> subnetIds = new LinkedHashSet<>();
 
   public static final String JSON_PROPERTY_NETWORK_CIDR = "networkCidr";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String networkCidr;
 
   public static final String JSON_PROPERTY_CREATE_PRIVATE_SUBNETS = "createPrivateSubnets";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean createPrivateSubnets;
 
   public static final String JSON_PROPERTY_CREATE_SERVICE_ENDPOINTS = "createServiceEndpoints";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean createServiceEndpoints;
 
   /**
@@ -158,90 +162,134 @@ public class CreateAWSEnvironmentRequest {
   }
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME = "endpointAccessGatewayScheme";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme;
 
   public static final String JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "endpointAccessGatewaySubnetIds";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> endpointAccessGatewaySubnetIds = new ArrayList<>();
 
   public static final String JSON_PROPERTY_S3_GUARD_TABLE_NAME = "s3GuardTableName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String s3GuardTableName;
 
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String description;
 
   public static final String JSON_PROPERTY_ENABLE_TUNNEL = "enableTunnel";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableTunnel = true;
 
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_TUNNEL_TYPE = "tunnelType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private TunnelType tunnelType;
 
   public static final String JSON_PROPERTY_CCM_V2_TLS_TYPE = "ccmV2TlsType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CcmV2TlsType ccmV2TlsType;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AWSFreeIpaCreationRequest freeIpa;
 
   public static final String JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER = "enableComputeCluster";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean enableComputeCluster;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private AWSComputeClusterConfigurationRequest computeClusterConfiguration;
 
   public static final String JSON_PROPERTY_IMAGE = "image";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private FreeIpaImageRequest image;
 
   public static final String JSON_PROPERTY_TAGS = "tags";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<TagRequest> tags = new ArrayList<>();
 
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String proxyConfigName;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String encryptionKeyArn;
 
   public static final String JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE = "idBrokerMappingSource";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String idBrokerMappingSource;
 
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CustomDockerRegistryRequest customDockerRegistry;
 
   public static final String JSON_PROPERTY_SECURITY = "security";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private SecurityRequest security;
 
-  public CreateAWSEnvironmentRequest() {
+  /**
+   * Environment type which can be hybrid or public cloud.
+   */
+  public enum EnvironmentTypeEnum {
+    PUBLIC_CLOUD(String.valueOf("PUBLIC_CLOUD")),
+    
+    HYBRID(String.valueOf("HYBRID")),
+    
+    HYBRID_BASE(String.valueOf("HYBRID_BASE"));
+
+    private String value;
+
+    EnvironmentTypeEnum(String value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static EnvironmentTypeEnum fromValue(String value) {
+      for (EnvironmentTypeEnum b : EnvironmentTypeEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
   }
 
-  public CreateAWSEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public static final String JSON_PROPERTY_ENVIRONMENT_TYPE = "environmentType";
+  @jakarta.annotation.Nullable
+  private EnvironmentTypeEnum environmentType;
+
+  public static final String JSON_PROPERTY_ENCRYPTION_PROFILE_NAME = "encryptionProfileName";
+  @jakarta.annotation.Nullable
+  private String encryptionProfileName;
+
+  public CreateAWSEnvironmentRequest() { 
+  }
+
+  public CreateAWSEnvironmentRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -250,7 +298,7 @@ public class CreateAWSEnvironmentRequest {
    * The name of the environment. Must contain only lowercase letters, numbers and hyphens.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -261,12 +309,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public CreateAWSEnvironmentRequest credentialName(@javax.annotation.Nonnull String credentialName) {
-    
+
+  public CreateAWSEnvironmentRequest credentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
     return this;
   }
@@ -275,7 +323,7 @@ public class CreateAWSEnvironmentRequest {
    * Name of the credential to use for the environment.
    * @return credentialName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -286,12 +334,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREDENTIAL_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setCredentialName(@javax.annotation.Nonnull String credentialName) {
+  public void setCredentialName(@jakarta.annotation.Nonnull String credentialName) {
     this.credentialName = credentialName;
   }
 
-  public CreateAWSEnvironmentRequest region(@javax.annotation.Nonnull String region) {
-    
+
+  public CreateAWSEnvironmentRequest region(@jakarta.annotation.Nonnull String region) {
     this.region = region;
     return this;
   }
@@ -300,7 +348,7 @@ public class CreateAWSEnvironmentRequest {
    * The region of the environment.
    * @return region
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -311,12 +359,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REGION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRegion(@javax.annotation.Nonnull String region) {
+  public void setRegion(@jakarta.annotation.Nonnull String region) {
     this.region = region;
   }
 
-  public CreateAWSEnvironmentRequest securityAccess(@javax.annotation.Nonnull SecurityAccessRequest securityAccess) {
-    
+
+  public CreateAWSEnvironmentRequest securityAccess(@jakarta.annotation.Nonnull SecurityAccessRequest securityAccess) {
     this.securityAccess = securityAccess;
     return this;
   }
@@ -325,7 +373,7 @@ public class CreateAWSEnvironmentRequest {
    * Get securityAccess
    * @return securityAccess
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -336,12 +384,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY_ACCESS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSecurityAccess(@javax.annotation.Nonnull SecurityAccessRequest securityAccess) {
+  public void setSecurityAccess(@jakarta.annotation.Nonnull SecurityAccessRequest securityAccess) {
     this.securityAccess = securityAccess;
   }
 
-  public CreateAWSEnvironmentRequest authentication(@javax.annotation.Nonnull AuthenticationRequest authentication) {
-    
+
+  public CreateAWSEnvironmentRequest authentication(@jakarta.annotation.Nonnull AuthenticationRequest authentication) {
     this.authentication = authentication;
     return this;
   }
@@ -350,7 +398,7 @@ public class CreateAWSEnvironmentRequest {
    * Get authentication
    * @return authentication
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -361,12 +409,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_AUTHENTICATION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAuthentication(@javax.annotation.Nonnull AuthenticationRequest authentication) {
+  public void setAuthentication(@jakarta.annotation.Nonnull AuthenticationRequest authentication) {
     this.authentication = authentication;
   }
 
-  public CreateAWSEnvironmentRequest logStorage(@javax.annotation.Nonnull AwsLogStorageRequest logStorage) {
-    
+
+  public CreateAWSEnvironmentRequest logStorage(@jakarta.annotation.Nonnull AwsLogStorageRequest logStorage) {
     this.logStorage = logStorage;
     return this;
   }
@@ -375,7 +423,7 @@ public class CreateAWSEnvironmentRequest {
    * Get logStorage
    * @return logStorage
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -386,12 +434,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_LOG_STORAGE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setLogStorage(@javax.annotation.Nonnull AwsLogStorageRequest logStorage) {
+  public void setLogStorage(@jakarta.annotation.Nonnull AwsLogStorageRequest logStorage) {
     this.logStorage = logStorage;
   }
 
-  public CreateAWSEnvironmentRequest vpcId(@javax.annotation.Nullable String vpcId) {
-    
+
+  public CreateAWSEnvironmentRequest vpcId(@jakarta.annotation.Nullable String vpcId) {
     this.vpcId = vpcId;
     return this;
   }
@@ -400,7 +448,7 @@ public class CreateAWSEnvironmentRequest {
    * The Amazon VPC ID.
    * @return vpcId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -411,12 +459,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_VPC_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVpcId(@javax.annotation.Nullable String vpcId) {
+  public void setVpcId(@jakarta.annotation.Nullable String vpcId) {
     this.vpcId = vpcId;
   }
 
-  public CreateAWSEnvironmentRequest subnetIds(@javax.annotation.Nullable Set<String> subnetIds) {
-    
+
+  public CreateAWSEnvironmentRequest subnetIds(@jakarta.annotation.Nullable Set<String> subnetIds) {
     this.subnetIds = subnetIds;
     return this;
   }
@@ -433,7 +481,7 @@ public class CreateAWSEnvironmentRequest {
    * One or more subnet IDs within the VPC.
    * @return subnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -445,12 +493,12 @@ public class CreateAWSEnvironmentRequest {
   @JsonDeserialize(as = LinkedHashSet.class)
   @JsonProperty(JSON_PROPERTY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSubnetIds(@javax.annotation.Nullable Set<String> subnetIds) {
+  public void setSubnetIds(@jakarta.annotation.Nullable Set<String> subnetIds) {
     this.subnetIds = subnetIds;
   }
 
-  public CreateAWSEnvironmentRequest networkCidr(@javax.annotation.Nullable String networkCidr) {
-    
+
+  public CreateAWSEnvironmentRequest networkCidr(@jakarta.annotation.Nullable String networkCidr) {
     this.networkCidr = networkCidr;
     return this;
   }
@@ -459,7 +507,7 @@ public class CreateAWSEnvironmentRequest {
    * [Deprecated] The network CIDR. This will create a VPC along with subnets in multiple Availability Zones.
    * @return networkCidr
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -470,12 +518,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_NETWORK_CIDR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNetworkCidr(@javax.annotation.Nullable String networkCidr) {
+  public void setNetworkCidr(@jakarta.annotation.Nullable String networkCidr) {
     this.networkCidr = networkCidr;
   }
 
-  public CreateAWSEnvironmentRequest createPrivateSubnets(@javax.annotation.Nullable Boolean createPrivateSubnets) {
-    
+
+  public CreateAWSEnvironmentRequest createPrivateSubnets(@jakarta.annotation.Nullable Boolean createPrivateSubnets) {
     this.createPrivateSubnets = createPrivateSubnets;
     return this;
   }
@@ -484,7 +532,7 @@ public class CreateAWSEnvironmentRequest {
    * Whether to create private subnets or not.
    * @return createPrivateSubnets
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATE_PRIVATE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -495,12 +543,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREATE_PRIVATE_SUBNETS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreatePrivateSubnets(@javax.annotation.Nullable Boolean createPrivateSubnets) {
+  public void setCreatePrivateSubnets(@jakarta.annotation.Nullable Boolean createPrivateSubnets) {
     this.createPrivateSubnets = createPrivateSubnets;
   }
 
-  public CreateAWSEnvironmentRequest createServiceEndpoints(@javax.annotation.Nullable Boolean createServiceEndpoints) {
-    
+
+  public CreateAWSEnvironmentRequest createServiceEndpoints(@jakarta.annotation.Nullable Boolean createServiceEndpoints) {
     this.createServiceEndpoints = createServiceEndpoints;
     return this;
   }
@@ -509,7 +557,7 @@ public class CreateAWSEnvironmentRequest {
    * Whether to create service endpoints or not.
    * @return createServiceEndpoints
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CREATE_SERVICE_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -520,12 +568,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CREATE_SERVICE_ENDPOINTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCreateServiceEndpoints(@javax.annotation.Nullable Boolean createServiceEndpoints) {
+  public void setCreateServiceEndpoints(@jakarta.annotation.Nullable Boolean createServiceEndpoints) {
     this.createServiceEndpoints = createServiceEndpoints;
   }
 
-  public CreateAWSEnvironmentRequest endpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
-    
+
+  public CreateAWSEnvironmentRequest endpointAccessGatewayScheme(@jakarta.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -534,7 +582,7 @@ public class CreateAWSEnvironmentRequest {
    * The scheme for the endpoint gateway. PUBLIC creates an external endpoint that can be accessed over the Internet. Defaults to PRIVATE which restricts the traffic to be internal to the VPC.
    * @return endpointAccessGatewayScheme
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -545,12 +593,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SCHEME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewayScheme(@javax.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+  public void setEndpointAccessGatewayScheme(@jakarta.annotation.Nullable EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
   }
 
-  public CreateAWSEnvironmentRequest endpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
-    
+
+  public CreateAWSEnvironmentRequest endpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -567,7 +615,7 @@ public class CreateAWSEnvironmentRequest {
    * The subnets to use for endpoint access gateway.
    * @return endpointAccessGatewaySubnetIds
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -578,12 +626,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEndpointAccessGatewaySubnetIds(@javax.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
+  public void setEndpointAccessGatewaySubnetIds(@jakarta.annotation.Nullable List<String> endpointAccessGatewaySubnetIds) {
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
   }
 
-  public CreateAWSEnvironmentRequest s3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
-    
+
+  public CreateAWSEnvironmentRequest s3GuardTableName(@jakarta.annotation.Nullable String s3GuardTableName) {
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
@@ -592,7 +640,7 @@ public class CreateAWSEnvironmentRequest {
    * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -603,12 +651,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_S3_GUARD_TABLE_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setS3GuardTableName(@javax.annotation.Nullable String s3GuardTableName) {
+  public void setS3GuardTableName(@jakarta.annotation.Nullable String s3GuardTableName) {
     this.s3GuardTableName = s3GuardTableName;
   }
 
-  public CreateAWSEnvironmentRequest description(@javax.annotation.Nullable String description) {
-    
+
+  public CreateAWSEnvironmentRequest description(@jakarta.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -617,7 +665,7 @@ public class CreateAWSEnvironmentRequest {
    * An description of the environment.
    * @return description
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -628,12 +676,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_DESCRIPTION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDescription(@javax.annotation.Nullable String description) {
+  public void setDescription(@jakarta.annotation.Nullable String description) {
     this.description = description;
   }
 
-  public CreateAWSEnvironmentRequest enableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
-    
+
+  public CreateAWSEnvironmentRequest enableTunnel(@jakarta.annotation.Nullable Boolean enableTunnel) {
     this.enableTunnel = enableTunnel;
     return this;
   }
@@ -642,7 +690,7 @@ public class CreateAWSEnvironmentRequest {
    * Whether to enable SSH tunneling for the environment.
    * @return enableTunnel
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -653,12 +701,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_TUNNEL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableTunnel(@javax.annotation.Nullable Boolean enableTunnel) {
+  public void setEnableTunnel(@jakarta.annotation.Nullable Boolean enableTunnel) {
     this.enableTunnel = enableTunnel;
   }
 
-  public CreateAWSEnvironmentRequest workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
-    
+
+  public CreateAWSEnvironmentRequest workloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -667,7 +715,7 @@ public class CreateAWSEnvironmentRequest {
    * When this is enabled, diagnostic information about job and query execution is sent to Workload Manager for Data Hub clusters created within this environment.
    * @return workloadAnalytics
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -678,12 +726,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-  public CreateAWSEnvironmentRequest reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
-    
+
+  public CreateAWSEnvironmentRequest reportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -692,7 +740,7 @@ public class CreateAWSEnvironmentRequest {
    * [Deprecated] When true, this will report additional diagnostic information back to Cloudera.
    * @return reportDeploymentLogs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -703,12 +751,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-  public CreateAWSEnvironmentRequest tunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
-    
+
+  public CreateAWSEnvironmentRequest tunnelType(@jakarta.annotation.Nullable TunnelType tunnelType) {
     this.tunnelType = tunnelType;
     return this;
   }
@@ -717,7 +765,7 @@ public class CreateAWSEnvironmentRequest {
    * Get tunnelType
    * @return tunnelType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -728,12 +776,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TUNNEL_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTunnelType(@javax.annotation.Nullable TunnelType tunnelType) {
+  public void setTunnelType(@jakarta.annotation.Nullable TunnelType tunnelType) {
     this.tunnelType = tunnelType;
   }
 
-  public CreateAWSEnvironmentRequest ccmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
-    
+
+  public CreateAWSEnvironmentRequest ccmV2TlsType(@jakarta.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
@@ -742,7 +790,7 @@ public class CreateAWSEnvironmentRequest {
    * Get ccmV2TlsType
    * @return ccmV2TlsType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -753,12 +801,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CCM_V2_TLS_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCcmV2TlsType(@javax.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
+  public void setCcmV2TlsType(@jakarta.annotation.Nullable CcmV2TlsType ccmV2TlsType) {
     this.ccmV2TlsType = ccmV2TlsType;
   }
 
-  public CreateAWSEnvironmentRequest cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
-    
+
+  public CreateAWSEnvironmentRequest cloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -767,7 +815,7 @@ public class CreateAWSEnvironmentRequest {
    * When this is enabled, logs from the VMs will end up on the pre-defined cloud storage (enabled by default).
    * @return cloudStorageLogging
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -778,12 +826,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-  public CreateAWSEnvironmentRequest freeIpa(@javax.annotation.Nullable AWSFreeIpaCreationRequest freeIpa) {
-    
+
+  public CreateAWSEnvironmentRequest freeIpa(@jakarta.annotation.Nullable AWSFreeIpaCreationRequest freeIpa) {
     this.freeIpa = freeIpa;
     return this;
   }
@@ -792,7 +840,7 @@ public class CreateAWSEnvironmentRequest {
    * Get freeIpa
    * @return freeIpa
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -803,12 +851,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_FREE_IPA)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setFreeIpa(@javax.annotation.Nullable AWSFreeIpaCreationRequest freeIpa) {
+  public void setFreeIpa(@jakarta.annotation.Nullable AWSFreeIpaCreationRequest freeIpa) {
     this.freeIpa = freeIpa;
   }
 
-  public CreateAWSEnvironmentRequest enableComputeCluster(@javax.annotation.Nullable Boolean enableComputeCluster) {
-    
+
+  public CreateAWSEnvironmentRequest enableComputeCluster(@jakarta.annotation.Nullable Boolean enableComputeCluster) {
     this.enableComputeCluster = enableComputeCluster;
     return this;
   }
@@ -817,7 +865,7 @@ public class CreateAWSEnvironmentRequest {
    * Enable compute clusters for environment
    * @return enableComputeCluster
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -828,12 +876,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableComputeCluster(@javax.annotation.Nullable Boolean enableComputeCluster) {
+  public void setEnableComputeCluster(@jakarta.annotation.Nullable Boolean enableComputeCluster) {
     this.enableComputeCluster = enableComputeCluster;
   }
 
-  public CreateAWSEnvironmentRequest computeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
-    
+
+  public CreateAWSEnvironmentRequest computeClusterConfiguration(@jakarta.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
@@ -842,7 +890,7 @@ public class CreateAWSEnvironmentRequest {
    * Get computeClusterConfiguration
    * @return computeClusterConfiguration
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -853,12 +901,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterConfiguration(@javax.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public void setComputeClusterConfiguration(@jakarta.annotation.Nullable AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
   }
 
-  public CreateAWSEnvironmentRequest image(@javax.annotation.Nullable FreeIpaImageRequest image) {
-    
+
+  public CreateAWSEnvironmentRequest image(@jakarta.annotation.Nullable FreeIpaImageRequest image) {
     this.image = image;
     return this;
   }
@@ -867,7 +915,7 @@ public class CreateAWSEnvironmentRequest {
    * Get image
    * @return image
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -878,12 +926,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImage(@javax.annotation.Nullable FreeIpaImageRequest image) {
+  public void setImage(@jakarta.annotation.Nullable FreeIpaImageRequest image) {
     this.image = image;
   }
 
-  public CreateAWSEnvironmentRequest tags(@javax.annotation.Nullable List<TagRequest> tags) {
-    
+
+  public CreateAWSEnvironmentRequest tags(@jakarta.annotation.Nullable List<TagRequest> tags) {
     this.tags = tags;
     return this;
   }
@@ -900,7 +948,7 @@ public class CreateAWSEnvironmentRequest {
    * Tags associated with the resources.
    * @return tags
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -911,12 +959,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_TAGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTags(@javax.annotation.Nullable List<TagRequest> tags) {
+  public void setTags(@jakarta.annotation.Nullable List<TagRequest> tags) {
     this.tags = tags;
   }
 
-  public CreateAWSEnvironmentRequest proxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
-    
+
+  public CreateAWSEnvironmentRequest proxyConfigName(@jakarta.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -925,7 +973,7 @@ public class CreateAWSEnvironmentRequest {
    * Name of the proxy config to use for the environment.
    * @return proxyConfigName
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -936,12 +984,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG_NAME)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setProxyConfigName(@javax.annotation.Nullable String proxyConfigName) {
+  public void setProxyConfigName(@jakarta.annotation.Nullable String proxyConfigName) {
     this.proxyConfigName = proxyConfigName;
   }
 
-  public CreateAWSEnvironmentRequest encryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
-    
+
+  public CreateAWSEnvironmentRequest encryptionKeyArn(@jakarta.annotation.Nullable String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -950,7 +998,7 @@ public class CreateAWSEnvironmentRequest {
    * ARN of the AWS KMS CMK to use for the server-side encryption of AWS storage resources.
    * @return encryptionKeyArn
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -961,12 +1009,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENCRYPTION_KEY_ARN)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEncryptionKeyArn(@javax.annotation.Nullable String encryptionKeyArn) {
+  public void setEncryptionKeyArn(@jakarta.annotation.Nullable String encryptionKeyArn) {
     this.encryptionKeyArn = encryptionKeyArn;
   }
 
-  public CreateAWSEnvironmentRequest idBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
-    
+
+  public CreateAWSEnvironmentRequest idBrokerMappingSource(@jakarta.annotation.Nullable String idBrokerMappingSource) {
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
@@ -975,7 +1023,7 @@ public class CreateAWSEnvironmentRequest {
    * This is an optional field. This is for QE testing purposes and internal use only.
    * @return idBrokerMappingSource
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -986,12 +1034,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setIdBrokerMappingSource(@javax.annotation.Nullable String idBrokerMappingSource) {
+  public void setIdBrokerMappingSource(@jakarta.annotation.Nullable String idBrokerMappingSource) {
     this.idBrokerMappingSource = idBrokerMappingSource;
   }
 
-  public CreateAWSEnvironmentRequest customDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
-    
+
+  public CreateAWSEnvironmentRequest customDockerRegistry(@jakarta.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -1000,7 +1048,7 @@ public class CreateAWSEnvironmentRequest {
    * Get customDockerRegistry
    * @return customDockerRegistry
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -1011,12 +1059,12 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCustomDockerRegistry(@javax.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
+  public void setCustomDockerRegistry(@jakarta.annotation.Nullable CustomDockerRegistryRequest customDockerRegistry) {
     this.customDockerRegistry = customDockerRegistry;
   }
 
-  public CreateAWSEnvironmentRequest security(@javax.annotation.Nullable SecurityRequest security) {
-    
+
+  public CreateAWSEnvironmentRequest security(@jakarta.annotation.Nullable SecurityRequest security) {
     this.security = security;
     return this;
   }
@@ -1025,7 +1073,7 @@ public class CreateAWSEnvironmentRequest {
    * Get security
    * @return security
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -1036,11 +1084,64 @@ public class CreateAWSEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_SECURITY)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSecurity(@javax.annotation.Nullable SecurityRequest security) {
+  public void setSecurity(@jakarta.annotation.Nullable SecurityRequest security) {
     this.security = security;
   }
 
 
+  public CreateAWSEnvironmentRequest environmentType(@jakarta.annotation.Nullable EnvironmentTypeEnum environmentType) {
+    this.environmentType = environmentType;
+    return this;
+  }
+
+  /**
+   * Environment type which can be hybrid or public cloud.
+   * @return environmentType
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_TYPE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public EnvironmentTypeEnum getEnvironmentType() {
+    return environmentType;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_TYPE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnvironmentType(@jakarta.annotation.Nullable EnvironmentTypeEnum environmentType) {
+    this.environmentType = environmentType;
+  }
+
+
+  public CreateAWSEnvironmentRequest encryptionProfileName(@jakarta.annotation.Nullable String encryptionProfileName) {
+    this.encryptionProfileName = encryptionProfileName;
+    return this;
+  }
+
+  /**
+   * Name of the encryption profile to use for the environment.
+   * @return encryptionProfileName
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENCRYPTION_PROFILE_NAME)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getEncryptionProfileName() {
+    return encryptionProfileName;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENCRYPTION_PROFILE_NAME)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEncryptionProfileName(@jakarta.annotation.Nullable String encryptionProfileName) {
+    this.encryptionProfileName = encryptionProfileName;
+  }
+
+
+  /**
+   * Return true if this CreateAWSEnvironmentRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1080,12 +1181,14 @@ public class CreateAWSEnvironmentRequest {
         Objects.equals(this.encryptionKeyArn, createAWSEnvironmentRequest.encryptionKeyArn) &&
         Objects.equals(this.idBrokerMappingSource, createAWSEnvironmentRequest.idBrokerMappingSource) &&
         Objects.equals(this.customDockerRegistry, createAWSEnvironmentRequest.customDockerRegistry) &&
-        Objects.equals(this.security, createAWSEnvironmentRequest.security);
+        Objects.equals(this.security, createAWSEnvironmentRequest.security) &&
+        Objects.equals(this.environmentType, createAWSEnvironmentRequest.environmentType) &&
+        Objects.equals(this.encryptionProfileName, createAWSEnvironmentRequest.encryptionProfileName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, vpcId, subnetIds, networkCidr, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry, security);
+    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, vpcId, subnetIds, networkCidr, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry, security, environmentType, encryptionProfileName);
   }
 
   @Override
@@ -1123,6 +1226,8 @@ public class CreateAWSEnvironmentRequest {
     sb.append("    idBrokerMappingSource: ").append(toIndentedString(idBrokerMappingSource)).append("\n");
     sb.append("    customDockerRegistry: ").append(toIndentedString(customDockerRegistry)).append("\n");
     sb.append("    security: ").append(toIndentedString(security)).append("\n");
+    sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
+    sb.append("    encryptionProfileName: ").append(toIndentedString(encryptionProfileName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

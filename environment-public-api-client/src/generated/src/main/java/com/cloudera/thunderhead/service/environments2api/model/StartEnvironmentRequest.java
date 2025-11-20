@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for a start environment request.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class StartEnvironmentRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_NAME = "environmentName";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environmentName;
 
   public static final String JSON_PROPERTY_WITH_DATAHUB_START = "withDatahubStart";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean withDatahubStart;
 
-  public StartEnvironmentRequest() {
+  public StartEnvironmentRequest() { 
   }
 
-  public StartEnvironmentRequest environmentName(@javax.annotation.Nonnull String environmentName) {
-    
+  public StartEnvironmentRequest environmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
     return this;
   }
@@ -53,7 +55,7 @@ public class StartEnvironmentRequest {
    * The name or CRN of the environment.
    * @return environmentName
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class StartEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironmentName(@javax.annotation.Nonnull String environmentName) {
+  public void setEnvironmentName(@jakarta.annotation.Nonnull String environmentName) {
     this.environmentName = environmentName;
   }
 
-  public StartEnvironmentRequest withDatahubStart(@javax.annotation.Nullable Boolean withDatahubStart) {
-    
+
+  public StartEnvironmentRequest withDatahubStart(@jakarta.annotation.Nullable Boolean withDatahubStart) {
     this.withDatahubStart = withDatahubStart;
     return this;
   }
@@ -78,7 +80,7 @@ public class StartEnvironmentRequest {
    * Whether the Data Hub clusters should start or not at the environment (re-)start
    * @return withDatahubStart
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WITH_DATAHUB_START)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class StartEnvironmentRequest {
 
   @JsonProperty(JSON_PROPERTY_WITH_DATAHUB_START)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWithDatahubStart(@javax.annotation.Nullable Boolean withDatahubStart) {
+  public void setWithDatahubStart(@jakarta.annotation.Nullable Boolean withDatahubStart) {
     this.withDatahubStart = withDatahubStart;
   }
 
 
+  /**
+   * Return true if this StartEnvironmentRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

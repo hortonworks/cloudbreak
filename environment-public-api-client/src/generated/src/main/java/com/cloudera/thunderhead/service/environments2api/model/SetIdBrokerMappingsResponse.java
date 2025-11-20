@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.IdBrokerMapping;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for setting ID Broker mappings for an environment.
@@ -41,34 +43,33 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetIdBrokerMappingsResponse {
   public static final String JSON_PROPERTY_MAPPINGS_VERSION = "mappingsVersion";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Long mappingsVersion;
 
   public static final String JSON_PROPERTY_DATA_ACCESS_ROLE = "dataAccessRole";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String dataAccessRole;
 
   public static final String JSON_PROPERTY_RANGER_AUDIT_ROLE = "rangerAuditRole";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String rangerAuditRole;
 
   public static final String JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE = "rangerCloudAccessAuthorizerRole";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String rangerCloudAccessAuthorizerRole;
 
   public static final String JSON_PROPERTY_BASELINE_ROLE = "baselineRole";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String baselineRole;
 
   public static final String JSON_PROPERTY_MAPPINGS = "mappings";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<IdBrokerMapping> mappings = new ArrayList<>();
 
-  public SetIdBrokerMappingsResponse() {
+  public SetIdBrokerMappingsResponse() { 
   }
 
-  public SetIdBrokerMappingsResponse mappingsVersion(@javax.annotation.Nonnull Long mappingsVersion) {
-    
+  public SetIdBrokerMappingsResponse mappingsVersion(@jakarta.annotation.Nonnull Long mappingsVersion) {
     this.mappingsVersion = mappingsVersion;
     return this;
   }
@@ -77,7 +78,7 @@ public class SetIdBrokerMappingsResponse {
    * The version of the mappings.
    * @return mappingsVersion
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_MAPPINGS_VERSION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -88,12 +89,12 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_MAPPINGS_VERSION)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setMappingsVersion(@javax.annotation.Nonnull Long mappingsVersion) {
+  public void setMappingsVersion(@jakarta.annotation.Nonnull Long mappingsVersion) {
     this.mappingsVersion = mappingsVersion;
   }
 
-  public SetIdBrokerMappingsResponse dataAccessRole(@javax.annotation.Nonnull String dataAccessRole) {
-    
+
+  public SetIdBrokerMappingsResponse dataAccessRole(@jakarta.annotation.Nonnull String dataAccessRole) {
     this.dataAccessRole = dataAccessRole;
     return this;
   }
@@ -102,7 +103,7 @@ public class SetIdBrokerMappingsResponse {
    * The cloud provider role to which data access services will be mapped (e.g. an ARN in AWS, a Resource ID in Azure).
    * @return dataAccessRole
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_DATA_ACCESS_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -113,12 +114,12 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_DATA_ACCESS_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDataAccessRole(@javax.annotation.Nonnull String dataAccessRole) {
+  public void setDataAccessRole(@jakarta.annotation.Nonnull String dataAccessRole) {
     this.dataAccessRole = dataAccessRole;
   }
 
-  public SetIdBrokerMappingsResponse rangerAuditRole(@javax.annotation.Nonnull String rangerAuditRole) {
-    
+
+  public SetIdBrokerMappingsResponse rangerAuditRole(@jakarta.annotation.Nonnull String rangerAuditRole) {
     this.rangerAuditRole = rangerAuditRole;
     return this;
   }
@@ -127,7 +128,7 @@ public class SetIdBrokerMappingsResponse {
    * The cloud provider role to which services that write to Ranger audit logs will be mapped (e.g. an ARN in AWS, a Resource ID in Azure). Note that some data access services also write to Ranger audit logs; such services will be mapped to the dataAccessRole, not the rangerAuditRole.
    * @return rangerAuditRole
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RANGER_AUDIT_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -138,12 +139,12 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_RANGER_AUDIT_ROLE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRangerAuditRole(@javax.annotation.Nonnull String rangerAuditRole) {
+  public void setRangerAuditRole(@jakarta.annotation.Nonnull String rangerAuditRole) {
     this.rangerAuditRole = rangerAuditRole;
   }
 
-  public SetIdBrokerMappingsResponse rangerCloudAccessAuthorizerRole(@javax.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
-    
+
+  public SetIdBrokerMappingsResponse rangerCloudAccessAuthorizerRole(@jakarta.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
     this.rangerCloudAccessAuthorizerRole = rangerCloudAccessAuthorizerRole;
     return this;
   }
@@ -152,7 +153,7 @@ public class SetIdBrokerMappingsResponse {
    * The cloud provider role to which the Ranger RAZ service will be mapped (e.g. an ARN in AWS, a Resource ID in Azure).
    * @return rangerCloudAccessAuthorizerRole
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -163,12 +164,12 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRangerCloudAccessAuthorizerRole(@javax.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
+  public void setRangerCloudAccessAuthorizerRole(@jakarta.annotation.Nullable String rangerCloudAccessAuthorizerRole) {
     this.rangerCloudAccessAuthorizerRole = rangerCloudAccessAuthorizerRole;
   }
 
-  public SetIdBrokerMappingsResponse baselineRole(@javax.annotation.Nullable String baselineRole) {
-    
+
+  public SetIdBrokerMappingsResponse baselineRole(@jakarta.annotation.Nullable String baselineRole) {
     this.baselineRole = baselineRole;
     return this;
   }
@@ -177,7 +178,7 @@ public class SetIdBrokerMappingsResponse {
    * Deprecated. Please use rangerAuditRole instead.
    * @return baselineRole
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_BASELINE_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -188,12 +189,12 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_BASELINE_ROLE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBaselineRole(@javax.annotation.Nullable String baselineRole) {
+  public void setBaselineRole(@jakarta.annotation.Nullable String baselineRole) {
     this.baselineRole = baselineRole;
   }
 
-  public SetIdBrokerMappingsResponse mappings(@javax.annotation.Nullable List<IdBrokerMapping> mappings) {
-    
+
+  public SetIdBrokerMappingsResponse mappings(@jakarta.annotation.Nullable List<IdBrokerMapping> mappings) {
     this.mappings = mappings;
     return this;
   }
@@ -210,7 +211,7 @@ public class SetIdBrokerMappingsResponse {
    * ID Broker mappings for individual actors and groups. Does not include mappings for data access services. May be empty if no individual mappings are needed.
    * @return mappings
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -221,11 +222,14 @@ public class SetIdBrokerMappingsResponse {
 
   @JsonProperty(JSON_PROPERTY_MAPPINGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMappings(@javax.annotation.Nullable List<IdBrokerMapping> mappings) {
+  public void setMappings(@jakarta.annotation.Nullable List<IdBrokerMapping> mappings) {
     this.mappings = mappings;
   }
 
 
+  /**
+   * Return true if this SetIdBrokerMappingsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The attached volume configuration.
@@ -34,22 +37,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AttachedVolumeDetail {
   public static final String JSON_PROPERTY_COUNT = "count";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer count;
 
   public static final String JSON_PROPERTY_VOLUME_TYPE = "volumeType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String volumeType;
 
   public static final String JSON_PROPERTY_SIZE = "size";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Integer size;
 
-  public AttachedVolumeDetail() {
+  public AttachedVolumeDetail() { 
   }
 
-  public AttachedVolumeDetail count(@javax.annotation.Nullable Integer count) {
-    
+  public AttachedVolumeDetail count(@jakarta.annotation.Nullable Integer count) {
     this.count = count;
     return this;
   }
@@ -58,7 +60,7 @@ public class AttachedVolumeDetail {
    * The number of volumes.
    * @return count
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_COUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -69,12 +71,12 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_COUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCount(@javax.annotation.Nullable Integer count) {
+  public void setCount(@jakarta.annotation.Nullable Integer count) {
     this.count = count;
   }
 
-  public AttachedVolumeDetail volumeType(@javax.annotation.Nullable String volumeType) {
-    
+
+  public AttachedVolumeDetail volumeType(@jakarta.annotation.Nullable String volumeType) {
     this.volumeType = volumeType;
     return this;
   }
@@ -83,7 +85,7 @@ public class AttachedVolumeDetail {
    * The type of volumes.
    * @return volumeType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,12 +96,12 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVolumeType(@javax.annotation.Nullable String volumeType) {
+  public void setVolumeType(@jakarta.annotation.Nullable String volumeType) {
     this.volumeType = volumeType;
   }
 
-  public AttachedVolumeDetail size(@javax.annotation.Nullable Integer size) {
-    
+
+  public AttachedVolumeDetail size(@jakarta.annotation.Nullable Integer size) {
     this.size = size;
     return this;
   }
@@ -108,7 +110,7 @@ public class AttachedVolumeDetail {
    * The size of each volume in GB.
    * @return size
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,11 +121,14 @@ public class AttachedVolumeDetail {
 
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setSize(@javax.annotation.Nullable Integer size) {
+  public void setSize(@jakarta.annotation.Nullable Integer size) {
     this.size = size;
   }
 
 
+  /**
+   * Return true if this AttachedVolumeDetail object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

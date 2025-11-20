@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for testing anonymization rules for account telemetry.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class TestAccountTelemetryRulesResponse {
   public static final String JSON_PROPERTY_OUTPUT = "output";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String output;
 
-  public TestAccountTelemetryRulesResponse() {
+  public TestAccountTelemetryRulesResponse() { 
   }
 
-  public TestAccountTelemetryRulesResponse output(@javax.annotation.Nullable String output) {
-    
+  public TestAccountTelemetryRulesResponse output(@jakarta.annotation.Nullable String output) {
     this.output = output;
     return this;
   }
@@ -48,7 +50,7 @@ public class TestAccountTelemetryRulesResponse {
    * Output text after applying the anonymization rules on the test input.
    * @return output
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -59,11 +61,14 @@ public class TestAccountTelemetryRulesResponse {
 
   @JsonProperty(JSON_PROPERTY_OUTPUT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOutput(@javax.annotation.Nullable String output) {
+  public void setOutput(@jakarta.annotation.Nullable String output) {
     this.output = output;
   }
 
 
+  /**
+   * Return true if this TestAccountTelemetryRulesResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

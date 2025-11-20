@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The response object for FreeIPA upscale.
@@ -69,7 +72,7 @@ public class UpscaleFreeipaResponse {
   }
 
   public static final String JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE = "originalAvailabilityType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private OriginalAvailabilityTypeEnum originalAvailabilityType;
 
   /**
@@ -106,18 +109,17 @@ public class UpscaleFreeipaResponse {
   }
 
   public static final String JSON_PROPERTY_TARGET_AVAILABILITY_TYPE = "targetAvailabilityType";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private TargetAvailabilityTypeEnum targetAvailabilityType;
 
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String operationId;
 
-  public UpscaleFreeipaResponse() {
+  public UpscaleFreeipaResponse() { 
   }
 
-  public UpscaleFreeipaResponse originalAvailabilityType(@javax.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
-    
+  public UpscaleFreeipaResponse originalAvailabilityType(@jakarta.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
     this.originalAvailabilityType = originalAvailabilityType;
     return this;
   }
@@ -126,7 +128,7 @@ public class UpscaleFreeipaResponse {
    * The original FreeIPA availability type.
    * @return originalAvailabilityType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -137,12 +139,12 @@ public class UpscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_ORIGINAL_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOriginalAvailabilityType(@javax.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
+  public void setOriginalAvailabilityType(@jakarta.annotation.Nullable OriginalAvailabilityTypeEnum originalAvailabilityType) {
     this.originalAvailabilityType = originalAvailabilityType;
   }
 
-  public UpscaleFreeipaResponse targetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
-    
+
+  public UpscaleFreeipaResponse targetAvailabilityType(@jakarta.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
@@ -151,7 +153,7 @@ public class UpscaleFreeipaResponse {
    * The target FreeIPA availability type.
    * @return targetAvailabilityType
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -162,12 +164,12 @@ public class UpscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_TARGET_AVAILABILITY_TYPE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setTargetAvailabilityType(@javax.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
+  public void setTargetAvailabilityType(@jakarta.annotation.Nullable TargetAvailabilityTypeEnum targetAvailabilityType) {
     this.targetAvailabilityType = targetAvailabilityType;
   }
 
-  public UpscaleFreeipaResponse operationId(@javax.annotation.Nullable String operationId) {
-    
+
+  public UpscaleFreeipaResponse operationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -176,7 +178,7 @@ public class UpscaleFreeipaResponse {
    * UUID of the request for this operation. This ID can be used to get the status of the operation.
    * @return operationId
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -187,11 +189,14 @@ public class UpscaleFreeipaResponse {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setOperationId(@javax.annotation.Nullable String operationId) {
+  public void setOperationId(@jakarta.annotation.Nullable String operationId) {
     this.operationId = operationId;
   }
 
 
+  /**
+   * Return true if this UpscaleFreeipaResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.AnonymizationRuleResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for set account level telemetry settings.
@@ -39,26 +41,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SetAccountTelemetryResponse {
   public static final String JSON_PROPERTY_WORKLOAD_ANALYTICS = "workloadAnalytics";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean workloadAnalytics;
 
   public static final String JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS = "reportDeploymentLogs";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean reportDeploymentLogs = false;
 
   public static final String JSON_PROPERTY_CLOUD_STORAGE_LOGGING = "cloudStorageLogging";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Boolean cloudStorageLogging;
 
   public static final String JSON_PROPERTY_RULES = "rules";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<AnonymizationRuleResponse> rules = new ArrayList<>();
 
-  public SetAccountTelemetryResponse() {
+  public SetAccountTelemetryResponse() { 
   }
 
-  public SetAccountTelemetryResponse workloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
-    
+  public SetAccountTelemetryResponse workloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -67,7 +68,7 @@ public class SetAccountTelemetryResponse {
    * Flag to enable account level workload analytics. (that will be used as a default for environment)
    * @return workloadAnalytics
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -78,12 +79,12 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_WORKLOAD_ANALYTICS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWorkloadAnalytics(@javax.annotation.Nullable Boolean workloadAnalytics) {
+  public void setWorkloadAnalytics(@jakarta.annotation.Nullable Boolean workloadAnalytics) {
     this.workloadAnalytics = workloadAnalytics;
   }
 
-  public SetAccountTelemetryResponse reportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
-    
+
+  public SetAccountTelemetryResponse reportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -92,7 +93,7 @@ public class SetAccountTelemetryResponse {
    * [Deprecated] Flag to enable account level deployment log collection. (that will be used as a default for environment)
    * @return reportDeploymentLogs
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -103,12 +104,12 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setReportDeploymentLogs(@javax.annotation.Nullable Boolean reportDeploymentLogs) {
+  public void setReportDeploymentLogs(@jakarta.annotation.Nullable Boolean reportDeploymentLogs) {
     this.reportDeploymentLogs = reportDeploymentLogs;
   }
 
-  public SetAccountTelemetryResponse cloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
-    
+
+  public SetAccountTelemetryResponse cloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -117,7 +118,7 @@ public class SetAccountTelemetryResponse {
    * Flag to enable account level cloud storage logging. (that will be used as a default for environment)
    * @return cloudStorageLogging
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -128,12 +129,12 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_CLOUD_STORAGE_LOGGING)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCloudStorageLogging(@javax.annotation.Nullable Boolean cloudStorageLogging) {
+  public void setCloudStorageLogging(@jakarta.annotation.Nullable Boolean cloudStorageLogging) {
     this.cloudStorageLogging = cloudStorageLogging;
   }
 
-  public SetAccountTelemetryResponse rules(@javax.annotation.Nullable List<AnonymizationRuleResponse> rules) {
-    
+
+  public SetAccountTelemetryResponse rules(@jakarta.annotation.Nullable List<AnonymizationRuleResponse> rules) {
     this.rules = rules;
     return this;
   }
@@ -150,7 +151,7 @@ public class SetAccountTelemetryResponse {
    * List of anonymization rules that are applied on logs that are shipped to Cloudera
    * @return rules
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -161,11 +162,14 @@ public class SetAccountTelemetryResponse {
 
   @JsonProperty(JSON_PROPERTY_RULES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRules(@javax.annotation.Nullable List<AnonymizationRuleResponse> rules) {
+  public void setRules(@jakarta.annotation.Nullable List<AnonymizationRuleResponse> rules) {
     this.rules = rules;
   }
 
 
+  /**
+   * Return true if this SetAccountTelemetryResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Volume configuration.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ModifyDisks {
   public static final String JSON_PROPERTY_SIZE = "size";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private Integer size;
 
   public static final String JSON_PROPERTY_VOLUME_TYPE = "volumeType";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String volumeType;
 
-  public ModifyDisks() {
+  public ModifyDisks() { 
   }
 
-  public ModifyDisks size(@javax.annotation.Nonnull Integer size) {
-    
+  public ModifyDisks size(@jakarta.annotation.Nonnull Integer size) {
     this.size = size;
     return this;
   }
@@ -53,7 +55,7 @@ public class ModifyDisks {
    * Size of disks to modify to on all the instances in GB.
    * @return size
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -64,12 +66,12 @@ public class ModifyDisks {
 
   @JsonProperty(JSON_PROPERTY_SIZE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSize(@javax.annotation.Nonnull Integer size) {
+  public void setSize(@jakarta.annotation.Nonnull Integer size) {
     this.size = size;
   }
 
-  public ModifyDisks volumeType(@javax.annotation.Nonnull String volumeType) {
-    
+
+  public ModifyDisks volumeType(@jakarta.annotation.Nonnull String volumeType) {
     this.volumeType = volumeType;
     return this;
   }
@@ -78,7 +80,7 @@ public class ModifyDisks {
    * Type of disks to modify to on all the instances.
    * @return volumeType
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -89,11 +91,14 @@ public class ModifyDisks {
 
   @JsonProperty(JSON_PROPERTY_VOLUME_TYPE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVolumeType(@javax.annotation.Nonnull String volumeType) {
+  public void setVolumeType(@jakarta.annotation.Nonnull String volumeType) {
     this.volumeType = volumeType;
   }
 
 
+  /**
+   * Return true if this ModifyDisks object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

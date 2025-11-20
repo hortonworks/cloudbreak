@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.InstanceTemplate;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The request object for FreeIPA vertical scaling.
@@ -34,18 +37,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class StartFreeIpaVerticalScalingRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_INSTANCE_TEMPLATE = "instanceTemplate";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private InstanceTemplate instanceTemplate;
 
-  public StartFreeIpaVerticalScalingRequest() {
+  public StartFreeIpaVerticalScalingRequest() { 
   }
 
-  public StartFreeIpaVerticalScalingRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public StartFreeIpaVerticalScalingRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -54,7 +56,7 @@ public class StartFreeIpaVerticalScalingRequest {
    * The name or CRN of the environment.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,12 +67,12 @@ public class StartFreeIpaVerticalScalingRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public StartFreeIpaVerticalScalingRequest instanceTemplate(@javax.annotation.Nonnull InstanceTemplate instanceTemplate) {
-    
+
+  public StartFreeIpaVerticalScalingRequest instanceTemplate(@jakarta.annotation.Nonnull InstanceTemplate instanceTemplate) {
     this.instanceTemplate = instanceTemplate;
     return this;
   }
@@ -79,7 +81,7 @@ public class StartFreeIpaVerticalScalingRequest {
    * Get instanceTemplate
    * @return instanceTemplate
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_INSTANCE_TEMPLATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -90,11 +92,14 @@ public class StartFreeIpaVerticalScalingRequest {
 
   @JsonProperty(JSON_PROPERTY_INSTANCE_TEMPLATE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInstanceTemplate(@javax.annotation.Nonnull InstanceTemplate instanceTemplate) {
+  public void setInstanceTemplate(@jakarta.annotation.Nonnull InstanceTemplate instanceTemplate) {
     this.instanceTemplate = instanceTemplate;
   }
 
 
+  /**
+   * Return true if this StartFreeIpaVerticalScalingRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

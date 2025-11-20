@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for attaching recipes to FreeIPA.
@@ -36,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class AttachFreeIpaRecipesRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT = "environment";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String environment;
 
   public static final String JSON_PROPERTY_RECIPES = "recipes";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private List<String> recipes = new ArrayList<>();
 
-  public AttachFreeIpaRecipesRequest() {
+  public AttachFreeIpaRecipesRequest() { 
   }
 
-  public AttachFreeIpaRecipesRequest environment(@javax.annotation.Nonnull String environment) {
-    
+  public AttachFreeIpaRecipesRequest environment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
     return this;
   }
@@ -56,7 +57,7 @@ public class AttachFreeIpaRecipesRequest {
    * The environment name or CRN of the FreeIPA.
    * @return environment
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -67,12 +68,12 @@ public class AttachFreeIpaRecipesRequest {
 
   @JsonProperty(JSON_PROPERTY_ENVIRONMENT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setEnvironment(@javax.annotation.Nonnull String environment) {
+  public void setEnvironment(@jakarta.annotation.Nonnull String environment) {
     this.environment = environment;
   }
 
-  public AttachFreeIpaRecipesRequest recipes(@javax.annotation.Nonnull List<String> recipes) {
-    
+
+  public AttachFreeIpaRecipesRequest recipes(@jakarta.annotation.Nonnull List<String> recipes) {
     this.recipes = recipes;
     return this;
   }
@@ -89,7 +90,7 @@ public class AttachFreeIpaRecipesRequest {
    * The list of recipes to attach.
    * @return recipes
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -100,11 +101,14 @@ public class AttachFreeIpaRecipesRequest {
 
   @JsonProperty(JSON_PROPERTY_RECIPES)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRecipes(@javax.annotation.Nonnull List<String> recipes) {
+  public void setRecipes(@jakarta.annotation.Nonnull List<String> recipes) {
     this.recipes = recipes;
   }
 
 
+  /**
+   * Return true if this AttachFreeIpaRecipesRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

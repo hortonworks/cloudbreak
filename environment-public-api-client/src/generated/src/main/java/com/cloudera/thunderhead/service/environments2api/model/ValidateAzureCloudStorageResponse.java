@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for Azure environment cloud storage validation.
@@ -33,18 +36,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ValidateAzureCloudStorageResponse {
   public static final String JSON_PROPERTY_STATUS = "status";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String status;
 
   public static final String JSON_PROPERTY_ERROR = "error";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private String error;
 
-  public ValidateAzureCloudStorageResponse() {
+  public ValidateAzureCloudStorageResponse() { 
   }
 
-  public ValidateAzureCloudStorageResponse status(@javax.annotation.Nullable String status) {
-    
+  public ValidateAzureCloudStorageResponse status(@jakarta.annotation.Nullable String status) {
     this.status = status;
     return this;
   }
@@ -53,7 +55,7 @@ public class ValidateAzureCloudStorageResponse {
    * Validation result. Allowed values are \&quot;OK\&quot;, \&quot;ACCESS_DENIED\&quot;, \&quot;ERROR\&quot;, \&quot;RESOURCE_NOT_FOUND\&quot;.
    * @return status
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -64,12 +66,12 @@ public class ValidateAzureCloudStorageResponse {
 
   @JsonProperty(JSON_PROPERTY_STATUS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setStatus(@javax.annotation.Nullable String status) {
+  public void setStatus(@jakarta.annotation.Nullable String status) {
     this.status = status;
   }
 
-  public ValidateAzureCloudStorageResponse error(@javax.annotation.Nullable String error) {
-    
+
+  public ValidateAzureCloudStorageResponse error(@jakarta.annotation.Nullable String error) {
     this.error = error;
     return this;
   }
@@ -78,7 +80,7 @@ public class ValidateAzureCloudStorageResponse {
    * Error message if validation failed.
    * @return error
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,11 +91,14 @@ public class ValidateAzureCloudStorageResponse {
 
   @JsonProperty(JSON_PROPERTY_ERROR)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(@javax.annotation.Nullable String error) {
+  public void setError(@jakarta.annotation.Nullable String error) {
     this.error = error;
   }
 
 
+  /**
+   * Return true if this ValidateAzureCloudStorageResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

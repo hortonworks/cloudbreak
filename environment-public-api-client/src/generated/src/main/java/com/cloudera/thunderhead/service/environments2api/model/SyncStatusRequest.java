@@ -14,14 +14,17 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Request object for Sync Status.
@@ -32,14 +35,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class SyncStatusRequest {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private String operationId;
 
-  public SyncStatusRequest() {
+  public SyncStatusRequest() { 
   }
 
-  public SyncStatusRequest operationId(@javax.annotation.Nonnull String operationId) {
-    
+  public SyncStatusRequest operationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
     return this;
   }
@@ -48,7 +50,7 @@ public class SyncStatusRequest {
    * operationId for the previously requested sync operation for user sync or password.
    * @return operationId
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -59,11 +61,14 @@ public class SyncStatusRequest {
 
   @JsonProperty(JSON_PROPERTY_OPERATION_ID)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOperationId(@javax.annotation.Nonnull String operationId) {
+  public void setOperationId(@jakarta.annotation.Nonnull String operationId) {
     this.operationId = operationId;
   }
 
 
+  /**
+   * Return true if this SyncStatusRequest object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

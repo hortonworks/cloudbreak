@@ -14,15 +14,18 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ProxyConfig;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Response object for a create proxy config request.
@@ -33,14 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CreateProxyConfigResponse {
   public static final String JSON_PROPERTY_PROXY_CONFIG = "proxyConfig";
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   private ProxyConfig proxyConfig;
 
-  public CreateProxyConfigResponse() {
+  public CreateProxyConfigResponse() { 
   }
 
-  public CreateProxyConfigResponse proxyConfig(@javax.annotation.Nonnull ProxyConfig proxyConfig) {
-    
+  public CreateProxyConfigResponse proxyConfig(@jakarta.annotation.Nonnull ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
     return this;
   }
@@ -49,7 +51,7 @@ public class CreateProxyConfigResponse {
    * Get proxyConfig
    * @return proxyConfig
    */
-  @javax.annotation.Nonnull
+  @jakarta.annotation.Nonnull
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -60,11 +62,14 @@ public class CreateProxyConfigResponse {
 
   @JsonProperty(JSON_PROPERTY_PROXY_CONFIG)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProxyConfig(@javax.annotation.Nonnull ProxyConfig proxyConfig) {
+  public void setProxyConfig(@jakarta.annotation.Nonnull ProxyConfig proxyConfig) {
     this.proxyConfig = proxyConfig;
   }
 
 
+  /**
+   * Return true if this CreateProxyConfigResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

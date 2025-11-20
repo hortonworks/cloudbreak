@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.CdwCluster;
 import com.cloudera.thunderhead.service.environments2api.model.CdwDbc;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,8 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The CDW summary.
@@ -35,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class CdwSummary {
   public static final String JSON_PROPERTY_CDW_CLUSTER = "cdwCluster";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CdwCluster cdwCluster;
 
   public static final String JSON_PROPERTY_CDW_DBC = "cdwDbc";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private CdwDbc cdwDbc;
 
-  public CdwSummary() {
+  public CdwSummary() { 
   }
 
-  public CdwSummary cdwCluster(@javax.annotation.Nullable CdwCluster cdwCluster) {
-    
+  public CdwSummary cdwCluster(@jakarta.annotation.Nullable CdwCluster cdwCluster) {
     this.cdwCluster = cdwCluster;
     return this;
   }
@@ -55,7 +57,7 @@ public class CdwSummary {
    * Get cdwCluster
    * @return cdwCluster
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -66,12 +68,12 @@ public class CdwSummary {
 
   @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwCluster(@javax.annotation.Nullable CdwCluster cdwCluster) {
+  public void setCdwCluster(@jakarta.annotation.Nullable CdwCluster cdwCluster) {
     this.cdwCluster = cdwCluster;
   }
 
-  public CdwSummary cdwDbc(@javax.annotation.Nullable CdwDbc cdwDbc) {
-    
+
+  public CdwSummary cdwDbc(@jakarta.annotation.Nullable CdwDbc cdwDbc) {
     this.cdwDbc = cdwDbc;
     return this;
   }
@@ -80,7 +82,7 @@ public class CdwSummary {
    * Get cdwDbc
    * @return cdwDbc
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CDW_DBC)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,11 +93,14 @@ public class CdwSummary {
 
   @JsonProperty(JSON_PROPERTY_CDW_DBC)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwDbc(@javax.annotation.Nullable CdwDbc cdwDbc) {
+  public void setCdwDbc(@jakarta.annotation.Nullable CdwDbc cdwDbc) {
     this.cdwDbc = cdwDbc;
   }
 
 
+  /**
+   * Return true if this CdwSummary object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

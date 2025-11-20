@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.cloudera.thunderhead.service.environments2api.model.ImageInfoResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * The response object with available FreeIPA upgrade candidates.
@@ -37,18 +39,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class GetFreeipaUpgradeOptionsResponse {
   public static final String JSON_PROPERTY_IMAGES = "images";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<ImageInfoResponse> images = new ArrayList<>();
 
   public static final String JSON_PROPERTY_CURRENT_IMAGE = "currentImage";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private ImageInfoResponse currentImage;
 
-  public GetFreeipaUpgradeOptionsResponse() {
+  public GetFreeipaUpgradeOptionsResponse() { 
   }
 
-  public GetFreeipaUpgradeOptionsResponse images(@javax.annotation.Nullable List<ImageInfoResponse> images) {
-    
+  public GetFreeipaUpgradeOptionsResponse images(@jakarta.annotation.Nullable List<ImageInfoResponse> images) {
     this.images = images;
     return this;
   }
@@ -65,7 +66,7 @@ public class GetFreeipaUpgradeOptionsResponse {
    * The list of the upgrade candidates.
    * @return images
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -76,12 +77,12 @@ public class GetFreeipaUpgradeOptionsResponse {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(@javax.annotation.Nullable List<ImageInfoResponse> images) {
+  public void setImages(@jakarta.annotation.Nullable List<ImageInfoResponse> images) {
     this.images = images;
   }
 
-  public GetFreeipaUpgradeOptionsResponse currentImage(@javax.annotation.Nullable ImageInfoResponse currentImage) {
-    
+
+  public GetFreeipaUpgradeOptionsResponse currentImage(@jakarta.annotation.Nullable ImageInfoResponse currentImage) {
     this.currentImage = currentImage;
     return this;
   }
@@ -90,7 +91,7 @@ public class GetFreeipaUpgradeOptionsResponse {
    * Get currentImage
    * @return currentImage
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_CURRENT_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -101,11 +102,14 @@ public class GetFreeipaUpgradeOptionsResponse {
 
   @JsonProperty(JSON_PROPERTY_CURRENT_IMAGE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCurrentImage(@javax.annotation.Nullable ImageInfoResponse currentImage) {
+  public void setCurrentImage(@jakarta.annotation.Nullable ImageInfoResponse currentImage) {
     this.currentImage = currentImage;
   }
 
 
+  /**
+   * Return true if this GetFreeipaUpgradeOptionsResponse object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

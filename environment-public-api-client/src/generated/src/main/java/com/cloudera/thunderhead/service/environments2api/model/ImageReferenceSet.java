@@ -14,16 +14,19 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * Detailed set of cloud providers region to image mappings.
@@ -36,22 +39,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ImageReferenceSet {
   public static final String JSON_PROPERTY_AWS = "aws";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> aws = new HashMap<>();
 
   public static final String JSON_PROPERTY_AZURE = "azure";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> azure = new HashMap<>();
 
   public static final String JSON_PROPERTY_GCP = "gcp";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private Map<String, String> gcp = new HashMap<>();
 
-  public ImageReferenceSet() {
+  public ImageReferenceSet() { 
   }
 
-  public ImageReferenceSet aws(@javax.annotation.Nullable Map<String, String> aws) {
-    
+  public ImageReferenceSet aws(@jakarta.annotation.Nullable Map<String, String> aws) {
     this.aws = aws;
     return this;
   }
@@ -68,7 +70,7 @@ public class ImageReferenceSet {
    * AWS-related region-to-image mappings.
    * @return aws
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -79,12 +81,12 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_AWS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAws(@javax.annotation.Nullable Map<String, String> aws) {
+  public void setAws(@jakarta.annotation.Nullable Map<String, String> aws) {
     this.aws = aws;
   }
 
-  public ImageReferenceSet azure(@javax.annotation.Nullable Map<String, String> azure) {
-    
+
+  public ImageReferenceSet azure(@jakarta.annotation.Nullable Map<String, String> azure) {
     this.azure = azure;
     return this;
   }
@@ -101,7 +103,7 @@ public class ImageReferenceSet {
    * Azure-related region-to-image mappings.
    * @return azure
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -112,12 +114,12 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_AZURE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAzure(@javax.annotation.Nullable Map<String, String> azure) {
+  public void setAzure(@jakarta.annotation.Nullable Map<String, String> azure) {
     this.azure = azure;
   }
 
-  public ImageReferenceSet gcp(@javax.annotation.Nullable Map<String, String> gcp) {
-    
+
+  public ImageReferenceSet gcp(@jakarta.annotation.Nullable Map<String, String> gcp) {
     this.gcp = gcp;
     return this;
   }
@@ -134,7 +136,7 @@ public class ImageReferenceSet {
    * GCP-related region-to-image mappings.
    * @return gcp
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -145,11 +147,14 @@ public class ImageReferenceSet {
 
   @JsonProperty(JSON_PROPERTY_GCP)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setGcp(@javax.annotation.Nullable Map<String, String> gcp) {
+  public void setGcp(@jakarta.annotation.Nullable Map<String, String> gcp) {
     this.gcp = gcp;
   }
 
 
+  /**
+   * Return true if this ImageReferenceSet object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {

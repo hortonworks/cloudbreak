@@ -14,7 +14,8 @@
 package com.cloudera.thunderhead.service.environments2api.model;
 
 import java.util.Objects;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.cloudera.thunderhead.service.environments2api.JSON;
+
 
 /**
  * FreeIPA-related versions and images.
@@ -37,22 +39,21 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class FreeIpaVersions {
   public static final String JSON_PROPERTY_IMAGES = "images";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> images = new ArrayList<>();
 
   public static final String JSON_PROPERTY_DEFAULTS = "defaults";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> defaults = new ArrayList<>();
 
   public static final String JSON_PROPERTY_VERSIONS = "versions";
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   private List<String> versions = new ArrayList<>();
 
-  public FreeIpaVersions() {
+  public FreeIpaVersions() { 
   }
 
-  public FreeIpaVersions images(@javax.annotation.Nullable List<String> images) {
-    
+  public FreeIpaVersions images(@jakarta.annotation.Nullable List<String> images) {
     this.images = images;
     return this;
   }
@@ -69,7 +70,7 @@ public class FreeIpaVersions {
    * List of image UUIDs.
    * @return images
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -80,12 +81,12 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_IMAGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setImages(@javax.annotation.Nullable List<String> images) {
+  public void setImages(@jakarta.annotation.Nullable List<String> images) {
     this.images = images;
   }
 
-  public FreeIpaVersions defaults(@javax.annotation.Nullable List<String> defaults) {
-    
+
+  public FreeIpaVersions defaults(@jakarta.annotation.Nullable List<String> defaults) {
     this.defaults = defaults;
     return this;
   }
@@ -102,7 +103,7 @@ public class FreeIpaVersions {
    * List of default image UUIDs.
    * @return defaults
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -113,12 +114,12 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_DEFAULTS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDefaults(@javax.annotation.Nullable List<String> defaults) {
+  public void setDefaults(@jakarta.annotation.Nullable List<String> defaults) {
     this.defaults = defaults;
   }
 
-  public FreeIpaVersions versions(@javax.annotation.Nullable List<String> versions) {
-    
+
+  public FreeIpaVersions versions(@jakarta.annotation.Nullable List<String> versions) {
     this.versions = versions;
     return this;
   }
@@ -135,7 +136,7 @@ public class FreeIpaVersions {
    * List of versions.
    * @return versions
    */
-  @javax.annotation.Nullable
+  @jakarta.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -146,11 +147,14 @@ public class FreeIpaVersions {
 
   @JsonProperty(JSON_PROPERTY_VERSIONS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setVersions(@javax.annotation.Nullable List<String> versions) {
+  public void setVersions(@jakarta.annotation.Nullable List<String> versions) {
     this.versions = versions;
   }
 
 
+  /**
+   * Return true if this FreeIpaVersions object is equal to o.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
