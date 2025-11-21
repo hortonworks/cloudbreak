@@ -61,7 +61,15 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     public void listClusters(OnPremisesApiProto.ListClustersRequest request, StreamObserver<OnPremisesApiProto.ListClustersResponse> responseObserver) {
         String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
         List<OnPremisesApiProto.Cluster> clusters = classicClusterService.findAllByAccountId(accountId).stream()
-                .map(this::convertWithCache)
+                .map(classicCluster -> {
+                    try {
+                        return convertWithCache(classicCluster);
+                    } catch (Exception e) {
+                        LOGGER.error("Error while converting Classic Cluster", e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .toList();
         OnPremisesApiProto.ListClustersResponse response = OnPremisesApiProto.ListClustersResponse.newBuilder()
                 .addAllClusters(clusters)
@@ -73,11 +81,16 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     @Override
     public void describeCluster(OnPremisesApiProto.DescribeClusterRequest request, StreamObserver<OnPremisesApiProto.DescribeClusterResponse> responseObserver) {
         classicClusterService.findByCrn(request.getClusterCrn()).ifPresentOrElse(classicCluster -> {
-            OnPremisesApiProto.DescribeClusterResponse response = OnPremisesApiProto.DescribeClusterResponse.newBuilder()
-                    .setCluster(convertWithCache(classicCluster))
-                    .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            try {
+                OnPremisesApiProto.DescribeClusterResponse response = OnPremisesApiProto.DescribeClusterResponse.newBuilder()
+                        .setCluster(convertWithCache(classicCluster))
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                LOGGER.error("Error while converting Classic Cluster", e);
+                responseObserver.onError(Status.INTERNAL.withCause(e).asException());
+            }
         }, () -> responseObserver.onError(Status.NOT_FOUND.withDescription("Classic Cluster not found with crn " + request.getClusterCrn()).asException()));
     }
 
