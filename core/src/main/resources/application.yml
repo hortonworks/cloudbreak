@@ -860,6 +860,8 @@ existing-stack-patcher:
       enabled: true
     embedded-db-certificate-rotation:
       enabled: true
+    gcp-subnet-id-fix:
+      enabled: true
 
 dynamic-entitlement:
   entitlements:

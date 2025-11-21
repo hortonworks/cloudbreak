@@ -245,6 +245,7 @@ public class GcpPlatformResources implements PlatformResources {
                                             .mapPublicIpOnLaunch(!subnetwork.getPrivateIpGoogleAccess())
                                             .igwAvailable(igwAvailable)
                                             .type(igwAvailable ? PUBLIC : PRIVATE)
+                                            .parameter(NetworkConstants.PROVIDER_SIDE_ID, subnetwork.getId())
                                             .build()
                             );
                         }
