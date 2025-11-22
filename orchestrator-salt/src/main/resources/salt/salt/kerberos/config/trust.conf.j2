@@ -1,5 +1,7 @@
 {%- set trust_realm = salt['pillar.get']('trust:realm') %}
 {%- set trust_domain = salt['pillar.get']('trust:domain') %}
+{%- set trust_kdc_fqdn = salt['pillar.get']('trust:kdcFqdn') %}
+{%- set trust_extend_realms = salt['pillar.get']('trust:extendRealms', False) %}
 {%- set sdx_domains = salt['pillar.get']('trust:sdxDomains') %}
 {%- set kerberos_realm = salt['pillar.get']('kerberos:realm')|upper %}
 [domain_realm]
@@ -19,3 +21,11 @@
 {{ kerberos_realm }} = {
   {{ trust_realm }} = {{ trust_realm }}
 }
+
+{%- if trust_extend_realms == True %}
+[realms]
+{{ trust_realm }} = {
+  kdc = {{ trust_kdc_fqdn }}
+  admin_server = {{ trust_kdc_fqdn }}
+}
+{%- endif %}

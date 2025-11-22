@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -87,8 +88,10 @@ public class KerberosPillarConfigGenerator {
                 Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(detailedEnvironmentResponse.getCrn());
                 LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}", trustResponse.getRealm());
                 return Map.of(
+                        "extendRealms", KdcType.MIT.name().equals(trustResponse.getKdcType()),
                         "realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),
                         "domain", trustResponse.getRealm().toLowerCase(Locale.ROOT),
+                        "kdcFqdn", trustResponse.getFqdn(),
                         "sdxDomains", sdxDomains);
             } else {
                 LOGGER.warn("Could not find trust realm for crn: {}", detailedEnvironmentResponse.getCrn());

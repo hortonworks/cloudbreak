@@ -11,15 +11,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -34,6 +39,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 public class KerberosPillarConfigGeneratorTest {
 
     private static final String TEST_REALM = "TEST.REALM";
+
+    private static final String TEST_FQDN = "TEST.FQDN";
 
     private static final String TEST_URL = "test-url";
 
@@ -181,8 +188,9 @@ public class KerberosPillarConfigGeneratorTest {
         assertTrue(trustProperties.isEmpty());
     }
 
-    @Test
-    public void testCreateKerberosPillarWhenEnvironmentIsHybridAndTrustResponseHasRealm() throws IOException {
+    @ParameterizedTest
+    @MethodSource("kdcArguments")
+    public void testCreateKerberosPillarWhenEnvironmentIsHybridAndTrustResponseHasRealmAD(String kdcType, Boolean extendRealms) throws IOException {
         // GIVEN
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withUrl(TEST_URL)
@@ -195,6 +203,8 @@ public class KerberosPillarConfigGeneratorTest {
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
         TrustResponse trustResponse = new TrustResponse();
         trustResponse.setRealm(TEST_REALM);
+        trustResponse.setFqdn(TEST_FQDN);
+        trustResponse.setKdcType(kdcType);
         freeIpaResponse.setTrust(trustResponse);
 
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
@@ -226,7 +236,19 @@ public class KerberosPillarConfigGeneratorTest {
         assertNotNull(trustProperties);
         assertEquals(TEST_REALM.toUpperCase(Locale.ROOT), trustProperties.get("realm"));
         assertEquals(TEST_REALM.toLowerCase(Locale.ROOT), trustProperties.get("domain"));
+        assertEquals(TEST_FQDN, trustProperties.get("kdcFqdn"));
+        assertEquals(extendRealms, trustProperties.get("extendRealms"));
         assertEquals(domains, trustProperties.get("sdxDomains"));
+    }
+
+    static Stream<Arguments> kdcArguments() {
+        return Stream.of(
+                Arguments.of(KdcType.ACTIVE_DIRECTORY.name(), Boolean.FALSE),
+                Arguments.of(KdcType.MIT.name(), Boolean.TRUE),
+                Arguments.of(null, Boolean.FALSE),
+                Arguments.of("", Boolean.FALSE),
+                Arguments.of("UNKNOWN", Boolean.FALSE)
+        );
     }
 
     @Test
