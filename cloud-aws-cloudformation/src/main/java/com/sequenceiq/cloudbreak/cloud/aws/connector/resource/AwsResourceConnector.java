@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -109,6 +110,9 @@ public class AwsResourceConnector implements ResourceConnector {
     @Inject
     private AwsDatabaseSslCertRotationService awsDatabaseSslCertRotationService;
 
+    @Inject
+    private List<ProviderResourceSyncer> providerResourceSyncers;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
@@ -156,6 +160,19 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<CloudResourceStatus> checkForSyncer(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        List<CloudResourceStatus> result = new ArrayList<>();
+        providerResourceSyncers.stream()
+                .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
+                .filter(syncer -> syncer.variant().equals(authenticatedContext.getCloudContext().getVariant()))
+                .filter(syncer -> syncer.shouldSync(authenticatedContext, resources))
+                .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
+
+        LOGGER.debug("Resource sync result: {}", result);
+        return result;
     }
 
     @Override

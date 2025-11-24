@@ -51,12 +51,14 @@ import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DiskValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.validate.disk.config.DiskValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.image.config.ImageValidationEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -202,15 +204,17 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             }
         }
 
-        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
-        flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        flowTriggers.add(new ImageValidationTriggerEvent(ImageValidationEvent.IMAGE_VALIDATION_EVENT.event(), event.getResourceId()));
-        if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
-            addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
-        }
         Map<String, Set<String>> repairableGroupsWithHostNames = new HashMap<>();
         boolean singlePrimaryGW = fillRepairableGroupsWithHostNames(repairConfig, repairableGroupsWithHostNames);
         LOGGER.info("Repairable groups with host names: {}", repairableGroupsWithHostNames);
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+        flowTriggers.add(new ImageValidationTriggerEvent(ImageValidationEvent.IMAGE_VALIDATION_EVENT.event(), event.getResourceId()));
+        flowTriggers.add(new DiskValidationTriggerEvent(DiskValidationEvent.DISK_VALIDATION_EVENT.event(), event.getResourceId(),
+                repairableGroupsWithHostNames));
+        if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
+            addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
+        }
         flowTriggers.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(stackDto, event.isUpgrade()));
         if (rootDiskRepairMigrationEnabled) {
             addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -61,6 +63,9 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private AwsCommonDiskUpdateService awsCommonDiskUpdateService;
+
+    @Inject
+    private List<ProviderResourceSyncer> providerResourceSyncers;
 
     @Override
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
@@ -143,5 +148,18 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Override
     public ResourceType getInstanceResourceType() {
         return ResourceType.AWS_INSTANCE;
+    }
+
+    @Override
+    public List<CloudResourceStatus> checkForSyncer(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        List<CloudResourceStatus> result = new ArrayList<>();
+        providerResourceSyncers.stream()
+                .filter(syncer -> syncer.platform().equals(authenticatedContext.getCloudContext().getPlatform()))
+                .filter(syncer -> syncer.variant().equals(authenticatedContext.getCloudContext().getVariant()))
+                .filter(syncer -> syncer.shouldSync(authenticatedContext, resources))
+                .forEach(syncer -> result.addAll(syncer.sync(authenticatedContext, resources)));
+
+        LOGGER.debug("Resource sync result: {}", result);
+        return result;
     }
 }

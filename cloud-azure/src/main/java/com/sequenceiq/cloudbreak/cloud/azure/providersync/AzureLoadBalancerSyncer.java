@@ -218,4 +218,5 @@ public class AzureLoadBalancerSyncer implements ProviderResourceSyncer<ResourceT
             loadBalancerResource.setTypedAttributes(skuAttributes);
         }, () -> LOGGER.debug("Load balancer SKU not found for load balancer resource: {}", loadBalancerResource));
     }
+
 }

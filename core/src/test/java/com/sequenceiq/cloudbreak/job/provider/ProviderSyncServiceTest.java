@@ -20,6 +20,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,10 +34,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.azure.providersync.AzureLoadBalancerSyncer;
+import com.sequenceiq.cloudbreak.cloud.azure.providersync.AzureNatGatewaySyncer;
+import com.sequenceiq.cloudbreak.cloud.azure.providersync.AzurePublicIpSyncer;
+import com.sequenceiq.cloudbreak.cloud.azure.providersync.AzureVolumeSetSyncer;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -47,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.SkuAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -124,6 +132,15 @@ class ProviderSyncServiceTest {
 
     @BeforeEach
     void setup() {
+        List<ProviderResourceSyncer> providerResourceSyncers = new ArrayList<>();
+        providerResourceSyncers.add(new AzureLoadBalancerSyncer());
+        providerResourceSyncers.add(new AzureNatGatewaySyncer());
+        providerResourceSyncers.add(new AzurePublicIpSyncer());
+        providerResourceSyncers.add(new AzureVolumeSetSyncer());
+        Field providerResourceSyncersField = ReflectionUtils.findField(ProviderSyncService.class, "providerResourceSyncers");
+        ReflectionUtils.makeAccessible(providerResourceSyncersField);
+        ReflectionUtils.setField(providerResourceSyncersField, underTest, providerResourceSyncers);
+
         lenient().when(cloudContextProvider.getCloudContext(stack)).thenReturn(cloudContext);
         lenient().when(credentialClientService.getCloudCredential(stack.getEnvironmentCrn())).thenReturn(cloudCredential);
         lenient().when(cloudPlatformConnectors.get(cloudContext.getPlatformVariant())).thenReturn(cloudConnector);

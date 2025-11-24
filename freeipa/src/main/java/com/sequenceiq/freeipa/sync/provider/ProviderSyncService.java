@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -51,6 +52,9 @@ public class ProviderSyncService {
 
     @Inject
     private ResourceNotifier resourceNotifier;
+
+    @Inject
+    private List<ProviderResourceSyncer> providerResourceSyncers;
 
     public void syncResources(Stack stack) {
         try {
@@ -81,10 +85,24 @@ public class ProviderSyncService {
             LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
                     .map(CloudResource::getDetailedInfo)
                     .toList());
+            syncedCloudResources = syncedCloudResources.stream()
+                    .filter(resource -> shouldPersistForResourceType(resource.getType()))
+                    .toList();
+            LOGGER.debug("Resources persisted for stack {}", syncedCloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
             resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
         } catch (Exception e) {
             LOGGER.error("Error during provider sync, skipping and logging it: ", e);
         }
+    }
+
+    public boolean shouldPersistForResourceType(ResourceType resourceType) {
+        return providerResourceSyncers.stream()
+                .filter(syncer -> syncer.getResourceType() == resourceType)
+                .findFirst()
+                .map(ProviderResourceSyncer::shouldPersist)
+                .orElse(true);
     }
 
     private List<CloudResource> getCloudResources(Stack stack) {
