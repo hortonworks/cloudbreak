@@ -28,6 +28,7 @@ import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
+import com.sequenceiq.environment.experience.policy.response.ProviderPolicyResponse;
 
 @Service
 public class CommonExperienceService implements Experience {
@@ -93,7 +94,7 @@ public class CommonExperienceService implements Experience {
                         LOGGER.info("Requesting {} to fetch granular policy for experience '{}' for cloud platform '{}'",
                                 ExperienceConnectorService.class.getSimpleName(), configuredExperience.getBusinessName(), environment.getCloudPlatform());
                         ExperiencePolicyResponse res = experienceConnectorService.collectPolicy(xpPath, environment.getCloudPlatform());
-                        policies.put(configuredExperience.getBusinessName(), getIfNotNullOtherwise(res.getAws(), aws -> aws.getPolicy(), null));
+                        policies.put(configuredExperience.getBusinessName(), getIfNotNullOtherwise(res.getAws(), ProviderPolicyResponse::getPolicy, null));
                     } catch (ExperienceOperationFailedException eofe) {
                         LOGGER.warn("Unable to fetch policy from experience \"" + configuredExperience.getName() + "\" due to: " + eofe.getMessage(), eofe);
                         policies.put(configuredExperience.getBusinessName(), "");

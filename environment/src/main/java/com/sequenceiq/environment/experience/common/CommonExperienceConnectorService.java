@@ -82,6 +82,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         LOGGER.info("WebTarget has created for deleting workspaces for environment [crn: {}]: {}",
                 environmentCrn, webTarget.toString());
         if (force) {
+            LOGGER.debug("Force deletion was requested thus request path is about to be decorated accordingly.");
             webTarget = QueryParamInjectorUtil.setQueryParams(webTarget, Map.of("force", "true"));
         }
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);

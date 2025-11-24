@@ -13,7 +13,7 @@ public final class ResponseReaderUtility {
         try {
             logger.info(msg, writeValueAsString(toRead));
         } catch (Exception e) {
-            logger.warn("Unable to process object into a valid JSON due to: " + e.getMessage(), e);
+            logger.warn("Unable to process object into a valid JSON due to: {}", e.getMessage(), e);
         }
     }
 

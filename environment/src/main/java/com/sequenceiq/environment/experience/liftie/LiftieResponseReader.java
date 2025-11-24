@@ -25,7 +25,7 @@ public class LiftieResponseReader implements ResponseReader {
         throwIfNull(response, () -> new IllegalStateException("Response should not be null!"));
         T result = null;
         LOGGER.debug("Going to read response from the Liftie call");
-        logInputResponseContentIfPossible(LOGGER, response, "Liftie response: ");
+        logInputResponseContentIfPossible(LOGGER, response, "Liftie response: {}");
         if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
             try {
                 result = response.readEntity(expectedType);

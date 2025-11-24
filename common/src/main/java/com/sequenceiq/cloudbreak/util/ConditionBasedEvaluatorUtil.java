@@ -42,9 +42,9 @@ public class ConditionBasedEvaluatorUtil {
         }
     }
 
-    public static <T extends Throwable> void throwIfTrue(boolean condition, Supplier<? extends T> exeption) throws T {
+    public static <T extends Throwable> void throwIfTrue(boolean condition, Supplier<? extends T> exception) throws T {
         if (condition) {
-            throw exeption.get();
+            throw exception.get();
         }
     }
 

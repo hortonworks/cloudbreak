@@ -25,7 +25,7 @@ public class CommonExperienceResponseReader implements ResponseReader {
         throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));
         T experienceCallResponse = null;
         LOGGER.debug("Going to read response from experience call");
-        logInputResponseContentIfPossible(LOGGER, response, "Common experience response: ");
+        logInputResponseContentIfPossible(LOGGER, response, "Common experience response: {}");
         if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
             try {
                 experienceCallResponse = response.readEntity(expectedType);
