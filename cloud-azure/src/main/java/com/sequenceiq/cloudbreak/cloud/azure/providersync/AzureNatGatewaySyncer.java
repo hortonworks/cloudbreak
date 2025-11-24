@@ -217,5 +217,6 @@ public class AzureNatGatewaySyncer implements ProviderResourceSyncer<ResourceTyp
         boolean isValid() {
             return Objects.nonNull(network) && StringUtils.isNotEmpty(resourceGroup) && Objects.nonNull(subnet);
         }
+
     }
 }

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.NetworkAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.SkuAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -62,6 +63,9 @@ public class ProviderSyncService {
     @Inject
     private StackUpdater stackUpdater;
 
+    @Inject
+    private List<ProviderResourceSyncer> providerResourceSyncers;
+
     public void syncResources(StackDto stack) {
         try {
             CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
@@ -81,11 +85,25 @@ public class ProviderSyncService {
             LOGGER.debug("Resource sync result for stack: {}", syncedCloudResources.stream()
                     .map(CloudResource::getDetailedInfo)
                     .toList());
+            syncedCloudResources = syncedCloudResources.stream()
+                    .filter(resource -> shouldPersistForResourceType(resource.getType()))
+                    .toList();
+            LOGGER.debug("Resources persisted for stack {}", syncedCloudResources.stream()
+                    .map(CloudResource::getDetailedInfo)
+                    .toList());
             resourceNotifier.notifyUpdates(syncedCloudResources, cloudContext);
             setProviderSyncStatus(stack, syncedCloudResources, cloudResources);
         } catch (Exception e) {
             LOGGER.error("Error during provider sync, skipping and logging it: ", e);
         }
+    }
+
+    public boolean shouldPersistForResourceType(ResourceType resourceType) {
+        return providerResourceSyncers.stream()
+                .filter(syncer -> syncer.getResourceType() == resourceType)
+                .findFirst()
+                .map(ProviderResourceSyncer::shouldPersist)
+                .orElse(true);
     }
 
     private void setProviderSyncStatus(StackDto stack, List<CloudResource> syncedCloudResources, List<CloudResource> cloudResources) {

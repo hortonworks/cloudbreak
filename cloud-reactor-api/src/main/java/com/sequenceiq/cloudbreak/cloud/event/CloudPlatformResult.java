@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.event;
 import java.util.Locale;
 
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
-import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 
-public class CloudPlatformResult implements Payload {
+public class CloudPlatformResult implements Selectable {
 
     private final Long resourceId;
 

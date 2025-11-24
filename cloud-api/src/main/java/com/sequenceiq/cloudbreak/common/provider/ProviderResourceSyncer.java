@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.common.provider;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,5 +38,13 @@ public interface ProviderResourceSyncer<ResourceType> extends CloudPlatformAware
 
     default boolean shouldSync(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         return true;
+    }
+
+    default boolean shouldPersist() {
+        return true;
+    }
+
+    default List<com.sequenceiq.common.api.type.ResourceType> getRequiredResourceTypes() {
+        return Collections.emptyList();
     }
 }
