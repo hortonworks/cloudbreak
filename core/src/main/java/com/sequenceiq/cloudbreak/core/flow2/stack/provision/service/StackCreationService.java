@@ -69,8 +69,6 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.notification.Notification;
-import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -90,6 +88,8 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.notification.WebSocketNotification;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Component
 public class StackCreationService {
@@ -111,7 +111,7 @@ public class StackCreationService {
     private ImageService imageService;
 
     @Inject
-    private NotificationSender notificationSender;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
@@ -324,11 +324,11 @@ public class StackCreationService {
 
     private void sendNotificationIfNecessary(CheckImageResult result, StackDtoDelegate stack) {
         if (of(CREATE_FAILED, CREATE_FINISHED).contains(result.getImageStatus())) {
-            notificationSender.send(getImageCopyNotification(result, stack));
+            webSocketNotificationService.send(getImageCopyNotification(result, stack));
         }
     }
 
-    private Notification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, StackDtoDelegate stack) {
+    private WebSocketNotification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, StackDtoDelegate stack) {
         CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType("IMAGE_COPY_STATE");
         notification.setEventTimestamp(new Date().getTime());
@@ -341,7 +341,7 @@ public class StackCreationService {
         notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
         notification.setTenantName(stack.getCreator().getTenant().getName());
-        return new Notification<>(notification);
+        return new WebSocketNotification<>(notification);
     }
 
     private void handleFailure(StackDto stack, String errorReason) {

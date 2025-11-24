@@ -133,8 +133,6 @@ cb:
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000
-  notification:
-    endpoint: http://localhost:3000/notifications
   environment:
     url: http://localhost:8088
     contextPath: /environmentservice

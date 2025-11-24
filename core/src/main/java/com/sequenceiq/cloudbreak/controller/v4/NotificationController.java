@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.notification.Notification;
-import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.notification.WebSocketNotification;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 public abstract class NotificationController {
 
@@ -22,7 +22,7 @@ public abstract class NotificationController {
     private CloudbreakMessagesService messagesService;
 
     @Inject
-    private NotificationSender notificationSender;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Inject
     private UserService userService;
@@ -56,6 +56,6 @@ public abstract class NotificationController {
             Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
             notification.setWorkspaceId(workspaceId);
         }
-        notificationSender.send(new Notification<>(notification));
+        webSocketNotificationService.send(new WebSocketNotification<>(notification));
     }
 }

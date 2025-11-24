@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 
 @Component
 public class WebSocketNotificationService {
@@ -28,7 +27,7 @@ public class WebSocketNotificationService {
     @Value("${notification.urls:}")
     private String notificationUrls;
 
-    public void send(WebSocketNotification<CloudbreakNotification> webSocketNotification) {
+    public <T> void send(WebSocketNotification<T> webSocketNotification) {
         webSocketNotificationSender.send(webSocketNotification, getNotificationUrls(), RestClientUtil.get());
     }
 

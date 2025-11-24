@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventBaseV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
@@ -44,6 +44,8 @@ import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabasePr
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.notification.WebSocketNotification;
+import com.sequenceiq.notification.WebSocketNotificationService;
 
 @Controller
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
@@ -70,7 +72,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private NotificationSender notificationSender;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Inject
     private StackOperationService stackOperationService;
@@ -144,7 +146,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ResourceEventResponse postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        notificationSender.sendTestNotification(cloudbreakUser.getUserId());
+        webSocketNotificationService.send(new WebSocketNotification<>(createTestNotification(cloudbreakUser.getUserId())));
         ResourceEventResponse response = new ResourceEventResponse();
         response.setEvent(ResourceEvent.CREDENTIAL_CREATED);
         return response;
@@ -162,5 +164,15 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @AccountIdNotNeeded
     public UsedImagesListV4Response usedImages(Integer thresholdInDays) {
         return usedImagesProvider.getUsedImages(thresholdInDays);
+    }
+
+    private CloudbreakEventBaseV4 createTestNotification(String userId) {
+        CloudbreakEventBaseV4 baseEvent = new CloudbreakEventBaseV4();
+        baseEvent.setEventType("TEST_NOTIFICATION");
+        baseEvent.setEventMessage("Test notification message.");
+        baseEvent.setEventTimestamp(System.currentTimeMillis());
+        baseEvent.setUserId(userId);
+        baseEvent.setNotificationType("TEST_NOTIFICATION");
+        return baseEvent;
     }
 }
