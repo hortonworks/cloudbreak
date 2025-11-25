@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.environment.publicapi;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 import com.cloudera.thunderhead.service.environments2api.ApiException;
 import com.cloudera.thunderhead.service.environments2api.model.LastSyncStatusResponse;
@@ -26,6 +27,12 @@ public class EnvironmentPublicApiGetLastSyncStatusAction implements Action<Envir
             return client.getDefaultClient().lastSyncStatus(testDto.getRequest());
         } catch (NotFoundException e) {
             return new LastSyncStatusResponse().status(SyncStatus.NEVER_RUN);
+        } catch (ApiException e) {
+            if (e.getCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+                return new LastSyncStatusResponse().status(SyncStatus.NEVER_RUN);
+            } else {
+                throw e;
+            }
         }
     }
 }
