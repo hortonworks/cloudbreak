@@ -909,26 +909,28 @@ We're happy for having your helpful intention to make this project greater than 
 When you would like to make a contribution you can do that by opening pull request against the desired version, but along with some very suggested guidelines not just for the sake of understandability but for having a properly combined request.
 
 
-## Appearance
+## Commit message guidelines
 
-First, let's start with the appearance.
-At the time of this writing, we don't enforce any formal requirements to the pull request message by any kind of tool, but we have the following strongly recommended guidelines:
-
-- if your commit message/jira description fits into a Twitter message then probably, it is too short, and might not be clear what is the intention there
-- if it contains words like: fix or handle then probably you should consider some rewording, but of course, sometimes it is acceptable
-- if your commit fixes something obvious, e.g, a compile error, then of course you don’t need to write a long description about why it is a good idea to fix a compile error
-- compared to a 200-1000 lines of code change (which is the size of our average commit), adding a few more lines into the commit message/jira description is just a tiny effort but would make a huge difference
+- Enforced rules:
+  - Separate subject from body with a blank line
+  - Subject line should begin with ticket number, e.g. CB-12345
+  - Capitalize the subject line after the ticket number
+  - Limit the subject line to 72 characters
+  - Do not end the subject line with a period
+- Best practices:
+  - Use the imperative mood in the subject line
+  - Use the body to explain what and why was changed, not the how
+  - Wrap the body at 72 characters
+  - If multiple authors were present, add each of them to give credits: `Co-authored-by: User1 <user1@cloudera.com>`
+  - If your commit message/jira description fits into a Twitter message then probably, it is too short, and might not be clear what is the intention there
+  - If it contains words like: fix or handle then probably you should consider some rewording, but of course, sometimes it is acceptable
+  - If your commit fixes something obvious, e.g, a compile error, then of course you don’t need to write a long description about why it is a good idea to fix a compile error
+  - Compared to a 200-1000 lines of code change (which is the size of our average commit), adding a few more lines into the commit message/jira description is just a tiny effort but would make a huge difference
 
 We were talking about what we should avoid, but let's see a few good examples, which helps the reviewer to understand the purpose of that commit:
-
-https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/56fdde5c6f48f48a378b505a170b3e3d83225c85
-
-https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/d09b0074c45af209ccf34855dcf4c1f34c3ccebb
-
-https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/c93b91fd6a08de7516ab763098f2dcd3abc149f0
-
-https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/f50f5c8f38941db958eac27c663ae00ecba7b0f5
-
+- https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/56fdde5c6f48f48a378b505a170b3e3d83225c85
+- https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/bb2decf66ae365a279367e02ddfbcb085efcbe09
+- https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/4556bca43e08b6c032d296fefbdc7df21e3bcd4c
 
 ## Coding Guidelines
 
