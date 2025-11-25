@@ -1,6 +1,7 @@
 package com.sequenceiq.mock.freeipa.response;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class ConfigShowResponse extends AbstractFreeIpaResponse<Config> {
     protected Config handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Config config = new Config();
         config.setIpamaxusernamelength(IPA_MAX_USERNAME_LENGTH);
+        config.setIpauserobjectclasses(Set.of("cdpUserAttr"));
         return config;
     }
 }

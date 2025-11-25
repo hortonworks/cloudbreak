@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaUserSyncSuccess;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -43,6 +44,7 @@ public class FreeIpaSyncTest extends AbstractMockTest {
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAllInternal())
                 .await(OperationState.COMPLETED)
+                .then(new FreeIpaUserSyncSuccess())
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.delete())
                 .await(Status.DELETE_COMPLETED)
