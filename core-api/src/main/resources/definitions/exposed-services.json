@@ -904,7 +904,7 @@
       "knoxUrl": "/clo/",
       "ssoSupported": false,
       "port": 8085,
-      "tlsPort": 8085,
+      "tlsPort": 8087,
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": false,

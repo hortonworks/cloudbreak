@@ -682,7 +682,7 @@
     <service>
         <role>DLM</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DLM_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['DLM'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['DLM'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -693,7 +693,7 @@
     <service>
         <role>LAKEHOUSE_OPTIMIZER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['CLO_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['LAKEHOUSE_OPTIMIZER'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LAKEHOUSE_OPTIMIZER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
