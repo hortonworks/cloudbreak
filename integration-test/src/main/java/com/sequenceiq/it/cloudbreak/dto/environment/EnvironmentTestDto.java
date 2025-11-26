@@ -514,6 +514,7 @@ public class EnvironmentTestDto
     public void deleteForCleanup() {
         try {
             EnvironmentClient client = getClientForCleanup();
+            LOGGER.info("Deleting Environment with crn: {}", getCrn());
             client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
             getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
         } catch (NotFoundException nfe) {

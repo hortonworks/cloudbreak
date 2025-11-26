@@ -493,6 +493,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public void deleteForCleanup() {
         try {
+            LOGGER.info("Deleting DataLake with crn: {}", getCrn());
             setFlow("SDX deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
             awaitForFlow();
         } catch (NotFoundException nfe) {
