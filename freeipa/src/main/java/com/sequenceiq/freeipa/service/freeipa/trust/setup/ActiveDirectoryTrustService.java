@@ -5,6 +5,8 @@ import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsC
 
 import java.util.Locale;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -13,17 +15,31 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Trust;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryBaseClusterKrb5ConfBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 
 @Service
 public class ActiveDirectoryTrustService extends TrustProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActiveDirectoryTrustService.class);
+
+    @Inject
+    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
+
+    @Inject
+    private ActiveDirectoryBaseClusterKrb5ConfBuilder adBaseClusterKrb5ConfBuilder;
 
     @Override
     public KdcType kdcType() {
@@ -66,5 +82,24 @@ public class ActiveDirectoryTrustService extends TrustProvider {
         ignoreNotFoundException(() -> client.deleteTrust(realm),
                 "Deleting trust for [{}] but it was not found", realm);
         LOGGER.debug("Deleting trust for crossRealm [{}]", crossRealmTrust);
+    }
+
+    @Override
+    public TrustSetupCommandsResponse buildTrustSetupCommandsResponse(TrustCommandType trustCommandType, String environmentCrn, Stack stack, FreeIpa freeIpa,
+            CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer) {
+        TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
+        response.setEnvironmentCrn(environmentCrn);
+        response.setKdcType(kdcType().name());
+
+        ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
+        adCommands.setCommands(activeDirectoryCommandsBuilder.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust));
+        response.setActiveDirectoryCommands(adCommands);
+
+        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
+        baseClusterTrustSetupCommands.setKrb5Conf(adBaseClusterKrb5ConfBuilder.buildCommands(stack.getResourceName(), trustCommandType, freeIpa,
+                crossRealmTrust));
+        response.setBaseClusterCommands(baseClusterTrustSetupCommands);
+
+        return response;
     }
 }

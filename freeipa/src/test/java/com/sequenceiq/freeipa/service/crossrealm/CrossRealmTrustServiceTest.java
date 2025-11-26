@@ -69,6 +69,24 @@ class CrossRealmTrustServiceTest {
     @MockBean
     private KerberosConfigService kerberosConfigService;
 
+    @MockBean
+    private StackHelper stackHelper;
+
+    @MockBean
+    private MitKdcCommandsBuilder mitKdcCommandsBuilder;
+
+    @MockBean
+    private MitDnsInstructionsBuilder mitDnsInstructionsBuilder;
+
+    @MockBean
+    private MitBaseClusterKrb5ConfBuilder mitBaseClusterKrb5ConfBuilder;
+
+    @MockBean
+    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
+
+    @MockBean
+    private ActiveDirectoryBaseClusterKrb5ConfBuilder activeDirectoryBaseClusterKrb5ConfBuilder;
+
     @Test
     void testGetTrustProvider() {
         when(crossRealmTrustRepository.findByStackId(STACK_ID)).thenReturn(Optional.of(crossRealmTrust));

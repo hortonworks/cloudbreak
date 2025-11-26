@@ -25,7 +25,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 @ExtendWith(MockitoExtension.class)
-class BaseClusterKrb5ConfBuilderTest {
+class ActiveDirectoryBaseClusterKrb5ConfBuilderTest {
     @Mock
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
@@ -33,7 +33,7 @@ class BaseClusterKrb5ConfBuilderTest {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @InjectMocks
-    private BaseClusterKrb5ConfBuilder underTest;
+    private ActiveDirectoryBaseClusterKrb5ConfBuilder underTest;
 
     @BeforeEach
     void setup() throws IOException, TemplateException {
@@ -56,9 +56,9 @@ class BaseClusterKrb5ConfBuilderTest {
         crossRealmTrust.setKdcRealm("ad.org");
         crossRealmTrust.setKdcFqdn("adHostName.ad.org");
         // WHEN
-        String result = underTest.buildCommands(trustCommandType, freeIpa, crossRealmTrust);
+        String result = underTest.buildCommands("resourceName", trustCommandType, freeIpa, crossRealmTrust);
         // THEN
-        String fileName = String.format("crossrealmtrust/basecluster/basecluster_krb5conf_%s.sh", trustCommandType.name().toLowerCase());
+        String fileName = String.format("crossrealmtrust/basecluster/ad_basecluster_krb5conf_%s.sh", trustCommandType.name().toLowerCase());
         String expectedOutput = FileReaderUtils.readFileFromClasspath(fileName);
         assertEquals(expectedOutput, result);
     }

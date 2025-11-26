@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -13,7 +14,6 @@ import java.util.Locale;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,13 +27,19 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Trust;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryBaseClusterKrb5ConfBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatusValidationService;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
@@ -84,8 +90,29 @@ class ActiveDirectoryTrustServiceTest {
     @Mock
     private FreeIpaClient freeIpaClient;
 
-    @BeforeEach
-    void setUp() throws Exception {
+    @Mock
+    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
+
+    @Mock
+    private ActiveDirectoryBaseClusterKrb5ConfBuilder adBaseClusterKrb5ConfBuilder;
+
+    @Test
+    void returnsCommandsResponseWithADExpectedFields() {
+        Stack stack = mock(Stack.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
+
+        when(activeDirectoryCommandsBuilder.buildCommands(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust)).thenReturn("active directory commands");
+        when(adBaseClusterKrb5ConfBuilder.buildCommands(stack.getResourceName(), TrustCommandType.SETUP, freeIpa, crossRealmTrust)).thenReturn("krb5 conf");
+
+        TrustSetupCommandsResponse response = underTest.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, "env-crn", stack, freeIpa,
+                crossRealmTrust, loadBalancer);
+
+        assertEquals("env-crn", response.getEnvironmentCrn());
+        assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
+        assertEquals("active directory commands", response.getActiveDirectoryCommands().getCommands());
+        assertEquals("krb5 conf", response.getBaseClusterCommands().getKrb5Conf());
     }
 
     @Test

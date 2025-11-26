@@ -37,6 +37,7 @@ import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCross
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelEvent;
@@ -47,6 +48,8 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.config.FreeIpaTrust
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishEvent;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -99,13 +102,13 @@ public class TrustSetupService {
     private CrossRealmTrustService crossRealmTrustService;
 
     @Inject
-    private TrustCommandsGeneratorService trustCommandsGeneratorService;
-
-    @Inject
     private FlowCancelService flowCancelService;
 
     @Inject
     private FlowLogDBService flowLogDBService;
+
+    @Inject
+    private FreeIpaLoadBalancerService loadBalancerService;
 
     public PrepareCrossRealmTrustResponse setupTrust(String accountId, PrepareCrossRealmTrustRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
@@ -226,7 +229,9 @@ public class TrustSetupService {
                     ", required states: " + ENABLED_TRUSTSTATUSES_FOR_TRUST_SETUP_COMMANDS);
         }
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return trustCommandsGeneratorService.getTrustCommands(trustCommandType, environmentCrn, stack, freeIpa, crossRealmTrust);
+        LoadBalancer loadBalancer = loadBalancerService.getByStackId(stack.getId());
+        TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(stack.getId());
+        return trustProvider.buildTrustSetupCommandsResponse(trustCommandType, environmentCrn, stack, freeIpa, crossRealmTrust, loadBalancer);
     }
 
     private boolean isFinishTrustSetupPossible(Stack stack, CrossRealmTrust crossRealmTrust) {

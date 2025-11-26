@@ -21,11 +21,16 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.crossrealm.StackHelper;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
 import com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatusValidationService;
@@ -62,6 +67,9 @@ public abstract class TrustProvider {
 
     @Inject
     private TrustStatusValidationService trustStatusValidationService;
+
+    @Inject
+    private StackHelper stackHelper;
 
     public abstract KdcType kdcType();
 
@@ -118,6 +126,9 @@ public abstract class TrustProvider {
         LOGGER.debug("Deleting DNS forward zone for crossRealm [{}]", crossRealmTrust);
     }
 
+    public abstract TrustSetupCommandsResponse buildTrustSetupCommandsResponse(TrustCommandType trustCommandType, String environmentCrn, Stack stack,
+            FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
+
     protected StackService getStackService() {
         return stackService;
     }
@@ -144,5 +155,9 @@ public abstract class TrustProvider {
 
     protected int getMaxRetryCountOnError() {
         return maxRetryCountOnError;
+    }
+
+    protected StackHelper getStackHelper() {
+        return stackHelper;
     }
 }

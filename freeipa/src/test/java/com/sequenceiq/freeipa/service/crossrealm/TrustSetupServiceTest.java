@@ -39,11 +39,14 @@ import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCross
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -66,6 +69,10 @@ class TrustSetupServiceTest {
 
     private static final String OPERATION_ID = "operationId";
 
+    private static final String LB_FQDN = "lb.fqdn";
+
+    private static final Long STACK_ID = 1L;
+
     @InjectMocks
     private TrustSetupService underTest;
 
@@ -79,9 +86,6 @@ class TrustSetupServiceTest {
     private CrossRealmTrustService crossRealmTrustService;
 
     @Mock
-    private TrustCommandsGeneratorService trustCommandsGeneratorService;
-
-    @Mock
     private OperationService operationService;
 
     @Mock
@@ -90,15 +94,24 @@ class TrustSetupServiceTest {
     @Mock
     private OperationToOperationStatusConverter operationConverter;
 
+    @Mock
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
+
+    @Mock
+    private ActiveDirectoryTrustService adTrustProvider;
+
     private Stack stack;
 
     private FreeIpa freeIpa;
 
     private CrossRealmTrust crossRealmTrust;
 
+    private LoadBalancer loadBalancer;
+
     @BeforeEach
     void setUp() {
         stack = new Stack();
+        stack.setId(STACK_ID);
         stack.setAccountId(ACCOUNT_ID);
         stack.setEnvironmentCrn(ENV_CRN);
         lenient().when(stackService.getFreeIpaStackWithMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -117,6 +130,11 @@ class TrustSetupServiceTest {
         OperationStatus operationStatus = new OperationStatus();
         operationStatus.setStatus(OperationState.RUNNING);
         lenient().when(operationConverter.convert(operation)).thenReturn(operationStatus);
+
+        loadBalancer = new LoadBalancer();
+        loadBalancer.setFqdn(LB_FQDN);
+
+        lenient().when(freeIpaLoadBalancerService.getByStackId(STACK_ID)).thenReturn(loadBalancer);
     }
 
     @Test
@@ -225,7 +243,9 @@ class TrustSetupServiceTest {
     void returnsTrustSetupCommandsResponseWhenStatusIsAllowed() {
         TrustSetupCommandsResponse expectedResponse = mock(TrustSetupCommandsResponse.class);
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
-        when(trustCommandsGeneratorService.getTrustCommands(TrustCommandType.SETUP, ENV_CRN, stack, freeIpa, crossRealmTrust)).thenReturn(expectedResponse);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(adTrustProvider);
+        when(adTrustProvider.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, ENV_CRN, stack, freeIpa, crossRealmTrust, loadBalancer))
+                .thenReturn(expectedResponse);
 
         TrustSetupCommandsResponse response = underTest.getTrustCommands(ACCOUNT_ID, ENV_CRN, TrustCommandType.SETUP);
 
