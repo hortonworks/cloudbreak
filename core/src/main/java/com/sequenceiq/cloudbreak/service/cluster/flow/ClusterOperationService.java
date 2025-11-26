@@ -229,21 +229,29 @@ public class ClusterOperationService {
         try {
             transactionService.required(() -> {
                 List<Resource> resources = stack.getResourcesByType(ResourceType.AWS_ENCRYPTED_VOLUME);
-                resources.forEach(resource -> updateDeleteVolumesFlag(Boolean.TRUE, resource));
-                return resourceService.saveAll(resources);
+                resources.addAll(stack.getResourcesByType(stack.getDiskResourceType()));
+                return resourceService.saveAll(updateDeleteVolumesFlag(resources));
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
     }
 
-    private Resource updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
-        Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
-        attributes.ifPresent(volumeSetAttributes -> {
-            volumeSetAttributes.setDeleteOnTermination(deleteVolumes);
-            resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+    private List<Resource> updateDeleteVolumesFlag(List<Resource> volumeSetResources) {
+        List<Resource> updatedResources = new ArrayList<>();
+        volumeSetResources.forEach(resource -> {
+            Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
+            attributes.ifPresent(volumeSetAttributes -> {
+                if (Boolean.FALSE.equals(volumeSetAttributes.getDeleteOnTermination())) {
+                    LOGGER.info("Enable delete on termination flag for termination on volume set: '{}' on instance: '{}'.", resource.getResourceName(),
+                            resource.getInstanceId());
+                    volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+                    resourceAttributeUtil.setTypedAttributes(resource, volumeSetAttributes);
+                    updatedResources.add(resource);
+                }
+            });
         });
-        return volumeSet;
+        return updatedResources;
     }
 
     public FlowIdentifier updateHosts(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
