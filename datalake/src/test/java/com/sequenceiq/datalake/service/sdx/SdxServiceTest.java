@@ -112,7 +112,6 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
-import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -188,9 +187,6 @@ class SdxServiceTest {
     private PlatformStringTransformer platformStringTransformer;
 
     @Mock
-    private SdxBackupRestoreService sdxBackupRestoreService;
-
-    @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Mock
@@ -215,9 +211,6 @@ class SdxServiceTest {
     private StorageValidationService storageValidationService;
 
     @Mock
-    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
-
-    @Mock
     private StackRequestHandler stackRequestHandler;
 
     @Mock
@@ -237,6 +230,9 @@ class SdxServiceTest {
 
     @Mock
     private AccountIdService accountIdService;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
 
     @InjectMocks
     private SdxService underTest;
@@ -603,59 +599,14 @@ class SdxServiceTest {
     }
 
     @Test
-    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsNotSupportedByRuntime() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.1");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("custom-ep");
-
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(false);
-
-        BadRequestException exception =
-                assertThrows(BadRequestException.class, () -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-
-        assertEquals("Encryption Profile is not supported in 7.3.1 runtime. Please use 7.3.2 or above", exception.getMessage());
-    }
-
-    @Test
     void testValidateRuntimeAndImageWhenDefaultEncryptionProfileIsUsed() {
         SdxClusterRequest clusterRequest = new SdxClusterRequest();
         clusterRequest.setRuntime("7.3.1");
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("cdp_default_1");
+        environment.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cdp_default_fips_v1");
 
         assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-    }
-
-    @Test
-    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsSupportedByRuntime() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.2");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileName("custom-ep");
-
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(true);
-
-        assertDoesNotThrow(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-    }
-
-    @Test
-    void testValidateRuntimeAndImageWhenCustomEncryptionProfileIsNotSupportedByRuntimeInDatalakeRequest() {
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        clusterRequest.setRuntime("7.3.1");
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        clusterRequest.setEncryptionProfileName("custom-ep");
-
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())).thenReturn(false);
-
-        BadRequestException exception =
-                assertThrows(BadRequestException.class, () -> underTest.validateRuntimeAndImage(clusterRequest, environment, null, null));
-
-        assertEquals("Encryption Profile is not supported in 7.3.1 runtime. Please use 7.3.2 or above", exception.getMessage());
     }
 
     @Test

@@ -13,5 +13,5 @@
     "enableGateway": true,
     "topologyName": "cb"
   },
-  "encryptionProfileName": "epName"
+  "encryptionProfileCrn": "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123"
 }

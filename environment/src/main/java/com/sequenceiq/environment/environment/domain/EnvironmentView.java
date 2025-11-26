@@ -173,8 +173,8 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Column(name = "remoteenvironmentcrn")
     private String remoteEnvironmentCrn;
 
-    @Column(name = "encryption_profile_name")
-    private String encryptionProfileName;
+    @Column(name = "encryption_profile_crn")
+    private String encryptionProfileCrn;
 
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
@@ -568,12 +568,12 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
     }
 
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
     @Override
@@ -614,7 +614,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", enableSecretEncryption=" + enableSecretEncryption +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfileName=" + encryptionProfileName +
+                ", encryptionProfileCrn=" + encryptionProfileCrn +
                 '}';
     }
 

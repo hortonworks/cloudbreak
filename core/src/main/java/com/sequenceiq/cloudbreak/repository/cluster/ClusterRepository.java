@@ -121,12 +121,10 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
 
     @Query("SELECT c.name as name " +
             "FROM Cluster c " +
-            "JOIN Stack s ON s.environmentCrn =  c.environmentCrn " +
-            "JOIN Userdata u ON u.stack.id =  s.id " +
-            "WHERE c.encryptionProfileName = :name " +
-            "AND u.accountId = :accountId " +
+            "JOIN Stack s ON s.id =  c.stack.id " +
+            "WHERE c.encryptionProfileCrn = :crn " +
             "AND s.terminated IS NUll ")
-    List<String> findAllClusterNamesByEncrytionProfileNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+    List<String> findAllClusterNamesByEncryptionProfileCrn(@Param("crn") String crn);
 
     @Override
     default Class<Cluster> getEntityClass() {

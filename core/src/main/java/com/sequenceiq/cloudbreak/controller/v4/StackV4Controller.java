@@ -786,7 +786,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
-    public List<String> getClustersNamesByEncrytionProfile(Long workspaceId, String encryptionProfileName, @AccountId String accountId) {
-        return clusterService.getAllClusterNamesUsingEncrytionProfile(encryptionProfileName, accountId);
+    public List<String> getClustersNamesByEncryptionProfile(Long workspaceId, @ResourceCrn String encryptionProfileCrn) {
+        return clusterService.getAllClusterNamesUsingEncryptionProfile(encryptionProfileCrn);
     }
 }

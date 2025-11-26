@@ -1019,12 +1019,11 @@ public interface StackV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
-    @Path("internal/get_clusters_names_by_encryption_profile/{name}")
+    @Path("internal/get_clusters_names_by_encryption_profile/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get clusters name using given encryption profile",
-            operationId = "getClustersNamesByEncrytionProfile",
+            operationId = "getClustersNamesByEncryptionProfile",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<String> getClustersNamesByEncrytionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String encryptionProfileName,
-            @QueryParam("accountId") String accountId);
+    List<String> getClustersNamesByEncryptionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String encryptionProfileCrn);
 }

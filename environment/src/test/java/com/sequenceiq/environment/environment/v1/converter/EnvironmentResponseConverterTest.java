@@ -136,7 +136,7 @@ class EnvironmentResponseConverterTest {
         ProxyResponse proxyResponse = mock(ProxyResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
 
         when(credentialConverter.convert(environment.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -209,7 +209,7 @@ class EnvironmentResponseConverterTest {
                 .build();
         environment.setEnvironmentType(null);
         environment.setRemoteEnvironmentCrn(null);
-        environment.setEncryptionProfileName(null);
+        environment.setEncryptionProfileCrn(null);
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -272,7 +272,7 @@ class EnvironmentResponseConverterTest {
         assertEquals("outbound", actual.getExternalizedComputeCluster().getAzure().getOutboundType());
         assertNull(actual.getEnvironmentType());
         assertNull(actual.getRemoteEnvironmentCrn());
-        assertNull(actual.getEncryptionProfileName());
+        assertNull(actual.getEncryptionProfileCrn());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -294,7 +294,7 @@ class EnvironmentResponseConverterTest {
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
 
         when(credentialViewConverter.convertResponse(environmentDto.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -357,7 +357,7 @@ class EnvironmentResponseConverterTest {
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
-        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
 
         when(credentialViewConverter.convert(environmentViewDto.getCredentialView())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentViewDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -491,7 +491,7 @@ class EnvironmentResponseConverterTest {
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(EnvironmentType.HYBRID)
                 .withRemoteEnvironmentCrn("remoteEnvironmentCrn")
-                .withEncryptionProfileName("encryptionProfName");
+                .withEncryptionProfileCrn("encryptionProfileCrn");
     }
 
     private EnvironmentViewDto createEnvironmentViewDto(CloudPlatform cloudPlatform) {
@@ -526,7 +526,7 @@ class EnvironmentResponseConverterTest {
                 .withEnableComputeCluster(true)
                 .withEnvironmentType(EnvironmentType.HYBRID)
                 .withRemoteEnvironmentCrn("remoteEnvironmentCrn")
-                .withEncryptionProfileName("epName")
+                .withEncryptionProfileCrn("epCrn")
                 .build();
     }
 

@@ -145,16 +145,20 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         return defaultEncryptionProfileMap.get(DEFAULT_NAME);
     }
 
-    public String getClouderaDefaultEncryptionProfileName() {
-        return  DEFAULT_NAME;
-    }
-
     public List<EncryptionProfile> getAllDefaultEncryptionProfiles() {
         return defaultEncryptionProfileProvider
                 .defaultEncryptionProfilesByName()
                 .values()
                 .stream()
                 .collect(Collectors.toList());
+    }
+
+    public EncryptionProfile getByCrnOrDefault(String encryptionProfileCrn) {
+        if (StringUtils.isNotEmpty(encryptionProfileCrn)) {
+            return getByCrn(encryptionProfileCrn);
+        } else {
+            return getClouderaDefaultEncryptionProfile();
+        }
     }
 
     public EncryptionProfile getByCrn(String encryptionProfileCrn) {
@@ -178,7 +182,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .findByNameAndAccountId(encryptionProfileName, accountId)
                 .orElseThrow(notFound("Encryption profile", encryptionProfileName));
 
-        checkEncryptionProfileCanBeDeleted(encryptionProfile, encryptionProfile.getAccountId());
+        checkEncryptionProfileCanBeDeleted(encryptionProfile);
 
         repository.delete(encryptionProfile);
         ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
@@ -192,7 +196,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         EncryptionProfile encryptionProfile = repository.findByResourceCrn(crn)
                 .orElseThrow(notFound("Encryption profile with crn", crn));
 
-        checkEncryptionProfileCanBeDeleted(encryptionProfile, encryptionProfile.getAccountId());
+        checkEncryptionProfileCanBeDeleted(encryptionProfile);
 
         repository.delete(encryptionProfile);
         ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
@@ -215,13 +219,13 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENCYRPTION_PROFILE, accountId);
     }
 
-    private void checkEncryptionProfileCanBeDeleted(EncryptionProfile encryptionProfile, String accountId) {
+    private void checkEncryptionProfileCanBeDeleted(EncryptionProfile encryptionProfile) {
         if (ResourceStatus.DEFAULT.equals(encryptionProfile.getResourceStatus())) {
             throw new BadRequestException("The default encryption profile cannot be deleted.");
         }
 
-        List<String> envNames = repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(encryptionProfile.getName(), accountId);
-        List<String> clusterNames = clusterService.getClustersNamesByEncrytionProfile(encryptionProfile.getName());
+        List<String> envNames = repository.findAllEnvNamesByEncryptionProfileCrn(encryptionProfile.getResourceCrn());
+        List<String> clusterNames = clusterService.getClustersNamesByEncryptionProfile(encryptionProfile.getResourceCrn());
 
         StringBuilder message = new StringBuilder();
 
@@ -237,7 +241,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
         }
 
-        if (message.length() > 0) {
+        if (!message.isEmpty()) {
             throw new BadRequestException(String.format("Encryption Profile cannot be deleted.%s", message));
         }
     }

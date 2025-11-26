@@ -53,7 +53,7 @@ public class StackRequestHandler {
         return stackV4Request;
     }
 
-    public void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled, String encryptionProfileName) {
+    public void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled, String encryptionProfileCrn) {
         if (javaVersion != null) {
             stackV4Request.setJavaVersion(javaVersion);
         }
@@ -62,6 +62,6 @@ public class StackRequestHandler {
         // this, we will set the raz enablement here. See CB-7474 for more details
         stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
         stackV4Request.getCluster().setRangerRmsEnabled(rmsEnabled);
-        stackV4Request.getCluster().setEncryptionProfileName(encryptionProfileName);
+        stackV4Request.getCluster().setEncryptionProfileCrn(encryptionProfileCrn);
     }
 }

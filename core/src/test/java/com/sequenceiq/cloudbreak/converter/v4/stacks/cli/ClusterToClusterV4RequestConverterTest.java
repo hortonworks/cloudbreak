@@ -163,12 +163,12 @@ public class ClusterToClusterV4RequestConverterTest {
 
     @Test
     public void testConvertWhenEncryptionProfileIsNotNull() {
-        String expected = "epName";
+        String expected = "epCrn";
 
-        when(cluster.getEncryptionProfileName()).thenReturn(expected);
+        when(cluster.getEncryptionProfileCrn()).thenReturn(expected);
 
         ClusterV4Request result = underTest.convert(cluster);
 
-        assertEquals(expected, result.getEncryptionProfileName());
+        assertEquals(expected, result.getEncryptionProfileCrn());
     }
 }

@@ -37,7 +37,7 @@ class EnvironmentViewDtoTest {
         EnvironmentDataServices dataServices = EnvironmentDataServices.builder().build();
         CredentialView credential = new CredentialView();
         ProxyConfigView proxyConfig = new ProxyConfigView();
-        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
 
         EnvironmentViewDto environmentViewDto = EnvironmentViewDto.builder()
                 .withId(456L)
@@ -74,7 +74,7 @@ class EnvironmentViewDtoTest {
                 .withEnableSecretEncryption(true)
                 .withCredentialView(credential)
                 .withProxyConfig(proxyConfig)
-                .withEncryptionProfileName(encryptionProfileName)
+                .withEncryptionProfileCrn(encryptionProfileCrn)
                 .build();
 
         assertThat(environmentViewDto).isNotNull();
@@ -112,7 +112,7 @@ class EnvironmentViewDtoTest {
         assertThat(environmentViewDto.isEnableSecretEncryption()).isTrue();
         assertThat(environmentViewDto.getCredentialView()).isSameAs(credential);
         assertThat(environmentViewDto.getProxyConfig()).isSameAs(proxyConfig);
-        assertThat(environmentViewDto.getEncryptionProfileName()).isEqualTo(encryptionProfileName);
+        assertThat(environmentViewDto.getEncryptionProfileCrn()).isEqualTo(encryptionProfileCrn);
     }
 
 }

@@ -187,11 +187,8 @@ public class EnvironmentCreationService {
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
 
-        Optional<EncryptionProfile> encryptionProfileOp = environmentResourceService.getEncryptionProfile(creationDto.getEncryptionProfileName(),
-                creationDto.getAccountId());
-        if (encryptionProfileOp.isPresent()) {
-            environment.setEncryptionProfileName(encryptionProfileOp.get().getName());
-        }
+        Optional<EncryptionProfile> encryptionProfileOp = environmentResourceService.getEncryptionProfile(creationDto.getEncryptionProfileCrn());
+        encryptionProfileOp.ifPresent(encryptionProfile -> environment.setEncryptionProfileCrn(encryptionProfile.getResourceCrn()));
         LOGGER.info("Environment is initialized for creation.");
         return environment;
     }

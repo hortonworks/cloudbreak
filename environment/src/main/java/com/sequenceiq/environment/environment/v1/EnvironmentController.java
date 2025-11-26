@@ -211,7 +211,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
-    @CheckPermissionByRequestProperty(path = "encryptionProfileName", type = NAME, action = DESCRIBE_ENCRYPTION_PROFILE, skipOnNull = true)
+    @CheckPermissionByRequestProperty(path = "encryptionProfileCrn", type = CRN, action = DESCRIBE_ENCRYPTION_PROFILE, skipOnNull = true)
     @CheckPermissionByRequestProperty(path = "freeIpa.recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
     public DetailedEnvironmentResponse post(@RequestObject EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);

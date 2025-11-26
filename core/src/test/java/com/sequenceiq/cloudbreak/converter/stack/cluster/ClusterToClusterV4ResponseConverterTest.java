@@ -108,7 +108,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         source.setDbSslRootCertBundle("bundle");
         source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
         source.setCertExpirationDetails(CERT_EXPIRATION_DETAILS);
-        source.setEncryptionProfileName("epName");
+        source.setEncryptionProfileCrn("epCrn");
         Blueprint blueprint = source.getBlueprint();
 
         // WHEN
@@ -134,7 +134,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
         assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
         assertEquals(CERT_EXPIRATION_DETAILS, result.getCertExpirationDetails());
-        assertEquals("epName", result.getEncryptionProfileName());
+        assertEquals("epCrn", result.getEncryptionProfileCrn());
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway", "customConfigurationsName",
                 "customConfigurationsCrn");
         assertAllFieldsNotNull(result, skippedFields);

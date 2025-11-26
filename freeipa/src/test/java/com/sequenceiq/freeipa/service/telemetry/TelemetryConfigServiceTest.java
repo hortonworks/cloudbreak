@@ -232,7 +232,7 @@ public class TelemetryConfigServiceTest {
                         "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
-        detailedEnvironmentResponse.setEncryptionProfileName("epName");
+        detailedEnvironmentResponse.setEncryptionProfileCrn("epCrn");
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
@@ -243,7 +243,7 @@ public class TelemetryConfigServiceTest {
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(cachedEncryptionProfileClientService.getByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName()))
+        given(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileCrn()))
                 .willReturn(encryptionProfileResponse);
 
         // WHEN
@@ -270,7 +270,7 @@ public class TelemetryConfigServiceTest {
                         "TLSv1.3", List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 )
         );
-        detailedEnvironmentResponse.setEncryptionProfileName("epName");
+        detailedEnvironmentResponse.setEncryptionProfileCrn("epCrn");
 
         given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
         given(umsClient.getAccountDetails(anyString())).willReturn(account);
@@ -285,7 +285,7 @@ public class TelemetryConfigServiceTest {
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
-        given(cachedEncryptionProfileClientService.getByNameOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileName()))
+        given(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(detailedEnvironmentResponse.getEncryptionProfileCrn()))
                 .willReturn(encryptionProfileResponse);
         given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
                 .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));

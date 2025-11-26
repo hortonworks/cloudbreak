@@ -229,15 +229,14 @@ public class EnvironmentResourceService {
         return supportedRawSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
     }
 
-    public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileName, String accountId) {
+    public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileCrn) {
         EncryptionProfile encryptionProfile = null;
 
-        if (StringUtils.isNotEmpty(encryptionProfileName)) {
+        if (StringUtils.isNotEmpty(encryptionProfileCrn)) {
             try {
-                encryptionProfile = encryptionProfileService.getByNameAndAccountId(encryptionProfileName, accountId);
+                encryptionProfile = encryptionProfileService.getByCrnOrDefault(encryptionProfileCrn);
             } catch (NotFoundException e) {
-                throw new BadRequestException(String.format("No Encryption Profile found with name [%s] in the account [%s].",
-                        encryptionProfileName, accountId), e);
+                throw new BadRequestException(String.format("No Encryption Profile found with CRN [%s].", encryptionProfileCrn), e);
             }
         }
 

@@ -162,7 +162,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String remoteEnvironmentCrn;
 
-        private String encryptionProfileName;
+        private String encryptionProfileCrn;
 
         private Builder() {
         }
@@ -387,8 +387,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withEncryptionProfileName(String encryptionProfileName) {
-            this.encryptionProfileName = encryptionProfileName;
+        public Builder withEncryptionProfileCrn(String encryptionProfileCrn) {
+            this.encryptionProfileCrn = encryptionProfileCrn;
             return this;
         }
 
@@ -437,7 +437,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             detailedEnvironmentResponse.setEnvironmentType(environmentType);
             detailedEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
-            detailedEnvironmentResponse.setEncryptionProfileName(encryptionProfileName);
+            detailedEnvironmentResponse.setEncryptionProfileCrn(encryptionProfileCrn);
             return detailedEnvironmentResponse;
         }
     }

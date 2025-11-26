@@ -140,7 +140,7 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null)
                 .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
-                .withEncryptionProfileName(environmentDto.getEncryptionProfileName());
+                .withEncryptionProfileCrn(environmentDto.getEncryptionProfileCrn());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -217,7 +217,7 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentViewDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentViewDto.getEnvironmentType() != null ? environmentViewDto.getEnvironmentType().toString() : null)
                 .withRemoteEnvironmentCrn(environmentViewDto.getRemoteEnvironmentCrn())
-                .withEncryptionProfileName(environmentViewDto.getEncryptionProfileName());
+                .withEncryptionProfileCrn(environmentViewDto.getEncryptionProfileCrn());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -259,7 +259,7 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() : null)
                 .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
-                .withEncryptionProfileName(environmentDto.getEncryptionProfileName());
+                .withEncryptionProfileCrn(environmentDto.getEncryptionProfileCrn());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

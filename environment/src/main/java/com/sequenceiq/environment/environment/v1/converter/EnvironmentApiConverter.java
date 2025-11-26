@@ -186,8 +186,7 @@ public class EnvironmentApiConverter {
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
                 .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
-                .withEncryptionProfileName(StringUtils.hasText(request.getEncryptionProfileName()) ?
-                        request.getEncryptionProfileName() : encryptionProfileService.getClouderaDefaultEncryptionProfileName());
+                .withEncryptionProfileCrn(request.getEncryptionProfileCrn());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

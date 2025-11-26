@@ -250,20 +250,20 @@ class EnvironmentResourceServiceTest {
 
     @Test
     void getEncryptionProfileShouldNotThrowExceptionWhenProfileNameIsEmpty() {
-        Optional<EncryptionProfile> result = environmentResourceServiceUnderTest.getEncryptionProfile("", ACCOUNT_ID);
+        Optional<EncryptionProfile> result = environmentResourceServiceUnderTest.getEncryptionProfile("");
 
         assertFalse(result.isPresent());
-        verify(encryptionProfileService, never()).getByNameAndAccountId(any(), any());
+        verify(encryptionProfileService, never()).getByCrnOrDefault(any());
     }
 
     @Test
     void getEncryptionProfileShouldThrowExceptionWhenProfileNameIsNotFound() {
-        when(encryptionProfileService.getByNameAndAccountId(any(), any())).thenThrow(NotFoundException.class);
+        when(encryptionProfileService.getByCrnOrDefault(any())).thenThrow(NotFoundException.class);
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> environmentResourceServiceUnderTest.getEncryptionProfile(
-                "ep-name", ACCOUNT_ID));
+                "ep-crn"));
 
-        assertEquals("No Encryption Profile found with name [ep-name] in the account [accid].", ex.getMessage());
+        assertEquals("No Encryption Profile found with CRN [ep-crn].", ex.getMessage());
     }
 
     @Configuration

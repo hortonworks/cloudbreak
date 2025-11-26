@@ -102,7 +102,7 @@ public class ClusterV4RequestToClusterConverter {
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setRangerRazEnabled(source.isRangerRazEnabled());
         cluster.setRangerRmsEnabled(source.isRangerRmsEnabled());
-        cluster.setEncryptionProfileName(source.getEncryptionProfileName());
+        cluster.setEncryptionProfileCrn(source.getEncryptionProfileCrn());
         return cluster;
     }
 

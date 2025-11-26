@@ -230,8 +230,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     private String certExpirationDetails;
 
-    @Column(name = "encryption_profile_name")
-    private String encryptionProfileName;
+    @Column(name = "encryption_profile_crn")
+    private String encryptionProfileCrn;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -855,6 +855,15 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     @Override
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
+    }
+
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(id);
     }
@@ -878,14 +887,5 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
             resourceCrn = stack.getResourceCrn();
         }
         return resourceCrn;
-    }
-
-    @Override
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
-    }
-
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
     }
 }

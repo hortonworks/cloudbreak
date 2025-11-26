@@ -237,7 +237,7 @@ public class EncryptionProfileServiceTest {
     @Test
     void testDeleteByNameAndAccountId() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
-        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of());
+        when(repository.findAllEnvNamesByEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of());
 
         EncryptionProfile result = underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID);
 
@@ -374,7 +374,7 @@ public class EncryptionProfileServiceTest {
     @Test
     void testDeleteByNameWhenProfileStillInUseByEnv() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
-        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of("env1", "env2"));
+        when(repository.findAllEnvNamesByEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of("env1", "env2"));
 
         assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
@@ -387,7 +387,7 @@ public class EncryptionProfileServiceTest {
     @Test
     void testDeleteByNameWhenProfileStillInUseByCluster() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
-        when(clusterService.getClustersNamesByEncrytionProfile(NAME)).thenReturn(List.of("cluster1", "cluster2"));
+        when(clusterService.getClustersNamesByEncryptionProfile(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of("cluster1", "cluster2"));
 
         assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
@@ -400,8 +400,8 @@ public class EncryptionProfileServiceTest {
     @Test
     void testDeleteByNameWhenProfileStillInUseByEnvAndCluster() {
         when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
-        when(repository.findAllEnvNamesByEncrytionProfileNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(List.of("env1", "env2"));
-        when(clusterService.getClustersNamesByEncrytionProfile(NAME)).thenReturn(List.of("cluster1", "cluster2"));
+        when(repository.findAllEnvNamesByEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of("env1", "env2"));
+        when(clusterService.getClustersNamesByEncryptionProfile(ENCRYPTION_PROFILE_CRN)).thenReturn(List.of("cluster1", "cluster2"));
 
         assertThatThrownBy(() -> underTest.deleteByNameAndAccountId(NAME, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)

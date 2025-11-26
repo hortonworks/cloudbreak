@@ -261,8 +261,8 @@ public class ModelDescriptions {
         public static final String FLAG_SKIP_SALT_UPDATE = "Flag to indicate if salt update should be skipped or not.";
         public static final String DATABASE_SSL_ENABLED = "Whether database SSL is enabled on this cluster or not.";
 
-        public static final String ENCRYPTION_PROFILE_NAME =
-                "Name of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
+        public static final String ENCRYPTION_PROFILE_CRN =
+                "CRN of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
     }
 
     public static class GatewayModelDescription {

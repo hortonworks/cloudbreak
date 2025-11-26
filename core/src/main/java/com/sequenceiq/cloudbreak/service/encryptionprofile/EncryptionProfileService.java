@@ -1,16 +1,21 @@
 package com.sequenceiq.cloudbreak.service.encryptionprofile;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
-import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -19,19 +24,57 @@ public class EncryptionProfileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionProfileService.class);
 
     @Inject
-    private EnvironmentService environmentService;
+    private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
-    public EncryptionProfileResponse getEncryptionProfileByNameOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
-        StackView stackView = stackDto.getStack();
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
         ClusterView clusterView = stackDto.getCluster();
-        String encryptionProfileName;
+        String encryptionProfileCrn;
 
-        if (StringUtils.isNotBlank(clusterView.getEncryptionProfileName())) {
-            encryptionProfileName = clusterView.getEncryptionProfileName();
+        if (StringUtils.isNotBlank(clusterView.getEncryptionProfileCrn())) {
+            LOGGER.info("Getting encryption profile {} from cluster", clusterView.getEncryptionProfileCrn());
+            encryptionProfileCrn = clusterView.getEncryptionProfileCrn();
         } else {
-            encryptionProfileName = environmentResponse.getEncryptionProfileName();
+            encryptionProfileCrn = environmentResponse.getEncryptionProfileCrn();
         }
 
-        return environmentService.getEncryptionProfileByNameOrDefaultIfEmpty(encryptionProfileName);
+        return getEncryptionProfileByCrnOrDefaultIfEmpty(encryptionProfileCrn);
+    }
+
+    public Optional<EncryptionProfileResponse> getEncryptionProfileByCrn(String encryptionProfileCrn) {
+        try {
+            return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)));
+        } catch (Exception ex) {
+            LOGGER.error("Failed to GET encryption profile by CRN: {}", encryptionProfileCrn, ex);
+            return Optional.empty();
+        }
+    }
+
+    private EncryptionProfileResponse getEncryptionProfileByCrnOrDefaultIfEmpty(String crn) {
+        try {
+            if (StringUtils.isNotEmpty(crn)) {
+                return ThreadBasedUserCrnProvider.doAsInternalActor(
+                        () -> encryptionProfileEndpoint.getByCrn(crn));
+            } else {
+                return getDefaultEncryptionProfile();
+            }
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET encryption profile by CRN: %s, due to: %s. %s.", crn, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (Exception e) {
+            String message = String.format("Failed to GET encryption profile by CRN: %s, due to: '%s' ", crn, e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    private EncryptionProfileResponse getDefaultEncryptionProfile() {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> encryptionProfileEndpoint.getDefaultEncryptionProfile());
     }
 }

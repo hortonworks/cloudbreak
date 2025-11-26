@@ -150,7 +150,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     private String remoteEnvironmentCrn;
 
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE)
-    private String encryptionProfileName;
+    private String encryptionProfileCrn;
 
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
@@ -503,12 +503,12 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
     }
 
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
     @Override
@@ -553,7 +553,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", enableComputeCluster=" + enableComputeCluster +
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
-                ", encryptionProfileName=" + encryptionProfileName +
+                ", encryptionProfileCrn=" + encryptionProfileCrn +
                 '}';
     }
 }

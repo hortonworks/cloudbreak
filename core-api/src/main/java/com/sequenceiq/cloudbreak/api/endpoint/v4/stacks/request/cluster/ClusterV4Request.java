@@ -88,8 +88,8 @@ public class ClusterV4Request implements JsonEntity {
     @Schema(description = ClusterModelDescription.ENABLE_RANGER_RMS)
     private boolean rangerRmsEnabled;
 
-    @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_NAME)
-    private String encryptionProfileName;
+    @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_CRN)
+    private String encryptionProfileCrn;
 
     public String getUserName() {
         return userName;
@@ -219,12 +219,12 @@ public class ClusterV4Request implements JsonEntity {
         this.rangerRmsEnabled = rangerRmsEnabled;
     }
 
-    public String getEncryptionProfileName() {
-        return encryptionProfileName;
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
     }
 
-    public void setEncryptionProfileName(String encryptionProfileName) {
-        this.encryptionProfileName = encryptionProfileName;
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
     @Override
@@ -245,7 +245,7 @@ public class ClusterV4Request implements JsonEntity {
                 ", customConfigurationsName='" + customConfigurationsName + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
                 ", rangerRmsEnabled=" + rangerRmsEnabled +
-                ", encryptionProfileName=" + encryptionProfileName +
+                ", encryptionProfileCrn=" + encryptionProfileCrn +
                 '}';
     }
 }

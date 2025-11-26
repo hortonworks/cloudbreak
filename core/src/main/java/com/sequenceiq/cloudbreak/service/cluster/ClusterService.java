@@ -584,7 +584,7 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         return repository.findByStackResourceCrn(blueprintId);
     }
 
-    public List<String> getAllClusterNamesUsingEncrytionProfile(String encryptionProfileName, String accountId) {
-        return repository.findAllClusterNamesByEncrytionProfileNameAndAccountId(encryptionProfileName, accountId);
+    public List<String> getAllClusterNamesUsingEncryptionProfile(String encryptionProfileCrn) {
+        return repository.findAllClusterNamesByEncryptionProfileCrn(encryptionProfileCrn);
     }
 }

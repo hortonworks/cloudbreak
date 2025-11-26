@@ -239,7 +239,7 @@ public class TelemetryDecoratorTest {
         telemetry.setMonitoring(monitoring);
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
         given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
-        given(encryptionProfileService.getEncryptionProfileByNameOrDefault(any(), any()))
+        given(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any()))
                 .willReturn(encryptionProfileResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());

@@ -12,15 +12,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionProfileServiceTest {
     @Mock
-    private EnvironmentService environmentService;
+    private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -28,30 +28,30 @@ class EncryptionProfileServiceTest {
     @Test
     void testWhenClusterEncryptionProfileIsNotNull() {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setEncryptionProfileName("environmentEp");
+        environment.setEncryptionProfileCrn("envEncryptionProfileCrn");
         StackDto stackDto = mock(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
 
         when(stackDto.getCluster()).thenReturn(cluster);
-        when(cluster.getEncryptionProfileName()).thenReturn("clusterEp");
+        when(cluster.getEncryptionProfileCrn()).thenReturn("clusterEpCrn");
 
-        EncryptionProfileResponse response = underTest.getEncryptionProfileByNameOrDefault(environment, stackDto);
+        EncryptionProfileResponse response = underTest.getEncryptionProfileByCrnOrDefault(environment, stackDto);
 
-        verify(environmentService, times(1)).getEncryptionProfileByNameOrDefaultIfEmpty("clusterEp");
+        verify(encryptionProfileEndpoint, times(1)).getByCrn("clusterEpCrn");
     }
 
     @Test
     void testWhenClusterEncryptionProfileIsNullEnvironmentEncryptionProfileShouldBeUsed() {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setEncryptionProfileName("environmentEp");
+        environment.setEncryptionProfileCrn("environmentEp");
         StackDto stackDto = mock(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
 
         when(stackDto.getCluster()).thenReturn(cluster);
-        when(cluster.getEncryptionProfileName()).thenReturn(null);
+        when(cluster.getEncryptionProfileCrn()).thenReturn(null);
 
-        EncryptionProfileResponse response = underTest.getEncryptionProfileByNameOrDefault(environment, stackDto);
+        EncryptionProfileResponse response = underTest.getEncryptionProfileByCrnOrDefault(environment, stackDto);
 
-        verify(environmentService, times(1)).getEncryptionProfileByNameOrDefaultIfEmpty("environmentEp");
+        verify(encryptionProfileEndpoint, times(1)).getByCrn("environmentEp");
     }
 }

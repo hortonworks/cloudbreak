@@ -610,7 +610,7 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByNameOrDefault(
+        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(
                 detailedEnvironmentResponse, stackDto);
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)
@@ -897,7 +897,7 @@ public class ClusterHostServiceRunner {
             gateway.put("address_is_ip", addressIsIp);
         }
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
-        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByNameOrDefault(
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(
                 detailedEnvironmentResponse, stackDto);
         Set<String> useTlsVersions =
                 Optional.ofNullable(encryptionProfileResponse)

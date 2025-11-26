@@ -1196,7 +1196,7 @@ class ClusterHostServiceRunnerTest {
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
-        when(encryptionProfileService.getEncryptionProfileByNameOrDefault(any(), any())).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(encryptionProfileResponse);
         when(encryptionProfileResponse.getTlsVersions()).thenReturn(tlsVersions);
         when(encryptionProfileResponse.getCipherSuites()).thenReturn(cipherSuites);
         when(encryptionProfileProvider.getTlsVersions(eq(tlsVersions), any())).thenReturn("TLSv1.2,TLSv1.3");

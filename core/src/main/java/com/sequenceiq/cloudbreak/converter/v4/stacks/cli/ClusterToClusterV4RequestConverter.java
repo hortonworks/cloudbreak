@@ -56,7 +56,7 @@ public class ClusterToClusterV4RequestConverter {
         }
         clusterRequest.setRangerRazEnabled(source.isRangerRazEnabled());
         clusterRequest.setRangerRmsEnabled(source.isRangerRmsEnabled());
-        clusterRequest.setEncryptionProfileName(source.getEncryptionProfileName());
+        clusterRequest.setEncryptionProfileCrn(source.getEncryptionProfileCrn());
         return clusterRequest;
     }
 

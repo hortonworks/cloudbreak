@@ -325,7 +325,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
         assertThat(result.isEnableComputeCluster()).isTrue();
-        assertThat(result.getEncryptionProfileName()).isNull();
+        assertThat(result.getEncryptionProfileCrn()).isNull();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -478,7 +478,7 @@ class EnvironmentDtoConverterTest {
         ExperimentalFeatures experimentalFeatures = ExperimentalFeatures.builder().build();
         EnvironmentTags environmentTags = new EnvironmentTags(Map.of(), Map.of());
         ProxyConfig proxyConfig = new ProxyConfig();
-        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
 
         when(environment.getId()).thenReturn(ID);
         when(environment.getResourceCrn()).thenReturn(RESOURCE_CRN);
@@ -522,7 +522,7 @@ class EnvironmentDtoConverterTest {
         when(environment.getNetwork()).thenReturn(null);
         when(environment.getParentEnvironment()).thenReturn(null);
         when(environment.isEnableSecretEncryption()).thenReturn(true);
-        when(environment.getEncryptionProfileName()).thenReturn(encryptionProfileName);
+        when(environment.getEncryptionProfileCrn()).thenReturn(encryptionProfileCrn);
 
         DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
         defaultComputeCluster.setCreate(true);
@@ -589,7 +589,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getParentEnvironmentName()).isNull();
         assertThat(result.getParentEnvironmentCloudPlatform()).isNull();
 
-        assertThat(result.getEncryptionProfileName()).isEqualTo(encryptionProfileName);
+        assertThat(result.getEncryptionProfileCrn()).isEqualTo(encryptionProfileCrn);
     }
 
     @Test

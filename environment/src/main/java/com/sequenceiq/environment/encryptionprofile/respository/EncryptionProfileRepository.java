@@ -39,10 +39,8 @@ public interface EncryptionProfileRepository extends JpaRepository<EncryptionPro
 
     @Query("SELECT e.name as name " +
             "FROM Environment e " +
-            "JOIN EncryptionProfile ep ON ep.name =  e.encryptionProfileName " +
-            "WHERE ep.name = :name " +
-            "AND e.accountId = :accountId " +
-            "AND ep.accountId = :accountId " +
+            "JOIN EncryptionProfile ep ON ep.resourceCrn =  e.encryptionProfileCrn " +
+            "WHERE ep.resourceCrn = :crn " +
             "AND e.archived = FALSE")
-    List<String> findAllEnvNamesByEncrytionProfileNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+    List<String> findAllEnvNamesByEncryptionProfileCrn(@Param("crn") String crn);
 }

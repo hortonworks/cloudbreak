@@ -100,7 +100,6 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
-import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -123,8 +122,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private static final String SDX_CLUSTER = "SDX cluster";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
-
-    private static final String DEFAULT_ENCRYPTION_PROFILE_NAME = "cdp_default";
 
     @Inject
     private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
@@ -174,9 +171,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    @Inject
-    private SdxBackupRestoreService sdxBackupRestoreService;
-
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
@@ -205,9 +199,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private StorageValidationService storageValidationService;
 
     @Inject
-    private SdxVersionRuleEnforcer sdxVersionRuleEnforcer;
-
-    @Inject
     private StackRequestHandler stackRequestHandler;
 
     @Inject
@@ -221,6 +212,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private AccountIdService accountIdService;
+
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
 
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
@@ -398,6 +392,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
+        encryptionProfileService.validateEncryptionProfile(sdxClusterRequest, environment);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateOsEntitled(os, accountId);
@@ -435,8 +430,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (sdxClusterRequest.getVariant() != null) {
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }
+
         stackRequestHandler.setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
-                sdxClusterRequest.isEnableRangerRms(), sdxClusterRequest.getEncryptionProfileName());
+                sdxClusterRequest.isEnableRangerRms(), sdxClusterRequest.getEncryptionProfileCrn());
         sdxInstanceService.overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
                 Collections.emptyList(), sdxClusterRequest.getClusterShape());
         recipeService.validateRecipes(sdxClusterRequest.getRecipes(), stackRequest);
@@ -758,22 +754,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             }
         }
 
-        if ((checkIfEncryptionProfileNameIsNeitherNullOrDefault(environment.getEncryptionProfileName()) ||
-                checkIfEncryptionProfileNameIsNeitherNullOrDefault(clusterRequest.getEncryptionProfileName())) &&
-                !sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())) {
-            validationBuilder.error(String.format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above",
-                    clusterRequest.getRuntime()));
-        }
-
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
 
-    }
-
-    private boolean checkIfEncryptionProfileNameIsNeitherNullOrDefault(String name) {
-        return isNotEmpty(name) && !name.startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME);
     }
 
     private void validateImage(SdxClusterRequest clusterRequest, ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response,
