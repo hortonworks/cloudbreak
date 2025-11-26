@@ -35,15 +35,19 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -52,14 +56,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustm
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -67,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -82,6 +90,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -387,6 +396,103 @@ class ClusterOperationServiceTest {
         FlowIdentifier result = underTest.rotateRdsCertificate(stack);
         verify(flowManager).triggerRotateRdsCertificate(STACK_ID);
         assertThat(result).isEqualTo(FLOW_IDENTIFIER);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"AWS", "AWS_NATIVE", "AWS_NATIVE_GOV"})
+    void testDeleteShouldMarkDiskResourcesDeleteOnTerminationOnAws(String platformVariant) throws TransactionExecutionException {
+        long stackId = 1L;
+        List<ResourceType> expectedVolumeResourceTypes = List.of(ResourceType.AWS_VOLUMESET, ResourceType.AWS_ENCRYPTED_VOLUME);
+        Credential credential = TestUtil.awsCredential();
+        Stack stack = TestUtil.stack(Status.AVAILABLE, credential);
+        stack.setPlatformVariant(platformVariant);
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(transactionService.required(any(Supplier.class))).then(invocation -> {
+            Supplier supplier = invocation.getArgument(0);
+            return supplier.get();
+        });
+        List<Resource> resources = List.of(
+                getVolumeResource(ResourceType.AWS_VOLUMESET, "volumeSet", stack, "availabilityZone"),
+                getVolumeResource(ResourceType.AWS_ENCRYPTED_VOLUME, "encryptedVolume", stack, "availabilityZone"),
+                new Resource(ResourceType.AWS_SECURITY_GROUP, "secGroup", stack, "availabilityZone")
+        );
+        when(resourceService.getAllByStackId(stackId)).thenReturn(resources);
+
+        underTest.delete(stackId, Boolean.FALSE);
+
+        ArgumentCaptor<Iterable<Resource>> savedResourcesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(resourceService).saveAll(savedResourcesCaptor.capture());
+        Iterable<Resource> savedResources = savedResourcesCaptor.getValue();
+        Assertions.assertThat(savedResources)
+                .hasSize(expectedVolumeResourceTypes.size())
+                .allMatch(resource -> expectedVolumeResourceTypes.contains(resource.getResourceType())
+                        && Boolean.TRUE.equals(resource.getAttributes().getMap().get("deleteOnTermination")));
+    }
+
+    @Test
+    void testDeleteShouldMarkDiskResourcesDeleteOnTerminationOnAzure() throws TransactionExecutionException {
+        List<ResourceType> expectedVolumeResourceTypes = List.of(ResourceType.AZURE_VOLUMESET);
+        long stackId = 1L;
+        Credential credential = TestUtil.azureCredential();
+        Stack stack = TestUtil.stack(Status.AVAILABLE, credential);
+        stack.setPlatformVariant("AZURE");
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(transactionService.required(any(Supplier.class))).then(invocation -> {
+            Supplier supplier = invocation.getArgument(0);
+            return supplier.get();
+        });
+        List<Resource> resources = List.of(
+                getVolumeResource(ResourceType.AZURE_VOLUMESET, "volumeSet", stack, "availabilityZone"),
+                new Resource(ResourceType.AZURE_INSTANCE, "secGroup", stack, "availabilityZone")
+        );
+        when(resourceService.getAllByStackId(stackId)).thenReturn(resources);
+
+        underTest.delete(stackId, Boolean.FALSE);
+
+        ArgumentCaptor<Iterable<Resource>> savedResourcesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(resourceService).saveAll(savedResourcesCaptor.capture());
+        Iterable<Resource> savedResources = savedResourcesCaptor.getValue();
+        Assertions.assertThat(savedResources)
+                .hasSize(expectedVolumeResourceTypes.size())
+                .allMatch(resource -> expectedVolumeResourceTypes.contains(resource.getResourceType())
+                        && Boolean.TRUE.equals(resource.getAttributes().getMap().get("deleteOnTermination")));
+    }
+
+    @Test
+    void testDeleteShouldMarkDiskResourcesDeleteOnTerminationOnGcp() throws TransactionExecutionException {
+        long stackId = 1L;
+        List<ResourceType> expectedVolumeResourceTypes = List.of(ResourceType.GCP_ATTACHED_DISKSET);
+        Credential credential = TestUtil.gcpCredential();
+        Stack stack = TestUtil.stack(Status.AVAILABLE, credential);
+        stack.setPlatformVariant("GCP");
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        when(transactionService.required(any(Supplier.class))).then(invocation -> {
+            Supplier supplier = invocation.getArgument(0);
+            return supplier.get();
+        });
+        List<Resource> resources = List.of(
+                getVolumeResource(ResourceType.GCP_ATTACHED_DISKSET, "volumeSet", stack, "availabilityZone"),
+                new Resource(ResourceType.GCP_DISK, "secGroup", stack, "availabilityZone"),
+                new Resource(ResourceType.GCP_INSTANCE, "secGroup", stack, "availabilityZone")
+        );
+        when(resourceService.getAllByStackId(stackId)).thenReturn(resources);
+
+        underTest.delete(stackId, Boolean.FALSE);
+
+        ArgumentCaptor<Iterable<Resource>> savedResourcesCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(resourceService).saveAll(savedResourcesCaptor.capture());
+        Iterable<Resource> savedResources = savedResourcesCaptor.getValue();
+        Assertions.assertThat(savedResources)
+                .hasSize(expectedVolumeResourceTypes.size())
+                .allMatch(resource -> expectedVolumeResourceTypes.contains(resource.getResourceType())
+                        && Boolean.TRUE.equals(resource.getAttributes().getMap().get("deleteOnTermination")));
+    }
+
+    private Resource getVolumeResource(ResourceType volumeResourceType, String volumeSet, Stack stack, String availabilityZone) {
+        Resource resource = new Resource(volumeResourceType, volumeSet, stack, availabilityZone);
+        resource.setAttributes(new Json(new VolumeSetAttributes(availabilityZone, Boolean.FALSE, "", List.of(), 0, "")));
+        resource.setInstanceId("instanceId");
+        return resource;
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

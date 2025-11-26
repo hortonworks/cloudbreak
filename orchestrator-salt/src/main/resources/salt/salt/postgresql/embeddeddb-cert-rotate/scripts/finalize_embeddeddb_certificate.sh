@@ -24,7 +24,7 @@ then
     cat ${CERTS_DIR}/old_cert_sn
     cat ${CERTS_DIR}/old_cert_sn | xargs ipa cert-revoke
   else
-    echo "$(date '+%d/%m/%Y %H:%M:%S') - Old certificate serial number missing, possible reason: missing from FreeIPA server or it is already expired, thus revokal is not necessary."
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Old certificate serial number missing, possible reason: missing from FreeIPA server or it is already expired, thus revocation is not necessary."
   fi
 fi
 
