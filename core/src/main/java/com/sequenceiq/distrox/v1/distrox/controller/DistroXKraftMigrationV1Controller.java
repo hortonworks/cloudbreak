@@ -1,9 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.MIGRATE_ZOOKEEPER_TO_KRAFT;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION;
 
 import java.util.List;
 
@@ -43,13 +41,13 @@ public class DistroXKraftMigrationV1Controller implements DistroXKraftMigrationV
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION)
+    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT)
     public FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION)
+    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT)
     public FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
