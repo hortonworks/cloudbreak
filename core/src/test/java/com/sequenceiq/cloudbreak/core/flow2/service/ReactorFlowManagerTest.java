@@ -198,6 +198,7 @@ class ReactorFlowManagerTest {
         underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant", false, "aRuntime");
         underTest.triggerClusterUpgradePreparation(STACK_ID, imageChangeDto, "runtimeVersion");
         underTest.triggerSaltUpdate(STACK_ID);
+        underTest.triggerSaltUpdate(STACK_ID, false);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true, Collections.emptyList(), 0, false);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null, 0, false);

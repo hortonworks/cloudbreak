@@ -348,8 +348,12 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, String accountId) {
+        return updateSalt(nameOrCrn, accountId, false);
+    }
+
+    public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, String accountId, boolean skipHighstate) {
         LOGGER.debug("Starting salt update: " + nameOrCrn);
-        return clusterCommonService.updateSalt(nameOrCrn, accountId);
+        return clusterCommonService.updateSalt(nameOrCrn, accountId, skipHighstate);
     }
 
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {

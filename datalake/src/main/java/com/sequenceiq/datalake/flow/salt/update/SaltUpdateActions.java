@@ -49,17 +49,14 @@ public class SaltUpdateActions {
                 LOGGER.info("Initiating Salt update for SDX stack {}", context.getSdxId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_UPDATE_IN_PROGRESS,
                         "Initiating SaltStack update", context.getSdxId());
-                sendEvent(context);
+                SaltUpdateRequest request = new SaltUpdateRequest(context.getSdxId(), context.getUserId(),
+                        Optional.ofNullable(payload.isSkipHighstate()).orElse(Boolean.FALSE));
+                sendEvent(context, request);
             }
 
             @Override
             protected Object getFailurePayload(SaltUpdateTriggerEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return new SaltUpdateFailureResponse(payload.getResourceId(), payload.getUserId(), ex);
-            }
-
-            @Override
-            protected Selectable createRequest(SdxContext context) {
-                return new SaltUpdateRequest(context.getSdxId(), context.getUserId());
             }
         };
     }

@@ -47,6 +47,8 @@ public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
                     .from(RECONFIGURE_KEYTABS_FOR_SU_STATE).to(RUN_HIGHSTATE_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
                     .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
+                    .from(RECONFIGURE_KEYTABS_FOR_SU_STATE).to(SALT_UPDATE_FINISHED_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
+                    .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
                     .from(RUN_HIGHSTATE_STATE).to(SALT_UPDATE_FINISHED_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
                     .from(SALT_UPDATE_FINISHED_STATE).to(FINAL_STATE).event(SALT_UPDATE_FINISHED_EVENT).noFailureEvent()

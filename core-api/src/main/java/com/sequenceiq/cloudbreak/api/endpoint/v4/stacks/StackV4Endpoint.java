@@ -621,7 +621,7 @@ public interface StackV4Endpoint {
     @Operation(summary = UPDATE_SALT, operationId = "updateSaltByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateSaltByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("accountId") String accountId);
+            @QueryParam("accountId") String accountId, @QueryParam("skipHighstate") @DefaultValue("false") boolean skipHighstate);
 
     /**
      * @deprecated Use updatePillarConfigurationByCrn instead

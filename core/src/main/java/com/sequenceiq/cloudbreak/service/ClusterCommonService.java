@@ -306,7 +306,7 @@ public class ClusterCommonService {
         }
     }
 
-    public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, String accountId) {
+    public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, String accountId, boolean skipHighstate) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         Status status = stack.getStatus();
@@ -316,7 +316,7 @@ public class ClusterCommonService {
             LOGGER.info(message);
             throw new BadRequestException(message);
         } else {
-            return clusterOperationService.updateSalt(stack.getId());
+            return clusterOperationService.updateSalt(stack.getId(), skipHighstate);
         }
     }
 

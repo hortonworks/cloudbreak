@@ -17,11 +17,22 @@ public class SaltUpdateTriggerEvent extends StackEvent {
 
     private final boolean finalChain;
 
+    private final boolean skipHighstate;
+
     public SaltUpdateTriggerEvent(Long stackId) {
         super(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), stackId);
         chained = false;
         finalChain = false;
         operationId = null;
+        this.skipHighstate = false;
+    }
+
+    public SaltUpdateTriggerEvent(Long stackId, Promise<AcceptResult> accepted, boolean chained, boolean finalChain, String operationId) {
+        super(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), stackId, accepted);
+        this.chained = chained;
+        this.finalChain = finalChain;
+        this.operationId = operationId;
+        this.skipHighstate = false;
     }
 
     @JsonCreator
@@ -30,11 +41,13 @@ public class SaltUpdateTriggerEvent extends StackEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("chained") boolean chained,
             @JsonProperty("finalChain") boolean finalChain,
-            @JsonProperty("operationId") String operationId) {
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("skipHighstate") boolean skipHighstate) {
         super(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), stackId, accepted);
         this.chained = chained;
         this.finalChain = finalChain;
         this.operationId = operationId;
+        this.skipHighstate = skipHighstate;
     }
 
     public String getOperationId() {
@@ -49,12 +62,17 @@ public class SaltUpdateTriggerEvent extends StackEvent {
         return finalChain;
     }
 
+    public boolean isSkipHighstate() {
+        return skipHighstate;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(SaltUpdateTriggerEvent.class, other,
                 event -> Objects.equals(operationId, event.operationId)
                         && chained == event.chained
-                        && finalChain == event.finalChain);
+                        && finalChain == event.finalChain
+                        && skipHighstate == event.skipHighstate);
     }
 
     @Override
@@ -63,6 +81,7 @@ public class SaltUpdateTriggerEvent extends StackEvent {
                 "operationId='" + operationId + '\'' +
                 ", chained=" + chained +
                 ", finalChain=" + finalChain +
+                ", skipHighstate=" + skipHighstate +
                 "} " + super.toString();
     }
 }

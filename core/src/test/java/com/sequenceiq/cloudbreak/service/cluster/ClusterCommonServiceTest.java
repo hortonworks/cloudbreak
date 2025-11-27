@@ -302,11 +302,11 @@ public class ClusterCommonServiceTest {
         when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
-        when(clusterOperationService.updateSalt(STACK_ID)).thenReturn(flowIdentifier);
+        when(clusterOperationService.updateSalt(STACK_ID, true)).thenReturn(flowIdentifier);
 
-        FlowIdentifier flowIdentifier = underTest.updateSalt(nameOrCrn, ACCOUNT_ID);
+        FlowIdentifier flowIdentifier = underTest.updateSalt(nameOrCrn, ACCOUNT_ID, true);
 
-        verify(clusterOperationService, times(1)).updateSalt(STACK_ID);
+        verify(clusterOperationService, times(1)).updateSalt(STACK_ID, true);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("1", flowIdentifier.getPollableId());
     }
@@ -321,7 +321,7 @@ public class ClusterCommonServiceTest {
         when(stack.getName()).thenReturn("stack-name");
         when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
 
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->  underTest.updateSalt(nameOrCrn, ACCOUNT_ID));
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->  underTest.updateSalt(nameOrCrn, ACCOUNT_ID, false));
 
         verifyNoInteractions(clusterOperationService);
         assertEquals(String.format("SaltStack update cannot be initiated as stack 'stack-name' is currently in '%s' state.", status), ex.getMessage());

@@ -593,7 +593,11 @@ public class ClusterOperationService {
     }
 
     public FlowIdentifier updateSalt(Long stackId) {
-        return flowManager.triggerSaltUpdate(stackId);
+        return flowManager.triggerSaltUpdate(stackId, false);
+    }
+
+    public FlowIdentifier updateSalt(Long stackId, boolean skipHighstate) {
+        return flowManager.triggerSaltUpdate(stackId, skipHighstate);
     }
 
     public FlowIdentifier updatePillarConfiguration(Long stackId) {

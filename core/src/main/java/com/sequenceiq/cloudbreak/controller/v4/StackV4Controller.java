@@ -480,8 +480,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public FlowIdentifier updateSaltByName(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.updateSalt(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
+    public FlowIdentifier updateSaltByName(Long workspaceId, String name, @AccountId String accountId, boolean skipHighstate) {
+        return stackOperations.updateSalt(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), skipHighstate);
     }
 
     /**

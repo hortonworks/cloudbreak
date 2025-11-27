@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -26,6 +27,12 @@ public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpda
 
     public UpdateSaltFilesAction(Class<SaltUpdateTriggerEvent> payloadClass) {
         super(payloadClass);
+    }
+
+    @Override
+    protected void prepareExecution(SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
+        Boolean skipHighstate = Optional.ofNullable(payload.isSkipHighstate()).orElse(Boolean.FALSE);
+        variables.put(SaltUpdateActions.SKIP_HIGHSTATE, skipHighstate);
     }
 
     @Override

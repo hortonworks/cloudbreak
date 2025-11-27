@@ -407,6 +407,24 @@ class StackOperationsTest {
         assertThat(result).containsExactlyInAnyOrder(stackViewV4Response2, stackViewV4Response4);
     }
 
+    @Test
+    void testUpdateSalt() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+
+        underTest.updateSalt(nameOrCrn, ACCOUNT_ID);
+
+        verify(clusterCommonService).updateSalt(nameOrCrn, ACCOUNT_ID, false);
+    }
+
+    @Test
+    void testUpdateSaltWhenSkipHighstate() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+
+        underTest.updateSalt(nameOrCrn, ACCOUNT_ID, true);
+
+        verify(clusterCommonService).updateSalt(nameOrCrn, ACCOUNT_ID, true);
+    }
+
     private static StackViewV4Response getStackViewV4Response(String resourceCrn) {
         StackViewV4Response stackViewV4Response = mock(StackViewV4Response.class);
         when(stackViewV4Response.getCrn()).thenReturn(resourceCrn);

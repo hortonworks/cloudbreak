@@ -1,35 +1,40 @@
-package com.sequenceiq.datalake.flow.salt.update.event;
+package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
+
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
-import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class SaltUpdateTriggerEvent extends SdxEvent {
+public class SaltUpdateTriggerEvent extends StackEvent {
 
     private final boolean skipHighstate;
 
-    public SaltUpdateTriggerEvent(Long sdxId, String userId) {
-        super(sdxId, userId);
-        skipHighstate = false;
+    public SaltUpdateTriggerEvent(Long stackId) {
+        super(SALT_UPDATE_EVENT.event(), stackId);
+        this.skipHighstate = false;
     }
 
-    public SaltUpdateTriggerEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted) {
-        super(selector, sdxId, userId, accepted);
-        this.skipHighstate = false;
+    public SaltUpdateTriggerEvent(Long stackId, boolean skipHighstate) {
+        super(SALT_UPDATE_EVENT.event(), stackId);
+        this.skipHighstate = skipHighstate;
     }
 
     @JsonCreator
     public SaltUpdateTriggerEvent(
-            @JsonProperty("selector") String selector,
-            @JsonProperty("resourceId") Long sdxId,
-            @JsonProperty("userId") String userId,
+            @JsonProperty("resourceId") Long stackId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("skipHighstate") boolean skipHighstate) {
-        super(selector, sdxId, userId, accepted);
+        super(SALT_UPDATE_EVENT.event(), stackId, accepted);
         this.skipHighstate = skipHighstate;
+    }
+
+    @Override
+    public String getSelector() {
+        return SALT_UPDATE_EVENT.event();
     }
 
     public boolean isSkipHighstate() {

@@ -161,23 +161,25 @@ public class CloudbreakStackServiceTest {
                 .hasMessage("Rds upgrade validation failed: " + ERROR_MSG);
     }
 
-    @Test
-    void testUpdateSaltByName() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpdateSaltByName(boolean skipHighstate) {
         SdxCluster sdxCluster = setupSdxCluster();
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster, skipHighstate));
 
-        verify(stackV4Endpoint).updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
+        verify(stackV4Endpoint).updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId(), skipHighstate);
     }
 
-    @Test
-    void testUpdateSaltByNameThrowsError() {
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    void testUpdateSaltByNameThrowsError(boolean skipHighstate) {
         SdxCluster sdxCluster = setupSdxCluster();
         when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
         doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint)
-                .updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
+                .updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId(), skipHighstate);
 
-        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster)))
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster, skipHighstate)))
                 .isInstanceOf(CloudbreakServiceException.class)
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)

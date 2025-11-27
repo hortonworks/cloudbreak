@@ -81,10 +81,10 @@ public class CloudbreakStackService {
         }
     }
 
-    public void updateSaltByName(SdxCluster sdxCluster) {
+    public void updateSaltByName(SdxCluster sdxCluster, boolean skipHighstate) {
         try {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
+                    () -> stackV4Endpoint.updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId(), skipHighstate));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String message = String.format("Could not launch Salt update in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));

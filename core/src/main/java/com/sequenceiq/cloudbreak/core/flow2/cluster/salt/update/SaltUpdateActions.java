@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -23,22 +25,33 @@ import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationR
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SaltUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class SaltUpdateActions {
+
+    private static final String SKIP_HIGHSTATE = "skipHighstate";
 
     @Inject
     private SaltUpdateService saltUpdateService;
 
     @Bean(name = "UPDATE_SALT_STATE_FILES_STATE")
     public Action<?, ?> updateSaltFilesAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(SaltUpdateTriggerEvent.class) {
+
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void prepareExecution(SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
+                Boolean skipHighstate = Optional.ofNullable(payload.isSkipHighstate()).orElse(Boolean.FALSE);
+                variables.put(SKIP_HIGHSTATE, skipHighstate);
+            }
+
+            @Override
+            protected void doExecute(StackCreationContext context, SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
                 saltUpdateService.bootstrappingMachines(context.getStackId());
                 sendEvent(context);
             }
@@ -46,6 +59,11 @@ public class SaltUpdateActions {
             @Override
             protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapMachinesRequest(context.getStackId(), true);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<SaltUpdateTriggerEvent>> payloadConverters) {
+                payloadConverters.add(new StackEventToSaltUpdateTriggerEventConverter());
             }
         };
     }
@@ -70,12 +88,17 @@ public class SaltUpdateActions {
         return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) {
-                sendEvent(context);
+                if (skipHighstate(variables)) {
+                    sendEvent(context, new StartClusterManagerServicesSuccess(context.getStackId()));
+                } else {
+                    sendEvent(context, new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE));
+                }
             }
 
-            @Override
-            protected Selectable createRequest(ClusterViewContext context) {
-                return new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE);
+            private static Boolean skipHighstate(Map<Object, Object> variables) {
+                return Optional.ofNullable(variables.get(SKIP_HIGHSTATE))
+                        .map(Boolean.class::cast)
+                        .orElse(Boolean.FALSE);
             }
         };
     }

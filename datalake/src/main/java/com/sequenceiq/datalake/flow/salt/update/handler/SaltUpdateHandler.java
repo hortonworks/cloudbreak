@@ -46,9 +46,10 @@ public class SaltUpdateHandler extends ExceptionCatcherEventHandler<SaltUpdateRe
         SaltUpdateRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
+        boolean skipHighstate = request.isSkipHighstate();
         try {
             SdxCluster sdxCluster = sdxService.getById(request.getResourceId());
-            cloudbreakStackService.updateSaltByName(sdxCluster);
+            cloudbreakStackService.updateSaltByName(sdxCluster, skipHighstate);
             LOGGER.debug("Salt update was successfully initiated in core.");
             return new SaltUpdateSuccessResponse(sdxId, userId);
         } catch (Exception e) {

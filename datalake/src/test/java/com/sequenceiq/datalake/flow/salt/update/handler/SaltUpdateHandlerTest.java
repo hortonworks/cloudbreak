@@ -70,14 +70,14 @@ public class SaltUpdateHandlerTest {
         assertEquals("SALTUPDATESUCCESSRESPONSE", nextEvent.selector());
         assertEquals(SDX_ID, nextEvent.getResourceId());
         assertEquals(USER_ID, ((SaltUpdateSuccessResponse) nextEvent).getUserId());
-        verify(cloudbreakStackService, times(1)).updateSaltByName(sdxCluster);
+        verify(cloudbreakStackService, times(1)).updateSaltByName(sdxCluster, false);
     }
 
     @Test
     void testAcceptWhenCloudbreakStackServiceThrows() {
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
-        doThrow(new RuntimeException("error")).when(cloudbreakStackService).updateSaltByName(eq(sdxCluster));
+        doThrow(new RuntimeException("error")).when(cloudbreakStackService).updateSaltByName(eq(sdxCluster), eq(false));
 
         Selectable nextEvent = underTest.doAccept(getEvent());
 
@@ -85,7 +85,7 @@ public class SaltUpdateHandlerTest {
         assertEquals(SDX_ID, nextEvent.getResourceId());
         assertEquals(USER_ID, ((SaltUpdateFailureResponse) nextEvent).getUserId());
         assertEquals("error", ((SaltUpdateFailureResponse) nextEvent).getException().getMessage());
-        verify(cloudbreakStackService, times(1)).updateSaltByName(sdxCluster);
+        verify(cloudbreakStackService, times(1)).updateSaltByName(sdxCluster, false);
     }
 
     private HandlerEvent<SaltUpdateRequest> getEvent() {

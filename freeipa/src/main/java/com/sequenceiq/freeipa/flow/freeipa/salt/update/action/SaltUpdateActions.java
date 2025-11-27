@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +14,15 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMa
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 
 @Configuration
 public class SaltUpdateActions {
+
+    public static final String SKIP_HIGHSTATE = "skipHighstate";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltUpdateActions.class);
 
@@ -34,12 +38,17 @@ public class SaltUpdateActions {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 LOGGER.info("Reupload pillar files");
-                sendEvent(context);
+                if (skipHighstate(variables)) {
+                    sendEvent(context, new InstallFreeIpaServicesSuccess(context.getStack().getId()));
+                } else {
+                    sendEvent(context, new OrchestratorConfigRequest(context.getStack().getId()));
+                }
             }
 
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new OrchestratorConfigRequest(context.getStack().getId());
+            private static Boolean skipHighstate(Map<Object, Object> variables) {
+                return Optional.ofNullable(variables.get(SKIP_HIGHSTATE))
+                        .map(Boolean.class::cast)
+                        .orElse(Boolean.FALSE);
             }
         };
     }

@@ -124,6 +124,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTr
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SaltUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
@@ -463,6 +464,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerSaltUpdate(Long stackId) {
         String selector = SALT_UPDATE_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerSaltUpdate(Long stackId, boolean skipHighstate) {
+        SaltUpdateTriggerEvent event = new SaltUpdateTriggerEvent(stackId, skipHighstate);
+        return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 
     public FlowIdentifier triggerPillarConfigurationUpdate(Long stackId) {
