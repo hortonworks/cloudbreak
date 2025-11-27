@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 
@@ -380,6 +381,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     public void syncOutdatedSecrets(@ResourceCrn String databaseServerCrn) {
-        redbeamsRotationService.syncOutdatedSecrets(databaseServerCrn);
+        throw new NotImplementedException("Synchronization for vault database fields is not needed anymore!");
     }
 }

@@ -54,14 +54,6 @@ public class SecretService {
         return response != null ? response.get(field) : null;
     }
 
-    public Optional<Integer> getVersion(String vaultSecretJson) {
-        if (!isSecret(vaultSecretJson)) {
-            return Optional.empty();
-        }
-        VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        return vaultRetryService.tryReadingVault(() -> persistentEngine.getVersion(vaultSecret.getPath()));
-    }
-
     public String getByResponse(SecretResponse secretResponse) {
         if (secretResponse == null) {
             return null;

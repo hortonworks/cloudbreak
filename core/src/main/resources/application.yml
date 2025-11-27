@@ -834,7 +834,7 @@ existing-stack-patcher:
   patch-configs:
     update-outdated-vault-secrets:
       intervalMinutes: 5
-      enabled: true
+      enabled: false
     unbound-restart:
       enabled: false
     logging-agent-auto-restart:

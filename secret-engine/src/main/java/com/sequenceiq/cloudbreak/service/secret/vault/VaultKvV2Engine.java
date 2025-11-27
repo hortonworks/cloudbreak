@@ -107,21 +107,6 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    public Optional<Integer> getVersion(String fullSecretPath) {
-        validatePathPattern(fullSecretPath);
-        long start = System.currentTimeMillis();
-        Map<String, String> ret = null;
-        Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(fullSecretPath);
-        if (response != null) {
-            return Optional.of(response.getVersion().getVersion());
-        }
-        long duration = System.currentTimeMillis() - start;
-        metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));
-        LOGGER.trace("Secret read took {} ms", duration);
-        return Optional.empty();
-    }
-
-    @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "{#fullSecretPath, #currentVersion}")
     public String put(String fullSecretPath, Integer currentVersion, Map<String, String> value) {
         validatePathOwnedByApp(fullSecretPath, "store");

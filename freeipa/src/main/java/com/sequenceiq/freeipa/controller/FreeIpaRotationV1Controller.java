@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -22,7 +23,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRot
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
-import com.sequenceiq.freeipa.service.rotation.FreeIpaSyncSecretVersionService;
 
 @Controller
 @AccountEntityType(Stack.class)
@@ -35,9 +35,6 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
 
     @Inject
     private SecretTypeListService<FreeipaSecretTypeResponse> listService;
-
-    @Inject
-    private FreeIpaSyncSecretVersionService freeIpaSyncSecretVersionService;
 
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
@@ -55,6 +52,6 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @Override
     @InternalOnly
     public void syncOutdatedSecrets(@ResourceCrn String environmentCrn) {
-        freeIpaSyncSecretVersionService.syncOutdatedSecrets(environmentCrn);
+        throw new NotImplementedException("Synchronization for vault database fields is not needed anymore!");
     }
 }
