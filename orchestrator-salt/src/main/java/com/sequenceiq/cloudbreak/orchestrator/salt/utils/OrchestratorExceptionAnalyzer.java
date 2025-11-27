@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.utils;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +19,14 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 
 public class OrchestratorExceptionAnalyzer {
+    public static final String COMMENT = "comment";
+
+    public static final String STDOUT = "stdout";
+
+    public static final String STDERR = "stderr";
+
+    public static final String NAME = "name";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorExceptionAnalyzer.class);
 
     /**
@@ -43,6 +56,30 @@ public class OrchestratorExceptionAnalyzer {
         }
     }
 
+    public static Set<HostSaltCommands> getHostSaltCommands(CloudbreakOrchestratorException orchestratorException) {
+        if (ExceptionUtils.getRootCause(orchestratorException) instanceof CloudbreakOrchestratorException rootCause) {
+            LOGGER.error("error: {}", rootCause.getNodesWithErrors());
+            return rootCause.getNodesWithErrors().asMap().entrySet().stream()
+                    .map(entry -> getHostSaltCommands(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toSet());
+        } else {
+            return Set.of();
+        }
+    }
+
+    private static HostSaltCommands getHostSaltCommands(String host, Collection<String> commands) {
+        return new HostSaltCommands(host, commands.stream().map(OrchestratorExceptionAnalyzer::getSaltCommand).toList());
+    }
+
+    private static SaltCommand getSaltCommand(String parameters) {
+        Map<String, String> parameterMap = parseLog(parameters);
+        if (!parameterMap.isEmpty() && parameterMap.containsKey(COMMENT)) {
+            return new SaltCommand(parameterMap.get(COMMENT), parameterMap);
+        } else {
+            return new SaltCommand(parameters, parameterMap);
+        }
+    }
+
     private static Map<String, String> convert(Multimap<String, String> multimap) {
         return multimap.entries().stream()
                 .flatMap(entry -> parseLog(entry.getValue()).entrySet().stream()
@@ -59,8 +96,18 @@ public class OrchestratorExceptionAnalyzer {
         Map<String, String> parsed = new LinkedHashMap<>();
         Matcher matcher = NODE_FAILURE_PATTERN.matcher(log);
         while (matcher.find()) {
-            parsed.put(matcher.group(1).trim(), matcher.group(2).trim());
+            String key = matcher.group(1).toLowerCase(Locale.ROOT).trim();
+            String value = matcher.group(2).trim();
+            if (StringUtils.isNoneBlank(key, value)) {
+                parsed.put(key, value);
+            }
         }
         return parsed;
+    }
+
+    public record HostSaltCommands(String host, List<SaltCommand> saltCommands) {
+    }
+
+    public record SaltCommand(String command, Map<String, String> params) {
     }
 }

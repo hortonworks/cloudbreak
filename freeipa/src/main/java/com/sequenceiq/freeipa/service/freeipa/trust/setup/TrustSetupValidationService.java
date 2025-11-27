@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.COMMENT;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.HostSaltCommands;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.SaltCommand;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.getHostSaltCommands;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.DNS_IP;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.KDC_FQDN;
@@ -11,6 +15,7 @@ import static com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker.I
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -27,7 +32,6 @@ import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDet
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
@@ -87,19 +91,20 @@ public class TrustSetupValidationService {
         LOGGER.info("Validate for IPA Server image trust packages");
         if (!packageAvailabilityChecker.isPackageAvailable(stackId)) {
             LOGGER.warn("Missing package [{}] required for AD trust setup", IPA_SERVER_TRUST_AD_PACKAGE);
-            return new TaskResult(TaskResultType.ERROR, IPA_SERVER_TRUST_AD_PACKAGE
-                    + " package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.", Map.of());
+            return new TaskResult(TaskResultType.ERROR, "Package validation failed",
+                    Map.of(COMMENT, "The following packages are missing from the FreeIPA nodes: - " + IPA_SERVER_TRUST_AD_PACKAGE + "\n" +
+                            "Please use the latest FreeIPA image available"));
         } else {
             return new TaskResult(TaskResultType.INFO, "Valid image trust packages", Map.of());
         }
     }
 
     private TaskResult validateDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "Dns validation");
+        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "DNS validation");
     }
 
     private TaskResult validateReverseDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse dns validation");
+        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse DNS validation");
     }
 
     private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
@@ -113,10 +118,12 @@ public class TrustSetupValidationService {
                     .map(PrivateDatalakeDetails::getKerberosInfo)
                     .map(KerberosInfo::getKerberized)
                     .orElse(false);
-            return kerberized ? new TaskResult(TaskResultType.INFO, "The on premises cluster is kerberized", Map.of()) :
-                    new TaskResult(TaskResultType.ERROR, "The on premises cluster is not kerberized", Map.of());
+            return kerberized ? new TaskResult(TaskResultType.INFO, "The on-premises cluster is kerberized", Map.of()) :
+                    new TaskResult(TaskResultType.ERROR, "Security validation failed",
+                            Map.of(COMMENT, "The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported."));
         } else {
-            return new TaskResult(TaskResultType.WARNING, "Remote environment crn is missing", Map.of());
+            return new TaskResult(TaskResultType.ERROR, "Security validation failed",
+                    Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
         }
     }
 
@@ -132,8 +139,12 @@ public class TrustSetupValidationService {
             return new TaskResult(TaskResultType.INFO, "Successful " + messagePrefix, Map.of());
         } catch (CloudbreakOrchestratorException orchestratorException) {
             LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), orchestratorException);
-            Map<String, String> params = OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException);
-            return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed: " + orchestratorException.getMessage(), params);
+            Set<HostSaltCommands> hostSaltCommands = getHostSaltCommands(orchestratorException);
+            return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed", hostSaltCommands.stream()
+                    .findFirst()
+                    .flatMap(hsc -> hsc.saltCommands().stream().findFirst())
+                    .map(SaltCommand::params)
+                    .orElse(Map.of(COMMENT, orchestratorException.getMessage())));
         } catch (Exception ex) {
             LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), ex);
             return new TaskResult(TaskResultType.ERROR, ex.getMessage(), Map.of());

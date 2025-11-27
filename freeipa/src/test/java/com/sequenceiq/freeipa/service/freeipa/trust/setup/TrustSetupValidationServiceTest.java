@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.COMMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,8 +11,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,8 +103,10 @@ class TrustSetupValidationServiceTest {
         setup();
         TaskResults validationResult = underTest.validateTrustSetup(4L);
         assertEquals(1L, validationResult.getErrors().size());
-        assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
+        assertEquals("Package validation failed",
                 validationResult.getErrors().get(0).message());
+        assertEquals("The following packages are missing from the FreeIPA nodes: - ipa-server-trust-ad\nPlease use the latest FreeIPA image available",
+                validationResult.getErrors().get(0).additionalParams().get(COMMENT));
     }
 
     @Test
@@ -123,12 +128,13 @@ class TrustSetupValidationServiceTest {
         CloudbreakOrchestratorFailedException orchestratorException = new CloudbreakOrchestratorFailedException("Dns validation error");
         doThrow(orchestratorException).doNothing().when(hostOrchestrator).runOrchestratorState(any());
         Map<String, String> params = Map.of("key1", "value1", "key2", "value2");
-        when(OrchestratorExceptionAnalyzer.getNodeErrorParameters(orchestratorException)).thenReturn(params);
+        when(OrchestratorExceptionAnalyzer.getHostSaltCommands(orchestratorException)).thenReturn(Set.of(
+                new OrchestratorExceptionAnalyzer.HostSaltCommands("host", List.of(new OrchestratorExceptionAnalyzer.SaltCommand("command", params)))));
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1, result.getErrors().size());
-        assertEquals(result.getErrors().get(0).message(), "Dns validation failed: Dns validation error");
+        assertEquals(result.getErrors().get(0).message(), "DNS validation failed");
         assertEquals(params, result.getErrors().get(0).additionalParams());
     }
 
@@ -141,11 +147,10 @@ class TrustSetupValidationServiceTest {
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(4L, result.getErrors().size());
-        assertEquals("ipa-server-trust-ad package is required for AD trust setup. Please upgrade to the latest image of FreeIPA.",
-                result.getErrors().get(0).message());
+        assertEquals("Package validation failed", result.getErrors().get(0).message());
         assertEquals("DNS validation error", result.getErrors().get(1).message());
         assertEquals("Reverse DNS validation error", result.getErrors().get(2).message());
-        assertEquals("The on premises cluster is not kerberized", result.getErrors().get(3).message());
+        assertEquals("Security validation failed", result.getErrors().get(3).message());
     }
 
     @Test
@@ -156,7 +161,9 @@ class TrustSetupValidationServiceTest {
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("The on premises cluster is not kerberized", result.getErrors().get(0).message());
+        assertEquals("Security validation failed", result.getErrors().get(0).message());
+        assertEquals("The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported.",
+                result.getErrors().get(0).additionalParams().get(COMMENT));
     }
 
     @Test
@@ -164,14 +171,16 @@ class TrustSetupValidationServiceTest {
         setup();
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setKdcFqdn("fqdn");
-        crossRealmTrust.setKdcIp("ip");
+        crossRealmTrust.setKdcIp("kdcip");
+        crossRealmTrust.setDnsIp("dnsip");
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
-        assertEquals(1L, result.getWarnings().size());
-        assertEquals("Remote environment crn is missing", result.getWarnings().get(0).message());
+        assertEquals(1L, result.getErrors().size());
+        assertEquals("Security validation failed", result.getErrors().get(0).message());
+        assertEquals("Remote environment CRN is missing.\nPlease contact Cloudera support.", result.getErrors().get(0).additionalParams().get(COMMENT));
     }
 
     private void setup() {
