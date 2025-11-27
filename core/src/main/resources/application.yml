@@ -690,11 +690,6 @@ cb:
     heartbeat.interval: 3
     missed.heartbeat.interval: 30
     kerberos.encryption.type: "aes256-cts"
-    zookeeperToKraftMigration:
-      supportedTemplates: >
-        Streams Messaging Light Duty,
-        Streams Messaging High Availability,
-        Streams Messaging Heavy Duty
     client:
       cluster.proxy.timeout: 120000
       connect.timeout.seconds: 125
