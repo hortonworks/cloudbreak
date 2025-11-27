@@ -45,6 +45,26 @@ class TelemetryFeatureServiceTest {
         assertTrue(result);
     }
 
+    @Test
+    void testIsMinifiLoggingSupportedWhenPackagesIsNull() {
+        assertFalse(undertest.isMinifiLoggingSupported(null));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenPackagesDoesNotContainMinifi() {
+        assertFalse(undertest.isMinifiLoggingSupported(Map.of()));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenPackagesContainsOldMinifiVersion() {
+        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.22.9")));
+    }
+
+    @Test
+    void testIsMinifiLoggingSupportedWhenPackagesContainsCorrectMinifi() {
+        assertTrue(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.25.09")));
+    }
+
     private Map<String, String> generatePackageVersions() {
         return Map.of("cdp-logging-agent", "0.3.3",
                 "cdp-request-signer", "0.2.3",

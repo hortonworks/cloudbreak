@@ -78,6 +78,9 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
             if (CollectionUtils.emptyIfNull(logShipperContext.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
                 builder.withIncludeSaltLogsInCloudStorageLogs();
             }
+            if (logShipperContext.isPreferMinifiLogging()) {
+                builder.preferMinifiLogging();
+            }
         }
         return builder
                 .withRegion(logShipperContext.getCloudRegion())

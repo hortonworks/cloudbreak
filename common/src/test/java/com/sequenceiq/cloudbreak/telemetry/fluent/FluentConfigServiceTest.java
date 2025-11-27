@@ -24,7 +24,7 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
-public class FluentConfigServiceTest {
+class FluentConfigServiceTest {
 
     private static final String CLUSTER_TYPE_DEFAULT = "datahub";
 
@@ -43,7 +43,7 @@ public class FluentConfigServiceTest {
     private FluentConfigService underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(null, null, null);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
@@ -51,7 +51,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testIsEnabled() {
+    void testIsEnabled() {
         // GIVEN
         // WHEN
         boolean result = underTest.isEnabled(telemetryContext());
@@ -60,7 +60,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testIsEnabledWithoutLogAndMeteringContext() {
+    void testIsEnabledWithoutLogAndMeteringContext() {
         // GIVEN
         TelemetryContext context = telemetryContext();
         context.setLogShipperContext(null);
@@ -71,7 +71,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testIsEnabledWithoutContext() {
+    void testIsEnabledWithoutContext() {
         // GIVEN
         // WHEN
         boolean result = underTest.isEnabled(null);
@@ -80,7 +80,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigs() {
+    void testCreateConfigs() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("mybucket/cluster-logs/datahub/cl1");
@@ -97,7 +97,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigsWithS3Scheme() {
+    void testCreateConfigsWithS3Scheme() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("s3://mybucket/cluster-logs/datahub/cl1");
@@ -113,7 +113,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigsWithGcs() {
+    void testCreateConfigsWithGcs() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("gs://mybucket/cluster-logs/datahub/cl1");
@@ -132,7 +132,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigsWithAbfs() {
+    void testCreateConfigsWithAbfs() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("abfs://mycontainer@myaccount.dfs.core.windows.net");
@@ -152,7 +152,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigsWithAbfsFullPath() {
+    void testCreateConfigsWithAbfsFullPath() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("abfs://mycontainer@myaccount.dfs.core.windows.net/my/custom/path");
@@ -172,7 +172,7 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateConfigsWithAbfsContainerPath() {
+    void testCreateConfigsWithAbfsContainerPath() {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation("abfs://mycontainer/my/custom/path@myaccount.dfs.core.windows.net");
@@ -191,12 +191,32 @@ public class FluentConfigServiceTest {
         assertEquals("mycontainer", result.get("azureContainer"));
     }
 
+    @Test
+    void testCreateConfigsWithoutMinifi() {
+        Logging logging = new Logging();
+
+        Map<String, Object> result = underTest.createConfigs(telemetryContext(logging)).toMap();
+
+        assertEquals(true, result.get("enabled"));
+        assertEquals(false, result.get("preferMinifiLogging"));
+    }
+
+    @Test
+    void testCreateConfigsWithMinifi() {
+        Logging logging = new Logging();
+
+        LogShipperContext logShipperContext = LogShipperContext.builder().enabled().cloudStorageLogging().preferMinifiLogging().build();
+        Map<String, Object> result = underTest.createConfigs(telemetryContext(logging, logShipperContext)).toMap();
+
+        assertEquals(true, result.get("enabled"));
+        assertEquals(true, result.get("preferMinifiLogging"));
+    }
+
     private TelemetryContext telemetryContext() {
         return telemetryContext(null);
     }
 
     private TelemetryContext telemetryContext(Logging logging) {
-        TelemetryContext telemetryContext = new TelemetryContext();
         LogShipperContext logShipperContext = LogShipperContext
                 .builder()
                 .enabled()
@@ -204,6 +224,11 @@ public class FluentConfigServiceTest {
                 .withCloudRegion(REGION_SAMPLE)
                 .withVmLogs(new ArrayList<>())
                 .build();
+        return telemetryContext(logging, logShipperContext);
+    }
+
+    private TelemetryContext telemetryContext(Logging logging, LogShipperContext logShipperContext) {
+        TelemetryContext telemetryContext = new TelemetryContext();
         TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withCrn(DATAHUB_CRN)
                 .build();

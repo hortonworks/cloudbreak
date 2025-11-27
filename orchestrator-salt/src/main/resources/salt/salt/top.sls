@@ -10,7 +10,11 @@ base:
     - tags
     - recipes.runner
     - telemetry
+    {% if salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
+    - minifi
+    {% else %}
     - fluent
+    {% endif %}
     - monitoring
     - logrotate
     - ntp

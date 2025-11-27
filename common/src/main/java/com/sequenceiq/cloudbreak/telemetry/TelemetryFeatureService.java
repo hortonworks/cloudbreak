@@ -21,6 +21,8 @@ public class TelemetryFeatureService {
             Pair.of("cdp-request-signer", () -> "0.2.3"),
             Pair.of("cdp-telemetry", () -> "0.4.30"));
 
+    private static final Pair<String, Versioned> MINIFI_MIN_VERSION_REQUIREMENT = Pair.of("cdp-minifi-agent", () -> "1.25.09");
+
     public boolean isECDSAAccessKeyTypeSupported(Map<String, String> packages) {
         if (packages == null) {
             return false;
@@ -40,6 +42,26 @@ public class TelemetryFeatureService {
             }
         }
         LOGGER.info("ECDSA based access key type is enabled by package versions. {}", packages);
+        return true;
+    }
+
+    public boolean isMinifiLoggingSupported(Map<String, String> packages) {
+        if (packages == null) {
+            return false;
+        }
+        String packageName = MINIFI_MIN_VERSION_REQUIREMENT.getKey();
+        if (!packages.containsKey(packageName)) {
+            LOGGER.warn("Image doesn't contain {} package. Minifi logging is not supported.", packageName);
+            return false;
+        } else {
+            String packageVersion = packages.get(packageName);
+            Versioned minimumVersion = MINIFI_MIN_VERSION_REQUIREMENT.getValue();
+            if (new VersionComparator().compare(() -> packageVersion, minimumVersion) < 0) {
+                LOGGER.info("{} package's version {} is smaller than {}. Minifi logging is not supported.",
+                        packageName, packageVersion, minimumVersion.getVersion());
+                return false;
+            }
+        }
         return true;
     }
 }

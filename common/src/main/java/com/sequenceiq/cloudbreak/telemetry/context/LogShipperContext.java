@@ -19,12 +19,19 @@ public class LogShipperContext {
 
     private final Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs;
 
+    private final boolean preferMinifiLogging;
+
     private LogShipperContext(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLogging = builder.cloudStorageLogging;
         this.cloudRegion = builder.cloudRegion;
         this.vmLogs = builder.vmLogs;
         this.enabledSensitiveStorageLogs = builder.enabledSensitiveStorageLogs;
+        this.preferMinifiLogging = builder.preferMinifiLogging;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public boolean isEnabled() {
@@ -47,8 +54,8 @@ public class LogShipperContext {
         return enabledSensitiveStorageLogs;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public boolean isPreferMinifiLogging() {
+        return preferMinifiLogging;
     }
 
     @Override
@@ -72,6 +79,8 @@ public class LogShipperContext {
         private List<VmLog> vmLogs;
 
         private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs = new HashSet<>();
+
+        private boolean preferMinifiLogging;
 
         private Builder() {
         }
@@ -102,6 +111,11 @@ public class LogShipperContext {
 
         public Builder includeSaltLogsInCloudStorageLogs() {
             enabledSensitiveStorageLogs.add(SensitiveLoggingComponent.SALT);
+            return this;
+        }
+
+        public Builder preferMinifiLogging() {
+            this.preferMinifiLogging = true;
             return this;
         }
 

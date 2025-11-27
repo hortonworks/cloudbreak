@@ -209,6 +209,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_NOTIFICATION_SENDING_ENABLED", (EntitlementCheckFunction) EntitlementService::isCdpCbNotificationSendingEnabled, false},
                 {"CDP_CB_NOTIFICATION_SENDING_ENABLED", (EntitlementCheckFunction) EntitlementService::isCdpCbNotificationSendingEnabled, true},
+
+                {"CDP_CB_PREFER_MINIFI_LOGGING", (EntitlementCheckFunction) EntitlementService::isPreferMinifiLogging, false},
+                {"CDP_CB_PREFER_MINIFI_LOGGING", (EntitlementCheckFunction) EntitlementService::isPreferMinifiLogging, true},
         };
     }
 

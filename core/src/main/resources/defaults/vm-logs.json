@@ -84,19 +84,19 @@
     "label": "rds_upgrade_canary_checkconnection"
   },
   {
-    "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.log*",
+    "path": "/var/log/cloudera-scm-server/cloudera-scm-server.log*",
     "label": "cloudera_server_log"
   },
   {
-    "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.out",
+    "path": "/var/log/cloudera-scm-server/cloudera-scm-server.out",
     "label": "cloudera_server_out"
   },
   {
-    "path": "${agentLogFolderPrefix}/cloudera-scm-agent/cloudera-scm-agent.log",
+    "path": "/var/log/cloudera-scm-agent/cloudera-scm-agent.log",
     "label": "cloudera_agent_log"
   },
   {
-    "path": "${agentLogFolderPrefix}/cloudera-scm-agent/cloudera-scm-agent*.out",
+    "path": "/var/log/cloudera-scm-agent/cloudera-scm-agent*.out",
     "label": "cloudera_agent_out"
   },
   {
@@ -132,127 +132,127 @@
     "label": "MGMT_TELEMETRYPUBLISHER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-yarn*-NODEMANAGER*.log.out",
+    "path": "/var/log/*/*cmf*-yarn*-NODEMANAGER*.log.out",
     "label": "YARN_NODEMANAGER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-yarn*-JOBHISTORY*.log.out",
+    "path": "/var/log/*/*cmf*-yarn*-JOBHISTORY*.log.out",
     "label": "YARN_JOBHISTORY"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-yarn*-RESOURCEMANAGER*.log.out",
+    "path": "/var/log/*/*cmf*-yarn*-RESOURCEMANAGER*.log.out",
     "label": "YARN_RESOURCEMANAGER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hive*-HIVEMETASTORE*.log.out",
+    "path": "/var/log/*/*cmf*-hive*-HIVEMETASTORE*.log.out",
     "label": "HIVE_HIVEMETASTORE"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hive*-HIVESERVER2*.log.out",
+    "path": "/var/log/*/*cmf*-hive*-HIVESERVER2*.log.out",
     "label": "HIVE_HIVESERVER2"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hdfs*-DATANODE*.log.out",
+    "path": "/var/log/*/*cmf*-hdfs*-DATANODE*.log.out",
     "label": "HDFS_DATANODE"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hdfs*-NAMENODE*.log.out",
+    "path": "/var/log/*/*cmf*-hdfs*-NAMENODE*.log.out",
     "label": "HDFS_NAMENODE"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hdfs*-SECONDARYNAMENODE*.log.out",
+    "path": "/var/log/*/*cmf*-hdfs*-SECONDARYNAMENODE*.log.out",
     "label": "HDFS_SECONDARYNAMENODE"
   },
   {
-    "path": "${serviceLogFolderPrefix}/knox/gateway/gateway.log*",
+    "path": "/var/log/knox/gateway/gateway.log*",
     "label": "KNOX_GATEWAY"
   },
   {
-    "path": "${serviceLogFolderPrefix}/knox/gateway/gateway-audit.log*",
+    "path": "/var/log/knox/gateway/gateway-audit.log*",
     "label": "KNOX_GATEWAY_AUDIT"
   },
   {
-    "path": "${serviceLogFolderPrefix}/knox/idbroker/gateway.log*",
+    "path": "/var/log/knox/idbroker/gateway.log*",
     "label": "KNOX_IDBROKER_GATEWAY"
   },
   {
-    "path": "${serviceLogFolderPrefix}/knox/idbroker/gateway-audit.log*",
+    "path": "/var/log/knox/idbroker/gateway-audit.log*",
     "label": "KNOX_IDBROKER_GATEWAY_AUDIT"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-solr*-SOLR_SERVER*.log.out",
+    "path": "/var/log/*/*cmf*-solr*-SOLR_SERVER*.log.out",
     "label": "SOLR_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/atlas/application.log",
+    "path": "/var/log/atlas/application.log",
     "label": "ATLAS_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/admin/ranger-admin-*-ranger.log",
+    "path": "/var/log/*/admin/ranger-admin-*-ranger.log",
     "label": "RANGER_ADMIN"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/tagsync/tagsync.log",
+    "path": "/var/log/*/tagsync/tagsync.log",
     "label": "RANGER_TAGSYNC"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/usersync/usersync-*-ranger.log",
+    "path": "/var/log/*/usersync/usersync-*-ranger.log",
     "label": "RANGER_USERSYN"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-oozie*-OOZIE_SERVER*.log.out",
+    "path": "/var/log/*/*cmf*-oozie*-OOZIE_SERVER*.log.out",
     "label": "OOZIE_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-zookeeper*-SERVER*.log",
+    "path": "/var/log/*/*cmf*-zookeeper*-SERVER*.log",
     "label": "ZOOKEEPER_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/spark-history-server*.log",
+    "path": "/var/log/*/spark-history-server*.log",
     "label": "SPARK_HISTORY_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/spark2-history-server*.log",
+    "path": "/var/log/*/spark2-history-server*.log",
     "label": "SPARK2_HISTORY_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/zeppelin/zeppelin-zeppelin*.log",
+    "path": "/var/log/zeppelin/zeppelin-zeppelin*.log",
     "label": "ZEPPELIN_SERVER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/impalad.*impala.log.INFO.*",
+    "path": "/var/log/*/impalad.*impala.log.INFO.*",
     "label": "IMPALA_impalad_INFO"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/impalad.*impala.log.WARNING.*",
+    "path": "/var/log/*/impalad.*impala.log.WARNING.*",
     "label": "IMPALA_impalad_WARNING"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/impalad.*impala.log.ERROR.*",
+    "path": "/var/log/*/impalad.*impala.log.ERROR.*",
     "label": "IMPALA_impalad_ERROR"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/catalogd.*impala.log.INFO.*",
+    "path": "/var/log/*/catalogd.*impala.log.INFO.*",
     "label": "IMPALA_catalogd_INFO"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/catalogd.*impala.log.WARNING.*",
+    "path": "/var/log/*/catalogd.*impala.log.WARNING.*",
     "label": "IMPALA_catalogd_WARNING"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/catalogd.*impala.log.ERROR.*",
+    "path": "/var/log/*/catalogd.*impala.log.ERROR.*",
     "label": "IMPALA_catalogd_ERROR"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.INFO.*",
+    "path": "/var/log/*/statestored.*impala.log.INFO.*",
     "label": "IMPALA_statestored_INFO"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.WARNING.*",
+    "path": "/var/log/*/statestored.*impala.log.WARNING.*",
     "label": "IMPALA_statestored_WARNING"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.ERROR.*",
+    "path": "/var/log/*/statestored.*impala.log.ERROR.*",
     "label": "IMPALA_statestored_ERROR"
   },
   {
@@ -260,57 +260,57 @@
     "label": "IMPALA_PROFILES"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager*.log",
+    "path": "/var/log/*/streams-messaging-manager*.log",
     "label": "STREAMS_MESSAGING_MANAGER_server",
     "excludes": [
-      "${serviceLogFolderPrefix}/*/streams-messaging-manager-ui*.log"
+      "/var/log/*/streams-messaging-manager-ui*.log"
     ]
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager-ui*.log",
+    "path": "/var/log/*/streams-messaging-manager-ui*.log",
     "label": "STREAMS_MESSAGING_MANAGER_ui"
   },
   {
-    "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager*.err",
+    "path": "/var/log/*/streams-messaging-manager*.err",
     "label": "STREAMS_MESSAGING_MANAGER_server_ERROR",
     "excludes": [
-      "${serviceLogFolderPrefix}/*/streams-messaging-manager-ui*.err"
+      "/var/log/*/streams-messaging-manager-ui*.err"
     ]
   },
   {
-    "path": "${serviceLogFolderPrefix}/schemaregistry/registry*.log",
+    "path": "/var/log/schemaregistry/registry*.log",
     "label": "SCHEMAREGISTRY_registry"
   },
   {
-    "path": "${serviceLogFolderPrefix}/kafka/kafka-broker*.log",
+    "path": "/var/log/kafka/kafka-broker*.log",
     "label": "KAFKA_BROKER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/kafka/ranger_kafka*.log",
+    "path": "/var/log/kafka/ranger_kafka*.log",
     "label": "KAFKA_RANGER"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hbase/*hbase-HBASETHRIFTSERVER*.log.out",
+    "path": "/var/log/hbase/*hbase-HBASETHRIFTSERVER*.log.out",
     "label": "HBASE_thriftserver"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hbase/*hbase-MASTER*.log.out",
+    "path": "/var/log/hbase/*hbase-MASTER*.log.out",
     "label": "HBASE_master"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hbase/*hbase-REGIONSERVER*.log.out",
+    "path": "/var/log/hbase/*hbase-REGIONSERVER*.log.out",
     "label": "HBASE_regionserver"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hue/runcpserver.log",
+    "path": "/var/log/hue/runcpserver.log",
     "label": "HUE_runcpserver"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hue/error.log",
+    "path": "/var/log/hue/error.log",
     "label": "HUE_error"
   },
   {
-    "path": "${serviceLogFolderPrefix}/hue-httpd/error_log",
+    "path": "/var/log/hue-httpd/error_log",
     "label": "HUE_HTTPD_error"
   },
   {

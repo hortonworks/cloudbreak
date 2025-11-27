@@ -83,6 +83,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs;
 
+    private boolean preferMinifiLogging;
+
     private FluentConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
@@ -109,6 +111,7 @@ public class FluentConfigView implements TelemetryConfigView {
         this.anonymizationRules = builder.anonymizationRules;
         this.overrideAttributes = builder.overrideAttributes;
         this.enabledSensitiveStorageLogs = builder.enabledSensitiveStorageLogs;
+        this.preferMinifiLogging = builder.preferMinifiLogging;
     }
 
     public String getUser() {
@@ -203,6 +206,10 @@ public class FluentConfigView implements TelemetryConfigView {
         return enabledSensitiveStorageLogs;
     }
 
+    public boolean isPreferMinifiLogging() {
+        return preferMinifiLogging;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -227,6 +234,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         map.put("gcsBucket", ObjectUtils.defaultIfNull(this.gcsBucket, EMPTY_CONFIG_DEFAULT));
         map.put("gcsProjectId", ObjectUtils.defaultIfNull(this.gcsProjectId, EMPTY_CONFIG_DEFAULT));
+        map.put("preferMinifiLogging", this.preferMinifiLogging);
         map.put(AZURE_IDBROKER_INSTANCE_MSI, ObjectUtils.defaultIfNull(this.azureIdBrokerInstanceMsi, EMPTY_CONFIG_DEFAULT));
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
@@ -300,6 +308,8 @@ public class FluentConfigView implements TelemetryConfigView {
         private Map<String, Object> overrideAttributes;
 
         private Set<SensitiveLoggingComponent> enabledSensitiveStorageLogs = new HashSet<>();
+
+        private boolean preferMinifiLogging;
 
         public FluentConfigView build() {
             return new FluentConfigView(this);
@@ -430,5 +440,9 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
+        public Builder preferMinifiLogging() {
+            this.preferMinifiLogging = true;
+            return this;
+        }
     }
 }

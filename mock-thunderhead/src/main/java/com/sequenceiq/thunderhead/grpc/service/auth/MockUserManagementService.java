@@ -28,6 +28,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_PREFER_MINIFI_LOGGING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
@@ -608,6 +609,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.cloudprivatelinks.enabled}")
     private boolean cloudprivatelinksEnabled;
 
+    @Value("${auth.mock.prefer.minifi.logging.enabled}")
+    private boolean preferMinifiLoggingEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1126,13 +1130,14 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (verticalScaleHaEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_VERTICAL_SCALE_HA));
         }
-
         if (datalakeUpgradeRecoveryEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_UPGRADE_RECOVERY));
         }
-
         if (cloudprivatelinksEnabled) {
             builder.addEntitlements(createEntitlement(CDP_PRIVATELINKS));
+        }
+        if (preferMinifiLoggingEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_PREFER_MINIFI_LOGGING));
         }
 
         responseObserver.onNext(

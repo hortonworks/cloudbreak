@@ -1,0 +1,220 @@
+{%- from 'minifi/settings.sls' import minifi with context %}
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+# CONFIGURED BY SALT - do not edit
+{% if providerPrefix != "databus" %}
+
+Flow Controller:
+    name: minifi-logging
+Processors:
+{% for logfile in telemetry.logs %}
+{%- if not ("type" in logfile and logfile["type"] == "salt" and not minifi.dbusIncludeSaltLogs) %}
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: TailFile_{{ logfile["label"] | replace('.', '') }}
+    class: org.apache.nifi.processors.standard.TailFile
+    scheduling strategy: TIMER_DRIVEN
+    scheduling period: 10 sec
+    auto-terminated relationships list: []
+    Properties:
+      {%- set full_path = logfile["path"] %}
+
+      {%- if '*' in full_path %}
+
+      {#- Extract basepath based on /* presence #}
+      {%- if '/*' in full_path %}
+        {%- set basepath = full_path.split('/*')[0] %}
+      {%- else %}
+        {%- set basepath = '/'.join(full_path.split('/')[:-1]) %}
+      {%- endif %}
+
+      {#- Extract filename as the remaining part after basepath (without leading /) #}
+      {%- set filename = logfile["path"][logfile["path"].rfind('/') + 1:] %}
+
+      {#- Convert glob pattern to regex #}
+      {%- set regex_filename = filename.replace('.', '\\\\.').replace('*', '.*').replace('?', '.') %}
+
+      tail-base-directory: {{ basepath }}
+      File to Tail: "{{ regex_filename }}"
+      tail-mode: Multiple file
+      Recursive lookup: true
+      Lookup frequency: 3 min
+      {%- else %}
+      File to Tail: "{{ full_path }}"
+      tail-mode: Single file
+      {%- endif %}
+      Result Mode: Flow file per batch
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
+    class: org.apache.nifi.processors.standard.UpdateAttribute
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+      - failure
+    Properties:
+      {%- if "type" in logfile and logfile["type"] == "cm_command" %}
+      filenamePrefix: CM_COMMAND-${absolute.path:substringAfter('/var/run/cloudera-scm-agent/process/'):substringBefore('/logs/')}-${absolute.path:substringAfter('/logs/std'):substringBefore('.log')}
+      {%- else %}
+      filenamePrefix: {{ logfile["label"] }}
+      {%- endif %}
+
+{% endif %}
+{% endfor %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: MergeContent
+    class: org.apache.nifi.processors.standard.MergeContent
+    scheduling strategy: TIMER_DRIVEN
+    scheduling period: 1 min
+    auto-terminated relationships list:
+        - original
+        - failure
+    Properties:
+      Attribute Strategy: Keep Only Common Attributes
+      Maximum number of Bins: 1000
+      Max Bin Age: {% minifi.partitionIntervalMin %} min
+      Minimum Number of Entries: 10000
+      Maximum Number of Entries: 10000
+      Batch Size: 1000
+      Merge Strategy: Bin-Packing Algorithm
+      Correlation Attribute Name: filenamePrefix
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UpdateAttributeFilename
+    class: org.apache.nifi.processors.standard.UpdateAttribute
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+      - failure
+    Properties:
+      filename: ${filenamePrefix}-${hostname()}-${now():format("%M", 'UTC'):minus(${now():format("%M", 'UTC'):mod(5)}):toRadix(10, 2)}-${now():format('%M%S', 'UTC'):replaceAll('\\\\.[0-9]+', '')}.log
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: CompressContent
+    class: org.apache.nifi.processors.standard.CompressContent
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+        - failure
+    Properties:
+      Mode: compress
+      Compression Format: gzip
+      Compression Level: 6
+      Update Filename: true
+      Encapsulate in TAR: false
+
+{%- if minifi.providerPrefix == "s3" %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UploadToProvider
+    class: org.apache.nifi.minifi.aws.processors.PutS3Object
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+        - success
+        - failure
+    Properties:
+      Bucket: {{minifi.s3LogArchiveBucketName}}
+      Region: {{minifi.region}}
+      AWS Credentials Provider service: AWSCredentialsService
+      Object Key: {{minifi.logFolderName}}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+
+{%- elif minifi.providerPrefix == "abfs" %}
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UploadToProvider
+    class: org.apache.nifi.minifi.azure.processors.PutAzureBlobStorage
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+      - success
+      - failure
+    Properties:
+      Container Name: {{ minifi.azureContainer }}
+      Credential Configuration Strategy: Default Credential
+      Blob: {{ minifi.logFolderName }}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+      Azure Storage Credentials Service: AzureStorageCredentialsService
+
+{%- elif minifi.providerPrefix == "gcs" %}
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UploadToProvider
+    class: org.apache.nifi.minifi.azure.processors.PutGCSObject
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+        - success
+        - failure
+    Properties:
+      Bucket: {{ minifi.gcsBucket }}
+      Key: {{ minifi.logFolderName }}/${now():format('%Y-%m-%d', 'UTC')}/${now():format('%H', 'UTC')}/${filename}
+      GCP Credentials Provider Service: GCPCredentialsControllerService
+
+{% endif %}
+
+
+Controller Services:
+
+{%- if minifi.providerPrefix == "s3" %}
+
+  - name: AWSCredentialsService
+    id: {{ salt['random.get_str'](32) | uuid }}
+    class: org.apache.nifi.minifi.aws.controllers.AWSCredentialsService
+    Properties:
+      Use Default Credentials: true
+{%- elif minifi.providerPrefix == "abfs" %}
+  - name: AzureStorageCredentialsService
+    id: {{ salt['random.get_str'](32) | uuid }}
+    class: org.apache.nifi.minifi.azure.controllers.AzureStorageCredentialsService
+    Properties:
+      Storage Account Name: {{ minifi.azureStorageAccount }}
+      Credential Configuration Strategy: Default Credential
+{%- elif minifi.providerPrefix == "gcs" %}
+  - name: GCPCredentialsControllerService
+    id: {{ salt['random.get_str'](32) | uuid }}
+    class: org.apache.nifi.minifi.gcp.controllers.GCPCredentialsControllerService
+    Properties:
+      Credentials Location: Use Compute Engine Credentials
+{% endif %}
+
+Connections:
+
+{% for logfile in telemetry.logs %}
+{%- if not ("type" in logfile and logfile["type"] == "salt" and not minifi.dbusIncludeSaltLogs) %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: TailFile/success/UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
+    source name: TailFile_{{ logfile["label"] | replace('.', '') }}
+    source relationship names:
+      - success
+    destination name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UpdateAttributeLogLabel/success/MergeContent_{{ logfile["label"] | replace('.', '') }}
+    source name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
+    source relationship names:
+      - success
+    destination name: MergeContent
+
+{% endif %}
+{% endfor %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: MergeContent/merged/UpdateAttributeFilename
+    source name: MergeContent
+    source relationship names:
+      - merged
+    destination name: UpdateAttributeFilename
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: UpdateAttributeFilename/success/CompressContent
+    source name: UpdateAttributeFilename
+    source relationship names:
+      - success
+    destination name: CompressContent
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: CompressContent/success/UploadToProvider
+    source name: CompressContent
+    source relationship names:
+      - success
+    destination name: UploadToProvider
+
+Remote Process Groups: []
+
+{% else %}
+# DATABUS inputs are disabled
+{% endif %}
+
+
