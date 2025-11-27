@@ -24,13 +24,13 @@ import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
 
 public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETest {
 
-    protected static String environmentName = "";
-
-    protected static String datalakeName = "";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractE2EWithReusableResourcesTest.class);
 
-    private static final Set<TestContext> TEST_CONTEXTS = new java.util.concurrent.CopyOnWriteArraySet<>();
+    protected String environmentName = "";
+
+    protected String datalakeName = "";
+
+    private final Set<TestContext> testContexts = new java.util.concurrent.CopyOnWriteArraySet<>();
 
     @Inject
     private SpotUtil spotUtil;
@@ -49,6 +49,7 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
         BouncyCastleFipsProviderLoader.load();
         TestContext testContext = getBean(TestContext.class);
         String className = getClass().getSimpleName();
+        MDC.put("testlabel", className + "_setup");
         LOGGER.info("Running minimalSetupClass in: {}", className);
         testContext.setTestMethodName(REUSABLE_RESOURCE_TAG_PREFIX + "-" + className);
         testInformationService.setTestInformation(new TestInformation(className, className));
@@ -57,7 +58,6 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
 
         environmentName = testContext.get(EnvironmentTestDto.class).getName();
         datalakeName = testContext.getInstanceOf(AbstractSdxTestDto.class).getName();
-        TEST_CONTEXTS.add(testContext);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        TEST_CONTEXTS.add(testContext);
+        testContexts.add(testContext);
     }
 
     /**
@@ -91,12 +91,14 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
      */
     @AfterClass(alwaysRun = true)
     protected void cleanupTestContextAfterClass() {
-        MDC.put("testlabel", null);
+        String className = getClass().getSimpleName();
+        MDC.put("testlabel", className + "_cleanup");
         testInformationService.removeTestInformation();
         LOGGER.info("Tear down contexts");
-        for (TestContext testContext : TEST_CONTEXTS) {
+        for (TestContext testContext : testContexts) {
             LOGGER.info("Cleaning up test context for test method: {}", testContext.getTestMethodName().orElse("unknown"));
             testContext.cleanupTestContext();
         }
+        MDC.put("testlabel", null);
     }
 }

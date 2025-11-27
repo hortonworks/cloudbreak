@@ -127,6 +127,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public void deleteForCleanup() {
         try {
             CloudbreakClient clientForCleanup = getClientForCleanup();
+            LOGGER.info("Deleting DataHub with crn: {}", getCrn());
             clientForCleanup.getDefaultClient().distroXV1Endpoint().deleteByCrn(getCrn(), true);
             awaitWithClient(STACK_DELETED, clientForCleanup);
         } catch (NotFoundException nfe) {
