@@ -96,8 +96,13 @@ public class RemoteClusterServiceClient {
     }
 
     public Cluster describeClassicCluster(String userCrn, String clusterCrn) {
+        return describeClassicCluster(userCrn, clusterCrn, false);
+    }
+
+    public Cluster describeClassicCluster(String userCrn, String clusterCrn, boolean withDetails) {
         OnPremisesApiProto.DescribeClusterRequest request = OnPremisesApiProto.DescribeClusterRequest.newBuilder()
                 .setClusterCrn(clusterCrn)
+                .setShowOnPremiseEnvironmentDetails(withDetails)
                 .build();
         LOGGER.info("Created request to describe cluster {}: {}", clusterCrn, request);
         return createOnPremisesApiBlockingStub(userCrn).describeCluster(request).getCluster();

@@ -1,6 +1,5 @@
 package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -52,6 +51,7 @@ import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.common.network.NetworkUtil;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
@@ -77,11 +77,18 @@ class ClassicClusterDescribeService {
     @Inject
     private AsyncTaskExecutor taskExecutor;
 
+    @Inject
+    private ClassicClusterToEnvironmentConverter classicClusterToEnvironmentConverter;
+
     public DescribeEnvironmentV2Response describe(OnPremisesApiProto.Cluster cluster) {
         DescribeEnvironmentV2Response describeEnvironmentV2Response = new DescribeEnvironmentV2Response();
-        CMResources cmResources = populateCmResources(cluster);
         describeEnvironmentV2Response.setAdditionalProperties(createEnvironmentProperties(cluster));
-        describeEnvironmentV2Response.setEnvironment(createEnvironment(cluster, cmResources));
+        if (cluster.hasOnPremEnvironmentDetails()) {
+            describeEnvironmentV2Response.setEnvironment(classicClusterToEnvironmentConverter.createEnvironment(cluster));
+        } else {
+            CMResources cmResources = populateCmResources(cluster);
+            describeEnvironmentV2Response.setEnvironment(createEnvironment(cluster, cmResources));
+        }
         return describeEnvironmentV2Response;
     }
 
@@ -121,6 +128,7 @@ class ClassicClusterDescribeService {
             Map<String, Application> applicationsMap = new HashMap<>();
             for (ApiEndPoint endPoint : endPoints) {
                 Application application = new Application();
+                application.setName(endPoint.getName());
                 application.setConfig(createConfigMap(endPoint.getServiceConfigs()));
                 createServiceItems(endPoint.getEndPointHostList(), application);
                 applicationsMap.put(endPoint.getServiceType(), application);
@@ -141,6 +149,7 @@ class ClassicClusterDescribeService {
         for (ApiEndPointHost host : endpointHosts) {
             try {
                 Service svc = new Service();
+                svc.setType(host.getType());
                 URI uri = new URI(host.getUri());
                 ServiceEndPoint svcEndpoint = new ServiceEndPoint();
                 svcEndpoint.setUri(uri.toString());
@@ -187,7 +196,7 @@ class ClassicClusterDescribeService {
             kerberosInfo.setKerberosRealm(apiKerberosInfo.getKerberosRealm());
             String kdcHost = apiKerberosInfo.getKdcHost();
             kerberosInfo.setKdcHost(kdcHost);
-            kerberosInfo.setKdcHostIp(resolveKdcHostAddress(kdcHost));
+            kerberosInfo.setKdcHostIp(NetworkUtil.resolveHostAddress(kdcHost).orElse(null));
         } else {
             kerberosInfo.setKerberized(false);
         }
@@ -221,16 +230,6 @@ class ClassicClusterDescribeService {
         environment.setClouderaManagerVersion(cmResources.apiVersionInfo().getVersion());
         if (cmResources.cdpParcel() != null) {
             environment.setCdpRuntimeVersion(cmResources.cdpParcel().getVersion());
-        }
-    }
-
-    private String resolveKdcHostAddress(String kdcHostAddress) {
-        try {
-            LOGGER.debug("Trying to resolve KDC host address " + kdcHostAddress);
-            return InetAddress.getByName(kdcHostAddress).getHostAddress();
-        } catch (Exception e) {
-            LOGGER.warn("Failed to resolve KDC host address " + kdcHostAddress, e);
-            return null;
         }
     }
 

@@ -41976,6 +41976,46 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
 
     /**
      * <pre>
+     * Cloudera Manager Version.
+     * </pre>
+     *
+     * <code>string cmVersion = 4;</code>
+     * @return The cmVersion.
+     */
+    java.lang.String getCmVersion();
+    /**
+     * <pre>
+     * Cloudera Manager Version.
+     * </pre>
+     *
+     * <code>string cmVersion = 4;</code>
+     * @return The bytes for cmVersion.
+     */
+    com.google.protobuf.ByteString
+        getCmVersionBytes();
+
+    /**
+     * <pre>
+     * Cloudera Runtime Version.
+     * </pre>
+     *
+     * <code>string clouderaRuntimeVersion = 5;</code>
+     * @return The clouderaRuntimeVersion.
+     */
+    java.lang.String getClouderaRuntimeVersion();
+    /**
+     * <pre>
+     * Cloudera Runtime Version.
+     * </pre>
+     *
+     * <code>string clouderaRuntimeVersion = 5;</code>
+     * @return The bytes for clouderaRuntimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getClouderaRuntimeVersionBytes();
+
+    /**
+     * <pre>
      * On-premises Data Lake details.
      * </pre>
      *
@@ -42020,6 +42060,8 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
     private OnPremEnvironmentDetails() {
       cmHost_ = "";
       knoxGatewayUrl_ = "";
+      cmVersion_ = "";
+      clouderaRuntimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -42244,6 +42286,100 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
       return map.get(key);
     }
 
+    public static final int CMVERSION_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmVersion_ = "";
+    /**
+     * <pre>
+     * Cloudera Manager Version.
+     * </pre>
+     *
+     * <code>string cmVersion = 4;</code>
+     * @return The cmVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getCmVersion() {
+      java.lang.Object ref = cmVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Cloudera Manager Version.
+     * </pre>
+     *
+     * <code>string cmVersion = 4;</code>
+     * @return The bytes for cmVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmVersionBytes() {
+      java.lang.Object ref = cmVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDERARUNTIMEVERSION_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clouderaRuntimeVersion_ = "";
+    /**
+     * <pre>
+     * Cloudera Runtime Version.
+     * </pre>
+     *
+     * <code>string clouderaRuntimeVersion = 5;</code>
+     * @return The clouderaRuntimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getClouderaRuntimeVersion() {
+      java.lang.Object ref = clouderaRuntimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clouderaRuntimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Cloudera Runtime Version.
+     * </pre>
+     *
+     * <code>string clouderaRuntimeVersion = 5;</code>
+     * @return The bytes for clouderaRuntimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClouderaRuntimeVersionBytes() {
+      java.lang.Object ref = clouderaRuntimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clouderaRuntimeVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     public static final int ONPREMDATALAKEDETAILS_FIELD_NUMBER = 7;
     private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails onPremDatalakeDetails_;
     /**
@@ -42308,6 +42444,12 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
           internalGetApplications(),
           ApplicationsDefaultEntryHolder.defaultEntry,
           3);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cmVersion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clouderaRuntimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clouderaRuntimeVersion_);
+      }
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(7, getOnPremDatalakeDetails());
       }
@@ -42336,6 +42478,12 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, applications__);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cmVersion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clouderaRuntimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clouderaRuntimeVersion_);
+      }
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, getOnPremDatalakeDetails());
@@ -42361,6 +42509,10 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
           .equals(other.getKnoxGatewayUrl())) return false;
       if (!internalGetApplications().equals(
           other.internalGetApplications())) return false;
+      if (!getCmVersion()
+          .equals(other.getCmVersion())) return false;
+      if (!getClouderaRuntimeVersion()
+          .equals(other.getClouderaRuntimeVersion())) return false;
       if (hasOnPremDatalakeDetails() != other.hasOnPremDatalakeDetails()) return false;
       if (hasOnPremDatalakeDetails()) {
         if (!getOnPremDatalakeDetails()
@@ -42385,6 +42537,10 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         hash = (37 * hash) + APPLICATIONS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetApplications().hashCode();
       }
+      hash = (37 * hash) + CMVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCmVersion().hashCode();
+      hash = (37 * hash) + CLOUDERARUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getClouderaRuntimeVersion().hashCode();
       if (hasOnPremDatalakeDetails()) {
         hash = (37 * hash) + ONPREMDATALAKEDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getOnPremDatalakeDetails().hashCode();
@@ -42555,6 +42711,8 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         cmHost_ = "";
         knoxGatewayUrl_ = "";
         internalGetMutableApplications().clear();
+        cmVersion_ = "";
+        clouderaRuntimeVersion_ = "";
         onPremDatalakeDetails_ = null;
         if (onPremDatalakeDetailsBuilder_ != null) {
           onPremDatalakeDetailsBuilder_.dispose();
@@ -42602,8 +42760,14 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.applications_ = internalGetApplications().build(ApplicationsDefaultEntryHolder.defaultEntry);
         }
-        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.cmVersion_ = cmVersion_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.clouderaRuntimeVersion_ = clouderaRuntimeVersion_;
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.onPremDatalakeDetails_ = onPremDatalakeDetailsBuilder_ == null
               ? onPremDatalakeDetails_
               : onPremDatalakeDetailsBuilder_.build();
@@ -42669,6 +42833,16 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         internalGetMutableApplications().mergeFrom(
             other.internalGetApplications());
         bitField0_ |= 0x00000004;
+        if (!other.getCmVersion().isEmpty()) {
+          cmVersion_ = other.cmVersion_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getClouderaRuntimeVersion().isEmpty()) {
+          clouderaRuntimeVersion_ = other.clouderaRuntimeVersion_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
         if (other.hasOnPremDatalakeDetails()) {
           mergeOnPremDatalakeDetails(other.getOnPremDatalakeDetails());
         }
@@ -42717,11 +42891,21 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
                 bitField0_ |= 0x00000004;
                 break;
               } // case 26
+              case 34: {
+                cmVersion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                clouderaRuntimeVersion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
               case 58: {
                 input.readMessage(
                     getOnPremDatalakeDetailsFieldBuilder().getBuilder(),
                     extensionRegistry);
-                bitField0_ |= 0x00000008;
+                bitField0_ |= 0x00000020;
                 break;
               } // case 58
               default: {
@@ -43112,6 +43296,190 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         return (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application.Builder) entry;
       }
 
+      private java.lang.Object cmVersion_ = "";
+      /**
+       * <pre>
+       * Cloudera Manager Version.
+       * </pre>
+       *
+       * <code>string cmVersion = 4;</code>
+       * @return The cmVersion.
+       */
+      public java.lang.String getCmVersion() {
+        java.lang.Object ref = cmVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Version.
+       * </pre>
+       *
+       * <code>string cmVersion = 4;</code>
+       * @return The bytes for cmVersion.
+       */
+      public com.google.protobuf.ByteString
+          getCmVersionBytes() {
+        java.lang.Object ref = cmVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Version.
+       * </pre>
+       *
+       * <code>string cmVersion = 4;</code>
+       * @param value The cmVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmVersion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Version.
+       * </pre>
+       *
+       * <code>string cmVersion = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmVersion() {
+        cmVersion_ = getDefaultInstance().getCmVersion();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Manager Version.
+       * </pre>
+       *
+       * <code>string cmVersion = 4;</code>
+       * @param value The bytes for cmVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmVersion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clouderaRuntimeVersion_ = "";
+      /**
+       * <pre>
+       * Cloudera Runtime Version.
+       * </pre>
+       *
+       * <code>string clouderaRuntimeVersion = 5;</code>
+       * @return The clouderaRuntimeVersion.
+       */
+      public java.lang.String getClouderaRuntimeVersion() {
+        java.lang.Object ref = clouderaRuntimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clouderaRuntimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Runtime Version.
+       * </pre>
+       *
+       * <code>string clouderaRuntimeVersion = 5;</code>
+       * @return The bytes for clouderaRuntimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getClouderaRuntimeVersionBytes() {
+        java.lang.Object ref = clouderaRuntimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clouderaRuntimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Cloudera Runtime Version.
+       * </pre>
+       *
+       * <code>string clouderaRuntimeVersion = 5;</code>
+       * @param value The clouderaRuntimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clouderaRuntimeVersion_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Runtime Version.
+       * </pre>
+       *
+       * <code>string clouderaRuntimeVersion = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClouderaRuntimeVersion() {
+        clouderaRuntimeVersion_ = getDefaultInstance().getClouderaRuntimeVersion();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Cloudera Runtime Version.
+       * </pre>
+       *
+       * <code>string clouderaRuntimeVersion = 5;</code>
+       * @param value The bytes for clouderaRuntimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clouderaRuntimeVersion_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
       private com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails onPremDatalakeDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetailsOrBuilder> onPremDatalakeDetailsBuilder_;
@@ -43124,7 +43492,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
        * @return Whether the onPremDatalakeDetails field is set.
        */
       public boolean hasOnPremDatalakeDetails() {
-        return ((bitField0_ & 0x00000008) != 0);
+        return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <pre>
@@ -43157,7 +43525,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         } else {
           onPremDatalakeDetailsBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -43175,7 +43543,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
         } else {
           onPremDatalakeDetailsBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -43188,7 +43556,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
        */
       public Builder mergeOnPremDatalakeDetails(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails value) {
         if (onPremDatalakeDetailsBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) != 0) &&
+          if (((bitField0_ & 0x00000020) != 0) &&
             onPremDatalakeDetails_ != null &&
             onPremDatalakeDetails_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.getDefaultInstance()) {
             getOnPremDatalakeDetailsBuilder().mergeFrom(value);
@@ -43199,7 +43567,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
           onPremDatalakeDetailsBuilder_.mergeFrom(value);
         }
         if (onPremDatalakeDetails_ != null) {
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000020;
           onChanged();
         }
         return this;
@@ -43212,7 +43580,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
        * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
        */
       public Builder clearOnPremDatalakeDetails() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onPremDatalakeDetails_ = null;
         if (onPremDatalakeDetailsBuilder_ != null) {
           onPremDatalakeDetailsBuilder_.dispose();
@@ -43229,7 +43597,7 @@ com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.Application defau
        * <code>.onpremises.OnPremDatalakeDetails onPremDatalakeDetails = 7;</code>
        */
       public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremDatalakeDetails.Builder getOnPremDatalakeDetailsBuilder() {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000020;
         onChanged();
         return getOnPremDatalakeDetailsFieldBuilder().getBuilder();
       }
@@ -63525,155 +63893,156 @@ java.lang.String defaultValue) {
       "id\030\037 \001(\t\022\026\n\016environmentCrn\030  \001(\t\022\016\n\006pvcC" +
       "rn\030! \001(\t\022F\n\030onPremEnvironmentDetails\030\" \001" +
       "(\0132$.onpremises.OnPremEnvironmentDetails" +
-      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\002\n\030OnPremEnvir" +
+      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\353\002\n\030OnPremEnvir" +
       "onmentDetails\022\016\n\006cmHost\030\001 \001(\t\022\026\n\016knoxGat" +
       "ewayUrl\030\002 \001(\t\022L\n\014applications\030\003 \003(\01326.on" +
       "premises.OnPremEnvironmentDetails.Applic" +
-      "ationsEntry\022@\n\025onPremDatalakeDetails\030\007 \001" +
-      "(\0132!.onpremises.OnPremDatalakeDetails\032L\n" +
-      "\021ApplicationsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value" +
-      "\030\002 \001(\0132\027.onpremises.Application:\0028\001:\026\200\227\"" +
-      "\001\212\227\"\016IN_DEVELOPMENT\"\226\002\n\013Application\022\014\n\004n" +
-      "ame\030\001 \001(\t\0227\n\010services\030\002 \003(\0132%.onpremises" +
-      ".Application.ServicesEntry\0223\n\006config\030\003 \003" +
-      "(\0132#.onpremises.Application.ConfigEntry\032" +
-      "D\n\rServicesEntry\022\013\n\003key\030\001 \001(\t\022\"\n\005value\030\002" +
-      " \001(\0132\023.onpremises.Service:\0028\001\032-\n\013ConfigE" +
-      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001:\026\200\227" +
-      "\"\001\212\227\"\016IN_DEVELOPMENT\"\277\001\n\007Service\022\014\n\004type" +
-      "\030\001 \001(\t\022.\n\tendpoints\030\002 \003(\0132\033.onpremises.S" +
-      "erviceEndpoint\022/\n\006config\030\003 \003(\0132\037.onpremi" +
-      "ses.Service.ConfigEntry\032-\n\013ConfigEntry\022\013" +
-      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT\"R\n\017ServiceEndpoint\022\014\n\004hos" +
-      "t\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\013\n\003uri\030\003 \001(\t:\026\200\227\"\001" +
-      "\212\227\"\016IN_DEVELOPMENT\"\274\002\n\025OnPremDatalakeDet" +
-      "ails\022\024\n\014datalakeName\030\001 \001(\t\022\027\n\017enableRang" +
-      "erRaz\030\002 \001(\010\022\037\n\027creationTimeEpochMillis\030\003" +
-      " \001(\003\022\016\n\006cmFqdn\030\004 \001(\t\022\014\n\004cmIp\030\005 \001(\t\022\022\n\ncm" +
-      "ServerId\030\006 \001(\t\0220\n\006status\030\007 \001(\0162 .onpremi" +
-      "ses.DatalakeStatus.Value\022\'\n\tinstances\030\010 " +
-      "\003(\0132\024.onpremises.Instance\022.\n\014kerberosInf" +
-      "o\030\t \001(\0132\030.onpremises.KerberosInfo:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT\"O\n\010Instance\022\n\n\002id\030\001 \001(" +
-      "\t\022\014\n\004fqdn\030\002 \001(\t\022\021\n\tprivateIp\030\003 \001(\t:\026\200\227\"\001" +
-      "\212\227\"\016IN_DEVELOPMENT\"\206\001\n\014KerberosInfo\022\017\n\007k" +
-      "dcType\030\001 \001(\t\022\025\n\rkerberosRealm\030\002 \001(\t\022\017\n\007k" +
-      "dcHost\030\003 \001(\t\022\021\n\tkdcHostIp\030\004 \001(\t\022\022\n\nkerbe" +
-      "rized\030\005 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"^\n\016D" +
-      "atalakeStatus\"4\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tAVA" +
-      "ILABLE\020\001\022\021\n\rNOT_AVAILABLE\020\002:\026\200\227\"\001\212\227\"\016IN_" +
-      "DEVELOPMENT\"V\n\016ClusterService\022\014\n\004name\030\001 " +
-      "\001(\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state\030\003 \001(\t:\026\200\227\"" +
-      "\001\212\227\"\016IN_DEVELOPMENT\"\360\001\n\013ClusterData\022\014\n\004n" +
-      "ame\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n\013displayNam" +
-      "e\030\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secured\030\005 \001(\010\022\024\n" +
-      "\014kerberosUser\030\006 \001(\t\022\036\n\026kerberosTicketLoc" +
-      "ation\030\007 \001(\t\0222\n\016clusterDetails\030\n \001(\0132\032.on" +
-      "premises.ClusterDetails\022\r\n\005stats\030\t \001(\t:\026" +
-      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Location\022\n\n\002i" +
-      "d\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010province\030\003 \001(\t\022" +
-      "\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010latitu" +
-      "de\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026\200\227\"\001\212\227\"\016IN_" +
-      "DEVELOPMENT\"\341\002\n\016ClusterDetails\022\014\n\004name\030\001" +
-      " \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007version\030\003 \001" +
-      "(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017maintenanceMo" +
-      "de\030\005 \001(\010\022\031\n\021maintenanceOwners\030\006 \003(\t\022\022\n\nc" +
-      "lusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010 \001(\t\0224\n\014ent" +
-      "ityStatus\030\t \001(\0162\036.onpremises.EntityStatu" +
-      "s.Value\022\014\n\004uuid\030\n \001(\t\022P\n\032clouderaManager" +
-      "ClusterType\030\013 \001(\0162,.onpremises.ClouderaM" +
-      "anagerClusterType.Value:\026\200\227\"\001\212\227\"\016IN_DEVE" +
-      "LOPMENT\"9\n\021ClusterDiscovered\022\014\n\004name\030\001 \001" +
-      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n\014ClusterSt" +
-      "ate\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SYNC\020\001\022\024\n" +
-      "\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016\n\nSYNC_" +
-      "ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERIFIED\020\005\022" +
-      "\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200\227\"\001\212\227\"\016" +
-      "IN_DEVELOPMENT\"b\n\022ClusterManagerType\"4\n\005" +
-      "Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020CLOUDERA" +
-      "_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\013Cl" +
-      "usterType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003HDP\020\001\022\007" +
-      "\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
-      "NT\"o\n\032ClouderaManagerClusterType\"9\n\005Valu" +
-      "e\022\t\n\005UNSET\020\000\022\020\n\014BASE_CLUSTER\020\001\022\023\n\017COMPUT" +
-      "E_CLUSTER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"S\n\024C" +
-      "lusterQueryOperator\"#\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
-      "\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013\n\007UNKNOWN\020\000" +
-      "\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DOWN\020\003\022\022\n\016UNK" +
-      "NOWN_HEALTH\020\004\022\023\n\017DISABLED_HEALTH\020\005\022\025\n\021CO" +
-      "NCERNING_HEALTH\020\006\022\016\n\nBAD_HEALTH\020\007\022\017\n\013GOO" +
-      "D_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010STOPPING\020\n\022\031" +
-      "\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227\"\001\212\227\"\016IN_DE" +
-      "VELOPMENT2\225\024\n\rOnPremisesApi\022u\n\014ListClust" +
-      "ers\022\037.onpremises.ListClustersRequest\032 .o" +
-      "npremises.ListClustersResponse\"\"\220\246\035\001\230\246\035\024" +
-      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017RegisterCl" +
-      "uster\022\".onpremises.RegisterClusterReques" +
-      "t\032#.onpremises.RegisterClusterResponse\"\032" +
-      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017DescribeCl" +
-      "uster\022\".onpremises.DescribeClusterReques" +
-      "t\032#.onpremises.DescribeClusterResponse\"\032" +
-      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUpdateClus" +
-      "ter\022 .onpremises.UpdateClusterRequest\032!." +
-      "onpremises.UpdateClusterResponse\"\032\240\246\035\001\252\246" +
-      "\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractClusters\022" +
-      "\".onpremises.ExtractClustersRequest\032#.on" +
-      "premises.ExtractClustersResponse\"\032\240\246\035\001\252\246" +
-      "\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListClusterServ" +
-      "ices\022&.onpremises.ListClusterServicesReq" +
-      "uest\032\'.onpremises.ListClusterServicesRes" +
-      "ponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022x\n\rLis" +
-      "tLocations\022 .onpremises.ListLocationsReq" +
-      "uest\032!.onpremises.ListLocationsResponse\"" +
-      "\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017S" +
-      "yncClusterData\022\".onpremises.SyncClusterD" +
-      "ataRequest\032#.onpremises.SyncClusterDataR" +
-      "esponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022p\n\rD" +
-      "eleteCluster\022 .onpremises.DeleteClusterR" +
-      "equest\032!.onpremises.DeleteClusterRespons" +
-      "e\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001\n\037ListPa" +
-      "rtiallyRegisteredClusters\0222.onpremises.L" +
-      "istPartiallyRegisteredClustersRequest\0323." +
-      "onpremises.ListPartiallyRegisteredCluste" +
-      "rsResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPME" +
-      "NT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClusterConnect" +
-      "ivity\022+.onpremises.SetupClusterConnectiv" +
-      "ityRequest\032,.onpremises.SetupClusterConn" +
-      "ectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
-      "\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePartiallyRegi" +
-      "steredCluster\0225.onpremises.DescribeParti" +
-      "allyRegisteredClusterRequest\0326.onpremise" +
-      "s.DescribePartiallyRegisteredClusterResp" +
-      "onse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006publ" +
-      "ic\022z\n\rRegisterAgent\022 .onpremises.Registe" +
-      "rAgentRequest\032!.onpremises.RegisterAgent" +
-      "Response\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006" +
-      "public\022\211\001\n\022ExtractSetupScript\022%.onpremis" +
-      "es.ExtractSetupScriptRequest\032&.onpremise" +
-      "s.ExtractSetupScriptResponse\"$\240\246\035\001\252\246\035\016IN" +
-      "_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001\n\037ExtractCe" +
-      "rtificateRefreshScript\0222.onpremises.Extr" +
-      "actCertificateRefreshScriptRequest\0323.onp" +
-      "remises.ExtractCertificateRefreshScriptR" +
-      "esponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006p" +
-      "ublic\022\211\001\n\022UpdateClusterState\022%.onpremise" +
-      "s.UpdateClusterStateRequest\032&.onpremises" +
-      ".UpdateClusterStateResponse\"$\240\246\035\001\252\246\035\016IN_" +
-      "DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n\030CheckClust" +
-      "erConnectivity\022+.onpremises.CheckCluster" +
-      "ConnectivityRequest\032,.onpremises.CheckCl" +
-      "usterConnectivityResponse\"\032\240\246\035\001\252\246\035\016IN_DE" +
-      "VELOPMENT\310\246\035\000\022\251\001\n DeletePartiallyRegiste" +
-      "redCluster\0223.onpremises.DeletePartiallyR" +
-      "egisteredClusterRequest\0324.onpremises.Del" +
-      "etePartiallyRegisteredClusterResponse\"\032\240" +
-      "\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304\023\030\n\nonpremi" +
-      "ses\022\nOnPremises\242\304\023\016private,publicB`\n+com" +
-      ".cloudera.thunderhead.service.onpremises" +
-      "B\022OnPremisesApiProtoZ\031com/cloudera/cdp/p" +
-      "rotobuf\200\210\'\001b\006proto3"
+      "ationsEntry\022\021\n\tcmVersion\030\004 \001(\t\022\036\n\026cloude" +
+      "raRuntimeVersion\030\005 \001(\t\022@\n\025onPremDatalake" +
+      "Details\030\007 \001(\0132!.onpremises.OnPremDatalak" +
+      "eDetails\032L\n\021ApplicationsEntry\022\013\n\003key\030\001 \001" +
+      "(\t\022&\n\005value\030\002 \001(\0132\027.onpremises.Applicati" +
+      "on:\0028\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\226\002\n\013Appli" +
+      "cation\022\014\n\004name\030\001 \001(\t\0227\n\010services\030\002 \003(\0132%" +
+      ".onpremises.Application.ServicesEntry\0223\n" +
+      "\006config\030\003 \003(\0132#.onpremises.Application.C" +
+      "onfigEntry\032D\n\rServicesEntry\022\013\n\003key\030\001 \001(\t" +
+      "\022\"\n\005value\030\002 \001(\0132\023.onpremises.Service:\0028\001" +
+      "\032-\n\013ConfigEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 " +
+      "\001(\t:\0028\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\277\001\n\007Serv" +
+      "ice\022\014\n\004type\030\001 \001(\t\022.\n\tendpoints\030\002 \003(\0132\033.o" +
+      "npremises.ServiceEndpoint\022/\n\006config\030\003 \003(" +
+      "\0132\037.onpremises.Service.ConfigEntry\032-\n\013Co" +
+      "nfigEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
+      "\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"R\n\017ServiceEndp" +
+      "oint\022\014\n\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\013\n\003uri\030" +
+      "\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\274\002\n\025OnPrem" +
+      "DatalakeDetails\022\024\n\014datalakeName\030\001 \001(\t\022\027\n" +
+      "\017enableRangerRaz\030\002 \001(\010\022\037\n\027creationTimeEp" +
+      "ochMillis\030\003 \001(\003\022\016\n\006cmFqdn\030\004 \001(\t\022\014\n\004cmIp\030" +
+      "\005 \001(\t\022\022\n\ncmServerId\030\006 \001(\t\0220\n\006status\030\007 \001(" +
+      "\0162 .onpremises.DatalakeStatus.Value\022\'\n\ti" +
+      "nstances\030\010 \003(\0132\024.onpremises.Instance\022.\n\014" +
+      "kerberosInfo\030\t \001(\0132\030.onpremises.Kerberos" +
+      "Info:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"O\n\010Instance" +
+      "\022\n\n\002id\030\001 \001(\t\022\014\n\004fqdn\030\002 \001(\t\022\021\n\tprivateIp\030" +
+      "\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\206\001\n\014Kerber" +
+      "osInfo\022\017\n\007kdcType\030\001 \001(\t\022\025\n\rkerberosRealm" +
+      "\030\002 \001(\t\022\017\n\007kdcHost\030\003 \001(\t\022\021\n\tkdcHostIp\030\004 \001" +
+      "(\t\022\022\n\nkerberized\030\005 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVEL" +
+      "OPMENT\"^\n\016DatalakeStatus\"4\n\005Value\022\t\n\005UNS" +
+      "ET\020\000\022\r\n\tAVAILABLE\020\001\022\021\n\rNOT_AVAILABLE\020\002:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\016ClusterService" +
+      "\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state" +
+      "\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\360\001\n\013Clust" +
+      "erData\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n" +
+      "\013displayName\030\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secur" +
+      "ed\030\005 \001(\010\022\024\n\014kerberosUser\030\006 \001(\t\022\036\n\026kerber" +
+      "osTicketLocation\030\007 \001(\t\0222\n\016clusterDetails" +
+      "\030\n \001(\0132\032.onpremises.ClusterDetails\022\r\n\005st" +
+      "ats\030\t \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Lo" +
+      "cation\022\n\n\002id\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010prov" +
+      "ince\030\003 \001(\t\022\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(" +
+      "\t\022\020\n\010latitude\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\341\002\n\016ClusterDetail" +
+      "s\022\014\n\004name\030\001 \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007" +
+      "version\030\003 \001(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017ma" +
+      "intenanceMode\030\005 \001(\010\022\031\n\021maintenanceOwners" +
+      "\030\006 \003(\t\022\022\n\nclusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010" +
+      " \001(\t\0224\n\014entityStatus\030\t \001(\0162\036.onpremises." +
+      "EntityStatus.Value\022\014\n\004uuid\030\n \001(\t\022P\n\032clou" +
+      "deraManagerClusterType\030\013 \001(\0162,.onpremise" +
+      "s.ClouderaManagerClusterType.Value:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"9\n\021ClusterDiscovered\022" +
+      "\014\n\004name\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001" +
+      "\n\014ClusterState\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007T" +
+      "O_SYNC\020\001\022\024\n\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED" +
+      "\020\003\022\016\n\nSYNC_ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_" +
+      "VERIFIED\020\005\022\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020" +
+      "\006:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\022ClusterMana" +
+      "gerType\"4\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022" +
+      "\024\n\020CLOUDERA_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
+      "PMENT\"V\n\013ClusterType\"/\n\005Value\022\t\n\005UNSET\020\000" +
+      "\022\007\n\003HDP\020\001\022\007\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016I" +
+      "N_DEVELOPMENT\"o\n\032ClouderaManagerClusterT" +
+      "ype\"9\n\005Value\022\t\n\005UNSET\020\000\022\020\n\014BASE_CLUSTER\020" +
+      "\001\022\023\n\017COMPUTE_CLUSTER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVEL" +
+      "OPMENT\"S\n\024ClusterQueryOperator\"#\n\005Value\022" +
+      "\t\n\005UNSET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_" +
+      "DEVELOPMENT\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013" +
+      "\n\007UNKNOWN\020\000\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DO" +
+      "WN\020\003\022\022\n\016UNKNOWN_HEALTH\020\004\022\023\n\017DISABLED_HEA" +
+      "LTH\020\005\022\025\n\021CONCERNING_HEALTH\020\006\022\016\n\nBAD_HEAL" +
+      "TH\020\007\022\017\n\013GOOD_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010S" +
+      "TOPPING\020\n\022\031\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227" +
+      "\"\001\212\227\"\016IN_DEVELOPMENT2\225\024\n\rOnPremisesApi\022u" +
+      "\n\014ListClusters\022\037.onpremises.ListClusters" +
+      "Request\032 .onpremises.ListClustersRespons" +
+      "e\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n" +
+      "\017RegisterCluster\022\".onpremises.RegisterCl" +
+      "usterRequest\032#.onpremises.RegisterCluste" +
+      "rResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n" +
+      "\017DescribeCluster\022\".onpremises.DescribeCl" +
+      "usterRequest\032#.onpremises.DescribeCluste" +
+      "rResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n" +
+      "\rUpdateCluster\022 .onpremises.UpdateCluste" +
+      "rRequest\032!.onpremises.UpdateClusterRespo" +
+      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017Extra" +
+      "ctClusters\022\".onpremises.ExtractClustersR" +
+      "equest\032#.onpremises.ExtractClustersRespo" +
+      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023List" +
+      "ClusterServices\022&.onpremises.ListCluster" +
+      "ServicesRequest\032\'.onpremises.ListCluster" +
+      "ServicesResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
+      "\310\246\035\000\022x\n\rListLocations\022 .onpremises.ListL" +
+      "ocationsRequest\032!.onpremises.ListLocatio" +
+      "nsResponse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPME" +
+      "NT\310\246\035\000\022v\n\017SyncClusterData\022\".onpremises.S" +
+      "yncClusterDataRequest\032#.onpremises.SyncC" +
+      "lusterDataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPME" +
+      "NT\310\246\035\001\022p\n\rDeleteCluster\022 .onpremises.Del" +
+      "eteClusterRequest\032!.onpremises.DeleteClu" +
+      "sterResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001" +
+      "\022\270\001\n\037ListPartiallyRegisteredClusters\0222.o" +
+      "npremises.ListPartiallyRegisteredCluster" +
+      "sRequest\0323.onpremises.ListPartiallyRegis" +
+      "teredClustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016I" +
+      "N_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClu" +
+      "sterConnectivity\022+.onpremises.SetupClust" +
+      "erConnectivityRequest\032,.onpremises.Setup" +
+      "ClusterConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_" +
+      "DEVELOPMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePa" +
+      "rtiallyRegisteredCluster\0225.onpremises.De" +
+      "scribePartiallyRegisteredClusterRequest\032" +
+      "6.onpremises.DescribePartiallyRegistered" +
+      "ClusterResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310" +
+      "\246\035\000\332\246\035\006public\022z\n\rRegisterAgent\022 .onpremi" +
+      "ses.RegisterAgentRequest\032!.onpremises.Re" +
+      "gisterAgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPM" +
+      "ENT\310\246\035\001\332\246\035\006public\022\211\001\n\022ExtractSetupScript" +
+      "\022%.onpremises.ExtractSetupScriptRequest\032" +
+      "&.onpremises.ExtractSetupScriptResponse\"" +
+      "$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001" +
+      "\n\037ExtractCertificateRefreshScript\0222.onpr" +
+      "emises.ExtractCertificateRefreshScriptRe" +
+      "quest\0323.onpremises.ExtractCertificateRef" +
+      "reshScriptResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPME" +
+      "NT\310\246\035\000\332\246\035\006public\022\211\001\n\022UpdateClusterState\022" +
+      "%.onpremises.UpdateClusterStateRequest\032&" +
+      ".onpremises.UpdateClusterStateResponse\"$" +
+      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n" +
+      "\030CheckClusterConnectivity\022+.onpremises.C" +
+      "heckClusterConnectivityRequest\032,.onpremi" +
+      "ses.CheckClusterConnectivityResponse\"\032\240\246" +
+      "\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\251\001\n DeleteParti" +
+      "allyRegisteredCluster\0223.onpremises.Delet" +
+      "ePartiallyRegisteredClusterRequest\0324.onp" +
+      "remises.DeletePartiallyRegisteredCluster" +
+      "Response\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304" +
+      "\023\030\n\nonpremises\022\nOnPremises\242\304\023\016private,pu" +
+      "blicB`\n+com.cloudera.thunderhead.service" +
+      ".onpremisesB\022OnPremisesApiProtoZ\031com/clo" +
+      "udera/cdp/protobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -63919,7 +64288,7 @@ java.lang.String defaultValue) {
     internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_OnPremEnvironmentDetails_descriptor,
-        new java.lang.String[] { "CmHost", "KnoxGatewayUrl", "Applications", "OnPremDatalakeDetails", });
+        new java.lang.String[] { "CmHost", "KnoxGatewayUrl", "Applications", "CmVersion", "ClouderaRuntimeVersion", "OnPremDatalakeDetails", });
     internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor =
       internal_static_onpremises_OnPremEnvironmentDetails_descriptor.getNestedTypes().get(0);
     internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_fieldAccessorTable = new

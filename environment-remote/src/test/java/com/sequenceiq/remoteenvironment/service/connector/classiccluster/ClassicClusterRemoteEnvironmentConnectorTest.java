@@ -71,7 +71,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+        lenient().when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, false)).thenReturn(cluster);
         underTest = spy(underTest);
         lenient().doReturn(true).when(underTest).isBaseCluster(cluster);
     }
@@ -91,6 +91,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV1() {
         DescribeEnvironmentV2Response mockV2 = mock();
         DescribeEnvironmentResponse mockV1 = mock();
+        when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, true)).thenReturn(cluster);
         when(mockV2.toV1Response()).thenReturn(mockV1);
         when(describeService.describe(cluster)).thenReturn(mockV2);
 
@@ -134,6 +135,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     @Test
     void describeV2() {
         DescribeEnvironmentV2Response describeEnvironmentV2Response = mock();
+        when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, true)).thenReturn(cluster);
         when(describeService.describe(cluster)).thenReturn(describeEnvironmentV2Response);
 
         DescribeEnvironmentResponse result = underTest.describeV2(USER_CRN, CLUSTER_CRN);

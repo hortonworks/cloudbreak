@@ -802,6 +802,10 @@ message OnPremEnvironmentDetails {
   string knoxGatewayUrl = 2;
   // A map of applications that provide services for the Service Discovery.
   map<string, Application> applications = 3;
+  // Cloudera Manager Version.
+  string cmVersion = 4;
+  // Cloudera Runtime Version.
+  string clouderaRuntimeVersion = 5;
   // On-premises Data Lake details.
   OnPremDatalakeDetails onPremDatalakeDetails = 7;
 }

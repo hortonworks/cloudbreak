@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,6 +60,9 @@ import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterDescribeServiceTest {
     @Mock
+    private ClassicClusterToEnvironmentConverter classicClusterToEnvironmentConverter;
+
+    @Mock
     private ClassicClusterClouderaManagerApiClientProvider apiClientProvider;
 
     @Mock
@@ -90,12 +94,12 @@ class ClassicClusterDescribeServiceTest {
 
     @BeforeEach
     void setup() {
-        when(apiClientProvider.getClouderaManagerRootClient(any())).thenReturn(apiClient);
-        when(apiClientProvider.getClouderaManagerV51Client(any())).thenReturn(apiV51Client);
-        when(clouderaManagerApiFactory.getClustersResourceApi(apiV51Client)).thenReturn(clustersResourceApi);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client)).thenReturn(cmResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client)).thenReturn(parcelsResourceApi);
-        when(clouderaManagerApiFactory.getCdpResourceApi(apiClient)).thenReturn(cdpResourceApi);
+        lenient().when(apiClientProvider.getClouderaManagerRootClient(any())).thenReturn(apiClient);
+        lenient().when(apiClientProvider.getClouderaManagerV51Client(any())).thenReturn(apiV51Client);
+        lenient().when(clouderaManagerApiFactory.getClustersResourceApi(apiV51Client)).thenReturn(clustersResourceApi);
+        lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client)).thenReturn(cmResourceApi);
+        lenient().when(clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client)).thenReturn(parcelsResourceApi);
+        lenient().when(clouderaManagerApiFactory.getCdpResourceApi(apiClient)).thenReturn(cdpResourceApi);
         ReflectionTestUtils.setField(underTest, "taskExecutor", taskExecutor);
     }
 
@@ -267,6 +271,24 @@ class ClassicClusterDescribeServiceTest {
         when(parcelsResourceApi.readParcels(cluster.getName(), "SUMMARY")).thenThrow(new ApiException());
 
         assertThrows(OnPremCMApiException.class, () -> underTest.describe(cluster));
+    }
+
+    @Test
+    void testDescribeWithDetails() throws ApiException {
+        OnPremisesApiProto.Cluster cluster = OnPremisesApiProto.Cluster.newBuilder()
+                .setName("cluster")
+                .setClusterCrn("clusterCrn")
+                .setManagerUri("managerUri")
+                .setKnoxEnabled(true)
+                .setKnoxUrl("knoxUrl")
+                .setOnPremEnvironmentDetails(OnPremisesApiProto.OnPremEnvironmentDetails.newBuilder().build())
+                .build();
+        Environment environment = new Environment();
+        when(classicClusterToEnvironmentConverter.createEnvironment(cluster)).thenReturn(environment);
+
+        DescribeEnvironmentV2Response describeEnvironmentV2Response = underTest.describe(cluster);
+
+        assertEquals(environment, describeEnvironmentV2Response.getEnvironment());
     }
 
     private ApiRemoteDataContext createRemoteDataContext() {

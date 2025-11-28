@@ -80,7 +80,7 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
                 throw e;
             }
         }
-        return describeService.describe(cluster).toV1Response();
+        return describeService.describe(getCluster(userCrn, environmentCrn, true)).toV1Response();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
                 throw e;
             }
         }
-        return describeService.describe(cluster);
+        return describeService.describe(getCluster(userCrn, environmentCrn, true));
     }
 
     @Override
@@ -126,7 +126,11 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     private OnPremisesApiProto.Cluster getCluster(String userCrn, String crn) {
-        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(userCrn, crn);
+        return getCluster(userCrn, crn, false);
+    }
+
+    private OnPremisesApiProto.Cluster getCluster(String userCrn, String crn, boolean withDetails) {
+        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(userCrn, crn, withDetails);
         if (!isBaseCluster(cluster)) {
             throw new BadRequestException("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
         }
