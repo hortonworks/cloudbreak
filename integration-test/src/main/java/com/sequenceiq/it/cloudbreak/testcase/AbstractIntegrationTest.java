@@ -402,6 +402,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected void waitForEnvironmentCreation(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
+                .awaitForFlow()
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
                 .validate();
