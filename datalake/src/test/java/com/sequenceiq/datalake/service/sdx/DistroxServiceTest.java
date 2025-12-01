@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.service.sdx.SdxTestUtil.CLUSTER_NAME;
 import static com.sequenceiq.datalake.service.sdx.SdxTestUtil.USER_CRN;
 import static com.sequenceiq.datalake.service.sdx.SdxTestUtil.getSdxCluster;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -77,22 +79,25 @@ class DistroxServiceTest {
         clusterV4Response.setStatus(Status.AVAILABLE);
         stackV4Response.setCluster(clusterV4Response);
 
-        when(sdxService.getByNameInAccountAllowDetached(anyString(), anyString()))
+        ArgumentCaptor<String> crnArgCaptor = ArgumentCaptor.forClass(String.class);
+        when(sdxService.getByNameInAccountAllowDetached(crnArgCaptor.capture(), anyString()))
                 .thenReturn(sdxCluster);
         when(distroXV1Endpoint.list(eq(null), eq(sdxCluster.getEnvCrn()))).thenReturn(stackViewV4Responses);
         when(distroXV1Endpoint.getByCrn(any(), any())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, null));
 
         verify(distroXV1Endpoint, times(2)).list(null, sdxCluster.getEnvCrn());
         verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any());
+        assertEquals("crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com", crnArgCaptor.getValue());
     }
 
     @Test
     void refreshDatahubsWithName() {
         SdxCluster sdxCluster = getSdxCluster();
-        when(sdxService.getByNameInAccountAllowDetached(anyString(), anyString()))
+
+        ArgumentCaptor<String> crnArgCaptor = ArgumentCaptor.forClass(String.class);
+        when(sdxService.getByNameInAccountAllowDetached(crnArgCaptor.capture(), anyString()))
                 .thenReturn(sdxCluster);
         StackV4Response stackV4Response = mock(StackV4Response.class);
         when(stackV4Response.getCrn()).thenReturn(
@@ -101,11 +106,11 @@ class DistroxServiceTest {
                         .setAccountId(UUID.randomUUID().toString())
                         .build().toString());
         when(distroXV1Endpoint.getByName(anyString(), eq(null))).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, "datahubName"));
 
         verify(distroXV1Endpoint, times(1)).getByName(anyString(), eq(null));
         verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any());
+        assertEquals("crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com", crnArgCaptor.getValue());
     }
 }
