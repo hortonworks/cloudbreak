@@ -28,6 +28,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -536,9 +539,9 @@ class ClusterRepairFlowEventChainFactoryTest {
     void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), RepairType.ALL_AT_ONCE, false, "variant");
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackDto.getId(), Map.of(), RepairType.ALL_AT_ONCE, false, "variant");
 
-        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
@@ -548,11 +551,11 @@ class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "triggeredVariant";
-        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), RepairType.ALL_AT_ONCE, Map.of(),
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackDto.getId(), RepairType.ALL_AT_ONCE, Map.of(),
                 false, triggeredVariant, false);
 
-        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
@@ -562,25 +565,25 @@ class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
-        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), RepairType.ALL_AT_ONCE,
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackDto.getId(), RepairType.ALL_AT_ONCE,
                 Map.of(), false, triggeredVariant, false);
 
-        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
-    void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotEntitledFor() {
+    void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndNotEntitledForMigration() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
-        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), RepairType.ALL_AT_ONCE,
+        when(stackDto.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackDto.getId(), RepairType.ALL_AT_ONCE,
                 Map.of(), false, triggeredVariant, false);
 
-        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
@@ -591,14 +594,63 @@ class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
         when(stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)).thenReturn(true);
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), RepairType.ALL_AT_ONCE,
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackDto.getId(), RepairType.ALL_AT_ONCE,
                 Map.of(), false, triggeredVariant, false);
 
-        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
         Assertions.assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         assertEquals(groupName, actual.getHostGroupName());
+    }
+
+    @Test
+    void testAddAwsNativeMigrationIfNeedWhenRepairForAllNodesAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration() {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        String triggeredVariant = "AWS_NATIVE";
+        when(stackUpgradeService.allNodesSelectedForRepair(any(), any())).thenReturn(true);
+        when(stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)).thenReturn(true);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackDto.getId(), Map.of(), RepairType.ALL_AT_ONCE, false,
+                triggeredVariant, false, false);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
+
+        Assertions.assertFalse(flowTriggers.isEmpty());
+        AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
+        assertEquals(groupName, actual.getHostGroupName());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"AWS"})
+    @NullAndEmptySource
+    void testAddAwsNativeMigrationIfNeedWhenRepairForAllNodesAndNotAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration(
+            String triggeredVariant) {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        when(stackUpgradeService.allNodesSelectedForRepair(any(), any())).thenReturn(true);
+        when(stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)).thenReturn(false);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackDto.getId(), Map.of(), RepairType.ALL_AT_ONCE, false,
+                triggeredVariant, false, false);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
+
+        Assertions.assertTrue(flowTriggers.isEmpty());
+    }
+
+    @Test
+    void testAddAwsNativeMigrationIfNeedWhenRepairAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotAllNodesRequestedInRepair() {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        String triggeredVariant = "AWS";
+        when(stackUpgradeService.allNodesSelectedForRepair(any(), any())).thenReturn(false);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackDto.getId(), Map.of(), RepairType.ALL_AT_ONCE, false,
+                triggeredVariant, false, false);
+
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
+
+        Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
     @Test

@@ -158,15 +158,19 @@ public class ClusterRepairService {
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
+        StackDto stack = stackDtoService.getById(stackId);
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, hostGroups, null, false);
+                validateRepair(ManualClusterRepairMode.HOST_GROUP, stack, hostGroups, false);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stack, ThreadBasedUserCrnProvider.getUserCrn(), Boolean.FALSE, repairStart);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, hostGroups, upgradeVariant, false);
     }
 
     public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean restartServices) {
+        StackDto stack = stackDtoService.getById(stackId);
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, nodeIds, null, false);
+                validateRepair(ManualClusterRepairMode.NODE_ID, stack, nodeIds, deleteVolumes);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stack, ThreadBasedUserCrnProvider.getUserCrn(), Boolean.FALSE, repairStart);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, nodeIds, upgradeVariant, false);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {

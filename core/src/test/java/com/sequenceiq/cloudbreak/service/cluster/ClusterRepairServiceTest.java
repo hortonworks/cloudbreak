@@ -236,6 +236,7 @@ class ClusterRepairServiceTest {
 
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(RepairType.ALL_AT_ONCE), eq(false), any(),
                 eq(false));
+        verify(stackUpgradeService, times(1)).calculateUpgradeVariant(any(), eq(USER_CRN), eq(false), any());
     }
 
     @Test
@@ -429,6 +430,7 @@ class ClusterRepairServiceTest {
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(RepairType.ALL_AT_ONCE),
                 eq(false), any(), eq(false));
+        verify(stackUpgradeService, times(1)).calculateUpgradeVariant(any(), eq(USER_CRN), eq(false), any());
     }
 
     @Test
