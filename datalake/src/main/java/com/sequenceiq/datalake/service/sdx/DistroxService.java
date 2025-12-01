@@ -125,8 +125,7 @@ public class DistroxService {
 
     public SdxRefreshDatahubResponse refreshDataHub(String clusterName, String datahubName) {
         SdxRefreshDatahubResponse response = new SdxRefreshDatahubResponse();
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(ThreadBasedUserCrnProvider.getUserCrn());
-        SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(clusterName, accountIdFromCrn);
+        SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), clusterName);
         if (Strings.isNullOrEmpty(datahubName)) {
             restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
             getAttachedDistroXClusters(sdxCluster.getEnvCrn())
