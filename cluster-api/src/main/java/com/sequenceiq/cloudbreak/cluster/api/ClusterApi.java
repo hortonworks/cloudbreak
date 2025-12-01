@@ -56,14 +56,6 @@ public interface ClusterApi {
         clusterModificationService().enableZookeeperMigrationMode(stackDtoDelegate);
     }
 
-    default void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
-        clusterModificationService().restartKafkaBrokerNodes(stackDtoDelegate);
-    }
-
-    default void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
-        clusterModificationService().restartKafkaConnectNodes(stackDtoDelegate);
-    }
-
     default void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
         clusterModificationService().migrateZookeeperToKraft(stackDtoDelegate);
     }

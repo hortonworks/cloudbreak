@@ -24,10 +24,6 @@ public interface ClusterModificationService {
 
     void enableZookeeperMigrationMode(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
-    void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
-
-    void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
-
     void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
     void finalizeZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;

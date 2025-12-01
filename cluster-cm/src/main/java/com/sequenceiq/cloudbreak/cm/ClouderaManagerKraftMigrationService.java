@@ -33,10 +33,6 @@ public class ClouderaManagerKraftMigrationService {
 
     private static final String KAFKA_SERVICE_TYPE = "KAFKA";
 
-    private static final String KAFKA_BROKER_ROLE = "KAFKA_BROKER";
-
-    private static final String KAFKA_CONNECT_ROLE = "KAFKA_CONNECT";
-
     private static final String KRAFT_MIGRATION_COMMAND_NAME = "KRaftMigrationCommand";
 
     private static final String KRAFT_FINALIZE_MIGRATION_COMMAND_NAME = "KRaftFinalizeMigrationCommand";
@@ -110,16 +106,6 @@ public class ClouderaManagerKraftMigrationService {
             LOGGER.error("Failed to finalize Zookeeper to KRaft migration", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
-    }
-
-    public void restartKafkaBrokerNodes(ApiClient client, StackDtoDelegate stackDtoDelegate) {
-        LOGGER.info("Restarting Kafka Broker nodes for cluster {}.", stackDtoDelegate.getCluster().getName());
-        clouderaManagerRestartService.restartServiceRolesByType(stackDtoDelegate, client, KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
-    }
-
-    public void restartKafkaConnectNodes(ApiClient client, StackDtoDelegate stackDtoDelegate) {
-        LOGGER.info("Restarting Kafka Connect nodes for cluster {}.", stackDtoDelegate.getCluster().getName());
-        clouderaManagerRestartService.restartServiceRolesByType(stackDtoDelegate, client, KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
     }
 
     public void migrateZookeeperToKraft(ApiClient client, StackDtoDelegate stackDtoDelegate) {

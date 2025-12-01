@@ -1710,20 +1710,6 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void testRestartKafkaConnectNodes() {
-        underTest.restartKafkaConnectNodes(stack);
-
-        verify(clouderaManagerKraftMigrationService).restartKafkaConnectNodes(eq(v31Client), eq(stack));
-    }
-
-    @Test
-    public void testRestartKafkaBrokerNodes() {
-        underTest.restartKafkaBrokerNodes(stack);
-
-        verify(clouderaManagerKraftMigrationService).restartKafkaBrokerNodes(eq(v31Client), eq(stack));
-    }
-
-    @Test
     public void testMigrateZookeeperToKraft() {
         underTest.migrateZookeeperToKraft(stack);
 

@@ -16,12 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -30,6 +30,10 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final String KAFKA_SERVICE_TYPE = "KAFKA";
+
+    private static final String KAFKA_BROKER_ROLE = "KAFKA_BROKER";
 
     @Mock
     private StackDtoService stackDtoService;
@@ -40,38 +44,43 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandlerTest {
     @Mock
     private ClusterApi clusterApi;
 
+    @Mock
+    private ClusterModificationService clusterModificationService;
+
     @InjectMocks
     private MigrateZookeeperToKraftRestartKafkaBrokerNodesHandler underTest;
 
     @Test
-    void testDoAcceptSuccess() throws Exception {
+    void testDoAcceptSuccess() {
         StackDto stackDto = new StackDto();
         MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_RESTART_KAFKA_CONNECT_NODES_EVENT.name(), result.getSelector());
-        verify(clusterApi).restartKafkaBrokerNodes(stackDto);
+        verify(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
     }
 
     @Test
-    void testDoAcceptFailure() throws Exception {
+    void testDoAcceptFailure() {
         StackDto stackDto = new StackDto();
         MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
 
-        doThrow(new CloudbreakException("error")).when(clusterApi).restartKafkaBrokerNodes(stackDto);
+        doThrow(new RuntimeException("error")).when(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftFailureEvent.class, result);
         assertEquals(FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
-        verify(clusterApi).restartKafkaBrokerNodes(stackDto);
+        verify(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
     }
 }

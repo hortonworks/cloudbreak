@@ -107,22 +107,6 @@ class ClouderaManagerKraftMigrationServiceTest {
     }
 
     @Test
-    void testRestartKafkaBrokerNodes() {
-        underTest.restartKafkaBrokerNodes(apiClient, stackDtoDelegate);
-
-        verify(clouderaManagerRestartService).restartServiceRolesByType(
-                eq(stackDtoDelegate), eq(apiClient), eq(KAFKA_SERVICE_TYPE), eq("KAFKA_BROKER"));
-    }
-
-    @Test
-    void testRestartKafkaConnectNodes() {
-        underTest.restartKafkaConnectNodes(apiClient, stackDtoDelegate);
-
-        verify(clouderaManagerRestartService).restartServiceRolesByType(
-                eq(stackDtoDelegate), eq(apiClient), eq(KAFKA_SERVICE_TYPE), eq("KAFKA_CONNECT"));
-    }
-
-    @Test
     void testMigrateZookeeperToKraft() throws ApiException {
         ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
         ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));

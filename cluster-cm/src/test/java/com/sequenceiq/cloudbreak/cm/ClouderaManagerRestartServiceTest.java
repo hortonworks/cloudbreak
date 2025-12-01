@@ -181,7 +181,7 @@ class ClouderaManagerRestartServiceTest {
     }
 
     @Test
-    void testRestartServiceRoleByType() throws ApiException, CloudbreakException {
+    void testRestartServiceRoleByType() throws ApiException {
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
         when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
         when(clouderaManagerApiFactory.getRoleCommandsResourceApi(any())).thenReturn(roleCommandsResourceApi);
@@ -192,9 +192,9 @@ class ClouderaManagerRestartServiceTest {
         when(apiService.getName()).thenReturn("knox");
         when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
         ApiRoleList apiRoleList = mock(ApiRoleList.class);
-        ApiRole apiRole = mock(ApiRole.class);
-        when(apiRoleList.getItems()).thenReturn(List.of(apiRole));
-        when(apiRole.getName()).thenReturn("knoxRoleName");
+        ApiRole apiRole1 = new ApiRole().name("role1");
+        ApiRole apiRole2 = new ApiRole().name("role2");
+        when(apiRoleList.getItems()).thenReturn(List.of(apiRole1, apiRole2));
         when(rolesResourceApi.readRoles(any(), any(), any(), any())).thenReturn(apiRoleList);
         ApiBulkCommandList apiBulkCommandList = mock(ApiBulkCommandList.class);
         when(apiBulkCommandList.getItems()).thenReturn(List.of(mock(ApiCommand.class)));
@@ -203,7 +203,8 @@ class ClouderaManagerRestartServiceTest {
         underTest.restartServiceRoleByType(stack, apiClient, "KNOX", "IDBROKER");
 
         ApiRoleNameList apiRoleNameList = new ApiRoleNameList();
-        apiRoleNameList.addItemsItem("knoxRoleName");
+        apiRoleNameList.addItemsItem(apiRole1.getName());
+        apiRoleNameList.addItemsItem(apiRole2.getName());
 
         verify(roleCommandsResourceApi, times(1)).restartCommand("stack-name", "knox", apiRoleNameList);
     }

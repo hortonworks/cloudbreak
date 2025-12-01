@@ -241,16 +241,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void restartKafkaBrokerNodes(StackDtoDelegate stackDtoDelegate) {
-        clouderaManagerKraftMigrationService.restartKafkaBrokerNodes(v31Client, stackDtoDelegate);
-    }
-
-    @Override
-    public void restartKafkaConnectNodes(StackDtoDelegate stackDtoDelegate) {
-        clouderaManagerKraftMigrationService.restartKafkaConnectNodes(v31Client, stackDtoDelegate);
-    }
-
-    @Override
     public void migrateZookeeperToKraft(StackDtoDelegate stackDtoDelegate) {
         clouderaManagerKraftMigrationService.migrateZookeeperToKraft(v31Client, stackDtoDelegate);
     }

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFailureEvent;
@@ -22,7 +22,12 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends ExceptionCatcherEventHandler<MigrateZookeeperToKraftEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MigrateZookeeperToKraftRestartKafkaConnectNodesHandler.class);
+
+    private static final String KAFKA_SERVICE_TYPE = "KAFKA";
+
+    private static final String KAFKA_CONNECT_ROLE = "KAFKA_CONNECT";
 
     @Inject
     private StackDtoService stackDtoService;
@@ -40,9 +45,9 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends Exce
     protected Selectable doAccept(HandlerEvent<MigrateZookeeperToKraftEvent> event) {
         Long stackId = event.getData().getResourceId();
         StackDto stackDto = stackDtoService.getById(stackId);
-        ClusterApi connector = getClusterConnector(stackDto);
+        ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         try {
-            connector.restartKafkaConnectNodes(stackDto);
+            clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka connect nodes) failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);
@@ -55,7 +60,7 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends Exce
         return RESTART_KAFKA_CONNECT_NODES_EVENT.selector();
     }
 
-    private ClusterApi getClusterConnector(StackDto stackDto) {
-        return clusterApiConnectors.getConnector(stackDto);
+    private ClusterModificationService getClusterModificationService(StackDto stackDto) {
+        return clusterApiConnectors.getConnector(stackDto).clusterModificationService();
     }
 }

@@ -101,30 +101,6 @@ public class ClouderaManagerRestartService {
             }
             ApiRoleNameList apiRoleNameList = new ApiRoleNameList();
             RoleCommandsResourceApi roleCommandsResourceApi = clouderaManagerApiFactory.getRoleCommandsResourceApi(apiClient);
-            apiRoleNameList.addItemsItem(apiRoleList.getItems().get(0).getName());
-            ApiBulkCommandList apiCommands = roleCommandsResourceApi.restartCommand(stack.getName(), serviceName, apiRoleNameList);
-            for (ApiCommand apiCommand : apiCommands.getItems()) {
-                waitForRestartExecution(apiClient, stack, apiCommand);
-            }
-        } catch (ApiException | CloudbreakException e) {
-            LOGGER.info("Could not restart services", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
-    }
-
-    public void restartServiceRolesByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType) {
-        try {
-            RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
-            String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
-                    .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by role '%s' in cluster '%s'.",
-                            serviceType, stack.getName())));
-            ApiRoleList apiRoleList = rolesResourceApi.readRoles(stack.getName(), serviceName, String.format("type==%s", roleType), SUMMARY.name());
-            if (apiRoleList.getItems() == null || apiRoleList.getItems().isEmpty()) {
-                throw new ClouderaManagerOperationFailedException(String.format("Cannot find CM service role by type '%s' in cluster '%s'.",
-                        roleType, stack.getName()));
-            }
-            ApiRoleNameList apiRoleNameList = new ApiRoleNameList();
-            RoleCommandsResourceApi roleCommandsResourceApi = clouderaManagerApiFactory.getRoleCommandsResourceApi(apiClient);
             for (ApiRole apiRole : apiRoleList.getItems()) {
                 apiRoleNameList.addItemsItem(apiRole.getName());
             }
