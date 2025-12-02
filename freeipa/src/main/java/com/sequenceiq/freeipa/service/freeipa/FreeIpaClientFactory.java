@@ -194,7 +194,7 @@ public class FreeIpaClientFactory {
     }
 
     public FreeIpaClient getFreeIpaClientForInstance(Stack stack, String fqdn) throws FreeIpaClientException {
-        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
+        LOGGER.debug("Creating FreeIpaClient for stack {} with fqdn {}", stack.getResourceCrn(), fqdn);
         return getFreeIpaClient(stack.getId(), false, false, Optional.of(fqdn));
     }
 

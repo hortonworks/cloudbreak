@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class EnvironmentClusterTest extends AbstractMockTest {
 
@@ -120,11 +121,12 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                 .withEnvironment()
                 .when(freeIpaTestClient.create())
-                .awaitForFlow()
+                .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .withEnvironment()
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow()
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
                 .given(DistroXTestDto.class)
                 .withEnvironmentName("")
                 .whenException(distroXTestClient.create(), TestFailException.class, expectedMessage("Env name cannot be null"))
