@@ -54,7 +54,7 @@ public class BackupRestoreSaltConfigGenerator {
     public static final String BACKUP_RESTORE_CONFIG_PATH = "/postgresql/backup_restore_config.sls";
 
     public static final List<DatabaseType> DEFAULT_BACKUP_DATABASE =
-            List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC, DatabaseType.KNOX_GATEWAY);
+            List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
 

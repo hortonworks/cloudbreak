@@ -113,14 +113,6 @@ execute_run() {
     doLog "INFO database for $SERVICE exist"
   fi
 
-  is_database_exists "knox_gateway"
-  if [ "$?" -eq 1 ]; then
-    doLog "ERROR database for $SERVICE doesn't exist"
-    ((FAILED++))
-  else
-    doLog "INFO database for $SERVICE exist"
-  fi
-
   doLog "INFO backup dir:" "$BACKUPS_DIR"
   mkdir -p "$BACKUPS_DIR"
   OBJECT_STORE_PATH=${BACKUP_LOCATION::-1}
