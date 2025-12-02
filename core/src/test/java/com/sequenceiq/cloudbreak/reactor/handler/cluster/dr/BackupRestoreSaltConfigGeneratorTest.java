@@ -100,7 +100,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
 
         assertEquals("s3a://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
         assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
-        assertEquals("ranger profiler_agent profiler_metric knox_gateway", disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
+        assertEquals("ranger profiler_agent profiler_metric", disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
 
     }
 
