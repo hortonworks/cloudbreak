@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentV2Endpoint;
@@ -19,8 +21,8 @@ public class RemoteEnvironmentV2Controller implements RemoteEnvironmentV2Endpoin
     private RemoteEnvironmentService remoteEnvironmentService;
 
     @Override
-    public DescribeEnvironmentV2Response getByCrn(DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentV2Response getByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.describeV2(request);
+        return remoteEnvironmentService.describeV2(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 }
