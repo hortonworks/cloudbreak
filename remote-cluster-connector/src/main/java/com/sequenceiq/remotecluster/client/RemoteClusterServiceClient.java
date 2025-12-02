@@ -21,7 +21,6 @@ import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
@@ -77,8 +76,8 @@ public class RemoteClusterServiceClient {
         return registerPvcBaseClusterResponse.getClusterCrn();
     }
 
-    public List<Cluster> listClassicClusters() {
-        OnPremisesApiGrpc.OnPremisesApiBlockingStub blockingStub = createOnPremisesApiBlockingStub();
+    public List<Cluster> listClassicClusters(String userCrn) {
+        OnPremisesApiGrpc.OnPremisesApiBlockingStub blockingStub = createOnPremisesApiBlockingStub(userCrn);
         List<Cluster> clusters = new ArrayList<>();
         String nextPageToken = "";
 
@@ -87,7 +86,6 @@ public class RemoteClusterServiceClient {
                     .setPageSize(LIST_CLUSTERS_PAGE_SIZE)
                     .setPageToken(nextPageToken)
                     .build();
-            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             LOGGER.info("Created request to list clusters: {}, with actor('{}')", request, userCrn);
             OnPremisesApiProto.ListClustersResponse response = blockingStub.listClusters(request);
             clusters.addAll(response.getClustersList());
@@ -97,12 +95,12 @@ public class RemoteClusterServiceClient {
         return clusters;
     }
 
-    public Cluster describeClassicCluster(String clusterCrn) {
+    public Cluster describeClassicCluster(String userCrn, String clusterCrn) {
         OnPremisesApiProto.DescribeClusterRequest request = OnPremisesApiProto.DescribeClusterRequest.newBuilder()
                 .setClusterCrn(clusterCrn)
                 .build();
         LOGGER.info("Created request to describe cluster {}: {}", clusterCrn, request);
-        return createOnPremisesApiBlockingStub().describeCluster(request).getCluster();
+        return createOnPremisesApiBlockingStub(userCrn).describeCluster(request).getCluster();
     }
 
     private RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub createRemoteClusterInternalBlockingStub() {
@@ -111,9 +109,8 @@ public class RemoteClusterServiceClient {
                 remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
     }
 
-    private OnPremisesApiGrpc.OnPremisesApiBlockingStub createOnPremisesApiBlockingStub() {
+    private OnPremisesApiGrpc.OnPremisesApiBlockingStub createOnPremisesApiBlockingStub(String userCrn) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return stubProvider.newOnPremisesStub(channelWrapper.getChannel(), requestId, remoteClusterConfig.getGrpcTimeoutSec(), userCrn);
     }
 }

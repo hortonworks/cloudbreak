@@ -27,8 +27,8 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
@@ -52,8 +52,8 @@ public class RemoteEnvironmentService {
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
-    public SimpleRemoteEnvironmentResponses list(List<String> types) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+    public SimpleRemoteEnvironmentResponses list(String userCrn, List<String> types) {
+        String accountId = Crn.safeFromString(userCrn).getAccountId();
         if (!entitlementService.hybridCloudEnabled(accountId)) {
             return new SimpleRemoteEnvironmentResponses();
         }
@@ -68,12 +68,12 @@ public class RemoteEnvironmentService {
         if (wantPrivate && !wantClassic) {
             LOGGER.info("Only PRIVATE_CONTROL_PLANE or empty type: list private environments only");
             result.addAll(remoteEnvironmentConnectorProvider.getForType(RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE)
-                    .list(accountId));
+                    .list(userCrn));
         } else if (wantClassic && !wantPrivate) {
-            result.addAll(filterClassicClustersWithoutPrivateEnvironments(accountId));
+            result.addAll(filterClassicClustersWithoutPrivateEnvironments(userCrn));
         } else {
             LOGGER.info("Both: list all classic clusters and private environments, no filtering");
-            Set<SimpleRemoteEnvironmentResponse> remoteEnvironments = getRemoteEnvironmentsByConnectorType(accountId).values().stream()
+            Set<SimpleRemoteEnvironmentResponse> remoteEnvironments = getRemoteEnvironmentsByConnectorType(userCrn).values().stream()
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
             result.addAll(remoteEnvironments);
@@ -82,9 +82,9 @@ public class RemoteEnvironmentService {
         return new SimpleRemoteEnvironmentResponses(result);
     }
 
-    private Collection<SimpleRemoteEnvironmentResponse> filterClassicClustersWithoutPrivateEnvironments(String accountId) {
+    private Collection<SimpleRemoteEnvironmentResponse> filterClassicClustersWithoutPrivateEnvironments(String userCrn) {
         LOGGER.info("Only CLASSIC_CLUSTER: list classic clusters, filter out those with private envs");
-        Map<RemoteEnvironmentConnectorType, Collection<SimpleRemoteEnvironmentResponse>> remoteEnvsByType = getRemoteEnvironmentsByConnectorType(accountId);
+        Map<RemoteEnvironmentConnectorType, Collection<SimpleRemoteEnvironmentResponse>> remoteEnvsByType = getRemoteEnvironmentsByConnectorType(userCrn);
 
         Collection<SimpleRemoteEnvironmentResponse> classicClusters = remoteEnvsByType.get(RemoteEnvironmentConnectorType.CLASSIC_CLUSTER);
         LOGGER.debug("Classic clusters found: {}", classicClusters);
@@ -106,13 +106,13 @@ public class RemoteEnvironmentService {
         return result;
     }
 
-    private Map<RemoteEnvironmentConnectorType, Collection<SimpleRemoteEnvironmentResponse>> getRemoteEnvironmentsByConnectorType(String accountId) {
+    private Map<RemoteEnvironmentConnectorType, Collection<SimpleRemoteEnvironmentResponse>> getRemoteEnvironmentsByConnectorType(String userCrn) {
         Map<RemoteEnvironmentConnectorType, Future<Collection<SimpleRemoteEnvironmentResponse>>> remoteEnvironmentFutures = new HashMap<>();
         List<RemoteEnvironmentConnectorType> remoteEnvTypes =
                 List.of(RemoteEnvironmentConnectorType.CLASSIC_CLUSTER, RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE);
         for (RemoteEnvironmentConnectorType type : remoteEnvTypes) {
             remoteEnvironmentFutures.put(type,
-                    intermediateBuilderExecutor.submit(() -> remoteEnvironmentConnectorProvider.getForType(type).list(accountId)));
+                    intermediateBuilderExecutor.submit(() -> remoteEnvironmentConnectorProvider.getForType(type).list(userCrn)));
         }
 
         Map<RemoteEnvironmentConnectorType, Collection<SimpleRemoteEnvironmentResponse>> remoteEnvsByType = remoteEnvironmentFutures.entrySet()
@@ -127,46 +127,42 @@ public class RemoteEnvironmentService {
         return remoteEnvsByType;
     }
 
-    public DescribeEnvironmentResponse describeV1(DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentResponse describeV1(String userCrn, DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        throwExceptionIfNotEntitled(accountId);
+        throwExceptionIfNotEntitled(userCrn);
         DescribeEnvironmentResponse describeEnvironmentResponse = remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV1(accountId, request.getCrn());
+                .describeV1(userCrn, request.getCrn());
         Optional.ofNullable(describeEnvironmentResponse.getEnvironment()).ifPresent(environment -> environment.setCrn(request.getCrn()));
         return describeEnvironmentResponse;
     }
 
-    public DescribeEnvironmentV2Response describeV2(DescribeRemoteEnvironment request) {
+    public DescribeEnvironmentV2Response describeV2(String userCrn, DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        throwExceptionIfNotEntitled(accountId);
+        throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .describeV2(accountId, request.getCrn());
+                .describeV2(userCrn, request.getCrn());
     }
 
-    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(DescribeRemoteEnvironment request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        throwExceptionIfNotEntitled(accountId);
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(String userCrn, DescribeRemoteEnvironment request) {
+        throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
-                .getRemoteDataContext(accountId, request.getCrn());
+                .getRemoteDataContext(userCrn, request.getCrn());
     }
 
-    public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(DescribeDatalakeServicesRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        throwExceptionIfNotEntitled(accountId);
+    public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(String userCrn, DescribeDatalakeServicesRequest request) {
+        throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getClusterid())
-                .getDatalakeServices(accountId, request.getClusterid());
+                .getDatalakeServices(userCrn, request.getClusterid());
     }
 
-    public GetRootCertificateResponse getRootCertificateByCrn(String environmentCrn) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        throwExceptionIfNotEntitled(accountId);
+    public GetRootCertificateResponse getRootCertificateByCrn(String userCrn, String environmentCrn) {
+        throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(environmentCrn)
-                .getRootCertificate(accountId, environmentCrn);
+                .getRootCertificate(userCrn, environmentCrn);
     }
 
-    private void throwExceptionIfNotEntitled(String accountId) {
+    private void throwExceptionIfNotEntitled(String userCrn) {
+        String accountId = Crn.safeFromString(userCrn).getAccountId();
         if (!entitlementService.hybridCloudEnabled(accountId)) {
             throw new BadRequestException(String.format("Entitlement %s is required for this operation", CDP_HYBRID_CLOUD));
         }
