@@ -103,6 +103,7 @@ public class FreeIpaAvailabilityAssertion {
                 try {
                     available().doAssertion(testContext, freeIpaTestDto, client);
                     errorCount = 0;
+                    Thread.sleep(ASSERTION_ERROR_SLEEPDURATION);
                 } catch (TestFailException ex) {
                     errorCount++;
                     LOGGER.warn("Freeipa availabilty assertion error during upgrade, tolerable count is {}, actual count is {}",
