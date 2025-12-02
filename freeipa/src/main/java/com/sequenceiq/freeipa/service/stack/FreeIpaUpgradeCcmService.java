@@ -6,6 +6,8 @@ import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.UPGRADE_CCM_CH
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,24 +31,20 @@ public class FreeIpaUpgradeCcmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeCcmService.class);
 
-    private final FreeIpaFlowManager flowManager;
+    @Inject
+    private FreeIpaFlowManager flowManager;
 
-    private final StackService stackService;
+    @Inject
+    private StackService stackService;
 
-    private final StackUpdater stackUpdater;
+    @Inject
+    private StackUpdater stackUpdater;
 
-    private final OperationService operationService;
+    @Inject
+    private OperationService operationService;
 
-    private final OperationToOperationStatusConverter operationConverter;
-
-    public FreeIpaUpgradeCcmService(FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater,
-            OperationService operationService, OperationToOperationStatusConverter operationConverter) {
-        this.flowManager = flowManager;
-        this.stackService = stackService;
-        this.stackUpdater = stackUpdater;
-        this.operationService = operationService;
-        this.operationConverter = operationConverter;
-    }
+    @Inject
+    private OperationToOperationStatusConverter operationConverter;
 
     public OperationStatus upgradeCcm(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);

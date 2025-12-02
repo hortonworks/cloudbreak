@@ -246,8 +246,18 @@
             <property name="onCommentFormat" value="CHECKSTYLE_CHECK:ON (\w+)"/>
             <property name="checkFormat" value="$1"/>
         </module>
-
+        <module name="MatchXpath">
+            <property name="id" value="NoInjectCtorComponent"/>
+            <property name="query" value="//CLASS_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='Component'] and ./OBJBLOCK/CTOR_DEF[./MODIFIERS/LITERAL_PUBLIC]]" />
+            <message key="matchxpath.match" value="Constructor injection is disabled. Remove the bean from the constructor." />
+        </module>
+        <module name="MatchXpath">
+            <property name="id" value="NoInjectCtorService"/>
+            <property name="query" value="//CLASS_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='Service'] and ./OBJBLOCK/CTOR_DEF[./MODIFIERS/LITERAL_PUBLIC]]" />
+            <message key="matchxpath.match" value="Constructor injection is disabled. Remove the bean from the constructor." />
+        </module>
     </module>
+
 
     <!-- Deprecation -->
     <module name="RegexpMultiline">

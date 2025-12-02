@@ -10,9 +10,10 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -48,19 +49,21 @@ public class TelemetryConverterTest {
     @Mock
     private MonitoringUrlResolver monitoringUrlResolver;
 
+    private TelemetryConfiguration configuration;
+
     @Mock
     private EntitlementService entitlementService;
 
+    @InjectMocks
     private TelemetryConverter underTest;
 
     @BeforeEach
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
-        MockitoAnnotations.openMocks(this);
-        underTest = new TelemetryConverter(telemetryConfiguration, true, monitoringUrlResolver, entitlementService);
+        configuration = new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
+        ReflectionTestUtils.setField(underTest, "freeIpaTelemetryEnabled", true);
+        ReflectionTestUtils.setField(underTest, "configuration", configuration);
     }
 
     @Test

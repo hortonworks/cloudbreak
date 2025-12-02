@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.converter.backup;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,15 +20,11 @@ import com.sequenceiq.freeipa.configuration.BackupConfiguration;
 public class BackupConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupConverter.class);
 
-    private final boolean freeIpaBackupEnabled;
+    @Value("${freeipa.backup.enabled:true}")
+    private boolean freeIpaBackupEnabled;
 
-    private final BackupConfiguration backupConfiguration;
-
-    public BackupConverter(BackupConfiguration backupConfiguration,
-            @Value("${freeipa.backup.enabled:true}") boolean freeIpaBackupEnabled) {
-        this.backupConfiguration = backupConfiguration;
-        this.freeIpaBackupEnabled = freeIpaBackupEnabled;
-    }
+    @Inject
+    private BackupConfiguration backupConfiguration;
 
     public Backup convert(TelemetryRequest request) {
         Backup backup = null;

@@ -6,6 +6,11 @@ import static org.hamcrest.core.Is.is;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -13,21 +18,27 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.configuration.BackupConfiguration;
 
+@ExtendWith(MockitoExtension.class)
 public class BackupConverterTest {
 
     private static final String INSTANCE_PROFILE_VALUE = "myInstanceProfile";
 
     private static final String DATABUS_ENDPOINT = "myCustomEndpoint";
 
+    @InjectMocks
     private BackupConverter underTest;
 
+    @InjectMocks
     private BackupConverter underTestBackupDisabled;
+
+    @Mock
+    private BackupConfiguration backupConfiguration;
 
     @BeforeEach
     public void setUp() {
         BackupConfiguration backupConfiguration = new BackupConfiguration(true, true, true);
-        underTest = new BackupConverter(backupConfiguration, true);
-        underTestBackupDisabled = new BackupConverter(backupConfiguration, false);
+        ReflectionTestUtils.setField(underTest, "freeIpaBackupEnabled", true);
+        ReflectionTestUtils.setField(underTestBackupDisabled, "freeIpaBackupEnabled", false);
     }
 
     @Test

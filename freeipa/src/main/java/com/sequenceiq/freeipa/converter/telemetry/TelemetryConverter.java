@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,27 +32,17 @@ public class TelemetryConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryConverter.class);
 
-    private final boolean freeIpaTelemetryEnabled;
+    @Value("${freeipa.telemetry.enabled:true}")
+    private boolean freeIpaTelemetryEnabled;
 
-    private final boolean useSharedAltusCredential;
+    @Inject
+    private TelemetryConfiguration configuration;
 
-    private final String databusEndpoint;
+    @Inject
+    private MonitoringUrlResolver monitoringUrlResolver;
 
-    private final MonitoringUrlResolver monitoringUrlResolver;
-
-    private final EntitlementService entitlementService;
-
-    public TelemetryConverter(
-            TelemetryConfiguration configuration,
-            @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled,
-            MonitoringUrlResolver monitoringUrlResolver,
-            EntitlementService entitlementService) {
-        this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
-        this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
-        this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
-        this.monitoringUrlResolver = monitoringUrlResolver;
-        this.entitlementService = entitlementService;
-    }
+    @Inject
+    private EntitlementService entitlementService;
 
     public Telemetry convert(String accountId, TelemetryRequest request) {
         Telemetry telemetry = null;
@@ -59,7 +51,7 @@ public class TelemetryConverter {
             telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
             telemetry.setMonitoring(createMonitoringFromRequest(accountId, request.getMonitoring()));
             telemetry.setFeatures(createFeaturesFromRequest(request.getFeatures()));
-            telemetry.setDatabusEndpoint(databusEndpoint);
+            telemetry.setDatabusEndpoint(configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint());
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
         return telemetry;
@@ -155,7 +147,7 @@ public class TelemetryConverter {
 
     private Features createFeaturesFromRequest(FeaturesRequest featuresRequest) {
         Features features = new Features();
-        if (useSharedAltusCredential) {
+        if (configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential()) {
             features.addUseSharedAltusCredential(true);
         }
         if (featuresRequest != null && featuresRequest.getCloudStorageLogging() != null) {

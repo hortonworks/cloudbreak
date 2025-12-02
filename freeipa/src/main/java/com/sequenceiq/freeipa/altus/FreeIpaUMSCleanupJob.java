@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.inject.Inject;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -29,18 +31,14 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUMSCleanupJob.class);
 
-    private final UMSCleanupConfig umsCleanupConfig;
+    @Inject
+    private UMSCleanupConfig umsCleanupConfig;
 
-    private final AltusMachineUserService altusMachineUserService;
+    @Inject
+    private AltusMachineUserService altusMachineUserService;
 
-    private final StackService stackService;
-
-    public FreeIpaUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
-            StackService stackService) {
-        this.umsCleanupConfig = umsCleanupConfig;
-        this.altusMachineUserService = altusMachineUserService;
-        this.stackService = stackService;
-    }
+    @Inject
+    private StackService stackService;
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {

@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.telemetry;
 
 import java.util.List;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -11,11 +13,8 @@ import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndp
 @Service
 public class AccountTelemetryService {
 
-    private final AccountTelemetryEndpoint accountTelemetryEndpoint;
-
-    public AccountTelemetryService(AccountTelemetryEndpoint accountTelemetryEndpoint) {
-        this.accountTelemetryEndpoint = accountTelemetryEndpoint;
-    }
+    @Inject
+    private AccountTelemetryEndpoint accountTelemetryEndpoint;
 
     public List<AnonymizationRule> getAnonymizationRules(String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(

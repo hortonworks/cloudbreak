@@ -6,6 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +37,16 @@ public class DefaultInstanceTypeProvider {
 
     private static final String DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX = "freeipa.platform.default.instanceType.";
 
-    private final Map<String, Map<Architecture, String>> platformInstanceTypeMap;
+    private Map<String, Map<Architecture, String>> platformInstanceTypeMap = new HashMap<>();
 
-    public DefaultInstanceTypeProvider(CloudPlatformConnectors cloudPlatformConnectors, Environment environment) {
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private Environment environment;
+
+    @PostConstruct
+    public void init() {
         PlatformVariants platformVariants = cloudPlatformConnectors.getPlatformVariants();
         Map<String, Map<Architecture, String>> instanceMap = new HashMap<>();
         platformVariants.getDefaultVariants().keySet().forEach(platform -> {

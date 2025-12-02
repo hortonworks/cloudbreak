@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,17 +37,14 @@ public class AltusMachineUserService {
 
     private static final String FREEIPA_MONITORING_MACHINE_USER_PATTERN = "freeipa-monitoring-%s";
 
-    private final AltusIAMService altusIAMService;
+    @Inject
+    private AltusIAMService altusIAMService;
 
-    private final StackService stackService;
+    @Inject
+    private StackService stackService;
 
-    private final TransactionService transactionService;
-
-    public AltusMachineUserService(AltusIAMService altusIAMService, StackService stackService,  TransactionService transactionService) {
-        this.altusIAMService = altusIAMService;
-        this.stackService = stackService;
-        this.transactionService = transactionService;
-    }
+    @Inject
+    private TransactionService transactionService;
 
     public Optional<AltusCredential> createDatabusMachineUserWithAccessKeys(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String machineUserName = getFluentMachineUser(stack);

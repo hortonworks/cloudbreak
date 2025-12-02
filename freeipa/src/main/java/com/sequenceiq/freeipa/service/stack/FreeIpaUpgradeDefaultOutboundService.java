@@ -5,6 +5,8 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedS
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,31 +34,26 @@ public class FreeIpaUpgradeDefaultOutboundService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeDefaultOutboundService.class);
 
-    private final FreeIpaFlowManager flowManager;
+    @Inject
+    private FreeIpaFlowManager flowManager;
 
-    private final StackService stackService;
+    @Inject
+    private StackService stackService;
 
-    private final StackUpdater stackUpdater;
+    @Inject
+    private StackUpdater stackUpdater;
 
-    private final ResourceService resourceService;
+    @Inject
+    private ResourceService resourceService;
 
-    private final ResourceAttributeUtil resourceAttributeUtil;
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
 
-    private final OperationService operationService;
+    @Inject
+    private OperationService operationService;
 
-    private final OperationToOperationStatusConverter operationConverter;
-
-    public FreeIpaUpgradeDefaultOutboundService(FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater,
-            ResourceService resourceService, ResourceAttributeUtil resourceAttributeUtil, OperationService operationService,
-            OperationToOperationStatusConverter operationConverter) {
-        this.flowManager = flowManager;
-        this.stackService = stackService;
-        this.stackUpdater = stackUpdater;
-        this.resourceService = resourceService;
-        this.resourceAttributeUtil = resourceAttributeUtil;
-        this.operationService = operationService;
-        this.operationConverter = operationConverter;
-    }
+    @Inject
+    private OperationToOperationStatusConverter operationConverter;
 
     public OperationStatus upgradeDefaultOutbound(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);

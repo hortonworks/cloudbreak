@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -15,16 +17,13 @@ public abstract class OperationAcceptor {
 
     private static final String CONFLICT_REASON = "operation %s running for users %s in environments %s";
 
-    private final OperationRepository operationRepository;
-
-    protected OperationAcceptor(OperationRepository operationRepository) {
-        this.operationRepository = operationRepository;
-    }
+    @Inject
+    private OperationRepository operationRepository;
 
     protected abstract OperationType selector();
 
     public AcceptResult accept(Operation operation) {
-        List<Operation> runningOperations = operationRepository
+        List<Operation> runningOperations = getOperationRepository()
                 .findRunningByAccountIdAndType(operation.getAccountId(), selector());
         List<String> rejectionReasons = new ArrayList<>(runningOperations.size());
 

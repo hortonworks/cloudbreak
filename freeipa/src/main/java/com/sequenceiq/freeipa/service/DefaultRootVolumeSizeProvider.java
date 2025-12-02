@@ -1,9 +1,13 @@
 package com.sequenceiq.freeipa.service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +39,16 @@ public class DefaultRootVolumeSizeProvider {
 
     private static final String ROOT_VOLUME_SIZE_PROPERTY_PREFIX = "cb.platform.default.rootVolumeSize.";
 
-    private final Map<String, Integer> platformVolumeSizeMap;
+    private Map<String, Integer> platformVolumeSizeMap = new HashMap<>();
 
-    public DefaultRootVolumeSizeProvider(CloudPlatformConnectors cloudPlatformConnectors, Environment environment) {
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private Environment environment;
+
+    @PostConstruct
+    public void init() {
         PlatformVariants platformVariants = cloudPlatformConnectors.getPlatformVariants();
         platformVolumeSizeMap = Collections.unmodifiableMap(
                 platformVariants.getDefaultVariants().keySet()

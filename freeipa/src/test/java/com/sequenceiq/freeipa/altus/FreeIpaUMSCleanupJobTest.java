@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,11 +42,6 @@ public class FreeIpaUMSCleanupJobTest {
 
     @Mock
     private JobExecutionContext jobExecutionContext;
-
-    @BeforeEach
-    public void setUp() {
-        underTest = new FreeIpaUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService);
-    }
 
     @Test
     public void testExecuteInternal() throws JobExecutionException {

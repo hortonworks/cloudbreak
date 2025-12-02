@@ -15,7 +15,7 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 @Component("FreeIpaTrustCancelConfigurationAction")
 public class FreeIpaTrustCancelConfigurationAction extends FreeIpaTrustCancelAction<FreeIpaTrustCancelEvent> {
 
-    public FreeIpaTrustCancelConfigurationAction() {
+    protected FreeIpaTrustCancelConfigurationAction() {
         super(FreeIpaTrustCancelEvent.class);
     }
 

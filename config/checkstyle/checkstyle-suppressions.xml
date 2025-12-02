@@ -67,4 +67,9 @@
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="VisibilityModifierCheck" files=".*Test.java"/>
 
+    <suppress files="^((?!.*[/\\]com[/\\]sequenceiq[/\\]freeipa[/\\]).)*$" checks="MatchXpath"/>
+    <suppress files=".*FlowConfig" checks="MatchXpath"/>
+    <suppress files="DiagnosticsCollectionValidator" checks="MatchXpath"/>
+    <suppress files="FreeIpaEventParameterFactory" checks="MatchXpath"/>
+    <suppress files=".*Action" checks="MatchXpath"/>
 </suppressions>

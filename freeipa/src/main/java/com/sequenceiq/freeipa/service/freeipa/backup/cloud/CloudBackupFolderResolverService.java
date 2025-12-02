@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,24 +15,19 @@ public class CloudBackupFolderResolverService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudBackupFolderResolverService.class);
 
-    private final S3BackupConfigGenerator s3BackupConfigGenerator;
+    @Inject
+    private S3BackupConfigGenerator s3BackupConfigGenerator;
 
-    private final GCSBackupConfigGenerator gcsBackupConfigGenerator;
+    @Inject
+    private GCSBackupConfigGenerator gcsBackupConfigGenerator;
 
-    private final AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator;
-
-    public CloudBackupFolderResolverService(S3BackupConfigGenerator s3BackupConfigGenerator,
-            AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator,
-            GCSBackupConfigGenerator gcsBackupConfigGenerator) {
-        this.s3BackupConfigGenerator = s3BackupConfigGenerator;
-        this.adlsGen2BackupConfigGenerator = adlsGen2BackupConfigGenerator;
-        this.gcsBackupConfigGenerator = gcsBackupConfigGenerator;
-    }
+    @Inject
+    private AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator;
 
     public Backup updateStorageLocation(Backup backup, String clusterType,
             String clusterName, String clusterCrn) {
         LOGGER.debug("Updating/enriching backup storage locations with cluster data.");
-        if (backup != null  && StringUtils.isNotEmpty(backup.getStorageLocation())) {
+        if (backup != null && StringUtils.isNotEmpty(backup.getStorageLocation())) {
             String storageLocation = backup.getStorageLocation();
             if (backup.getS3() != null) {
                 storageLocation = resolveS3Location(storageLocation,
