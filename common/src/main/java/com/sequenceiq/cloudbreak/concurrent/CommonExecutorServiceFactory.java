@@ -55,8 +55,10 @@ public class CommonExecutorServiceFactory {
 
     public AsyncTaskExecutor newAsyncTaskExecutor(String executorServiceName, boolean virtualThread, int corePoolSize, int queueCapacity,
             int awaitTerminationSeconds) {
-        CompositeTaskDecorator taskDecorator =
-                new CompositeTaskDecorator(List.of(new MDCCopyDecorator(), new TimeTaskDecorator(meterRegistry, executorServiceName)));
+        CompositeTaskDecorator taskDecorator = new CompositeTaskDecorator(List.of(
+                new MDCCopyDecorator(),
+                new ThreadBasedUserCrnDecorator(),
+                new TimeTaskDecorator(meterRegistry, executorServiceName)));
         if (virtualThread) {
             SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
             executor.setVirtualThreads(true);
