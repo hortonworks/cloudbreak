@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,8 @@ public class ClusterProxyRegistrationFailedToUpscaleFailureEventConverterTest {
     @Test
     void testConvert() {
         RuntimeException caughtException = new RuntimeException("my exception message");
-        ClusterProxyRegistrationFailed clusterProxyRegistrationFailed = new ClusterProxyRegistrationFailed(STACK_ID, caughtException);
+        ClusterProxyRegistrationFailed clusterProxyRegistrationFailed =
+                new ClusterProxyRegistrationFailed(STACK_ID, caughtException, ERROR);
 
         UpscaleFailureEvent upscaleFailureEvent = underTest.convert(clusterProxyRegistrationFailed);
 

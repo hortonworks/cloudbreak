@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public class FreeIpaTrustSetupPrepareServerHandler extends ExceptionCatcherEvent
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustSetupPrepareServerRequest> event) {
-        return new FreeIpaTrustSetupPrepareServerFailed(resourceId, e);
+        return new FreeIpaTrustSetupPrepareServerFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class FreeIpaTrustSetupPrepareServerHandler extends ExceptionCatcherEvent
             trustProvider.prepare(request.getResourceId());
             return new FreeIpaTrustSetupPrepareServerSuccess(request.getResourceId());
         } catch (Exception e) {
-            return new FreeIpaTrustSetupPrepareServerFailed(request.getResourceId(), e);
+            return new FreeIpaTrustSetupPrepareServerFailed(request.getResourceId(), e, ERROR);
         }
     }
 

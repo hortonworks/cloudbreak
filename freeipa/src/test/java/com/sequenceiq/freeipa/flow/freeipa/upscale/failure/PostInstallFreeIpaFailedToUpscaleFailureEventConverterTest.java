@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,7 +26,7 @@ public class PostInstallFreeIpaFailedToUpscaleFailureEventConverterTest {
     public void testReturnsUpscaleFailureEventWithFailedPhase() {
         PostInstallFreeIpaFailedToUpscaleFailureEventConverter converter = new PostInstallFreeIpaFailedToUpscaleFailureEventConverter();
         Exception exception = new Exception();
-        PostInstallFreeIpaFailed payload = new PostInstallFreeIpaFailed(1L, exception);
+        PostInstallFreeIpaFailed payload = new PostInstallFreeIpaFailed(1L, exception, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertEquals("Post installing FreeIPA", result.getFailedPhase());
         assertTrue(result.getSuccess().isEmpty());
@@ -52,7 +53,7 @@ public class PostInstallFreeIpaFailedToUpscaleFailureEventConverterTest {
     @Test
     public void testExceptionIsNullUpscaleFailureEventExceptionIsNull() {
         PostInstallFreeIpaFailedToUpscaleFailureEventConverter converter = new PostInstallFreeIpaFailedToUpscaleFailureEventConverter();
-        PostInstallFreeIpaFailed payload = new PostInstallFreeIpaFailed(1L, null);
+        PostInstallFreeIpaFailed payload = new PostInstallFreeIpaFailed(1L, null, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertNull(result.getException());
     }

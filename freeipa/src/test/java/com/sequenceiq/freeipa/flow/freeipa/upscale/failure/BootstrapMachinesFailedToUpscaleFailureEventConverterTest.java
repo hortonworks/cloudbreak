@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,7 +26,7 @@ public class BootstrapMachinesFailedToUpscaleFailureEventConverterTest {
     public void testReturnsUpscaleFailureEventWithEmptySuccessSet() {
         BootstrapMachinesFailedToUpscaleFailureEventConverter converter = new BootstrapMachinesFailedToUpscaleFailureEventConverter();
         Exception exception = new Exception();
-        BootstrapMachinesFailed payload = new BootstrapMachinesFailed(1L, exception);
+        BootstrapMachinesFailed payload = new BootstrapMachinesFailed(1L, exception, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertEquals("Bootstrapping machines", result.getFailedPhase());
         assertTrue(result.getSuccess().isEmpty());
@@ -52,7 +53,7 @@ public class BootstrapMachinesFailedToUpscaleFailureEventConverterTest {
     @Test
     public void testExceptionIsNullUpscaleFailureEventExceptionIsNull() {
         BootstrapMachinesFailedToUpscaleFailureEventConverter converter = new BootstrapMachinesFailedToUpscaleFailureEventConverter();
-        BootstrapMachinesFailed payload = new BootstrapMachinesFailed(1L, null);
+        BootstrapMachinesFailed payload = new BootstrapMachinesFailed(1L, null, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertNull(result.getException());
     }

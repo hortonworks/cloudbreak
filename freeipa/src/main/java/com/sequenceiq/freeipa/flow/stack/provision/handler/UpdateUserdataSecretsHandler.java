@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class UpdateUserdataSecretsHandler extends ExceptionCatcherEventHandler<U
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpdateUserdataSecretsRequest> event) {
         LOGGER.error("Unexpected error occurred while updating userdata secrets", e);
-        return new UpdateUserdataSecretsFailed(resourceId, e);
+        return new UpdateUserdataSecretsFailed(resourceId, e, ERROR);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
 
 import java.util.Map;
@@ -43,11 +44,11 @@ public class RebuildUpdateEnvironmentStackConfigAction extends AbstractRebuildAc
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to update the clusters' config due to {}", errorMessage, e);
-            sendEvent(context, new RebuildFailureEvent(payload.getResourceId(),
+            sendEvent(context, new RebuildFailureEvent(payload.getResourceId(), ERROR,
                     new Exception("Failed to update the clusters' config due to " + errorMessage, e)));
         } catch (Exception e) {
             LOGGER.error("Failed to update the clusters' config", e);
-            sendEvent(context, new RebuildFailureEvent(payload.getResourceId(),
+            sendEvent(context, new RebuildFailureEvent(payload.getResourceId(), ERROR,
                     new Exception("Failed to update the clusters' config due to " + e.getMessage(), e)));
         }
     }

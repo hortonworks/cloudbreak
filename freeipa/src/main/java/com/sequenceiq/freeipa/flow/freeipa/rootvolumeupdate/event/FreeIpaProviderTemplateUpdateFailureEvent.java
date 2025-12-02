@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProvid
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.freeipa.flow.freeipa.common.FailureType;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 
 public class FreeIpaProviderTemplateUpdateFailureEvent extends StackFailureEvent {
@@ -14,8 +15,9 @@ public class FreeIpaProviderTemplateUpdateFailureEvent extends StackFailureEvent
     public FreeIpaProviderTemplateUpdateFailureEvent(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("failedPhase") String failedPhase,
-            @JsonProperty("exception") Exception exception) {
-        super(FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT.selector(), stackId, exception);
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("failureType") FailureType failureType) {
+        super(FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT.selector(), stackId, exception, failureType);
         this.failedPhase = failedPhase;
     }
 

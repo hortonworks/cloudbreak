@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import com.sequenceiq.flow.core.PayloadConverter;
 
 public class HealthCheckFailedToStackFailureEventConverter implements PayloadConverter<StackFailureEvent> {
@@ -11,6 +13,6 @@ public class HealthCheckFailedToStackFailureEventConverter implements PayloadCon
     @Override
     public StackFailureEvent convert(Object payload) {
         HealthCheckFailed result = (HealthCheckFailed) payload;
-        return new StackFailureEvent(result.getResourceId(), result.getException());
+        return new StackFailureEvent(result.getResourceId(), result.getException(), ERROR);
     }
 }

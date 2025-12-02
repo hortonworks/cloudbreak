@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.converter;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,7 +21,7 @@ class ValidateBackupFailedToRebuildFailureEventTest {
 
     @Test
     void convert() {
-        ValidateBackupFailed payload = new ValidateBackupFailed(6L,  new CloudbreakException("fda"));
+        ValidateBackupFailed payload = new ValidateBackupFailed(6L,  new CloudbreakException("fda"), ERROR);
 
         RebuildFailureEvent result = underTest.convert(payload);
 

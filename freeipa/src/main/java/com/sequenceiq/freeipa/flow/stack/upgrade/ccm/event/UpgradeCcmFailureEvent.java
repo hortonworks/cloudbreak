@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.flow.freeipa.common.FailureType;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.AbstractUpgradeCcmEventHandler;
 
@@ -23,10 +24,16 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
 
     private String statusReason;
 
-    public UpgradeCcmFailureEvent(String selector, Long stackId, Tunnel oldTunnel,
-            Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin, Exception exception, LocalDateTime revertTime, String statusReason) {
-
-        super(selector, stackId, exception);
+    public UpgradeCcmFailureEvent(
+            String selector,
+            Long stackId,
+            Tunnel oldTunnel,
+            Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin,
+            Exception exception,
+            LocalDateTime revertTime,
+            String statusReason,
+            FailureType failureType) {
+        super(selector, stackId, exception, failureType);
         this.oldTunnel = oldTunnel;
         this.failureOrigin = failureOrigin;
         this.transitionStatusAfterFailure = null;
@@ -43,8 +50,9 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
             @JsonProperty("exception") Exception exception,
             @JsonProperty("transitionStatusAfterFailure") DetailedStackStatus transitionStatus,
             @JsonProperty("revertTime") LocalDateTime revertTime,
-            @JsonProperty("statusReason") String statusReason) {
-        super(selector, stackId, exception);
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("failureType") FailureType failureType) {
+        super(selector, stackId, exception, failureType);
         this.oldTunnel = oldTunnel;
         this.failureOrigin = failureOrigin;
         this.transitionStatusAfterFailure = transitionStatus;

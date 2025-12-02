@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REMOVE_MINA_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_CLEANING_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_REMOVE_MINA_FINISHED_EVENT;
@@ -34,9 +35,16 @@ public class UpgradeCcmRemoveMinaHandler extends AbstractUpgradeCcmEventHandler 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Removing Mina for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_CLEANING_FAILED_EVENT.event(), resourceId,
-                event.getData().getOldTunnel(), getClass(), e, event.getData().getRevertTime(),
-                "Removing Mina for CCM upgrade has been failed, but new CCMv2 is operational.");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_CLEANING_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Removing Mina for CCM upgrade has been failed, but new CCMv2 is operational.",
+                ERROR
+        );
     }
 
     @Override

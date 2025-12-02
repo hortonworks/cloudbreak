@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -61,7 +63,7 @@ public class CreateUserDataHandler extends ExceptionCatcherEventHandler<CreateUs
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<CreateUserDataRequest> event) {
         LOGGER.error("Creating user data has failed with unexpected error", e);
-        return new CreateUserDataFailed(resourceId, e);
+        return new CreateUserDataFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -92,7 +94,7 @@ public class CreateUserDataHandler extends ExceptionCatcherEventHandler<CreateUs
             return new CreateUserDataSuccess(stackId);
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creating user data has failed", e);
-            return new CreateUserDataFailed(stackId, e);
+            return new CreateUserDataFailed(stackId, e, ERROR);
         }
     }
 }

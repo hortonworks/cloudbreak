@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +38,6 @@ public class RebuildRebootWaitUntilAvailableAction extends AbstractRebuildAction
 
     @Override
     protected Object getFailurePayload(RebootInstancesResult payload, Optional<StackContext> flowContext, Exception ex) {
-        return new HealthCheckFailed(payload.getResourceId(), payload.getInstanceIds(), ex);
+        return new HealthCheckFailed(payload.getResourceId(), payload.getInstanceIds(), ex, ERROR);
     }
 }

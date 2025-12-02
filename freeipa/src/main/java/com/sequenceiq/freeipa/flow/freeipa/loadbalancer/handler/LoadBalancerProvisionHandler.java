@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ public class LoadBalancerProvisionHandler extends ExceptionCatcherEventHandler<L
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<LoadBalancerProvisionRequest> event) {
         LOGGER.error("Unexpected error occurred while creating load balancer for FreeIPA", e);
-        return new LoadBalancerCreationFailureEvent(resourceId, e);
+        return new LoadBalancerCreationFailureEvent(resourceId, ERROR, e);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class LoadBalancerProvisionHandler extends ExceptionCatcherEventHandler<L
             return new LoadBalancerProvisionSuccess(stackId);
         } catch (Exception e) {
             LOGGER.error("Failed to provision FreeIPA load balancer", e);
-            return new LoadBalancerCreationFailureEvent(stackId, e);
+            return new LoadBalancerCreationFailureEvent(stackId, ERROR, e);
         }
     }
 }

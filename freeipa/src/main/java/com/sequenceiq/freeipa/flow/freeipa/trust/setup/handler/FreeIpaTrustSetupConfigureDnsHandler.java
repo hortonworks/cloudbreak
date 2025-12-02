@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public class FreeIpaTrustSetupConfigureDnsHandler extends ExceptionCatcherEventH
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustSetupConfigureDnsRequest> event) {
-        return new FreeIpaTrustSetupConfigureDnsFailed(resourceId, e);
+        return new FreeIpaTrustSetupConfigureDnsFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class FreeIpaTrustSetupConfigureDnsHandler extends ExceptionCatcherEventH
             trustProvider.configureDns(request.getResourceId());
             return new FreeIpaTrustSetupConfigureDnsSuccess(request.getResourceId());
         } catch (Exception e) {
-            return new FreeIpaTrustSetupConfigureDnsFailed(request.getResourceId(), e);
+            return new FreeIpaTrustSetupConfigureDnsFailed(request.getResourceId(), e, ERROR);
         }
     }
 

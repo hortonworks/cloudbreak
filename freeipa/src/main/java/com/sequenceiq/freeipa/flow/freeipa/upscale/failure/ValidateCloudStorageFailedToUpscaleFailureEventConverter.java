@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -16,8 +18,13 @@ public class ValidateCloudStorageFailedToUpscaleFailureEventConverter implements
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         ValidateCloudStorageFailed result = (ValidateCloudStorageFailed) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Cloud storage validation", Set.of(),
+        return new UpscaleFailureEvent(
+                result.getResourceId(),
+                "Cloud storage validation",
+                Set.of(),
+                VALIDATION,
                 result.getException() != null ? Map.of("statusReason", result.getException().getMessage()) : Map.of(),
-                result.getException());
+                result.getException()
+        );
     }
 }

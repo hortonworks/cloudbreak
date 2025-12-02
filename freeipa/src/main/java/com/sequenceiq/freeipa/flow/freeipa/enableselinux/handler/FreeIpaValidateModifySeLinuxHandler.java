@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,7 +61,7 @@ public class FreeIpaValidateModifySeLinuxHandler extends ExceptionCatcherEventHa
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaValidateModifySeLinuxHandlerEvent> event) {
         LOGGER.warn("Exception while trying to validate stack for updating SELinux to {}, exception: ", event.getData().getSeLinuxMode(), e);
-        return new FreeIpaModifySeLinuxFailedEvent(resourceId, "VALIDATION_FAILED", e);
+        return new FreeIpaModifySeLinuxFailedEvent(resourceId, "VALIDATION_FAILED", e, VALIDATION);
     }
 
     @Override

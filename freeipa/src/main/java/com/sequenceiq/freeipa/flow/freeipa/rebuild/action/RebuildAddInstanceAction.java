@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FAILED_EVENT;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class RebuildAddInstanceAction extends AbstractRebuildAction<StackEvent> 
 
     @Override
     protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
-        return new StackFailureEvent(ADD_INSTANCE_FAILED_EVENT.event(), payload.getResourceId(), ex);
+        return new StackFailureEvent(ADD_INSTANCE_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
     }
 
     private void addNewInstances(StackContext context, List<CloudInstance> newInstances) {

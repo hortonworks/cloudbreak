@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,6 @@ public class RebuildValidateCloudStorageAction extends AbstractRebuildAction<Orc
 
     @Override
     protected Object getFailurePayload(OrchestratorConfigSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-        return new ValidateCloudStorageFailed(payload.getResourceId(), ex);
+        return new ValidateCloudStorageFailed(payload.getResourceId(), ex, VALIDATION);
     }
 }

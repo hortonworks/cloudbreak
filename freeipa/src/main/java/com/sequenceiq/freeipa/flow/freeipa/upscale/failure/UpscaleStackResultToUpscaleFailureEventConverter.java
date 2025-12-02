@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -18,8 +20,13 @@ public class UpscaleStackResultToUpscaleFailureEventConverter implements Payload
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         UpscaleStackResult result = (UpscaleStackResult) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Adding instances", Set.of(),
+        return new UpscaleFailureEvent(
+                result.getResourceId(),
+                "Adding instances",
+                Set.of(),
+                ERROR,
                 StringUtils.isNotEmpty(result.getStatusReason()) ? Map.of("statusReason", result.getStatusReason()) : Map.of(),
-                result.getException());
+                result.getException()
+        );
     }
 }

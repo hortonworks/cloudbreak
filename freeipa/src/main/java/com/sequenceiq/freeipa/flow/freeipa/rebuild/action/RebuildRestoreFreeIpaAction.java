@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,6 +27,6 @@ public class RebuildRestoreFreeIpaAction extends AbstractRebuildAction<InstallFr
 
     @Override
     protected Object getFailurePayload(InstallFreeIpaServicesSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaRestoreFailed(payload.getResourceId(), ex);
+        return new FreeIpaRestoreFailed(payload.getResourceId(), ex, ERROR);
     }
 }

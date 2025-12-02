@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_RECONFIGURE_NGINX_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_REVERT_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT;
@@ -35,8 +36,16 @@ public class UpgradeCcmReconfigureNginxHandler extends AbstractUpgradeCcmEventHa
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Reconfiguring NGINX for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_REVERT_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(),
-                e, event.getData().getRevertTime(), "Upgrading CCM is failed, reconfiguring nginx has been failed.");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_REVERT_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Upgrading CCM is failed, reconfiguring nginx has been failed.",
+                ERROR
+        );
     }
 
     @Override
@@ -49,9 +58,16 @@ public class UpgradeCcmReconfigureNginxHandler extends AbstractUpgradeCcmEventHa
                 upgradeCcmService.reconfigureNginx(request.getResourceId());
             } catch (CloudbreakOrchestratorException e) {
                 LOGGER.debug("Failed reconfiguring NGINX with salt state");
-                return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_REVERT_EVENT.event(), request.getResourceId(), event.getData().getOldTunnel(),
-                        getClass(), e, event.getData().getRevertTime(),
-                        "Upgrading CCM is failed, reconfiguring nginx has been failed.");
+                return new UpgradeCcmFailureEvent(
+                        UPGRADE_CCM_FAILED_REVERT_EVENT.event(),
+                        request.getResourceId(),
+                        event.getData().getOldTunnel(),
+                        getClass(),
+                        e,
+                        event.getData().getRevertTime(),
+                        "Upgrading CCM is failed, reconfiguring nginx has been failed.",
+                        ERROR
+                );
             }
         } else {
             LOGGER.info("NGINX reconfiguration is not needed for previous tunnel type '{}'", request.getOldTunnel());

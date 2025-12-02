@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +68,7 @@ public abstract class AbstractRebuildAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new RebuildFailureEvent(payload.getResourceId(), ex);
+        return new RebuildFailureEvent(payload.getResourceId(), ERROR, ex);
     }
 
     protected void setInstanceToRestoreFqdn(Map<Object, Object> variables, String fqdn) {

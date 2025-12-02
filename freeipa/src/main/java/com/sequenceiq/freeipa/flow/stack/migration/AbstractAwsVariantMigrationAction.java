@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.stack.migration;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Optional;
 
@@ -67,6 +68,6 @@ abstract class AbstractAwsVariantMigrationAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<AwsVariantMigrationFlowContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex, ERROR);
     }
 }

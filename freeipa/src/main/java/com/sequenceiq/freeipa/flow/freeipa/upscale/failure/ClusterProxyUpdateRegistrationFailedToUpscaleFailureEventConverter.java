@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +18,7 @@ public class ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter 
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         ClusterProxyUpdateRegistrationFailed result = (ClusterProxyUpdateRegistrationFailed) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Updating cluster proxy", Set.of(), Map.of(),
+        return new UpscaleFailureEvent(result.getResourceId(), "Updating cluster proxy", Set.of(), ERROR, Map.of(),
                 result.getException());
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.stack.provision.action;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_STARTED;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstants.START_DATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 
@@ -242,7 +243,11 @@ public class StackProvisionActions {
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {
                     LOGGER.warn("Image fallback already happened at least once! Failing flow to avoid infinite loop!");
-                    sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
+                    sendEvent(context, new ImageFallbackFailed(
+                            payload.getResourceId(),
+                            new Exception("Image fallback started second time!"),
+                            ERROR
+                    ));
                 } else {
                     stackProvisionService.stackCreationImageFallbackRequired(context.getStack(), payload.getNotificationMessage());
                     sendEvent(context, new StackEvent(IMAGE_FALLBACK_START_EVENT.event(), payload.getResourceId()));

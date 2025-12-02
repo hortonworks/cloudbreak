@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.IMAGE_FALLBACK_START_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_FINISHED_EVENT;
@@ -317,7 +319,7 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, UpscaleStackImageFallbackResult payload, Map<Object, Object> variables) {
                 if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {
                     LOGGER.warn("Image fallback already happened at least once! Failing flow to avoid infinite loop!");
-                    sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
+                    sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!"), ERROR));
                 } else {
                     Stack stack = context.getStack();
                     String notificationMessage = payload.getNotificationMessage();
@@ -364,7 +366,7 @@ public class FreeIpaUpscaleActions {
                 } catch (Exception e) {
                     LOGGER.error("Failed to validate the instances", e);
                     sendEvent(context, UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT.selector(),
-                            new UpscaleFailureEvent(stack.getId(), "Validating new instances", Set.of(), Map.of(), e));
+                            new UpscaleFailureEvent(stack.getId(), "Validating new instances", Set.of(), VALIDATION, Map.of(), e));
                 }
             }
 
@@ -466,7 +468,7 @@ public class FreeIpaUpscaleActions {
                     event = new StackEvent(UpscaleFlowEvent.UPSCALE_TLS_SETUP_FINISHED_EVENT.event(), stack.getId());
                 } catch (Exception e) {
                     LOGGER.error("Failed to setup TLS", e);
-                    event = new UpscaleFailureEvent(stack.getId(), "Setting ups TLS", Set.of(), Map.of(), e);
+                    event = new UpscaleFailureEvent(stack.getId(), "Setting ups TLS", Set.of(), ERROR, Map.of(), e);
                 }
                 sendEvent(context, event.selector(), event);
             }
@@ -644,7 +646,7 @@ public class FreeIpaUpscaleActions {
                 } catch (Exception e) {
                     LOGGER.error("Failed to update the kerberos nameserver config", e);
                     sendEvent(context, UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT.selector(),
-                            new UpscaleFailureEvent(stack.getId(), "Updating kerberos nameserver config", Set.of(), Map.of(), e));
+                            new UpscaleFailureEvent(stack.getId(), "Updating kerberos nameserver config", Set.of(), ERROR, Map.of(), e));
                 }
             }
         };
@@ -692,11 +694,11 @@ public class FreeIpaUpscaleActions {
                     String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                     LOGGER.error("Failed to update the stack config due to {}", errorMessage, e);
                     sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT.selector(),
-                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), Map.of(), e));
+                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), ERROR, Map.of(), e));
                 } catch (Exception e) {
                     LOGGER.error("Failed to update the stack config", e);
                     sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT.selector(),
-                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), Map.of(), e));
+                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), ERROR, Map.of(), e));
                 }
             }
         };

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,7 +26,7 @@ public class ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverterT
     public void testReturnsUpscaleFailureEventWithEmptySuccessSet() {
         ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter converter = new ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter();
         Exception exception = new Exception();
-        ClusterProxyUpdateRegistrationFailed payload = new ClusterProxyUpdateRegistrationFailed(1L, exception);
+        ClusterProxyUpdateRegistrationFailed payload = new ClusterProxyUpdateRegistrationFailed(1L, exception, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertEquals("Updating cluster proxy", result.getFailedPhase());
         assertTrue(result.getSuccess().isEmpty());
@@ -52,7 +53,7 @@ public class ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverterT
     @Test
     public void testExceptionIsNullUpscaleFailureEventExceptionIsNull() {
         ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter converter = new ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter();
-        ClusterProxyUpdateRegistrationFailed payload = new ClusterProxyUpdateRegistrationFailed(1L, null);
+        ClusterProxyUpdateRegistrationFailed payload = new ClusterProxyUpdateRegistrationFailed(1L, null, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertNull(result.getException());
     }

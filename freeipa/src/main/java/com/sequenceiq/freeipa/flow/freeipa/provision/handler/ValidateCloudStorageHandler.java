@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -35,7 +38,7 @@ public class ValidateCloudStorageHandler extends ExceptionCatcherEventHandler<Va
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateCloudStorageRequest> event) {
-        return new ValidateCloudStorageFailed(resourceId, e);
+        return new ValidateCloudStorageFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class ValidateCloudStorageHandler extends ExceptionCatcherEventHandler<Va
             response = new ValidateCloudStorageSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("FreeIPA cloud storage validation failed", e);
-            response = new ValidateCloudStorageFailed(request.getResourceId(), e);
+            response = new ValidateCloudStorageFailed(request.getResourceId(), e, VALIDATION);
         }
         return response;
     }

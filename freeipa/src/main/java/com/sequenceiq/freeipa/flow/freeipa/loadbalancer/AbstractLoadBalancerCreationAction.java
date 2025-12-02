@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.loadbalancer;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -58,7 +60,7 @@ public abstract class AbstractLoadBalancerCreationAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new LoadBalancerCreationFailureEvent(payload.getResourceId(), ex);
+        return new LoadBalancerCreationFailureEvent(payload.getResourceId(), ERROR, ex);
     }
 
     protected StackUpdater stackUpdater() {

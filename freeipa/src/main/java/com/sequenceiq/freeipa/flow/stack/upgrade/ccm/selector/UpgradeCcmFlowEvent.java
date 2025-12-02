@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
@@ -16,12 +18,15 @@ public interface UpgradeCcmFlowEvent extends FlowEvent {
     }
 
     default UpgradeCcmFailureEvent createBasedOn(UpgradeCcmFailureEvent upgradeCcmFailureEvent) {
-        return new UpgradeCcmFailureEvent(event(),
+        return new UpgradeCcmFailureEvent(
+                event(),
                 upgradeCcmFailureEvent.getResourceId(),
                 upgradeCcmFailureEvent.getOldTunnel(),
                 upgradeCcmFailureEvent.getFailureOrigin(),
                 upgradeCcmFailureEvent.getException(),
                 upgradeCcmFailureEvent.getRevertTime(),
-                upgradeCcmFailureEvent.getStatusReason());
+                upgradeCcmFailureEvent.getStatusReason(),
+                ERROR
+        );
     }
 }

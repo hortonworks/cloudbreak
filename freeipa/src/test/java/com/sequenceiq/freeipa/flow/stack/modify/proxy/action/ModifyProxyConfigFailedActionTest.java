@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.modify.proxy.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -78,7 +79,7 @@ class ModifyProxyConfigFailedActionTest extends ActionTest {
     @Test
     void doExecute() throws Exception {
         Exception exception = new Exception("cause");
-        StackFailureEvent stackFailureEvent = new StackFailureEvent(STACK_ID, exception);
+        StackFailureEvent stackFailureEvent = new StackFailureEvent(STACK_ID, exception, ERROR);
 
         underTest.doExecute(context, stackFailureEvent, VARIABLES);
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -48,8 +50,11 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
             Set<InstanceMetaData> ims = instanceMetaDataService.findNotTerminatedForStack(request.getResourceId());
             if (ims.isEmpty()) {
                 LOGGER.error("Cluster Proxy registration has failed. No available instances  found for FreeIPA");
-                ClusterProxyRegistrationFailed response = new ClusterProxyRegistrationFailed(request.getResourceId(),
-                        new NotFoundException("Cluster Proxy registration has failed. No available instances  found for FreeIPA"));
+                ClusterProxyRegistrationFailed response = new ClusterProxyRegistrationFailed(
+                        request.getResourceId(),
+                        new NotFoundException("Cluster Proxy registration has failed. No available instances  found for FreeIPA"),
+                        ERROR
+                );
                 sendEvent(response, event);
             } else {
                 boolean allInstanceHasFqdn = ims.stream().allMatch(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()));
@@ -64,7 +69,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
             }
         } catch (Exception e) {
             LOGGER.error("Cluster Proxy bootstrap registration has failed", e);
-            sendEvent(new ClusterProxyRegistrationFailed(request.getResourceId(), e), event);
+            sendEvent(new ClusterProxyRegistrationFailed(request.getResourceId(), e, ERROR), event);
         }
 
     }

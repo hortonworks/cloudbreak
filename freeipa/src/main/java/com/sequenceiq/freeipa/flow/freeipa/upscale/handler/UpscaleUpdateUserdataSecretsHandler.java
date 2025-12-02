@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,7 @@ public class UpscaleUpdateUserdataSecretsHandler extends ExceptionCatcherEventHa
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpscaleUpdateUserdataSecretsRequest> event) {
         LOGGER.error("Unexpected error occurred while updating userdata secrets!", e);
-        return new UpscaleFailureEvent(resourceId, "Updating userdata secrets", Set.of(), Map.of(), e);
+        return new UpscaleFailureEvent(resourceId, "Updating userdata secrets", Set.of(), ERROR, Map.of(), e);
     }
 
     @Override

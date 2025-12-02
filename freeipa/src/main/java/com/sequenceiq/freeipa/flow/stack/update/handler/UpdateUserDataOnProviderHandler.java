@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.update.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDATE_USERDATA_FAILED_EVENT;
 
 import java.util.Map;
@@ -39,7 +40,7 @@ public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandle
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UserDataUpdateOnProviderRequest> event) {
         LOGGER.error("Updating user data on provider side has failed", e);
-        return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), resourceId, e);
+        return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), resourceId, e, ERROR);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandle
             return new UserDataUpdateOnProviderResult(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating user data on provider side has failed", e);
-            return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), request.getResourceId(), e);
+            return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), request.getResourceId(), e, ERROR);
         }
     }
 }

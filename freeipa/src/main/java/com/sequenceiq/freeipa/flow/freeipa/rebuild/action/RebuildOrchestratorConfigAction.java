@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,6 @@ public class RebuildOrchestratorConfigAction extends AbstractRebuildAction<Boots
 
     @Override
     protected Object getFailurePayload(BootstrapMachinesSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-        return new OrchestratorConfigFailed(payload.getResourceId(), ex);
+        return new OrchestratorConfigFailed(payload.getResourceId(), ex, ERROR);
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.common.api.type.Tunnel.CCM;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
 
@@ -43,15 +44,23 @@ class UpgradeCcmRevertAllHandlerTest {
 
     @BeforeEach
     void setUp() {
-        UpgradeCcmFailureEvent upgradeCcmEvent = new UpgradeCcmFailureEvent("selector", STACK_ID, Tunnel.CCM,
-                UpgradeCcmCheckPrerequisitesHandler.class, new ArrayIndexOutOfBoundsException(""), LocalDateTime.now(), "reason");
+        UpgradeCcmFailureEvent upgradeCcmEvent = new UpgradeCcmFailureEvent(
+                "selector",
+                STACK_ID,
+                CCM,
+                UpgradeCcmCheckPrerequisitesHandler.class,
+                new ArrayIndexOutOfBoundsException(""),
+                LocalDateTime.now(),
+                "reason",
+                ERROR
+        );
         event = new Event<>(upgradeCcmEvent);
     }
 
     @Test
     void testRevertAllHandlerAccept() throws CloudbreakOrchestratorException {
         underTest.accept(event);
-        verify(upgradeCcmService).changeTunnel(STACK_ID, Tunnel.CCM);
+        verify(upgradeCcmService).changeTunnel(STACK_ID, CCM);
         verify(upgradeCcmService).registerClusterProxyAndCheckHealth(STACK_ID);
         verify(upgradeCcmService).pushSaltStates(STACK_ID);
         verify(eventBus).notify(eq(UPGRADE_CCM_FAILED_EVENT.event()), eventCaptor.capture());

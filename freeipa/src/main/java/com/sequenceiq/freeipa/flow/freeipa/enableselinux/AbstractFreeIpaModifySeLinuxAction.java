@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.enableselinux;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Optional;
 
@@ -75,6 +76,6 @@ abstract class AbstractFreeIpaModifySeLinuxAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaModifySeLinuxFailedEvent(payload.getResourceId(), "Unexpected error during action", ex);
+        return new FreeIpaModifySeLinuxFailedEvent(payload.getResourceId(), "Unexpected error during action", ex, ERROR);
     }
 }

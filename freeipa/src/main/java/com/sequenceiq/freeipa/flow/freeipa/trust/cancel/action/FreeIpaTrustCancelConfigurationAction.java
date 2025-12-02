@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,6 +36,6 @@ public class FreeIpaTrustCancelConfigurationAction extends FreeIpaTrustCancelAct
 
     @Override
     protected Object getFailurePayload(FreeIpaTrustCancelEvent payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaTrustCancelConfigurationFailed(payload.getResourceId(), ex);
+        return new FreeIpaTrustCancelConfigurationFailed(payload.getResourceId(), ex, ERROR);
     }
 }

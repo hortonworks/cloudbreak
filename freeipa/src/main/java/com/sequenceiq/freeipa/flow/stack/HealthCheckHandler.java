@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -36,7 +38,7 @@ public class HealthCheckHandler extends ExceptionCatcherEventHandler<HealthCheck
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<HealthCheckRequest> event) {
-        return new HealthCheckFailed(resourceId, event.getData().getInstanceIds(), e);
+        return new HealthCheckFailed(resourceId, event.getData().getInstanceIds(), e, ERROR);
     }
 
     @Override
@@ -51,14 +53,14 @@ public class HealthCheckHandler extends ExceptionCatcherEventHandler<HealthCheck
                     freeIpaServiceStartService.pollFreeIpaHealth(stack);
                 } catch (Exception e) {
                     LOGGER.error("FreeIpa health check failed because waiting until FreeIpa is available failed", e);
-                    return new HealthCheckFailed(stackId, request.getInstanceIds(), e);
+                    return new HealthCheckFailed(stackId, request.getInstanceIds(), e, ERROR);
                 }
             }
             stackStatusCheckerJob.syncAStack(stack, true);
             result = new HealthCheckSuccess(stackId, request.getInstanceIds());
         } catch (Exception e) {
             LOGGER.error("FreeIpa health check failed", e);
-            result = new HealthCheckFailed(stackId, request.getInstanceIds(), e);
+            result = new HealthCheckFailed(stackId, request.getInstanceIds(), e, ERROR);
         }
         return result;
     }

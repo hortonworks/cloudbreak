@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class UpscaleCreateUserdataSecretsHandler extends ExceptionCatcherEventHa
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpscaleCreateUserdataSecretsRequest> event) {
         LOGGER.error("Unexpected error occurred while creating userdata secrets!", e);
-        return new UpscaleFailureEvent(resourceId, "Creating userdata secrets", Set.of(), Map.of(), e);
+        return new UpscaleFailureEvent(resourceId, "Creating userdata secrets", Set.of(), ERROR, Map.of(), e);
     }
 
     @Override

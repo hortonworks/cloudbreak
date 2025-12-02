@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -30,7 +32,7 @@ public class OrchestratorConfigHandler extends ExceptionCatcherEventHandler<Orch
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<OrchestratorConfigRequest> event) {
-        return new OrchestratorConfigFailed(resourceId, e);
+        return new OrchestratorConfigFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class OrchestratorConfigHandler extends ExceptionCatcherEventHandler<Orch
             response = new OrchestratorConfigSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("FreeIPA orchestration configuration failed", e);
-            response = new OrchestratorConfigFailed(request.getResourceId(), e);
+            response = new OrchestratorConfigFailed(request.getResourceId(), e, ERROR);
         }
         return response;
     }

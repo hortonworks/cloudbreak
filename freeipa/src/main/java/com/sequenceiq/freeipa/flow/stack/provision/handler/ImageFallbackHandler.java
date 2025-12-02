@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -47,7 +49,7 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ImageFallbackRequest> event) {
-        return new ImageFallbackFailed(resourceId, e);
+        return new ImageFallbackFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -59,21 +61,21 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
             String msg = String.format("Failed to start instances with the designated image: %s. Image fallback is only supported on the Azure cloud platform",
                     currentImage.getImageName());
             LOGGER.warn(msg);
-            return new ImageFallbackFailed(stackId, new CloudbreakServiceException(msg));
+            return new ImageFallbackFailed(stackId, new CloudbreakServiceException(msg), ERROR);
         } else if (entitlementService.azureOnlyMarketplaceImagesEnabled(stack.getAccountId())) {
             String message = String.format("Azure Marketplace image terms were not accepted, cannot start instances with image: %s. " +
                             "Fallback to VHD image is not possible, only Azure Marketplace images allowed. " +
                             "Please accept image terms or turn on automatic image terms acceptance.",
                     currentImage.getImageName()
             );
-            return new ImageFallbackFailed(stackId, new CloudbreakServiceException(message));
+            return new ImageFallbackFailed(stackId, new CloudbreakServiceException(message), ERROR);
         } else {
             try {
                 imageFallbackService.performImageFallback(currentImage, stack);
                 return new ImageFallbackSuccess(stackId);
             } catch (Exception e) {
                 LOGGER.error("Image fallback failed", e);
-                return new ImageFallbackFailed(stackId, e);
+                return new ImageFallbackFailed(stackId, e, ERROR);
             }
         }
     }

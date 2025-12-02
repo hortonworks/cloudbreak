@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -47,7 +49,7 @@ public class FreeIpaModifySeLinuxHandler extends ExceptionCatcherEventHandler<Fr
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaModifySeLinuxHandlerEvent> event) {
         LOGGER.warn("Exception while trying to update SELinux to {}, exception: ", event.getData().getSeLinuxMode(), e);
-        return new FreeIpaModifySeLinuxFailedEvent(resourceId, "SELINUX_MODIFICATION_FAILED", e);
+        return new FreeIpaModifySeLinuxFailedEvent(resourceId, "SELINUX_MODIFICATION_FAILED", e, ERROR);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class FreeIpaModifySeLinuxHandler extends ExceptionCatcherEventHandler<Fr
             return new FreeIpaModifySeLinuxEvent(FreeIpaModifySeLinuxStateSelectors.FINISH_MODIFY_SELINUX_FREEIPA_EVENT.selector(),
                     eventData.getResourceId(), eventData.getOperationId(), selinuxMode);
         } catch (Exception e) {
-            return new FreeIpaModifySeLinuxFailedEvent(eventData.getResourceId(), "SELINUX_MODIFICATION_FAILED", e);
+            return new FreeIpaModifySeLinuxFailedEvent(eventData.getResourceId(), "SELINUX_MODIFICATION_FAILED", e, ERROR);
         }
     }
 }

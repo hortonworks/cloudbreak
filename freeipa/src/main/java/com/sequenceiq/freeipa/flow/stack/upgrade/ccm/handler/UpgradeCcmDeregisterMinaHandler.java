@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_DEREGISTER_MINA_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_CLEANING_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_DEREGISTER_MINA_FINISHED_EVENT;
@@ -34,8 +35,16 @@ public class UpgradeCcmDeregisterMinaHandler extends AbstractUpgradeCcmEventHand
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Deregistering mina for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_CLEANING_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(),
-                e, event.getData().getRevertTime(), "Deregistering MINA failed for CCM upgrade, ");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_CLEANING_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Deregistering MINA failed for CCM upgrade, ",
+                ERROR
+        );
     }
 
     @Override

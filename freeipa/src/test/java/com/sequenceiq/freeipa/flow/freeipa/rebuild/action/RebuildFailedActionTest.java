@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -75,7 +76,8 @@ class RebuildFailedActionTest {
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
 
-        underTest.doExecute(context, new RebuildFailureEvent(4L, new CloudbreakException("asdf")), Map.of(OperationAwareAction.OPERATION_ID, OPERATION_ID));
+        underTest.doExecute(context, new RebuildFailureEvent(4L, ERROR, new CloudbreakException("asdf")),
+                Map.of(OperationAwareAction.OPERATION_ID, OPERATION_ID));
 
         ArgumentCaptor<Object> payloadCapture = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), payloadCapture.capture());

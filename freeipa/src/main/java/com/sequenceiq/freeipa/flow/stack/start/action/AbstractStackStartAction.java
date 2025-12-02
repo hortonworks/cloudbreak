@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.stack.start.action;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +69,6 @@ public abstract class AbstractStackStartAction<P extends Payload> extends Abstra
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackStartContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex, ERROR);
     }
 }

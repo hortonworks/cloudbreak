@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -50,6 +52,6 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex, ERROR);
     }
 }

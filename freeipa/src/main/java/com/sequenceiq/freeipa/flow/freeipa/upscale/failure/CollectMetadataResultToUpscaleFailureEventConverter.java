@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +18,13 @@ public class CollectMetadataResultToUpscaleFailureEventConverter implements Payl
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         CollectMetadataResult result = (CollectMetadataResult) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Collecting metadata", Set.of(), Map.of(),
-                result.getException());
+        return new UpscaleFailureEvent(
+                result.getResourceId(),
+                "Collecting metadata",
+                Set.of(),
+                ERROR,
+                Map.of(),
+                result.getException()
+        );
     }
 }

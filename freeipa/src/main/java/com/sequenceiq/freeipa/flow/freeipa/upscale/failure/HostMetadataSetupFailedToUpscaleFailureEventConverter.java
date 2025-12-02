@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +18,13 @@ public class HostMetadataSetupFailedToUpscaleFailureEventConverter implements Pa
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         HostMetadataSetupFailed result = (HostMetadataSetupFailed) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Host metadata setup", Set.of(), Map.of(),
-                result.getException());
+        return new UpscaleFailureEvent(
+                result.getResourceId(),
+                "Host metadata setup",
+                Set.of(),
+                ERROR,
+                Map.of(),
+                result.getException()
+        );
     }
 }

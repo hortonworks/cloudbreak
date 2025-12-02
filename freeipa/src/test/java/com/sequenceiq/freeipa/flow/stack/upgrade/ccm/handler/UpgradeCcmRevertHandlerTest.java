@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,7 +45,7 @@ class UpgradeCcmRevertHandlerTest {
     @BeforeEach
     void setUp() {
         UpgradeCcmFailureEvent upgradeCcmEvent = new UpgradeCcmFailureEvent("selector", STACK_ID, Tunnel.CCM,
-                UpgradeCcmCheckPrerequisitesHandler.class, new ArrayIndexOutOfBoundsException(""), LocalDateTime.now(), "reason");
+                UpgradeCcmCheckPrerequisitesHandler.class, new ArrayIndexOutOfBoundsException(""), LocalDateTime.now(), "reason", ERROR);
         event = new Event<>(upgradeCcmEvent);
     }
 

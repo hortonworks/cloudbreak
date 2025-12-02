@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -61,7 +64,7 @@ public class ValidateBackupHandler extends ExceptionCatcherEventHandler<Validate
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateBackupRequest> event) {
-        return new ValidateBackupFailed(resourceId, e);
+        return new ValidateBackupFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class ValidateBackupHandler extends ExceptionCatcherEventHandler<Validate
             return new ValidateBackupSuccess(event.getData().getResourceId());
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.error("Failed to validate backup for {}", request, e);
-            return new ValidateBackupFailed(request.getResourceId(), e);
+            return new ValidateBackupFailed(request.getResourceId(), e, VALIDATION);
         }
     }
 

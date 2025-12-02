@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class ClusterProxyUpdateRegistrationHandler implements EventHandler<Clust
             response = new ClusterProxyUpdateRegistrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating Cluster Proxy registration has failed", e);
-            response = new ClusterProxyUpdateRegistrationFailed(request.getResourceId(), e);
+            response = new ClusterProxyUpdateRegistrationFailed(request.getResourceId(), e, ERROR);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class PostInstallFreeIpaHandler implements EventHandler<PostInstallFreeIp
             response = new PostInstallFreeIpaSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Post install tasks have failed", e);
-            response = new PostInstallFreeIpaFailed(request.getResourceId(), e);
+            response = new PostInstallFreeIpaFailed(request.getResourceId(), e, ERROR);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

@@ -37,6 +37,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MO
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_VALIDATION_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REPAIR_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
@@ -67,7 +68,9 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UP
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_DEFAULT_OUTBOUND_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_DEFAULT_OUTBOUND_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_VALIDATION_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPSCALE_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPSCALE_VALIDATION_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.VERTICAL_SCALE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.WAIT_FOR_SYNC;
 
@@ -98,6 +101,7 @@ public class EnvironmentSyncService {
             Map.entry(UPDATE_REQUESTED, UPDATE_INITIATED),
             Map.entry(UPDATE_FAILED, EnvironmentStatus.UPDATE_FAILED),
             Map.entry(UPSCALE_FAILED, EnvironmentStatus.AVAILABLE),
+            Map.entry(UPSCALE_VALIDATION_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(DOWNSCALE_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(VERTICAL_SCALE_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(REPAIR_FAILED, FREEIPA_UNHEALTHY),
@@ -127,9 +131,11 @@ public class EnvironmentSyncService {
             Map.entry(UNREACHABLE, FREEIPA_UNREACHABLE),
             Map.entry(UNHEALTHY, FREEIPA_UNHEALTHY),
             Map.entry(UNKNOWN, FREEIPA_UNHEALTHY),
+            Map.entry(UPGRADE_VALIDATION_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(UPGRADE_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(REBUILD_IN_PROGRESS, FREEIPA_REBUILD_IN_PROGRESS),
             Map.entry(REBUILD_FAILED, FREEIPA_REBUILD_FAILED),
+            Map.entry(REBUILD_VALIDATION_FAILED, FREEIPA_REBUILD_FAILED),
             Map.entry(STALE, FREEIPA_STALE),
             Map.entry(TRUST_SETUP_IN_PROGRESS, EnvironmentStatus.TRUST_SETUP_IN_PROGRESS),
             Map.entry(TRUST_SETUP_FINISH_REQUIRED, EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED),

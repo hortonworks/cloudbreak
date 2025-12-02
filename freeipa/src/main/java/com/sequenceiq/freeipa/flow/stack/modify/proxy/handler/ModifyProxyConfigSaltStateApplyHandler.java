@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.modify.proxy.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -35,7 +37,7 @@ public class ModifyProxyConfigSaltStateApplyHandler extends ExceptionCatcherEven
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ModifyProxyConfigSaltStateApplyRequest> event) {
         LOGGER.warn("Fallback to default failure event for exception", e);
-        return new StackFailureEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILED_EVENT.selector(), resourceId, e);
+        return new StackFailureEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILED_EVENT.selector(), resourceId, e, ERROR);
     }
 
     @Override

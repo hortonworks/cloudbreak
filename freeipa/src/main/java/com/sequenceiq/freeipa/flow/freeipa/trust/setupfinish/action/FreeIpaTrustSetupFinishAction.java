@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,6 @@ public class FreeIpaTrustSetupFinishAction extends FreeIpaTrustSetupFinishBaseAc
 
     @Override
     protected Object getFailurePayload(FreeIpaTrustSetupFinishEvent payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaTrustSetupFinishAddTrustFailed(payload.getResourceId(), ex);
+        return new FreeIpaTrustSetupFinishAddTrustFailed(payload.getResourceId(), ex, ERROR);
     }
 }

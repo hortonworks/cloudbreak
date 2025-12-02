@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -71,6 +73,6 @@ abstract class AbstractStackTerminationAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackTerminationContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex, ERROR);
     }
 }

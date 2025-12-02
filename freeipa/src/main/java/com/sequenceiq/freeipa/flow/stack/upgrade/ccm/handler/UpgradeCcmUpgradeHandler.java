@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_APPLY_UPGRADE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_REVERT_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_UPGRADE_FINISHED_EVENT;
@@ -43,8 +44,16 @@ public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Running upgrade for CCM upgrade has failed", e);
         LocalDateTime revertDate = getRevertDate();
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_REVERT_EVENT.event(), resourceId, event.getData().getOldTunnel(),
-                getClass(), e, revertDate, "Upgrading CCM is failed.");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_REVERT_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                revertDate,
+                "Upgrading CCM is failed.",
+                ERROR
+        );
     }
 
     @Override
@@ -68,8 +77,16 @@ public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {
             return resultEvent;
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.debug("Failed applying CCM upgrade state", e);
-            return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_REVERT_EVENT.event(), request.getResourceId(),
-                    event.getData().getOldTunnel(), getClass(), e, event.getData().getRevertTime(), "Upgrading CCM is failed.");
+            return new UpgradeCcmFailureEvent(
+                    UPGRADE_CCM_FAILED_REVERT_EVENT.event(),
+                    request.getResourceId(),
+                    event.getData().getOldTunnel(),
+                    getClass(),
+                    e,
+                    event.getData().getRevertTime(),
+                    "Upgrading CCM is failed.",
+                    ERROR
+            );
         }
     }
 

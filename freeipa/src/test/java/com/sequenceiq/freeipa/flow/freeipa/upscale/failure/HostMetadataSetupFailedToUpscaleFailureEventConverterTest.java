@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,7 +26,7 @@ public class HostMetadataSetupFailedToUpscaleFailureEventConverterTest {
     public void testReturnsUpscaleFailureEventWithEmptySuccessSet() {
         HostMetadataSetupFailedToUpscaleFailureEventConverter converter = new HostMetadataSetupFailedToUpscaleFailureEventConverter();
         Exception exception = new Exception();
-        HostMetadataSetupFailed payload = new HostMetadataSetupFailed(1L, exception);
+        HostMetadataSetupFailed payload = new HostMetadataSetupFailed(1L, exception, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertEquals("Host metadata setup", result.getFailedPhase());
         assertTrue(result.getSuccess().isEmpty());
@@ -52,7 +53,7 @@ public class HostMetadataSetupFailedToUpscaleFailureEventConverterTest {
     @Test
     public void testExceptionIsNullUpscaleFailureEventExceptionIsNull() {
         HostMetadataSetupFailedToUpscaleFailureEventConverter converter = new HostMetadataSetupFailedToUpscaleFailureEventConverter();
-        HostMetadataSetupFailed payload = new HostMetadataSetupFailed(1L, null);
+        HostMetadataSetupFailed payload = new HostMetadataSetupFailed(1L, null, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertNull(result.getException());
     }

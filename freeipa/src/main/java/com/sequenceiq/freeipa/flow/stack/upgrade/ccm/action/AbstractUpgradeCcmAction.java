@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
 
 import java.time.LocalDateTime;
@@ -63,7 +64,16 @@ public abstract class AbstractUpgradeCcmAction<P extends StackEvent> extends Abs
             UpgradeCcmEvent ufe = (UpgradeCcmEvent) payload;
             oldTunnel = ufe.getOldTunnel();
         }
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), payload.getResourceId(), oldTunnel, failureOrigin, e, revertTime, e.getMessage());
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_EVENT.event(),
+                payload.getResourceId(),
+                oldTunnel,
+                failureOrigin,
+                e,
+                revertTime,
+                e.getMessage(),
+                ERROR
+        );
     }
 
     protected void failOperation(String accountId, String failureMessage, Map<Object, Object> variables) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,6 @@ public class RebuildValidateBackupAction extends AbstractRebuildAction<ValidateC
 
     @Override
     protected Object getFailurePayload(ValidateCloudStorageSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-        return new ValidateBackupFailed(payload.getResourceId(), ex);
+        return new ValidateBackupFailed(payload.getResourceId(), ex, VALIDATION);
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.image.change.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FAILED_EVENT;
@@ -104,7 +105,7 @@ public class ImageChangeActions {
             @Override
             protected Object getFailurePayload(ImageChangeEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[PREPARE_IMAGE_STATE] failed", ex);
-                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
         };
     }
@@ -131,7 +132,7 @@ public class ImageChangeActions {
             @Override
             protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[IMAGE_FALLBACK_STATE] failed", ex);
-                return new StackFailureEvent(IMAGE_FALLBACK_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new StackFailureEvent(IMAGE_FALLBACK_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
 
             @Override
@@ -164,7 +165,7 @@ public class ImageChangeActions {
             @Override
             protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[SET_IMAGE_ON_PROVIDER_STATE] failed", ex);
-                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
         };
     }
@@ -180,7 +181,7 @@ public class ImageChangeActions {
             @Override
             protected Object getFailurePayload(CloudPlatformResult payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[IMAGE_CHANGE_FINISHED_STATE] failed", ex);
-                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
 
             @Override

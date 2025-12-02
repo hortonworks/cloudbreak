@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHECK_PREREQUISITES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_CHECK_PREREQUISITES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
@@ -34,9 +35,17 @@ public class UpgradeCcmCheckPrerequisitesHandler extends AbstractUpgradeCcmEvent
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Checking prerequisites for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId,
-                event.getData().getOldTunnel(), getClass(), e, DetailedStackStatus.AVAILABLE, event.getData().getRevertTime(),
-                "Upgrade CCM failed, prerequisites have not met");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                DetailedStackStatus.AVAILABLE,
+                event.getData().getRevertTime(),
+                "Upgrade CCM failed, prerequisites have not met",
+                ERROR
+        );
     }
 
     @Override

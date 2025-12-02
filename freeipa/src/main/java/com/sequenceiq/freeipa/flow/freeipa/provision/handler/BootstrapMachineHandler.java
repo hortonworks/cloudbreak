@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class BootstrapMachineHandler implements EventHandler<BootstrapMachinesRe
             response = new BootstrapMachinesSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Bootstrap failed", e);
-            response = new BootstrapMachinesFailed(request.getResourceId(), e);
+            response = new BootstrapMachinesFailed(request.getResourceId(), e, ERROR);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

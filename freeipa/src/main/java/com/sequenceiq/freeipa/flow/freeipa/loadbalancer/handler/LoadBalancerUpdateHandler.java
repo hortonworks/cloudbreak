@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -39,7 +41,7 @@ public class LoadBalancerUpdateHandler extends ExceptionCatcherEventHandler<Load
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<LoadBalancerUpdateRequest> event) {
         LOGGER.error("Unexpected error occurred while updating load balancer for FreeIPA", e);
-        return new LoadBalancerUpdateFailureEvent(resourceId, e);
+        return new LoadBalancerUpdateFailureEvent(resourceId, ERROR, e);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class LoadBalancerUpdateHandler extends ExceptionCatcherEventHandler<Load
                 return new LoadBalancerUpdateSuccess(stackId);
             } catch (Exception e) {
                 LOGGER.error("Failed to update FreeIPA load balancer", e);
-                return new LoadBalancerUpdateFailureEvent(stackId, e);
+                return new LoadBalancerUpdateFailureEvent(stackId, ERROR, e);
             }
         } else {
             LOGGER.debug("No load balancer found for FreeIPA cluster");

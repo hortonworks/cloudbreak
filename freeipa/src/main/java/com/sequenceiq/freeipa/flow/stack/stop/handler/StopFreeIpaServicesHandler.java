@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.stop.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -31,7 +33,7 @@ public class StopFreeIpaServicesHandler extends ExceptionCatcherEventHandler<Sto
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopFreeIpaServicesEvent> event) {
-        return new StackFailureEvent(StackStopEvent.STOP_FAILURE_EVENT.event(), resourceId, e);
+        return new StackFailureEvent(StackStopEvent.STOP_FAILURE_EVENT.event(), resourceId, e, ERROR);
     }
 
     @Override

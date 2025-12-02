@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -48,7 +50,7 @@ public class FreeIpaRestoreHandler extends ExceptionCatcherEventHandler<FreeIpaR
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaRestoreRequest> event) {
-        return new FreeIpaRestoreFailed(resourceId, e);
+        return new FreeIpaRestoreFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -66,7 +68,7 @@ public class FreeIpaRestoreHandler extends ExceptionCatcherEventHandler<FreeIpaR
             return new FreeIpaRestoreSuccess(request.getResourceId());
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.error("FreeIpa restore failed", e);
-            return new FreeIpaRestoreFailed(request.getResourceId(), e);
+            return new FreeIpaRestoreFailed(request.getResourceId(), e, ERROR);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.common.FailureType;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -54,7 +56,7 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateInstancesHealthEvent> event) {
         LOGGER.error("Unexpected exception during the validation of FreeIPA instances' health", e);
-        return new UpscaleFailureEvent(resourceId, PHASE, Set.of(), Map.of(), e);
+        return new UpscaleFailureEvent(resourceId, PHASE, Set.of(), FailureType.ERROR, Map.of(), e);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
         Set<String> healthyInstances = collectHealthyInstanceIds(healthDetails);
         Map<String, String> failureDetails = constructFailureDetails(notHealthyNodes);
         Exception exceptionForFailureEvent = new Exception("Unhealthy instances found: " + failureDetails.keySet());
-        return new UpscaleFailureEvent(event.getData().getResourceId(), PHASE, healthyInstances, failureDetails, exceptionForFailureEvent);
+        return new UpscaleFailureEvent(event.getData().getResourceId(), PHASE, healthyInstances, VALIDATION, failureDetails, exceptionForFailureEvent);
     }
 
     private Map<String, String> constructFailureDetails(List<NodeHealthDetails> notHealthyNodes) {

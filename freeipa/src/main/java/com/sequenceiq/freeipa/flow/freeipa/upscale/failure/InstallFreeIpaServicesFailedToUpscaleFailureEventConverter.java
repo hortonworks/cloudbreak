@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +18,13 @@ public class InstallFreeIpaServicesFailedToUpscaleFailureEventConverter implemen
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         InstallFreeIpaServicesFailed result = (InstallFreeIpaServicesFailed) payload;
-        return new UpscaleFailureEvent(result.getResourceId(), "Installing FreeIPA services", Set.of(), Map.of(),
-                result.getException());
+        return new UpscaleFailureEvent(
+                result.getResourceId(),
+                "Installing FreeIPA services",
+                Set.of(),
+                ERROR,
+                Map.of(),
+                result.getException()
+        );
     }
 }

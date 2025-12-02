@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,7 +30,7 @@ public class FreeIpaTrustSetupFinishAddTrustHandler extends ExceptionCatcherEven
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustSetupFinishAddRequest> event) {
         LOGGER.error("Failed to add trust on FreeIPA", e);
-        return new FreeIpaTrustSetupFinishAddTrustFailed(resourceId, e);
+        return new FreeIpaTrustSetupFinishAddTrustFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -41,7 +43,7 @@ public class FreeIpaTrustSetupFinishAddTrustHandler extends ExceptionCatcherEven
             return new FreeIpaTrustSetupFinishAddTrustSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to add trust on FreeIPA", e);
-            return new FreeIpaTrustSetupFinishAddTrustFailed(request.getResourceId(), e);
+            return new FreeIpaTrustSetupFinishAddTrustFailed(request.getResourceId(), e, ERROR);
         }
     }
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.backup.full;
 
+import static com.sequenceiq.freeipa.flow.freeipa.backup.full.FullBackupEvent.FULL_BACKUP_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -52,7 +55,7 @@ public class CreateFullBackupHandler extends ExceptionCatcherEventHandler<Create
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<CreateFullBackupEvent> event) {
         LOGGER.error("Unexpected error happened during backup creation", e);
-        return new StackFailureEvent(FullBackupEvent.FULL_BACKUP_FAILED_EVENT.event(), resourceId, e);
+        return new StackFailureEvent(FULL_BACKUP_FAILED_EVENT.event(), resourceId, e, ERROR);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class CreateFullBackupHandler extends ExceptionCatcherEventHandler<Create
             return new StackEvent(FullBackupEvent.FULL_BACKUP_SUCCESSFUL_EVENT.event(), event.getData().getResourceId());
         } catch (CloudbreakOrchestratorFailedException | CloneNotSupportedException e) {
             LOGGER.error("Full backup failed for node: {}", stateParameters.getTargetHostNames(), e);
-            return new StackFailureEvent(FullBackupEvent.FULL_BACKUP_FAILED_EVENT.event(), event.getData().getResourceId(), e);
+            return new StackFailureEvent(FULL_BACKUP_FAILED_EVENT.event(), event.getData().getResourceId(), e, ERROR);
         }
     }
 

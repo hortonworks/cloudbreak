@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.freeipa.flow.freeipa.common.FailureType;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 
 public class UpscaleFailureEvent extends StackFailureEvent {
@@ -20,9 +21,10 @@ public class UpscaleFailureEvent extends StackFailureEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("failedPhase") String failedPhase,
             @JsonProperty("success") Set<String> success,
+            @JsonProperty("failureType") FailureType failureType,
             @JsonProperty("failureDetails") Map<String, String> failureDetails,
             @JsonProperty("exception") Exception exception) {
-        super(stackId, exception);
+        super(stackId, exception, failureType);
         this.failedPhase = failedPhase;
         this.success = success;
         this.failureDetails = failureDetails;

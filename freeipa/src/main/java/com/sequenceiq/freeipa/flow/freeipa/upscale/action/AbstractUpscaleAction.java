@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Map;
 import java.util.Optional;
@@ -87,7 +88,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new UpscaleFailureEvent(payload.getResourceId(), "Unexpected failure in during action", Set.of(), Map.of(), ex);
+        return new UpscaleFailureEvent(payload.getResourceId(), "Unexpected failure in during action", Set.of(), ERROR, Map.of(), ex);
     }
 
     protected DetailedStackStatus getInProgressStatus(Map<Object, Object> variables) {

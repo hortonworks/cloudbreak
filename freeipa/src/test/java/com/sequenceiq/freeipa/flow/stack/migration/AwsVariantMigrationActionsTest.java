@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.migration;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -104,7 +105,7 @@ public class AwsVariantMigrationActionsTest {
     @Test
     public void testMigrationFailed() throws Exception {
         String errorReason = "error reason";
-        StackFailureEvent payload = new StackFailureEvent(STACK_ID, new Exception(errorReason));
+        StackFailureEvent payload = new StackFailureEvent(STACK_ID, new Exception(errorReason), ERROR);
         Map<Object, Object> variables = new HashMap<>();
         when(runningFlows.get(any())).thenReturn(mock(Flow.class));
         new AbstractActionTestSupport<>(getMigrationFailedAction()).doExecute(context, payload, variables);

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -33,7 +35,7 @@ public class GenerateEncryptionKeysHandler extends ExceptionCatcherEventHandler<
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<GenerateEncryptionKeysRequest> event) {
         LOGGER.error("Generating Encryption Keys has failed with unexpected error", e);
-        return new GenerateEncryptionKeysFailed(resourceId, e);
+        return new GenerateEncryptionKeysFailed(resourceId, e, ERROR);
     }
 
     @Override

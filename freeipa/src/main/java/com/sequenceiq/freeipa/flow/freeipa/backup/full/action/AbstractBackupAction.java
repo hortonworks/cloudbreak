@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.backup.full.action;
 
 import static com.sequenceiq.freeipa.flow.freeipa.backup.full.FullBackupEvent.FULL_BACKUP_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Optional;
 
@@ -40,6 +41,6 @@ public abstract class AbstractBackupAction<P extends Payload> extends AbstractAc
 
     @Override
     protected Object getFailurePayload(P payload, Optional<BackupContext> flowContext, Exception ex) {
-        return new StackFailureEvent(FULL_BACKUP_FAILED_EVENT.event(), payload.getResourceId(), ex);
+        return new StackFailureEvent(FULL_BACKUP_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
     }
 }

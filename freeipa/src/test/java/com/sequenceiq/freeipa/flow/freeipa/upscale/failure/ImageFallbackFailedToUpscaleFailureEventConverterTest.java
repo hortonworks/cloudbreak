@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -26,7 +27,7 @@ public class ImageFallbackFailedToUpscaleFailureEventConverterTest {
     public void testReturnsUpscaleFailureEventWithFailedPhase() {
         ImageFallbackFailedToUpscaleFailureEventConverter converter = new ImageFallbackFailedToUpscaleFailureEventConverter();
         Exception exception = new Exception("message");
-        ImageFallbackFailed payload = new ImageFallbackFailed(1L, exception);
+        ImageFallbackFailed payload = new ImageFallbackFailed(1L, exception, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertEquals("Image fallback", result.getFailedPhase());
         assertFalse(result.getFailureDetails().isEmpty());
@@ -55,7 +56,7 @@ public class ImageFallbackFailedToUpscaleFailureEventConverterTest {
     @Test
     public void testExceptionIsNullUpscaleFailureEventExceptionIsNull() {
         ImageFallbackFailedToUpscaleFailureEventConverter converter = new ImageFallbackFailedToUpscaleFailureEventConverter();
-        ImageFallbackFailed payload = new ImageFallbackFailed(1L, null);
+        ImageFallbackFailed payload = new ImageFallbackFailed(1L, null, ERROR);
         UpscaleFailureEvent result = converter.convert(payload);
         assertNull(result.getException());
     }

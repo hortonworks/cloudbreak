@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_PUSH_SALT_STATES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_PUSH_SALT_STATES_FINISHED_EVENT;
@@ -35,8 +36,16 @@ public class UpgradeCcmPushSaltStatesHandler extends AbstractUpgradeCcmEventHand
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Pushing salt states for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(),
-                e, event.getData().getRevertTime(), "Upgrading CCM is failed, pushing salt states has been failed.");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Upgrading CCM is failed, pushing salt states has been failed.",
+                ERROR
+        );
     }
 
     @Override
@@ -49,8 +58,16 @@ public class UpgradeCcmPushSaltStatesHandler extends AbstractUpgradeCcmEventHand
                 upgradeCcmService.pushSaltStates(request.getResourceId());
             } catch (CloudbreakOrchestratorException e) {
                 LOGGER.debug("Failed pushing salt states");
-                return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), request.getResourceId(), event.getData().getOldTunnel(), getClass(),
-                        e, event.getData().getRevertTime(), "Upgrading CCM is failed, pushing salt states has been failed.");
+                return new UpgradeCcmFailureEvent(
+                        UPGRADE_CCM_FAILED_EVENT.event(),
+                        request.getResourceId(),
+                        event.getData().getOldTunnel(),
+                        getClass(),
+                        e,
+                        event.getData().getRevertTime(),
+                        "Upgrading CCM is failed, pushing salt states has been failed.",
+                        ERROR
+                );
             }
         } else {
             LOGGER.info("Pushing salt states step is skipped for previous tunnel type '{}'", request.getOldTunnel());

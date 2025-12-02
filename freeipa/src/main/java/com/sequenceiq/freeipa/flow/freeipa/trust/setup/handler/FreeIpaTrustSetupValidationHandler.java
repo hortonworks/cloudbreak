@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,7 +30,7 @@ public class FreeIpaTrustSetupValidationHandler extends ExceptionCatcherEventHan
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustSetupValidationRequest> event) {
-        return new FreeIpaTrustSetupValidationFailed(resourceId, e);
+        return new FreeIpaTrustSetupValidationFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -36,13 +39,13 @@ public class FreeIpaTrustSetupValidationHandler extends ExceptionCatcherEventHan
         try {
             TaskResults taskResults = validationService.validateTrustSetup(request.getResourceId());
             if (taskResults.hasErrors()) {
-                return new FreeIpaTrustSetupValidationFailed(request.getResourceId(), taskResults);
+                return new FreeIpaTrustSetupValidationFailed(request.getResourceId(), taskResults, VALIDATION);
             } else {
                 return new FreeIpaTrustSetupValidationSuccess(request.getResourceId(), taskResults);
             }
         } catch (Exception e) {
             LOGGER.error("Validation failed for trust setup", e);
-            return new FreeIpaTrustSetupValidationFailed(request.getResourceId(), e);
+            return new FreeIpaTrustSetupValidationFailed(request.getResourceId(), e, VALIDATION);
         }
     }
 

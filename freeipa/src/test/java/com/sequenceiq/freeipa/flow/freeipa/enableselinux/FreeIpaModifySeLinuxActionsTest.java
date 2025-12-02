@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.enableselinux;
 
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FINALIZE_MODIFY_SELINUX_FREEIPA_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.FINISH_MODIFY_SELINUX_FREEIPA_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.enableselinux.event.FreeIpaModifySeLinuxStateSelectors.HANDLED_FAILED_MODIFY_SELINUX_FREEIPA_EVENT;
@@ -159,7 +160,12 @@ public class FreeIpaModifySeLinuxActionsTest {
 
     @Test
     void testFailedAction() throws Exception {
-        FreeIpaModifySeLinuxFailedEvent event = new FreeIpaModifySeLinuxFailedEvent(1L, "test-op", new CloudbreakException("test"));
+        FreeIpaModifySeLinuxFailedEvent event = new FreeIpaModifySeLinuxFailedEvent(
+                1L,
+                "test-op",
+                new CloudbreakException("test"),
+                ERROR
+        );
         doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
         AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxFailedEvent> action =
                 (AbstractFreeIpaModifySeLinuxAction<FreeIpaModifySeLinuxFailedEvent>) underTest.failedAction();

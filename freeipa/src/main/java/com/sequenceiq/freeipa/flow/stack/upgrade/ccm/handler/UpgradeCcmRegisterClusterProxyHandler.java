@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT;
@@ -34,9 +35,16 @@ public class UpgradeCcmRegisterClusterProxyHandler extends AbstractUpgradeCcmEve
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Registering cluster proxy for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT.event(), resourceId, event.getData().getOldTunnel(),
-                getClass(), e, event.getData().getRevertTime(),
-                "Upgrading CCM is failed, registering cluster proxy has been failed.");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Upgrading CCM is failed, registering cluster proxy has been failed.",
+                ERROR
+        );
     }
 
     @Override

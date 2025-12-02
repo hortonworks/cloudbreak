@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.action;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Optional;
 
@@ -72,6 +73,6 @@ public abstract class AbstractFreeIpaProviderTemplateUpdateAction<P extends Payl
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaProviderTemplateUpdateFailureEvent(payload.getResourceId(), "Unexpected error during action", ex);
+        return new FreeIpaProviderTemplateUpdateFailureEvent(payload.getResourceId(), "Unexpected error during action", ex, ERROR);
     }
 }

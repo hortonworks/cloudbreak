@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -44,7 +46,7 @@ public class DeleteUserdataSecretsHandler extends ExceptionCatcherEventHandler<D
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DeleteUserdataSecretsRequest> event) {
         LOGGER.error("Unexpected error occurred while deleting userdata secrets.", e);
-        return new DeleteUserdataSecretsFailed(resourceId, e);
+        return new DeleteUserdataSecretsFailed(resourceId, e, ERROR);
     }
 
     @Override

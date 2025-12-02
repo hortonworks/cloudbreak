@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setup.action;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_IN_PROGRESS;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
 
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,6 @@ public class FreeIpaTrustSetupValidationAction extends FreeIpaTrustSetupBaseActi
 
     @Override
     protected Object getFailurePayload(FreeIpaTrustSetupEvent payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIpaTrustSetupValidationFailed(payload.getResourceId(), ex);
+        return new FreeIpaTrustSetupValidationFailed(payload.getResourceId(), ex, VALIDATION);
     }
 }

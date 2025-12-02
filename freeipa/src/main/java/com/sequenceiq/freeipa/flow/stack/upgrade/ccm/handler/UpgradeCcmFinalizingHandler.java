@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_FINALIZATION_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FINALIZE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FINALIZING_FINISHED_EVENT;
@@ -35,8 +36,16 @@ public class UpgradeCcmFinalizingHandler extends AbstractUpgradeCcmEventHandler 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Finalizing for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FINALIZE_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(),
-                e, event.getData().getRevertTime(), "Finalizing CCM upgrade failed, ");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FINALIZE_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                event.getData().getRevertTime(),
+                "Finalizing CCM upgrade failed, ",
+                ERROR
+        );
     }
 
     @Override
@@ -47,8 +56,16 @@ public class UpgradeCcmFinalizingHandler extends AbstractUpgradeCcmEventHandler 
             upgradeCcmService.finalizeConfiguration(request.getResourceId());
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Finalizing for CCM upgrade has failed", e);
-            return new UpgradeCcmFailureEvent(UPGRADE_CCM_FINALIZE_FAILED_EVENT.event(), request.getResourceId(), request.getOldTunnel(), getClass(),
-                    e, request.getRevertTime(), "Finalizing CCM upgrade failed, ");
+            return new UpgradeCcmFailureEvent(
+                    UPGRADE_CCM_FINALIZE_FAILED_EVENT.event(),
+                    request.getResourceId(),
+                    request.getOldTunnel(),
+                    getClass(),
+                    e,
+                    request.getRevertTime(),
+                    "Finalizing CCM upgrade failed, ",
+                    ERROR
+            );
         }
         return UPGRADE_CCM_FINALIZING_FINISHED_EVENT.createBasedOn(request);
     }

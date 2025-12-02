@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHANGE_TUNNEL_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_TUNNEL_CHANGE_FINISHED_EVENT;
@@ -35,9 +36,17 @@ public class UpgradeCcmChangeTunnelHandler extends AbstractUpgradeCcmEventHandle
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Changing tunnel for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId,
-                event.getData().getOldTunnel(), getClass(), e, DetailedStackStatus.AVAILABLE,
-                event.getData().getRevertTime(), "CCM upgrade failed due to changing tunnel ");
+        return new UpgradeCcmFailureEvent(
+                UPGRADE_CCM_FAILED_EVENT.event(),
+                resourceId,
+                event.getData().getOldTunnel(),
+                getClass(),
+                e,
+                DetailedStackStatus.AVAILABLE,
+                event.getData().getRevertTime(),
+                "CCM upgrade failed due to changing tunnel ",
+                ERROR
+        );
     }
 
     @Override

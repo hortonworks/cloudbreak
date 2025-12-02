@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.update.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDATE_USERDATA_FAILED_EVENT;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class UserDataUpdateActions {
 
             @Override
             protected Object getFailurePayload(UserDataUpdateRequest payload, Optional<StackContext> flowContext, Exception ex) {
-                return new UserDataUpdateFailed(payload.getResourceId(), ex);
+                return new UserDataUpdateFailed(payload.getResourceId(), ex, ERROR);
             }
         };
     }
@@ -88,7 +89,7 @@ public class UserDataUpdateActions {
 
             @Override
             protected Object getFailurePayload(UserDataUpdateSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-                return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
 
             private List<CloudResource> getCloudResources(Long stackId) {
@@ -118,7 +119,7 @@ public class UserDataUpdateActions {
 
             @Override
             protected Object getFailurePayload(UserDataUpdateOnProviderResult payload, Optional<StackContext> flowContext, Exception ex) {
-                return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), payload.getResourceId(), ex);
+                return new UserDataUpdateFailed(UPDATE_USERDATA_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
         };
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.modify.proxy.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -40,6 +42,6 @@ public abstract class ModifyProxyConfigAction<P extends StackEvent>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<ModifyProxyConfigContext> flowContext, Exception ex) {
-        return new StackFailureEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILED_EVENT.selector(), payload.getResourceId(), ex);
+        return new StackFailureEvent(ModifyProxyConfigEvent.MODIFY_PROXY_FAILED_EVENT.selector(), payload.getResourceId(), ex, ERROR);
     }
 }

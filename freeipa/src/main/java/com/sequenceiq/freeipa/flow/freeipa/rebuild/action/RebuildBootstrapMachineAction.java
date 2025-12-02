@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,6 @@ public class RebuildBootstrapMachineAction extends AbstractRebuildAction<Cluster
 
     @Override
     protected Object getFailurePayload(ClusterProxyRegistrationSuccess payload, Optional<StackContext> flowContext, Exception ex) {
-        return new BootstrapMachinesFailed(payload.getResourceId(), ex);
+        return new BootstrapMachinesFailed(payload.getResourceId(), ex, ERROR);
     }
 }

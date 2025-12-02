@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.cancel.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,7 +30,7 @@ public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEven
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaTrustCancelConfigurationRequest> event) {
         LOGGER.error("Failed to cancel trust on FreeIPA", e);
-        return new FreeIpaTrustCancelConfigurationFailed(resourceId, e);
+        return new FreeIpaTrustCancelConfigurationFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -41,7 +43,7 @@ public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEven
             return new FreeIpaTrustCancelConfigurationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to cancel trust on FreeIPA", e);
-            return new FreeIpaTrustCancelConfigurationFailed(request.getResourceId(), e);
+            return new FreeIpaTrustCancelConfigurationFailed(request.getResourceId(), e, ERROR);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,7 +59,7 @@ public class FreeIpaCleanupAfterRestoreHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaCleanupAfterRestoreRequest> event) {
-        return new FreeIpaCleanupAfterRestoreFailed(resourceId, e);
+        return new FreeIpaCleanupAfterRestoreFailed(resourceId, e, ERROR);
     }
 
     @Override
@@ -75,7 +77,7 @@ public class FreeIpaCleanupAfterRestoreHandler extends ExceptionCatcherEventHand
             }
             return new FreeIpaCleanupAfterRestoreSuccess(request.getResourceId());
         } catch (FreeIpaClientException e) {
-            return new FreeIpaCleanupAfterRestoreFailed(request.getResourceId(), e);
+            return new FreeIpaCleanupAfterRestoreFailed(request.getResourceId(), e, ERROR);
         }
     }
 

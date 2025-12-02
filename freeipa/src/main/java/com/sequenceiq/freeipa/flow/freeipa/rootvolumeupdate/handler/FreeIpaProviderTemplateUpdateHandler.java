@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class FreeIpaProviderTemplateUpdateHandler extends ExceptionCatcherEventH
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<FreeIpaProviderTemplateUpdateHandlerRequest> event) {
-        return new FreeIpaProviderTemplateUpdateFailureEvent(resourceId, "Exception in Launch Template Update Handler", e);
+        return new FreeIpaProviderTemplateUpdateFailureEvent(resourceId, "Exception in Launch Template Update Handler", e, ERROR);
     }
 
     @Override

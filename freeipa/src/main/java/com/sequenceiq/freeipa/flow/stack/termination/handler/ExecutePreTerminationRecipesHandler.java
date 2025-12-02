@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +64,7 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ExecutePreTerminationRecipesRequest> event) {
         boolean forced = event.getData().getForced();
         if (!forced) {
-            return new StackFailureEvent(StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), resourceId, e);
+            return new StackFailureEvent(StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), resourceId, e, ERROR);
         } else {
             return new ExecutePreTerminationRecipesFinished(event.getData().getResourceId(), forced);
         }
@@ -102,7 +104,7 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
                 LOGGER.info("Force flag is true, don't care about pre-termination recipe fail");
                 return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());
             }
-            return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
+            return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e, ERROR);
         }
         return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());
     }
