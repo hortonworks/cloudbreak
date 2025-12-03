@@ -59,7 +59,7 @@ grow_disk() {
 
 main() {
   device_names=$(blkid | grep -i /dev | cut -d ':' -f 1)
-  root_disk=$(get_root_disk $LOG_FILE)
+  root_disk=$(get_root_disk)
 
   for device in $device_names; do
     # Check if growpart is required
