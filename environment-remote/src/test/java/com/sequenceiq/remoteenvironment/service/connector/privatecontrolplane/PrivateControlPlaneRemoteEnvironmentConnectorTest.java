@@ -56,6 +56,9 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
     private static final String PUBLIC_CLOUD_ACCOUNT_ID = "publicCloudAccountId";
 
+    private static final String USER_CRN =
+            String.format("crn:cdp:iam:us-west-1:%s:user:06533e78-b2bd-41c9-8ac4-c4109af7797b", PUBLIC_CLOUD_ACCOUNT_ID);
+
     private static final String CONTROL_PLANE = "controlPlane";
 
     @Mock
@@ -137,7 +140,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(converterMock.convert(eq(environment1), eq(privateControlPlane1))).thenReturn(response1);
         when(converterMock.convert(eq(environment2), eq(privateControlPlane2))).thenReturn(response2);
 
-        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId");
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list(USER_CRN);
 
         assertEquals(2, result.size());
         verify(taskExecutor, times(result.size())).submit(any(Callable.class));
@@ -159,7 +162,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         ListEnvironmentsResponse environmentResponses1 = new ListEnvironmentsResponse();
         environmentResponses1.setEnvironments(List.of(environment1));
 
-        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list("sampleAccountId");
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list(USER_CRN);
 
         assertTrue(result.isEmpty());
         verifyNoInteractions(converterMock);
@@ -171,7 +174,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         describeRemoteEnvironment.setCrn("crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd");
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest
-                .describeV1(PUBLIC_CLOUD_ACCOUNT_ID, "crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd"));
+                .describeV1(USER_CRN, "crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd"));
 
         assertEquals("The provided environment CRN('crn:altus:us-west-1:5abe6882-ff63:environment:test-hybrid-1/06533e78-b2bd') is invalid",
                 ex.getMessage());
@@ -197,7 +200,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         DescribeEnvironmentResponse result = underTest
                 .describeV1(
-                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                        USER_CRN, ENV_CRN
                         );
 
         assertEquals(describeEnvironmentResponse, result);
@@ -224,7 +227,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         DescribeEnvironmentV2Response result = underTest
                 .describeV2(
-                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                        USER_CRN, ENV_CRN
                 );
 
         assertEquals(describeEnvironmentResponse, result);
@@ -241,7 +244,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> underTest
                 .describeV1(
-                        PUBLIC_CLOUD_ACCOUNT_ID,
+                        USER_CRN,
                         ENV_CRN));
 
         assertEquals("There is no control plane for this account with account id 5abe6882-ff63-4ad2-af86-a5582872a9cd.",
@@ -261,7 +264,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.describeV1(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> underTest.describeV1(USER_CRN, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch environment for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 
@@ -277,7 +280,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(privateControlPlaneClient.getRemoteDataContext(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenReturn(describeDatalakeAsApiRemoteDataContextResponse);
 
-        DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
+        DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext(USER_CRN, ENV_CRN);
         assertEquals(describeDatalakeAsApiRemoteDataContextResponse, result);
     }
 
@@ -285,7 +288,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     public void testGetRemoteDataContextThrowsBadRequestExceptionInvalidCrn() {
         String invalidCrn = "test";
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.getRemoteDataContext(PUBLIC_CLOUD_ACCOUNT_ID, invalidCrn));
+                () -> underTest.getRemoteDataContext(USER_CRN, invalidCrn));
         assertEquals(String.format("The provided environment CRN('%s') is invalid", invalidCrn), badRequestException.getMessage());
     }
 
@@ -295,7 +298,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 .thenReturn(Optional.empty());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.getRemoteDataContext(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> underTest.getRemoteDataContext(USER_CRN, ENV_CRN));
         assertEquals(String.format("There is no control plane for this account with account id %s.", TENANT), badRequestException.getMessage());
     }
 
@@ -309,7 +312,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.getRemoteDataContext(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> underTest.getRemoteDataContext(USER_CRN, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch remote data context for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 
@@ -325,7 +328,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
         when(privateControlPlaneClient.getDatalakeServices(eq(CONTROL_PLANE), any(), eq(ENV_CRN)))
                 .thenReturn(describeDatalakeServicesResponse);
 
-        DescribeDatalakeServicesResponse result = underTest.getDatalakeServices(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN);
+        DescribeDatalakeServicesResponse result = underTest.getDatalakeServices(USER_CRN, ENV_CRN);
         assertEquals(describeDatalakeServicesResponse, result);
     }
 
@@ -333,7 +336,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     public void testGetDatalakeServicesThrowsBadRequestExceptionInvalidCrn() {
         String invalidCrn = "test";
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.getDatalakeServices(PUBLIC_CLOUD_ACCOUNT_ID, invalidCrn));
+                () -> underTest.getDatalakeServices(USER_CRN, invalidCrn));
         assertEquals(String.format("The provided environment CRN('%s') is invalid", invalidCrn), badRequestException.getMessage());
     }
 
@@ -341,7 +344,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
     public void testGetDatalakeServicesThrowsBadRequestExceptionControlPlaneDoesNotExist() {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.getDatalakeServices(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> underTest.getDatalakeServices(USER_CRN, ENV_CRN));
         assertEquals(String.format("There is no control plane for this account with account id %s.", TENANT), badRequestException.getMessage());
     }
 
@@ -355,7 +358,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 .thenThrow(new RuntimeException());
 
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.getDatalakeServices(PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN));
+                () -> underTest.getDatalakeServices(USER_CRN, ENV_CRN));
         assertEquals(String.format(String.format("Unable to fetch data lake services for crn %s", ENV_CRN)), runtimeException.getMessage());
     }
 
@@ -375,7 +378,7 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
 
         GetRootCertificateResponse result = underTest
                 .getRootCertificate(
-                        PUBLIC_CLOUD_ACCOUNT_ID, ENV_CRN
+                        USER_CRN, ENV_CRN
                 );
 
         assertEquals("certecske", result.getContents());

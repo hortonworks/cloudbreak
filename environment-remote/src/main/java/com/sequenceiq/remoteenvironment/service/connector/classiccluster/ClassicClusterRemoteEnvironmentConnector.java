@@ -61,20 +61,20 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     @Override
-    public Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
-        List<OnPremisesApiProto.Cluster> clusters = remoteClusterServiceClient.listClassicClusters().stream()
+    public Collection<SimpleRemoteEnvironmentResponse> list(String userCrn) {
+        List<OnPremisesApiProto.Cluster> clusters = remoteClusterServiceClient.listClassicClusters(userCrn).stream()
                 .filter(this::isBaseCluster)
                 .toList();
         return listService.list(clusters);
     }
 
     @Override
-    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+    public DescribeEnvironmentResponse describeV1(String userCrn, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
         if (StringUtils.isNotEmpty(cluster.getEnvironmentCrn())) {
             try {
                 LOGGER.info("Forwarding describeV1 to connected Private Control Plane");
-                return privateControlPlaneRemoteEnvironmentConnector.describeV1(publicCloudAccountId, cluster.getEnvironmentCrn());
+                return privateControlPlaneRemoteEnvironmentConnector.describeV1(userCrn, cluster.getEnvironmentCrn());
             } catch (Exception e) {
                 LOGGER.warn("Failed to forward describeV1 to connected Private Control Plane", e);
                 throw e;
@@ -84,12 +84,12 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     @Override
-    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+    public DescribeEnvironmentV2Response describeV2(String userCrn, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
         if (StringUtils.isNotEmpty(cluster.getEnvironmentCrn())) {
             try {
                 LOGGER.info("Forwarding describeV2 to connected Private Control Plane");
-                return privateControlPlaneRemoteEnvironmentConnector.describeV2(publicCloudAccountId, cluster.getEnvironmentCrn());
+                return privateControlPlaneRemoteEnvironmentConnector.describeV2(userCrn, cluster.getEnvironmentCrn());
             } catch (Exception e) {
                 LOGGER.warn("Failed to forward describeV2 to connected Private Control Plane", e);
                 throw e;
@@ -99,24 +99,24 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     @Override
-    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String publicCloudAccountId, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String userCrn, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
         return remoteDataContextProvider.getRemoteDataContext(cluster);
     }
 
     @Override
-    public DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+    public DescribeDatalakeServicesResponse getDatalakeServices(String userCrn, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
         return datalakeServicesProvider.getDatalakeServices(cluster);
     }
 
     @Override
-    public GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
-        OnPremisesApiProto.Cluster cluster = getCluster(environmentCrn);
+    public GetRootCertificateResponse getRootCertificate(String userCrn, String environmentCrn) {
+        OnPremisesApiProto.Cluster cluster = getCluster(userCrn, environmentCrn);
         if (StringUtils.isNotEmpty(cluster.getEnvironmentCrn())) {
             try {
                 LOGGER.info("Forwarding getRootCertificate to connected Private Control Plane");
-                return privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(publicCloudAccountId, cluster.getEnvironmentCrn());
+                return privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(userCrn, cluster.getEnvironmentCrn());
             } catch (Exception e) {
                 LOGGER.warn("Failed to forward getRootCertificate to connected Private Control Plane", e);
                 throw e;
@@ -125,8 +125,8 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
         return rootCertificateProvider.getRootCertificate(cluster);
     }
 
-    private OnPremisesApiProto.Cluster getCluster(String crn) {
-        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(crn);
+    private OnPremisesApiProto.Cluster getCluster(String userCrn, String crn) {
+        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(userCrn, crn);
         if (!isBaseCluster(cluster)) {
             throw new BadRequestException("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
         }

@@ -38,6 +38,8 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     private static final String ACCOUNT_ID = "acc";
 
+    private static final String USER_CRN = "user";
+
     private static final String PVC_CP_ENV_CRN = "env";
 
     @Mock
@@ -69,7 +71,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(remoteClusterServiceClient.describeClassicCluster(CLUSTER_CRN)).thenReturn(cluster);
+        lenient().when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         underTest = spy(underTest);
         lenient().doReturn(true).when(underTest).isBaseCluster(cluster);
     }
@@ -78,9 +80,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void list() {
         OnPremisesApiProto.Cluster computeCluster = mock();
         doReturn(false).when(underTest).isBaseCluster(computeCluster);
-        when(remoteClusterServiceClient.listClassicClusters()).thenReturn(List.of(cluster, computeCluster));
+        when(remoteClusterServiceClient.listClassicClusters(USER_CRN)).thenReturn(List.of(cluster, computeCluster));
 
-        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list(ACCOUNT_ID);
+        Collection<SimpleRemoteEnvironmentResponse> result = underTest.list(USER_CRN);
 
         verify(listService).list(List.of(cluster));
     }
@@ -92,7 +94,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         when(mockV2.toV1Response()).thenReturn(mockV1);
         when(describeService.describe(cluster)).thenReturn(mockV2);
 
-        DescribeEnvironmentResponse result = underTest.describeV1(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeEnvironmentResponse result = underTest.describeV1(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(mockV1);
         verify(describeService).describe(cluster);
@@ -103,7 +105,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV1ComputeCluster() {
         doReturn(false).when(underTest).isBaseCluster(cluster);
 
-        assertThatThrownBy(() -> underTest.describeV1(ACCOUNT_ID, CLUSTER_CRN))
+        assertThatThrownBy(() -> underTest.describeV1(USER_CRN, CLUSTER_CRN))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
     }
@@ -112,9 +114,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV1WithPvcCpSuccess() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         DescribeEnvironmentResponse describeEnvironmentResponse = mock();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentResponse);
+        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(USER_CRN, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentResponse);
 
-        DescribeEnvironmentResponse result = underTest.describeV1(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeEnvironmentResponse result = underTest.describeV1(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(describeEnvironmentResponse);
     }
@@ -123,9 +125,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV1WithPvcCpFailure() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         RuntimeException ex = new RuntimeException();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenThrow(ex);
+        when(privateControlPlaneRemoteEnvironmentConnector.describeV1(USER_CRN, PVC_CP_ENV_CRN)).thenThrow(ex);
 
-        assertThatThrownBy(() -> underTest.describeV1(ACCOUNT_ID, CLUSTER_CRN))
+        assertThatThrownBy(() -> underTest.describeV1(USER_CRN, CLUSTER_CRN))
                 .isEqualTo(ex);
     }
 
@@ -134,7 +136,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeEnvironmentV2Response describeEnvironmentV2Response = mock();
         when(describeService.describe(cluster)).thenReturn(describeEnvironmentV2Response);
 
-        DescribeEnvironmentResponse result = underTest.describeV2(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeEnvironmentResponse result = underTest.describeV2(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(describeEnvironmentV2Response);
     }
@@ -143,9 +145,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV2WithPvcCpSuccess() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         DescribeEnvironmentV2Response describeEnvironmentV2Response = mock();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentV2Response);
+        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(USER_CRN, PVC_CP_ENV_CRN)).thenReturn(describeEnvironmentV2Response);
 
-        DescribeEnvironmentResponse result = underTest.describeV2(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeEnvironmentResponse result = underTest.describeV2(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(describeEnvironmentV2Response);
     }
@@ -154,9 +156,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void describeV2WithPvcCpFailure() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         RuntimeException ex = new RuntimeException();
-        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenThrow(ex);
+        when(privateControlPlaneRemoteEnvironmentConnector.describeV2(USER_CRN, PVC_CP_ENV_CRN)).thenThrow(ex);
 
-        assertThatThrownBy(() -> underTest.describeV2(ACCOUNT_ID, CLUSTER_CRN))
+        assertThatThrownBy(() -> underTest.describeV2(USER_CRN, CLUSTER_CRN))
                 .isEqualTo(ex);
     }
 
@@ -165,7 +167,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeDatalakeAsApiRemoteDataContextResponse rdc = mock();
         when(remoteDataContextProvider.getRemoteDataContext(cluster)).thenReturn(rdc);
 
-        DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeDatalakeAsApiRemoteDataContextResponse result = underTest.getRemoteDataContext(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(rdc);
     }
@@ -175,7 +177,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         DescribeDatalakeServicesResponse datalakeServices = mock();
         when(datalakeServicesProvider.getDatalakeServices(cluster)).thenReturn(datalakeServices);
 
-        DescribeDatalakeServicesResponse result = underTest.getDatalakeServices(ACCOUNT_ID, CLUSTER_CRN);
+        DescribeDatalakeServicesResponse result = underTest.getDatalakeServices(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(datalakeServices);
     }
@@ -185,7 +187,7 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
         GetRootCertificateResponse rootCertificate = mock();
         when(rootCertificateProvider.getRootCertificate(cluster)).thenReturn(rootCertificate);
 
-        GetRootCertificateResponse result = underTest.getRootCertificate(ACCOUNT_ID, CLUSTER_CRN);
+        GetRootCertificateResponse result = underTest.getRootCertificate(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(rootCertificate);
         verifyNoInteractions(privateControlPlaneRemoteEnvironmentConnector);
@@ -195,9 +197,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void getRootCertificateWithPvcCpSuccess() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         GetRootCertificateResponse rootCertificate = mock();
-        when(privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenReturn(rootCertificate);
+        when(privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(USER_CRN, PVC_CP_ENV_CRN)).thenReturn(rootCertificate);
 
-        GetRootCertificateResponse result = underTest.getRootCertificate(ACCOUNT_ID, CLUSTER_CRN);
+        GetRootCertificateResponse result = underTest.getRootCertificate(USER_CRN, CLUSTER_CRN);
 
         assertThat(result).isEqualTo(rootCertificate);
         verifyNoInteractions(rootCertificateProvider);
@@ -207,9 +209,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
     void getRootCertificateWithPvcCpFailure() {
         when(cluster.getEnvironmentCrn()).thenReturn(PVC_CP_ENV_CRN);
         RuntimeException ex = new RuntimeException();
-        when(privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(ACCOUNT_ID, PVC_CP_ENV_CRN)).thenThrow(ex);
+        when(privateControlPlaneRemoteEnvironmentConnector.getRootCertificate(USER_CRN, PVC_CP_ENV_CRN)).thenThrow(ex);
 
-        assertThatThrownBy(() -> underTest.getRootCertificate(ACCOUNT_ID, CLUSTER_CRN))
+        assertThatThrownBy(() -> underTest.getRootCertificate(USER_CRN, CLUSTER_CRN))
                 .isEqualTo(ex);
     }
 

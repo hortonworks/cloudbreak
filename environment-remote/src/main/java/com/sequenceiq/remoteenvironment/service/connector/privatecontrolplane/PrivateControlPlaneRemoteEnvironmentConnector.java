@@ -24,7 +24,6 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -72,10 +71,10 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
+    public Collection<SimpleRemoteEnvironmentResponse> list(String userCrn) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(publicCloudAccountId);
+        String accountId = Crn.safeFromString(userCrn).getAccountId();
+        Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(accountId);
         LOGGER.info("Starting to list environments from '{}' control planes with actor('{}')", privateControlPlanes.size(), userCrn);
         String controlPlaneNames = privateControlPlanes.stream().map(PrivateControlPlane::getName).collect(Collectors.joining(","));
         LOGGER.debug("Starting to list environments from control planes with name '{}' actor('{}')", controlPlaneNames, userCrn);
@@ -95,9 +94,9 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public DescribeEnvironmentResponse describeV1(String publicCloudAccountId, String environmentCrn) {
+    public DescribeEnvironmentResponse describeV1(String userCrn, String environmentCrn) {
         DescribeEnvironmentResponse describeEnvironmentResponse = callRemoteEnvironment(
-                publicCloudAccountId,
+                userCrn,
                 environmentCrn,
                 this::describeRemoteEnvironmentWithActor);
 
@@ -105,10 +104,11 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, String environmentCrn) {
+    public DescribeEnvironmentV2Response describeV2(String userCrn, String environmentCrn) {
+        String publicCloudAccountId = Crn.safeFromString(userCrn).getAccountId();
         String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
         DescribeEnvironmentV2Response describeEnvironmentResponse = callRemoteEnvironment(
-                publicCloudAccountId,
+                userCrn,
                 environmentCrn,
                 this::describeRemoteEnvironmentWithActor);
 
@@ -152,27 +152,27 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     }
 
     @Override
-    public GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
-        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRootCertificateWithActor);
+    public GetRootCertificateResponse getRootCertificate(String userCrn, String environmentCrn) {
+        return callRemoteEnvironment(userCrn, environmentCrn, this::getRootCertificateWithActor);
     }
 
     @Override
-    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String publicCloudAccountId, String environmentCrn) {
-        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getRdcForEnvironmentWithActor);
+    public DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String userCrn, String environmentCrn) {
+        return callRemoteEnvironment(userCrn, environmentCrn, this::getRdcForEnvironmentWithActor);
     }
 
     @Override
-    public DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
-        return callRemoteEnvironment(publicCloudAccountId, environmentCrn, this::getDatalakeServicesForEnvironmentWithActor);
+    public DescribeDatalakeServicesResponse getDatalakeServices(String userCrn, String environmentCrn) {
+        return callRemoteEnvironment(userCrn, environmentCrn, this::getDatalakeServicesForEnvironmentWithActor);
     }
 
-    private <T> T callRemoteEnvironment(String publicCloudAccountId, String environmentCrn, PrivateControlPlaneCaller<T> function) {
+    private <T> T callRemoteEnvironment(String userCrn, String environmentCrn, PrivateControlPlaneCaller<T> function) {
         try {
+            String publicCloudAccountId = Crn.safeFromString(userCrn).getAccountId();
             String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
             Optional<PrivateControlPlane> privateControlPlane =
                     privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
             if (privateControlPlane.isPresent()) {
-                String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 return function.call(privateControlPlane.get(), environmentCrn, userCrn);
             } else {
                 throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));

@@ -13,27 +13,27 @@ public interface RemoteEnvironmentConnector {
 
     RemoteEnvironmentConnectorType type();
 
-    default Collection<SimpleRemoteEnvironmentResponse> list(String publicCloudAccountId) {
+    default Collection<SimpleRemoteEnvironmentResponse> list(String userCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeEnvironmentResponse describeV1(String publicCloudAccountId, String environmentCrn) {
+    default DescribeEnvironmentResponse describeV1(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeEnvironmentV2Response describeV2(String publicCloudAccountId, String environmentCrn) {
+    default DescribeEnvironmentV2Response describeV2(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default GetRootCertificateResponse getRootCertificate(String publicCloudAccountId, String environmentCrn) {
+    default GetRootCertificateResponse getRootCertificate(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String publicCloudAccountId, String environmentCrn) {
+    default DescribeDatalakeAsApiRemoteDataContextResponse getRemoteDataContext(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 
-    default DescribeDatalakeServicesResponse getDatalakeServices(String publicCloudAccountId, String environmentCrn) {
+    default DescribeDatalakeServicesResponse getDatalakeServices(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 }

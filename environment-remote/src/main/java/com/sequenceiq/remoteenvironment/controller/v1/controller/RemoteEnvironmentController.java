@@ -12,6 +12,7 @@ import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
@@ -28,30 +29,30 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     @Override
     public SimpleRemoteEnvironmentResponses list(List<String> types) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.list(types);
+        return remoteEnvironmentService.list(ThreadBasedUserCrnProvider.getUserCrn(), types);
     }
 
     @Override
     public DescribeEnvironmentResponse getByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.describeV1(request);
+        return remoteEnvironmentService.describeV1(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.getRdcByCrn(request);
+        return remoteEnvironmentService.getRdcByCrn(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@RequestObject DescribeDatalakeServicesRequest request) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.getDatalakeServicesByCrn(request);
+        return remoteEnvironmentService.getDatalakeServicesByCrn(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public GetRootCertificateResponse getRootCertificateByCrn(@RequestObject String environmentCrn) {
         MDCBuilder.buildMdcContext();
-        return remoteEnvironmentService.getRootCertificateByCrn(environmentCrn);
+        return remoteEnvironmentService.getRootCertificateByCrn(ThreadBasedUserCrnProvider.getUserCrn(), environmentCrn);
     }
 }
