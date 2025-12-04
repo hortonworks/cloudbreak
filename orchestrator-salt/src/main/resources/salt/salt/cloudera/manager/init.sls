@@ -47,6 +47,12 @@ tls_advanced_control:
     - text: "export CMF_FF_TLS_ADVANCED_CONTROL=true"
     - unless: grep "export CMF_FF_TLS_ADVANCED_CONTROL=true" /etc/default/cloudera-scm-server
 
+encrypt_all_ports:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_FF_ENCRYPT_ALL_PORTS=true"
+    - unless: grep "export CMF_FF_ENCRYPT_ALL_PORTS=true" /etc/default/cloudera-scm-server
+
 setup_ciphers:
   file.append:
     - name: /etc/cloudera-scm-server/cm.settings
