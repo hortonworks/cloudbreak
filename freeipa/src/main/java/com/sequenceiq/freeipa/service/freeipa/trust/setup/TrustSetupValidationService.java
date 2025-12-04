@@ -29,6 +29,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -80,16 +81,16 @@ public class TrustSetupValidationService {
     private TaskResults validateTrustSetup(Long stackId, CrossRealmTrust crossRealmTrust) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         TaskResults taskResults = new TaskResults();
-        taskResults.addTaskResult(validatePackageAvailability(stackId));
+        taskResults.addTaskResult(validatePackageAvailability(stackId, crossRealmTrust));
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateKerberization(crossRealmTrust));
         return taskResults;
     }
 
-    private TaskResult validatePackageAvailability(Long stackId) {
+    private TaskResult validatePackageAvailability(Long stackId, CrossRealmTrust crossRealmTrust) {
         LOGGER.info("Validate for IPA Server image trust packages");
-        if (!packageAvailabilityChecker.isPackageAvailable(stackId)) {
+        if (KdcType.ACTIVE_DIRECTORY.equals(crossRealmTrust.getKdcType()) && !packageAvailabilityChecker.isPackageAvailable(stackId)) {
             LOGGER.warn("Missing package [{}] required for AD trust setup", IPA_SERVER_TRUST_AD_PACKAGE);
             return new TaskResult(TaskResultType.ERROR, "Package validation failed",
                     Map.of(COMMENT, "The following packages are missing from the FreeIPA nodes: - " + IPA_SERVER_TRUST_AD_PACKAGE + "\n" +
@@ -138,7 +139,7 @@ public class TrustSetupValidationService {
             hostOrchestrator.runOrchestratorState(stateParams);
             return new TaskResult(TaskResultType.INFO, "Successful " + messagePrefix, Map.of());
         } catch (CloudbreakOrchestratorException orchestratorException) {
-            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), orchestratorException);
+            LOGGER.error("{} failed on KDC: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), orchestratorException);
             Set<HostSaltCommands> hostSaltCommands = getHostSaltCommands(orchestratorException);
             return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed", hostSaltCommands.stream()
                     .findFirst()
@@ -146,7 +147,7 @@ public class TrustSetupValidationService {
                     .map(SaltCommand::params)
                     .orElse(Map.of(COMMENT, orchestratorException.getMessage())));
         } catch (Exception ex) {
-            LOGGER.error("{} failed on AD: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), ex);
+            LOGGER.error("{} failed for KDC: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), ex);
             return new TaskResult(TaskResultType.ERROR, ex.getMessage(), Map.of());
         }
     }

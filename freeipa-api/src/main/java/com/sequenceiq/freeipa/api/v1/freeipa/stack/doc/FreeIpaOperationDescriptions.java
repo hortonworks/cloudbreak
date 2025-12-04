@@ -28,10 +28,10 @@ public final class FreeIpaOperationDescriptions {
     public static final String REBOOT = "Reboot one or more instances";
     public static final String REPAIR = "Repair one or more instances";
     public static final String REBUILD = "Rebuild the FreeIPA cluster";
-    public static final String CANCEL_CROSS_REALM_TRUST = "Cancel cross-realm trust of FreeIPA with an Active Directory Server";
-    public static final String REPAIR_CROSS_REALM_TRUST = "Repair cross-realm trust of FreeIPA with an Active Directory Server";
-    public static final String SETUP_CROSS_REALM_TRUST = "Prepare cross-realm trust of FreeIPA with an Active Directory Server";
-    public static final String SETUP_FINISH_CROSS_REALM_TRUST = "Finish setting up cross-realm trust of FreeIPA with an Active Directory Server";
+    public static final String CANCEL_CROSS_REALM_TRUST = "Cancel cross-realm trust of FreeIPA with another KDC Server";
+    public static final String REPAIR_CROSS_REALM_TRUST = "Repair cross-realm trust of FreeIPA with another KDC Server";
+    public static final String SETUP_CROSS_REALM_TRUST = "Prepare cross-realm trust of FreeIPA with another KDC Server";
+    public static final String SETUP_FINISH_CROSS_REALM_TRUST = "Finish setting up cross-realm trust of FreeIPA with another KDC Server";
     public static final String TRUST_SETUP_COMMANDS = "Get commands to be run for cross-realm trust setup";
     public static final String TRUST_CLEANUP_COMMANDS = "Get commands to be run for cross-realm trust cleanup after cancel";
     public static final String BIND_USER_CREATE = "Creates kerberos and ldap bind users for cluster";

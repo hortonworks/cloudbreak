@@ -31,6 +31,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -173,6 +174,7 @@ class TrustSetupValidationServiceTest {
         crossRealmTrust.setKdcFqdn("fqdn");
         crossRealmTrust.setKdcIp("kdcip");
         crossRealmTrust.setDnsIp("dnsip");
+        crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
 
@@ -193,6 +195,7 @@ class TrustSetupValidationServiceTest {
         crossRealmTrust.setKdcIp("ip");
         crossRealmTrust.setDnsIp("dnsip");
         crossRealmTrust.setRemoteEnvironmentCrn("remoteenvcrn");
+        crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
         when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
         when(stackService.getByIdWithListsInTransaction(4L)).thenReturn(mock(Stack.class));
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
