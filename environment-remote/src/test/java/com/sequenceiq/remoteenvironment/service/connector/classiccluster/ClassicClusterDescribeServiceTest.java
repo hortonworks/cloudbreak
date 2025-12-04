@@ -271,7 +271,8 @@ class ClassicClusterDescribeServiceTest {
 
     private ApiRemoteDataContext createRemoteDataContext() {
         List<ApiEndPointHost> apiEndPointHosts = List.of(new ApiEndPointHost().type("serviceType").uri("http://host:1234"));
-        List<ApiMapEntry> apiServiceConfigs = List.of(new ApiMapEntry().key("configKey").value("configValue"));
+        List<ApiMapEntry> apiServiceConfigs = List.of(new ApiMapEntry().key("configKey").value("configValue"),
+                new ApiMapEntry().key("configKey").value("configValue"));
         List<ApiEndPoint> apiEndPoints = List.of(
                 new ApiEndPoint().serviceType("serviceType").endPointHostList(apiEndPointHosts).serviceConfigs(apiServiceConfigs));
         return new ApiRemoteDataContext().endPoints(apiEndPoints);
