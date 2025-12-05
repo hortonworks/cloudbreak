@@ -104,7 +104,6 @@ class ProviderSyncJobTest {
         when(flowLogService.isOtherFlowRunning(eq(LOCAL_ID))).thenReturn(false);
         StackStatus stackStatus = mock(StackStatus.class);
         when(stack.getStackStatus()).thenReturn(stackStatus);
-        when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackStatus.getStatus()).thenReturn(Status.AVAILABLE);
 
         underTest.executeJob(jobExecutionContext);

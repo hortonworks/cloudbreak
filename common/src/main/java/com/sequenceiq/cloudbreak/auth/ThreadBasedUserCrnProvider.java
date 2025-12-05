@@ -132,7 +132,17 @@ public class ThreadBasedUserCrnProvider {
         String originalUserCrn = getUserCrn();
         String accountId = getAccountIdIfAvailable(originalUserCrn);
         if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
-            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
+            LOGGER.warn("Missing or invalid accountId [{}] for internal actor. Operation may execute with incorrect authorization.", accountId,
+                    new IllegalArgumentException());
+        }
+        String internalCrn = getInternalUserCrn(accountId);
+        return doAs(internalCrn, callable);
+    }
+
+    public static <T> T doAsInternalActor(Supplier<T> callable, String accountId) {
+        if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
+            LOGGER.warn("Missing or invalid accountId [{}] for internal actor. Operation may execute with incorrect authorization.", accountId,
+                    new IllegalArgumentException());
         }
         String internalCrn = getInternalUserCrn(accountId);
         return doAs(internalCrn, callable);
@@ -156,7 +166,8 @@ public class ThreadBasedUserCrnProvider {
         String originalUserCrn = getUserCrn();
         String accountId = getAccountIdIfAvailable(originalUserCrn);
         if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
-            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
+            LOGGER.warn("Missing or invalid accountId [{}] for internal actor. Operation may execute with incorrect authorization.", accountId,
+                    new IllegalArgumentException());
         }
         String internalCrn = getInternalUserCrn(accountId);
         doAs(internalCrn, runnable);
@@ -185,7 +196,8 @@ public class ThreadBasedUserCrnProvider {
         String originalUserCrn = getUserCrn();
         String accountId = getAccountIdIfAvailable(originalUserCrn);
         if (StringUtils.isEmpty(accountId) || RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT.equals(accountId)) {
-            LOGGER.warn("Internal actor used without accountId", new IllegalArgumentException());
+            LOGGER.warn("Missing or invalid accountId [{}] for internal actor. Operation may execute with incorrect authorization.", accountId,
+                    new IllegalArgumentException());
         }
         String internalCrn = getInternalUserCrn(accountId);
         return doAs(internalCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));

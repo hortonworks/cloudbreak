@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
@@ -53,7 +52,7 @@ public class ProviderSyncJob extends StatusCheckerJob {
             jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
             LOGGER.info("ProviderSyncJob will run...");
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> providerSyncService.syncResources(stack), stack.getAccountId());
+            providerSyncService.syncResources(stack);
         } else {
             LOGGER.info("ProviderSyncJob will not run, because stack status is {}.", status);
         }

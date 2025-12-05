@@ -142,6 +142,45 @@ class ThreadBasedUserCrnProviderTest {
         assertEmptyThreadLocals();
     }
 
+    @Test
+    void doAsInternalActorWithAccountIdSetsInternalCrn() {
+        assertEmptyThreadLocals();
+        String result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            assertEquals(INTERNAL_CRN_WITH_ACCOUNT_ID, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals(ACCOUNT_ID, ThreadBasedUserCrnProvider.getAccountId());
+            return "success";
+        }, ACCOUNT_ID);
+        assertEquals("success", result);
+        assertEmptyThreadLocals();
+    }
+
+    @Test
+    void doAsInternalActorWithAccountIdWorksWithEmptyAccountId() {
+        assertEmptyThreadLocals();
+        String result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            String crn = ThreadBasedUserCrnProvider.getUserCrn();
+            String expectedCrn = RegionAwareInternalCrnGenerator
+                    .regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1", "")
+                    .getInternalCrnForServiceAsString();
+            assertEquals(expectedCrn, crn);
+            return "empty-account";
+        }, "");
+        assertEquals("empty-account", result);
+        assertEmptyThreadLocals();
+    }
+
+    @Test
+    void doAsInternalActorWithAccountIdCleansUpOnException() {
+        assertEmptyThreadLocals();
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+                throw new RuntimeException("test exception");
+            }, ACCOUNT_ID);
+        });
+        assertEquals("test exception", exception.getMessage());
+        assertEmptyThreadLocals();
+    }
+
     private Future<String> submitSleepTask(String userCrn, boolean willBeCancelled) {
         return ThreadBasedUserCrnProvider.doAs(userCrn, () -> executor.submit(() -> {
             Future<String> innerFuture = executor.submit(() -> {

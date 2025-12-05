@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -71,9 +70,7 @@ public class CrossRealmTrustStatusSyncJob extends StatusCheckerJob {
                 LOGGER.info("CrossRealmTrustStatusSyncJob will not run, because cross realm trust status is {}.", crossRealmTrust.get().getTrustStatus());
             } else {
                 LOGGER.info("CrossRealmTrustStatusSyncJob will run...");
-                ThreadBasedUserCrnProvider.doAsInternalActor(
-                        () -> crossRealmTrustStatusSyncService.syncCrossRealmTrustStatus(stack, crossRealmTrust.get()),
-                        stack.getAccountId());
+                crossRealmTrustStatusSyncService.syncCrossRealmTrustStatus(stack, crossRealmTrust.get());
             }
         } else {
             LOGGER.info("CrossRealmTrustStatusSyncJob will not run, because FreeIPA stack status is {}.", status);

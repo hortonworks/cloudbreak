@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -57,7 +56,7 @@ public class ProviderSyncJob extends StatusCheckerJob {
             jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
             LOGGER.info("ProviderSyncJob will run...");
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> providerSyncService.syncResources(stack), stack.getAccountId());
+            providerSyncService.syncResources(stack);
         } else {
             LOGGER.info("ProviderSyncJob will not run, because FreeIPA stack status is {}.", status);
         }

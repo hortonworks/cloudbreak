@@ -26,8 +26,6 @@ class ProviderSyncJobTest {
 
     private static final Long LOCAL_ID = 1L;
 
-    private static final String ACCOUNT_ID = "account-id";
-
     @Mock
     private StackDtoService stackDtoService;
 
@@ -99,7 +97,6 @@ class ProviderSyncJobTest {
         when(providerSyncConfig.isProviderSyncEnabled()).thenReturn(true);
         when(flowLogService.isOtherFlowRunning(eq(LOCAL_ID))).thenReturn(false);
         when(stackDto.getStatus()).thenReturn(Status.AVAILABLE);
-        when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
 
         underTest.executeJob(jobExecutionContext);
 
