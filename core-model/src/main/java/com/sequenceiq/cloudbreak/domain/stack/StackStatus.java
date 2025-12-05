@@ -49,59 +49,63 @@ public class StackStatus implements ProvisionEntity {
     }
 
     public StackStatus(Stack stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus) {
+        this(stack, status, statusReason, detailedStackStatus, new Date().getTime());
+    }
+
+    public StackStatus(Stack stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus, Long created) {
         this.stack = stack;
         this.status = status;
         this.statusReason = statusReason;
         this.detailedStackStatus = detailedStackStatus;
-        created = new Date().getTime();
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.created = created == null ? new Date().getTime() : created;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Stack getStack() {
         return stack;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setStack(Stack stack) {
+        this.stack = stack;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setStatusReason(String statusReason) {
-        this.statusReason = statusReason;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public String getStatusReason() {
         return statusReason;
     }
 
-    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
-        this.detailedStackStatus = detailedStackStatus;
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     public DetailedStackStatus getDetailedStackStatus() {
         return detailedStackStatus;
     }
 
-    public void setCreated(Long created) {
-        this.created = created;
+    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
+        this.detailedStackStatus = detailedStackStatus;
     }
 
     public Long getCreated() {
         return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 
     @Override

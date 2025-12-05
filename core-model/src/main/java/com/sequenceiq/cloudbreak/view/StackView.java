@@ -69,8 +69,10 @@ public interface StackView extends MdcContextInfoProvider {
 
     String getStatusReason();
 
+    Long getStatusCreated();
+
     default StackStatus getStackStatus() {
-        return new StackStatus(null, getStatus(), getStatusReason(), getDetailedStatus());
+        return new StackStatus(null, getStatus(), getStatusReason(), getDetailedStatus(), getStatusCreated());
     }
 
     String getCloudPlatform();

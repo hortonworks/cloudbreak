@@ -34,6 +34,7 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
             + "ss.status as status, "
             + "ss.detailedStackStatus as detailedStatus, "
             + "ss.statusReason as statusReason, "
+            + "ss.created as statusCreated, "
             + "s.cloudPlatform as cloudPlatform, "
             + "s.created as created, "
             + "s.datalakeCrn as datalakeCrn, "

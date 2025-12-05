@@ -271,6 +271,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @Convert(converter = ProviderSyncSetToStringConverter.class)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
+    @Override
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -293,6 +294,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return this;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
@@ -301,14 +303,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.id = id;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    @Override
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
     public String getDescription() {
         return description;
     }
@@ -317,6 +321,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.description = description;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -330,17 +335,18 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return this;
     }
 
+    @Override
     public Cluster getCluster() {
         return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
     }
 
     @Override
     public Blueprint getBlueprint() {
         return cluster.getBlueprint();
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
     }
 
     public StackStatus getStackStatus() {
@@ -351,17 +357,24 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.stackStatus = stackStatus;
     }
 
+    @Override
     public Status getStatus() {
         return stackStatus != null ? stackStatus.getStatus() : null;
     }
 
     @Override
     public DetailedStackStatus getDetailedStatus() {
-        return stackStatus == null ? null : stackStatus.getDetailedStackStatus();
+        return stackStatus != null ? stackStatus.getDetailedStackStatus() : null;
     }
 
+    @Override
     public String getStatusReason() {
         return stackStatus != null ? stackStatus.getStatusReason() : null;
+    }
+
+    @Override
+    public Long getStatusCreated() {
+        return stackStatus != null ? stackStatus.getCreated() : null;
     }
 
     public Long getVersion() {
@@ -372,6 +385,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.version = version;
     }
 
+    @Override
     public String getRegion() {
         return region;
     }
@@ -380,6 +394,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.region = region;
     }
 
+    @Override
     public Set<Resource> getResources() {
         return resources;
     }
@@ -394,10 +409,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return this;
     }
 
-    public void setCreatorClient(String creatorClient) {
-        this.creatorClient = creatorClient;
-    }
-
     public int getConsulServers() {
         return consulServers;
     }
@@ -406,6 +417,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.consulServers = consulServers;
     }
 
+    @Override
     public OnFailureAction getOnFailureActionAction() {
         return onFailureActionAction;
     }
@@ -414,6 +426,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.onFailureActionAction = onFailureActionAction;
     }
 
+    @Override
     public FailurePolicy getFailurePolicy() {
         return failurePolicy;
     }
@@ -422,6 +435,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.failurePolicy = failurePolicy;
     }
 
+    @Override
     public SecurityConfig getSecurityConfig() {
         return securityConfig;
     }
@@ -430,6 +444,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.securityConfig = securityConfig;
     }
 
+    @Override
     public Orchestrator getOrchestrator() {
         return orchestrator;
     }
@@ -438,6 +453,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.orchestrator = orchestrator;
     }
 
+    @Override
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -446,6 +462,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.availabilityZone = availabilityZone;
     }
 
+    @Override
     public Integer getGatewayPort() {
         return gatewayPort;
     }
@@ -462,6 +479,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.useCcm = useCcm;
     }
 
+    @Override
     public Tunnel getTunnel() {
         return tunnel;
     }
@@ -470,6 +488,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.tunnel = tunnel;
     }
 
+    @Override
     public String getPlatformVariant() {
         return platformVariant;
     }
@@ -482,10 +501,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-    }
-
+    @Override
     public User getCreator() {
         return creator;
     }
@@ -494,6 +510,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.creator = creator;
     }
 
+    @Override
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -506,6 +523,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
      * @deprecated please use PlatformAwareSdxConnector instead to find out related DL CRN by environmentCrn
      * or ensure to use this only in case of VM form DL deployment
      */
+    @Override
     @Deprecated
     public String getDatalakeCrn() {
         return datalakeCrn;
@@ -515,6 +533,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.datalakeCrn = datalakeCrn;
     }
 
+    @Override
     public List<Resource> getDiskResources() {
         switch (platformVariant) {
             case CloudConstants.AWS:
@@ -530,6 +549,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         }
     }
 
+    @Override
     public ResourceType getDiskResourceType() {
         switch (platformVariant) {
             case CloudConstants.AWS:
@@ -547,6 +567,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         }
     }
 
+    @Override
     public List<Resource> getResourcesByType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {
@@ -575,6 +596,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return null;
     }
 
+    @Override
     public InstanceGroupDto getInstanceGroupByInstanceGroupName(String group) {
         for (InstanceGroupDto instanceGroup : getInstanceGroupDtos()) {
             if (group.equals(instanceGroup.getInstanceGroup().getGroupName())) {
@@ -584,6 +606,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return null;
     }
 
+    @Override
     public Long getFullNodeCount() {
         Integer nodeCount = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
@@ -652,14 +675,17 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return new ArrayList<>(instanceGroups);
     }
 
+    @Override
     public boolean isStackInDeletionPhase() {
         return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
     }
 
+    @Override
     public boolean isStackInDeletionOrFailedPhase() {
         return isStackInDeletionPhase() || DELETE_FAILED.equals(getStatus());
     }
 
+    @Override
     public boolean isStopFailed() {
         return STOP_FAILED.equals(getStatus())
                 || EXTERNAL_DATABASE_STOP_FAILED.equals(getStatus());
@@ -670,11 +696,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
     }
 
+    @Override
     public boolean isStartFailed() {
         return START_FAILED.equals(getStatus())
                 || EXTERNAL_DATABASE_START_FAILED.equals(getStatus());
     }
 
+    @Override
     public Map<String, String> getParameters() {
         return parameters;
     }
@@ -683,6 +711,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.parameters = parameters;
     }
 
+    @Override
     public List<InstanceMetadataView> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
@@ -697,6 +726,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<InstanceMetadataView> getReachableGatewayInstanceMetadata() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
@@ -704,6 +734,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toList());
     }
 
+    @Override
     public InstanceMetadataView getPrimaryGatewayInstance() {
         Optional<InstanceMetadataView> metaData = getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
@@ -722,8 +753,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .findFirst();
     }
 
+    @Override
     public Network getNetwork() {
         return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
     }
 
     @Override
@@ -760,10 +796,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toSet());
     }
 
-    public void setNetwork(Network network) {
-        this.network = network;
-    }
-
+    @Override
     public String getClusterManagerIp() {
         return cluster == null ? null : cluster.getClusterManagerIp();
     }
@@ -772,16 +805,19 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return cluster == null ? null : cluster.getFqdn();
     }
 
+    @Override
     public boolean isAvailable() {
         return AVAILABLE.equals(getStatus());
     }
 
+    @Override
     public boolean isAvailableWithStoppedInstances() {
         // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
         //  when there are some STOPPED instances. The entire method may be removed.
         return isAvailable();
     }
 
+    @Override
     public boolean hasNodeFailure() {
         return NODE_FAILURE.equals(getStatus());
     }
@@ -790,6 +826,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return STOP_REQUESTED.equals(getStatus());
     }
 
+    @Override
     public boolean isStopped() {
         return STOPPED.equals(getStatus());
     }
@@ -798,10 +835,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return DELETE_COMPLETED.equals(getStatus());
     }
 
+    @Override
     public boolean isDeleteInProgress() {
         return DELETE_IN_PROGRESS.equals(getStatus());
     }
 
+    @Override
     public boolean isStartInProgress() {
         return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus())
                 || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
@@ -811,6 +850,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return REQUESTED.equals(getStatus()) || CREATE_IN_PROGRESS.equals(getStatus());
     }
 
+    @Override
     public boolean isReadyForStop() {
         return AVAILABLE.equals(getStatus())
                 || STOPPED.equals(getStatus())
@@ -820,10 +860,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 || NODE_FAILURE.equals(getStatus());
     }
 
+    @Override
     public boolean isExternalDatabaseStopped() {
         return EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
     }
 
+    @Override
     public boolean isModificationInProgress() {
         Status status = getStatus();
         return CREATE_IN_PROGRESS.equals(status)
@@ -835,14 +877,17 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
+    @Override
     public boolean isMaintenanceModeEnabled() {
         return MAINTENANCE_MODE_ENABLED.equals(getStatus());
     }
 
+    @Override
     public boolean isStopInProgress() {
         return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus()) || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(getStatus());
     }
 
+    @Override
     public boolean isReadyForStart() {
         return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus())
                 || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
@@ -864,6 +909,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         });
     }
 
+    @Override
     public Long getCreated() {
         return created;
     }
@@ -885,15 +931,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return tags;
     }
 
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
+
     @Override
     public Long getClusterId() {
         return cluster == null ? null : cluster.getId();
     }
 
-    public void setTags(Json tags) {
-        this.tags = tags;
-    }
-
+    @Override
     public String getUuid() {
         return uuid;
     }
@@ -902,6 +949,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.uuid = uuid;
     }
 
+    @Override
     public String getCustomDomain() {
         return customDomain;
     }
@@ -910,6 +958,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.customDomain = customDomain;
     }
 
+    @Override
     public String getCustomHostname() {
         return customHostname;
     }
@@ -918,6 +967,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.customHostname = customHostname;
     }
 
+    @Override
     public boolean isHostgroupNameAsHostname() {
         return hostgroupNameAsHostname;
     }
@@ -926,6 +976,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.hostgroupNameAsHostname = hostgroupNameAsHostname;
     }
 
+    @Override
     public boolean isClusterNameAsSubdomain() {
         return clusterNameAsSubdomain;
     }
@@ -934,6 +985,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.clusterNameAsSubdomain = clusterNameAsSubdomain;
     }
 
+    @Override
     public StackAuthentication getStackAuthentication() {
         return stackAuthentication;
     }
@@ -942,6 +994,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.stackAuthentication = stackAuthentication;
     }
 
+    @Override
     public Json getInputs() {
         return inputs;
     }
@@ -950,10 +1003,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.inputs = inputs;
     }
 
+    @Override
     public Workspace getWorkspace() {
         return workspace;
     }
 
+    @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
     }
@@ -963,8 +1018,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return WorkspaceAwareResource.super.getTenant();
     }
 
+    @Override
     public StackType getType() {
         return type;
+    }
+
+    public void setType(StackType type) {
+        this.type = type;
     }
 
     @Override
@@ -974,10 +1034,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toList());
     }
 
-    public void setType(StackType type) {
-        this.type = type;
-    }
-
+    @Override
     public Long getTerminated() {
         return terminated;
     }
@@ -986,10 +1043,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.terminated = terminated;
     }
 
+    @Override
     public String getCloudPlatform() {
         return cloudPlatform;
     }
 
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    @Override
     public boolean isDatalake() {
         return type == StackType.DATALAKE;
     }
@@ -998,6 +1061,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return !StringUtils.isEmpty(customHostname) || hostgroupNameAsHostname;
     }
 
+    @Override
     public boolean isClusterProxyRegistered() {
         return clusterProxyRegistered;
     }
@@ -1006,6 +1070,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.clusterProxyRegistered = clusterProxyRegistered;
     }
 
+    @Override
     public String getMinaSshdServiceId() {
         return minaSshdServiceId;
     }
@@ -1014,6 +1079,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.minaSshdServiceId = minaSshdServiceId;
     }
 
+    @Override
     public DatabaseAvailabilityType getExternalDatabaseCreationType() {
         return database.getExternalDatabaseAvailabilityType();
     }
@@ -1032,6 +1098,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toList());
     }
 
+    @Override
     public String getCcmV2AgentCrn() {
         return ccmV2AgentCrn;
     }
@@ -1040,6 +1107,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.ccmV2AgentCrn = ccmV2AgentCrn;
     }
 
+    @Override
     public String getStackVersion() {
         return stackVersion;
     }
@@ -1048,6 +1116,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.stackVersion = stackVersion;
     }
 
+    @Override
     public String getExternalDatabaseEngineVersion() {
         return database.getExternalDatabaseEngineVersion();
     }
@@ -1077,6 +1146,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return StackView.super.getResourceName();
     }
 
+    @Override
     public DnsResolverType getDomainDnsResolver() {
         return domainDnsResolver;
     }
@@ -1085,6 +1155,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.domainDnsResolver = domainDnsResolver;
     }
 
+    @Override
     public String getOriginalName() {
         return originalName;
     }
@@ -1093,13 +1164,22 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.originalName = originalName;
     }
 
+    @Override
     public Integer getJavaVersion() {
         return javaVersion;
+    }
+
+    public void setJavaVersion(Integer javaVersion) {
+        this.javaVersion = javaVersion;
     }
 
     @Override
     public boolean isMultiAz() {
         return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
     }
 
     @Override
@@ -1112,12 +1192,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return creatorClient;
     }
 
-    public void setJavaVersion(Integer javaVersion) {
-        this.javaVersion = javaVersion;
-    }
-
-    public void setMultiAz(boolean multiAz) {
-        this.multiAz = multiAz;
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
     }
 
     @Override
@@ -1125,6 +1201,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return new ArrayList<>(instanceGroups);
     }
 
+    @Override
     public Database getDatabase() {
         return database;
     }
@@ -1133,6 +1210,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.database = database;
     }
 
+    @Override
     public String getSupportedImdsVersion() {
         return supportedImdsVersion;
     }
@@ -1146,14 +1224,15 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return architecture;
     }
 
-    public String getArchitectureName() {
-        return architecture == null ? null : architecture.getName();
-    }
-
     public void setArchitecture(Architecture architecture) {
         this.architecture = architecture;
     }
 
+    public String getArchitectureName() {
+        return architecture == null ? null : architecture.getName();
+    }
+
+    @Override
     public Set<ProviderSyncState> getProviderSyncStates() {
         return providerSyncStates;
     }
