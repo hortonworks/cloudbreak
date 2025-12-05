@@ -1,29 +1,17 @@
 package com.sequenceiq.notification.domain;
 
-public class DistributionList {
+public class DistributionList extends Subscription {
 
-    private String resourceCrn;
-
-    private String resourceName;
-
-    private String externalDistributionListId;
+    private String externalId;
 
     private DistributionListManagementType type;
 
-    public String getResourceCrn() {
-        return resourceCrn;
+    public String getExternalId() {
+        return externalId;
     }
 
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
-    }
-
-    public String getExternalDistributionListId() {
-        return externalDistributionListId;
-    }
-
-    public void setExternalDistributionListId(String externalDistributionListId) {
-        this.externalDistributionListId = externalDistributionListId;
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public DistributionListManagementType getType() {
@@ -34,24 +22,13 @@ public class DistributionList {
         this.type = type;
     }
 
-    public String getResourceName() {
-        return resourceName;
-    }
-
-    public void setResourceName(String resourceName) {
-        this.resourceName = resourceName;
-    }
-
     public String generateDistributionListUuid() {
-        return String.join("/", this.resourceName, this.resourceCrn, this.externalDistributionListId);
+        return String.join("/", getResourceName(), getResourceCrn(), this.externalId);
     }
 
-    @Override
     public String toString() {
-        return "DistributionList{" +
-                "resourceCrn='" + resourceCrn + '\'' +
-                ", resourceName='" + resourceName + '\'' +
-                ", externalDistributionListId='" + externalDistributionListId + '\'' +
+        return super.toString() + " DistributionList{" +
+                "externalDistributionListId='" + externalId + '\'' +
                 ", type=" + type +
                 '}';
     }
@@ -62,16 +39,28 @@ public class DistributionList {
 
     public static class Builder {
 
-        private String resourceCrn;
-
-        private String resourceName;
-
         private String externalDistributionListId;
 
         private DistributionListManagementType type;
 
+        private String resourceCrn;
+
+        private String resourceName;
+
+        private String parentResourceCrn;
+
         public Builder resourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
+            return this;
+        }
+
+        public Builder resourceName(String resourceName) {
+            this.resourceName = resourceName;
+            return this;
+        }
+
+        public Builder parentResourceCrn(String parentResourceCrn) {
+            this.parentResourceCrn = parentResourceCrn;
             return this;
         }
 
@@ -85,18 +74,13 @@ public class DistributionList {
             return this;
         }
 
-        // Builder method for resourceName
-        public Builder resourceName(String resourceName) {
-            this.resourceName = resourceName;
-            return this;
-        }
-
         public DistributionList build() {
             DistributionList distributionList = new DistributionList();
             distributionList.setResourceCrn(resourceCrn);
-            distributionList.setExternalDistributionListId(externalDistributionListId);
-            distributionList.setType(type);
             distributionList.setResourceName(resourceName);
+            distributionList.setParentResourceCrn(parentResourceCrn);
+            distributionList.setExternalId(externalDistributionListId);
+            distributionList.setType(type);
             return distributionList;
         }
     }

@@ -108,7 +108,7 @@ public class DistributionListManagementService {
         DistributionList existingDistributionList = existingDistributionLists.getFirst();
         if (!userManagedList(existingDistributionList)) {
             LOGGER.warn("Distribution list with id {} and non user-managed type {} exists for resourceCrn: {}, updating it now!",
-                    existingDistributionList.getExternalDistributionListId(),
+                    existingDistributionList.getExternalId(),
                     existingDistributionList.getType(),
                     resourceCrn);
             DistributionList distributionList = updateDistributionList(
@@ -118,7 +118,7 @@ public class DistributionListManagementService {
             return Optional.ofNullable(distributionList);
         } else {
             LOGGER.warn("Distribution list with id {} and type {} already exists for resourceCrn: {}, nothing to do..",
-                    existingDistributionList.getExternalDistributionListId(),
+                    existingDistributionList.getExternalId(),
                     existingDistributionList.getType(),
                     resourceCrn);
         }
@@ -200,13 +200,13 @@ public class DistributionListManagementService {
     private DistributionList updateDistributionList(DistributionList existingDistributionList,
             Set<String> emailList, List<EventChannelPreferenceDto> eventChannelPreferences) {
         LOGGER.debug("Updating existing distribution list id {} for resourceCrn {}",
-                existingDistributionList.getExternalDistributionListId(), existingDistributionList.getResourceCrn());
+                existingDistributionList.getExternalId(), existingDistributionList.getResourceCrn());
         CreateOrUpdateDistributionListRequestDto request = new CreateOrUpdateDistributionListRequestDto();
         request.setResourceCrn(existingDistributionList.getResourceCrn());
         request.setResourceName(existingDistributionList.getResourceName());
         request.setEventChannelPreferences(eventChannelPreferences);
         request.setEmailAddresses(emailList);
-        request.setDistributionListId(existingDistributionList.getExternalDistributionListId());
+        request.setDistributionListId(existingDistributionList.getExternalId());
         request.setDistributionListManagementType(existingDistributionList.getType().name());
         CreateOrUpdateDistributionListResponseDto response = grpcNotificationClient.createOrUpdateDistributionList(request);
         return getList(response, existingDistributionList.getResourceName());
@@ -230,7 +230,7 @@ public class DistributionListManagementService {
         List<DistributionList> distributionLists = listDistributionListsForResource(resourceCrn);
         for (DistributionList distributionList : distributionLists) {
             grpcNotificationClient.deleteDistributionList(
-                    new DeleteDistributionListRequestDto(distributionList.getExternalDistributionListId()));
+                    new DeleteDistributionListRequestDto(distributionList.getExternalId()));
         }
         LOGGER.debug("Deleted distribution list(s) for resourceCrn: {} ", resourceCrn);
     }
@@ -266,7 +266,7 @@ public class DistributionListManagementService {
                 .orElse(null);
         if (details != null) {
             DistributionList distributionList = new DistributionList();
-            distributionList.setExternalDistributionListId(details.distributionListId());
+            distributionList.setExternalId(details.distributionListId());
             distributionList.setResourceCrn(details.resourceCrn());
             distributionList.setResourceName(resourceName);
             distributionList.setType(DistributionListManagementType.USER_MANAGED);

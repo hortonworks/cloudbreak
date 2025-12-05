@@ -28,7 +28,7 @@ public class DistributionListDtoToDistributionListConverterTest {
         DistributionList domain = underTest.convert(dto);
         assertNotNull(domain);
         assertEquals("crn:resource:1", domain.getResourceCrn());
-        assertEquals("dl-123", domain.getExternalDistributionListId());
+        assertEquals("dl-123", domain.getExternalId());
         assertEquals(DistributionListManagementType.USER_MANAGED, domain.getType());
     }
 
@@ -39,7 +39,7 @@ public class DistributionListDtoToDistributionListConverterTest {
         DistributionList domain = underTest.convert(dto, null);
         assertNotNull(domain);
         assertEquals("crn:resource:2", domain.getResourceCrn());
-        assertEquals("dl-456", domain.getExternalDistributionListId());
+        assertEquals("dl-456", domain.getExternalId());
         assertEquals(DistributionListManagementType.USER_MANAGED, domain.getType());
     }
 
@@ -50,7 +50,7 @@ public class DistributionListDtoToDistributionListConverterTest {
         DistributionList domain = underTest.convert(dto, DistributionListManagementType.SYSTEM_MANAGED);
         assertNotNull(domain);
         assertEquals("crn:resource:3", domain.getResourceCrn());
-        assertEquals("dl-789", domain.getExternalDistributionListId());
+        assertEquals("dl-789", domain.getExternalId());
         assertEquals(DistributionListManagementType.SYSTEM_MANAGED, domain.getType());
     }
 

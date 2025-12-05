@@ -130,7 +130,7 @@ class DistributionListManagementServiceTest {
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
 
         assertTrue(result.isPresent());
-        assertEquals("dl-1", result.get().getExternalDistributionListId());
+        assertEquals("dl-1", result.get().getExternalId());
         assertEquals(RESOURCE_CRN, result.get().getResourceCrn());
         verify(grpcNotificationClient).createOrUpdateDistributionList(any());
     }
@@ -173,7 +173,7 @@ class DistributionListManagementServiceTest {
         CreateDistributionListRequest request = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME, List.of(samplePreference));
         Optional<DistributionList> result = underTest.createOrUpdateList(request);
         assertTrue(result.isPresent());
-        assertEquals("dl-new", result.get().getExternalDistributionListId());
+        assertEquals("dl-new", result.get().getExternalId());
     }
 
     @Test
@@ -292,7 +292,7 @@ class DistributionListManagementServiceTest {
         CreateDistributionListRequest req2 = new CreateDistributionListRequest(RESOURCE_CRN, RESOURCE_NAME + "2", List.of(samplePreference));
         List<DistributionList> results = underTest.createOrUpdateLists(Set.of(req1, req2));
         assertEquals(1, results.size());
-        assertTrue(results.stream().anyMatch(dl -> dl != null && "dl-a".equals(dl.getExternalDistributionListId())));
+        assertTrue(results.stream().anyMatch(dl -> dl != null && "dl-a".equals(dl.getExternalId())));
     }
 
     @Test
@@ -354,9 +354,9 @@ class DistributionListManagementServiceTest {
 
         List<DistributionList> result = underTest.listDistributionListsForResource(RESOURCE_CRN);
         assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(dl -> "id1".equals(dl.getExternalDistributionListId())
+        assertTrue(result.stream().anyMatch(dl -> "id1".equals(dl.getExternalId())
                 && dl.getType() == DistributionListManagementType.USER_MANAGED));
-        assertTrue(result.stream().anyMatch(dl -> "id2".equals(dl.getExternalDistributionListId())
+        assertTrue(result.stream().anyMatch(dl -> "id2".equals(dl.getExternalId())
                 && dl.getType() == DistributionListManagementType.SYSTEM_MANAGED));
     }
 
