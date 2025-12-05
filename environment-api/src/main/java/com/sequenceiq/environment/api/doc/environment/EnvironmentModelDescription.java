@@ -196,6 +196,8 @@ public class EnvironmentModelDescription {
 
     public static final String ENVIRONMENT_ENABLE_COMPUTE_CLUSTER = "True if externalized compute cluster is enabled for the environment.";
 
+    public static final String ENVIRONMENT_NOTIFICATION_PARAMETERS = "Notification parameters for the environment.";
+
     public static final String ENVIRONMENT_TYPE = "Type of the environment";
 
     public static final String FREEIPA_LOADBALANCER = "FreeIpa load balancer type to be created. " +

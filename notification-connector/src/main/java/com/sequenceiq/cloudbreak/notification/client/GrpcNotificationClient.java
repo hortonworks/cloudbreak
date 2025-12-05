@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.CreateOrUpdateDistributionListResponse;
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.PublishTargetedEventResponse;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.notification.client.converter.CreateOrUpdateDistributionListResponseConverter;
 import com.sequenceiq.cloudbreak.notification.client.converter.EventChannelPreferenceDtoConverter;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistribut
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.CreateOrUpdateDistributionListResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.DeleteDistributionListRequestDto;
+import com.sequenceiq.cloudbreak.notification.client.dto.GetPublishedEventStatusResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsResponseDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.PublishEventForResourceRequestDto;
@@ -43,9 +43,6 @@ public class GrpcNotificationClient {
 
     @Inject
     private NotificationServiceConfig notificationServiceConfig;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private StubProvider stubProvider;
@@ -141,6 +138,37 @@ public class GrpcNotificationClient {
         NotificationAdminProto.CreateOrUpdateAccountMetadataResponse response = serviceClient.createOrUpdateAccountMetadata(
                 request.accountId(), allowedDomains);
         LOGGER.debug("Created or updated account metadata for account [{}], response: {}", request.accountId(), response);
+    }
+
+    /**
+     * Get the status of a published event.
+     *
+     * @param eventId the ID of the event to check status for
+     * @return the status response from the notification service
+     */
+    public GetPublishedEventStatusResponseDto getPublishedEventStatus(String eventId) {
+        NotificationServiceClient serviceClient = makeClient(channelWrapper.getChannel());
+        LOGGER.debug("Getting published event status for event ID [{}]", eventId);
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse response =
+                serviceClient.getPublishedEventStatus(eventId);
+        LOGGER.debug("Retrieved published event status for event ID [{}]", eventId);
+        return getPublishedEventStatusResponseConverter.convert(response);
+    }
+
+    /**
+     * Get the status of a published event using the event type ID and resource CRN.
+     *
+     * @param eventTypeId the event type ID
+     * @param resourceCrn the resource CRN
+     * @return the status response from the notification service
+     */
+    public GetPublishedEventStatusResponseDto getPublishedEventStatus(String eventTypeId, String resourceCrn) {
+        NotificationServiceClient serviceClient = makeClient(channelWrapper.getChannel());
+        LOGGER.debug("Getting published event status for event type ID [{}] and resource CRN [{}]", eventTypeId, resourceCrn);
+        com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto.GetPublishedEventStatusResponse response =
+                serviceClient.getPublishedEventStatus(eventTypeId, resourceCrn);
+        LOGGER.debug("Retrieved published event status for event type ID [{}] and resource CRN [{}]", eventTypeId, resourceCrn);
+        return getPublishedEventStatusResponseConverter.convert(response);
     }
 
     /**

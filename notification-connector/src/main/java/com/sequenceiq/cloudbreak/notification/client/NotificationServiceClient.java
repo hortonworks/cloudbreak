@@ -42,45 +42,56 @@ public class NotificationServiceClient {
 
     private final StubProvider stubProvider;
 
+    private final GrpcErrorHandler errorHandler;
+
     public NotificationServiceClient(
             ManagedChannel channel,
             NotificationServiceConfig notificationServiceConfig,
             StubProvider stubProvider) {
+        this(channel, notificationServiceConfig, stubProvider, new GrpcErrorHandler());
+    }
+
+    public NotificationServiceClient(
+            ManagedChannel channel,
+            NotificationServiceConfig notificationServiceConfig,
+            StubProvider stubProvider,
+            GrpcErrorHandler errorHandler) {
         this.channel = channel;
         this.notificationServiceConfig = notificationServiceConfig;
         this.stubProvider = stubProvider;
+        this.errorHandler = errorHandler;
     }
 
-    public PublishTargetedEventResponse publishTargetedEvent(String title, String message,
-            SeverityType.Value severity, String resourceCrn, String eventType) {
-        // Event Message varies for EMAIL and IN_APP, so we set separate event Messages based on the channel
-        EventMessage eventMessageRichText = EventMessage.newBuilder()
-                .setMessageType(MessageType.Value.RICH_TEXT)
-                .setTitle(title)
-                .setDescription(message)
-                .build();
+    public PublishTargetedEventResponse publishTargetedEvent(String title, String message, SeverityType.Value severity, String resourceCrn, String eventType) {
+        return executeWithErrorHandling(() -> {
+            EventMessage eventMessageRichText = EventMessage.newBuilder()
+                    .setMessageType(MessageType.Value.RICH_TEXT)
+                    .setTitle(title)
+                    .setDescription(message)
+                    .build();
 
-        EventMessage eventMessagePlainText = EventMessage.newBuilder()
-                .setMessageType(MessageType.Value.PLAIN_TEXT)
-                .setTitle(title)
-                .setDescription(message)
-                .build();
+            EventMessage eventMessagePlainText = EventMessage.newBuilder()
+                    .setMessageType(MessageType.Value.PLAIN_TEXT)
+                    .setTitle(title)
+                    .setDescription(message)
+                    .build();
 
-        Event event = Event.newBuilder()
-                .setEventId(UUID.randomUUID().toString())
-                .setEventTypeId(eventType)
-                .setEventSeverity(severity)
-                .addEventMessages(eventMessagePlainText)
-                .addEventMessages(eventMessageRichText)
-                .setEventTime(System.currentTimeMillis())
-                .setResourceCrn(resourceCrn)
-                .build();
+            Event event = Event.newBuilder()
+                    .setEventId(UUID.randomUUID().toString())
+                    .setEventTypeId(eventType)
+                    .setEventSeverity(severity)
+                    .addEventMessages(eventMessagePlainText)
+                    .addEventMessages(eventMessageRichText)
+                    .setEventTime(System.currentTimeMillis())
+                    .setResourceCrn(resourceCrn)
+                    .build();
 
-        PublishTargetedEventRequest request = PublishTargetedEventRequest.newBuilder().setEvent(event).build();
-        PublishTargetedEventResponse response =
-                createNotificationServiceAdminStub().publishTargetedEvent(request);
-        LOGGER.info("Published targeted event with id: {} for resource: {}", event.getEventId(), resourceCrn);
-        return response;
+            PublishTargetedEventRequest request = PublishTargetedEventRequest.newBuilder().setEvent(event).build();
+            PublishTargetedEventResponse response =
+                    createNotificationServiceAdminStub().publishTargetedEvent(request);
+            LOGGER.info("Published targeted event with id: {} for resource: {}", event.getEventId(), resourceCrn);
+            return response;
+        }, "publish event", "resource: " + resourceCrn);
     }
 
     /**
@@ -90,17 +101,19 @@ public class NotificationServiceClient {
      * @return the status response from the notification service
      */
     public GetPublishedEventStatusResponse getPublishedEventStatus(String eventId) {
-        LOGGER.info("Getting published event status for event ID: {}", eventId);
-        GetPublishedEventStatusRequest request =
-                GetPublishedEventStatusRequest.newBuilder()
-                        .setPublishedEventId(eventId)
-                        .build();
+        return executeWithErrorHandling(() -> {
+            LOGGER.info("Getting published event status for event ID: {}", eventId);
+            GetPublishedEventStatusRequest request =
+                    GetPublishedEventStatusRequest.newBuilder()
+                            .setPublishedEventId(eventId)
+                            .build();
 
-        GetPublishedEventStatusResponse response =
-                createNotificationServiceAdminStub().getPublishedEventStatus(request);
+            GetPublishedEventStatusResponse response =
+                    createNotificationServiceAdminStub().getPublishedEventStatus(request);
 
-        LOGGER.info("Retrieved published event status for event ID: {}", eventId);
-        return response;
+            LOGGER.info("Retrieved published event status for event ID: {}", eventId);
+            return response;
+        }, "get event status", "event ID: " + eventId);
     }
 
     /**
@@ -110,65 +123,67 @@ public class NotificationServiceClient {
      * @param resourceCrn the resource CRN
      * @return the status response from the notification service
      */
-    public GetPublishedEventStatusResponse
-    getPublishedEventStatus(String eventTypeId, String resourceCrn) {
-        LOGGER.info("Getting published event status for event type ID: {} and resource CRN: {}", eventTypeId, resourceCrn);
+    public GetPublishedEventStatusResponse getPublishedEventStatus(String eventTypeId, String resourceCrn) {
+        return executeWithErrorHandling(() -> {
+            LOGGER.info("Getting published event status for event type ID: {} and resource CRN: {}", eventTypeId, resourceCrn);
 
-        PublishedEventTypeDetails publishedEventTypeDetails =
-                PublishedEventTypeDetails.newBuilder()
-                        .setEventTypeId(eventTypeId)
-                        .setResourceCrn(resourceCrn)
-                        .build();
+            PublishedEventTypeDetails publishedEventTypeDetails =
+                    PublishedEventTypeDetails.newBuilder()
+                            .setEventTypeId(eventTypeId)
+                            .setResourceCrn(resourceCrn)
+                            .build();
 
-        GetPublishedEventStatusRequest request =
-                GetPublishedEventStatusRequest.newBuilder()
-                        .setPublishedEventTypeDetails(publishedEventTypeDetails)
-                        .build();
+            GetPublishedEventStatusRequest request =
+                    GetPublishedEventStatusRequest.newBuilder()
+                            .setPublishedEventTypeDetails(publishedEventTypeDetails)
+                            .build();
 
-        GetPublishedEventStatusResponse response =
-                createNotificationServiceAdminStub().getPublishedEventStatus(request);
+            GetPublishedEventStatusResponse response =
+                    createNotificationServiceAdminStub().getPublishedEventStatus(request);
 
-        LOGGER.info("Retrieved published event status for event type ID: {} and resource CRN: {}", eventTypeId, resourceCrn);
-        return response;
+            LOGGER.info("Retrieved published event status for event type ID: {} and resource CRN: {}", eventTypeId, resourceCrn);
+            return response;
+        }, "get event status", "event type: " + eventTypeId + ", resource: " + resourceCrn);
     }
 
-    public CreateOrUpdateDistributionListResponse
-    createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
-        LOGGER.info("Creating or updating distribution list for resource: {}", dto.resourceCrn());
+    public CreateOrUpdateDistributionListResponse createOrUpdateDistributionList(CreateOrUpdateDistributionListDto dto) {
+        return executeWithErrorHandling(() -> {
+            LOGGER.info("Creating or updating distribution list for resource: {}", dto.resourceCrn());
 
-        CreateOrUpdateDistributionListRequest.Builder requestBuilder =
-                CreateOrUpdateDistributionListRequest.newBuilder()
-                        .setResourceCrn(dto.resourceCrn())
-                        .setResourceName(dto.resourceName())
-                        .setParentResourceCrn(dto.resourceCrn())
-                        .setAccountId(Crn.safeFromString(dto.resourceCrn()).getAccountId())
-                        .setDistributionListManagementType(dto.distributionListManagementType());
+            CreateOrUpdateDistributionListRequest.Builder requestBuilder =
+                    CreateOrUpdateDistributionListRequest.newBuilder()
+                            .setResourceCrn(dto.resourceCrn())
+                            .setResourceName(dto.resourceName())
+                            .setParentResourceCrn(dto.resourceCrn())
+                            .setAccountId(Crn.safeFromString(dto.resourceCrn()).getAccountId())
+                            .setDistributionListManagementType(dto.distributionListManagementType());
 
-        if (CollectionUtils.isNotEmpty(dto.eventChannelPreferences())) {
-            requestBuilder.addAllEventChannelPreferences(dto.eventChannelPreferences());
-        }
+            if (CollectionUtils.isNotEmpty(dto.eventChannelPreferences())) {
+                requestBuilder.addAllEventChannelPreferences(dto.eventChannelPreferences());
+            }
 
-        if (CollectionUtils.isNotEmpty(dto.emailAddresses())) {
-            requestBuilder.addAllEmailAddresses(dto.emailAddresses());
-        }
+            if (CollectionUtils.isNotEmpty(dto.emailAddresses())) {
+                requestBuilder.addAllEmailAddresses(dto.emailAddresses());
+            }
 
-        if (dto.distributionListId() != null) {
-            requestBuilder.setDistributionListId(dto.distributionListId());
-        }
+            if (dto.distributionListId() != null) {
+                requestBuilder.setDistributionListId(dto.distributionListId());
+            }
 
-        if (dto.parentResourceCrn() != null) {
-            requestBuilder.setParentResourceCrn(dto.parentResourceCrn());
-        }
+            if (dto.parentResourceCrn() != null) {
+                requestBuilder.setParentResourceCrn(dto.parentResourceCrn());
+            }
 
-        if (CollectionUtils.isNotEmpty(dto.slackChannelIds())) {
-            requestBuilder.addAllSlackChannelIds(dto.slackChannelIds());
-        }
+            if (CollectionUtils.isNotEmpty(dto.slackChannelIds())) {
+                requestBuilder.addAllSlackChannelIds(dto.slackChannelIds());
+            }
 
-        CreateOrUpdateDistributionListResponse response =
-                createNotificationServiceAdminStub().createOrUpdateDistributionList(requestBuilder.build());
+            CreateOrUpdateDistributionListResponse response =
+                    createNotificationServiceAdminStub().createOrUpdateDistributionList(requestBuilder.build());
 
-        LOGGER.info("Created or updated distribution list for resource: {}", dto.resourceCrn());
-        return response;
+            LOGGER.info("Created or updated distribution list for resource: {}", dto.resourceCrn());
+            return response;
+        }, "create/update distribution list", "resource: " + dto.resourceCrn());
     }
 
     /**
@@ -177,35 +192,36 @@ public class NotificationServiceClient {
      * @param name the name of the distribution list to delete
      * @return the delete distribution list response
      */
-    public DeleteDistributionListResponse
-    deleteDistributionList(String name) {
+    public DeleteDistributionListResponse deleteDistributionList(String name) {
+        return executeWithErrorHandling(() -> {
+            DeleteDistributionListRequest request =
+                    DeleteDistributionListRequest.newBuilder()
+                            .setDistributionListId(name)
+                            .build();
 
-        DeleteDistributionListRequest request =
-                DeleteDistributionListRequest.newBuilder()
-                        .setDistributionListId(name)
-                        .build();
+            DeleteDistributionListResponse response =
+                    createNotificationServiceAdminStub().deleteDistributionList(request);
 
-        DeleteDistributionListResponse response =
-                createNotificationServiceAdminStub().deleteDistributionList(request);
-
-        LOGGER.info("Deleted distribution list with name: {}", name);
-        return response;
+            LOGGER.info("Deleted distribution list with name: {}", name);
+            return response;
+        }, "delete distribution list", "name: " + name);
     }
 
     public ListDistributionListsResponse
     listDistributionLists(String resourceCrn) {
+        return executeWithErrorHandling(() -> {
+            ListDistributionListsRequest request =
+                    ListDistributionListsRequest.newBuilder()
+                            .setResourceCrn(resourceCrn)
+                            .setAccountId(Crn.safeFromString(resourceCrn).getAccountId())
+                            .build();
 
-        ListDistributionListsRequest request =
-                ListDistributionListsRequest.newBuilder()
-                        .setResourceCrn(resourceCrn)
-                        .setAccountId(Crn.safeFromString(resourceCrn).getAccountId())
-                        .build();
+            ListDistributionListsResponse response =
+                    createNotificationServiceAdminStub().listDistributionLists(request);
 
-        ListDistributionListsResponse response =
-                createNotificationServiceAdminStub().listDistributionLists(request);
-
-        LOGGER.info("Listed distribution lists for resource CRN: {}", resourceCrn);
-        return response;
+            LOGGER.info("Listed distribution lists for resource CRN: {}", resourceCrn);
+            return response;
+        }, "list distribution lists", "resource CRN: " + resourceCrn);
     }
 
     /**
@@ -215,21 +231,22 @@ public class NotificationServiceClient {
      * @param allowedDomains list of allowed domains for the account
      * @return the service response
      */
-    public CreateOrUpdateAccountMetadataResponse createOrUpdateAccountMetadata(
-            String accountId, List<String> allowedDomains) {
-        LOGGER.info("Creating or updating account metadata for account: {} with {} allowed domains", accountId, allowedDomains.size());
+    public CreateOrUpdateAccountMetadataResponse createOrUpdateAccountMetadata(String accountId, List<String> allowedDomains) {
+        return executeWithErrorHandling(() -> {
+            LOGGER.info("Creating or updating account metadata for account: {} with {} allowed domains", accountId, allowedDomains.size());
 
-        CreateOrUpdateAccountMetadataRequest request =
-                CreateOrUpdateAccountMetadataRequest.newBuilder()
-                        .setAccountId(accountId)
-                        .addAllAllowedDomains(allowedDomains)
-                        .build();
+            CreateOrUpdateAccountMetadataRequest request =
+                    CreateOrUpdateAccountMetadataRequest.newBuilder()
+                            .setAccountId(accountId)
+                            .addAllAllowedDomains(allowedDomains)
+                            .build();
 
-        CreateOrUpdateAccountMetadataResponse response =
-                createNotificationServiceAdminStub().createOrUpdateAccountMetadata(request);
+            CreateOrUpdateAccountMetadataResponse response =
+                    createNotificationServiceAdminStub().createOrUpdateAccountMetadata(request);
 
-        LOGGER.info("Account metadata create/update completed for account: {}", accountId);
-        return response;
+            LOGGER.info("Account metadata create/update completed for account: {}", accountId);
+            return response;
+        }, "create/update account metadata", "account: " + accountId);
     }
 
     private NotificationAdminGrpc.NotificationAdminBlockingStub createNotificationServiceAdminStub() {
@@ -237,5 +254,9 @@ public class NotificationServiceClient {
         return stubProvider.newInternalAdminStub(channel, requestId,
                 notificationServiceConfig.getGrpcTimeoutSec(), notificationServiceConfig.internalCrnForIamServiceAsString(),
                 notificationServiceConfig.getCallingServiceName());
+    }
+
+    private <T> T executeWithErrorHandling(java.util.function.Supplier<T> operation, String operationDescription, String contextInfo) {
+        return errorHandler.executeWithErrorHandling(operation, operationDescription, contextInfo);
     }
 }

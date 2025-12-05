@@ -26,6 +26,9 @@ public class NotificationServiceConfig {
     @Value("${thunderheadnotification.service.grpc.timeout.sec:120}")
     private long grpcTimeoutSec;
 
+    @Value("${thunderheadnotification.service.grpc.retry.number:3}")
+    private int grpcRetryNumber;
+
     @Value("${altus.ums.caller:cloudbreak}")
     private String callingServiceName;
 
@@ -38,6 +41,8 @@ public class NotificationServiceConfig {
                 ManagedChannelBuilder.forAddress(host, port)
                         .usePlaintext()
                         .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
+                        .enableRetry()
+                        .maxRetryAttempts(grpcRetryNumber)
                         .build());
     }
 

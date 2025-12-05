@@ -41,6 +41,8 @@ public enum EnvironmentStatus {
 
     EVENT_CLEANUP_IN_PROGRESS("Environment event cleanup in progress"),
 
+    DISTRIBUTION_LIST_CLEANUP_IN_PROGRESS("Deleting the Distribution list for the environment"),
+
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS("Deleting Role Mappings"),
     S3GUARD_TABLE_DELETE_IN_PROGRESS("Deleting DynamoDB table"),
 

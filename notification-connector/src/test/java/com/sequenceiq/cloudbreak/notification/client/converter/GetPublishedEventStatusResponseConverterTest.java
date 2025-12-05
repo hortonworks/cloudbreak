@@ -5,115 +5,178 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.cloudera.thunderhead.service.notificationadmin.NotificationAdminProto;
 import com.sequenceiq.cloudbreak.notification.client.dto.GetPublishedEventStatusResponseDto;
-import com.sequenceiq.cloudbreak.notification.client.dto.GetPublishedEventStatusResponseDto.ChannelStatusDto;
 
 class GetPublishedEventStatusResponseConverterTest {
 
-    private final GetPublishedEventStatusResponseConverter underTest = new GetPublishedEventStatusResponseConverter();
+    private static final String EVENT_ID = "event-123";
 
-    @Test
-    void testConvertNullProto() {
-        GetPublishedEventStatusResponseDto dto = underTest.convert(null);
-        assertNotNull(dto, "Should return a non-null DTO");
-        assertNull(dto.publishedEventId());
-        assertNull(dto.eventTypeId());
-        assertNull(dto.title());
-        assertNull(dto.resourceCrn());
-        assertNull(dto.targetedEventType());
-        assertNull(dto.description());
-        assertTrue(dto.channelStatuses().isEmpty(), "Channel statuses should be null for default ctor");
-        assertEquals(0L, dto.createdAt());
+    private static final String EVENT_TYPE_ID = "event-type-456";
+
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:account:cluster:resource-123";
+
+    private static final String TITLE = "Test Event";
+
+    private static final String DESCRIPTION = "Test description";
+
+    private static final String TARGETED_EVENT_TYPE = "TARGETED";
+
+    private static final long CREATED_AT = 1234567890L;
+
+    private GetPublishedEventStatusResponseConverter underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new GetPublishedEventStatusResponseConverter();
     }
 
     @Test
-    void testConvertWithEmptyStatusList() {
-        NotificationAdminProto.PublishedEventStatus eventStatus = NotificationAdminProto.PublishedEventStatus.newBuilder()
-                .setPublishedEventId("pub-1")
-                .setEventTypeId("event-type-1")
-                .setTitle("Title One")
-                .setResourceCrn("crn:cdp:env:us-west-1:tenant:environment:env1")
-                .setTargetedEventType("TARGET")
-                .setDescription("No channels yet")
-                .setCreatedAt(12345L)
-                .build();
+    void convertNullProtoReturnsEmptyDto() {
+        GetPublishedEventStatusResponseDto result = underTest.convert(null);
 
-        NotificationAdminProto.GetPublishedEventStatusResponse proto = NotificationAdminProto
-                .GetPublishedEventStatusResponse.newBuilder()
-                .setPublishedEventStatus(eventStatus)
-                .build();
-
-        GetPublishedEventStatusResponseDto dto = underTest.convert(proto);
-        assertEquals("pub-1", dto.publishedEventId());
-        assertEquals("event-type-1", dto.eventTypeId());
-        assertEquals("Title One", dto.title());
-        assertEquals("crn:cdp:env:us-west-1:tenant:environment:env1", dto.resourceCrn());
-        assertEquals("TARGET", dto.targetedEventType());
-        assertEquals("No channels yet", dto.description());
-        assertEquals(12345L, dto.createdAt());
-        assertNotNull(dto.channelStatuses());
-        assertTrue(dto.channelStatuses().isEmpty(), "Expected empty channel status list");
+        assertNotNull(result);
+        assertNull(result.publishedEventId());
+        assertNull(result.eventTypeId());
+        assertNull(result.title());
+        assertNull(result.resourceCrn());
+        assertNull(result.targetedEventType());
+        assertNull(result.description());
+        assertNotNull(result.channelStatuses());
+        assertTrue(result.channelStatuses().isEmpty());
+        assertEquals(0L, result.createdAt());
     }
 
     @Test
-    void testConvertWithMultipleChannelStatuses() {
-        NotificationAdminProto.ChannelEventStatus status1 = NotificationAdminProto.ChannelEventStatus.newBuilder()
-                .setChannelType(NotificationAdminProto.ChannelType.Value.EMAIL)
-                .setEventStatus(NotificationAdminProto.EventStatus.Value.PROCESSED)
-                .build();
-        NotificationAdminProto.ChannelEventStatus status2 = NotificationAdminProto.ChannelEventStatus.newBuilder()
-                .setChannelType(NotificationAdminProto.ChannelType.Value.SLACK)
-                .setEventStatus(NotificationAdminProto.EventStatus.Value.UNPROCESSED)
-                .build();
-        NotificationAdminProto.ChannelEventStatus status3 = NotificationAdminProto.ChannelEventStatus.newBuilder()
-                .setChannelType(NotificationAdminProto.ChannelType.Value.IN_APP)
-                .setEventStatus(NotificationAdminProto.EventStatus.Value.PROCESSED)
-                .build();
+    void convertValidProtoMapsAllFields() {
+        NotificationAdminProto.GetPublishedEventStatusResponse proto = createProto(EVENT_ID, EVENT_TYPE_ID, TITLE,
+                RESOURCE_CRN, TARGETED_EVENT_TYPE, DESCRIPTION, CREATED_AT);
 
+        GetPublishedEventStatusResponseDto result = underTest.convert(proto);
+
+        assertNotNull(result);
+        assertEquals(EVENT_ID, result.publishedEventId());
+        assertEquals(EVENT_TYPE_ID, result.eventTypeId());
+        assertEquals(TITLE, result.title());
+        assertEquals(RESOURCE_CRN, result.resourceCrn());
+        assertEquals(TARGETED_EVENT_TYPE, result.targetedEventType());
+        assertEquals(DESCRIPTION, result.description());
+        assertEquals(CREATED_AT, result.createdAt());
+    }
+
+    @Test
+    void convertProtoWithEmptyChannelStatusesReturnsEmptyList() {
+        NotificationAdminProto.GetPublishedEventStatusResponse proto = createProto(EVENT_ID, EVENT_TYPE_ID, TITLE,
+                RESOURCE_CRN, TARGETED_EVENT_TYPE, DESCRIPTION, CREATED_AT);
+
+        GetPublishedEventStatusResponseDto result = underTest.convert(proto);
+
+        assertNotNull(result.channelStatuses());
+        assertTrue(result.channelStatuses().isEmpty());
+    }
+
+    @Test
+    void convertProtoWithMultipleChannelStatusesReturnsAllInOrder() {
+        NotificationAdminProto.GetPublishedEventStatusResponse proto = createProtoWithChannelStatuses(
+                NotificationAdminProto.ChannelType.Value.EMAIL, NotificationAdminProto.EventStatus.Value.PROCESSED,
+                NotificationAdminProto.ChannelType.Value.IN_APP, NotificationAdminProto.EventStatus.Value.UNPROCESSED,
+                NotificationAdminProto.ChannelType.Value.SLACK, NotificationAdminProto.EventStatus.Value.PROCESSED);
+
+        GetPublishedEventStatusResponseDto result = underTest.convert(proto);
+
+        assertNotNull(result.channelStatuses());
+        assertEquals(3, result.channelStatuses().size());
+        assertEquals("EMAIL", result.channelStatuses().get(0).channel());
+        assertEquals("PROCESSED", result.channelStatuses().get(0).status());
+        assertEquals("IN_APP", result.channelStatuses().get(1).channel());
+        assertEquals("UNPROCESSED", result.channelStatuses().get(1).status());
+        assertEquals("SLACK", result.channelStatuses().get(2).channel());
+        assertEquals("PROCESSED", result.channelStatuses().get(2).status());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideChannelTypes")
+    void convertHandlesAllChannelTypes(NotificationAdminProto.ChannelType.Value channelType) {
+        NotificationAdminProto.GetPublishedEventStatusResponse proto = createProtoWithChannelStatuses(
+                channelType, NotificationAdminProto.EventStatus.Value.PROCESSED);
+
+        GetPublishedEventStatusResponseDto result = underTest.convert(proto);
+
+        assertEquals(channelType.name(), result.channelStatuses().get(0).channel());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideEventStatusTypes")
+    void convertHandlesAllEventStatusTypes(NotificationAdminProto.EventStatus.Value eventStatus) {
+        NotificationAdminProto.GetPublishedEventStatusResponse proto = createProtoWithChannelStatuses(
+                NotificationAdminProto.ChannelType.Value.EMAIL, eventStatus);
+
+        GetPublishedEventStatusResponseDto result = underTest.convert(proto);
+
+        assertEquals(eventStatus.name(), result.channelStatuses().get(0).status());
+    }
+
+    private static Stream<Arguments> provideChannelTypes() {
+        return Stream.of(
+                Arguments.of(NotificationAdminProto.ChannelType.Value.EMAIL),
+                Arguments.of(NotificationAdminProto.ChannelType.Value.IN_APP),
+                Arguments.of(NotificationAdminProto.ChannelType.Value.SLACK)
+        );
+    }
+
+    private static Stream<Arguments> provideEventStatusTypes() {
+        return Stream.of(
+                Arguments.of(NotificationAdminProto.EventStatus.Value.UNPROCESSED),
+                Arguments.of(NotificationAdminProto.EventStatus.Value.PROCESSED)
+        );
+    }
+
+    private NotificationAdminProto.GetPublishedEventStatusResponse createProto(String eventId, String eventTypeId,
+            String title, String resourceCrn, String targetedEventType, String description, long createdAt) {
         NotificationAdminProto.PublishedEventStatus eventStatus = NotificationAdminProto.PublishedEventStatus.newBuilder()
-                .setPublishedEventId("pub-2")
-                .setEventTypeId("event-type-2")
-                .setTitle("Title Two")
-                .setResourceCrn("crn:cdp:env:us-east-1:acct:environment:env2")
-                .setTargetedEventType("TARGET_TYPE")
-                .setDescription("Three channel statuses")
-                .addStatus(status1)
-                .addStatus(status2)
-                .addStatus(status3)
-                .setCreatedAt(99999L)
+                .setPublishedEventId(eventId)
+                .setEventTypeId(eventTypeId)
+                .setTitle(title)
+                .setResourceCrn(resourceCrn)
+                .setTargetedEventType(targetedEventType)
+                .setDescription(description)
+                .setCreatedAt(createdAt)
                 .build();
 
-        NotificationAdminProto.GetPublishedEventStatusResponse proto = NotificationAdminProto
-                .GetPublishedEventStatusResponse.newBuilder()
+        return NotificationAdminProto.GetPublishedEventStatusResponse.newBuilder()
                 .setPublishedEventStatus(eventStatus)
                 .build();
+    }
 
-        GetPublishedEventStatusResponseDto dto = underTest.convert(proto);
-        assertEquals("pub-2", dto.publishedEventId());
-        assertEquals("event-type-2", dto.eventTypeId());
-        assertEquals("Title Two", dto.title());
-        assertEquals("crn:cdp:env:us-east-1:acct:environment:env2", dto.resourceCrn());
-        assertEquals("TARGET_TYPE", dto.targetedEventType());
-        assertEquals("Three channel statuses", dto.description());
-        assertEquals(99999L, dto.createdAt());
+    private NotificationAdminProto.GetPublishedEventStatusResponse createProtoWithChannelStatuses(Object... channelStatusPairs) {
+        NotificationAdminProto.PublishedEventStatus.Builder eventStatusBuilder = NotificationAdminProto.PublishedEventStatus.newBuilder()
+                .setPublishedEventId(EVENT_ID)
+                .setEventTypeId(EVENT_TYPE_ID)
+                .setTitle(TITLE)
+                .setResourceCrn(RESOURCE_CRN)
+                .setTargetedEventType(TARGETED_EVENT_TYPE)
+                .setDescription(DESCRIPTION)
+                .setCreatedAt(CREATED_AT);
 
-        List<ChannelStatusDto> channels = dto.channelStatuses();
-        assertNotNull(channels);
-        assertEquals(3, channels.size());
+        for (int i = 0; i < channelStatusPairs.length; i += 2) {
+            NotificationAdminProto.ChannelType.Value channelType = (NotificationAdminProto.ChannelType.Value) channelStatusPairs[i];
+            NotificationAdminProto.EventStatus.Value eventStatus = (NotificationAdminProto.EventStatus.Value) channelStatusPairs[i + 1];
+            eventStatusBuilder.addStatus(NotificationAdminProto.ChannelEventStatus.newBuilder()
+                    .setChannelType(channelType)
+                    .setEventStatus(eventStatus)
+                    .build());
+        }
 
-        ChannelStatusDto c1 = channels.get(0);
-        assertEquals("EMAIL", c1.channel());
-        assertEquals("PROCESSED", c1.status());
-        ChannelStatusDto c2 = channels.get(1);
-        assertEquals("SLACK", c2.channel());
-        assertEquals("UNPROCESSED", c2.status());
-        ChannelStatusDto c3 = channels.get(2);
-        assertEquals("IN_APP", c3.channel());
-        assertEquals("PROCESSED", c3.status());
+        return NotificationAdminProto.GetPublishedEventStatusResponse.newBuilder()
+                .setPublishedEventStatus(eventStatusBuilder.build())
+                .build();
     }
 }

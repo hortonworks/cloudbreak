@@ -13,6 +13,7 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.NotificationParameters;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -140,6 +141,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableComputeCluster;
+
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_NOTIFICATION_PARAMETERS)
+    private NotificationParameters notificationParameters;
 
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE,
             subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class},
@@ -511,6 +515,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
+    public NotificationParameters getNotificationParameters() {
+        return notificationParameters;
+    }
+
+    public void setNotificationParameters(NotificationParameters notificationParameters) {
+        this.notificationParameters = notificationParameters;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -554,6 +566,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
+                ", notificationParameters=" + notificationParameters +
                 '}';
     }
 }

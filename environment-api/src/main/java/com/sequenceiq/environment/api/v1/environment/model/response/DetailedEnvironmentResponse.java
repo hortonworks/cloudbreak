@@ -9,6 +9,7 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.NotificationParameters;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -163,6 +164,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String remoteEnvironmentCrn;
 
         private String encryptionProfileCrn;
+
+        private NotificationParameters notificationParameters;
 
         private Builder() {
         }
@@ -392,6 +395,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withNotificationParameters(NotificationParameters notificationParameters) {
+            this.notificationParameters = notificationParameters;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -438,6 +446,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnvironmentType(environmentType);
             detailedEnvironmentResponse.setRemoteEnvironmentCrn(remoteEnvironmentCrn);
             detailedEnvironmentResponse.setEncryptionProfileCrn(encryptionProfileCrn);
+            detailedEnvironmentResponse.setNotificationParameters(notificationParameters);
             return detailedEnvironmentResponse;
         }
     }
