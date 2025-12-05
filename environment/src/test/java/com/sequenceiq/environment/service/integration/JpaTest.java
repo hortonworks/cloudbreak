@@ -27,6 +27,7 @@ import org.springframework.data.repository.support.Repositories;
         "com.sequenceiq.cloudbreak.rotation",
         "com.sequenceiq.environment",
         "com.sequenceiq.cloudbreak.ha.domain",
+        "com.sequenceiq.notification.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain"})
 @Import(SqlStatementInspector.class)
 public class JpaTest {

@@ -44,6 +44,9 @@ public abstract class BaseParameters {
     @Column(nullable = false)
     private String accountId;
 
+    @Column(name = "distribution_list")
+    private String distributionList;
+
     public Long getId() {
         return id;
     }
@@ -74,5 +77,13 @@ public abstract class BaseParameters {
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    public String getDistributionList() {
+        return distributionList;
+    }
+
+    public void setDistributionList(String distributionList) {
+        this.distributionList = distributionList;
     }
 }

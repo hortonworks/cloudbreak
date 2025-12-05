@@ -8,7 +8,7 @@ CREATE SEQUENCE notification_id_seq START WITH 1
     CACHE 1;
 
 CREATE TABLE IF NOT EXISTS notification (
-                                            id                  BIGINT PRIMARY KEY NOT NULL DEFAULT nextval('notification_id_seq'),
+    id                  BIGINT PRIMARY KEY NOT NULL DEFAULT nextval('notification_id_seq'),
     severity            varchar(255) NOT NULL,
     type                varchar(255) NOT NULL,
     channelType         varchar(255) NOT NULL,

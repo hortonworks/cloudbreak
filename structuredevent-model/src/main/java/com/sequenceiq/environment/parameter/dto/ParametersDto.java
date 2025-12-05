@@ -12,6 +12,8 @@ public class ParametersDto {
 
     private final String accountId;
 
+    private final String distributionList;
+
     private final AwsParametersDto awsParametersDto;
 
     private final AzureParametersDto azureParametersDto;
@@ -24,6 +26,7 @@ public class ParametersDto {
         id = builder.id;
         name = builder.name;
         accountId = builder.accountId;
+        distributionList = builder.distributionList;
         awsParametersDto = builder.awsParametersDto;
         azureParametersDto = builder.azureParametersDto;
         yarnParametersDto = builder.yarnParametersDto;
@@ -44,6 +47,10 @@ public class ParametersDto {
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public String getDistributionList() {
+        return distributionList;
     }
 
     public AwsParametersDto getAwsParametersDto() {
@@ -76,6 +83,7 @@ public class ParametersDto {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", accountId='" + accountId + '\'' +
+                ", distributionList='" + distributionList + '\'' +
                 ", awsParametersDto=" + awsParametersDto +
                 ", azureParametersDto=" + azureParametersDto +
                 '}';
@@ -88,6 +96,8 @@ public class ParametersDto {
         private String name;
 
         private String accountId;
+
+        private String distributionList;
 
         private AwsParametersDto awsParametersDto;
 
@@ -109,6 +119,11 @@ public class ParametersDto {
 
         public Builder withAccountId(String accountId) {
             this.accountId = accountId;
+            return this;
+        }
+
+        public Builder withDistributionList(String distributionList) {
+            this.distributionList = distributionList;
             return this;
         }
 
