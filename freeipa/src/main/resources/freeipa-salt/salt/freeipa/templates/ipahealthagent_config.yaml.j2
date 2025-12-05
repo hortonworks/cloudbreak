@@ -1,5 +1,10 @@
 {%- set os = salt['grains.get']('os') %}
 {%- set osMajorRelease = salt['grains.get']('osmajorrelease') | int %}
+debug: False
+port: 5080
+host: '0.0.0.0'
+publicCert: 'publicCert.pem'
+privateKey: 'privateKey.pem'
 realm: {{ salt['pillar.get']('freeipa:domain') }}
 hostname: {{ grains['fqdn'] }}
 timeout: 1000
@@ -14,14 +19,14 @@ services:
   - ipa-dnskeysyncd
   - kadmin
   - krb5kdc
-{%- if os == 'RedHat' and osMajorRelease == 9 %}
+{%- if os == 'RedHat' and osMajorRelease > 8 %}
   - named
 {%- else %}
   - named-pkcs11
+  - polkit
 {%- endif %}
   - nginx
   - pki-tomcatd@pki-tomcat
-  - polkit
   - salt-api
   - salt-bootstrap
   - salt-master
@@ -29,4 +34,9 @@ services:
   - sshd
   - sssd
   - dirsrv
-
+backup:
+  status_file: /var/log/ipabackup_status_hourly.json
+  success_file: /cdp/ipahealthagent/backup.success
+  unhealthy_after_no_backup_in_min: 2880
+  required_uptime_in_min: 180
+  config_file: /etc/freeipa_backup.conf
