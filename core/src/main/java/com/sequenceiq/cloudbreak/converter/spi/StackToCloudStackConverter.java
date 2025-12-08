@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
@@ -308,7 +309,9 @@ public class StackToCloudStackConverter {
     }
 
     private Comparator<VolumeTemplate> preserveOrdering() {
-        return Comparator.comparing(VolumeTemplate::getId);
+        return Comparator
+                .comparing((VolumeTemplate vt) -> volumeIsEphemeralWhichMustBeProvisioned(vt))
+                .thenComparing(VolumeTemplate::getId);
     }
 
     private CloudVolumeUsageType getVolumeUsageType(VolumeUsageType volumeUsageType) {
