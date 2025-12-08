@@ -134,7 +134,7 @@ class ClassicClusterDescribeService {
     private Map<String, String> createConfigMap(List<ApiMapEntry> configs) {
         return configs.stream()
                 .filter(config -> !Strings.CI.containsAny(config.getKey(), "password"))
-                .collect(Collectors.toMap(ApiMapEntry::getKey, ApiMapEntry::getValue));
+                .collect(Collectors.toMap(ApiMapEntry::getKey, ApiMapEntry::getValue, (v1, v2) -> v1));
     }
 
     private void createServiceItems(List<ApiEndPointHost> endpointHosts, Application application) {
