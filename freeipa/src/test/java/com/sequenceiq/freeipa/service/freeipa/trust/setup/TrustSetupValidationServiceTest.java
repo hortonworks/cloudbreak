@@ -168,6 +168,20 @@ class TrustSetupValidationServiceTest {
     }
 
     @Test
+    void testValidateWhenExceptionDuringKerberized() {
+        setup(false);
+        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
+        when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(new RuntimeException("exception"));
+
+        TaskResults result = underTest.validateTrustSetup(4L);
+
+        assertEquals(1L, result.getErrors().size());
+        assertEquals("Security validation failed", result.getErrors().get(0).message());
+        assertEquals("An error occurred during the kerberization verification: exception",
+                result.getErrors().get(0).additionalParams().get(COMMENT));
+    }
+
+    @Test
     void testValidateWhenNoRemoteEnvironment() {
         setup();
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();

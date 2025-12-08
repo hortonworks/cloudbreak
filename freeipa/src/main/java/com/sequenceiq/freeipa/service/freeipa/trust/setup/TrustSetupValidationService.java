@@ -109,22 +109,28 @@ public class TrustSetupValidationService {
     }
 
     private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
-        if (StringUtils.isNotBlank(crossRealmTrust.getRemoteEnvironmentCrn())) {
-            DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
-            describeRemoteEnvironment.setCrn(crossRealmTrust.getRemoteEnvironmentCrn());
-            DescribeEnvironmentResponse describeRemoteEnvironmentResponse = remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment);
-            boolean kerberized = Optional.of(describeRemoteEnvironmentResponse.getEnvironment())
-                    .map(Environment::getPvcEnvironmentDetails)
-                    .map(PvcEnvironmentDetails::getPrivateDatalakeDetails)
-                    .map(PrivateDatalakeDetails::getKerberosInfo)
-                    .map(KerberosInfo::getKerberized)
-                    .orElse(false);
-            return kerberized ? new TaskResult(TaskResultType.INFO, "The on-premises cluster is kerberized", Map.of()) :
-                    new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                            Map.of(COMMENT, "The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported."));
-        } else {
+        try {
+            if (StringUtils.isNotBlank(crossRealmTrust.getRemoteEnvironmentCrn())) {
+                DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
+                describeRemoteEnvironment.setCrn(crossRealmTrust.getRemoteEnvironmentCrn());
+                DescribeEnvironmentResponse describeRemoteEnvironmentResponse = remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment);
+                boolean kerberized = Optional.of(describeRemoteEnvironmentResponse.getEnvironment())
+                        .map(Environment::getPvcEnvironmentDetails)
+                        .map(PvcEnvironmentDetails::getPrivateDatalakeDetails)
+                        .map(PrivateDatalakeDetails::getKerberosInfo)
+                        .map(KerberosInfo::getKerberized)
+                        .orElse(false);
+                return kerberized ? new TaskResult(TaskResultType.INFO, "The on-premises cluster is kerberized", Map.of()) :
+                        new TaskResult(TaskResultType.ERROR, "Security validation failed",
+                                Map.of(COMMENT, "The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported."));
+            } else {
+                return new TaskResult(TaskResultType.ERROR, "Security validation failed",
+                        Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("An error occurred during the kerberization verification", e);
             return new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                    Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
+                    Map.of(COMMENT, "An error occurred during the kerberization verification: " + e.getMessage()));
         }
     }
 
