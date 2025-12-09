@@ -6,10 +6,12 @@ import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTest
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.USER_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,13 +23,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -35,7 +35,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.CipherSuitesByTlsVersionResponse;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -70,10 +69,6 @@ public class EncryptionProfileControllerTest {
     @Mock
     private EncryptionProfileToEncryptionProfileResponseConverter responseConverter;
 
-    @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
-
-    @InjectMocks
     private EncryptionProfileController controller;
 
     @BeforeEach
@@ -274,16 +269,16 @@ public class EncryptionProfileControllerTest {
     }
 
     @Test
-    public void testCreateTls13OnlyShouldThrowBadRequestException() {
+    public void testCreateTls13Only() {
         EncryptionProfileRequest request = new EncryptionProfileRequest();
         request.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
 
-        assertThatThrownBy(() ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.create(request)))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("TLS 1.3 only is not supported yet. Use TLSv1.2 and TLSv1.3 or TLSv1.2 only");
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> controller.create(request)));
+
+        verify(encryptionProfileService, times(1)).create(any(), anyString(), anyString());
+        verify(responseConverter, times(1)).convert(any());
     }
 
     @Test
