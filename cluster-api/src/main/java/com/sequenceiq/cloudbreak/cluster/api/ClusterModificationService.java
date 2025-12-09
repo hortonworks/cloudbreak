@@ -50,7 +50,7 @@ public interface ClusterModificationService {
 
     String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId);
 
-    void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean patchUpgrade, Optional<String> remoteDataContext, boolean rollingUpgradeEnabled)
+    void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean cdhPatchUpgrade, Optional<String> remoteDataContext, boolean rollingUpgradeEnabled)
             throws CloudbreakException;
 
     Set<ParcelInfo> gatherInstalledParcels(String stackName);

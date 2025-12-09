@@ -347,10 +347,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean patchUpgrade, Optional<String> remoteDataContext,
+    public void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean cdhPatchUpgrade, Optional<String> remoteDataContext,
             boolean rollingUpgradeEnabled) throws CloudbreakException {
         try {
-            LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", patchUpgrade);
+            LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", cdhPatchUpgrade);
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(v31Client);
             ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(v31Client);
 
@@ -367,7 +367,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             downloadParcels(products, parcelResourceApi, parcelsResourceApi);
             distributeParcels(products, parcelResourceApi, parcelsResourceApi);
             LOGGER.debug("Starting the upgrade for the new components: {}", products);
-            if (patchUpgrade) {
+            if (cdhPatchUpgrade) {
                 activateParcels(products, parcelResourceApi, parcelsResourceApi);
                 clouderaManagerRestartService.waitForRestartExecutionIfPresent(v31Client, stack, rollingUpgradeEnabled);
                 startServices();

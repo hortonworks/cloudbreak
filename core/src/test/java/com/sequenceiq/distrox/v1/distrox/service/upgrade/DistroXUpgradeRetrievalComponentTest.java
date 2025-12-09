@@ -159,7 +159,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRu
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.OsType;
@@ -727,7 +727,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             ManifestRetrieverService.class,
             CloudbreakRestRequestThreadLocalService.class,
             VersionComparisonContextFactory.class,
-            CdhPatchVersionProvider.class,
+            CdhVersionProvider.class,
             UpgradePathRestrictionService.class,
             OsChangeUpgradeCondition.class,
             CdhPackageLocationFilter.class,

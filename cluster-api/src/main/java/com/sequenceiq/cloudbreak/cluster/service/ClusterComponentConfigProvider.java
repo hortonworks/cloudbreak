@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
-import com.sequenceiq.cloudbreak.util.VersionNormalizer;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -126,7 +126,7 @@ public class ClusterComponentConfigProvider {
         Optional<ClouderaManagerProduct> product = getCdhProduct(clusterId);
         if (product.isPresent()) {
             ClouderaManagerProduct prod = product.get();
-            prod.setVersion(VersionNormalizer.normalizeCdhVersion(prod.getVersion()));
+            CdhVersionProvider.getCdhStackVersionFromVersionString(prod.getVersion()).ifPresent(prod::setVersion);
         }
         return product;
     }
