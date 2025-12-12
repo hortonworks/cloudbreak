@@ -563,7 +563,8 @@ class RebuildFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA Post Installation");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validate FreeIPA health");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED,
-                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: [NodeHealthDetails{issues=[], status=FAILED, name='null', instanceId='null'}]");
+                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: " +
+                        "[NodeHealthDetails{issues=[], status=FAILED, name='null', instanceId='null', healthChecks='[]'}]");
         stackStatusVerify.verifyNoMoreInteractions();
 
         verify(terminationService).requestDeletion(STACK_ID, null);
@@ -606,7 +607,8 @@ class RebuildFlowIntegrationTest {
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
         verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
-                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: [NodeHealthDetails{issues=[], status=FAILED, name='null', instanceId='null'}]");
+                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: " +
+                        "[NodeHealthDetails{issues=[], status=FAILED, name='null', instanceId='null', healthChecks='[]'}]");
     }
 
     @Test

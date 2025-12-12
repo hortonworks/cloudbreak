@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static java.util.function.Predicate.not;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -22,7 +23,10 @@ import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.CheckResultV1Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthCheckV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.PluginStatV1Response;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
@@ -187,7 +191,50 @@ public class FreeIpaInstanceHealthDetailsService {
             nodeResponse.setStatus(InstanceStatus.UNHEALTHY);
             nodeResponse.setIssues(rpcResponse.getMessages().stream().map(RPCMessage::getMessage).collect(Collectors.toList()));
         }
+        nodeResponse.setHealthChecks(getCheckResultV1Responses(rpcResponse));
         return nodeResponse;
+    }
+
+    private List<HealthCheckV1Response> getCheckResultV1Responses(RPCResponse<CheckResult> rpcResponse) {
+        return rpcResponse.getMessages()
+                .stream()
+                .map(RPCMessage::getMessage)
+                .map(e -> {
+                    try {
+                        CheckResult checkResult = JsonUtil.readValue(e, CheckResult.class);
+                        HealthCheckV1Response healthCheckV1Response = new HealthCheckV1Response();
+                        healthCheckV1Response.setHost(checkResult.getHost());
+                        healthCheckV1Response.setStatus(checkResult.getStatus());
+                        healthCheckV1Response.setChecks(
+                                checkResult.getChecks().stream()
+                                        .map(ce -> {
+                                            CheckResultV1Response check = new CheckResultV1Response();
+                                            check.setCheckId(ce.getCheckId());
+                                            check.setStatus(ce.getStatus());
+                                            check.setPlugin(ce.getPlugin());
+                                            return check;
+                                        })
+                                        .collect(Collectors.toList())
+                        );
+                        healthCheckV1Response.setPluginStat(
+                                checkResult.getPluginStats().stream()
+                                        .map(pe -> {
+                                            PluginStatV1Response pluginStatV1Response = new PluginStatV1Response();
+                                            pluginStatV1Response.setPlugin(pe.getPlugin());
+                                            pluginStatV1Response.setStatus(pe.getStatus());
+                                            pluginStatV1Response.setResponseTime(pe.getResponseTime());
+                                            pluginStatV1Response.setHost(pe.getHost());
+                                            return pluginStatV1Response;
+                                        })
+                                        .collect(Collectors.toList())
+                        );
+                        return healthCheckV1Response;
+                    } catch (IOException  ex) {
+                        LOGGER.warn("Cannot parse health check message: {}", e, ex);
+                        return new HealthCheckV1Response();
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     private NodeHealthDetails legacyParseMessages(RPCResponse<Boolean> rpcResponse, InstanceMetaData instanceMetaData) {

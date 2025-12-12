@@ -32,6 +32,9 @@ public class NodeHealthDetails {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String instanceId;
 
+    @NotNull
+    private List<HealthCheckV1Response> healthChecks = new ArrayList<>();
+
     public InstanceStatus getStatus() {
         return status;
     }
@@ -74,6 +77,14 @@ public class NodeHealthDetails {
         this.instanceId = instanceId;
     }
 
+    public List<HealthCheckV1Response> getHealthChecks() {
+        return healthChecks;
+    }
+
+    public void setHealthChecks(List<HealthCheckV1Response> healthChecks) {
+        this.healthChecks = healthChecks;
+    }
+
     @Override
     public String toString() {
         return "NodeHealthDetails{" +
@@ -81,6 +92,7 @@ public class NodeHealthDetails {
                 ", status=" + status +
                 ", name='" + name + '\'' +
                 ", instanceId='" + instanceId + '\'' +
+                ", healthChecks='" + healthChecks + '\'' +
                 '}';
     }
 }
