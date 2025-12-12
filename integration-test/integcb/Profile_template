@@ -42,6 +42,8 @@ export MEMORY_FOR_SERVICES=2048M
 export LIFTIE_GRPC_HOST=mock-infrastructure
 export LIFTIE_GRPC_PORT=8987
 
+export ENVOY_AUTH_ENABLED=true
+
 # hibernate.session.circuitbreak.* is intended to catch inefficient queries in IT time
 # We can add 400 instances at once. It can cause a false N+1 error.
 export CB_JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djdk.virtualThreadScheduler.parallelism=64 -Djdk.virtualThreadScheduler.minRunnable=32 -Djdk.virtualThreadScheduler.maxPoolSize=256 -Dspring.threads.virtual.enabled=true -Drest.debug=true -Dcb.limit.nodecountlimits.experimental.upgrade=800 -Dcb.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=400 -Dcb.limit.primaryGatewayRecommendations.0.nodeCount=50 -Dcb.limit.primaryGatewayRecommendations.0.minCpu=32 -Dcb.limit.primaryGatewayRecommendations.0.minMemory=128 -Dcb.limit.primaryGatewayRecommendations.0.recommendedInstance.MOCK=large"

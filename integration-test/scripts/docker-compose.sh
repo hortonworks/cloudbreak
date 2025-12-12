@@ -61,7 +61,7 @@ cbd_services_sanity_check() {
 
 less Profile
 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cadence jumpgate-interop jumpgate-admin jumpgate-proxy thunderhead-mock
+./cbd start-wait traefik dev-gateway core-gateway envoy commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cadence jumpgate-interop jumpgate-admin jumpgate-proxy thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
 

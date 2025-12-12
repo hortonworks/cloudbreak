@@ -661,6 +661,7 @@ jobs:
           name: schema-compatibility-service-artifact
           retention-days: 5
           path: |
+            integration-test/integcb-logs.tar.gz
             integration-test/cloudbreak.log
             integration-test/datalake.log
             integration-test/redbeams.log
@@ -672,6 +673,7 @@ jobs:
             integration-test/jumpgate-proxy.log
             integration-test/dev-gateway.log
             integration-test/core-gateway.log
+            integration-test/envoy.log
       - name: schema_compatibility_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: steps.schema_compatibility_test.conclusion == 'failure'
@@ -773,6 +775,18 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/jumpgate-interop.log
+            integration-test/jumpgate-admin.log
+            integration-test/jumpgate-proxy.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+            integration-test/envoy.log
       - name: integration_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -862,6 +876,18 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/jumpgate-interop.log
+            integration-test/jumpgate-admin.log
+            integration-test/jumpgate-proxy.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+            integration-test/envoy.log
       - name: fedramp_integration_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -956,6 +982,18 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/jumpgate-interop.log
+            integration-test/jumpgate-admin.log
+            integration-test/jumpgate-proxy.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+            integration-test/envoy.log
       - name: real_ums_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
@@ -1099,6 +1137,18 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/cloudbreak.log
+            integration-test/datalake.log
+            integration-test/redbeams.log
+            integration-test/environment.log
+            integration-test/freeipa.log
+            integration-test/thunderhead-mock.log
+            integration-test/jumpgate-interop.log
+            integration-test/jumpgate-admin.log
+            integration-test/jumpgate-proxy.log
+            integration-test/dev-gateway.log
+            integration-test/core-gateway.log
+            integration-test/envoy.log
       - name: aws_test_collect_test_artifacts
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
