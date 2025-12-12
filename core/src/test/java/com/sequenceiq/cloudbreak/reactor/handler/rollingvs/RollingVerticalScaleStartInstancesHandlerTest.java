@@ -329,7 +329,7 @@ class RollingVerticalScaleStartInstancesHandlerTest {
         rollingVerticalScaleResult.setStatus(INSTANCE_ID_2, RollingVerticalScaleStatus.SUCCESS);
         ExtendedPollingResult failedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
                 .failure()
-                .withPayload(Set.of(1L))
+                .withFailedInstanceIds(Set.of(1L))
                 .build();
         when(clusterStatusService.waitForHostHealthyServices(anySet(), any())).thenReturn(failedPollingResult);
 

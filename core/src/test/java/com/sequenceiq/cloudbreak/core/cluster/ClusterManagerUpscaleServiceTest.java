@@ -160,7 +160,8 @@ public class ClusterManagerUpscaleServiceTest {
                 .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
         when(clusterApiConnectors.getConnector(eq(stackDto), eq("otherclusterIp"))).thenReturn(clusterApi);
-        when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder().withPayload(Set.of(INSTANCE_METADATA_ID)).timeout().build());
+        when(clusterApi.waitForHosts(any()))
+                .thenReturn(new ExtendedPollingResultBuilder().withFailedInstanceIds(Set.of(INSTANCE_METADATA_ID)).timeout().build());
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));
@@ -183,7 +184,7 @@ public class ClusterManagerUpscaleServiceTest {
                 .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
         when(clusterApiConnectors.getConnector(eq(stackDto), eq("otherclusterIp"))).thenReturn(clusterApi);
-        when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder().withPayload(Set.of()).timeout().build());
+        when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder().withFailedInstanceIds(Set.of()).timeout().build());
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));

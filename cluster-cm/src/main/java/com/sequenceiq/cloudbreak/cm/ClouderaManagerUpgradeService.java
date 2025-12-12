@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.cloudera.api.swagger.model.ApiCdhUpgradeArgs;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiRollingUpgradeClusterArgs;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
+import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -46,12 +48,9 @@ class ClouderaManagerUpgradeService {
     void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient,
             boolean rollingUpgradeEnabled) throws ApiException, CloudbreakException {
         LOGGER.info("Upgrading the CDP Runtime...");
+        AtomicReference<Optional<Long>> earlierUpgradeCommandId = new AtomicReference<>(Optional.empty());
         try {
-            Long upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient, false, rollingUpgradeEnabled);
-            ExtendedPollingResult pollingResult = startPollingCdpRuntimeUpgrade(stack, apiClient, rollingUpgradeEnabled, upgradeCommandId);
-            pollingResultErrorHandler.handlePollingResult(pollingResult,
-                    "Cluster was terminated while waiting for CDP Runtime to be upgraded",
-                    "Timeout during CDP Runtime upgrade.");
+            tryCallUpgradeCdhCommand(earlierUpgradeCommandId, stackProductVersion, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
         } catch (ApiException ex) {
             String responseBody = ex.getResponseBody();
             if (StringUtils.hasText(responseBody) && responseBody.contains("Cannot upgrade because the version is already CDH")) {
@@ -59,25 +58,40 @@ class ClouderaManagerUpgradeService {
             } else {
                 throw ex;
             }
+        } catch (ClouderaManagerOperationFailedException e) {
+            LOGGER.warn("First attempt to upgrade CDP Runtime failed, retrying once...", e);
+            tryCallUpgradeCdhCommand(earlierUpgradeCommandId, stackProductVersion, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
         }
         LOGGER.info("Runtime is successfully upgraded!");
+    }
+
+    private void tryCallUpgradeCdhCommand(AtomicReference<Optional<Long>> earlierUpgradeCommandId, String stackProductVersion,
+            ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient, boolean rollingUpgradeEnabled)
+            throws ApiException, CloudbreakException {
+        Long upgradeCommandId = determineUpgradeLogic(earlierUpgradeCommandId.get(), stackProductVersion, clustersResourceApi, stack, apiClient, false,
+                rollingUpgradeEnabled);
+        earlierUpgradeCommandId.set(Optional.of(upgradeCommandId));
+        ExtendedPollingResult pollingResult = startPollingCdpRuntimeUpgrade(stack, apiClient, rollingUpgradeEnabled, upgradeCommandId);
+        pollingResultErrorHandler.handlePollingResult(pollingResult,
+                "Cluster was terminated while waiting for CDP Runtime to be upgraded",
+                "Timeout during CDP Runtime upgrade.");
     }
 
     void callPostRuntimeUpgradeCommand(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         LOGGER.info("Call post runtime upgrade command after maintenance upgrade");
-        Long upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true, false);
+        Long upgradeCommandId = determineUpgradeLogic(Optional.empty(), "", clustersResourceApi, stack, apiClient, true, false);
         ExtendedPollingResult pollingResult = startPollingCdpRuntimeUpgrade(stack, apiClient, false, upgradeCommandId);
         pollingResultErrorHandler.handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for CDP Runtime to be upgraded",
                 "Timeout during CDP Runtime upgrade.");
         LOGGER.info("Runtime is successfully upgraded!");
     }
 
-    private Long determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack,
-            ApiClient apiClient, boolean postRuntimeUpgrade, boolean rollingUpgradeEnabled) throws ApiException {
+    private Long determineUpgradeLogic(Optional<Long> earlierUpgradeCommandId, String stackProductVersion, ClustersResourceApi clustersResourceApi,
+            StackDtoDelegate stack, ApiClient apiClient, boolean postRuntimeUpgrade, boolean rollingUpgradeEnabled) throws ApiException {
         String command = postRuntimeUpgrade ? POST_RUNTIME_UPGRADE_COMMAND : RUNTIME_UPGRADE_COMMAND;
         LOGGER.debug("Upgrade command to execute: {}", command);
-        Optional<Long> optionalUpgradeCommand = findUpgradeApiCommandId(clustersResourceApi, stack, command);
+        Optional<Long> optionalUpgradeCommand = earlierUpgradeCommandId.or(() -> findUpgradeApiCommandId(clustersResourceApi, stack, command));
         Long upgradeCommandId;
         if (optionalUpgradeCommand.isPresent()) {
             upgradeCommandId = optionalUpgradeCommand.get();
@@ -91,10 +105,10 @@ class ClouderaManagerUpgradeService {
                 if (!commandSuccess && commandCanRetry) {
                     LOGGER.debug("Retrying previous failed upgrade with command id {}", upgradeCommandId);
                     upgradeCommandId = clouderaManagerCommandsService.retryApiCommand(apiClient, upgradeCommandId).getId();
-                } else {
-                    LOGGER.debug("Last upgrade command ({}) is not active, it was {} successful and {} retryable, submitting it now", upgradeCommandId,
-                            commandSuccess ? "" : "not",
-                            commandCanRetry ? "" : "not");
+                } else if (earlierUpgradeCommandId.isEmpty()) {
+                    LOGGER.debug("Last upgrade command ({}) is not active, was{} successful and is{} retryable, submitting it now", upgradeCommandId,
+                            commandSuccess ? "" : " not",
+                            commandCanRetry ? "" : " not");
                     upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade, rollingUpgradeEnabled);
                 }
             }

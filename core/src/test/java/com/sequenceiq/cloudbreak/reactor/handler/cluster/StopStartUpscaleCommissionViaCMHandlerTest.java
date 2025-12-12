@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
-public class StopStartUpscaleCommissionViaCMHandlerTest {
+class StopStartUpscaleCommissionViaCMHandlerTest {
 
     private static final String INSTANCE_GROUP_NAME = "compute";
 
@@ -218,7 +218,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
-        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().withPayload(Set.of(5L)).build();
+        ExtendedPollingResult extendedPollingResult =
+                new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().withFailedInstanceIds(Set.of(5L)).build();
         when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
 
         StopStartUpscaleCommissionViaCMRequest request =

@@ -60,7 +60,7 @@ public class ExtendedPollingResult {
 
         private PollingResult pollingResult;
 
-        public ExtendedPollingResultBuilder withPayload(Set<Long> failedInstanceIds) {
+        public ExtendedPollingResultBuilder withFailedInstanceIds(Set<Long> failedInstanceIds) {
             this.failedInstancePrivateIds = failedInstanceIds;
             return this;
         }
