@@ -34,7 +34,8 @@ public class ZookeeperToKraftMigrationValidator {
             throw new BadRequestException("Cannot start KRaft migration. The cluster has been migrated already to KRaft.");
         }
 
-        if (!KraftMigrationStatus.ZOOKEEPER_INSTALLED.name().equals(kraftMigrationState)) {
+        if (!KraftMigrationStatus.ZOOKEEPER_INSTALLED.name().equals(kraftMigrationState)
+        && !KraftMigrationStatus.PRE_MIGRATION.name().equals(kraftMigrationState)) {
             throw new BadRequestException(String.format("Cannot start KRaft migration. The cluster is being migrated to KRaft and has the status: %s.",
                     kraftMigrationState));
         }
@@ -80,8 +81,7 @@ public class ZookeeperToKraftMigrationValidator {
         }
 
         if (!isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())) {
-            throw new BadRequestException("Zookeeper to KRaft migration is supported only for CDP version " + ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION
-                    + " or higher");
+            throw new BadRequestException("Zookeeper to KRaft migration is supported only for CDP version " + ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION);
         }
 
         if (!entitlementService.isZookeeperToKRaftMigrationEnabled(accountId)) {
@@ -92,7 +92,7 @@ public class ZookeeperToKraftMigrationValidator {
 
     private boolean isZookeeperToKRaftMigrationSupportedForStackVersion(String version) {
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION) >= 0;
+        return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION) == 0;
     }
 
     private boolean hasStreamsMessagingTemplateType(StackDto stack) {

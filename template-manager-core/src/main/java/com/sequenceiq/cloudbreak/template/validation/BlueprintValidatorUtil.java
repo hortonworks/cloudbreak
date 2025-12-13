@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -70,6 +71,17 @@ public class BlueprintValidatorUtil {
         if (!failures.isEmpty()) {
             throw new BlueprintValidationException("Node count for the following host groups does not meet requirements: "
                     + String.join(", ", failures));
+        }
+    }
+
+    public void validateHostGroupNodeCounts(Collection<HostGroup> hostGroups, Map<String, Map.Entry<Predicate<Integer>, String>> hostGroupRestrictions) {
+        for (HostGroup hostGroup : hostGroups) {
+            if (hostGroupRestrictions.containsKey(hostGroup.getName())) {
+                Map.Entry<Predicate<Integer>, String> restrictionEntry = hostGroupRestrictions.get(hostGroup.getName());
+                if (!restrictionEntry.getKey().test(hostGroup.getInstanceGroup().getNodeCount())) {
+                    throw new BlueprintValidationException(restrictionEntry.getValue());
+                }
+            }
         }
     }
 }

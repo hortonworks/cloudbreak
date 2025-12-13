@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.template.validation;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,15 +11,23 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.utils.HostGroupUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -124,4 +134,44 @@ public class BlueprintValidatorUtilTest {
         underTest.validateHostGroupCardinality(request, requirements);
     }
 
+    @ParameterizedTest
+    @MethodSource("testValidateHostGroupNodeCountsSource")
+    public void testValidateHostGroupNodeCounts(int nodeCount, boolean valid) {
+        String hostGroupName = "kraft";
+        Predicate<Integer> nodeCountAtLeastThree = i -> i >= 3;
+        Predicate<Integer> nodeCountIsOdd = i -> i % 2 == 1;
+        Predicate<Integer> nodeCountIsZero = i -> i == 0;
+        String errorMessage = "The kraft host group must have 0 nodes or at least 3 nodes with an odd number of nodes.";
+        Map<String, Map.Entry<Predicate<Integer>, String>> hostGroupRestrictions = Map.of(
+                hostGroupName,
+                Map.entry((nodeCountAtLeastThree.and(nodeCountIsOdd)).or(nodeCountIsZero), errorMessage));
+        HostGroup kraftHostGroup = new HostGroup();
+        kraftHostGroup.setName(hostGroupName);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(hostGroupName);
+        instanceGroup.setInstanceMetaData(Stream.generate(InstanceMetaData::new)
+                .limit(nodeCount)
+                .collect(Collectors.toSet()));
+        kraftHostGroup.setInstanceGroup(instanceGroup);
+        Set<HostGroup> hostGroups = Set.of(kraftHostGroup);
+
+        if (valid) {
+            assertDoesNotThrow(() -> underTest.validateHostGroupNodeCounts(hostGroups, hostGroupRestrictions));
+        } else {
+            BlueprintValidationException exception = assertThrows(BlueprintValidationException.class, () ->
+                    underTest.validateHostGroupNodeCounts(hostGroups, hostGroupRestrictions));
+            assertEquals(errorMessage, exception.getMessage());
+        }
+    }
+
+    private static Stream<Arguments> testValidateHostGroupNodeCountsSource() {
+        return Stream.of(
+                Arguments.of(0, true),
+                Arguments.of(1, false),
+                Arguments.of(2, false),
+                Arguments.of(3, true),
+                Arguments.of(4, false),
+                Arguments.of(5, true)
+        );
+    }
 }

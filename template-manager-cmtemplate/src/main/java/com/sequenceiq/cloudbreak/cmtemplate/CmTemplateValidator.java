@@ -39,6 +39,13 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateValidator.class);
 
+    private static final int KRAFT_NODE_MIN_COUNT = 3;
+
+    private static final Map<String, Map.Entry<Predicate<Integer>, String>> HOST_GROUP_RESTRICTIONS = Map.of(
+        "kraft", Map.entry((nodecountAtLeast(KRAFT_NODE_MIN_COUNT).and(nodeCount -> (nodeCount % 2) == 1)).or(nodeCount -> nodeCount == 0),
+                    "The kraft host group must have 0 nodes or at least 3 nodes with an odd number of nodes.")
+    );
+
     private static final List<ServiceRoleRestriction> REQUIRED_SERVICEROLE_RESTRICTION = List.of(
             new ServiceRoleRestriction("ZOOKEEPER", "SERVER", (nodecount) -> (nodecount % 2) == 1,
                     "Number of nodes with ZooKeeper server should be odd number."),
@@ -54,7 +61,7 @@ public class CmTemplateValidator implements BlueprintValidator {
                     "Minimal number of hosts with KUDU_TSERVER role is 1."),
             new ServiceRoleRestriction("KAFKA", "KAFKA_BROKER", nodecountAtLeast(3),
                     "Minimal number of hosts with KAFKA_BROKER role is 3."),
-            new ServiceRoleRestriction("KAFKA", "KRAFT", nodecountAtLeast(3),
+            new ServiceRoleRestriction("KAFKA", "KRAFT", nodecountAtLeast(KRAFT_NODE_MIN_COUNT),
                     "Minimal number of hosts with KRAFT role is 3."),
             new ServiceRoleRestriction("KAFKA", "KRAFT", (nodecount) -> (nodecount % 2) == 1,
                     "Number of KRAFT nodes should be an odd number.")
@@ -80,6 +87,7 @@ public class CmTemplateValidator implements BlueprintValidator {
 
         blueprintValidatorUtil.validateHostGroupsMatch(hostGroups, blueprintHostGroupCardinality.keySet());
         blueprintValidatorUtil.validateInstanceGroups(hostGroups, instanceGroups);
+        blueprintValidatorUtil.validateHostGroupNodeCounts(hostGroups, HOST_GROUP_RESTRICTIONS);
         if (validateServiceCardinality) {
             blueprintValidatorUtil.validateHostGroupCardinality(hostGroups, blueprintHostGroupCardinality);
         }

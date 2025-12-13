@@ -653,6 +653,60 @@ class StackCommonServiceTest {
         assertEquals(actual.getMessage(), "Upscaling is not supported on AWS cloudplatform");
     }
 
+    @ParameterizedTest
+    @MethodSource("scalingAdjustmentProvider")
+    void testPutScalingInWorkspaceWhenUpscalingKraftHostGroup(String cloudPlatform, String platformVariant,
+            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
+        String group = "kraft";
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        StackScaleV4Request updateRequest = new StackScaleV4Request();
+        updateRequest.setGroup(group);
+        updateRequest.setAdjustmentType(inputAdjustmentType);
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustment.setScalingAdjustment(1);
+        instanceGroupAdjustment.setInstanceGroup(group);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
+        ArgumentCaptor<StackScaleV4Request> scaleRequestCaptor = ArgumentCaptor.forClass(StackScaleV4Request.class);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(scaleRequestCaptor.capture())).thenReturn(updateStackV4Request);
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));
+        assertEquals(actual.getMessage(), "Resizing is not supported for kraft host group");
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalingAdjustmentProvider")
+    void testPutScalingInWorkspaceWhenDownscalingKraftHostGroup(String cloudPlatform, String platformVariant,
+            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
+        String group = "kraft";
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        StackScaleV4Request updateRequest = new StackScaleV4Request();
+        updateRequest.setGroup(group);
+        updateRequest.setAdjustmentType(inputAdjustmentType);
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustment.setScalingAdjustment(-1);
+        instanceGroupAdjustment.setInstanceGroup(group);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
+        ArgumentCaptor<StackScaleV4Request> scaleRequestCaptor = ArgumentCaptor.forClass(StackScaleV4Request.class);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(scaleRequestCaptor.capture())).thenReturn(updateStackV4Request);
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));
+        assertEquals(actual.getMessage(), "Resizing is not supported for kraft host group");
+    }
+
     @Test
     void testRotateSaltPassword() {
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));

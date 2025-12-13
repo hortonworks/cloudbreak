@@ -92,9 +92,12 @@ class ZookeeperToKraftMigrationValidatorTest {
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getName()).thenReturn("Streams Messaging Light Duty");
         when(stack.getStackVersion()).thenReturn(HIGHER_VERSION);
-        when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
+
+        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2",
+                exception.getMessage());
     }
 
     @Test
@@ -153,7 +156,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateZookeeperToKraftMigrationEligibility(stack, ACCOUNT_ID));
 
-        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2 or higher",
+        assertEquals("Zookeeper to KRaft migration is supported only for CDP version 7.3.2",
                 exception.getMessage());
     }
 
@@ -188,6 +191,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @Test
     void testValidateZookeeperToKraftMigrationState() {
         assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.PRE_MIGRATION.name()));
     }
 
     @Test

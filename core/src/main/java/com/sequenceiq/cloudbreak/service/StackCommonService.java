@@ -83,6 +83,8 @@ public class StackCommonService {
 
     private static final int MAX_INSTANCES_TO_RESTART = 20;
 
+    private static final String KRAFT_HOST_GROUP = "kraft";
+
     private static final Set<String> RESTART_INSTANCES_SUPPORTED_CLOUD_PLATFORMS = Set.of(
             CloudConstants.AWS,
             CloudConstants.AZURE,
@@ -324,8 +326,9 @@ public class StackCommonService {
             eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK);
         }
         UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(stackScaleV4Request);
+        String instanceGroupName = updateStackJson.getInstanceGroupAdjustment().getInstanceGroup();
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
-        validateScalingRequest(stack.getStack(), scalingAdjustment);
+        validateScalingRequest(stack.getStack(), instanceGroupName, scalingAdjustment);
         validateNetworkScaleRequest(stack, stackScaleV4Request.getStackNetworkScaleV4Request(), stackScaleV4Request.getGroup());
         if (scalingAdjustment > 0) {
             saltVersionUpgradeService.validateSaltVersion(stack);
@@ -348,7 +351,10 @@ public class StackCommonService {
         return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
     }
 
-    private void validateScalingRequest(StackView stack, Integer scalingAdjustment) {
+    private void validateScalingRequest(StackView stack, String instanceGroupName, Integer scalingAdjustment) {
+        if (KRAFT_HOST_GROUP.equalsIgnoreCase(instanceGroupName)) {
+            throw new BadRequestException(String.format("Resizing is not supported for %s host group", instanceGroupName));
+        }
         if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }

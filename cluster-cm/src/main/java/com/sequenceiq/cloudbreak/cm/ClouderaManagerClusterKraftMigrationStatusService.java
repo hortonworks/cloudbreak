@@ -138,10 +138,12 @@ public class ClouderaManagerClusterKraftMigrationStatusService implements Cluste
     }
 
     private KraftMigrationStatus determineKraftBasedStatus(boolean brokerMigrationEnabled, boolean kraftMigrationEnabled) {
-        if (!brokerMigrationEnabled && !kraftMigrationEnabled) {
-            return KraftMigrationStatus.KRAFT_INSTALLED;
-        } else if (brokerMigrationEnabled && kraftMigrationEnabled) {
+        if (brokerMigrationEnabled && kraftMigrationEnabled) {
             return KraftMigrationStatus.BROKERS_IN_KRAFT;
+        } else if (!brokerMigrationEnabled && kraftMigrationEnabled) {
+            return KraftMigrationStatus.BROKERS_IN_KRAFT;
+        } else if (!brokerMigrationEnabled && !kraftMigrationEnabled) {
+            return KraftMigrationStatus.KRAFT_INSTALLED;
         }
         return KraftMigrationStatus.NOT_APPLICABLE;
     }
