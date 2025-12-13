@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
-import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
 public class StackVersionBasedRollingUpgradeValidator implements ServiceUpgradeValidator {
@@ -36,9 +36,6 @@ public class StackVersionBasedRollingUpgradeValidator implements ServiceUpgradeV
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private CdhPatchVersionProvider cdhPatchVersionProvider;
 
     @Override
     public void validate(ServiceUpgradeValidationRequest request) {
@@ -91,6 +88,6 @@ public class StackVersionBasedRollingUpgradeValidator implements ServiceUpgradeV
 
     private Optional<Integer> getCurrentCdhPatchVersion(ServiceUpgradeValidationRequest validationRequest) {
         return clusterComponentConfigProvider.getCdhProduct(validationRequest.stack().getCluster().getId())
-                .flatMap(cdhProduct -> cdhPatchVersionProvider.getPatchFromVersionString(cdhProduct.getVersion()));
+                .flatMap(cdhProduct -> CdhVersionProvider.getCdhPatchVersionFromVersionString(cdhProduct.getVersion()));
     }
 }

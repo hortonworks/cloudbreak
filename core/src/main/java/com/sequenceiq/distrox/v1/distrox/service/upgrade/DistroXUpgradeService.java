@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.util.VersionNormalizer;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.dto.DistroXUpgradeDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -147,7 +147,8 @@ public class DistroXUpgradeService {
     public boolean isGracefulStopServicesNeeded(StackDto stackDto) {
         return StackType.WORKLOAD.equals(stackDto.getType()) && clusterComponentConfigProvider.getCdhProduct(stackDto.getCluster().getId())
                 .filter(clouderaManagerProduct -> {
-                    if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(VersionNormalizer.normalizeCdhVersion(clouderaManagerProduct.getVersion()),
+                    Optional<String> cdhStackVersion = CdhVersionProvider.getCdhStackVersionFromVersionString(clouderaManagerProduct.getVersion());
+                    if (cdhStackVersion.isPresent() && CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cdhStackVersion.get(),
                             CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18)) {
                         return true;
                     } else {

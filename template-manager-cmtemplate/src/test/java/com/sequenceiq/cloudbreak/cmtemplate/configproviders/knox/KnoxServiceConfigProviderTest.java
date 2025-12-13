@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
-import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @ExtendWith(MockitoExtension.class)
 public class KnoxServiceConfigProviderTest {
@@ -41,7 +41,7 @@ public class KnoxServiceConfigProviderTest {
     private KnoxServiceConfigProvider underTest;
 
     @Spy
-    private CdhPatchVersionProvider cdhPatchVersionProvider;
+    private CdhVersionProvider cdhVersionProvider;
 
     @Test
     public void testGetServiceTypeShouldReturnKnox() {

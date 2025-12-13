@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.util.VersionNormalizer;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
 public class ClouderaManagerFlinkConfigurationService {
@@ -58,7 +58,8 @@ public class ClouderaManagerFlinkConfigurationService {
     private boolean isConfigNecessaryByRuntime(Set<ClouderaManagerProduct> products) {
         Optional<ClouderaManagerProduct> cdhProduct = clouderaManagerProductsProvider.getCdhProduct(products);
         return cdhProduct
-                .map(cdh -> isVersionEqualToLimited(VersionNormalizer.normalizeCdhVersion(cdh.getVersion()), CLOUDERA_STACK_VERSION_7_3_1))
+                .flatMap(product -> CdhVersionProvider.getCdhStackVersionFromVersionString(product.getVersion()))
+                .map(cdh -> isVersionEqualToLimited(cdh, CLOUDERA_STACK_VERSION_7_3_1))
                 .orElse(false);
     }
 
