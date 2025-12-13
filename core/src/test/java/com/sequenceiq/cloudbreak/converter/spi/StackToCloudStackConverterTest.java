@@ -1,16 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENVIRONMENT_RESOURCE_ENCRYPTION_KEY;
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -39,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,7 +45,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
-import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -73,7 +66,6 @@ import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -102,18 +94,11 @@ import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.common.model.SeLinux;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,19 +127,15 @@ public class StackToCloudStackConverterTest {
 
     private static final String STACK_CRN = "stack-crn";
 
-    private static final String RESOURCE_GROUP = "resource-group";
-
-    private static final String DISCOVERY_FQDN = "host.foo.org";
-
-    private static final String DISCOVERY_NAME = "host";
-
     private static final String SUBNET_ID = "subnetId";
 
-    private static final String AVAILABILITY_ZONE = "availabilityZone";
+    private static final String LOCAL_SSD = "local-ssd";
 
-    private static final String INSTANCE_NAME = "instanceName";
+    private static final String PD_STANDARD = "pd-standard";
 
-    private static final String YARN_APPLICATION_NAME = "yarn-application";
+    private static final String PD_SSD = "pd-ssd";
+
+    private static final String PD_BALANCED = "pd-balanced";
 
     @InjectMocks
     private StackToCloudStackConverter underTest;
@@ -1057,270 +1038,278 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildCloudInstanceParametersAWSComplete() {
-        InstanceMetadataView instanceMetaData = mock(InstanceMetadataView.class);
-        when(instanceMetaData.getId()).thenReturn(1L);
-        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
-        when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
-        when(instanceMetaData.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
-        when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
-        when(instanceMetaData.getShortHostname()).thenReturn(DISCOVERY_NAME);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(1L);
-        Resource secretResource = new Resource();
-        secretResource.setResourceReference("secret-reference");
-        when(resourceService.findById(1L)).thenReturn(Optional.of(secretResource));
-
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
-
-        assertThat(result).hasSize(6);
-        assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
-        assertThat(result).doesNotContainKey(RESOURCE_GROUP_USAGE_PARAMETER);
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
-        assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
-        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
-        assertThat(result.get(CloudInstance.USERDATA_SECRET_ID)).isEqualTo("secret-reference");
-    }
-
-    @Test
-    public void testBuildCloudInstanceParametersWhenSecretResourceDoesNotExist() {
-        assertThrows(UserdataSecretsException.class, () ->
-                underTest.buildCloudInstanceParameters(environment, stack, mock(InstanceMetadataView.class), CloudPlatform.AWS, null));
-    }
-
-    @Test
-    public void testBuildCloudInstanceParametersAWSWithEmptyInstanceMetaData() {
-        InstanceMetadataView instanceMetaData = mock(InstanceMetadataView.class);
-        when(instanceMetaData.getId()).thenReturn(1L);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
-
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
-
-        assertEquals(1, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
-    }
-
-    @Test
-    public void testBuildCloudInstanceParametersAWSWithNullInstanceMetaData() {
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, null, CloudPlatform.AWS, null);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testBuildCloudInstanceParametersAzureSingleResourceGroup() {
-        InstanceMetadataView instanceMetaData = spy(InstanceMetadataView.class);
-        when(instanceMetaData.getId()).thenReturn(1L);
-        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
-        when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
-        when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
-
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("AZURE");
-        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(AzureResourceGroup.builder()
-                        .withName(RESOURCE_GROUP)
-                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
-                        .build())
-                .build());
+    void testBuildInstanceTemplateEphemeralVolumesArePlacedLast() {
         Template template = new Template();
+        template.setInstanceType("n2-standard-8");
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environmentResponse, stack, instanceMetaData, CloudPlatform.AZURE, template);
+        VolumeTemplate regularVol1 = new VolumeTemplate();
+        regularVol1.setId(1L);
+        regularVol1.setVolumeCount(1);
+        regularVol1.setVolumeType(PD_STANDARD);
+        regularVol1.setVolumeSize(100);
+        regularVol1.setUsageType(VolumeUsageType.GENERAL);
 
-        assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
-        assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
-        assertEquals(8, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
-        assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
-        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+        VolumeTemplate ephemeralVol = new VolumeTemplate();
+        ephemeralVol.setId(2L);
+        ephemeralVol.setVolumeCount(1);
+        ephemeralVol.setVolumeType(LOCAL_SSD);
+        ephemeralVol.setVolumeSize(375);
+        ephemeralVol.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate regularVol2 = new VolumeTemplate();
+        regularVol2.setId(3L);
+        regularVol2.setVolumeCount(1);
+        regularVol2.setVolumeType(PD_SSD);
+        regularVol2.setVolumeSize(200);
+        regularVol2.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(regularVol1, ephemeralVol, regularVol2));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(3, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(PD_STANDARD, volumes.get(0).getType());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(PD_SSD, volumes.get(1).getType());
+        assertEquals(200, volumes.get(1).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "3", volumes.get(2).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(2).getType());
+        assertEquals(375, volumes.get(2).getSize());
     }
 
     @Test
-    public void testBuildCloudInstanceParametersAzureMultipleResourceGroup() {
-        InstanceMetadataView instanceMetaData = spy(InstanceMetadataView.class);
-        when(instanceMetaData.getId()).thenReturn(1L);
-        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
-        when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
-        when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
-
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("AZURE");
-        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(AzureResourceGroup.builder()
-                        .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
-                        .build())
-                .build());
+    void testBuildInstanceTemplateMultipleEphemeralVolumesAreSortedById() {
         Template template = new Template();
-        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        template.setInstanceType("n2-standard-8");
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AZURE, template);
+        VolumeTemplate regularVol = new VolumeTemplate();
+        regularVol.setId(1L);
+        regularVol.setVolumeCount(1);
+        regularVol.setVolumeType(PD_STANDARD);
+        regularVol.setVolumeSize(100);
+        regularVol.setUsageType(VolumeUsageType.GENERAL);
 
-        assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
-        assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
+        VolumeTemplate ephemeralVol2 = new VolumeTemplate();
+        ephemeralVol2.setId(4L);
+        ephemeralVol2.setVolumeCount(1);
+        ephemeralVol2.setVolumeType(LOCAL_SSD);
+        ephemeralVol2.setVolumeSize(375);
+        ephemeralVol2.setUsageType(VolumeUsageType.GENERAL);
 
-        assertEquals(6, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
-        assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
-        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+        VolumeTemplate ephemeralVol1 = new VolumeTemplate();
+        ephemeralVol1.setId(2L);
+        ephemeralVol1.setVolumeCount(2);
+        ephemeralVol1.setVolumeType(LOCAL_SSD);
+        ephemeralVol1.setVolumeSize(375);
+        ephemeralVol1.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(regularVol, ephemeralVol2, ephemeralVol1));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(4, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(PD_STANDARD, volumes.get(0).getType());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(1).getType());
+        assertEquals(375, volumes.get(1).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "3", volumes.get(2).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(2).getType());
+        assertEquals(375, volumes.get(2).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "4", volumes.get(3).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(3).getType());
+        assertEquals(375, volumes.get(3).getSize());
     }
 
     @Test
-    void buildCloudInstanceParametersYarn() {
-        InstanceMetadataView instanceMetaData = spy(InstanceMetadataView.class);
-        when(instanceMetaData.getId()).thenReturn(1L);
-        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
-        when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
-        when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
-
-        Resource yarnApplication = new Resource();
-        yarnApplication.setResourceName(YARN_APPLICATION_NAME);
-        when(resourceService.findByStackIdAndType(stack.getId(), ResourceType.YARN_APPLICATION)).thenReturn(List.of(yarnApplication));
-
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.YARN, new Template());
-
-        assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
-        assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-
-        assertEquals(6, result.size());
-        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
-        assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
-        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
-        assertThat(result.get(CloudInstance.APPLICATION_NAME)).isEqualTo(YARN_APPLICATION_NAME);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testBuildCloudStackParametersAzureSingleResourceGroup(Boolean input) {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("AZURE");
-        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(AzureResourceGroup.builder()
-                        .withName(RESOURCE_GROUP)
-                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
-                        .build())
-                .build());
-        when(stack.getCloudPlatform()).thenReturn("AZURE");
-        when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(environmentResponse);
-        Map<String, String> expected = new LinkedHashMap<>();
-        expected.put("key", "value");
-        when(stack.getParameters()).thenReturn(expected);
-        when(stack.getStack()).thenReturn(stack);
-        when(azureMarketplaceTermsClientService.getAccepted(stack.getResourceCrn())).thenReturn(input);
-
-        SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
-        when(stack.getSecurityConfig()).thenReturn(securityConfig);
-        CloudStack result = underTest.convert(stack);
-        Map<String, String> parameters = result.getParameters();
-
-        assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER));
-        assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(parameters.get(ACCEPTANCE_POLICY_PARAMETER), input.toString());
-        assertEquals(5, parameters.size());
-    }
-
-    @Test
-    public void testBuildCloudStackParametersAzureMultipleResourceGroup() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("AZURE");
-        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(AzureResourceGroup.builder()
-                        .withName(RESOURCE_GROUP)
-                        .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
-                        .build())
-                .build());
-        when(stack.getCloudPlatform()).thenReturn("AZURE");
-        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
-        Map<String, String> expected = new LinkedHashMap<>();
-        expected.put("key", "value");
-        when(stack.getParameters()).thenReturn(expected);
-        when(stack.getStack()).thenReturn(stack);
-
-        SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
-        when(stack.getSecurityConfig()).thenReturn(securityConfig);
-        CloudStack result = underTest.convert(stack);
-        Map<String, String> parameters = result.getParameters();
-
-        assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
-        assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(parameters.get(ACCEPTANCE_POLICY_PARAMETER), Boolean.FALSE.toString());
-        assertEquals(3, parameters.size());
-    }
-
-    @Test
-    void testBuildCloudStackParametersGcpEncryptionKey() {
-        when(stack.getStack()).thenReturn(stack);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        DetailedEnvironmentResponse environment = mock(DetailedEnvironmentResponse.class);
-        GcpEnvironmentParameters gcp = mock(GcpEnvironmentParameters.class);
-        GcpResourceEncryptionParameters gcpResourceEncryptionParameters = mock(GcpResourceEncryptionParameters.class);
-        when(environmentClientService.getByCrnAsInternal(ENV_CRN)).thenReturn(environment);
-        when(environment.getGcp()).thenReturn(gcp);
-        when(gcp.getGcpResourceEncryptionParameters()).thenReturn(gcpResourceEncryptionParameters);
-        when(gcpResourceEncryptionParameters.getEncryptionKey()).thenReturn("encryptionKey");
-
-        CloudStack cloudStack = underTest.convert(stack);
-
-        assertEquals("encryptionKey", cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY));
-    }
-
-    private StackAuthentication createStackAuthentication() {
-        StackAuthentication stackAuthentication = new StackAuthentication();
-        stackAuthentication.setLoginUserName(TEST_USERNAME_VALUE);
-        stackAuthentication.setPublicKey(TEST_PUBLICKEY_VALUE);
-        stackAuthentication.setPublicKeyId(TEST_STRING_ID);
-        return stackAuthentication;
-    }
-
-    private <T> Map<String, T> createMap(String keyPrefix, Class<T> clazz) {
-        Map<String, T> map = new LinkedHashMap<>(GENERAL_TEST_QUANTITY);
-        for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
-            map.put(String.format("%s-key-%s", keyPrefix, i), clazz.cast(String.format("key-%s", i)));
-        }
-        return map;
-    }
-
-    @Test
-    public void testBuildInstanceTemplateWithAttributes() {
+    void testBuildInstanceTemplateOnlyEphemeralVolumes() {
         Template template = new Template();
-        template.setVolumeTemplates(Sets.newHashSet());
-        template.setAttributes(new Json(Map.of("someAttr", "value")));
-        template.setSecretAttributes(new Json(Map.of("otherAttr", "value")).getValue());
+        template.setInstanceType("n2-standard-8");
 
-        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
-                template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
+        VolumeTemplate ephemeralVol1 = new VolumeTemplate();
+        ephemeralVol1.setId(1L);
+        ephemeralVol1.setVolumeCount(1);
+        ephemeralVol1.setVolumeType(LOCAL_SSD);
+        ephemeralVol1.setVolumeSize(375);
+        ephemeralVol1.setUsageType(VolumeUsageType.GENERAL);
 
-        assertNotNull(instanceTemplate.getParameters());
-        assertEquals("value", instanceTemplate.getParameters().get("someAttr"));
-        assertEquals("value", instanceTemplate.getParameters().get("otherAttr"));
+        VolumeTemplate ephemeralVol2 = new VolumeTemplate();
+        ephemeralVol2.setId(2L);
+        ephemeralVol2.setVolumeCount(1);
+        ephemeralVol2.setVolumeType(LOCAL_SSD);
+        ephemeralVol2.setVolumeSize(375);
+        ephemeralVol2.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(ephemeralVol1, ephemeralVol2));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(2, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(0).getType());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(1).getType());
     }
 
     @Test
-    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() {
+    void testBuildInstanceTemplateEphemeralVolumesWithMultipleCountsArePlacedLast() {
         Template template = new Template();
-        template.setVolumeTemplates(Sets.newHashSet());
-        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name())));
-        template.setSecretAttributes(new Json(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "myKey")).getValue());
+        template.setInstanceType("n2-standard-8");
 
-        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
-                template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
+        VolumeTemplate regularVol1 = new VolumeTemplate();
+        regularVol1.setId(1L);
+        regularVol1.setVolumeCount(2);
+        regularVol1.setVolumeType(PD_STANDARD);
+        regularVol1.setVolumeSize(100);
+        regularVol1.setUsageType(VolumeUsageType.GENERAL);
 
-        Map<String, Object> parameters = instanceTemplate.getParameters();
-        assertNotNull(parameters);
-        assertEquals("RAW", parameters.get("keyEncryptionMethod"));
-        assertEquals(EncryptionType.CUSTOM.name(), parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
-        assertEquals("myKey", parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
+        VolumeTemplate ephemeralVol = new VolumeTemplate();
+        ephemeralVol.setId(2L);
+        ephemeralVol.setVolumeCount(3);
+        ephemeralVol.setVolumeType(LOCAL_SSD);
+        ephemeralVol.setVolumeSize(375);
+        ephemeralVol.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate regularVol2 = new VolumeTemplate();
+        regularVol2.setId(3L);
+        regularVol2.setVolumeCount(1);
+        regularVol2.setVolumeType(PD_SSD);
+        regularVol2.setVolumeSize(200);
+        regularVol2.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(regularVol1, ephemeralVol, regularVol2));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(6, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(PD_STANDARD, volumes.get(0).getType());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(PD_STANDARD, volumes.get(1).getType());
+        assertEquals(100, volumes.get(1).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "3", volumes.get(2).getMount());
+        assertEquals(PD_SSD, volumes.get(2).getType());
+        assertEquals(200, volumes.get(2).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "4", volumes.get(3).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(3).getType());
+        assertEquals(375, volumes.get(3).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "5", volumes.get(4).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(4).getType());
+        assertEquals(375, volumes.get(4).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "6", volumes.get(5).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(5).getType());
+        assertEquals(375, volumes.get(5).getSize());
+    }
+
+    @Test
+    void testBuildInstanceTemplateMixedVolumesWithNonSequentialIds() {
+        Template template = new Template();
+        template.setInstanceType("n2-standard-8");
+
+        VolumeTemplate regularVol1 = new VolumeTemplate();
+        regularVol1.setId(5L);
+        regularVol1.setVolumeCount(1);
+        regularVol1.setVolumeType(PD_BALANCED);
+        regularVol1.setVolumeSize(150);
+        regularVol1.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate ephemeralVol1 = new VolumeTemplate();
+        ephemeralVol1.setId(10L);
+        ephemeralVol1.setVolumeCount(1);
+        ephemeralVol1.setVolumeType(LOCAL_SSD);
+        ephemeralVol1.setVolumeSize(375);
+        ephemeralVol1.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate regularVol2 = new VolumeTemplate();
+        regularVol2.setId(3L);
+        regularVol2.setVolumeCount(1);
+        regularVol2.setVolumeType(PD_STANDARD);
+        regularVol2.setVolumeSize(100);
+        regularVol2.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate ephemeralVol2 = new VolumeTemplate();
+        ephemeralVol2.setId(7L);
+        ephemeralVol2.setVolumeCount(1);
+        ephemeralVol2.setVolumeType(LOCAL_SSD);
+        ephemeralVol2.setVolumeSize(375);
+        ephemeralVol2.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate regularVol3 = new VolumeTemplate();
+        regularVol3.setId(8L);
+        regularVol3.setVolumeCount(1);
+        regularVol3.setVolumeType(PD_SSD);
+        regularVol3.setVolumeSize(200);
+        regularVol3.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(regularVol1, ephemeralVol1, regularVol2, ephemeralVol2, regularVol3));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(5, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(PD_STANDARD, volumes.get(0).getType());
+        assertEquals(100, volumes.get(0).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(1).getMount());
+        assertEquals(PD_BALANCED, volumes.get(1).getType());
+        assertEquals(150, volumes.get(1).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "3", volumes.get(2).getMount());
+        assertEquals(PD_SSD, volumes.get(2).getType());
+        assertEquals(200, volumes.get(2).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "4", volumes.get(3).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(3).getType());
+        assertEquals(375, volumes.get(3).getSize());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "5", volumes.get(4).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(4).getType());
+        assertEquals(375, volumes.get(4).getSize());
+    }
+
+    @Test
+    void testBuildInstanceTemplateDatabaseVolumesNotAffectedByEphemeralOrdering() {
+        Template template = new Template();
+        template.setInstanceType("n2-standard-8");
+
+        VolumeTemplate regularVol = new VolumeTemplate();
+        regularVol.setId(1L);
+        regularVol.setVolumeCount(1);
+        regularVol.setVolumeType(PD_STANDARD);
+        regularVol.setVolumeSize(100);
+        regularVol.setUsageType(VolumeUsageType.GENERAL);
+
+        VolumeTemplate databaseVol = new VolumeTemplate();
+        databaseVol.setId(2L);
+        databaseVol.setVolumeCount(1);
+        databaseVol.setVolumeType(PD_SSD);
+        databaseVol.setVolumeSize(500);
+        databaseVol.setUsageType(VolumeUsageType.DATABASE);
+
+        VolumeTemplate ephemeralVol = new VolumeTemplate();
+        ephemeralVol.setId(3L);
+        ephemeralVol.setVolumeCount(1);
+        ephemeralVol.setVolumeType(LOCAL_SSD);
+        ephemeralVol.setVolumeSize(375);
+        ephemeralVol.setUsageType(VolumeUsageType.GENERAL);
+
+        template.setVolumeTemplates(Set.of(regularVol, databaseVol, ephemeralVol));
+
+        InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(template, "worker", 1L, InstanceStatus.CREATE_REQUESTED, "image-id");
+
+        List<Volume> volumes = instanceTemplate.getVolumes();
+        assertEquals(3, volumes.size());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "1", volumes.get(0).getMount());
+        assertEquals(PD_STANDARD, volumes.get(0).getType());
+        assertEquals(VolumeUtils.DATABASE_VOLUME, volumes.get(1).getMount());
+        assertEquals(PD_SSD, volumes.get(1).getType());
+        assertEquals(VolumeUtils.VOLUME_PREFIX + "2", volumes.get(2).getMount());
+        assertEquals(LOCAL_SSD, volumes.get(2).getType());
     }
 
     @Test
@@ -1631,5 +1620,21 @@ public class StackToCloudStackConverterTest {
         instanceTemplateRequest.setRootVolume(rootVolumeRequest);
         verticalScaleRequest.setTemplate(instanceTemplateRequest);
         return verticalScaleRequest;
+    }
+
+    private StackAuthentication createStackAuthentication() {
+        StackAuthentication stackAuthentication = new StackAuthentication();
+        stackAuthentication.setLoginUserName(TEST_USERNAME_VALUE);
+        stackAuthentication.setPublicKey(TEST_PUBLICKEY_VALUE);
+        stackAuthentication.setPublicKeyId("key-id");
+        return stackAuthentication;
+    }
+
+    private <T> Map<String, T> createMap(String keyPrefix, Class<T> clazz) {
+        Map<String, T> map = new LinkedHashMap<>(GENERAL_TEST_QUANTITY);
+        for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
+            map.put(String.format("%s-key-%s", keyPrefix, i), clazz.cast(String.format("key-%s", i)));
+        }
+        return map;
     }
 }

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
-import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +43,7 @@ class StackVersionBasedRollingUpgradeValidatorTest {
     private StackVersionBasedRollingUpgradeValidator underTest;
 
     @Spy
-    private CdhPatchVersionProvider cdhPatchVersionProvider;
+    private CdhVersionProvider cdhVersionProvider;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;

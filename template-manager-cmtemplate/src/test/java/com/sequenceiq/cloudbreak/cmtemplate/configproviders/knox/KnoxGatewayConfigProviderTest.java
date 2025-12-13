@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -61,7 +61,7 @@ public class KnoxGatewayConfigProviderTest {
     private static final String IDBROKER_SECURITY_DIR = "/mnt/cdp-luks/var/lib/knox/idbroker/data/security";
 
     @Spy
-    private CdhPatchVersionProvider cdhPatchVersionProvider;
+    private CdhVersionProvider cdhVersionProvider;
 
     @Mock
     private VirtualGroupService virtualGroupService;
